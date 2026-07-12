@@ -1,0 +1,16 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 140,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "tag": "forge:ingots/steel"
+  },
+  "input_count": 4,
+  "machine": "hydraulic_press",
+  "press_mode": "heavy",
+  "results": [
+    {
+      "item": "magneticraft:steel_heavy_plate"
+    }
+  ]
+}

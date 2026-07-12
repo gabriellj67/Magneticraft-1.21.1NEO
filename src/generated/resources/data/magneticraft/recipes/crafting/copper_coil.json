@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "W": {
+      "item": "magneticraft:fine_copper_wire"
+    }
+  },
+  "pattern": [
+    "WWW",
+    "W I",
+    "WWW"
+  ],
+  "result": {
+    "count": 2,
+    "item": "magneticraft:copper_coil"
+  },
+  "show_notification": true
+}

@@ -1,0 +1,22 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/mithril"
+  },
+  "machine": "sieve",
+  "results": [
+    {
+      "item": "magneticraft:mithril_chunk"
+    },
+    {
+      "chance": 0.15,
+      "item": "magneticraft:osmium_dust"
+    },
+    {
+      "chance": 0.15,
+      "item": "magneticraft:zinc_dust"
+    }
+  ]
+}

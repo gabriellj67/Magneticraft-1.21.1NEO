@@ -1,0 +1,17 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/galena"
+  },
+  "machine": "sieve",
+  "results": [
+    {
+      "item": "magneticraft:lead_chunk"
+    },
+    {
+      "item": "magneticraft:silver_chunk"
+    }
+  ]
+}

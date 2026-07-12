@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.data;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
+import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
@@ -31,6 +32,8 @@ final class ModItemModelProvider extends ItemModelProvider {
                 .texture("layer0", mcLoc("block/oak_planks"));
         withExistingParent(ModNetworkItems.WRENCH.getId().getPath(), mcLoc("item/handheld"))
                 .texture("layer0", mcLoc("item/iron_hoe"));
+        withExistingParent(ModComputerContent.FLOPPY_DISK.getId().getPath(), mcLoc("item/generated"))
+                .texture("layer0", mcLoc("item/paper"));
 
         for (FluidDefinition definition : FluidDefinition.values()) {
             ModFluids.FluidFamily family = ModFluids.get(definition);

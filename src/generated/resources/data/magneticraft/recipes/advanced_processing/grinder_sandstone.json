@@ -1,0 +1,15 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 40,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:sandstone"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "count": 4,
+      "item": "minecraft:sand"
+    }
+  ]
+}

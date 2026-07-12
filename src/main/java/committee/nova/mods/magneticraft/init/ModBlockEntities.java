@@ -4,6 +4,8 @@ import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlockEnti
 import committee.nova.mods.magneticraft.content.machine.crushingtable.CrushingTableBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
+import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
+import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
@@ -99,6 +101,24 @@ public final class ModBlockEntities {
                             ModMachineBlocks.machines().values().stream()
                                     .map(RegistryObject::get)
                                     .toArray(net.minecraft.world.level.block.Block[]::new)
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<AdvancedMultiblockBlockEntity>> ADVANCED_MULTIBLOCK =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "advanced_multiblock",
+                    () -> BlockEntityType.Builder.of(
+                            AdvancedMultiblockBlockEntity::new,
+                            ModAdvancedBlocks.controllers().values().stream()
+                                    .map(RegistryObject::get)
+                                    .toArray(net.minecraft.world.level.block.Block[]::new)
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<OilDepositBlockEntity>> OIL_DEPOSIT =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "oil_deposit",
+                    () -> BlockEntityType.Builder.of(
+                            OilDepositBlockEntity::new,
+                            ModAdvancedBlocks.OIL_DEPOSIT.get()
                     ).build(null)
             );
 

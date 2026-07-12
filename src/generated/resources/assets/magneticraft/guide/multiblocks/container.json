@@ -1,0 +1,72 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "storage",
+  "controller": "magneticraft:container",
+  "id": "magneticraft:container",
+  "layers": [
+    [
+      "RMR",
+      "RRR",
+      "RRR",
+      "RRR",
+      "RRR",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "RRR",
+      "RAR",
+      "RAR",
+      "RAR",
+      "RAR",
+      "RAR",
+      "RRR"
+    ],
+    [
+      "RRR",
+      "RRR",
+      "RRR",
+      "RRR",
+      "RRR",
+      "RRR",
+      "RRR"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "minecraft:air",
+      "rule": "air",
+      "symbol": "A"
+    },
+    {
+      "block": "magneticraft:container",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 65536,
+    "electricity": false,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 3,
+    "z": 7
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.container"
+}

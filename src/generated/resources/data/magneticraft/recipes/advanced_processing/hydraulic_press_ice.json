@@ -1,0 +1,15 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 200,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "item": "minecraft:ice"
+  },
+  "machine": "hydraulic_press",
+  "press_mode": "light",
+  "results": [
+    {
+      "item": "minecraft:packed_ice"
+    }
+  ]
+}

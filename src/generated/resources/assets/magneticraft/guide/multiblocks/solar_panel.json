@@ -1,0 +1,45 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "energy",
+  "controller": "magneticraft:solar_panel",
+  "id": "magneticraft:solar_panel",
+  "layers": [
+    [
+      "EME",
+      "EEE",
+      "EEE"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:solar_panel",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:electric_multiblock_part",
+      "rule": "electric",
+      "symbol": "E"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": true,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 1,
+    "z": 3
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.solar_panel"
+}

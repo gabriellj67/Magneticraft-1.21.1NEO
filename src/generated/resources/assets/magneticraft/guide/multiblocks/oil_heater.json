@@ -1,0 +1,102 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "oil",
+  "controller": "magneticraft:oil_heater",
+  "id": "magneticraft:oil_heater",
+  "layers": [
+    [
+      "YMY",
+      "ZZZ",
+      "ZZZ"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:oil_heater",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:multiblock_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    },
+    {
+      "block": "magneticraft:multiblock_column",
+      "properties": {
+        "axis": "z"
+      },
+      "rule": "column_z",
+      "symbol": "Z"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": false,
+    "fluid_tank_capacities_mb": [
+      16000,
+      16000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "magneticraft:oil",
+          "#minecraft:water"
+        ],
+        "access": {
+          "front": "input",
+          "unsided": "both"
+        },
+        "capacity_mb": 16000,
+        "index": 0,
+        "role": "feed_input"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:hot_crude",
+          "magneticraft:steam"
+        ],
+        "access": {
+          "back": "output",
+          "unsided": "none",
+          "up": "output"
+        },
+        "capacity_mb": 16000,
+        "index": 1,
+        "role": "product_output"
+      }
+    ],
+    "heat": true,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 3,
+    "z": 3
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.oil_heater"
+}

@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 80,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:soul_sand"
+  },
+  "machine": "sieve",
+  "results": [
+    {
+      "chance": 0.15,
+      "item": "minecraft:quartz"
+    },
+    {
+      "chance": 0.1,
+      "item": "minecraft:quartz"
+    },
+    {
+      "chance": 0.05,
+      "item": "minecraft:quartz"
+    }
+  ]
+}

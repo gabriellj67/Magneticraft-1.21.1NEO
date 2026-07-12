@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/electric_multiblock_part"
+    }
+  }
+}

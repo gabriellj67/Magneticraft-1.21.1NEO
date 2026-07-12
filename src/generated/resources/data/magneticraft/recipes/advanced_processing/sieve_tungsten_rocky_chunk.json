@@ -1,0 +1,18 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/tungsten"
+  },
+  "machine": "sieve",
+  "results": [
+    {
+      "item": "magneticraft:tungsten_chunk"
+    },
+    {
+      "chance": 0.15,
+      "item": "magneticraft:iron_dust"
+    }
+  ]
+}

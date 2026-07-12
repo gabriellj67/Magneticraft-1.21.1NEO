@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": {
+      "item": "magneticraft:multiblock_base"
+    },
+    "C": {
+      "item": "magneticraft:copper_coil"
+    },
+    "M": {
+      "item": "minecraft:iron_bars"
+    }
+  },
+  "pattern": [
+    "BBB",
+    "CMC",
+    "BBB"
+  ],
+  "result": {
+    "item": "magneticraft:sieve"
+  },
+  "show_notification": true
+}

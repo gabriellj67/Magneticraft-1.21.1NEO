@@ -83,7 +83,7 @@ public final class FluidFuelRecipe implements Recipe<SimpleContainer> {
     }
 
     public double totalEnergyPerMilliBucket() {
-        return SingleBlockMachineMath.fluidFuelEnergy(durationTicks, powerPerTick);
+        return SingleBlockMachineMath.fluidFuelEnergy(durationTicks, powerPerTick) / 1_000.0D;
     }
 
     public static final class Serializer implements RecipeSerializer<FluidFuelRecipe> {

@@ -1,0 +1,20 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 40,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:bone"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "count": 5,
+      "item": "minecraft:bone_meal"
+    },
+    {
+      "chance": 0.5,
+      "count": 3,
+      "item": "minecraft:bone_meal"
+    }
+  ]
+}

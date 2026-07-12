@@ -1,0 +1,15 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "tag": "forge:ingots/gold"
+  },
+  "machine": "hydraulic_press",
+  "press_mode": "medium",
+  "results": [
+    {
+      "item": "magneticraft:gold_light_plate"
+    }
+  ]
+}

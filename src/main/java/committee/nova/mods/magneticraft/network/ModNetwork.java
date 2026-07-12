@@ -36,10 +36,22 @@ public final class ModNetwork {
                 SetGhostFilterMessage::handle,
                 Optional.of(NetworkDirection.PLAY_TO_SERVER)
         );
+        CHANNEL.registerMessage(
+                1,
+                UploadComputerProgramMessage.class,
+                UploadComputerProgramMessage::encode,
+                UploadComputerProgramMessage::decode,
+                UploadComputerProgramMessage::handle,
+                Optional.of(NetworkDirection.PLAY_TO_SERVER)
+        );
         registered = true;
     }
 
     public static void setGhostFilter(SetGhostFilterMessage message) {
+        CHANNEL.sendToServer(message);
+    }
+
+    public static void uploadComputerProgram(UploadComputerProgramMessage message) {
         CHANNEL.sendToServer(message);
     }
 }

@@ -1,0 +1,18 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:diamond_ore"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "item": "minecraft:diamond"
+    },
+    {
+      "chance": 0.75,
+      "item": "minecraft:diamond"
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 package committee.nova.mods.magneticraft.data;
 
+import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
+import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import net.minecraft.data.loot.BlockLootSubProvider;
@@ -24,6 +26,9 @@ final class ModBlockLootSubProvider extends BlockLootSubProvider {
         ModBlocks.all().values().stream().map(RegistryObject::get).forEach(this::dropSelf);
         ModMachineBlocks.blockItems().forEach(item -> dropSelf(Block.byItem(item.get())));
         ModNetworkBlocks.blockItems().forEach(item -> dropSelf(Block.byItem(item.get())));
+        ModAdvancedBlocks.blockItems().forEach(item -> dropSelf(Block.byItem(item.get())));
+        dropSelf(ModComputerContent.COMPUTER.get());
+        dropSelf(ModComputerContent.MINING_ROBOT.get());
     }
 
     @Override
@@ -31,7 +36,9 @@ final class ModBlockLootSubProvider extends BlockLootSubProvider {
         return Stream.of(
                 ModBlocks.all().values().stream().map(RegistryObject::get),
                 ModMachineBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
-                ModNetworkBlocks.blockItems().stream().map(item -> Block.byItem(item.get()))
+                ModNetworkBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
+                ModAdvancedBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
+                Stream.of(ModComputerContent.COMPUTER.get(), ModComputerContent.MINING_ROBOT.get())
         ).flatMap(stream -> stream)::iterator;
     }
 }

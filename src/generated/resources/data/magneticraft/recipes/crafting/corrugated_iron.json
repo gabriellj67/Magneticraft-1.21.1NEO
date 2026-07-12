@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "I": {
+      "tag": "magneticraft:light_plates/iron"
+    }
+  },
+  "pattern": [
+    "III"
+  ],
+  "result": {
+    "count": 4,
+    "item": "magneticraft:corrugated_iron"
+  },
+  "show_notification": true
+}

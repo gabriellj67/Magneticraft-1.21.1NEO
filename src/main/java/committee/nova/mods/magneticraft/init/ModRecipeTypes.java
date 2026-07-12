@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Fluid
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.GasificationRecipe;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.SluiceRecipe;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.ThermopileRecipe;
+import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraftforge.registries.RegistryObject;
@@ -34,6 +35,13 @@ public final class ModRecipeTypes {
     public static final RegistryObject<RecipeType<FluidFuelRecipe>> FLUID_FUEL_TYPE = type("fluid_fuel");
     public static final RegistryObject<RecipeSerializer<FluidFuelRecipe>> FLUID_FUEL_SERIALIZER =
             ModRegistries.RECIPE_SERIALIZERS.register("fluid_fuel", FluidFuelRecipe.Serializer::new);
+    public static final RegistryObject<RecipeType<AdvancedProcessingRecipe>> ADVANCED_PROCESSING_TYPE =
+            type("advanced_processing");
+    public static final RegistryObject<RecipeSerializer<AdvancedProcessingRecipe>> ADVANCED_PROCESSING_SERIALIZER =
+            ModRegistries.RECIPE_SERIALIZERS.register(
+                    "advanced_processing",
+                    AdvancedProcessingRecipe.Serializer::new
+            );
 
     private ModRecipeTypes() {
     }

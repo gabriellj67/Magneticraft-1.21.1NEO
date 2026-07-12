@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/multiblock_base"
+    }
+  }
+}

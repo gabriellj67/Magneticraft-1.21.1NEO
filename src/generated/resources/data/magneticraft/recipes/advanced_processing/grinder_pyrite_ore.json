@@ -1,0 +1,19 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 40,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "forge:ores/pyrite"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "count": 4,
+      "item": "magneticraft:sulfur"
+    },
+    {
+      "chance": 0.01,
+      "item": "magneticraft:iron_dust"
+    }
+  ]
+}

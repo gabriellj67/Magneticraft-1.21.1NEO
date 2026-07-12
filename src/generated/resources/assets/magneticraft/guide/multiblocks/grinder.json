@@ -1,0 +1,80 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "processing",
+  "controller": "magneticraft:grinder",
+  "id": "magneticraft:grinder",
+  "layers": [
+    [
+      "#M#",
+      "###",
+      "###"
+    ],
+    [
+      "RGR",
+      "GCG",
+      "RGR"
+    ],
+    [
+      "RGR",
+      "G#G",
+      "RGR"
+    ],
+    [
+      "SSS",
+      "S#S",
+      "SSS"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:grinder",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:multiblock_base",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:striped_multiblock_part",
+      "rule": "striped",
+      "symbol": "S"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": true,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 3
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 4,
+    "z": 3
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.grinder"
+}

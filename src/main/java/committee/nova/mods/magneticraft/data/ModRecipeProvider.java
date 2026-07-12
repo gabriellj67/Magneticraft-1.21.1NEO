@@ -1,5 +1,7 @@
 package committee.nova.mods.magneticraft.data;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
@@ -10,16 +12,22 @@ import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMath;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.SluiceRecipe;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.HydraulicPressMode;
+import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
 import committee.nova.mods.magneticraft.data.recipe.CountedCookingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.CrushingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.SingleBlockRecipeBuilder;
-import committee.nova.mods.magneticraft.init.ModFluids;
+import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
+import committee.nova.mods.magneticraft.init.ModComputerContent;
+import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
+import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModTags;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.PackOutput;
@@ -35,16 +43,20 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -73,6 +85,341 @@ final class ModRecipeProvider extends RecipeProvider {
         addGasificationRecipes(consumer);
         addThermopileRecipes(consumer);
         addFluidFuelRecipes(consumer);
+        addAdvancedCraftingRecipes(consumer);
+        addAdvancedProcessingRecipes(consumer);
+    }
+
+    private void addAdvancedCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.MULTIBLOCK_BASE.get(), 4)
+                .pattern("III")
+                .pattern("ISI")
+                .pattern("III")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('S', Tags.Items.STONE)
+                .unlockedBy("has_iron_ingot", has(Tags.Items.INGOTS_IRON))
+                .save(consumer, id("crafting/multiblock_base"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.CORRUGATED_IRON.get(), 4)
+                .pattern("III")
+                .define('I', ModTags.Items.lightPlate(Metal.IRON))
+                .unlockedBy("has_iron_light_plate", has(ModTags.Items.lightPlate(Metal.IRON)))
+                .save(consumer, id("crafting/corrugated_iron"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.COPPER_COIL.get(), 2)
+                .pattern("WWW")
+                .pattern("W I")
+                .pattern("WWW")
+                .define('W', component(CraftingComponent.FINE_COPPER_WIRE))
+                .define('I', Tags.Items.INGOTS_IRON)
+                .unlockedBy("has_fine_copper_wire", has(component(CraftingComponent.FINE_COPPER_WIRE)))
+                .save(consumer, id("crafting/copper_coil"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.MULTIBLOCK_COLUMN.get(), 4)
+                .pattern("I")
+                .pattern("B")
+                .pattern("I")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('B', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
+                .unlockedBy("has_multiblock_base", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                .save(consumer, id("crafting/multiblock_column"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(), 4)
+                .pattern("YBY")
+                .define('Y', Tags.Items.DYES_YELLOW)
+                .define('B', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
+                .unlockedBy("has_multiblock_base", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                .save(consumer, id("crafting/striped_multiblock_part"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(), 4)
+                .pattern("RWR")
+                .pattern("WBW")
+                .pattern("RWR")
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('W', component(CraftingComponent.FINE_COPPER_WIRE))
+                .define('B', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
+                .unlockedBy("has_multiblock_base", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                .save(consumer, id("crafting/electric_multiblock_part"));
+
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            ShapedRecipeBuilder.shaped(
+                            RecipeCategory.REDSTONE,
+                            ModAdvancedBlocks.controller(definition).get()
+                    )
+                    .pattern("BBB")
+                    .pattern("CMC")
+                    .pattern("BBB")
+                    .define('B', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
+                    .define('C', ModAdvancedBlocks.COPPER_COIL.get())
+                    .define('M', controllerMarker(definition))
+                    .unlockedBy("has_multiblock_base", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                    .save(consumer, id("crafting/" + definition.id()));
+        }
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModComputerContent.COMPUTER.get())
+                .pattern("IRI")
+                .pattern("QCQ")
+                .pattern("III")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('Q', Tags.Items.GEMS_QUARTZ)
+                .define('C', ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get())
+                .unlockedBy("has_electric_multiblock_part", has(ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get()))
+                .save(consumer, id("crafting/computer"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModComputerContent.MINING_ROBOT.get())
+                .pattern("IPI")
+                .pattern("ICI")
+                .pattern("IHI")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('P', Blocks.PISTON)
+                .define('C', ModComputerContent.COMPUTER.get())
+                .define('H', Tags.Items.CHESTS_WOODEN)
+                .unlockedBy("has_computer", has(ModComputerContent.COMPUTER.get()))
+                .save(consumer, id("crafting/mining_robot"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModComputerContent.FLOPPY_DISK.get())
+                .pattern("IRI")
+                .pattern("PPP")
+                .define('I', Tags.Items.NUGGETS_IRON)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('P', Items.PAPER)
+                .unlockedBy("has_paper", has(Items.PAPER))
+                .save(consumer, id("crafting/floppy_disk"));
+    }
+
+    private void addAdvancedProcessingRecipes(Consumer<FinishedRecipe> consumer) {
+        for (Metal metal : Metal.values()) {
+            if (MaterialForm.ROCKY_CHUNK.appliesTo(metal)) {
+                grinder(
+                        consumer,
+                        metal.id() + "_ore",
+                        Ingredient.of(ModTags.Items.ore(metal.id())),
+                        output(ModItems.material(MaterialForm.ROCKY_CHUNK, metal).get(), 1, 1.0F),
+                        output(Blocks.GRAVEL, 1, 0.15F),
+                        50
+                );
+            }
+            if (!metal.isComposite() && MaterialForm.DUST.appliesTo(metal)) {
+                grinder(
+                        consumer,
+                        metal.id() + "_ingot",
+                        Ingredient.of(ModTags.Items.ingot(metal)),
+                        output(ModItems.material(MaterialForm.DUST, metal).get(), 1, 1.0F),
+                        null,
+                        50
+                );
+            }
+        }
+
+        grinder(consumer, "redstone_ore", Ingredient.of(Blocks.REDSTONE_ORE),
+                output(Items.REDSTONE, 4, 1.0F), output(Blocks.GRAVEL, 1, 0.15F), 50);
+        grinder(consumer, "lapis_ore", Ingredient.of(Blocks.LAPIS_ORE),
+                output(Items.LAPIS_LAZULI, 6, 1.0F), output(Blocks.GRAVEL, 1, 0.15F), 50);
+        grinder(consumer, "nether_quartz_ore", Ingredient.of(Blocks.NETHER_QUARTZ_ORE),
+                output(Items.QUARTZ, 3, 1.0F), output(Items.QUARTZ, 1, 0.5F), 60);
+        grinder(consumer, "emerald_ore", Ingredient.of(Blocks.EMERALD_ORE),
+                output(Items.EMERALD, 2, 1.0F), output(Blocks.GRAVEL, 1, 0.15F), 50);
+        grinder(consumer, "diamond_ore", Ingredient.of(Blocks.DIAMOND_ORE),
+                output(Items.DIAMOND, 1, 1.0F), output(Items.DIAMOND, 1, 0.75F), 50);
+        grinder(consumer, "coal_ore", Ingredient.of(Blocks.COAL_ORE),
+                output(Items.COAL, 1, 1.0F), output(Items.COAL, 1, 0.5F), 50);
+        grinder(consumer, "glowstone", Ingredient.of(Blocks.GLOWSTONE),
+                output(Items.GLOWSTONE_DUST, 4, 1.0F), null, 40);
+        grinder(consumer, "sandstone", Ingredient.of(Blocks.SANDSTONE),
+                output(Blocks.SAND, 4, 1.0F), null, 40);
+        grinder(consumer, "red_sandstone", Ingredient.of(Blocks.RED_SANDSTONE),
+                output(Blocks.RED_SAND, 4, 1.0F), null, 40);
+        grinder(consumer, "blaze_rod", Ingredient.of(Items.BLAZE_ROD),
+                output(Items.BLAZE_POWDER, 4, 1.0F), output(component(CraftingComponent.SULFUR), 1, 0.5F), 50);
+        grinder(consumer, "wool", Ingredient.of(ItemTags.WOOL),
+                output(Items.STRING, 4, 1.0F), null, 40);
+        grinder(consumer, "bone", Ingredient.of(Items.BONE),
+                output(Items.BONE_MEAL, 5, 1.0F), output(Items.BONE_MEAL, 3, 0.5F), 40);
+        grinder(consumer, "sugar_cane", Ingredient.of(Items.SUGAR_CANE),
+                output(Items.SUGAR, 1, 1.0F), output(Items.SUGAR, 2, 0.5F), 40);
+        grinder(consumer, "cobblestone", Ingredient.of(Blocks.COBBLESTONE),
+                output(Blocks.GRAVEL, 1, 1.0F), output(Blocks.SAND, 1, 0.5F), 60);
+        grinder(consumer, "quartz_block", Ingredient.of(Blocks.QUARTZ_BLOCK),
+                output(Items.QUARTZ, 4, 1.0F), null, 50);
+        grinder(consumer, "limestone", Ingredient.of(block(BaseBlockDefinition.LIMESTONE)),
+                output(block(BaseBlockDefinition.COBBLED_LIMESTONE), 1, 1.0F), null, 20);
+        grinder(consumer, "burnt_limestone", Ingredient.of(block(BaseBlockDefinition.BURNT_LIMESTONE)),
+                output(block(BaseBlockDefinition.COBBLED_BURNT_LIMESTONE), 1, 1.0F), null, 20);
+        grinder(consumer, "pyrite_ore", Ingredient.of(ModTags.Items.ore("pyrite")),
+                output(component(CraftingComponent.SULFUR), 4, 1.0F),
+                output(ModItems.material(MaterialForm.DUST, Metal.IRON).get(), 1, 0.01F), 40);
+
+        for (Metal metal : Metal.values()) {
+            if (!MaterialForm.ROCKY_CHUNK.appliesTo(metal)) {
+                continue;
+            }
+            List<AdvancedProcessingRecipe.ChanceResult> outputs = new ArrayList<>();
+            if (metal == Metal.GALENA) {
+                outputs.add(output(ModItems.material(MaterialForm.CHUNK, Metal.LEAD).get(), 1, 1.0F));
+                outputs.add(output(ModItems.material(MaterialForm.CHUNK, Metal.SILVER).get(), 1, 1.0F));
+            } else if (MaterialForm.CHUNK.appliesTo(metal)) {
+                outputs.add(output(ModItems.material(MaterialForm.CHUNK, metal).get(), 1, 1.0F));
+                for (Metal subProduct : sluiceSubProducts(metal).stream().limit(2).toList()) {
+                    outputs.add(output(ModItems.material(MaterialForm.DUST, subProduct).get(), 1, 0.15F));
+                }
+            }
+            if (!outputs.isEmpty()) {
+                advancedProcessing(
+                        consumer,
+                        "sieve_" + metal.id() + "_rocky_chunk",
+                        MultiblockDefinition.SIEVE,
+                        Ingredient.of(ModTags.Items.rockyChunk(metal)),
+                        1,
+                        outputs,
+                        null,
+                        50,
+                        40
+                );
+            }
+        }
+        sieve(consumer, "gravel", Ingredient.of(Blocks.GRAVEL), List.of(
+                output(Items.FLINT, 1, 1.0F),
+                output(Items.FLINT, 1, 0.15F),
+                output(Items.FLINT, 1, 0.05F)
+        ), 50);
+        sieve(consumer, "sand", Ingredient.of(Blocks.SAND), List.of(
+                output(Items.GOLD_NUGGET, 1, 0.04F),
+                output(Items.GOLD_NUGGET, 1, 0.02F),
+                output(Items.QUARTZ, 1, 0.01F)
+        ), 80);
+        sieve(consumer, "soul_sand", Ingredient.of(Blocks.SOUL_SAND), List.of(
+                output(Items.QUARTZ, 1, 0.15F),
+                output(Items.QUARTZ, 1, 0.10F),
+                output(Items.QUARTZ, 1, 0.05F)
+        ), 80);
+
+        Map<Metal, Integer> pressDurations = Map.of(
+                Metal.IRON, 120,
+                Metal.GOLD, 50,
+                Metal.COPPER, 100,
+                Metal.LEAD, 50,
+                Metal.TUNGSTEN, 250,
+                Metal.STEEL, 140
+        );
+        pressDurations.forEach((metal, duration) -> {
+            press(consumer, metal.id() + "_heavy_plate", Ingredient.of(ModTags.Items.ingot(metal)), 4,
+                    ModItems.material(MaterialForm.HEAVY_PLATE, metal).get(), HydraulicPressMode.HEAVY, duration);
+            press(consumer, metal.id() + "_light_plate", Ingredient.of(ModTags.Items.ingot(metal)), 1,
+                    ModItems.material(MaterialForm.LIGHT_PLATE, metal).get(), HydraulicPressMode.MEDIUM, duration);
+        });
+        press(consumer, "stone", Ingredient.of(Blocks.STONE), 1, Blocks.COBBLESTONE,
+                HydraulicPressMode.LIGHT, 55);
+        press(consumer, "polished_andesite", Ingredient.of(Blocks.POLISHED_ANDESITE), 1, Blocks.ANDESITE,
+                HydraulicPressMode.LIGHT, 55);
+        press(consumer, "polished_diorite", Ingredient.of(Blocks.POLISHED_DIORITE), 1, Blocks.DIORITE,
+                HydraulicPressMode.LIGHT, 55);
+        press(consumer, "polished_granite", Ingredient.of(Blocks.POLISHED_GRANITE), 1, Blocks.GRANITE,
+                HydraulicPressMode.LIGHT, 55);
+        press(consumer, "mossy_stone_bricks", Ingredient.of(Blocks.MOSSY_STONE_BRICKS), 1, Blocks.MOSSY_COBBLESTONE,
+                HydraulicPressMode.LIGHT, 55);
+        press(consumer, "stone_bricks", Ingredient.of(Blocks.STONE_BRICKS), 1, Blocks.CRACKED_STONE_BRICKS,
+                HydraulicPressMode.LIGHT, 55);
+        press(consumer, "end_stone_bricks", Ingredient.of(Blocks.END_STONE_BRICKS), 1, Blocks.END_STONE,
+                HydraulicPressMode.LIGHT, 100);
+        press(consumer, "smooth_red_sandstone", Ingredient.of(Blocks.SMOOTH_RED_SANDSTONE), 1, Blocks.RED_SANDSTONE,
+                HydraulicPressMode.LIGHT, 40);
+        press(consumer, "smooth_sandstone", Ingredient.of(Blocks.SMOOTH_SANDSTONE), 1, Blocks.SANDSTONE,
+                HydraulicPressMode.LIGHT, 40);
+        press(consumer, "prismarine_bricks", Ingredient.of(Blocks.PRISMARINE_BRICKS), 1, Blocks.PRISMARINE,
+                HydraulicPressMode.LIGHT, 50);
+        press(consumer, "ice", Ingredient.of(Blocks.ICE), 1, Blocks.PACKED_ICE,
+                HydraulicPressMode.LIGHT, 200);
+    }
+
+    private void grinder(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            Ingredient input,
+            AdvancedProcessingRecipe.ChanceResult primary,
+            @Nullable AdvancedProcessingRecipe.ChanceResult secondary,
+            int duration
+    ) {
+        List<AdvancedProcessingRecipe.ChanceResult> outputs = secondary == null
+                ? List.of(primary)
+                : List.of(primary, secondary);
+        advancedProcessing(consumer, "grinder_" + name, MultiblockDefinition.GRINDER,
+                input, 1, outputs, null, duration, 40);
+    }
+
+    private void sieve(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            Ingredient input,
+            List<AdvancedProcessingRecipe.ChanceResult> outputs,
+            int duration
+    ) {
+        advancedProcessing(consumer, "sieve_" + name, MultiblockDefinition.SIEVE,
+                input, 1, outputs, null, duration, 40);
+    }
+
+    private void press(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            Ingredient input,
+            int inputCount,
+            ItemLike output,
+            HydraulicPressMode mode,
+            int duration
+    ) {
+        advancedProcessing(consumer, "hydraulic_press_" + name, MultiblockDefinition.HYDRAULIC_PRESS,
+                input, inputCount, List.of(output(output, 1, 1.0F)), mode, duration, 60);
+    }
+
+    private static AdvancedProcessingRecipe.ChanceResult output(
+            ItemLike item,
+            int count,
+            float chance
+    ) {
+        return new AdvancedProcessingRecipe.ChanceResult(new ItemStack(item, count), chance);
+    }
+
+    private void advancedProcessing(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            MultiblockDefinition machine,
+            Ingredient input,
+            int inputCount,
+            List<AdvancedProcessingRecipe.ChanceResult> outputs,
+            @Nullable HydraulicPressMode pressMode,
+            int duration,
+            int energyPerTick
+    ) {
+        consumer.accept(new AdvancedProcessingResult(
+                id("advanced_processing/" + name),
+                machine,
+                input,
+                inputCount,
+                outputs,
+                pressMode,
+                duration,
+                energyPerTick
+        ));
+    }
+
+    private static ItemLike controllerMarker(MultiblockDefinition definition) {
+        return switch (definition) {
+            case BIG_COMBUSTION_CHAMBER -> Items.COAL;
+            case BIG_ELECTRIC_FURNACE -> Blocks.BLAST_FURNACE;
+            case BIG_STEAM_BOILER -> Items.CAULDRON;
+            case CONTAINER -> Items.CHEST;
+            case GRINDER -> Items.DIAMOND;
+            case HYDRAULIC_PRESS -> Blocks.PISTON;
+            case OIL_HEATER -> Items.MAGMA_CREAM;
+            case PUMPJACK -> Items.BUCKET;
+            case REFINERY -> Items.BREWING_STAND;
+            case SHELVING_UNIT -> Blocks.BOOKSHELF;
+            case SIEVE -> Blocks.IRON_BARS;
+            case SOLAR_MIRROR -> Items.GLASS_PANE;
+            case SOLAR_PANEL -> Blocks.DAYLIGHT_DETECTOR;
+            case SOLAR_TOWER -> Blocks.GLOWSTONE;
+            case STEAM_ENGINE -> Items.MINECART;
+            case STEAM_TURBINE -> Items.LIGHTNING_ROD;
+        };
     }
 
     private void addMachineCraftingRecipes(Consumer<FinishedRecipe> consumer) {
@@ -897,6 +1244,85 @@ final class ModRecipeProvider extends RecipeProvider {
                 )
                 .unlockedBy("has_" + inputId, unlockCriterion)
                 .save(consumer, id("smelting/" + inputId));
+    }
+
+    private record AdvancedProcessingResult(
+            ResourceLocation id,
+            MultiblockDefinition machine,
+            Ingredient input,
+            int inputCount,
+            List<AdvancedProcessingRecipe.ChanceResult> outputs,
+            @Nullable HydraulicPressMode pressMode,
+            int duration,
+            int energyPerTick
+    ) implements FinishedRecipe {
+        private AdvancedProcessingResult {
+            Objects.requireNonNull(id, "id");
+            Objects.requireNonNull(machine, "machine");
+            Objects.requireNonNull(input, "input");
+            outputs = List.copyOf(outputs);
+            if (inputCount <= 0 || outputs.isEmpty() || outputs.size() > 3) {
+                throw new IllegalArgumentException("Advanced processing recipes require one to three outputs");
+            }
+            if ((machine == MultiblockDefinition.HYDRAULIC_PRESS) != (pressMode != null)) {
+                throw new IllegalArgumentException("Hydraulic mode must be present only for press recipes");
+            }
+            if (duration <= 0 || energyPerTick < 0) {
+                throw new IllegalArgumentException("Invalid advanced processing cost for " + id);
+            }
+        }
+
+        @Override
+        public void serializeRecipeData(JsonObject json) {
+            json.addProperty("machine", machine.id());
+            json.add("ingredient", input.toJson());
+            if (inputCount != 1) {
+                json.addProperty("input_count", inputCount);
+            }
+            if (pressMode != null) {
+                json.addProperty("press_mode", pressMode.serializedName());
+            }
+            JsonArray results = new JsonArray();
+            for (AdvancedProcessingRecipe.ChanceResult output : outputs) {
+                JsonObject result = new JsonObject();
+                result.addProperty(
+                        "item",
+                        Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(output.stack().getItem())).toString()
+                );
+                if (output.stack().getCount() != 1) {
+                    result.addProperty("count", output.stack().getCount());
+                }
+                if (output.chance() != 1.0F) {
+                    result.addProperty("chance", output.chance());
+                }
+                results.add(result);
+            }
+            json.add("results", results);
+            json.addProperty("duration", duration);
+            json.addProperty("energy_per_tick", energyPerTick);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public RecipeSerializer<?> getType() {
+            return ModRecipeTypes.ADVANCED_PROCESSING_SERIALIZER.get();
+        }
+
+        @Nullable
+        @Override
+        public JsonObject serializeAdvancement() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public ResourceLocation getAdvancementId() {
+            return null;
+        }
     }
 
     private static Item component(CraftingComponent component) {

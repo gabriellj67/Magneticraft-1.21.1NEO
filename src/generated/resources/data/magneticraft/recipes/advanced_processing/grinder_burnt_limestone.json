@@ -1,0 +1,14 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 20,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "magneticraft:burnt_limestone"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "item": "magneticraft:cobbled_burnt_limestone"
+    }
+  ]
+}

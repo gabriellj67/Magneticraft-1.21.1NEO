@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": {
+      "item": "magneticraft:multiblock_base"
+    },
+    "C": {
+      "item": "magneticraft:copper_coil"
+    },
+    "M": {
+      "item": "minecraft:chest"
+    }
+  },
+  "pattern": [
+    "BBB",
+    "CMC",
+    "BBB"
+  ],
+  "result": {
+    "item": "magneticraft:container"
+  },
+  "show_notification": true
+}

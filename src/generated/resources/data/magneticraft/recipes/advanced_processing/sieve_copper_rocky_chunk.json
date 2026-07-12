@@ -1,0 +1,22 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/copper"
+  },
+  "machine": "sieve",
+  "results": [
+    {
+      "item": "magneticraft:copper_chunk"
+    },
+    {
+      "chance": 0.15,
+      "item": "magneticraft:gold_dust"
+    },
+    {
+      "chance": 0.15,
+      "item": "magneticraft:iron_dust"
+    }
+  ]
+}

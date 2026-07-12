@@ -4,12 +4,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.material.Metal;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
@@ -19,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -300,6 +303,97 @@ class GeneratedDataContractTest {
         JsonObject diesel = readObject(recipe("fluid_fuel/diesel"));
         assertEquals(10_000, diesel.get("duration").getAsInt());
         assertEquals(80.0D, diesel.get("power").getAsDouble());
+    }
+
+    @Test
+    void advancedSystemsDataAssetsAndGuidesAreComplete() throws IOException {
+        JsonObject english = readObject(ASSETS.resolve("lang/en_us.json"));
+        JsonObject chinese = readObject(ASSETS.resolve("lang/zh_cn.json"));
+
+        for (String part : Set.of(
+                "multiblock_base",
+                "corrugated_iron",
+                "copper_coil",
+                "multiblock_column",
+                "striped_multiblock_part",
+                "electric_multiblock_part"
+        )) {
+            assertFile(ASSETS.resolve("blockstates/" + part + ".json"));
+            assertFile(ASSETS.resolve("models/block/" + part + ".json"));
+            assertFile(ASSETS.resolve("models/item/" + part + ".json"));
+            assertFile(DATA.resolve("loot_tables/blocks/" + part + ".json"));
+            assertFile(recipe("crafting/" + part));
+            assertTrue(english.has("block.magneticraft." + part), part);
+            assertTrue(chinese.has("block.magneticraft." + part), part);
+        }
+
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            String id = definition.id();
+            JsonObject blockState = readObject(ASSETS.resolve("blockstates/" + id + ".json"));
+            assertEquals(8, blockState.getAsJsonObject("variants").size(), id + " state coverage");
+            assertFile(ASSETS.resolve("models/block/" + id + ".json"));
+            assertFile(ASSETS.resolve("models/block/" + id + "_formed.json"));
+            assertFile(ASSETS.resolve("models/item/" + id + ".json"));
+            assertFile(DATA.resolve("loot_tables/blocks/" + id + ".json"));
+            assertFile(recipe("crafting/" + id));
+            assertFile(ASSETS.resolve("guide/multiblocks/" + id + ".json"));
+            assertTrue(english.has("block.magneticraft." + id), id);
+            assertTrue(chinese.has("block.magneticraft." + id), id);
+        }
+
+        assertFile(ASSETS.resolve("blockstates/oil_deposit.json"));
+        assertFile(ASSETS.resolve("models/block/oil_deposit.json"));
+        assertFalse(Files.exists(ASSETS.resolve("models/item/oil_deposit.json")));
+        assertFalse(Files.exists(DATA.resolve("loot_tables/blocks/oil_deposit.json")));
+
+        for (String block : Set.of("computer", "mining_robot")) {
+            assertFile(ASSETS.resolve("blockstates/" + block + ".json"));
+            assertEquals(
+                    4,
+                    readObject(ASSETS.resolve("blockstates/" + block + ".json"))
+                            .getAsJsonObject("variants")
+                            .size(),
+                    block + " facing coverage"
+            );
+            assertFile(ASSETS.resolve("models/block/" + block + ".json"));
+            assertFile(ASSETS.resolve("models/item/" + block + ".json"));
+            assertFile(DATA.resolve("loot_tables/blocks/" + block + ".json"));
+            assertFile(recipe("crafting/" + block));
+            assertTrue(english.has("block.magneticraft." + block), block);
+            assertTrue(chinese.has("block.magneticraft." + block), block);
+        }
+        assertFile(ASSETS.resolve("models/item/floppy_disk.json"));
+        assertFile(recipe("crafting/floppy_disk"));
+        assertTrue(english.has("item.magneticraft.floppy_disk"));
+        assertTrue(chinese.has("item.magneticraft.floppy_disk"));
+
+        for (AdvancedWorldgenProvider.DepositDefinition deposit : AdvancedWorldgenProvider.deposits()) {
+            assertFile(DATA.resolve("worldgen/configured_feature/" + deposit.id() + ".json"));
+            assertFile(DATA.resolve("worldgen/placed_feature/" + deposit.id() + ".json"));
+            assertFile(DATA.resolve("forge/biome_modifier/" + deposit.id() + ".json"));
+        }
+        assertFile(DATA.resolve("structures/advanced_systems.nbt"));
+
+        Map<String, String> processingMachines = Map.of(
+                "grinder_cobblestone", "grinder",
+                "sieve_gravel", "sieve",
+                "hydraulic_press_iron_light_plate", "hydraulic_press"
+        );
+        for (Map.Entry<String, String> entry : processingMachines.entrySet()) {
+            JsonObject processing = readObject(recipe("advanced_processing/" + entry.getKey()));
+            assertEquals("magneticraft:advanced_processing", processing.get("type").getAsString());
+            assertEquals(entry.getValue(), processing.get("machine").getAsString());
+            assertTrue(processing.get("duration").getAsInt() > 0);
+            assertTrue(processing.get("energy_per_tick").getAsInt() >= 0);
+            assertTrue(processing.getAsJsonArray("results").size() > 0);
+        }
+
+        JsonObject opcodeGuide = readObject(ASSETS.resolve("guide/computer_opcodes.json"));
+        assertEquals(ComputerOpcode.values().length, opcodeGuide.getAsJsonArray("opcodes").size());
+        for (ComputerOpcode opcode : ComputerOpcode.values()) {
+            assertTrue(english.has(opcode.descriptionTranslationKey()), opcode.name());
+            assertTrue(chinese.has(opcode.descriptionTranslationKey()), opcode.name());
+        }
     }
 
     private static void assertRecipeDirectory(String directory, long expectedCount, String type) throws IOException {

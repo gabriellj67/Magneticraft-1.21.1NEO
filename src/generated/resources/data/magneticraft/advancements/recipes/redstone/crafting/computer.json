@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_electric_multiblock_part": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "magneticraft:electric_multiblock_part"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/computer"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_electric_multiblock_part",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/computer"
+    ]
+  },
+  "sends_telemetry_event": false
+}

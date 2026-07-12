@@ -1,0 +1,65 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "energy",
+  "controller": "magneticraft:solar_mirror",
+  "id": "magneticraft:solar_mirror",
+  "layers": [
+    [
+      "AMA",
+      "###",
+      "A#A"
+    ],
+    [
+      "AAA",
+      "ARA",
+      "AAA"
+    ],
+    [
+      "AAA",
+      "ARA",
+      "AAA"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "minecraft:air",
+      "rule": "air",
+      "symbol": "A"
+    },
+    {
+      "block": "magneticraft:solar_mirror",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:multiblock_base",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": false,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 3,
+    "z": 3
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.solar_mirror"
+}

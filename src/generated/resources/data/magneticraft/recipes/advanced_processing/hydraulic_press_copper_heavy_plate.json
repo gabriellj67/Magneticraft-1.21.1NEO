@@ -1,0 +1,16 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 100,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "tag": "forge:ingots/copper"
+  },
+  "input_count": 4,
+  "machine": "hydraulic_press",
+  "press_mode": "heavy",
+  "results": [
+    {
+      "item": "magneticraft:copper_heavy_plate"
+    }
+  ]
+}

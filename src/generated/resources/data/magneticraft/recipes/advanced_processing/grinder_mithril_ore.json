@@ -1,0 +1,18 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "forge:ores/mithril"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "item": "magneticraft:mithril_rocky_chunk"
+    },
+    {
+      "chance": 0.15,
+      "item": "minecraft:gravel"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 60,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:nether_quartz_ore"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "count": 3,
+      "item": "minecraft:quartz"
+    },
+    {
+      "chance": 0.5,
+      "item": "minecraft:quartz"
+    }
+  ]
+}

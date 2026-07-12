@@ -5,7 +5,11 @@ import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlock;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
+import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
@@ -144,6 +148,77 @@ final class ModBlockStateProvider extends BlockStateProvider {
         conveyorModel.element().from(14, 3, 0).to(16, 4, 16).textureAll("#rail").end();
         horizontalBlock(conveyor, conveyorModel);
         simpleBlockItem(conveyor, conveyorModel);
+
+        simpleBlockWithItem(
+                ModAdvancedBlocks.MULTIBLOCK_BASE.get(),
+                models().cubeAll("multiblock_base", mcLoc("block/iron_block"))
+        );
+        simpleBlockWithItem(
+                ModAdvancedBlocks.CORRUGATED_IRON.get(),
+                models().cubeAll("corrugated_iron", mcLoc("block/polished_andesite"))
+        );
+        simpleBlockWithItem(
+                ModAdvancedBlocks.COPPER_COIL.get(),
+                models().cubeAll("copper_coil", mcLoc("block/copper_block"))
+        );
+        simpleBlockWithItem(
+                ModAdvancedBlocks.MULTIBLOCK_COLUMN.get(),
+                models().cubeAll("multiblock_column", mcLoc("block/iron_block"))
+        );
+        simpleBlockWithItem(
+                ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(),
+                models().cubeAll("striped_multiblock_part", mcLoc("block/yellow_concrete"))
+        );
+        simpleBlockWithItem(
+                ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(),
+                models().cubeAll("electric_multiblock_part", mcLoc("block/redstone_block"))
+        );
+
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            Block controller = ModAdvancedBlocks.controller(definition).get();
+            ModelFile idle = models().orientable(
+                    definition.id(),
+                    mcLoc("block/iron_block"),
+                    mcLoc("block/polished_andesite"),
+                    mcLoc("block/iron_block")
+            );
+            ModelFile formed = models().orientable(
+                    definition.id() + "_formed",
+                    mcLoc("block/copper_block"),
+                    mcLoc("block/redstone_lamp"),
+                    mcLoc("block/iron_block")
+            );
+            horizontalBlock(
+                    controller,
+                    state -> state.getValue(AdvancedMultiblockBlock.FORMED) ? formed : idle
+            );
+            simpleBlockItem(controller, idle);
+        }
+
+        simpleBlock(
+                ModAdvancedBlocks.OIL_DEPOSIT.get(),
+                models().cubeAll("oil_deposit", mcLoc("block/deepslate"))
+        );
+
+        Block computer = ModComputerContent.COMPUTER.get();
+        ModelFile computerModel = models().orientable(
+                "computer",
+                mcLoc("block/iron_block"),
+                mcLoc("block/observer_front"),
+                mcLoc("block/iron_block")
+        );
+        horizontalBlock(computer, computerModel);
+        simpleBlockItem(computer, computerModel);
+
+        Block miningRobot = ModComputerContent.MINING_ROBOT.get();
+        ModelFile miningRobotModel = models().orientable(
+                "mining_robot",
+                mcLoc("block/copper_block"),
+                mcLoc("block/dispenser_front"),
+                mcLoc("block/iron_block")
+        );
+        horizontalBlock(miningRobot, miningRobotModel);
+        simpleBlockItem(miningRobot, miningRobotModel);
 
         for (FluidDefinition definition : FluidDefinition.values()) {
             ModelFile model = models().getBuilder(definition.id())

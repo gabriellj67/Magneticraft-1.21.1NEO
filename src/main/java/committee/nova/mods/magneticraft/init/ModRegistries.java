@@ -52,6 +52,8 @@ public final class ModRegistries {
         ModMachineItems.bootstrap();
         ModNetworkBlocks.bootstrap();
         ModNetworkItems.bootstrap();
+        ModAdvancedBlocks.bootstrap();
+        ModComputerContent.bootstrap();
         ModBlockEntities.bootstrap();
         ModMenus.bootstrap();
         ModRecipeTypes.bootstrap();

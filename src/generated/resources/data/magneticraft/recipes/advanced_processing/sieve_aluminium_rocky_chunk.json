@@ -1,0 +1,22 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/aluminium"
+  },
+  "machine": "sieve",
+  "results": [
+    {
+      "item": "magneticraft:aluminium_chunk"
+    },
+    {
+      "chance": 0.15,
+      "item": "magneticraft:nickel_dust"
+    },
+    {
+      "chance": 0.15,
+      "item": "magneticraft:iron_dust"
+    }
+  ]
+}

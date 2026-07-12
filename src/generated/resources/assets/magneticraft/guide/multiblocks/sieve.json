@@ -1,0 +1,77 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "processing",
+  "controller": "magneticraft:sieve",
+  "id": "magneticraft:sieve",
+  "layers": [
+    [
+      "#M#",
+      "YGY",
+      "YGY",
+      "YGY",
+      "#G#"
+    ],
+    [
+      "###",
+      "SRS",
+      "SRS",
+      "SRS",
+      "SRS"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:sieve",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:multiblock_base",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:multiblock_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    },
+    {
+      "block": "magneticraft:striped_multiblock_part",
+      "rule": "striped",
+      "symbol": "S"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": true,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 4
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 2,
+    "z": 5
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.sieve"
+}

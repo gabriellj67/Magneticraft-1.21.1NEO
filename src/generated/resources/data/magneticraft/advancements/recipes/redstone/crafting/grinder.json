@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_multiblock_base": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "magneticraft:multiblock_base"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/grinder"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_multiblock_base",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/grinder"
+    ]
+  },
+  "sends_telemetry_event": false
+}

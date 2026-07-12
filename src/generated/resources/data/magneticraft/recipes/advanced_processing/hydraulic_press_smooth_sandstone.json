@@ -1,0 +1,15 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 40,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "item": "minecraft:smooth_sandstone"
+  },
+  "machine": "hydraulic_press",
+  "press_mode": "light",
+  "results": [
+    {
+      "item": "minecraft:sandstone"
+    }
+  ]
+}

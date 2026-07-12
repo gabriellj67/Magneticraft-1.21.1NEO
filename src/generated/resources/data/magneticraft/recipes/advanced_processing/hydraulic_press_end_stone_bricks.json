@@ -1,0 +1,15 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 100,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "item": "minecraft:end_stone_bricks"
+  },
+  "machine": "hydraulic_press",
+  "press_mode": "light",
+  "results": [
+    {
+      "item": "minecraft:end_stone"
+    }
+  ]
+}

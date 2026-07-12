@@ -1,0 +1,117 @@
+{
+  "anchor": {
+    "x": 0,
+    "y": 1,
+    "z": 0
+  },
+  "category": "energy",
+  "controller": "magneticraft:steam_engine",
+  "id": "magneticraft:steam_engine",
+  "layers": [
+    [
+      "...",
+      "...",
+      ".G.",
+      ".G."
+    ],
+    [
+      "M..",
+      "b..",
+      "bGC",
+      "bGY"
+    ],
+    [
+      "R..",
+      "Y..",
+      "GG.",
+      ".G."
+    ],
+    [
+      "#..",
+      "#..",
+      "#..",
+      "..."
+    ]
+  ],
+  "legend": [
+    {
+      "ignored": true,
+      "rule": "ignore",
+      "symbol": "."
+    },
+    {
+      "block": "magneticraft:steam_engine",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:multiblock_base",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:multiblock_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    },
+    {
+      "block": "minecraft:bricks",
+      "rule": "bricks",
+      "symbol": "b"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": true,
+    "fluid_tank_capacities_mb": [
+      16000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "magneticraft:steam"
+        ],
+        "access": {
+          "back": "input",
+          "down": "input",
+          "front": "input",
+          "left": "input",
+          "right": "input",
+          "unsided": "both",
+          "up": "input"
+        },
+        "capacity_mb": 16000,
+        "index": 0,
+        "role": "steam_input"
+      }
+    ],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 4,
+    "z": 4
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.steam_engine"
+}

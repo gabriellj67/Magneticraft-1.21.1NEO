@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInv
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
+import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
@@ -33,6 +34,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -42,6 +45,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     public static final int MENU_DATA_COUNT = 12;
     public static final int SLUICE_MAX_ITEMS = 10;
     public static final int SLUICE_DURATION = 80;
+    private static final String MULTIBLOCK_CONTROLLER_TAG = "multiblock_controller";
 
     private final SingleBlockMachineDefinition definition;
     @Nullable
@@ -64,6 +68,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     private final SingleBlockMachineLogic logic;
     private final SingleBlockMachineInteractions interactions;
     private final SingleBlockFabricator fabricator;
+    @Nullable
+    private BlockPos multiblockController;
 
     public SingleBlockMachineBlockEntity(BlockPos position, BlockState state) {
         super(ModBlockEntities.SINGLE_BLOCK_MACHINE.get(), position, state);
@@ -105,6 +111,19 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
             BlockState state,
             SingleBlockMachineBlockEntity machine
     ) {
+        if (machine.multiblockController != null) {
+            ServerLevel serverLevel = (ServerLevel) level;
+            BlockPos controller = machine.multiblockController;
+            if (!serverLevel.hasChunk(controller.getX() >> 4, controller.getZ() >> 4)) {
+                return;
+            }
+            if (serverLevel.getBlockEntity(controller) instanceof AdvancedMultiblockBlockEntity multiblock
+                    && multiblock.formed()
+                    && multiblock.members().contains(position)) {
+                return;
+            }
+            machine.releaseMultiblockClaim(controller);
+        }
         machine.tickModules();
         machine.logic.tick((ServerLevel) level);
         boolean shouldBeLit = machine.definition.hasLitState() && machine.logic.isVisuallyLit();
@@ -179,7 +198,41 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     }
 
     public InteractionResult interact(Player player, InteractionHand hand, BlockHitResult hit) {
+        if (multiblockController != null) {
+            return InteractionResult.CONSUME;
+        }
         return interactions.interact(player, hand);
+    }
+
+    public boolean claimedByMultiblock() {
+        return multiblockController != null;
+    }
+
+    public void claimForMultiblock(BlockPos controller) {
+        if (definition != SingleBlockMachineDefinition.SMALL_TANK) {
+            throw new IllegalStateException("Only small tanks can be multiblock members");
+        }
+        BlockPos stable = controller.immutable();
+        if (!stable.equals(multiblockController)) {
+            multiblockController = stable;
+            invalidateCaps();
+            markChangedAndSync();
+        }
+    }
+
+    public void releaseMultiblockClaim(BlockPos controller) {
+        if (multiblockController != null && multiblockController.equals(controller)) {
+            multiblockController = null;
+            reviveCaps();
+            markChangedAndSync();
+        }
+    }
+
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction side) {
+        return multiblockController == null
+                ? super.getCapability(capability, side)
+                : LazyOptional.empty();
     }
 
     public void onBroken() {
@@ -213,6 +266,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         blockEntityTag.remove("x");
         blockEntityTag.remove("y");
         blockEntityTag.remove("z");
+        blockEntityTag.remove(MULTIBLOCK_CONTROLLER_TAG);
         stack.addTagElement("BlockEntityTag", blockEntityTag);
     }
 
@@ -242,11 +296,17 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     @Override
     protected void saveMachineData(CompoundTag tag) {
         state.save(tag);
+        if (multiblockController != null) {
+            tag.putLong(MULTIBLOCK_CONTROLLER_TAG, multiblockController.asLong());
+        }
     }
 
     @Override
     protected void loadMachineData(CompoundTag tag) {
         state.load(tag);
+        multiblockController = tag.contains(MULTIBLOCK_CONTROLLER_TAG)
+                ? BlockPos.of(tag.getLong(MULTIBLOCK_CONTROLLER_TAG))
+                : null;
     }
 
     private FluidTankModule[] createFluidTanks() {

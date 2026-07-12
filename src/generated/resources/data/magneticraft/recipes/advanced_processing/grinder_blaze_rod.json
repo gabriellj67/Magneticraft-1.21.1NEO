@@ -1,0 +1,19 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:blaze_rod"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "count": 4,
+      "item": "minecraft:blaze_powder"
+    },
+    {
+      "chance": 0.5,
+      "item": "magneticraft:sulfur"
+    }
+  ]
+}

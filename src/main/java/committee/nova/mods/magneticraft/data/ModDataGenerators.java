@@ -41,6 +41,10 @@ public final class ModDataGenerators {
                 event.includeClient(),
                 new ModLanguageProvider(output, "zh_cn", true)
         );
+        generator.addProvider(
+                event.includeClient(),
+                new AdvancedGuideDataProvider(output, AdvancedGuideDataProvider.computerOpcodes())
+        );
 
         ModBlockTagsProvider blockTags = new ModBlockTagsProvider(output, lookupProvider, existingFileHelper);
         generator.addProvider(event.includeServer(), blockTags);
@@ -54,5 +58,7 @@ public final class ModDataGenerators {
         );
         generator.addProvider(event.includeServer(), ModLootTableProvider.create(output));
         generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
+        generator.addProvider(event.includeServer(), new AdvancedWorldgenProvider(output));
+        generator.addProvider(event.includeServer(), new AdvancedGameTestStructureProvider(output));
     }
 }

@@ -1,0 +1,182 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "oil",
+  "controller": "magneticraft:refinery",
+  "id": "magneticraft:refinery",
+  "layers": [
+    [
+      "YMY",
+      "ZZZ",
+      "ZZZ"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:refinery",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:multiblock_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    },
+    {
+      "block": "magneticraft:multiblock_column",
+      "properties": {
+        "axis": "z"
+      },
+      "rule": "column_z",
+      "symbol": "Z"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": false,
+    "fluid_tank_capacities_mb": [
+      16000,
+      64000,
+      16000,
+      16000,
+      16000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "magneticraft:steam",
+          "magneticraft:hot_crude",
+          "magneticraft:heavy_oil",
+          "magneticraft:light_oil",
+          "magneticraft:lpg"
+        ],
+        "access": {
+          "front": "input",
+          "unsided": "both"
+        },
+        "capacity_mb": 16000,
+        "index": 0,
+        "role": "feed_input"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:steam"
+        ],
+        "access": {
+          "back": "input",
+          "unsided": "none"
+        },
+        "capacity_mb": 64000,
+        "index": 1,
+        "role": "process_steam_input"
+      },
+      {
+        "accepted_fluids": [
+          "#minecraft:water",
+          "magneticraft:heavy_oil",
+          "magneticraft:oil_residue",
+          "magneticraft:diesel",
+          "magneticraft:plastic"
+        ],
+        "access": {
+          "left": "output",
+          "unsided": "none"
+        },
+        "capacity_mb": 16000,
+        "index": 2,
+        "role": "heavy_product_output"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:light_oil",
+          "magneticraft:fuel",
+          "magneticraft:kerosene",
+          "magneticraft:naphtha"
+        ],
+        "access": {
+          "right": "output",
+          "unsided": "none"
+        },
+        "capacity_mb": 16000,
+        "index": 3,
+        "role": "light_product_output"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:lpg",
+          "magneticraft:lubricant",
+          "magneticraft:gasoline",
+          "magneticraft:natural_gas"
+        ],
+        "access": {
+          "unsided": "none",
+          "up": "output"
+        },
+        "capacity_mb": 16000,
+        "index": 4,
+        "role": "gas_product_output"
+      }
+    ],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 9,
+    "z": 3
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.refinery"
+}

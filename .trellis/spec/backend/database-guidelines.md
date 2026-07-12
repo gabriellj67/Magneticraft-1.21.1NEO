@@ -195,6 +195,96 @@ CountedCookingRecipeBuilder.smelting(
 {"result": {"item": "magneticraft:lead_ingot", "count": 2}}
 ```
 
+## Scenario: Multiblock authority, port exposure and portable state
+
+### 1. Scope / trigger
+
+Apply this contract when a formed multiblock claims another block entity,
+exposes capabilities through directional ports, or preserves controller state
+in its dropped item. These paths cross structure validation, runtime caches,
+capabilities, NBT, loot and generated guide data.
+
+### 2. Signatures
+
+```java
+public boolean operational()
+public void claimForMultiblock(BlockPos controller)
+public void releaseMultiblockClaim(BlockPos controller)
+public void saveToItem(ItemStack stack)
+
+MultiblockPortProfile.TankPort port =
+        MultiblockPortProfile.tank(definition, tankIndex);
+```
+
+### 3. Contracts
+
+- The controller modules own durable machine state. `MultiblockMembershipService`
+  is only a loaded-level lookup cache and must be rebuildable after reload.
+- `formed` records the durable structure decision; `operational()` additionally
+  requires every structure chunk to be loaded and valid. Validation never
+  force-loads chunks. An unloaded required chunk suspends processing and port
+  exposure without immediately destroying the formed state.
+- A claimed small tank invalidates its own capabilities. If the controller
+  chunk is unloaded, the claim remains frozen; if that chunk is loaded and the
+  controller is missing, unformed or no longer contains the tank, the tank
+  releases the claim and revives its capabilities.
+- An unform transition may update the controller block state only after reading
+  the current world block and proving that it is the same controller definition.
+  Removal callbacks must never recreate a controller that has already been
+  replaced with air or another block.
+- Portable controller NBT removes coordinates, owner, formed state and runtime
+  links. Member items remove their controller claim. Large shelving contents
+  are emitted as separate stacks rather than embedded into one oversized
+  `BlockEntityTag`.
+- `MultiblockPortProfile` is the single source of truth for tank capacity,
+  accepted fluids, relative-side access and semantic role. Runtime handlers and
+  generated guide JSON consume the same profile.
+
+### 4. Validation and error matrix
+
+| Condition | Required result |
+|---|---|
+| Required member chunk is unloaded | Suspend operation and capabilities; do not force-load or unform |
+| Claimed tank can load its controller chunk and finds no valid owner | Release the claim and revive local capabilities |
+| Controller block is removed while `unform()` runs | Do not write a formed-state block back into the world |
+| A stateful controller has no normal loot result | Emit one controller fallback item containing portable state |
+| Shelving contains items or upgrade chests | Drop contents separately and strip shelving storage from controller NBT |
+| Guide port data differs from runtime access or validation | Fail generated-data tests; correct `MultiblockPortProfile` |
+
+### 5. Good, base and bad cases
+
+- Good: a refinery reloads with its controller state intact, exposes each tank
+  on the profile-defined side, and the guide reports exactly those roles.
+- Base: an unformed empty controller drops a normal stateless controller item
+  and member tanks retain their independent capabilities.
+- Bad: breaking a formed controller calls `setBlock` with its cached state and
+  resurrects it, or a portable tank keeps a stale controller position.
+
+### 6. Tests required
+
+- Unit-test profile tank counts, capacities, roles, accepted-fluid rules and
+  generated guide equality for every multiblock definition.
+- GameTest all definitions, rotations and representative mirrors; invalid
+  members, controller destruction, capability invalidate/revive, unloaded or
+  stale claims, portable storage and runtime recipe execution.
+- Run `runData` twice and compare every non-cache path and SHA-256 value.
+- Run a dedicated server through save, clean shutdown and restart when changing
+  durable multiblock or member state.
+
+### 7. Wrong vs correct
+
+```java
+// Wrong: the cached block state may recreate a controller during onRemove.
+level.setBlock(worldPosition, getBlockState().setValue(FORMED, formed), Block.UPDATE_ALL);
+
+// Correct: mutate only a still-present controller of the same definition.
+BlockState worldState = level.getBlockState(worldPosition);
+if (worldState.getBlock() instanceof AdvancedMultiblockBlock controller
+        && controller.definition() == definition) {
+    level.setBlock(worldPosition, worldState.setValue(FORMED, formed), Block.UPDATE_ALL);
+}
+```
+
 ## Configuration
 
 - Use Forge configuration specs for operator-tunable values. Keep gameplay

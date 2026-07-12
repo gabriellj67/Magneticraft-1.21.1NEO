@@ -1,0 +1,19 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 40,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:sugar_cane"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "item": "minecraft:sugar"
+    },
+    {
+      "chance": 0.5,
+      "count": 2,
+      "item": "minecraft:sugar"
+    }
+  ]
+}
