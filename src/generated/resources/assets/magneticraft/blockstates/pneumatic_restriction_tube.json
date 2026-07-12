@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/pneumatic_restriction_tube"
+    }
+  }
+}

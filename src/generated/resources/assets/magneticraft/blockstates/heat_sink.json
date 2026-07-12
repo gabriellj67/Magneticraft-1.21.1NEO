@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/heat_sink",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/heat_sink"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/heat_sink",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/heat_sink",
+      "y": 270
+    }
+  }
+}

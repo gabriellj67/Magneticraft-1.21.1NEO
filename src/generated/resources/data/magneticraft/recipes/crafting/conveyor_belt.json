@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "I": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "M": {
+      "item": "magneticraft:motor"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "III",
+    "RMR",
+    "III"
+  ],
+  "result": {
+    "count": 4,
+    "item": "magneticraft:conveyor_belt"
+  },
+  "show_notification": true
+}

@@ -4,7 +4,10 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
@@ -26,6 +29,7 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
 
     private final ItemInventoryModule inventory;
     private final EnergyStorageModule energy;
+    private final ElectricalNetworkModule electricity;
     private final ElectricFurnaceProcessModule process;
     private final ContainerData data;
 
@@ -46,6 +50,24 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
                 ElectricFurnaceProcessModule.MAX_CONSUMPTION_PER_TICK,
                 side -> true,
                 true,
+                false
+        ));
+        electricity = addModule(new ElectricalNetworkModule(
+                Magneticraft.id("electricity"),
+                this,
+                new ElectricalNode(1.0D, 125.0D, 0.001D),
+                0.001D,
+                8.0D,
+                side -> true
+        ));
+        addModule(new ElectricalEnergyBridgeModule(
+                Magneticraft.id("electricity_bridge"),
+                this,
+                electricity,
+                energy,
+                60.0D,
+                60.0D,
+                MAX_INPUT,
                 false
         ));
         process = addModule(new ElectricFurnaceProcessModule(
@@ -94,6 +116,10 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
 
     public EnergyStorageModule energy() {
         return energy;
+    }
+
+    public ElectricalNetworkModule electricity() {
+        return electricity;
     }
 
     public ElectricFurnaceProcessModule process() {

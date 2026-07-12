@@ -4,6 +4,9 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,6 +33,7 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
 
     private final ItemInventoryModule inventory;
     private final EnergyStorageModule energy;
+    private final ElectricalNetworkModule electricity;
     private final ContainerData data;
 
     public BatteryBlockEntity(BlockPos position, BlockState state) {
@@ -48,6 +52,24 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
                 NETWORK_TRANSFER_RATE,
                 NETWORK_TRANSFER_RATE,
                 this::canAccessEnergy
+        ));
+        electricity = addModule(new ElectricalNetworkModule(
+                Magneticraft.id("electricity"),
+                this,
+                new ElectricalNode(0.5D, 125.0D, 0.001D),
+                0.001D,
+                8.0D,
+                this::canAccessEnergy
+        ));
+        addModule(new ElectricalEnergyBridgeModule(
+                Magneticraft.id("electricity_bridge"),
+                this,
+                electricity,
+                energy,
+                90.0D,
+                90.0D,
+                NETWORK_TRANSFER_RATE,
+                true
         ));
         data = new ContainerData() {
             @Override
@@ -88,6 +110,10 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
 
     public EnergyStorageModule energy() {
         return energy;
+    }
+
+    public ElectricalNetworkModule electricity() {
+        return electricity;
     }
 
     public ContainerData data() {

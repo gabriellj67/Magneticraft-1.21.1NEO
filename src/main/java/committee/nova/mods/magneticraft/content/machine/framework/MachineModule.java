@@ -31,6 +31,14 @@ public interface MachineModule {
     default void onLoad() {
     }
 
+    /**
+     * Called when the owning block entity is removed or its chunk unloads.
+     * Implementations must be idempotent because Forge may invalidate other
+     * lifecycle surfaces during the same removal.
+     */
+    default void onUnload() {
+    }
+
     default void invalidateCapabilities() {
     }
 

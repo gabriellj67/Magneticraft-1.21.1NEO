@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "pattern": [
+    "III",
+    "   ",
+    "III"
+  ],
+  "result": {
+    "count": 8,
+    "item": "magneticraft:heat_pipe"
+  },
+  "show_notification": true
+}

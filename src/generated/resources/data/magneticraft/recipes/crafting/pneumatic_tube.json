@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "G": {
+      "tag": "forge:glass"
+    },
+    "I": {
+      "tag": "forge:nuggets/iron"
+    }
+  },
+  "pattern": [
+    "IGI",
+    "G G",
+    "IGI"
+  ],
+  "result": {
+    "count": 8,
+    "item": "magneticraft:pneumatic_tube"
+  },
+  "show_notification": true
+}

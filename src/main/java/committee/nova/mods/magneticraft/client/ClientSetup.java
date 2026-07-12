@@ -24,6 +24,8 @@ public final class ClientSetup {
             MenuScreens.register(ModMenus.BATTERY.get(), BatteryScreen::new);
             MenuScreens.register(ModMenus.ELECTRIC_FURNACE.get(), ElectricFurnaceScreen::new);
             BlockEntityRenderers.register(ModBlockEntities.CRUSHING_TABLE.get(), CrushingTableRenderer::new);
+            BlockEntityRenderers.register(ModBlockEntities.CONVEYOR_BELT.get(), ConveyorBeltRenderer::new);
+            BlockEntityRenderers.register(ModBlockEntities.PNEUMATIC_TUBE.get(), PneumaticTubeRenderer::new);
         });
     }
 }

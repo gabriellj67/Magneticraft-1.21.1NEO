@@ -199,6 +199,41 @@ public static void energyCapabilityExists(GameTestHelper helper) {
 }
 ```
 
+## Rebuildable physical-network state
+
+### Authority and lifecycle
+
+- Electrical, thermal, pressure, fluid and logistics state belongs to the owning block entity module and
+  is persisted below its stable module ID. A graph manager is a loaded-level cache, never the only copy of
+  node values, side modes or in-flight payloads.
+- Runtime managers must be keyed by `ServerLevel` identity (not a bare dimension integer or `BlockPos`) and
+  must not connect nodes from different levels. Chunk unload unregisters nodes without draining or deleting
+  their authoritative storage; `onLoad` reconstructs local topology.
+- Every module that registers runtime state needs an idempotent unload hook. Capability invalidation does not
+  replace topology unregistering, because it may also happen during block-state or loader lifecycle changes.
+
+### Incremental topology and budgets
+
+- Add/remove/update operations inspect the changed node and direct neighbors only. A removed edge may rebuild
+  its former connected component, but no server tick may scan chunks or rebuild every component.
+- Continuous-domain ticks traverse each loaded edge at most once. Item pathfinding has explicit visited-node
+  and queue limits; full targets, redstone-disabled components and unloaded chunks must cause backpressure,
+  not an unbounded retry queue.
+- Expose cumulative topology metrics in the pure core so tests can prove that a 1024-node steady topology does
+  no rebuild work and that a split only visits the affected component.
+
+### Conservation and adapters
+
+- Each domain declares its own unit and conservation equation. Losses (electrical resistance or configured
+  pressure leakage) are returned as explicit transfer results; rounding remainders must be restored to the
+  source rather than silently discarded.
+- FE, `IFluidHandler` and `IItemHandler` are side-specific boundary adapters. Always simulate the target first,
+  execute only the accepted amount, and keep cached views safe after a side is disabled.
+- A simulation call may report capacity or route availability but must not alter storage, cursors, payloads,
+  dirty flags or client sync state.
+- Network behavior requires both pure Java conservation/budget tests and loaded GameTests for topology,
+  capability injection, block-entity persistence and exactly-once item transfer.
+
 ## Test requirements
 
 Every large migration task must pass the applicable gates before its single

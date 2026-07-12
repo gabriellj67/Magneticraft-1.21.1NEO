@@ -9,6 +9,7 @@ import committee.nova.mods.magneticraft.content.material.Metal;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModTags;
+import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
@@ -51,6 +52,7 @@ final class ModItemTagsProvider extends ItemTagsProvider {
                 ModItems.hammer(HammerType.IRON).get(),
                 ModItems.hammer(HammerType.STEEL).get()
         );
+        tag(ModTags.Items.WRENCHES).add(ModNetworkItems.WRENCH.get());
     }
 
     private void addMaterialForms() {

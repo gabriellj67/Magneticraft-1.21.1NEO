@@ -104,6 +104,12 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
     }
 
     @Override
+    public void setRemoved() {
+        modules.values().forEach(MachineModule::onUnload);
+        super.setRemoved();
+    }
+
+    @Override
     public void invalidateCaps() {
         modules.values().forEach(MachineModule::invalidateCapabilities);
         super.invalidateCaps();

@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModTags;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
@@ -50,6 +51,26 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 ModMachineBlocks.BATTERY.get(),
                 ModMachineBlocks.GRATE.get(),
                 ModMachineBlocks.ELECTRIC_FURNACE.get()
+        );
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
+                ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                ModNetworkBlocks.HEAT_PIPE.get(),
+                ModNetworkBlocks.INSULATED_HEAT_PIPE.get(),
+                ModNetworkBlocks.HEAT_SINK.get(),
+                ModNetworkBlocks.IRON_PIPE.get(),
+                ModNetworkBlocks.PNEUMATIC_TUBE.get(),
+                ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
+                ModNetworkBlocks.CONVEYOR_BELT.get()
+        );
+        tag(BlockTags.NEEDS_STONE_TOOL).add(
+                ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                ModNetworkBlocks.HEAT_PIPE.get(),
+                ModNetworkBlocks.INSULATED_HEAT_PIPE.get(),
+                ModNetworkBlocks.HEAT_SINK.get(),
+                ModNetworkBlocks.IRON_PIPE.get(),
+                ModNetworkBlocks.PNEUMATIC_TUBE.get(),
+                ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
+                ModNetworkBlocks.CONVEYOR_BELT.get()
         );
 
         addOre(BaseBlockDefinition.GALENA_ORE, "galena", "lead", "silver");

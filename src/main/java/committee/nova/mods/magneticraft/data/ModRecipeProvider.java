@@ -12,6 +12,8 @@ import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModTags;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.PackOutput;
@@ -108,6 +110,87 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', ModTags.Items.ingot(Metal.COPPER))
                 .unlockedBy("has_fine_copper_wire", has(ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get()))
                 .save(consumer, id("crafting/electric_furnace_temporary"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModNetworkItems.WRENCH.get())
+                .pattern(" I ")
+                .pattern(" SI")
+                .pattern("S  ")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('S', Tags.Items.RODS_WOODEN)
+                .unlockedBy("has_iron_ingot", has(Tags.Items.INGOTS_IRON))
+                .save(consumer, id("crafting/wrench"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_CABLE.get(), 8)
+                .pattern("CCC")
+                .pattern("WWW")
+                .pattern("CCC")
+                .define('C', ModTags.Items.ingot(Metal.COPPER))
+                .define('W', ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get())
+                .unlockedBy("has_fine_copper_wire", has(ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get()))
+                .save(consumer, id("crafting/electric_cable"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.HEAT_PIPE.get(), 8)
+                .pattern("III")
+                .pattern("   ")
+                .pattern("III")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .unlockedBy("has_iron_ingot", has(Tags.Items.INGOTS_IRON))
+                .save(consumer, id("crafting/heat_pipe"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), 8)
+                .pattern("WWW")
+                .pattern("PPP")
+                .pattern("WWW")
+                .define('W', ItemTags.WOOL)
+                .define('P', ModNetworkBlocks.HEAT_PIPE.get())
+                .unlockedBy("has_heat_pipe", has(ModNetworkBlocks.HEAT_PIPE.get()))
+                .save(consumer, id("crafting/insulated_heat_pipe"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.HEAT_SINK.get())
+                .pattern("III")
+                .pattern("CGC")
+                .pattern("III")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('C', ModTags.Items.ingot(Metal.COPPER))
+                .define('G', ModMachineBlocks.GRATE.get())
+                .unlockedBy("has_grate", has(ModMachineBlocks.GRATE.get()))
+                .save(consumer, id("crafting/heat_sink"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.IRON_PIPE.get(), 8)
+                .pattern("III")
+                .pattern("   ")
+                .pattern("III")
+                .define('I', ModTags.Items.lightPlate(Metal.IRON))
+                .unlockedBy("has_iron_light_plate", has(ModTags.Items.lightPlate(Metal.IRON)))
+                .save(consumer, id("crafting/iron_pipe"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.PNEUMATIC_TUBE.get(), 8)
+                .pattern("IGI")
+                .pattern("G G")
+                .pattern("IGI")
+                .define('I', Tags.Items.NUGGETS_IRON)
+                .define('G', Tags.Items.GLASS)
+                .unlockedBy("has_glass", has(Tags.Items.GLASS))
+                .save(consumer, id("crafting/pneumatic_tube"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(), 8)
+                .pattern("RRR")
+                .pattern("TTT")
+                .pattern("RRR")
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('T', ModNetworkBlocks.PNEUMATIC_TUBE.get())
+                .unlockedBy("has_pneumatic_tube", has(ModNetworkBlocks.PNEUMATIC_TUBE.get()))
+                .save(consumer, id("crafting/pneumatic_restriction_tube"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.CONVEYOR_BELT.get(), 4)
+                .pattern("III")
+                .pattern("RMR")
+                .pattern("III")
+                .define('I', ModTags.Items.lightPlate(Metal.IRON))
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('M', ModItems.component(CraftingComponent.MOTOR).get())
+                .unlockedBy("has_motor", has(ModItems.component(CraftingComponent.MOTOR).get()))
+                .save(consumer, id("crafting/conveyor_belt"));
     }
 
     private void addCrushingRecipes(Consumer<FinishedRecipe> consumer) {

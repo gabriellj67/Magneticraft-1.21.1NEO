@@ -207,6 +207,51 @@ class GeneratedDataContractTest {
         }
     }
 
+    @Test
+    void physicalNetworkDataAndAssetsAreComplete() throws IOException {
+        JsonObject english = readObject(ASSETS.resolve("lang/en_us.json"));
+        JsonObject chinese = readObject(ASSETS.resolve("lang/zh_cn.json"));
+        Set<String> blocks = Set.of(
+                "electric_cable",
+                "heat_pipe",
+                "insulated_heat_pipe",
+                "heat_sink",
+                "iron_pipe",
+                "pneumatic_tube",
+                "pneumatic_restriction_tube",
+                "conveyor_belt"
+        );
+        for (String block : blocks) {
+            assertFile(ASSETS.resolve("blockstates/" + block + ".json"));
+            assertFile(ASSETS.resolve("models/block/" + block + ".json"));
+            assertFile(ASSETS.resolve("models/item/" + block + ".json"));
+            assertFile(DATA.resolve("loot_tables/blocks/" + block + ".json"));
+            assertFile(recipe("crafting/" + block));
+            assertTrue(english.has("block.magneticraft." + block), block);
+            assertTrue(chinese.has("block.magneticraft." + block), block);
+        }
+
+        JsonObject wrench = readObject(ASSETS.resolve("models/item/wrench.json"));
+        assertEquals("minecraft:item/handheld", wrench.get("parent").getAsString());
+        assertEquals("minecraft:item/iron_hoe", wrench.getAsJsonObject("textures").get("layer0").getAsString());
+        assertTrue(english.has("item.magneticraft.wrench"));
+        assertTrue(chinese.has("item.magneticraft.wrench"));
+        assertFile(recipe("crafting/wrench"));
+
+        JsonObject wrenchTag = readObject(GENERATED.resolve("data/forge/tags/items/tools/wrenches.json"));
+        assertTrue(wrenchTag.getAsJsonArray("values").asList().stream()
+                .anyMatch(value -> value.getAsString().equals("magneticraft:wrench")));
+        for (String key : Set.of(
+                "message.magneticraft.connection_enabled",
+                "message.magneticraft.connection_disabled",
+                "message.magneticraft.redstone_mode",
+                "message.magneticraft.fluid_side_mode"
+        )) {
+            assertTrue(english.has(key), key);
+            assertTrue(chinese.has(key), key);
+        }
+    }
+
     private static void assertItemAssetsAndTranslation(String id, JsonObject language) throws IOException {
         assertPng(SOURCE_TEXTURES.resolve("item/" + id + ".png"));
         assertFile(ASSETS.resolve("models/item/" + id + ".json"));

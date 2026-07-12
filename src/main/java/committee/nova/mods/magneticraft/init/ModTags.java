@@ -50,6 +50,7 @@ public final class ModTags {
         public static final TagKey<Item> CHUNKS = mod("chunks");
         public static final TagKey<Item> ROCKY_CHUNKS = mod("rocky_chunks");
         public static final TagKey<Item> HAMMERS = mod("hammers");
+        public static final TagKey<Item> WRENCHES = forge("tools/wrenches");
         public static final TagKey<Item> SULFUR = mod("sulfur");
         public static final TagKey<Item> SULFUR_DUST = forge("dusts/sulfur");
 

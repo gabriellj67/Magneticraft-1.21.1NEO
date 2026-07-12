@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
+import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
@@ -24,6 +25,8 @@ final class ModItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         ModItems.creativeItems().stream().map(RegistryObject::get).forEach(this::basicItem);
         ModMachineItems.creativeItems().stream().map(RegistryObject::get).forEach(this::basicItem);
+        withExistingParent(ModNetworkItems.WRENCH.getId().getPath(), mcLoc("item/handheld"))
+                .texture("layer0", mcLoc("item/iron_hoe"));
 
         for (FluidDefinition definition : FluidDefinition.values()) {
             ModFluids.FluidFamily family = ModFluids.get(definition);

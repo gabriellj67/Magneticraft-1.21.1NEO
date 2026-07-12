@@ -21,8 +21,10 @@ public final class ModCreativeTabs {
                     .displayItems((parameters, output) -> {
                         ModBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModMachineBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModNetworkBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModMachineItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModNetworkItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModFluids.buckets().stream().map(RegistryObject::get).forEach(output::accept);
                     })
                     .build()

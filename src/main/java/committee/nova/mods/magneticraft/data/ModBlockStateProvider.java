@@ -7,6 +7,7 @@ import committee.nova.mods.magneticraft.content.machine.electricfurnace.Electric
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.core.Direction;
@@ -86,6 +87,41 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
         simpleBlockItem(electricFurnace, furnaceOff);
 
+        conduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable", mcLoc("block/copper_block"));
+        conduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe", mcLoc("block/iron_block"));
+        conduitBlock(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), "insulated_heat_pipe", mcLoc("block/black_wool"));
+        conduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_pipe", mcLoc("block/iron_block"));
+        conduitBlock(ModNetworkBlocks.PNEUMATIC_TUBE.get(), "pneumatic_tube", mcLoc("block/light_gray_concrete"));
+        conduitBlock(
+                ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
+                "pneumatic_restriction_tube",
+                mcLoc("block/red_concrete")
+        );
+
+        Block heatSink = ModNetworkBlocks.HEAT_SINK.get();
+        BlockModelBuilder heatSinkModel = models().getBuilder("heat_sink")
+                .texture("particle", mcLoc("block/iron_block"))
+                .texture("metal", mcLoc("block/iron_block"))
+                .texture("face", modLoc("block/grate"));
+        heatSinkModel.element().from(2, 2, 2).to(14, 14, 14).textureAll("#metal").end();
+        for (int x = 1; x <= 13; x += 3) {
+            heatSinkModel.element().from(x, 0, 0).to(x + 1, 16, 2).textureAll("#metal").end();
+        }
+        heatSinkModel.element().from(2, 2, 0).to(14, 14, 2).textureAll("#face").end();
+        horizontalBlock(heatSink, heatSinkModel);
+        simpleBlockItem(heatSink, heatSinkModel);
+
+        Block conveyor = ModNetworkBlocks.CONVEYOR_BELT.get();
+        BlockModelBuilder conveyorModel = models().getBuilder("conveyor_belt")
+                .texture("particle", mcLoc("block/black_concrete"))
+                .texture("belt", mcLoc("block/black_concrete"))
+                .texture("rail", mcLoc("block/iron_block"));
+        conveyorModel.element().from(0, 0, 0).to(16, 3, 16).textureAll("#belt").end();
+        conveyorModel.element().from(0, 3, 0).to(2, 4, 16).textureAll("#rail").end();
+        conveyorModel.element().from(14, 3, 0).to(16, 4, 16).textureAll("#rail").end();
+        horizontalBlock(conveyor, conveyorModel);
+        simpleBlockItem(conveyor, conveyorModel);
+
         for (FluidDefinition definition : FluidDefinition.values()) {
             ModelFile model = models().getBuilder(definition.id())
                     .texture("particle", Magneticraft.id("fluid/" + definition.id() + "_still"));
@@ -101,5 +137,19 @@ final class ModBlockStateProvider extends BlockStateProvider {
             int maxZ
     ) {
         model.element().from(minX, 0, minZ).to(maxX, 12, maxZ).textureAll("#side").end();
+    }
+
+    private void conduitBlock(Block block, String name, ResourceLocation texture) {
+        BlockModelBuilder model = models().getBuilder(name)
+                .texture("particle", texture)
+                .texture("all", texture);
+        model.element().from(5, 5, 5).to(11, 11, 11).textureAll("#all").end();
+        model.element().from(5, 0, 5).to(11, 5, 11).textureAll("#all").end();
+        model.element().from(5, 11, 5).to(11, 16, 11).textureAll("#all").end();
+        model.element().from(5, 5, 0).to(11, 11, 5).textureAll("#all").end();
+        model.element().from(5, 5, 11).to(11, 11, 16).textureAll("#all").end();
+        model.element().from(0, 5, 5).to(5, 11, 11).textureAll("#all").end();
+        model.element().from(11, 5, 5).to(16, 11, 11).textureAll("#all").end();
+        simpleBlockWithItem(block, model);
     }
 }

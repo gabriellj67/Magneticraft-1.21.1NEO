@@ -3,6 +3,12 @@ package committee.nova.mods.magneticraft.init;
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.crushingtable.CrushingTableBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
+import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntity;
+import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
+import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlockEntity;
+import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBlockEntity;
+import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -32,6 +38,56 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             ElectricFurnaceBlockEntity::new,
                             ModMachineBlocks.ELECTRIC_FURNACE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<ElectricCableBlockEntity>> ELECTRIC_CABLE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "electric_cable",
+                    () -> BlockEntityType.Builder.of(
+                            ElectricCableBlockEntity::new,
+                            ModNetworkBlocks.ELECTRIC_CABLE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<HeatPipeBlockEntity>> HEAT_PIPE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "heat_pipe",
+                    () -> BlockEntityType.Builder.of(
+                            HeatPipeBlockEntity::new,
+                            ModNetworkBlocks.HEAT_PIPE.get(),
+                            ModNetworkBlocks.INSULATED_HEAT_PIPE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<HeatSinkBlockEntity>> HEAT_SINK =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "heat_sink",
+                    () -> BlockEntityType.Builder.of(
+                            HeatSinkBlockEntity::new,
+                            ModNetworkBlocks.HEAT_SINK.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<IronPipeBlockEntity>> IRON_PIPE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "iron_pipe",
+                    () -> BlockEntityType.Builder.of(
+                            IronPipeBlockEntity::new,
+                            ModNetworkBlocks.IRON_PIPE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<PneumaticTubeBlockEntity>> PNEUMATIC_TUBE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "pneumatic_tube",
+                    () -> BlockEntityType.Builder.of(
+                            PneumaticTubeBlockEntity::new,
+                            ModNetworkBlocks.PNEUMATIC_TUBE.get(),
+                            ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<ConveyorBeltBlockEntity>> CONVEYOR_BELT =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "conveyor_belt",
+                    () -> BlockEntityType.Builder.of(
+                            ConveyorBeltBlockEntity::new,
+                            ModNetworkBlocks.CONVEYOR_BELT.get()
                     ).build(null)
             );
 

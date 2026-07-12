@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": {
+      "tag": "forge:ingots/copper"
+    },
+    "W": {
+      "item": "magneticraft:fine_copper_wire"
+    }
+  },
+  "pattern": [
+    "CCC",
+    "WWW",
+    "CCC"
+  ],
+  "result": {
+    "count": 8,
+    "item": "magneticraft:electric_cable"
+  },
+  "show_notification": true
+}

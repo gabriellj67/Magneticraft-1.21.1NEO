@@ -18,6 +18,14 @@
     "magneticraft:inverted_limestone_tiles",
     "magneticraft:battery",
     "magneticraft:grate",
-    "magneticraft:electric_furnace"
+    "magneticraft:electric_furnace",
+    "magneticraft:electric_cable",
+    "magneticraft:heat_pipe",
+    "magneticraft:insulated_heat_pipe",
+    "magneticraft:heat_sink",
+    "magneticraft:iron_pipe",
+    "magneticraft:pneumatic_tube",
+    "magneticraft:pneumatic_restriction_tube",
+    "magneticraft:conveyor_belt"
   ]
 }

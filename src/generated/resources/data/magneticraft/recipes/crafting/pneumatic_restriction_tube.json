@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "T": {
+      "item": "magneticraft:pneumatic_tube"
+    }
+  },
+  "pattern": [
+    "RRR",
+    "TTT",
+    "RRR"
+  ],
+  "result": {
+    "count": 8,
+    "item": "magneticraft:pneumatic_restriction_tube"
+  },
+  "show_notification": true
+}
