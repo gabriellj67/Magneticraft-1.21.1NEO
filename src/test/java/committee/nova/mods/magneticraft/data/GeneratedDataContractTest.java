@@ -30,6 +30,7 @@ class GeneratedDataContractTest {
     private static final Path ASSETS = GENERATED.resolve("assets/magneticraft");
     private static final Path DATA = GENERATED.resolve("data/magneticraft");
     private static final Path SOURCE_TEXTURES = Path.of("src/main/resources/assets/magneticraft/textures");
+    private static final Path SOURCE_MODELS = Path.of("src/main/resources/assets/magneticraft/models");
 
     @Test
     void everyGeneratedJsonFileIsValid() throws IOException {
@@ -154,6 +155,55 @@ class GeneratedDataContractTest {
         for (Path path : expectedSmelting) {
             assertEquals("minecraft:smelting", readObject(path).get("type").getAsString(), path.toString());
             assertFalse(path.toString().contains("blasting"), path.toString());
+        }
+    }
+
+    @Test
+    void machineFrameworkDataAndAssetsAreComplete() throws IOException {
+        for (String block : Set.of("crushing_table", "battery", "grate", "electric_furnace")) {
+            assertFile(ASSETS.resolve("blockstates/" + block + ".json"));
+            assertFile(ASSETS.resolve("models/block/" + block + ".json"));
+            assertFile(ASSETS.resolve("models/item/" + block + ".json"));
+            assertFile(DATA.resolve("loot_tables/blocks/" + block + ".json"));
+        }
+        for (String texture : Set.of(
+                "crushing_table_top", "crushing_table_side", "crushing_table_bottom",
+                "battery", "grate", "electric_furnace_side", "electric_furnace_front",
+                "electric_furnace_front_on"
+        )) {
+            assertPng(SOURCE_TEXTURES.resolve("block/" + texture + ".png"));
+        }
+        assertFile(SOURCE_MODELS.resolve("block/battery.obj"));
+        assertFile(SOURCE_MODELS.resolve("block/battery.mtl"));
+        JsonObject batteryModel = readObject(ASSETS.resolve("models/block/battery.json"));
+        assertEquals("forge:obj", batteryModel.get("loader").getAsString());
+        assertEquals("magneticraft:models/block/battery.obj", batteryModel.get("model").getAsString());
+        assertEquals("magneticraft:models/block/battery.mtl", batteryModel.get("mtl_override").getAsString());
+        assertItemAssetsAndTranslation("battery_item_low", readObject(ASSETS.resolve("lang/en_us.json")));
+
+        for (String recipe : Set.of(
+                "crushing_table", "battery_item_low", "grate", "battery", "electric_furnace_temporary"
+        )) {
+            assertFile(recipe("crafting/" + recipe));
+        }
+        JsonObject temporaryFurnace = readObject(recipe("crafting/electric_furnace_temporary"));
+        assertEquals("minecraft:furnace", temporaryFurnace.getAsJsonObject("key").getAsJsonObject("B").get("item").getAsString());
+
+        Path crushingDirectory = DATA.resolve("recipes/crushing");
+        try (Stream<Path> paths = Files.list(crushingDirectory)) {
+            assertTrue(paths.filter(Files::isRegularFile).count() >= 20, "Legacy crushing catalogue is incomplete");
+        }
+        JsonObject blazeRod = readObject(recipe("crushing/blaze_rod"));
+        assertEquals("magneticraft:crushing", blazeRod.get("type").getAsString());
+        assertEquals(5, blazeRod.getAsJsonObject("result").get("count").getAsInt());
+
+        JsonObject sounds = readObject(Path.of("src/main/resources/assets/magneticraft/sounds.json"));
+        assertEquals(3, sounds.getAsJsonObject("crushing_hit").getAsJsonArray("sounds").size());
+        assertEquals(2, sounds.getAsJsonObject("crushing_final").getAsJsonArray("sounds").size());
+        for (String sample : Set.of(
+                "crushing_hit1", "crushing_hit2", "crushing_hit3", "crushing_final1", "crushing_final2"
+        )) {
+            assertFile(Path.of("src/main/resources/assets/magneticraft/sounds/" + sample + ".ogg"));
         }
     }
 

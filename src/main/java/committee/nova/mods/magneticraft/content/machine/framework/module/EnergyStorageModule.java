@@ -1,0 +1,173 @@
+package committee.nova.mods.magneticraft.content.machine.framework.module;
+
+import committee.nova.mods.magneticraft.content.machine.framework.EnergyBuffer;
+import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
+import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.IEnergyStorage;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.Predicate;
+
+/**
+ * Forge Energy adapter around the framework's pure Java energy buffer.
+ */
+public final class EnergyStorageModule implements MachineModule, IEnergyStorage {
+    private static final String ENERGY_TAG = "energy";
+
+    private final ResourceLocation id;
+    private final MachineModuleHost host;
+    private final EnergyBuffer buffer;
+    private final Predicate<Direction> exposedSides;
+    private final boolean externalReceive;
+    private final boolean externalExtract;
+    private LazyOptional<IEnergyStorage> capability = LazyOptional.empty();
+
+    public EnergyStorageModule(
+            ResourceLocation id,
+            MachineModuleHost host,
+            int capacity,
+            int maxReceive,
+            int maxExtract,
+            Predicate<Direction> exposedSides
+    ) {
+        this(id, host, capacity, maxReceive, maxExtract, exposedSides, maxReceive > 0, maxExtract > 0);
+    }
+
+    public EnergyStorageModule(
+            ResourceLocation id,
+            MachineModuleHost host,
+            int capacity,
+            int maxReceive,
+            int maxExtract,
+            Predicate<Direction> exposedSides,
+            boolean externalReceive,
+            boolean externalExtract
+    ) {
+        this.id = Objects.requireNonNull(id);
+        this.host = Objects.requireNonNull(host);
+        this.buffer = new EnergyBuffer(capacity, maxReceive, maxExtract);
+        this.exposedSides = Objects.requireNonNull(exposedSides);
+        this.externalReceive = externalReceive;
+        this.externalExtract = externalExtract;
+        reviveCapabilities();
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return id;
+    }
+
+    @Override
+    public void load(CompoundTag tag) {
+        buffer.setEnergy(tag.getInt(ENERGY_TAG));
+    }
+
+    @Override
+    public void save(CompoundTag tag) {
+        tag.putInt(ENERGY_TAG, buffer.energy());
+    }
+
+    @Override
+    public void invalidateCapabilities() {
+        capability.invalidate();
+        capability = LazyOptional.empty();
+    }
+
+    @Override
+    public void reviveCapabilities() {
+        capability = LazyOptional.of(ExternalEnergyView::new);
+    }
+
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> requested, @Nullable Direction side) {
+        if (requested == ForgeCapabilities.ENERGY && exposedSides.test(side)) {
+            return capability.cast();
+        }
+        return LazyOptional.empty();
+    }
+
+    @Override
+    public int receiveEnergy(int maxReceive, boolean simulate) {
+        int accepted = buffer.receive(maxReceive, simulate);
+        if (accepted > 0 && !simulate) {
+            host.markChanged();
+        }
+        return accepted;
+    }
+
+    @Override
+    public int extractEnergy(int maxExtract, boolean simulate) {
+        int extracted = buffer.extract(maxExtract, simulate);
+        if (extracted > 0 && !simulate) {
+            host.markChanged();
+        }
+        return extracted;
+    }
+
+    @Override
+    public int getEnergyStored() {
+        return buffer.energy();
+    }
+
+    @Override
+    public int getMaxEnergyStored() {
+        return buffer.capacity();
+    }
+
+    @Override
+    public boolean canExtract() {
+        return buffer.maxExtract() > 0;
+    }
+
+    @Override
+    public boolean canReceive() {
+        return buffer.maxReceive() > 0;
+    }
+
+    public void setEnergyStored(int amount) {
+        int oldEnergy = buffer.energy();
+        buffer.setEnergy(amount);
+        if (oldEnergy != buffer.energy()) {
+            host.markChanged();
+        }
+    }
+
+    private final class ExternalEnergyView implements IEnergyStorage {
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            return externalReceive ? EnergyStorageModule.this.receiveEnergy(maxReceive, simulate) : 0;
+        }
+
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return externalExtract ? EnergyStorageModule.this.extractEnergy(maxExtract, simulate) : 0;
+        }
+
+        @Override
+        public int getEnergyStored() {
+            return EnergyStorageModule.this.getEnergyStored();
+        }
+
+        @Override
+        public int getMaxEnergyStored() {
+            return EnergyStorageModule.this.getMaxEnergyStored();
+        }
+
+        @Override
+        public boolean canExtract() {
+            return externalExtract && EnergyStorageModule.this.canExtract();
+        }
+
+        @Override
+        public boolean canReceive() {
+            return externalReceive && EnergyStorageModule.this.canReceive();
+        }
+    }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "magneticraft:battery_item_low"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "C": {
+      "item": "magneticraft:grate"
+    },
+    "D": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "DCD",
+    "DBD"
+  ],
+  "result": {
+    "item": "magneticraft:battery"
+  },
+  "show_notification": true
+}

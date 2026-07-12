@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "B": {
+      "item": "minecraft:furnace"
+    },
+    "C": {
+      "tag": "forge:ingots/copper"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "CCC"
+  ],
+  "result": {
+    "item": "magneticraft:electric_furnace"
+  },
+  "show_notification": true
+}

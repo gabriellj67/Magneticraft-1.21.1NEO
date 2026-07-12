@@ -7,8 +7,11 @@ import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.material.Metal;
 import committee.nova.mods.magneticraft.data.recipe.CountedCookingRecipeBuilder;
+import committee.nova.mods.magneticraft.data.recipe.CrushingRecipeBuilder;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModItems;
+import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModTags;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.PackOutput;
@@ -18,9 +21,13 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.Tags;
 
@@ -45,6 +52,120 @@ final class ModRecipeProvider extends RecipeProvider {
         addComponentRecipes(consumer);
         addHammerRecipes(consumer);
         addSmeltingRecipes(consumer);
+        addMachineCraftingRecipes(consumer);
+        addCrushingRecipes(consumer);
+    }
+
+    private void addMachineCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModMachineBlocks.CRUSHING_TABLE.get())
+                .pattern("AAA")
+                .pattern("BCB")
+                .pattern("CDC")
+                .define('A', Blocks.STONE_SLAB)
+                .define('B', Tags.Items.RODS_WOODEN)
+                .define('C', ItemTags.PLANKS)
+                .define('D', ItemTags.LOGS)
+                .unlockedBy("has_stone_slab", has(Blocks.STONE_SLAB))
+                .save(consumer, id("crafting/crushing_table"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineItems.LOW_BATTERY.get())
+                .pattern("ABA")
+                .pattern("CDC")
+                .pattern("CDC")
+                .define('A', Tags.Items.NUGGETS_IRON)
+                .define('B', ModTags.Items.ingot(Metal.COPPER))
+                .define('C', ModTags.Items.ingot(Metal.LEAD))
+                .define('D', ModTags.Items.SULFUR_DUST)
+                .unlockedBy("has_sulfur", has(ModTags.Items.SULFUR_DUST))
+                .save(consumer, id("crafting/battery_item_low"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModMachineBlocks.GRATE.get(), 4)
+                .pattern(" A ")
+                .pattern("ABA")
+                .pattern(" A ")
+                .define('A', Blocks.IRON_BARS)
+                .define('B', Tags.Items.STONE)
+                .unlockedBy("has_iron_bars", has(Blocks.IRON_BARS))
+                .save(consumer, id("crafting/grate"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineBlocks.BATTERY.get())
+                .pattern("AAA")
+                .pattern("DCD")
+                .pattern("DBD")
+                .define('A', ModMachineItems.LOW_BATTERY.get())
+                .define('B', ModTags.Items.lightPlate(Metal.IRON))
+                .define('C', ModMachineBlocks.GRATE.get())
+                .define('D', Tags.Items.INGOTS_IRON)
+                .unlockedBy("has_battery_item_low", has(ModMachineItems.LOW_BATTERY.get()))
+                .save(consumer, id("crafting/battery"));
+
+        // Temporary dependency bridge. Delete when brick_furnace and the heat network are migrated.
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineBlocks.ELECTRIC_FURNACE.get())
+                .pattern("ABA")
+                .pattern("CCC")
+                .define('A', ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get())
+                .define('B', Blocks.FURNACE)
+                .define('C', ModTags.Items.ingot(Metal.COPPER))
+                .unlockedBy("has_fine_copper_wire", has(ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get()))
+                .save(consumer, id("crafting/electric_furnace_temporary"));
+    }
+
+    private void addCrushingRecipes(Consumer<FinishedRecipe> consumer) {
+        crush(consumer, "creeper_head", Ingredient.of(Items.CREEPER_HEAD), Items.GUNPOWDER, 8, -1);
+        crush(consumer, "skeleton_skull", Ingredient.of(Items.SKELETON_SKULL), Items.BONE_MEAL, 8, -1);
+        crush(consumer, "zombie_head", Ingredient.of(Items.ZOMBIE_HEAD), Items.ROTTEN_FLESH, 4, -1);
+
+        for (Metal metal : Metal.values()) {
+            if (MaterialForm.ROCKY_CHUNK.appliesTo(metal)) {
+                crush(
+                        consumer,
+                        metal.id() + "_ore",
+                        Ingredient.of(ModTags.Items.ore(metal.id())),
+                        ModItems.material(MaterialForm.ROCKY_CHUNK, metal).get(),
+                        1,
+                        1
+                );
+            }
+        }
+        crush(
+                consumer,
+                "pyrite_ore",
+                Ingredient.of(ModTags.Items.ore("pyrite")),
+                ModItems.component(CraftingComponent.SULFUR).get(),
+                2,
+                1
+        );
+
+        crush(consumer, "limestone", Ingredient.of(block(BaseBlockDefinition.LIMESTONE)), block(BaseBlockDefinition.COBBLED_LIMESTONE), 1, 0);
+        crush(consumer, "burnt_limestone", Ingredient.of(block(BaseBlockDefinition.BURNT_LIMESTONE)), block(BaseBlockDefinition.COBBLED_BURNT_LIMESTONE), 1, 0);
+        crush(consumer, "iron_block", Ingredient.of(Blocks.IRON_BLOCK), ModItems.material(MaterialForm.LIGHT_PLATE, Metal.IRON).get(), 5, 1);
+        crush(consumer, "gold_block", Ingredient.of(Blocks.GOLD_BLOCK), ModItems.material(MaterialForm.LIGHT_PLATE, Metal.GOLD).get(), 5, 2);
+        crush(consumer, "copper_block", Ingredient.of(ModTags.Items.storageBlock("copper")), ModItems.material(MaterialForm.LIGHT_PLATE, Metal.COPPER).get(), 5, 1);
+        crush(consumer, "lead_block", Ingredient.of(ModTags.Items.storageBlock("lead")), ModItems.material(MaterialForm.LIGHT_PLATE, Metal.LEAD).get(), 5, 1);
+        crush(consumer, "tungsten_block", Ingredient.of(ModTags.Items.storageBlock("tungsten")), ModItems.material(MaterialForm.LIGHT_PLATE, Metal.TUNGSTEN).get(), 5, 2);
+        crush(consumer, "steel_ingot", Ingredient.of(ModTags.Items.ingot(Metal.STEEL)), ModItems.material(MaterialForm.LIGHT_PLATE, Metal.STEEL).get(), 1, -1);
+        crush(consumer, "blaze_rod", Ingredient.of(Items.BLAZE_ROD), Items.BLAZE_POWDER, 5, -1);
+        crush(consumer, "bone", Ingredient.of(Items.BONE), Items.BONE_MEAL, 4, -1);
+        crush(consumer, "stone", Ingredient.of(Blocks.STONE), Blocks.COBBLESTONE, 1, 0);
+        crush(consumer, "polished_andesite", Ingredient.of(Blocks.POLISHED_ANDESITE), Blocks.ANDESITE, 1, 0);
+        crush(consumer, "polished_diorite", Ingredient.of(Blocks.POLISHED_DIORITE), Blocks.DIORITE, 1, 0);
+        crush(consumer, "polished_granite", Ingredient.of(Blocks.POLISHED_GRANITE), Blocks.GRANITE, 1, 0);
+        crush(consumer, "stone_bricks", Ingredient.of(Blocks.STONE_BRICKS), Blocks.CRACKED_STONE_BRICKS, 1, 0);
+        crush(consumer, "mossy_stone_bricks", Ingredient.of(Blocks.MOSSY_STONE_BRICKS), Blocks.MOSSY_COBBLESTONE, 1, 0);
+        crush(consumer, "dark_prismarine", Ingredient.of(Blocks.DARK_PRISMARINE), Blocks.PRISMARINE, 1, 0);
+        crush(consumer, "end_stone_bricks", Ingredient.of(Blocks.END_STONE_BRICKS), Blocks.END_STONE, 1, 0);
+    }
+
+    private void crush(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            Ingredient input,
+            ItemLike output,
+            int count,
+            int requiredLevel
+    ) {
+        CrushingRecipeBuilder.crushing(input, new ItemStack(output, count), requiredLevel)
+                .save(consumer, id("crushing/" + name));
     }
 
     private void addMaterialConversions(Consumer<FinishedRecipe> consumer) {

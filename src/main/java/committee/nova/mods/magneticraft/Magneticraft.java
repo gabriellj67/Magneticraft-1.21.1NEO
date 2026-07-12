@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import committee.nova.mods.magneticraft.config.MagneticraftConfig;
 import committee.nova.mods.magneticraft.data.ModDataGenerators;
 import committee.nova.mods.magneticraft.init.ModRegistries;
+import committee.nova.mods.magneticraft.network.ModNetwork;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -25,6 +26,7 @@ public final class Magneticraft {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         ModRegistries.register(modBus);
+        ModNetwork.register();
         modBus.addListener(ModDataGenerators::gatherData);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, MagneticraftConfig.SPEC);
     }

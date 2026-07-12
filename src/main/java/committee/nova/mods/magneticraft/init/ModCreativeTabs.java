@@ -20,7 +20,9 @@ public final class ModCreativeTabs {
                     .icon(() -> new ItemStack(ModItems.component(CraftingComponent.MAGNET).get()))
                     .displayItems((parameters, output) -> {
                         ModBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModMachineBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModMachineItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModFluids.buckets().stream().map(RegistryObject::get).forEach(output::accept);
                     })
                     .build()

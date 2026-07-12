@@ -122,6 +122,83 @@ ResourceLocation still = id("fluid/" + definition.id() + "_still");
 ResourceLocation still = texture(getDescriptionId(), "_still");
 ```
 
+## Scenario: plain JUnit versus Forge loader tests
+
+### 1. Scope / trigger
+
+Apply whenever a test touches `ForgeCapabilities`, `ItemStack`, vanilla registry holders, block entities,
+recipes, menus or any API whose implementation is injected by ModLauncher.
+
+### 2. Signatures
+
+```java
+// src/test/java: loader-independent value logic only
+@Test
+void receiveSimulationDoesNotMutateEnergy() { }
+
+// src/gametest/java: registry/capability/world behavior
+@GameTest(template = "base_content")
+public static void energyCapabilityInvalidatesAndRevives(GameTestHelper helper) { }
+```
+
+### 3. Contracts
+
+- Plain JUnit may test pure Java algorithms, NBT routing that does not initialize item/block registries,
+  generated files and other loader-independent codecs.
+- Any test that resolves `ForgeCapabilities`, constructs registry-backed `ItemStack` values, queries
+  `RecipeManager`, creates a real block entity/menu, or requires capability bytecode injection belongs in
+  the Forge GameTest source set or another explicit ModLauncher harness.
+- Do not call `Bootstrap.bootStrap()` in a plain test as a substitute for Forge lifecycle injection; it
+  does not implement Forge's capability transformer contract.
+
+### 4. Validation and error matrix
+
+| Symptom | Cause | Required action |
+|---|---|---|
+| `CapabilityToken.getType(): This will be implemented by a transformer` | Plain JUnit touched an injected Forge capability | Move that assertion to GameTest |
+| `IllegalArgumentException: Not bootstrapped` from `BuiltInRegistries` | Test initialized blocks/items before Minecraft bootstrap | Move registry-backed behavior to GameTest |
+| Pure bounds/serialization helper needs a running game | Domain logic is coupled to the loader | Extract the smallest pure value object, then unit-test it |
+| GameTest compiles but is not executed | Test is outside the configured namespace/source set | Verify `forge.enabledGameTestNamespaces` and `runGameTestServer` output |
+
+### 5. Good, base and bad cases
+
+- Good: `EnergyBuffer` bounds run in milliseconds under JUnit, while sided FE capabilities and BE reloads
+  run in `runGameTestServer`.
+- Base: an NBT module-key router using only `CompoundTag` and `ResourceLocation` remains a plain unit test.
+- Bad: a JUnit test references `ForgeCapabilities.ENERGY` or `Items.IRON_INGOT` and tries to repair the
+  resulting initialization failure with manual bootstrap calls.
+
+### 6. Tests required
+
+- Plain JUnit asserts simulation immutability, clamping, duplicate stable IDs and missing/unknown NBT nodes.
+- GameTest asserts capability direction, invalidate/revive, item capability persistence, menu movement,
+  recipe execution and block entity save/load in a loaded server.
+- The final gate runs both `test` and `runGameTestServer`; compiling the GameTest source set alone is not
+  runtime evidence.
+
+### 7. Wrong vs correct
+
+```java
+// Wrong: ForgeCapabilities requires ModLauncher transformation.
+@Test
+void energyCapabilityExists() {
+    assertTrue(machine.getCapability(ForgeCapabilities.ENERGY).isPresent());
+}
+
+// Correct: keep JUnit pure and exercise the adapter in GameTest.
+@Test
+void boundedEnergySimulationIsPure() {
+    assertEquals(100, new EnergyBuffer(100, 100, 100).receive(200, true));
+}
+```
+
+```java
+@GameTest(template = "base_content")
+public static void energyCapabilityExists(GameTestHelper helper) {
+    // Place the registered block, query ForgeCapabilities and assert lifecycle behavior here.
+}
+```
+
 ## Test requirements
 
 Every large migration task must pass the applicable gates before its single

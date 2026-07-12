@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:stone_slab"
+    },
+    "B": {
+      "tag": "forge:rods/wooden"
+    },
+    "C": {
+      "tag": "minecraft:planks"
+    },
+    "D": {
+      "tag": "minecraft:logs"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "BCB",
+    "CDC"
+  ],
+  "result": {
+    "item": "magneticraft:crushing_table"
+  },
+  "show_notification": true
+}

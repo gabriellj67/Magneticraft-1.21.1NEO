@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "item": "magneticraft:burnt_limestone"
+  },
+  "required_level": 0,
+  "result": {
+    "item": "magneticraft:cobbled_burnt_limestone"
+  }
+}

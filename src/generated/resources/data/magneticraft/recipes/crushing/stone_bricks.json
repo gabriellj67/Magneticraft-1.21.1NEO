@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "item": "minecraft:stone_bricks"
+  },
+  "required_level": 0,
+  "result": {
+    "item": "minecraft:cracked_stone_bricks"
+  }
+}

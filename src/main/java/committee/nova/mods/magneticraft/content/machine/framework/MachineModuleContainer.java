@@ -1,0 +1,47 @@
+package committee.nova.mods.magneticraft.content.machine.framework;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Loader-independent module identity and NBT routing.
+ */
+public final class MachineModuleContainer {
+    private final Map<ResourceLocation, MachineModule> modules = new LinkedHashMap<>();
+
+    public <T extends MachineModule> T add(T module) {
+        MachineModule previous = modules.putIfAbsent(module.id(), module);
+        if (previous != null) {
+            throw new IllegalArgumentException("Duplicate machine module id: " + module.id());
+        }
+        return module;
+    }
+
+    public CompoundTag save() {
+        CompoundTag root = new CompoundTag();
+        modules.forEach((id, module) -> {
+            CompoundTag moduleTag = new CompoundTag();
+            module.save(moduleTag);
+            root.put(id.toString(), moduleTag);
+        });
+        return root;
+    }
+
+    public void load(CompoundTag root) {
+        modules.forEach((id, module) -> {
+            String key = id.toString();
+            if (root.contains(key, CompoundTag.TAG_COMPOUND)) {
+                module.load(root.getCompound(key));
+            }
+        });
+    }
+
+    public Collection<MachineModule> values() {
+        return Collections.unmodifiableCollection(modules.values());
+    }
+}

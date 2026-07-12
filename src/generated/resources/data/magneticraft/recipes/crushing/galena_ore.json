@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "tag": "forge:ores/galena"
+  },
+  "required_level": 1,
+  "result": {
+    "item": "magneticraft:galena_rocky_chunk"
+  }
+}

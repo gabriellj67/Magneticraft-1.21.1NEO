@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModTags;
+import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
@@ -39,6 +40,17 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 }
             }
         }
+        tag(BlockTags.MINEABLE_WITH_AXE).add(ModMachineBlocks.CRUSHING_TABLE.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
+                ModMachineBlocks.BATTERY.get(),
+                ModMachineBlocks.GRATE.get(),
+                ModMachineBlocks.ELECTRIC_FURNACE.get()
+        );
+        tag(BlockTags.NEEDS_STONE_TOOL).add(
+                ModMachineBlocks.BATTERY.get(),
+                ModMachineBlocks.GRATE.get(),
+                ModMachineBlocks.ELECTRIC_FURNACE.get()
+        );
 
         addOre(BaseBlockDefinition.GALENA_ORE, "galena", "lead", "silver");
         addOre(BaseBlockDefinition.COBALT_ORE, "cobalt");

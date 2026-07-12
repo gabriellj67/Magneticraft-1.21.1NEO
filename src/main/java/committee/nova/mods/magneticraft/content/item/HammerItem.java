@@ -9,11 +9,17 @@ import net.minecraft.world.item.ItemStack;
  * A handheld crafting hammer with the Nova 1.12 bonus-hit behavior.
  */
 public final class HammerItem extends Item {
+    private final HammerType type;
     private final float bonusDamage;
 
     public HammerItem(HammerType type) {
         super(new Item.Properties().durability(type.durability()));
+        this.type = type;
         this.bonusDamage = type.bonusDamage();
+    }
+
+    public HammerType type() {
+        return type;
     }
 
     @Override

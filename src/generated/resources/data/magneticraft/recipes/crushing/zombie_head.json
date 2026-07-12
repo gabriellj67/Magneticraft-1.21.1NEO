@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "item": "minecraft:zombie_head"
+  },
+  "result": {
+    "count": 4,
+    "item": "minecraft:rotten_flesh"
+  }
+}

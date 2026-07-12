@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "item": "minecraft:polished_andesite"
+  },
+  "required_level": 0,
+  "result": {
+    "item": "minecraft:andesite"
+  }
+}

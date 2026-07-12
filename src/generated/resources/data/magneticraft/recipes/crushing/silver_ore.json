@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "tag": "forge:ores/silver"
+  },
+  "required_level": 1,
+  "result": {
+    "item": "magneticraft:silver_rocky_chunk"
+  }
+}

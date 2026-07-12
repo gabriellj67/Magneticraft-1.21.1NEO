@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "item": "minecraft:skeleton_skull"
+  },
+  "result": {
+    "count": 8,
+    "item": "minecraft:bone_meal"
+  }
+}

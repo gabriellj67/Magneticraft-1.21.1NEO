@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "tag": "forge:ores/nickel"
+  },
+  "required_level": 1,
+  "result": {
+    "item": "magneticraft:nickel_rocky_chunk"
+  }
+}

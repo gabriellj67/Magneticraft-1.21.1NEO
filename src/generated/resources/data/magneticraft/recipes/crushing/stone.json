@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "item": "minecraft:stone"
+  },
+  "required_level": 0,
+  "result": {
+    "item": "minecraft:cobblestone"
+  }
+}

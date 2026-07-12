@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModItems;
+import committee.nova.mods.magneticraft.init.ModMachineItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
@@ -22,6 +23,7 @@ final class ModItemModelProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         ModItems.creativeItems().stream().map(RegistryObject::get).forEach(this::basicItem);
+        ModMachineItems.creativeItems().stream().map(RegistryObject::get).forEach(this::basicItem);
 
         for (FluidDefinition definition : FluidDefinition.values()) {
             ModFluids.FluidFamily family = ModFluids.get(definition);

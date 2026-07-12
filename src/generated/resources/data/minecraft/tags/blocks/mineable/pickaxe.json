@@ -15,6 +15,9 @@
     "magneticraft:burnt_limestone_bricks",
     "magneticraft:cobbled_burnt_limestone",
     "magneticraft:limestone_tiles",
-    "magneticraft:inverted_limestone_tiles"
+    "magneticraft:inverted_limestone_tiles",
+    "magneticraft:battery",
+    "magneticraft:grate",
+    "magneticraft:electric_furnace"
   ]
 }

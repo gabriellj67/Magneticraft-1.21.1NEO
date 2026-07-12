@@ -1,6 +1,9 @@
 {
   "values": [
     "magneticraft:galena_ore",
-    "magneticraft:pyrite_ore"
+    "magneticraft:pyrite_ore",
+    "magneticraft:battery",
+    "magneticraft:grate",
+    "magneticraft:electric_furnace"
   ]
 }

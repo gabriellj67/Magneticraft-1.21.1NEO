@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/battery.obj",
+  "mtl_override": "magneticraft:models/block/battery.mtl",
+  "textures": {
+    "particle": "magneticraft:block/battery"
+  }
+}

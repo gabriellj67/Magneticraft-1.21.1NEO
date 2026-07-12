@@ -1,0 +1,9 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "tag": "forge:ingots/steel"
+  },
+  "result": {
+    "item": "magneticraft:steel_light_plate"
+  }
+}

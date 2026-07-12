@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing",
+  "ingredient": {
+    "tag": "forge:ores/copper"
+  },
+  "required_level": 1,
+  "result": {
+    "item": "magneticraft:copper_rocky_chunk"
+  }
+}
