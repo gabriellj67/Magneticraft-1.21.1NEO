@@ -1,0 +1,47 @@
+# Gradle and build output
+.gradle/
+build/
+out/
+src/generated/resources/.cache/
+
+# Minecraft development runs
+run/
+runs/
+logs/
+libs-*/
+
+# Local reference repositories used during the port
+.references/
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+Thumbs.db
+
+# Local agent and code-index state
+.agents/
+.codegraph/
+.codex/
+.spec-workflow/
+
+# Trellis local runtime; committed code specifications remain visible
+.trellis/*
+!.trellis/spec/
+.trellis/spec/*
+!.trellis/spec/backend/
+!.trellis/spec/backend/**
+
+# Serena local caches and per-machine overrides
+.serena/cache/
+.serena/project.local.yml
+
+# JVM crash and temporary files
+hs_err_pid*
+replay_pid*
+*.tmp
+*.bak
+*~

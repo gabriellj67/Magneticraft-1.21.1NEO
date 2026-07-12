@@ -62,6 +62,80 @@ public void load(CompoundTag tag) {
 - Multiblock definitions are immutable Java definitions in the first release;
   do not invent a custom datapack schema without a confirmed requirement.
 
+## Scenario: Forge 1.20.1 datagen provider and cache boundary
+
+### 1. Scope / trigger
+
+Apply this contract whenever a `GatherDataEvent` adds a provider or a build
+starts consuming `src/generated/resources`. It prevents an overloaded Java
+call from failing compilation and prevents datagen's private hash cache from
+being published as mod content.
+
+### 2. Signatures
+
+```java
+DataGenerator generator = event.getGenerator();
+PackOutput output = generator.getPackOutput();
+generator.addProvider(event.includeClient(), new ModLanguageProvider(output));
+```
+
+```groovy
+sourceSets.main.resources.exclude ".cache/**"
+```
+
+The repository `.gitignore` must also contain
+`src/generated/resources/.cache/`.
+
+### 3. Contracts
+
+- Register a concrete `DataProvider` instance when a lambda could match both
+  `addProvider(boolean, DataProvider.Factory<T>)` and
+  `addProvider(boolean, T)` on Minecraft 1.20.1.
+- Track generated assets/data that are build inputs; do not track or package
+  the `.cache` directory used by `HashCache`.
+- Run the exact same `runData` command twice. Hash every non-cache generated
+  file before and after the second run; all paths and SHA-256 values must match.
+- The binary and sources JARs must contain the generated resources but no
+  `.cache` entry.
+
+### 4. Validation and error matrix
+
+| Condition | Required result |
+|---|---|
+| Java reports an ambiguous `addProvider` call | Replace the lambda with an explicit provider instance; do not cast blindly |
+| First datagen run writes owned resources | Review and stage only intended resource files |
+| Second datagen run changes a non-cache hash | Fail the task and fix nondeterminism |
+| `.cache` appears in Git or either JAR | Fail packaging and correct both ignore and resource-exclude rules |
+| Provider is disabled by `includeClient/includeServer` | No output is expected for that run mode |
+
+### 5. Good, base and bad cases
+
+- Good: two language files are generated, the second run writes zero files,
+  hashes stay equal, and both JARs omit `.cache`.
+- Base: a provider is excluded by the selected run mode; it produces no file
+  and does not make the run fail.
+- Bad: an untyped constructor lambda is ambiguous at compile time, or a broad
+  `srcDir` causes `.cache` hashes to ship in the release JAR.
+
+### 6. Tests required
+
+- Run `compileJava` to prove every `addProvider` overload resolves.
+- Run `runData` twice and assert non-cache path/SHA-256 equality.
+- Inspect binary and sources JAR entry lists for required generated resources
+  and the absence of `.cache`.
+- Run `git diff --check` and inspect the staged path list for cache files.
+
+### 7. Wrong vs correct
+
+```java
+// Wrong on this 1.20.1 toolchain: the lambda matches two overloads.
+generator.addProvider(event.includeClient(), output -> new ModLanguageProvider(output));
+
+// Correct: overload selection and provider ownership are explicit.
+PackOutput output = generator.getPackOutput();
+generator.addProvider(event.includeClient(), new ModLanguageProvider(output));
+```
+
 ## Configuration
 
 - Use Forge configuration specs for operator-tunable values. Keep gameplay
