@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.init;
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.crushingtable.CrushingTableBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
@@ -88,6 +89,16 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             ConveyorBeltBlockEntity::new,
                             ModNetworkBlocks.CONVEYOR_BELT.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<SingleBlockMachineBlockEntity>> SINGLE_BLOCK_MACHINE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "single_block_machine",
+                    () -> BlockEntityType.Builder.of(
+                            SingleBlockMachineBlockEntity::new,
+                            ModMachineBlocks.machines().values().stream()
+                                    .map(RegistryObject::get)
+                                    .toArray(net.minecraft.world.level.block.Block[]::new)
                     ).build(null)
             );
 

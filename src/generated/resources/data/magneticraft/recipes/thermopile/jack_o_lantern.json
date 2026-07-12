@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "minecraft:jack_o_lantern",
+  "conductivity": 3.5,
+  "temperature": 1300.0
+}

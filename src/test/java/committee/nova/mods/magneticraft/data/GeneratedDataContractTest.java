@@ -9,6 +9,7 @@ import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.material.Metal;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
@@ -17,6 +18,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -182,12 +184,16 @@ class GeneratedDataContractTest {
         assertItemAssetsAndTranslation("battery_item_low", readObject(ASSETS.resolve("lang/en_us.json")));
 
         for (String recipe : Set.of(
-                "crushing_table", "battery_item_low", "grate", "battery", "electric_furnace_temporary"
+                "crushing_table", "battery_item_low", "grate", "battery", "electric_furnace"
         )) {
             assertFile(recipe("crafting/" + recipe));
         }
-        JsonObject temporaryFurnace = readObject(recipe("crafting/electric_furnace_temporary"));
-        assertEquals("minecraft:furnace", temporaryFurnace.getAsJsonObject("key").getAsJsonObject("B").get("item").getAsString());
+        JsonObject electricFurnace = readObject(recipe("crafting/electric_furnace"));
+        assertEquals(
+                "magneticraft:brick_furnace",
+                electricFurnace.getAsJsonObject("key").getAsJsonObject("B").get("item").getAsString()
+        );
+        assertFalse(Files.exists(recipe("crafting/electric_furnace_temporary")));
 
         Path crushingDirectory = DATA.resolve("recipes/crushing");
         try (Stream<Path> paths = Files.list(crushingDirectory)) {
@@ -249,6 +255,61 @@ class GeneratedDataContractTest {
         )) {
             assertTrue(english.has(key), key);
             assertTrue(chinese.has(key), key);
+        }
+    }
+
+    @Test
+    void singleBlockMachineDataRecipesAndAssetsAreComplete() throws IOException {
+        JsonObject english = readObject(ASSETS.resolve("lang/en_us.json"));
+        JsonObject chinese = readObject(ASSETS.resolve("lang/zh_cn.json"));
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            String id = definition.id();
+            assertFile(ASSETS.resolve("blockstates/" + id + ".json"));
+            assertFile(ASSETS.resolve("models/block/" + id + ".json"));
+            assertFile(ASSETS.resolve("models/item/" + id + ".json"));
+            assertFile(DATA.resolve("loot_tables/blocks/" + id + ".json"));
+            assertTrue(english.has("block.magneticraft." + id), id);
+            assertTrue(chinese.has("block.magneticraft." + id), id);
+            if (definition.hasMenu()) {
+                assertTrue(english.has("container.magneticraft." + id), id);
+                assertTrue(chinese.has("container.magneticraft." + id), id);
+            }
+            if (definition != SingleBlockMachineDefinition.INFINITE_ENERGY) {
+                assertFile(recipe("crafting/" + id));
+            }
+        }
+        for (String id : Set.of("tube_light", "inserter_speed_upgrade", "inserter_stack_upgrade")) {
+            assertFile(ASSETS.resolve("models/item/" + id + ".json"));
+            assertTrue(english.has((id.equals("tube_light") ? "block" : "item") + ".magneticraft." + id), id);
+        }
+        assertFile(ASSETS.resolve("blockstates/air_bubble.json"));
+        assertFalse(Files.exists(ASSETS.resolve("models/item/air_bubble.json")));
+        assertFalse(Files.exists(DATA.resolve("loot_tables/blocks/air_bubble.json")));
+
+        assertRecipeDirectory("sluice", 16, "magneticraft:sluice");
+        assertRecipeDirectory("gasification", 19, "magneticraft:gasification");
+        assertRecipeDirectory("thermopile", 33, "magneticraft:thermopile");
+        assertRecipeDirectory("fluid_fuel", 10, "magneticraft:fluid_fuel");
+        JsonObject sand = readObject(recipe("sluice/sand"));
+        assertEquals(9, sand.getAsJsonArray("results").size());
+        JsonObject log = readObject(recipe("gasification/00_logs"));
+        assertEquals("minecraft:charcoal", log.getAsJsonObject("item_result").get("item").getAsString());
+        assertEquals(150, log.getAsJsonObject("fluid_result").get("amount").getAsInt());
+        JsonObject snow = readObject(recipe("thermopile/snow_layer_8"));
+        assertEquals("8", snow.getAsJsonObject("state").get("layers").getAsString());
+        JsonObject diesel = readObject(recipe("fluid_fuel/diesel"));
+        assertEquals(10_000, diesel.get("duration").getAsInt());
+        assertEquals(80.0D, diesel.get("power").getAsDouble());
+    }
+
+    private static void assertRecipeDirectory(String directory, long expectedCount, String type) throws IOException {
+        Path root = DATA.resolve("recipes/" + directory);
+        try (Stream<Path> paths = Files.list(root)) {
+            List<Path> recipes = paths.filter(Files::isRegularFile).toList();
+            assertEquals(expectedCount, recipes.size(), directory);
+            for (Path recipe : recipes) {
+                assertEquals(type, readObject(recipe).get("type").getAsString(), recipe.toString());
+            }
         }
     }
 

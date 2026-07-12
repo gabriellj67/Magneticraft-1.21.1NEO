@@ -3,6 +3,10 @@ package committee.nova.mods.magneticraft.init;
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlock;
 import committee.nova.mods.magneticraft.content.machine.crushingtable.CrushingTableBlock;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlock;
+import committee.nova.mods.magneticraft.content.machine.singleblock.AirBubbleBlock;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlock;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.machine.singleblock.TubeLightBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -12,7 +16,10 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -20,6 +27,8 @@ import java.util.function.Supplier;
  */
 public final class ModMachineBlocks {
     private static final List<RegistryObject<? extends Item>> BLOCK_ITEMS = new ArrayList<>();
+    private static final Map<SingleBlockMachineDefinition, RegistryObject<Block>> MACHINES =
+            new EnumMap<>(SingleBlockMachineDefinition.class);
 
     public static final RegistryObject<Block> CRUSHING_TABLE = register(
             "crushing_table",
@@ -45,6 +54,36 @@ public final class ModMachineBlocks {
             "electric_furnace",
             () -> new ElectricFurnaceBlock(machineProperties())
     );
+    public static final RegistryObject<Block> AIR_BUBBLE = ModRegistries.BLOCKS.register(
+            "air_bubble",
+            () -> new AirBubbleBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WATER)
+                    .noCollission()
+                    .noOcclusion()
+                    .randomTicks()
+                    .strength(-1.0F, 3_600_000.0F)
+                    .sound(SoundType.GLASS)
+                    .noLootTable())
+    );
+    public static final RegistryObject<Block> TUBE_LIGHT = register(
+            "tube_light",
+            () -> new TubeLightBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_YELLOW)
+                    .strength(0.5F)
+                    .sound(SoundType.GLASS)
+                    .lightLevel(state -> 15)
+                    .noOcclusion())
+    );
+
+    static {
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            RegistryObject<Block> block = register(
+                    definition.id(),
+                    () -> new SingleBlockMachineBlock(definition, machineProperties(definition))
+            );
+            MACHINES.put(definition, block);
+        }
+    }
 
     private ModMachineBlocks() {
     }
@@ -54,6 +93,18 @@ public final class ModMachineBlocks {
 
     public static List<RegistryObject<? extends Item>> blockItems() {
         return List.copyOf(BLOCK_ITEMS);
+    }
+
+    public static RegistryObject<Block> machine(SingleBlockMachineDefinition definition) {
+        RegistryObject<Block> block = MACHINES.get(definition);
+        if (block == null) {
+            throw new IllegalArgumentException("No single-block machine registered for " + definition);
+        }
+        return block;
+    }
+
+    public static Map<SingleBlockMachineDefinition, RegistryObject<Block>> machines() {
+        return Collections.unmodifiableMap(MACHINES);
     }
 
     private static RegistryObject<Block> register(String id, Supplier<Block> factory) {
@@ -68,5 +119,15 @@ public final class ModMachineBlocks {
                 .requiresCorrectToolForDrops()
                 .strength(3.5F, 10.0F)
                 .sound(SoundType.METAL);
+    }
+
+    private static BlockBehaviour.Properties machineProperties(SingleBlockMachineDefinition definition) {
+        if (definition.isWooden()) {
+            return BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0F, 5.0F)
+                    .sound(SoundType.WOOD);
+        }
+        return machineProperties();
     }
 }

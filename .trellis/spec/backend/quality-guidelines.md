@@ -234,6 +234,80 @@ public static void energyCapabilityExists(GameTestHelper helper) {
 - Network behavior requires both pure Java conservation/budget tests and loaded GameTests for topology,
   capability injection, block-entity persistence and exactly-once item transfer.
 
+## Scenario: constructor-safe sided capability views
+
+### 1. Scope / trigger
+
+Apply whenever a block entity passes a side-access callback into an inventory,
+fluid, energy or other capability module whose constructor immediately creates
+and caches sided `LazyOptional` views.
+
+### 2. Signatures
+
+```java
+public ItemInventoryModule(
+        int slots,
+        Function<Direction, ItemInventoryModule.SideAccess> accessBySide
+)
+
+private ItemInventoryModule.SideAccess inventoryAccess(Direction side)
+```
+
+### 3. Contracts
+
+- A callback evaluated from a module constructor may read only constructor
+  arguments, immutable machine definitions or host state assigned before the
+  module constructor starts.
+- It must not read the host field that will receive the module instance, because
+  Java assigns that field only after `new Module(...)` returns.
+- If access policy requires live module state, defer creation of sided views
+  until host construction completes and recreate them from `reviveCaps()`.
+- Each cached view preserves its side policy through capability
+  invalidate/revive and block-entity save/load cycles.
+
+### 4. Validation and error matrix
+
+| Condition | Required result |
+|---|---|
+| Callback observes an unassigned host module field | Fail; derive policy from immutable definition or defer view creation |
+| Intended side returns an empty capability immediately after placement | Fail; inspect constructor-order dependency |
+| Disabled side exposes a capability after revive | Fail; rebuild views with the same side policy |
+| Reload changes the exposed side set | Fail; keep policy definition-driven and deterministic |
+
+### 5. Good, base and bad cases
+
+- Good: the host derives slot access from `definition.inventorySlots()` while
+  constructing the inventory module; intended sides are available immediately.
+- Base: a side-independent module returns one immutable access policy for every
+  non-null direction and an explicit internal policy for `null`.
+- Bad: `inventoryAccess()` reads `this.inventory`, which is still `null` while
+  the `ItemInventoryModule` constructor caches its sided handlers.
+
+### 6. Tests required
+
+- Pure JUnit asserts deterministic access-policy mapping from the immutable
+  machine definition, without loading Forge capabilities.
+- GameTest places the block and asserts the intended side is present and a
+  forbidden side is absent before the first tick.
+- GameTest invalidates and revives capabilities, then saves/reloads the block
+  entity and repeats both side assertions.
+
+### 7. Wrong vs correct
+
+```java
+// Wrong: inventory is assigned only after the module constructor returns.
+private SideAccess inventoryAccess(Direction side) {
+    return inventory == null ? SideAccess.NONE : inventory.policyFor(side);
+}
+
+// Correct: definition was assigned before module construction begins.
+private SideAccess inventoryAccess(Direction side) {
+    return definition.inventorySlots() == 0
+            ? SideAccess.NONE
+            : definition.policyFor(side);
+}
+```
+
 ## Test requirements
 
 Every large migration task must pass the applicable gates before its single

@@ -7,6 +7,7 @@ import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModCreativeTabs;
 import committee.nova.mods.magneticraft.init.ModFluids;
@@ -41,8 +42,20 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModMachineBlocks.GRATE.get(), chinese ? "格栅" : "Grate");
         add(ModMachineBlocks.ELECTRIC_FURNACE.get(), chinese ? "电炉" : "Electric Furnace");
         add(ModMachineItems.LOW_BATTERY.get(), chinese ? "小型电池" : "Low-Capacity Battery");
+        add(ModMachineItems.INSERTER_SPEED_UPGRADE.get(), chinese ? "机械臂速度升级" : "Inserter Speed Upgrade");
+        add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂整组升级" : "Inserter Stack Upgrade");
         add("container.magneticraft.battery", chinese ? "电池" : "Battery");
         add("container.magneticraft.electric_furnace", chinese ? "电炉" : "Electric Furnace");
+        ModMachineBlocks.machines().forEach((definition, holder) -> {
+            add(holder.get(), chinese ? definition.chineseName() : definition.englishName());
+            add(
+                    "container.magneticraft." + definition.id(),
+                    chinese ? definition.chineseName() : definition.englishName()
+            );
+        });
+        add(ModMachineBlocks.TUBE_LIGHT.get(), chinese ? "管灯" : "Tube Light");
+        add("message.magneticraft.tank_export_enabled", chinese ? "储罐底部主动输出已启用" : "Tank bottom export enabled");
+        add("message.magneticraft.tank_export_disabled", chinese ? "储罐底部主动输出已禁用" : "Tank bottom export disabled");
         add(ModNetworkItems.WRENCH.get(), chinese ? "扳手" : "Wrench");
         add(ModNetworkBlocks.ELECTRIC_CABLE.get(), chinese ? "电缆" : "Electric Cable");
         add(ModNetworkBlocks.HEAT_PIPE.get(), chinese ? "热管" : "Heat Pipe");

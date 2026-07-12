@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "minecraft:packed_ice",
+  "conductivity": 80.0,
+  "temperature": 273.15
+}

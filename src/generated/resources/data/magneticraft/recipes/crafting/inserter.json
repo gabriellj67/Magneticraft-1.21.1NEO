@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "forge:ingots/copper"
+    },
+    "B": {
+      "tag": "forge:nuggets/iron"
+    },
+    "C": {
+      "tag": "forge:ingots/lead"
+    },
+    "D": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "E": {
+      "item": "magneticraft:motor"
+    }
+  },
+  "pattern": [
+    "AB ",
+    "BCB",
+    "DED"
+  ],
+  "result": {
+    "item": "magneticraft:inserter"
+  },
+  "show_notification": true
+}

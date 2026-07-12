@@ -1,0 +1,12 @@
+{
+  "type": "magneticraft:gasification",
+  "duration": 15,
+  "fluid_result": {
+    "amount": 50,
+    "fluid": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "tag": "minecraft:wooden_trapdoors"
+  },
+  "minimum_temperature": 473.15
+}

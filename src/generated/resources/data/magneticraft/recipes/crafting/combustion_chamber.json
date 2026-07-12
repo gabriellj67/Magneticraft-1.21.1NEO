@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:brick"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "C": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "A C",
+    "AAA"
+  ],
+  "result": {
+    "item": "magneticraft:combustion_chamber"
+  },
+  "show_notification": true
+}

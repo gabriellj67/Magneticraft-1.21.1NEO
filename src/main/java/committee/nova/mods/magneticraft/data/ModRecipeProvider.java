@@ -6,8 +6,14 @@ import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.material.Metal;
+import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMath;
+import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.SluiceRecipe;
 import committee.nova.mods.magneticraft.data.recipe.CountedCookingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.CrushingRecipeBuilder;
+import committee.nova.mods.magneticraft.data.recipe.SingleBlockRecipeBuilder;
+import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
@@ -29,10 +35,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.common.Tags;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -55,7 +67,12 @@ final class ModRecipeProvider extends RecipeProvider {
         addHammerRecipes(consumer);
         addSmeltingRecipes(consumer);
         addMachineCraftingRecipes(consumer);
+        addSingleBlockCraftingRecipes(consumer);
         addCrushingRecipes(consumer);
+        addSluiceRecipes(consumer);
+        addGasificationRecipes(consumer);
+        addThermopileRecipes(consumer);
+        addFluidFuelRecipes(consumer);
     }
 
     private void addMachineCraftingRecipes(Consumer<FinishedRecipe> consumer) {
@@ -101,15 +118,14 @@ final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_battery_item_low", has(ModMachineItems.LOW_BATTERY.get()))
                 .save(consumer, id("crafting/battery"));
 
-        // Temporary dependency bridge. Delete when brick_furnace and the heat network are migrated.
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineBlocks.ELECTRIC_FURNACE.get())
                 .pattern("ABA")
                 .pattern("CCC")
                 .define('A', ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get())
-                .define('B', Blocks.FURNACE)
+                .define('B', machine(SingleBlockMachineDefinition.BRICK_FURNACE))
                 .define('C', ModTags.Items.ingot(Metal.COPPER))
                 .unlockedBy("has_fine_copper_wire", has(ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get()))
-                .save(consumer, id("crafting/electric_furnace_temporary"));
+                .save(consumer, id("crafting/electric_furnace"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModNetworkItems.WRENCH.get())
                 .pattern(" I ")
@@ -237,6 +253,334 @@ final class ModRecipeProvider extends RecipeProvider {
         crush(consumer, "mossy_stone_bricks", Ingredient.of(Blocks.MOSSY_STONE_BRICKS), Blocks.MOSSY_COBBLESTONE, 1, 0);
         crush(consumer, "dark_prismarine", Ingredient.of(Blocks.DARK_PRISMARINE), Blocks.PRISMARINE, 1, 0);
         crush(consumer, "end_stone_bricks", Ingredient.of(Blocks.END_STONE_BRICKS), Blocks.END_STONE, 1, 0);
+    }
+
+    private void addSingleBlockCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, machine(SingleBlockMachineDefinition.BOX))
+                .pattern("ABA").pattern("BAB").pattern("ABA")
+                .define('A', Tags.Items.RODS_WOODEN).define('B', ItemTags.PLANKS)
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(consumer, id("crafting/box"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.SLUICE_BOX))
+                .pattern("AB ").pattern("CAB").pattern("DDD")
+                .define('A', ItemTags.PLANKS).define('B', Tags.Items.RODS_WOODEN)
+                .define('C', component(CraftingComponent.FABRIC_MESH)).define('D', Blocks.STONE_SLAB)
+                .unlockedBy("has_fabric_mesh", has(component(CraftingComponent.FABRIC_MESH)))
+                .save(consumer, id("crafting/sluice_box"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.FABRICATOR))
+                .pattern("AB").pattern("CD")
+                .define('A', Tags.Items.INGOTS_COPPER).define('B', Tags.Items.INGOTS_IRON)
+                .define('C', Tags.Items.DUSTS_REDSTONE).define('D', Blocks.CRAFTING_TABLE)
+                .unlockedBy("has_crafting_table", has(Blocks.CRAFTING_TABLE))
+                .save(consumer, id("crafting/fabricator"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.SMALL_TANK))
+                .pattern("AAA").pattern("ABA").pattern("AAA")
+                .define('A', Tags.Items.GLASS).define('B', ModMachineBlocks.GRATE.get())
+                .unlockedBy("has_grate", has(ModMachineBlocks.GRATE.get()))
+                .save(consumer, id("crafting/small_tank"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, machine(SingleBlockMachineDefinition.FEEDING_TROUGH))
+                .pattern("A A").pattern("B B").pattern("ABA")
+                .define('A', Tags.Items.RODS_WOODEN).define('B', ItemTags.PLANKS)
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(consumer, id("crafting/feeding_trough"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.INSERTER))
+                .pattern("AB ").pattern("BCB").pattern("DED")
+                .define('A', Tags.Items.INGOTS_COPPER).define('B', Tags.Items.NUGGETS_IRON)
+                .define('C', ModTags.Items.ingot(Metal.LEAD)).define('D', ModTags.Items.lightPlate(Metal.IRON))
+                .define('E', component(CraftingComponent.MOTOR))
+                .unlockedBy("has_motor", has(component(CraftingComponent.MOTOR)))
+                .save(consumer, id("crafting/inserter"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.WATER_GENERATOR))
+                .pattern("ABA").pattern("BCB").pattern("ABA")
+                .define('A', ModTags.Items.lightPlate(Metal.IRON)).define('B', Tags.Items.GLASS)
+                .define('C', Items.WATER_BUCKET)
+                .unlockedBy("has_water_bucket", has(Items.WATER_BUCKET))
+                .save(consumer, id("crafting/water_generator"));
+        automationEndpoint(consumer, SingleBlockMachineDefinition.RELAY, ModTags.Items.lightPlate(Metal.IRON));
+        automationEndpoint(consumer, SingleBlockMachineDefinition.FILTER, component(CraftingComponent.FABRIC_MESH));
+        automationEndpoint(consumer, SingleBlockMachineDefinition.TRANSPOSER, component(CraftingComponent.MOTOR));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.COMBUSTION_CHAMBER))
+                .pattern("ABA").pattern("A C").pattern("AAA")
+                .define('A', Items.BRICK).define('B', ModTags.Items.lightPlate(Metal.IRON))
+                .define('C', Tags.Items.INGOTS_IRON)
+                .unlockedBy("has_brick", has(Items.BRICK))
+                .save(consumer, id("crafting/combustion_chamber"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.STEAM_BOILER))
+                .pattern("ABA").pattern("A A").pattern("ABA")
+                .define('A', Tags.Items.INGOTS_IRON).define('B', ModTags.Items.lightPlate(Metal.IRON))
+                .unlockedBy("has_iron_ingot", has(Tags.Items.INGOTS_IRON))
+                .save(consumer, id("crafting/steam_boiler"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.ELECTRIC_HEATER))
+                .pattern("ABA").pattern("ACA").pattern("DDD")
+                .define('A', Tags.Items.INGOTS_IRON).define('B', Tags.Items.INGOTS_COPPER)
+                .define('C', ModMachineBlocks.GRATE.get()).define('D', component(CraftingComponent.FINE_COPPER_WIRE))
+                .unlockedBy("has_fine_copper_wire", has(component(CraftingComponent.FINE_COPPER_WIRE)))
+                .save(consumer, id("crafting/electric_heater"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.RF_HEATER))
+                .pattern("ABA").pattern("ACA").pattern("DED")
+                .define('A', Tags.Items.INGOTS_IRON).define('B', Tags.Items.INGOTS_COPPER)
+                .define('C', ModMachineBlocks.GRATE.get()).define('D', Tags.Items.DUSTS_REDSTONE)
+                .define('E', Tags.Items.INGOTS_GOLD)
+                .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
+                .save(consumer, id("crafting/rf_heater"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.GASIFICATION_UNIT))
+                .pattern("AAA").pattern("ABA").pattern("AAA")
+                .define('A', Tags.Items.INGOTS_IRON).define('B', ModTags.Items.lightPlate(Metal.TUNGSTEN))
+                .unlockedBy("has_tungsten_plate", has(ModTags.Items.lightPlate(Metal.TUNGSTEN)))
+                .save(consumer, id("crafting/gasification_unit"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.BRICK_FURNACE))
+                .pattern("AAA").pattern("A A").pattern("ABA")
+                .define('A', Blocks.BRICKS).define('B', ModTags.Items.lightPlate(Metal.COPPER))
+                .unlockedBy("has_bricks", has(Blocks.BRICKS))
+                .save(consumer, id("crafting/brick_furnace"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.AIRLOCK))
+                .pattern("ABA").pattern("BCB").pattern("ABA")
+                .define('A', Tags.Items.GLASS).define('B', Items.BUCKET).define('C', ModMachineBlocks.GRATE.get())
+                .unlockedBy("has_bucket", has(Items.BUCKET))
+                .save(consumer, id("crafting/airlock"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.THERMOPILE))
+                .pattern("ABA").pattern("BCB").pattern("ABA")
+                .define('A', Tags.Items.INGOTS_IRON).define('B', ModTags.Items.lightPlate(Metal.COPPER))
+                .define('C', ModMachineBlocks.GRATE.get())
+                .unlockedBy("has_copper_plate", has(ModTags.Items.lightPlate(Metal.COPPER)))
+                .save(consumer, id("crafting/thermopile"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.RF_TRANSFORMER))
+                .pattern("ABA").pattern("CDC").pattern("ABA")
+                .define('A', ModTags.Items.lightPlate(Metal.IRON)).define('B', ModTags.Items.lightPlate(Metal.GOLD))
+                .define('C', ModTags.Items.lightPlate(Metal.LEAD)).define('D', Blocks.REDSTONE_BLOCK)
+                .unlockedBy("has_redstone_block", has(Blocks.REDSTONE_BLOCK))
+                .save(consumer, id("crafting/rf_transformer"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.ELECTRIC_ENGINE))
+                .pattern("AAA").pattern(" B ").pattern("CDC")
+                .define('A', Tags.Items.INGOTS_COPPER).define('B', Tags.Items.GLASS)
+                .define('C', component(CraftingComponent.MOTOR)).define('D', Blocks.PISTON)
+                .unlockedBy("has_motor", has(component(CraftingComponent.MOTOR)))
+                .save(consumer, id("crafting/electric_engine"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModMachineBlocks.TUBE_LIGHT.get())
+                .pattern(" A ").pattern("BCB")
+                .define('A', Tags.Items.INGOTS_IRON).define('B', Tags.Items.NUGGETS_IRON)
+                .define('C', Tags.Items.DUSTS_GLOWSTONE)
+                .unlockedBy("has_glowstone", has(Tags.Items.DUSTS_GLOWSTONE))
+                .save(consumer, id("crafting/tube_light"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModMachineItems.INSERTER_SPEED_UPGRADE.get())
+                .pattern("A").pattern("B").define('A', Items.SUGAR).define('B', Blocks.STONE_SLAB)
+                .unlockedBy("has_sugar", has(Items.SUGAR))
+                .save(consumer, id("crafting/inserter_speed_upgrade"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModMachineItems.INSERTER_STACK_UPGRADE.get())
+                .pattern("A").pattern("B").define('A', Tags.Items.CHESTS_WOODEN).define('B', Blocks.STONE_SLAB)
+                .unlockedBy("has_chest", has(Tags.Items.CHESTS_WOODEN))
+                .save(consumer, id("crafting/inserter_stack_upgrade"));
+    }
+
+    private void automationEndpoint(
+            Consumer<FinishedRecipe> consumer,
+            SingleBlockMachineDefinition definition,
+            ItemLike component
+    ) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(definition))
+                .pattern("AAA").pattern("BCB").pattern("BDB")
+                .define('A', ItemTags.PLANKS).define('B', Tags.Items.COBBLESTONE)
+                .define('C', component).define('D', Tags.Items.DUSTS_REDSTONE)
+                .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
+                .save(consumer, id("crafting/" + definition.id()));
+    }
+
+    private void automationEndpoint(
+            Consumer<FinishedRecipe> consumer,
+            SingleBlockMachineDefinition definition,
+            TagKey<Item> component
+    ) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(definition))
+                .pattern("AAA").pattern("BCB").pattern("BDB")
+                .define('A', ItemTags.PLANKS).define('B', Tags.Items.COBBLESTONE)
+                .define('C', component).define('D', Tags.Items.DUSTS_REDSTONE)
+                .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
+                .save(consumer, id("crafting/" + definition.id()));
+    }
+
+    private void addSluiceRecipes(Consumer<FinishedRecipe> consumer) {
+        for (Metal metal : Metal.values()) {
+            if (!metal.isOre() || !MaterialForm.ROCKY_CHUNK.appliesTo(metal)) {
+                continue;
+            }
+            List<SluiceRecipe.ChanceOutput> outputs = new ArrayList<>();
+            if (metal == Metal.GALENA) {
+                outputs.add(chance(ModItems.material(MaterialForm.CHUNK, Metal.LEAD).get(), 1.0F));
+                outputs.add(chance(ModItems.material(MaterialForm.CHUNK, Metal.SILVER).get(), 1.0F));
+            } else {
+                outputs.add(chance(ModItems.material(MaterialForm.CHUNK, metal).get(), 1.0F));
+                for (Metal subProduct : sluiceSubProducts(metal)) {
+                    outputs.add(chance(ModItems.material(MaterialForm.DUST, subProduct).get(), 0.15F));
+                }
+            }
+            outputs.add(chance(Blocks.COBBLESTONE, 0.15F));
+            SingleBlockRecipeBuilder.sluice(
+                    consumer,
+                    id("sluice/" + metal.id() + "_rocky_chunk"),
+                    Ingredient.of(ModItems.material(MaterialForm.ROCKY_CHUNK, metal).get()),
+                    outputs
+            );
+        }
+        SingleBlockRecipeBuilder.sluice(
+                consumer,
+                id("sluice/gravel"),
+                Ingredient.of(Blocks.GRAVEL),
+                List.of(chance(Items.FLINT, 1.0F), chance(Items.FLINT, 0.15F))
+        );
+        List<SluiceRecipe.ChanceOutput> gold = new ArrayList<>();
+        float chance = 0.01F;
+        for (int roll = 0; roll < 9; roll++) {
+            gold.add(chance(Items.GOLD_NUGGET, chance));
+            chance *= 0.5F;
+        }
+        SingleBlockRecipeBuilder.sluice(consumer, id("sluice/sand"), Ingredient.of(Blocks.SAND), gold);
+    }
+
+    private void addGasificationRecipes(Consumer<FinishedRecipe> consumer) {
+        Fluid woodGas = ModFluids.get(FluidDefinition.WOOD_GAS).source().get();
+        gasify(consumer, "00_logs", Ingredient.of(ItemTags.LOGS), new ItemStack(Items.CHARCOAL), woodGas, 150, 30, 573.15D);
+        gasify(consumer, "10_planks", Ingredient.of(ItemTags.PLANKS), ItemStack.EMPTY, woodGas, 50, 30, 523.15D);
+        gasify(consumer, "11_stairs", Ingredient.of(vanillaTag("wooden_stairs")), ItemStack.EMPTY, woodGas, 50, 30, 523.15D);
+        gasify(consumer, "12_fences", Ingredient.of(vanillaTag("wooden_fences")), ItemStack.EMPTY, woodGas, 50, 30, 523.15D);
+        gasify(consumer, "13_doors", Ingredient.of(ItemTags.WOODEN_DOORS), ItemStack.EMPTY, woodGas, 50, 20, 523.15D);
+        gasify(consumer, "14_slabs", Ingredient.of(ItemTags.WOODEN_SLABS), ItemStack.EMPTY, woodGas, 50, 15, 473.15D);
+        gasify(consumer, "15_trapdoors", Ingredient.of(ItemTags.WOODEN_TRAPDOORS), ItemStack.EMPTY, woodGas, 50, 15, 473.15D);
+        gasify(consumer, "20_saplings", Ingredient.of(ItemTags.SAPLINGS), ItemStack.EMPTY, woodGas, 30, 10, 453.15D);
+        gasify(consumer, "21_leaves", Ingredient.of(ItemTags.LEAVES), ItemStack.EMPTY, woodGas, 30, 10, 453.15D);
+        gasify(consumer, "30_hay", Ingredient.of(Blocks.HAY_BLOCK), ItemStack.EMPTY, woodGas, 100, 15, 523.15D);
+        gasify(consumer, "31_cactus", Ingredient.of(Blocks.CACTUS), ItemStack.EMPTY, woodGas, 10, 10, 453.15D);
+        gasify(consumer, "32_chest", Ingredient.of(Tags.Items.CHESTS_WOODEN), ItemStack.EMPTY, woodGas, 50, 30, 473.15D);
+        gasify(consumer, "40_stick", Ingredient.of(Tags.Items.RODS_WOODEN), ItemStack.EMPTY, woodGas, 10, 10, 423.15D);
+        gasify(consumer, "41_wheat", Ingredient.of(Items.WHEAT), ItemStack.EMPTY, woodGas, 50, 20, 473.15D);
+        gasify(consumer, "42_sugar_cane", Ingredient.of(Items.SUGAR_CANE), ItemStack.EMPTY, woodGas, 30, 10, 473.15D);
+        gasify(consumer, "43_nether_wart", Ingredient.of(Items.NETHER_WART), ItemStack.EMPTY, woodGas, 50, 10, 473.15D);
+        gasify(consumer, "44_carrot", Ingredient.of(Items.CARROT), ItemStack.EMPTY, woodGas, 50, 10, 473.15D);
+        gasify(consumer, "45_potato", Ingredient.of(Items.POTATO), ItemStack.EMPTY, woodGas, 50, 10, 473.15D);
+        gasify(consumer, "46_beetroot", Ingredient.of(Items.BEETROOT), ItemStack.EMPTY, woodGas, 50, 10, 473.15D);
+    }
+
+    private void gasify(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            Ingredient input,
+            ItemStack itemOutput,
+            Fluid fluid,
+            int fluidAmount,
+            int duration,
+            double minimumTemperature
+    ) {
+        SingleBlockRecipeBuilder.gasification(
+                consumer,
+                id("gasification/" + name),
+                input,
+                itemOutput,
+                new FluidStack(fluid, fluidAmount),
+                duration,
+                minimumTemperature
+        );
+    }
+
+    private void addThermopileRecipes(Consumer<FinishedRecipe> consumer) {
+        thermopile(consumer, "snow_block", Blocks.SNOW_BLOCK, Map.of(), 273.15D, 40.0D);
+        thermopile(consumer, "ice", Blocks.ICE, Map.of(), 273.15D, 60.0D);
+        thermopile(consumer, "packed_ice", Blocks.PACKED_ICE, Map.of(), 273.15D, 80.0D);
+        thermopile(consumer, "torch", Blocks.TORCH, Map.of(), 1_300.0D, 4.0D);
+        thermopile(consumer, "jack_o_lantern", Blocks.JACK_O_LANTERN, Map.of(), 1_300.0D, 3.5D);
+        thermopile(consumer, "fire", Blocks.FIRE, Map.of(), 1_300.0D, 4.5D);
+        thermopile(consumer, "magma_block", Blocks.MAGMA_BLOCK, Map.of(), 1_000.0D, 1.4D);
+        for (int layers = 1; layers <= 8; layers++) {
+            thermopile(
+                    consumer,
+                    "snow_layer_" + layers,
+                    Blocks.SNOW,
+                    Map.of("layers", Integer.toString(layers)),
+                    273.15D,
+                    layers / 15.0D * 40.0D
+            );
+        }
+        thermopile(consumer, "water", Blocks.WATER, Map.of(), 300.0D, SingleBlockMachineMath.balancedConductivity(300.0D));
+        thermopile(consumer, "lava", Blocks.LAVA, Map.of(), 1_300.0D, SingleBlockMachineMath.balancedConductivity(1_300.0D));
+        for (FluidDefinition definition : FluidDefinition.values()) {
+            double temperature = definition.temperatureKelvin();
+            thermopile(
+                    consumer,
+                    definition.id(),
+                    ModFluids.get(definition).block().get(),
+                    Map.of(),
+                    temperature,
+                    SingleBlockMachineMath.balancedConductivity(temperature)
+            );
+        }
+    }
+
+    private void thermopile(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            Block block,
+            Map<String, String> state,
+            double temperature,
+            double conductivity
+    ) {
+        SingleBlockRecipeBuilder.thermopile(
+                consumer,
+                id("thermopile/" + name),
+                block,
+                state,
+                temperature,
+                conductivity
+        );
+    }
+
+    private void addFluidFuelRecipes(Consumer<FinishedRecipe> consumer) {
+        fluidFuel(consumer, FluidDefinition.OIL, 10_000, 30.0D);
+        fluidFuel(consumer, FluidDefinition.HEAVY_OIL, 25_000, 60.0D);
+        fluidFuel(consumer, FluidDefinition.LIGHT_OIL, 25_000, 80.0D);
+        fluidFuel(consumer, FluidDefinition.NATURAL_GAS, 2_500, 40.0D);
+        fluidFuel(consumer, FluidDefinition.FUEL, 25_000, 60.0D);
+        fluidFuel(consumer, FluidDefinition.DIESEL, 10_000, 80.0D);
+        fluidFuel(consumer, FluidDefinition.KEROSENE, 5_000, 120.0D);
+        fluidFuel(consumer, FluidDefinition.GASOLINE, 12_000, 100.0D);
+        fluidFuel(consumer, FluidDefinition.NAPHTHA, 25_000, 40.0D);
+        fluidFuel(consumer, FluidDefinition.WOOD_GAS, 2_500, 20.0D);
+    }
+
+    private void fluidFuel(Consumer<FinishedRecipe> consumer, FluidDefinition definition, int duration, double power) {
+        SingleBlockRecipeBuilder.fluidFuel(
+                consumer,
+                id("fluid_fuel/" + definition.id()),
+                ModFluids.get(definition).source().get(),
+                duration,
+                power
+        );
+    }
+
+    private static List<Metal> sluiceSubProducts(Metal metal) {
+        return switch (metal) {
+            case IRON -> List.of(Metal.NICKEL, Metal.ALUMINIUM);
+            case GOLD -> List.of(Metal.COPPER, Metal.SILVER);
+            case COPPER -> List.of(Metal.GOLD, Metal.IRON);
+            case LEAD -> List.of(Metal.SILVER);
+            case COBALT -> List.of(Metal.MITHRIL, Metal.OSMIUM);
+            case TUNGSTEN -> List.of(Metal.IRON);
+            case ALUMINIUM -> List.of(Metal.NICKEL, Metal.IRON);
+            case GALENA -> List.of(Metal.LEAD, Metal.SILVER);
+            case MITHRIL -> List.of(Metal.OSMIUM, Metal.ZINC);
+            case NICKEL -> List.of(Metal.IRON, Metal.TIN);
+            case OSMIUM -> List.of(Metal.MITHRIL, Metal.NICKEL);
+            case SILVER -> List.of(Metal.LEAD);
+            case TIN -> List.of(Metal.IRON, Metal.ALUMINIUM);
+            case ZINC -> List.of(Metal.NICKEL, Metal.TIN);
+            case STEEL -> List.of();
+        };
+    }
+
+    private static SluiceRecipe.ChanceOutput chance(ItemLike item, float chance) {
+        return new SluiceRecipe.ChanceOutput(new ItemStack(item), chance);
+    }
+
+    private static TagKey<Item> vanillaTag(String path) {
+        return ItemTags.create(ResourceLocation.fromNamespaceAndPath("minecraft", path));
     }
 
     private void crush(
@@ -561,6 +905,10 @@ final class ModRecipeProvider extends RecipeProvider {
 
     private static ItemLike block(BaseBlockDefinition definition) {
         return ModBlocks.get(definition).get();
+    }
+
+    private static Block machine(SingleBlockMachineDefinition definition) {
+        return ModMachineBlocks.machine(definition).get();
     }
 
     private static ResourceLocation id(String path) {

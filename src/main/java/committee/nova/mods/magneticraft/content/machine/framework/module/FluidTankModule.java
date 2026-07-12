@@ -14,6 +14,9 @@ import net.minecraftforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -21,9 +24,10 @@ import java.util.function.Predicate;
  */
 public final class FluidTankModule implements MachineModule {
     private final ResourceLocation id;
-    private final Predicate<Direction> exposedSides;
+    private final Function<Direction, TankAccess> accessBySide;
     private final FluidTank tank;
-    private LazyOptional<IFluidHandler> capability = LazyOptional.empty();
+    private final Map<Direction, LazyOptional<IFluidHandler>> sidedCapabilities = new EnumMap<>(Direction.class);
+    private LazyOptional<IFluidHandler> unsidedCapability = LazyOptional.empty();
 
     public FluidTankModule(
             ResourceLocation id,
@@ -32,9 +36,27 @@ public final class FluidTankModule implements MachineModule {
             Predicate<FluidStack> validator,
             Predicate<Direction> exposedSides
     ) {
+        this(
+                id,
+                host,
+                capacity,
+                validator,
+                (Function<Direction, TankAccess>) side -> exposedSides.test(side)
+                        ? TankAccess.BOTH
+                        : TankAccess.NONE
+        );
+    }
+
+    private FluidTankModule(
+            ResourceLocation id,
+            MachineModuleHost host,
+            int capacity,
+            Predicate<FluidStack> validator,
+            Function<Direction, TankAccess> accessBySide
+    ) {
         this.id = Objects.requireNonNull(id);
         Objects.requireNonNull(host);
-        this.exposedSides = Objects.requireNonNull(exposedSides);
+        this.accessBySide = Objects.requireNonNull(accessBySide);
         this.tank = new FluidTank(capacity, Objects.requireNonNull(validator)) {
             @Override
             protected void onContentsChanged() {
@@ -42,6 +64,16 @@ public final class FluidTankModule implements MachineModule {
             }
         };
         reviveCapabilities();
+    }
+
+    public static FluidTankModule directional(
+            ResourceLocation id,
+            MachineModuleHost host,
+            int capacity,
+            Predicate<FluidStack> validator,
+            Function<Direction, TankAccess> accessBySide
+    ) {
+        return new FluidTankModule(id, host, capacity, validator, accessBySide);
     }
 
     @Override
@@ -61,24 +93,89 @@ public final class FluidTankModule implements MachineModule {
 
     @Override
     public void invalidateCapabilities() {
-        capability.invalidate();
-        capability = LazyOptional.empty();
+        unsidedCapability.invalidate();
+        unsidedCapability = LazyOptional.empty();
+        sidedCapabilities.values().forEach(LazyOptional::invalidate);
+        sidedCapabilities.clear();
     }
 
     @Override
     public void reviveCapabilities() {
-        capability = LazyOptional.of(() -> tank);
+        unsidedCapability = viewFor(null);
+        for (Direction direction : Direction.values()) {
+            sidedCapabilities.put(direction, viewFor(direction));
+        }
     }
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> requested, @Nullable Direction side) {
-        if (requested == ForgeCapabilities.FLUID_HANDLER && exposedSides.test(side)) {
-            return capability.cast();
+        if (requested != ForgeCapabilities.FLUID_HANDLER) {
+            return LazyOptional.empty();
         }
-        return LazyOptional.empty();
+        LazyOptional<IFluidHandler> result = side == null ? unsidedCapability : sidedCapabilities.get(side);
+        return result == null ? LazyOptional.empty() : result.cast();
     }
 
     public FluidTank tank() {
         return tank;
+    }
+
+    private LazyOptional<IFluidHandler> viewFor(@Nullable Direction side) {
+        TankAccess access = Objects.requireNonNullElse(accessBySide.apply(side), TankAccess.NONE);
+        return access == TankAccess.NONE
+                ? LazyOptional.empty()
+                : LazyOptional.of(() -> new RestrictedFluidHandler(tank, access));
+    }
+
+    public enum TankAccess {
+        NONE(false, false),
+        INPUT(true, false),
+        OUTPUT(false, true),
+        BOTH(true, true);
+
+        private final boolean input;
+        private final boolean output;
+
+        TankAccess(boolean input, boolean output) {
+            this.input = input;
+            this.output = output;
+        }
+    }
+
+    private record RestrictedFluidHandler(FluidTank delegate, TankAccess access) implements IFluidHandler {
+        @Override
+        public int getTanks() {
+            return 1;
+        }
+
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+            return tank == 0 ? delegate.getFluidInTank(0) : FluidStack.EMPTY;
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+            return tank == 0 ? delegate.getTankCapacity(0) : 0;
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, FluidStack stack) {
+            return tank == 0 && access.input && delegate.isFluidValid(0, stack);
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+            return access.input ? delegate.fill(resource, action) : 0;
+        }
+
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+            return access.output ? delegate.drain(resource, action) : FluidStack.EMPTY;
+        }
+
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            return access.output ? delegate.drain(maxDrain, action) : FluidStack.EMPTY;
+        }
     }
 }

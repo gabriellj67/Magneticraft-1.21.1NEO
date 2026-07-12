@@ -1,0 +1,12 @@
+{
+  "type": "magneticraft:gasification",
+  "duration": 20,
+  "fluid_result": {
+    "amount": 50,
+    "fluid": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "item": "minecraft:wheat"
+  },
+  "minimum_temperature": 473.15
+}

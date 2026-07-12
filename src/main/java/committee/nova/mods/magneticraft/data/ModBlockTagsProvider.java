@@ -52,6 +52,15 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 ModMachineBlocks.GRATE.get(),
                 ModMachineBlocks.ELECTRIC_FURNACE.get()
         );
+        ModMachineBlocks.machines().forEach((definition, holder) -> {
+            if (definition.isWooden()) {
+                tag(BlockTags.MINEABLE_WITH_AXE).add(holder.get());
+            } else {
+                tag(BlockTags.MINEABLE_WITH_PICKAXE).add(holder.get());
+                tag(BlockTags.NEEDS_STONE_TOOL).add(holder.get());
+            }
+        });
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModMachineBlocks.TUBE_LIGHT.get());
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 ModNetworkBlocks.ELECTRIC_CABLE.get(),
                 ModNetworkBlocks.HEAT_PIPE.get(),

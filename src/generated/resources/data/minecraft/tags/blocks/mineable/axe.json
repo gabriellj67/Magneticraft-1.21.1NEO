@@ -1,5 +1,8 @@
 {
   "values": [
-    "magneticraft:crushing_table"
+    "magneticraft:crushing_table",
+    "magneticraft:box",
+    "magneticraft:sluice_box",
+    "magneticraft:feeding_trough"
   ]
 }

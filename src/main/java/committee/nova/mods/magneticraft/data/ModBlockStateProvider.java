@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlock;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
@@ -86,6 +87,28 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 state -> state.getValue(ElectricFurnaceBlock.LIT) ? furnaceOn : furnaceOff
         );
         simpleBlockItem(electricFurnace, furnaceOff);
+
+        ModMachineBlocks.machines().forEach((definition, holder) -> {
+            Block block = holder.get();
+            ResourceLocation texture = definition.isWooden()
+                    ? mcLoc("block/oak_planks")
+                    : switch (definition) {
+                        case COMBUSTION_CHAMBER, BRICK_FURNACE -> mcLoc("block/bricks");
+                        case STEAM_BOILER, SMALL_TANK, WATER_GENERATOR -> mcLoc("block/iron_block");
+                        case AIRLOCK -> mcLoc("block/glass");
+                        default -> mcLoc("block/smooth_stone");
+                    };
+            simpleBlockWithItem(block, models().cubeAll(definition.id(), texture));
+        });
+        simpleBlock(
+                ModMachineBlocks.AIR_BUBBLE.get(),
+                models().cubeAll("air_bubble", mcLoc("block/white_stained_glass"))
+                        .renderType(ResourceLocation.fromNamespaceAndPath("minecraft", "translucent"))
+        );
+        simpleBlockWithItem(
+                ModMachineBlocks.TUBE_LIGHT.get(),
+                models().cubeAll("tube_light", mcLoc("block/glowstone"))
+        );
 
         conduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable", mcLoc("block/copper_block"));
         conduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe", mcLoc("block/iron_block"));

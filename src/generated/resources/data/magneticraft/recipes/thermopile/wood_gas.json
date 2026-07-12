@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "magneticraft:wood_gas",
+  "conductivity": 12.523481527864742,
+  "temperature": 373.0
+}

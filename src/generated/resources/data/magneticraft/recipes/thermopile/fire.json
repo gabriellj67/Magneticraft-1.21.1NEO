@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "minecraft:fire",
+  "conductivity": 4.5,
+  "temperature": 1300.0
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "tag": "minecraft:planks"
+    },
+    "B": {
+      "tag": "forge:rods/wooden"
+    },
+    "C": {
+      "item": "magneticraft:fabric_mesh"
+    },
+    "D": {
+      "item": "minecraft:stone_slab"
+    }
+  },
+  "pattern": [
+    "AB ",
+    "CAB",
+    "DDD"
+  ],
+  "result": {
+    "item": "magneticraft:sluice_box"
+  },
+  "show_notification": true
+}

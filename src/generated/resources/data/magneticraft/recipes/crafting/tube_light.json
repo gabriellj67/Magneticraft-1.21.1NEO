@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "tag": "forge:ingots/iron"
+    },
+    "B": {
+      "tag": "forge:nuggets/iron"
+    },
+    "C": {
+      "tag": "forge:dusts/glowstone"
+    }
+  },
+  "pattern": [
+    " A ",
+    "BCB"
+  ],
+  "result": {
+    "item": "magneticraft:tube_light"
+  },
+  "show_notification": true
+}

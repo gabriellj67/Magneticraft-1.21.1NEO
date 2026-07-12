@@ -6,7 +6,7 @@
       "item": "magneticraft:fine_copper_wire"
     },
     "B": {
-      "item": "minecraft:furnace"
+      "item": "magneticraft:brick_furnace"
     },
     "C": {
       "tag": "forge:ingots/copper"

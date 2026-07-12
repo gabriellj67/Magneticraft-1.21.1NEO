@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:fluid_fuel",
+  "duration": 5000,
+  "fluid": "magneticraft:kerosene",
+  "power": 120.0
+}

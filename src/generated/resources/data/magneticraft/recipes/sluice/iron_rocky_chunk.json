@@ -1,0 +1,31 @@
+{
+  "type": "magneticraft:sluice",
+  "ingredient": {
+    "item": "magneticraft:iron_rocky_chunk"
+  },
+  "results": [
+    {
+      "stack": {
+        "item": "magneticraft:iron_chunk"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "item": "magneticraft:nickel_dust"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "item": "magneticraft:aluminium_dust"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "item": "minecraft:cobblestone"
+      }
+    }
+  ]
+}

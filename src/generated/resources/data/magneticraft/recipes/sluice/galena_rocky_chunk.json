@@ -1,0 +1,24 @@
+{
+  "type": "magneticraft:sluice",
+  "ingredient": {
+    "item": "magneticraft:galena_rocky_chunk"
+  },
+  "results": [
+    {
+      "stack": {
+        "item": "magneticraft:lead_chunk"
+      }
+    },
+    {
+      "stack": {
+        "item": "magneticraft:silver_chunk"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "item": "minecraft:cobblestone"
+      }
+    }
+  ]
+}

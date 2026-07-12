@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.init;
 
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryMenu;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceMenu;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.RegistryObject;
@@ -16,6 +17,11 @@ public final class ModMenus {
             ModRegistries.MENU_TYPES.register(
                     "electric_furnace",
                     () -> IForgeMenuType.create(ElectricFurnaceMenu::new)
+            );
+    public static final RegistryObject<MenuType<SingleBlockMachineMenu>> SINGLE_BLOCK_MACHINE =
+            ModRegistries.MENU_TYPES.register(
+                    "single_block_machine",
+                    () -> IForgeMenuType.create(SingleBlockMachineMenu::new)
             );
 
     private ModMenus() {

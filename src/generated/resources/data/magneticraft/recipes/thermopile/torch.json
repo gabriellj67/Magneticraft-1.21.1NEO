@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "minecraft:torch",
+  "conductivity": 4.0,
+  "temperature": 1300.0
+}

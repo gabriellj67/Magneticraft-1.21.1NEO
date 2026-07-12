@@ -24,7 +24,11 @@ final class ModItemModelProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         ModItems.creativeItems().stream().map(RegistryObject::get).forEach(this::basicItem);
-        ModMachineItems.creativeItems().stream().map(RegistryObject::get).forEach(this::basicItem);
+        basicItem(ModMachineItems.LOW_BATTERY.get());
+        withExistingParent(ModMachineItems.INSERTER_SPEED_UPGRADE.getId().getPath(), mcLoc("item/generated"))
+                .texture("layer0", mcLoc("item/sugar"));
+        withExistingParent(ModMachineItems.INSERTER_STACK_UPGRADE.getId().getPath(), mcLoc("item/generated"))
+                .texture("layer0", mcLoc("block/oak_planks"));
         withExistingParent(ModNetworkItems.WRENCH.getId().getPath(), mcLoc("item/handheld"))
                 .texture("layer0", mcLoc("item/iron_hoe"));
 

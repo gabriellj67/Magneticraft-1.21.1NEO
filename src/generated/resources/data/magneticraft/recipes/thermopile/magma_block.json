@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "minecraft:magma_block",
+  "conductivity": 1.4,
+  "temperature": 1000.0
+}

@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:fluid_fuel",
+  "duration": 25000,
+  "fluid": "magneticraft:naphtha",
+  "power": 40.0
+}

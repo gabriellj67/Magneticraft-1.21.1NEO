@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:fluid_fuel",
+  "duration": 2500,
+  "fluid": "magneticraft:natural_gas",
+  "power": 40.0
+}

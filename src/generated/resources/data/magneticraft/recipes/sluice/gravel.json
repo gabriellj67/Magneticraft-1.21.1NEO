@@ -1,0 +1,19 @@
+{
+  "type": "magneticraft:sluice",
+  "ingredient": {
+    "item": "minecraft:gravel"
+  },
+  "results": [
+    {
+      "stack": {
+        "item": "minecraft:flint"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "item": "minecraft:flint"
+      }
+    }
+  ]
+}

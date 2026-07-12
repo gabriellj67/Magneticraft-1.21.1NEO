@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "magneticraft:fuel",
+  "conductivity": 206.18556701030832,
+  "temperature": 298.0
+}
