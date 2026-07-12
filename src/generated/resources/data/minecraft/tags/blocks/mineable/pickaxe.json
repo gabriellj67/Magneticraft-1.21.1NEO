@@ -1,0 +1,20 @@
+{
+  "values": [
+    "magneticraft:galena_ore",
+    "magneticraft:cobalt_ore",
+    "magneticraft:tungsten_ore",
+    "magneticraft:pyrite_ore",
+    "magneticraft:lead_block",
+    "magneticraft:cobalt_block",
+    "magneticraft:tungsten_block",
+    "magneticraft:sulfur_block",
+    "magneticraft:limestone",
+    "magneticraft:limestone_bricks",
+    "magneticraft:cobbled_limestone",
+    "magneticraft:burnt_limestone",
+    "magneticraft:burnt_limestone_bricks",
+    "magneticraft:cobbled_burnt_limestone",
+    "magneticraft:limestone_tiles",
+    "magneticraft:inverted_limestone_tiles"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/zinc_ingot_from_material"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_zinc_ingot_material": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:nuggets/zinc"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_zinc_ingot_material",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/zinc_ingot_from_material"
+    ]
+  },
+  "sends_telemetry_event": false
+}

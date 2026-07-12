@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:smelting/zinc_chunk"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_zinc_chunk": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "magneticraft:chunks/zinc"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_zinc_chunk",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:smelting/zinc_chunk"
+    ]
+  },
+  "sends_telemetry_event": false
+}

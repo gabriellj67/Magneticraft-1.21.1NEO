@@ -136,6 +136,65 @@ PackOutput output = generator.getPackOutput();
 generator.addProvider(event.includeClient(), new ModLanguageProvider(output));
 ```
 
+## Scenario: Counted Forge cooking results
+
+### 1. Scope / trigger
+
+Apply when legacy furnace behavior produces more than one item. Minecraft
+1.20.1's vanilla cooking builder exposes only a single result, while Forge
+47.4.20 extends the recipe JSON and serializer with a counted result object.
+
+### 2. Signatures
+
+```java
+CountedCookingRecipeBuilder.smelting(
+        ingredient, RecipeCategory.MISC, result, resultCount,
+        experience, cookingTime
+).save(consumer, recipeId);
+```
+
+### 3. Contracts
+
+- `resultCount` is positive and is serialized as
+  `"result": {"item": "namespace:id", "count": n}`.
+- Use the counted builder only when `count > 1`; single-result recipes retain
+  the normal cooking shape produced by the same validated builder.
+- Do not add blasting recipes unless the behavioral authority defines them.
+- A Forge runtime test, not JSON parsing alone, must prove the assembled output
+  stack count because the object result is a Forge patch to the vanilla codec.
+
+### 4. Validation and error matrix
+
+| Condition | Required result |
+|---|---|
+| `resultCount <= 0` | Reject during builder creation |
+| Counted result is serialized as a string | Fail generated-data validation |
+| Runtime recipe output count differs from JSON | Fail GameTest |
+| A migration invents a blasting counterpart | Remove it unless explicitly required |
+
+### 5. Good, base and bad cases
+
+- Good: a chunk smelts into two ingots in JSON and in a loaded server recipe.
+- Base: ore or dust smelting produces one item through the same recipe family.
+- Bad: two identical furnace recipes are emitted to imitate a count of two.
+
+### 6. Tests required
+
+- Unit-test generated JSON type, item ID and count for every counted recipe.
+- GameTest `RecipeManager` lookup and assembled stack count for representative
+  single- and double-result recipes.
+- Run `runData` twice to prove stable output.
+
+### 7. Wrong vs correct
+
+```json
+// Wrong: vanilla string form cannot preserve a count of two.
+{"result": "magneticraft:lead_ingot"}
+
+// Correct on Forge 47.4.20.
+{"result": {"item": "magneticraft:lead_ingot", "count": 2}}
+```
+
 ## Configuration
 
 - Use Forge configuration specs for operator-tunable values. Keep gameplay

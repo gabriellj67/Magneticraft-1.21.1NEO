@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:smelting/tungsten_dust"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_tungsten_dust": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:dusts/tungsten"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_tungsten_dust",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:smelting/tungsten_dust"
+    ]
+  },
+  "sends_telemetry_event": false
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "forge:ingots/mithril"
+    }
+  ],
+  "result": {
+    "count": 9,
+    "item": "magneticraft:mithril_nugget"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:smelting/tungsten_chunk"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_tungsten_chunk": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "magneticraft:chunks/tungsten"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_tungsten_chunk",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:smelting/tungsten_chunk"
+    ]
+  },
+  "sends_telemetry_event": false
+}

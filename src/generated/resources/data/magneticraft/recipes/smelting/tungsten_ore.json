@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": {
+    "tag": "forge:ores/tungsten"
+  },
+  "result": {
+    "item": "magneticraft:tungsten_ingot"
+  }
+}

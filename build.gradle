@@ -18,6 +18,7 @@ java {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
     options.release = 17
+    options.compilerArgs.add("-Xlint:deprecation")
 }
 
 repositories {
@@ -34,6 +35,15 @@ tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
 
+sourceSets {
+    gameTest {
+        java.setSrcDirs(["src/gametest/java"])
+        resources.setSrcDirs(["src/gametest/resources"])
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
 legacyForge {
     version = "${mc_version}-${forge_version}"
 
@@ -45,6 +55,7 @@ legacyForge {
     mods {
         "${mod_id}" {
             sourceSet sourceSets.main
+            sourceSet sourceSets.gameTest
         }
     }
 
@@ -81,6 +92,7 @@ legacyForge {
     }
 
     addModdingDependenciesTo(sourceSets.test)
+    addModdingDependenciesTo(sourceSets.gameTest)
 }
 
 sourceSets {
@@ -139,6 +151,10 @@ tasks.named("sourcesJar", Jar).configure {
     from("PORTING_SOURCES.md") {
         into "META-INF"
     }
+}
+
+tasks.named("check").configure {
+    dependsOn tasks.named("compileGameTestJava")
 }
 
 publishing {

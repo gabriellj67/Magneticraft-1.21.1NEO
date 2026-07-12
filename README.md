@@ -10,9 +10,12 @@ versions is not supported.
 
 ## Current status
 
-The repository currently contains the engineering baseline. Gameplay content
-is added in dependency order and each large migration stage is verified before
-its Chinese commit.
+The repository contains the engineering baseline plus the first player-visible
+base-content layer: materials, ores, limestone blocks, crafting components,
+hammers and sixteen fluid families. See the
+[base-content migration map](docs/porting/base-content.md) for stable IDs,
+legacy metadata mappings and deferred ownership. Later gameplay systems are
+added in dependency order, with one verified Chinese commit per large stage.
 
 ## Requirements
 

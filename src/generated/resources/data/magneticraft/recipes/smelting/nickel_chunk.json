@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": {
+    "tag": "magneticraft:chunks/nickel"
+  },
+  "result": {
+    "count": 2,
+    "item": "magneticraft:nickel_ingot"
+  }
+}

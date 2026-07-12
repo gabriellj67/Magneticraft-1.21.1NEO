@@ -36,7 +36,12 @@ Future adaptations must add one row before the corresponding commit:
 
 | Local path | Source path and commit | Adaptation summary | Reviewer |
 |---|---|---|---|
-| _None yet_ | | | |
+| `src/main/resources/assets/magneticraft/textures/item/*_{ingot,nugget,light_plate,heavy_plate,chunk,dust,rocky_chunk}.png` | Nova 1.12 `textures/items/{ingots,nugget,light_plate,heavy_plate,chunk,dust,rocky_chunk}/*.png` at `4108ca9bb332d11965c30e0c592b310d0858f251` | Copied only the 76 registered variants; renamed metadata variants to stable singular item IDs and moved them to the 1.20 `textures/item` layout. | Codex |
+| `src/main/resources/assets/magneticraft/textures/item/{sulfur,alternator,motor,fine_copper_wire,magnet,iron_mesh,fabric_mesh,*_hammer}.png` | Nova 1.12 `textures/items/{crafting,tools}/*.png` at `4108ca9bb332d11965c30e0c592b310d0858f251` | Copied the seven in-scope crafting components and three hammers; renamed files to their split registry IDs. | Codex |
+| `src/main/resources/assets/magneticraft/textures/block/*.png` | Nova 1.12 `textures/blocks/{ore_block,decoration}/**/*.png` at `4108ca9bb332d11965c30e0c592b310d0858f251` | Copied the four ores, four storage blocks and eight limestone variants; excluded copper, oil-source and tube-light assets owned by other stages. | Codex |
+| `src/main/resources/assets/magneticraft/textures/fluid/*` | Nova 1.12 `textures/fluids/*` at `4108ca9bb332d11965c30e0c592b310d0858f251` | Copied the 16 still/flow texture pairs and their animation metadata verbatim, changing only the directory from `textures/fluids` to the 1.20 `textures/fluid` layout. | Codex |
+| `src/main/java/committee/nova/mods/magneticraft/data/recipe/CountedCookingRecipeBuilder.java` | MochiButter/Magneticraft `datagen/providers/util/FurnaceMultiRecipeBuilder.java` at `140fdf5c1076570aebf35a65e44a499482863812` (GPL-2.0) | File-level audited and adapted to a validated, smelting-only builder for Forge's counted cooking-result extension; renamed, reduced and independently wired to Nova recipe behavior. | Codex |
+| `src/gametest/resources/data/magneticraft/structures/base_content.nbt` | MinecraftForge/MinecraftForge `src/test_old/resources/data/gametest_test/structures/gametesttest.teststone.nbt` at `b7efb8287b6743400c98e3f826e0ac7def943c49` (LGPL-2.1) | Reused the official minimal 3x3x3 GameTest structure under a Magneticraft-local name; tests replace the template contents before assertions. SHA-256 `f1f8adacd54763fcf7a8a6b84251862678966309ac45bc322c78929d6de8ba75`. | Codex |
 
 ## Magneticraft2 boundary
 

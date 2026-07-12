@@ -47,6 +47,81 @@
   integrations, or mixins without a documented API gap.
 - Source or assets copied from `hypersmc/magneticraft2-1.20.x`.
 
+## Scenario: Forge fluid client lifecycle and resource closure
+
+### 1. Scope / trigger
+
+Apply this contract whenever a `FluidType`, `LiquidBlock`, fluid bucket, or
+custom fluid texture is added. It prevents constructor-time null access and
+client-visible missing models or sprites.
+
+### 2. Signatures
+
+```java
+@Override
+public void initializeClient(Consumer<IClientFluidTypeExtensions> consumer)
+```
+
+```java
+atlas(BLOCKS_ATLAS).addSource(
+        new SingleFile(Magneticraft.id("fluid/oil_still"), Optional.empty())
+);
+simpleBlock(fluidBlock, particleOnlyModel);
+```
+
+### 3. Contracts
+
+- Forge 1.20.1 calls `FluidType#initializeClient` from the `FluidType`
+  constructor. An override must use constants or state already initialized by
+  the superclass, such as an explicit description ID; it must not read subclass
+  fields assigned after `super(...)` returns.
+- Every still and flowing texture returned by the client extension must be a
+  source in Minecraft's `blocks` atlas. Keeping textures under
+  `textures/fluid` therefore requires a `SpriteSourceProvider` entry.
+- Every registered `LiquidBlock` needs a default blockstate and a valid model.
+  A particle-only model is sufficient because the liquid renderer owns world
+  geometry; the empty variant covers all `level=0..15` states.
+- Common fluid code may use Forge's `IClientFluidTypeExtensions` callback, but
+  must not reference `net.minecraft.client.*`. A dedicated server must load the
+  complete registry without a client-class linkage failure.
+
+### 4. Validation and error matrix
+
+| Condition | Required result |
+|---|---|
+| `initializeClient` throws before the subclass constructor returns | Fail; remove access to subclass instance fields |
+| Bucket model reports a missing still texture | Fail; add the texture to the block atlas |
+| Model bakery reports missing `level` variants | Fail; generate a default blockstate and model |
+| Dedicated server reports client-only linkage | Fail; move the client reference behind a physical-client boundary |
+
+### 5. Good, base and bad cases
+
+- Good: all fluid families register, buckets and world fluids resolve both
+  sprites, and the client log contains no Magneticraft model/texture warning.
+- Base: datagen skips `initializeClient`; generated atlas and blockstate
+  contracts are still unit-tested from disk.
+- Bad: the callback reads `this.definition`, which is still `null` while the
+  `FluidType` superclass constructor is executing.
+
+### 6. Tests required
+
+- Unit-test description-ID to still/flow texture derivation for every fluid.
+- Parse generated atlas, blockstate and model JSON and assert catalogue
+  coverage.
+- Run the client through sound-engine and block-atlas creation, then scan
+  `latest.log` for missing textures, missing models and registry failures.
+- Run GameTest and a dedicated server to prove common-side classloading.
+
+### 7. Wrong vs correct
+
+```java
+// Wrong: definition is assigned only after super(...) returns.
+ResourceLocation still = id("fluid/" + definition.id() + "_still");
+
+// Correct: FluidType has already assigned the description ID before callback.
+ResourceLocation still = texture(getDescriptionId(), "_still");
+```
+
 ## Test requirements
 
 Every large migration task must pass the applicable gates before its single

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": {
+    "tag": "magneticraft:chunks/lead"
+  },
+  "result": {
+    "count": 2,
+    "item": "magneticraft:lead_ingot"
+  }
+}
