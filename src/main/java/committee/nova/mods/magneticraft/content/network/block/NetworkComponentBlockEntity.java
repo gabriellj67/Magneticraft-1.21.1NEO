@@ -19,6 +19,7 @@ public abstract class NetworkComponentBlockEntity extends MachineBlockEntity {
     public final void serverTick() {
         tickModules();
         tickComponent();
+        finishServerTick();
     }
 
     protected void tickComponent() {

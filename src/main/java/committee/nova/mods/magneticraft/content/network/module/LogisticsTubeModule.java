@@ -45,6 +45,7 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
     private final List<TravelingItem> items = new ArrayList<>();
     private final Map<Direction, LazyOptional<IItemHandler>> capabilities = new EnumMap<>(Direction.class);
     private int routeCursor;
+    private long clientSnapshotTick = Long.MIN_VALUE;
 
     public LogisticsTubeModule(
             ResourceLocation id,
@@ -73,6 +74,14 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
                         item.outgoing
                 ))
                 .toList();
+    }
+
+    public long clientSnapshotTick() {
+        return clientSnapshotTick;
+    }
+
+    public boolean clientMovementEnabled() {
+        return automationEnabled();
     }
 
     public List<ItemStack> removeAllItems() {
@@ -193,6 +202,7 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
     @Override
     public void loadClientData(CompoundTag tag) {
         loadNetworkData(tag);
+        clientSnapshotTick = host().level() == null ? Long.MIN_VALUE : host().level().getGameTime();
     }
 
     @Override

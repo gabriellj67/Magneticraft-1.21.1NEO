@@ -25,3 +25,24 @@ mandatory = true
 versionRange = "${mc_range}"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "jei"
+mandatory = false
+versionRange = "${jei_version_range}"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "crafttweaker"
+mandatory = false
+versionRange = "${crafttweaker_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "tconstruct"
+mandatory = false
+versionRange = "${tconstruct_version_range}"
+ordering = "AFTER"
+side = "BOTH"

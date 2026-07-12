@@ -6,10 +6,15 @@ import committee.nova.mods.magneticraft.content.computer.vm.ComputerInstruction;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.computer.vm.VmFault;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.network.UploadComputerProgramMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,7 +27,7 @@ import java.util.UUID;
 /**
  * Durable owner and VM state shared by computers and mining robots.
  */
-public abstract class ProgrammableBlockEntity extends MachineBlockEntity implements ComputerDevice {
+public abstract class ProgrammableBlockEntity extends MachineBlockEntity implements ComputerDevice, MenuProvider {
     private static final int VM_FORMAT_VERSION = 1;
     private static final String VM_VERSION_TAG = "vm_version";
     private static final String PROGRAM_TAG = "program";
@@ -41,6 +46,7 @@ public abstract class ProgrammableBlockEntity extends MachineBlockEntity impleme
     private UUID owner;
     private long programRevision;
     private int redstoneOutput;
+    private boolean clientRunning;
 
     protected ProgrammableBlockEntity(BlockEntityType<?> type, BlockPos position, BlockState state) {
         super(type, position, state);
@@ -51,6 +57,7 @@ public abstract class ProgrammableBlockEntity extends MachineBlockEntity impleme
         if (executed > 0) {
             markChanged();
         }
+        syncClientState(vm.running() ? 1 : 0);
     }
 
     public final boolean tryReplaceProgram(long expectedRevision, List<ComputerInstruction> replacement) {
@@ -109,6 +116,11 @@ public abstract class ProgrammableBlockEntity extends MachineBlockEntity impleme
         return redstoneOutput;
     }
 
+    public final boolean visuallyRunning() {
+        Level currentLevel = getLevel();
+        return currentLevel != null && currentLevel.isClientSide ? clientRunning : vm.running();
+    }
+
     public final Component statusComponent() {
         if (vm.fault() != VmFault.NONE) {
             return Component.translatable(
@@ -122,6 +134,29 @@ public abstract class ProgrammableBlockEntity extends MachineBlockEntity impleme
                         : "message.magneticraft.computer.stopped",
                 vm.programCounter(),
                 programRevision
+        );
+    }
+
+    @Override
+    public final Component getDisplayName() {
+        return Component.translatable(
+                this instanceof MiningRobotBlockEntity
+                        ? "container.magneticraft.mining_robot"
+                        : "container.magneticraft.computer"
+        );
+    }
+
+    @Nullable
+    @Override
+    public final AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+        return canManage(player) ? new ProgrammableMenu(containerId, playerInventory, this) : null;
+    }
+
+    public final void writeMenuOpeningData(FriendlyByteBuf buffer) {
+        buffer.writeBoolean(this instanceof MiningRobotBlockEntity);
+        UploadComputerProgramMessage.encode(
+                new UploadComputerProgramMessage(worldPosition, programRevision, program()),
+                buffer
         );
     }
 
@@ -210,11 +245,13 @@ public abstract class ProgrammableBlockEntity extends MachineBlockEntity impleme
     protected final void saveClientData(CompoundTag tag) {
         tag.putInt(REDSTONE_OUTPUT_TAG, redstoneOutput);
         tag.putLong(PROGRAM_REVISION_TAG, programRevision);
+        tag.putBoolean(RUNNING_TAG, vm.running());
     }
 
     @Override
     protected final void loadClientData(CompoundTag tag) {
         redstoneOutput = Math.max(0, Math.min(15, tag.getInt(REDSTONE_OUTPUT_TAG)));
         programRevision = Math.max(0L, tag.getLong(PROGRAM_REVISION_TAG));
+        clientRunning = tag.getBoolean(RUNNING_TAG);
     }
 }

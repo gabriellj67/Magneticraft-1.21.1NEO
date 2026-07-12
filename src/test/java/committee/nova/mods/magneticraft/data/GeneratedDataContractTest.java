@@ -178,12 +178,7 @@ class GeneratedDataContractTest {
         )) {
             assertPng(SOURCE_TEXTURES.resolve("block/" + texture + ".png"));
         }
-        assertFile(SOURCE_MODELS.resolve("block/battery.obj"));
-        assertFile(SOURCE_MODELS.resolve("block/battery.mtl"));
-        JsonObject batteryModel = readObject(ASSETS.resolve("models/block/battery.json"));
-        assertEquals("forge:obj", batteryModel.get("loader").getAsString());
-        assertEquals("magneticraft:models/block/battery.obj", batteryModel.get("model").getAsString());
-        assertEquals("magneticraft:models/block/battery.mtl", batteryModel.get("mtl_override").getAsString());
+        assertObjModel("battery", "battery", "battery");
         assertItemAssetsAndTranslation("battery_item_low", readObject(ASSETS.resolve("lang/en_us.json")));
 
         for (String recipe : Set.of(
@@ -239,7 +234,6 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + block), block);
             assertTrue(chinese.has("block.magneticraft." + block), block);
         }
-
         JsonObject wrench = readObject(ASSETS.resolve("models/item/wrench.json"));
         assertEquals("minecraft:item/handheld", wrench.get("parent").getAsString());
         assertEquals("minecraft:item/iron_hoe", wrench.getAsJsonObject("textures").get("layer0").getAsString());
@@ -340,6 +334,12 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + id), id);
             assertTrue(chinese.has("block.magneticraft." + id), id);
         }
+        assertObjModel("grinder", "grinder_block", "grinder");
+        assertObjModel("grinder_formed", "grinder_block", "grinder");
+        assertObjModel("hydraulic_press", "hydraulic_press_base", "hydraulic_press");
+        assertObjModel("hydraulic_press_formed", "hydraulic_press_base", "hydraulic_press");
+        assertObjModel("solar_panel", "solar_panel_base", "solar_panel");
+        assertObjModel("solar_panel_formed", "solar_panel_base", "solar_panel");
 
         assertFile(ASSETS.resolve("blockstates/oil_deposit.json"));
         assertFile(ASSETS.resolve("models/block/oil_deposit.json"));
@@ -362,6 +362,7 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + block), block);
             assertTrue(chinese.has("block.magneticraft." + block), block);
         }
+        assertObjModel("computer", "computer", "computer");
         assertFile(ASSETS.resolve("models/item/floppy_disk.json"));
         assertFile(recipe("crafting/floppy_disk"));
         assertTrue(english.has("item.magneticraft.floppy_disk"));
@@ -411,6 +412,23 @@ class GeneratedDataContractTest {
         assertPng(SOURCE_TEXTURES.resolve("item/" + id + ".png"));
         assertFile(ASSETS.resolve("models/item/" + id + ".json"));
         assertTrue(language.has("item.magneticraft." + id), id);
+    }
+
+    private static void assertObjModel(String generatedName, String sourceName, String textureName) throws IOException {
+        assertFile(SOURCE_MODELS.resolve("block/" + sourceName + ".obj"));
+        assertFile(SOURCE_MODELS.resolve("block/" + sourceName + ".mtl"));
+        assertPng(SOURCE_TEXTURES.resolve("block/" + textureName + ".png"));
+
+        JsonObject model = readObject(ASSETS.resolve("models/block/" + generatedName + ".json"));
+        assertEquals("forge:obj", model.get("loader").getAsString());
+        assertEquals(
+                "magneticraft:models/block/" + sourceName + ".obj",
+                model.get("model").getAsString()
+        );
+        assertEquals(
+                "magneticraft:models/block/" + sourceName + ".mtl",
+                model.get("mtl_override").getAsString()
+        );
     }
 
     private static Path recipe(String path) {

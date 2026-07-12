@@ -1,6 +1,8 @@
 package committee.nova.mods.magneticraft.client;
 
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 
 /**
  * Shared vanilla-sized panel and slot rendering for texture-free machine screens.
@@ -40,5 +42,23 @@ final class MachineScreenLayout {
     static void drawInset(GuiGraphics graphics, int x, int y, int width, int height) {
         graphics.fill(x, y, x + width, y + height, SLOT_BORDER);
         graphics.fill(x + 1, y + 1, x + width - 1, y + height - 1, 0xFF111416);
+    }
+
+    static Component fitToWidth(Font font, Component text, int maxWidth) {
+        if (maxWidth <= 0) {
+            return Component.empty();
+        }
+        if (font.width(text) <= maxWidth) {
+            return text;
+        }
+        String suffix = "…";
+        int contentWidth = Math.max(0, maxWidth - font.width(suffix));
+        return Component.literal(font.plainSubstrByWidth(text.getString(), contentWidth) + suffix)
+                .withStyle(text.getStyle());
+    }
+
+    static int availableTitleWidth(int imageWidth, int titleX, int statusWidth) {
+        int statusX = imageWidth - 8 - Math.max(0, statusWidth);
+        return Math.max(0, statusX - titleX - 6);
     }
 }

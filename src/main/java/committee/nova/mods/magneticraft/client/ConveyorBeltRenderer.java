@@ -27,9 +27,17 @@ public final class ConveyorBeltRenderer implements BlockEntityRenderer<ConveyorB
     ) {
         var facing = belt.facing();
         var lateral = facing.getClockWise();
+        long gameTick = belt.getLevel() == null ? 0L : belt.getLevel().getGameTime();
+        float interpolationTicks = AnimationMath.boundedSnapshotAge(
+                gameTick,
+                belt.belt().clientSnapshotTick(),
+                partialTick,
+                4.0F,
+                belt.belt().clientMovementEnabled()
+        );
         int seed = 0;
         for (ConveyorBeltModule.ParcelView parcel : belt.belt().parcels()) {
-            float progress = Math.min(ConveyorBeltModule.MAX_PROGRESS, parcel.progress() + partialTick);
+            float progress = Math.min(ConveyorBeltModule.MAX_PROGRESS, parcel.progress() + interpolationTicks);
             double along = progress / ConveyorBeltModule.MAX_PROGRESS - 0.5D;
             double laneOffset = parcel.lane() == ConveyorBeltModule.Lane.LEFT ? -0.18D : 0.18D;
             double x = 0.5D + facing.getStepX() * along + lateral.getStepX() * laneOffset;

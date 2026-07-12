@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.machine.battery;
 
 import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractMachineMenu;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import net.minecraft.core.BlockPos;
@@ -51,7 +52,7 @@ public final class BatteryMenu extends AbstractMachineMenu {
         }
 
         IItemHandler handler = battery == null ? new ItemStackHandler(2) : battery.inventory().menuHandler();
-        data = battery == null ? new SimpleContainerData(2) : battery.data();
+        data = knownBattery == null ? new SimpleContainerData(BatteryBlockEntity.MENU_DATA_COUNT) : knownBattery.data();
         access = battery == null
                 ? ContainerLevelAccess.NULL
                 : ContainerLevelAccess.create(playerInventory.player.level(), position);
@@ -72,11 +73,11 @@ public final class BatteryMenu extends AbstractMachineMenu {
     }
 
     public int energyStored() {
-        return data.get(0);
+        return Int32ContainerData.read(data, 0);
     }
 
     public int energyCapacity() {
-        return data.get(1);
+        return Int32ContainerData.read(data, 1);
     }
 
     @Override

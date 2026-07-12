@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.singleblock.AirBubbleBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMenu;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.FluidFuelRecipe;
@@ -407,7 +408,10 @@ public final class SingleBlockMachineGameTests {
         SingleBlockMachineBlockEntity thermopile = requireMachine(helper, CENTER);
 
         helper.runAfterDelay(25, () -> {
-            helper.assertTrue(thermopile.menuData().get(11) > 0, "Thermopile did not calculate heat flux");
+            helper.assertTrue(
+                    Int32ContainerData.read(thermopile.menuData(), 11) > 0,
+                    "Thermopile did not calculate heat flux"
+            );
             helper.assertTrue(thermopile.electricity().node().energyJoules() > 0.0D, "Thermopile did not generate electricity");
             helper.succeed();
         });

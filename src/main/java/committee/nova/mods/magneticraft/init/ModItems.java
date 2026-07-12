@@ -27,8 +27,13 @@ public final class ModItems {
     private static final Map<HammerType, RegistryObject<Item>> HAMMERS =
             new EnumMap<>(HammerType.class);
     private static final List<RegistryObject<? extends Item>> CREATIVE_ITEMS = new ArrayList<>();
+    public static final RegistryObject<Item> GUIDE_BOOK = ModRegistries.ITEMS.register(
+            "guide_book",
+            () -> new Item(new Item.Properties().stacksTo(1))
+    );
 
     static {
+        CREATIVE_ITEMS.add(GUIDE_BOOK);
         registerMaterials();
         registerComponents();
         registerHammers();

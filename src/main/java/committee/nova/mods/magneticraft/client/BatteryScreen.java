@@ -20,6 +20,19 @@ public final class BatteryScreen extends AbstractContainerScreen<BatteryMenu> {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTick);
+        if (mouseX >= leftPos + 82 && mouseX < leftPos + 94
+                && mouseY >= topPos + 20 && mouseY < topPos + 67) {
+            graphics.renderTooltip(
+                    font,
+                    Component.translatable(
+                            "gui.magneticraft.energy.tooltip",
+                            menu.energyStored(),
+                            menu.energyCapacity()
+                    ),
+                    mouseX,
+                    mouseY
+            );
+        }
         renderTooltip(graphics, mouseX, mouseY);
     }
 

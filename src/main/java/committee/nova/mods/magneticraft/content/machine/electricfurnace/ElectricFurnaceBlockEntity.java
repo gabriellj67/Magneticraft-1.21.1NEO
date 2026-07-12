@@ -108,6 +108,7 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
         if (lit != furnace.process.working()) {
             level.setBlock(position, state.setValue(ElectricFurnaceBlock.LIT, furnace.process.working()), 3);
         }
+        furnace.finishServerTick();
     }
 
     public ItemInventoryModule inventory() {

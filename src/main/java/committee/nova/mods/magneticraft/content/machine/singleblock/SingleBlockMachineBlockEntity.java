@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.content.machine.singleblock;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
 import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.GhostFilterModule;
@@ -42,7 +43,8 @@ import org.jetbrains.annotations.Nullable;
  * Module, capability and persistence host for the Task 5 single-block behavior strategies.
  */
 public final class SingleBlockMachineBlockEntity extends MachineBlockEntity implements MenuProvider {
-    public static final int MENU_DATA_COUNT = 12;
+    public static final int MENU_LOGICAL_DATA_COUNT = 12;
+    public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     public static final int SLUICE_MAX_ITEMS = 10;
     public static final int SLUICE_DURATION = 80;
     private static final String MULTIBLOCK_CONTROLLER_TAG = "multiblock_controller";
@@ -62,8 +64,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     private final ElectricalNetworkModule electricity;
     @Nullable
     private final HeatNetworkModule heat;
-    private final int[] clientMenuData = new int[MENU_DATA_COUNT];
-    private final ContainerData menuData = new MenuData();
+    private final ContainerData menuData;
     private final SingleBlockMachineState state = new SingleBlockMachineState();
     private final SingleBlockMachineLogic logic;
     private final SingleBlockMachineInteractions interactions;
@@ -103,6 +104,22 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         logic = new SingleBlockMachineLogic(this, this.state);
         interactions = new SingleBlockMachineInteractions(this, this.state);
         fabricator = new SingleBlockFabricator(this);
+        menuData = Int32ContainerData.readOnly(
+                () -> energy == null ? 0 : energy.getEnergyStored(),
+                () -> energy == null ? 0 : energy.getMaxEnergyStored(),
+                () -> this.state.progress,
+                () -> this.state.totalProgress,
+                () -> heat == null ? 0 : (int) Math.round(heat.node().temperatureKelvin() * 10.0D),
+                () -> primaryTank == null ? 0 : primaryTank.tank().getFluidAmount(),
+                () -> primaryTank == null ? 0 : primaryTank.tank().getCapacity(),
+                () -> secondaryTank == null ? 0 : secondaryTank.tank().getFluidAmount(),
+                () -> secondaryTank == null ? 0 : secondaryTank.tank().getCapacity(),
+                () -> definition == SingleBlockMachineDefinition.INSERTER
+                        ? inserterFlags()
+                        : this.state.doorOpen ? 1 : 0,
+                () -> electricity == null ? 0 : (int) Math.round(electricity.node().voltage() * 10.0D),
+                () -> (int) Math.round(this.state.thermopileFlux)
+        );
     }
 
     public static void serverTick(
@@ -130,6 +147,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         if (state.getValue(SingleBlockMachineBlock.LIT) != shouldBeLit) {
             level.setBlock(position, state.setValue(SingleBlockMachineBlock.LIT, shouldBeLit), Block.UPDATE_ALL);
         }
+        machine.syncClientState(visualStateHash(machine.state.progress, machine.state.totalProgress, machine.state.working));
+        machine.finishServerTick();
     }
 
     public SingleBlockMachineDefinition definition() {
@@ -307,6 +326,20 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         multiblockController = tag.contains(MULTIBLOCK_CONTROLLER_TAG)
                 ? BlockPos.of(tag.getLong(MULTIBLOCK_CONTROLLER_TAG))
                 : null;
+    }
+
+    @Override
+    protected void saveClientData(CompoundTag tag) {
+        state.save(tag);
+    }
+
+    @Override
+    protected void loadClientData(CompoundTag tag) {
+        state.load(tag);
+    }
+
+    private static int visualStateHash(int progress, int totalProgress, boolean working) {
+        return 31 * (31 * progress + totalProgress) + (working ? 1 : 0);
     }
 
     private FluidTankModule[] createFluidTanks() {
@@ -495,44 +528,6 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
 
     void activateSluiceChain() {
         logic.activateSluiceChain();
-    }
-
-    private final class MenuData implements ContainerData {
-        @Override
-        public int get(int index) {
-            if (getLevel() != null && getLevel().isClientSide) {
-                return clientMenuData[index];
-            }
-            return switch (index) {
-                case 0 -> energy == null ? 0 : energy.getEnergyStored();
-                case 1 -> energy == null ? 0 : energy.getMaxEnergyStored();
-                case 2 -> state.progress;
-                case 3 -> state.totalProgress;
-                case 4 -> heat == null ? 0 : (int) Math.round(heat.node().temperatureKelvin() * 10.0D);
-                case 5 -> primaryTank == null ? 0 : primaryTank.tank().getFluidAmount();
-                case 6 -> primaryTank == null ? 0 : primaryTank.tank().getCapacity();
-                case 7 -> secondaryTank == null ? 0 : secondaryTank.tank().getFluidAmount();
-                case 8 -> secondaryTank == null ? 0 : secondaryTank.tank().getCapacity();
-                case 9 -> definition == SingleBlockMachineDefinition.INSERTER
-                        ? inserterFlags()
-                        : state.doorOpen ? 1 : 0;
-                case 10 -> electricity == null ? 0 : (int) Math.round(electricity.node().voltage() * 10.0D);
-                case 11 -> (int) Math.round(state.thermopileFlux);
-                default -> 0;
-            };
-        }
-
-        @Override
-        public void set(int index, int value) {
-            if (index >= 0 && index < clientMenuData.length) {
-                clientMenuData[index] = value;
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return MENU_DATA_COUNT;
-        }
     }
 
 }

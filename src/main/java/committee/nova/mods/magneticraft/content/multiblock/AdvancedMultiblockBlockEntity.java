@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.multiblock;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
 import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.BulkItemStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
@@ -18,8 +19,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -41,12 +46,15 @@ import java.util.UUID;
  * Server-authoritative structure lifecycle host. Machine modules are added by
  * the advanced behavior layer without changing formation semantics.
  */
-public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
+public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity implements MenuProvider {
+    public static final int MENU_LOGICAL_DATA_COUNT = 22;
+    public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     private static final String FORMED_TAG = "formed";
     private static final String MIRRORED_TAG = "mirrored";
     private static final String OWNER_TAG = "owner";
     private static final String PROGRESS_TAG = "progress";
     private static final String TOTAL_PROGRESS_TAG = "total_progress";
+    private static final String WORKING_TAG = "working";
     private static final String ACTIVE_RECIPE_TAG = "active_recipe";
     private static final String BURN_TICKS_TAG = "burn_ticks";
     private static final String BURN_POWER_TAG = "burn_power";
@@ -69,6 +77,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
     @Nullable
     private final HeatNetworkModule heat;
     private final AdvancedMultiblockLogic logic;
+    private final ContainerData menuData;
     private boolean formed;
     private boolean structureReady;
     private boolean mirrored;
@@ -114,6 +123,30 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
             ));
         }
         logic = new AdvancedMultiblockLogic(this);
+        menuData = Int32ContainerData.readOnly(
+                () -> energy == null ? 0 : energy.getEnergyStored(),
+                () -> energy == null ? 0 : energy.getMaxEnergyStored(),
+                () -> progress,
+                () -> totalProgress,
+                () -> working ? 1 : 0,
+                () -> heat == null ? 0 : (int) Math.round(heat.node().temperatureKelvin() * 10.0D),
+                () -> electricity == null ? 0 : (int) Math.round(electricity.node().voltage() * 10.0D),
+                () -> bulkStorage == null ? 0 : bulkStorage.amount(),
+                () -> bulkStorage == null ? 0 : bulkStorage.capacity(),
+                () -> shelvingStorage == null ? 0 : shelvingStorage.installedChests(),
+                () -> shelvingStorage == null ? 0 : shelvingStorage.unlockedSlots(),
+                definition::tankCount,
+                () -> tankAmount(0),
+                () -> tankCapacity(0),
+                () -> tankAmount(1),
+                () -> tankCapacity(1),
+                () -> tankAmount(2),
+                () -> tankCapacity(2),
+                () -> tankAmount(3),
+                () -> tankCapacity(3),
+                () -> tankAmount(4),
+                () -> tankCapacity(4)
+        );
     }
 
     public static void serverTick(
@@ -182,6 +215,14 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
 
     public int progress() {
         return progress;
+    }
+
+    public int totalProgress() {
+        return totalProgress;
+    }
+
+    public ContainerData menuData() {
+        return menuData;
     }
 
     public int burnTicks() {
@@ -364,6 +405,19 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
         return owner == null || owner.equals(player.getUUID()) || player.hasPermissions(2);
     }
 
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable(getBlockState().getBlock().getDescriptionId());
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+        return formed && canManage(player)
+                ? new AdvancedMultiblockMenu(containerId, playerInventory, this)
+                : null;
+    }
+
     public boolean hasPortableState() {
         if (bulkStorage != null && bulkStorage.amount() > 0) {
             return true;
@@ -479,6 +533,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
     protected void saveClientData(CompoundTag tag) {
         tag.putBoolean(FORMED_TAG, formed);
         tag.putBoolean(MIRRORED_TAG, mirrored);
+        tag.putBoolean(WORKING_TAG, working);
+        tag.putInt(PROGRESS_TAG, progress);
+        tag.putInt(TOTAL_PROGRESS_TAG, totalProgress);
         if (solarTowerPosition != null) {
             tag.putLong(SOLAR_TOWER_TAG, solarTowerPosition.asLong());
         }
@@ -489,6 +546,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
     protected void loadClientData(CompoundTag tag) {
         formed = tag.getBoolean(FORMED_TAG);
         mirrored = tag.getBoolean(MIRRORED_TAG);
+        working = tag.getBoolean(WORKING_TAG);
+        progress = Math.max(0, tag.getInt(PROGRESS_TAG));
+        totalProgress = Math.max(0, tag.getInt(TOTAL_PROGRESS_TAG));
         solarTowerPosition = tag.contains(SOLAR_TOWER_TAG)
                 ? BlockPos.of(tag.getLong(SOLAR_TOWER_TAG))
                 : null;
@@ -520,7 +580,13 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
         if (structureReady) {
             tickModules();
             logic.tick(serverLevel);
+            syncClientState(visualStateHash(progress, totalProgress, working));
+            finishServerTick();
         }
+    }
+
+    private static int visualStateHash(int progress, int totalProgress, boolean working) {
+        return 31 * (31 * progress + totalProgress) + (working ? 1 : 0);
     }
 
     private void setFormed(boolean formed) {
@@ -789,6 +855,16 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity {
             case BIG_ELECTRIC_FURNACE -> 200;
             default -> 0;
         };
+    }
+
+    private int tankAmount(int index) {
+        FluidTankModule tank = tank(index);
+        return tank == null ? 0 : tank.tank().getFluidAmount();
+    }
+
+    private int tankCapacity(int index) {
+        FluidTankModule tank = tank(index);
+        return tank == null ? 0 : tank.tank().getCapacity();
     }
 
     private void rebindPhysicalModules() {

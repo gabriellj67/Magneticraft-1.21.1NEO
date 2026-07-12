@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -101,6 +102,11 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
             controller.tryForm(serverPlayer);
         } else if (player.isShiftKeyDown()) {
             controller.cycleHydraulicMode(serverPlayer);
+        } else if (controller.canManage(serverPlayer)) {
+            NetworkHooks.openScreen(serverPlayer, controller, buffer -> {
+                buffer.writeBlockPos(position);
+                buffer.writeEnum(definition);
+            });
         } else {
             controller.describe(serverPlayer);
         }

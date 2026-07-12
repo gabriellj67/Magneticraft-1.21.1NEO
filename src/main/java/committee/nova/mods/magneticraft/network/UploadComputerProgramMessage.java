@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.network;
 
 import committee.nova.mods.magneticraft.content.computer.ProgrammableBlockEntity;
+import committee.nova.mods.magneticraft.content.computer.ProgrammableMenu;
 import committee.nova.mods.magneticraft.content.computer.vm.BoundedComputerVm;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerInstruction;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
@@ -73,8 +74,19 @@ public record UploadComputerProgramMessage(
     ) {
         NetworkEvent.Context context = contextSupplier.get();
         ServerPlayer sender = context.getSender();
-        context.enqueueWork(() -> applyIfValid(sender, message));
+        context.enqueueWork(() -> applyFromOpenMenu(sender, message));
         context.setPacketHandled(true);
+    }
+
+    private static boolean applyFromOpenMenu(ServerPlayer sender, UploadComputerProgramMessage message) {
+        if (sender == null
+                || !(sender.containerMenu instanceof ProgrammableMenu menu)
+                || !menu.position().equals(message.position)
+                || menu.revision() != message.expectedRevision
+                || !menu.stillValid(sender)) {
+            return false;
+        }
+        return applyIfValid(sender, message);
     }
 
     public static boolean applyIfValid(Player sender, UploadComputerProgramMessage message) {

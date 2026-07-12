@@ -23,12 +23,82 @@ tasks.withType(JavaCompile).configureEach {
 
 repositories {
     mavenCentral()
+    maven {
+        name = "BlameJared Maven"
+        url = uri("https://maven.blamejared.com")
+        content {
+            includeGroup "mezz.jei"
+            includeGroup "com.blamejared.crafttweaker"
+            includeGroup "org.openzen.zencode"
+        }
+    }
+    maven {
+        name = "DVS1 Maven FS"
+        url = uri("https://dvs1.progwml6.com/files/maven")
+        content {
+            includeGroup "slimeknights.mantle"
+            includeGroup "slimeknights.tconstruct"
+        }
+    }
+}
+
+def optionalRuntimeEnabled = { String propertyName ->
+    providers.gradleProperty(propertyName).map { it.toBoolean() }.getOrElse(false)
+}
+def jeiRuntimeEnabled = optionalRuntimeEnabled("enable_jei_runtime")
+def craftTweakerRuntimeEnabled = optionalRuntimeEnabled("enable_crafttweaker_runtime")
+def tconstructRuntimeEnabled = optionalRuntimeEnabled("enable_tconstruct_runtime")
+def quickPlayWorld = providers.gradleProperty("quick_play_world").orNull
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+obfuscation {
+    createRemappingConfiguration(configurations.localRuntime)
 }
 
 dependencies {
+    // LegacyForge production mod jars must enter the remapping configurations.
+    modCompileOnly("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
+    modCompileOnly("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
+    modCompileOnly("com.blamejared.crafttweaker:CraftTweaker-forge-${mc_version}:${crafttweaker_version}")
+
+    if (jeiRuntimeEnabled) {
+        ["core", "common", "common-api", "lib", "gui", "forge-api", "forge"].each { module ->
+            modLocalRuntime("mezz.jei:jei-${mc_version}-${module}:${jei_version}")
+        }
+    }
+    if (craftTweakerRuntimeEnabled) {
+        modLocalRuntime("com.blamejared.crafttweaker:CraftTweaker-forge-${mc_version}:${crafttweaker_version}")
+        [
+                "CodeFormatter",
+                "CodeFormatterShared",
+                "JavaIntegration",
+                "JavaAnnotations",
+                "JavaBytecodeCompiler",
+                "JavaShared",
+                "Validator",
+                "Parser",
+                "CodeModel",
+                "Shared"
+        ].each { module ->
+            localRuntime("org.openzen.zencode:${module}:${crafttweaker_zencode_version}")
+        }
+    }
+    if (tconstructRuntimeEnabled) {
+        modLocalRuntime("slimeknights.mantle:Mantle:${mc_version}-${mantle_version}")
+        modLocalRuntime("slimeknights.tconstruct:TConstruct:${mc_version}-${tconstruct_version}")
+    }
+
     testImplementation(platform("org.junit:junit-bom:${junit_version}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+def prepareCraftTweakerIntegrationScripts = tasks.register("prepareCraftTweakerIntegrationScripts", Copy) {
+    from("src/integrationTest/crafttweaker/scripts")
+    into(layout.projectDirectory.dir("run/scripts"))
 }
 
 tasks.withType(Test).configureEach {
@@ -68,11 +138,17 @@ legacyForge {
 
         client {
             client()
+            if (quickPlayWorld) {
+                programArguments.addAll("--quickPlaySingleplayer", quickPlayWorld)
+            }
         }
 
         server {
             server()
             programArgument "--nogui"
+            if (craftTweakerRuntimeEnabled) {
+                taskBefore prepareCraftTweakerIntegrationScripts
+            }
         }
 
         data {
@@ -115,7 +191,10 @@ def expansionProperties = [
         mod_authors         : mod_authors,
         mod_description     : mod_description,
         issue_tracker       : issue_tracker,
-        display_url         : display_url
+        display_url                : display_url,
+        jei_version_range         : jei_version_range,
+        crafttweaker_version_range: crafttweaker_version_range,
+        tconstruct_version_range  : tconstruct_version_range
 ]
 
 processResources {

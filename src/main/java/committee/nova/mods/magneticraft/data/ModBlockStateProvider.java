@@ -56,13 +56,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockWithItem(crushingTable, crushingModel);
 
         Block battery = ModMachineBlocks.BATTERY.get();
-        ModelFile batteryModel = models().getBuilder("battery")
-                .texture("particle", modLoc("block/battery"))
-                .customLoader(ObjModelBuilder::begin)
-                .modelLocation(modLoc("models/block/battery.obj"))
-                .flipV(true)
-                .overrideMaterialLibrary(modLoc("models/block/battery.mtl"))
-                .end();
+        ModelFile batteryModel = objModel("battery", "battery", modLoc("block/battery"));
         horizontalBlock(battery, batteryModel);
         simpleBlockItem(battery, batteryModel);
 
@@ -176,18 +170,8 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
-            ModelFile idle = models().orientable(
-                    definition.id(),
-                    mcLoc("block/iron_block"),
-                    mcLoc("block/polished_andesite"),
-                    mcLoc("block/iron_block")
-            );
-            ModelFile formed = models().orientable(
-                    definition.id() + "_formed",
-                    mcLoc("block/copper_block"),
-                    mcLoc("block/redstone_lamp"),
-                    mcLoc("block/iron_block")
-            );
+            ModelFile idle = advancedControllerModel(definition, false);
+            ModelFile formed = advancedControllerModel(definition, true);
             horizontalBlock(
                     controller,
                     state -> state.getValue(AdvancedMultiblockBlock.FORMED) ? formed : idle
@@ -201,12 +185,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         Block computer = ModComputerContent.COMPUTER.get();
-        ModelFile computerModel = models().orientable(
-                "computer",
-                mcLoc("block/iron_block"),
-                mcLoc("block/observer_front"),
-                mcLoc("block/iron_block")
-        );
+        ModelFile computerModel = objModel("computer", "computer", modLoc("block/computer"));
         horizontalBlock(computer, computerModel);
         simpleBlockItem(computer, computerModel);
 
@@ -235,6 +214,35 @@ final class ModBlockStateProvider extends BlockStateProvider {
             int maxZ
     ) {
         model.element().from(minX, 0, minZ).to(maxX, 12, maxZ).textureAll("#side").end();
+    }
+
+    private ModelFile advancedControllerModel(MultiblockDefinition definition, boolean formed) {
+        String generatedName = definition.id() + (formed ? "_formed" : "");
+        return switch (definition) {
+            case GRINDER -> objModel(generatedName, "grinder_block", modLoc("block/grinder"));
+            case HYDRAULIC_PRESS -> objModel(
+                    generatedName,
+                    "hydraulic_press_base",
+                    modLoc("block/hydraulic_press")
+            );
+            case SOLAR_PANEL -> objModel(generatedName, "solar_panel_base", modLoc("block/solar_panel"));
+            default -> models().orientable(
+                    generatedName,
+                    formed ? mcLoc("block/copper_block") : mcLoc("block/iron_block"),
+                    formed ? mcLoc("block/redstone_lamp") : mcLoc("block/polished_andesite"),
+                    mcLoc("block/iron_block")
+            );
+        };
+    }
+
+    private ModelFile objModel(String generatedName, String sourceName, ResourceLocation particleTexture) {
+        return models().getBuilder(generatedName)
+                .texture("particle", particleTexture)
+                .customLoader(ObjModelBuilder::begin)
+                .modelLocation(modLoc("models/block/" + sourceName + ".obj"))
+                .flipV(true)
+                .overrideMaterialLibrary(modLoc("models/block/" + sourceName + ".mtl"))
+                .end();
     }
 
     private void conduitBlock(Block block, String name, ResourceLocation texture) {

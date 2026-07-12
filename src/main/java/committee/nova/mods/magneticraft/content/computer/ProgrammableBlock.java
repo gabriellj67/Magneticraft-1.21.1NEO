@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.content.computer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -101,7 +103,9 @@ public abstract class ProgrammableBlock extends BaseEntityBlock {
             return InteractionResult.CONSUME;
         }
 
-        player.displayClientMessage(programmable.statusComponent(), true);
+        if (player instanceof ServerPlayer serverPlayer) {
+            NetworkHooks.openScreen(serverPlayer, programmable, programmable::writeMenuOpeningData);
+        }
         return InteractionResult.CONSUME;
     }
 

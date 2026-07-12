@@ -1,8 +1,9 @@
 {
-  "parent": "minecraft:block/orientable",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/computer.obj",
+  "mtl_override": "magneticraft:models/block/computer.mtl",
   "textures": {
-    "front": "minecraft:block/observer_front",
-    "side": "minecraft:block/iron_block",
-    "top": "minecraft:block/iron_block"
+    "particle": "magneticraft:block/computer"
   }
 }

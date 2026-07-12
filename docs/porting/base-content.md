@@ -143,7 +143,10 @@ their advancements, language files, tags, and the block-atlas additions. A
 second unchanged `runData` invocation must write zero files; unit tests parse
 every generated JSON document and verify catalogue coverage.
 
-## Deferred ownership
+## Stage-two historical ownership handoff
+
+The following list records boundaries deliberately left to later owners at the
+end of the base-content stage; it is not the current release backlog:
 
 - Guide book: guide/client stage.
 - Copper coil, voltmeter, thermometer and wrench: network/machine stages whose
@@ -154,5 +157,8 @@ every generated JSON document and verify catalogue coverage.
   real system consumer.
 - Multiblock parts and machine recipes: multiblock/machine stages.
 
-This prevents inactive placeholders and keeps later changes tied to their
-actual behavior owner.
+Those owners were subsequently implemented by the network, machine,
+world-generation, multiblock, computer and client tasks. The history remains
+here to explain why the base registry was intentionally narrow. Current scope,
+intentional exclusions and verification evidence are recorded in the
+[release-readiness report](release-readiness.md).

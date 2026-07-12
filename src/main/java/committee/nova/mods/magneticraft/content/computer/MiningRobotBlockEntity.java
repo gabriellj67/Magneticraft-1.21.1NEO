@@ -96,6 +96,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
     public static void serverTick(Level level, BlockPos position, BlockState state, MiningRobotBlockEntity robot) {
         robot.tickModules();
         robot.tickComputer();
+        robot.finishServerTick();
         if (robot.pendingMove != null && level instanceof ServerLevel serverLevel) {
             robot.performPendingMove(serverLevel);
         }

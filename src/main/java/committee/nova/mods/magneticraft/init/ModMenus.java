@@ -1,8 +1,10 @@
 package committee.nova.mods.magneticraft.init;
 
+import committee.nova.mods.magneticraft.content.computer.ProgrammableMenu;
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryMenu;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceMenu;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMenu;
+import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.RegistryObject;
@@ -22,6 +24,16 @@ public final class ModMenus {
             ModRegistries.MENU_TYPES.register(
                     "single_block_machine",
                     () -> IForgeMenuType.create(SingleBlockMachineMenu::new)
+            );
+    public static final RegistryObject<MenuType<ProgrammableMenu>> PROGRAMMABLE =
+            ModRegistries.MENU_TYPES.register(
+                    "programmable",
+                    () -> IForgeMenuType.create(ProgrammableMenu::new)
+            );
+    public static final RegistryObject<MenuType<AdvancedMultiblockMenu>> ADVANCED_MULTIBLOCK =
+            ModRegistries.MENU_TYPES.register(
+                    "advanced_multiblock",
+                    () -> IForgeMenuType.create(AdvancedMultiblockMenu::new)
             );
 
     private ModMenus() {

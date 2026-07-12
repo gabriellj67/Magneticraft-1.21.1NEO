@@ -26,9 +26,17 @@ public final class PneumaticTubeRenderer implements BlockEntityRenderer<Pneumati
             int packedLight,
             int packedOverlay
     ) {
+        long gameTick = tube.getLevel() == null ? 0L : tube.getLevel().getGameTime();
+        float interpolationTicks = AnimationMath.boundedSnapshotAge(
+                gameTick,
+                tube.logistics().clientSnapshotTick(),
+                partialTick,
+                4.0F,
+                tube.logistics().clientMovementEnabled()
+        );
         int seed = 0;
         for (LogisticsTubeModule.TravelingItemView item : tube.logistics().itemsSnapshot()) {
-            double[] offset = offset(item, partialTick);
+            double[] offset = offset(item, interpolationTicks);
             poseStack.pushPose();
             poseStack.translate(0.5D + offset[0], 0.5D + offset[1], 0.5D + offset[2]);
             poseStack.scale(0.25F, 0.25F, 0.25F);
@@ -46,8 +54,11 @@ public final class PneumaticTubeRenderer implements BlockEntityRenderer<Pneumati
         }
     }
 
-    private static double[] offset(LogisticsTubeModule.TravelingItemView item, float partialTick) {
-        double progress = Math.min(LogisticsTubeModule.MAX_PROGRESS, item.progress() + partialTick * LogisticsTubeModule.PROGRESS_PER_TICK);
+    private static double[] offset(LogisticsTubeModule.TravelingItemView item, float interpolationTicks) {
+        double progress = Math.min(
+                LogisticsTubeModule.MAX_PROGRESS,
+                item.progress() + interpolationTicks * LogisticsTubeModule.PROGRESS_PER_TICK
+        );
         Direction direction;
         double distance;
         if (progress <= LogisticsTubeModule.CENTER_PROGRESS) {

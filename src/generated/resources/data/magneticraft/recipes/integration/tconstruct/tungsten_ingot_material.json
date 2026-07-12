@@ -1,0 +1,15 @@
+{
+  "type": "tconstruct:material",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "tconstruct"
+    }
+  ],
+  "ingredient": {
+    "tag": "forge:ingots/tungsten"
+  },
+  "material": "magneticraft:tungsten",
+  "needed": 1,
+  "value": 1
+}

@@ -1,8 +1,9 @@
 {
-  "parent": "minecraft:block/orientable",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/grinder_block.obj",
+  "mtl_override": "magneticraft:models/block/grinder_block.mtl",
   "textures": {
-    "front": "minecraft:block/polished_andesite",
-    "side": "minecraft:block/iron_block",
-    "top": "minecraft:block/iron_block"
+    "particle": "magneticraft:block/grinder"
   }
 }

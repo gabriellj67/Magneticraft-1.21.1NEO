@@ -308,6 +308,89 @@ private SideAccess inventoryAccess(Direction side) {
 }
 ```
 
+## Scenario: LegacyForge optional-mod remapping and publication isolation
+
+### 1. Scope / trigger
+
+Apply whenever a production-obfuscated Forge mod is used as a compile-only API
+or opt-in development runtime under ModDevGradle LegacyForge. This includes JEI,
+CraftTweaker, Tinkers' Construct and any future optional compatibility target.
+
+### 2. Signatures
+
+```groovy
+obfuscation {
+    createRemappingConfiguration(configurations.localRuntime)
+}
+
+dependencies {
+    modCompileOnly("group:optional-api:version")
+    modLocalRuntime("group:optional-mod:version")
+    localRuntime("group:ordinary-java-library:version")
+}
+```
+
+### 3. Contracts
+
+- Production mod JARs must enter a `mod*` configuration so LegacyForge remaps
+  SRG bytecode to the development namespace. Plain `runtimeOnly` or
+  `localRuntime` is invalid for a mod JAR even when its dynamic Mixin refmap is
+  present.
+- `modCompileOnly` supplies public optional APIs without making the base mod
+  require them at runtime. Opt-in test runtimes use an isolated remapped
+  `modLocalRuntime`, created from `localRuntime`, so they do not become
+  dependencies in the published POM.
+- ModDevGradle's remapped dependency configurations are non-transitive. List
+  every required mod module explicitly. Ordinary Java libraries required by an
+  optional mod stay on `localRuntime`; they are not passed through mod remapping.
+- Each optional runtime is disabled by default and enabled by an explicit
+  Gradle property. Base compilation, tests and server/client startup must not
+  load or link optional-mod classes.
+
+### 4. Validation and error matrix
+
+| Symptom | Cause | Required action |
+|---|---|---|
+| Mixin shadow still names an SRG member such as `m_8895_` in development | Production mod JAR entered plain runtime configuration | Move the mod JAR to `modLocalRuntime` and verify the transformed artifact |
+| Optional client works but all-in-one runtime misses a module/class | Remapped configurations are non-transitive | Enumerate every required mod module or Java library explicitly |
+| Generated POM lists JEI, CraftTweaker, Mantle or TConstruct | Test runtime leaked into a published configuration | Keep opt-in dependencies on isolated `localRuntime`/`modLocalRuntime` and fail the artifact audit |
+| Base installation throws `NoClassDefFoundError` for an optional API | Common registration linked integration classes eagerly | Gate integration entry points by loader presence and keep optional classes behind their mod event boundary |
+
+### 5. Good, base and bad cases
+
+- Good: the enabled runtime classpath contains a transformed optional-mod JAR,
+  standalone and combined load matrices pass, and the generated POM contains no
+  optional development dependency.
+- Base: all optional properties are false; compile-only API references compile,
+  while base client and dedicated server start without optional classes.
+- Bad: `runtimeOnly("...:CraftTweaker-...jar")` starts with production SRG
+  bytecode and fails after Mixin refmap remapping cannot repair method bodies.
+
+### 6. Tests required
+
+- Inspect the enabled runtime classpath and prove production mod JARs resolve
+  through Gradle's transformed cache; use bytecode inspection when a mapping
+  failure is suspected.
+- Run each optional integration alone on its required physical sides, then run
+  the complete combination on client and dedicated server.
+- For stateful integrations, save, stop and restart the same world with the same
+  mod set; scan logs for mapping, classloading, registry and Mixin failures.
+- Generate the Maven POM with every optional runtime enabled and assert that it
+  contains no optional development dependency.
+
+### 7. Wrong vs correct
+
+```groovy
+// Wrong: a production-obfuscated mod JAR bypasses LegacyForge remapping.
+runtimeOnly("com.example:optional-forge-mod:1.0.0")
+
+// Correct: the optional mod is remapped and remains local to development.
+modCompileOnly("com.example:optional-forge-mod:1.0.0")
+if (optionalRuntimeEnabled) {
+    modLocalRuntime("com.example:optional-forge-mod:1.0.0")
+}
+```
+
 ## Test requirements
 
 Every large migration task must pass the applicable gates before its single

@@ -24,7 +24,11 @@ final class ModItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        ModItems.creativeItems().stream().map(RegistryObject::get).forEach(this::basicItem);
+        ModItems.creativeItems().stream()
+                .filter(holder -> holder != ModItems.GUIDE_BOOK)
+                .map(RegistryObject::get)
+                .forEach(this::basicItem);
+        withExistingParent(ModItems.GUIDE_BOOK.getId().getPath(), mcLoc("item/book"));
         basicItem(ModMachineItems.LOW_BATTERY.get());
         withExistingParent(ModMachineItems.INSERTER_SPEED_UPGRADE.getId().getPath(), mcLoc("item/generated"))
                 .texture("layer0", mcLoc("item/sugar"));

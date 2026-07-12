@@ -15,5 +15,6 @@ public final class ComputerBlockEntity extends ProgrammableBlockEntity {
 
     public static void serverTick(Level level, BlockPos position, BlockState state, ComputerBlockEntity computer) {
         computer.tickComputer();
+        computer.finishServerTick();
     }
 }

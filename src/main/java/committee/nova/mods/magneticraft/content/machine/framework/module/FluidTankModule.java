@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleH
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -23,11 +24,17 @@ import java.util.function.Predicate;
  * Persisted and lifecycle-safe directional fluid capability module.
  */
 public final class FluidTankModule implements MachineModule {
+    private static final String CLIENT_SNAPSHOT_VERSION_TAG = "client_snapshot_version";
+    private static final int CLIENT_SNAPSHOT_VERSION = 1;
+
     private final ResourceLocation id;
+    private final MachineModuleHost host;
     private final Function<Direction, TankAccess> accessBySide;
     private final FluidTank tank;
     private final Map<Direction, LazyOptional<IFluidHandler>> sidedCapabilities = new EnumMap<>(Direction.class);
     private LazyOptional<IFluidHandler> unsidedCapability = LazyOptional.empty();
+    private CompoundTag lastClientSnapshot;
+    private boolean clientSnapshotDirty = true;
 
     public FluidTankModule(
             ResourceLocation id,
@@ -55,11 +62,12 @@ public final class FluidTankModule implements MachineModule {
             Function<Direction, TankAccess> accessBySide
     ) {
         this.id = Objects.requireNonNull(id);
-        Objects.requireNonNull(host);
+        this.host = Objects.requireNonNull(host);
         this.accessBySide = Objects.requireNonNull(accessBySide);
         this.tank = new FluidTank(capacity, Objects.requireNonNull(validator)) {
             @Override
             protected void onContentsChanged() {
+                clientSnapshotDirty = true;
                 host.markChanged();
             }
         };
@@ -89,6 +97,34 @@ public final class FluidTankModule implements MachineModule {
     @Override
     public void save(CompoundTag tag) {
         tank.writeToNBT(tag);
+    }
+
+    @Override
+    public void loadClientData(CompoundTag tag) {
+        tank.readFromNBT(tag);
+    }
+
+    @Override
+    public void saveClientData(CompoundTag tag) {
+        // Keep an empty tank snapshot present in the owning BE update tag so a
+        // client can clear fluid that was rendered by an earlier snapshot.
+        tag.putInt(CLIENT_SNAPSHOT_VERSION_TAG, CLIENT_SNAPSHOT_VERSION);
+        tank.writeToNBT(tag);
+    }
+
+    @Override
+    public void serverTick() {
+        if (!clientSnapshotDirty
+                || !(host.level() instanceof ServerLevel level)
+                || level.getGameTime() % 4L != 0L) {
+            return;
+        }
+        CompoundTag snapshot = tank.writeToNBT(new CompoundTag());
+        clientSnapshotDirty = false;
+        if (!snapshot.equals(lastClientSnapshot)) {
+            lastClientSnapshot = snapshot.copy();
+            host.requestClientSync();
+        }
     }
 
     @Override

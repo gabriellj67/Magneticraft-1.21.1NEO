@@ -20,6 +20,31 @@ public final class ElectricFurnaceScreen extends AbstractContainerScreen<Electri
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTick);
+        if (mouseX >= leftPos + 14 && mouseX < leftPos + 24
+                && mouseY >= topPos + 18 && mouseY < topPos + 70) {
+            graphics.renderTooltip(
+                    font,
+                    Component.translatable(
+                            "gui.magneticraft.energy.tooltip",
+                            menu.energyStored(),
+                            menu.energyCapacity()
+                    ),
+                    mouseX,
+                    mouseY
+            );
+        } else if (mouseX >= leftPos + 77 && mouseX < leftPos + 111
+                && mouseY >= topPos + 37 && mouseY < topPos + 49) {
+            graphics.renderTooltip(
+                    font,
+                    Component.translatable(
+                            "gui.magneticraft.progress.tooltip",
+                            menu.progress(),
+                            menu.totalProgress()
+                    ),
+                    mouseX,
+                    mouseY
+            );
+        }
         renderTooltip(graphics, mouseX, mouseY);
     }
 

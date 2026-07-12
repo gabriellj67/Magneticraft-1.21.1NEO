@@ -152,6 +152,105 @@ final class ModLanguageProvider extends LanguageProvider {
         for (ComputerOpcode opcode : ComputerOpcode.values()) {
             add(opcode.descriptionTranslationKey(), chinese ? opcodeChinese(opcode) : opcodeEnglish(opcode));
         }
+        addClientTranslations();
+    }
+
+    private void addClientTranslations() {
+        add(ModItems.GUIDE_BOOK.get(), chinese ? "磁场工艺指南" : "Magneticraft Guide");
+        add("container.magneticraft.computer", chinese ? "可编程计算机" : "Programmable Computer");
+        add("container.magneticraft.mining_robot", chinese ? "采矿机器人" : "Mining Robot");
+        add("gui.magneticraft.state.running", chinese ? "运行中" : "Running");
+        add("gui.magneticraft.state.stopped", chinese ? "已停止" : "Stopped");
+        add("gui.magneticraft.energy.tooltip", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
+        add("gui.magneticraft.progress.tooltip", chinese ? "进度：%s / %s" : "Progress: %s / %s");
+        add("gui.magneticraft.items.tooltip", chinese ? "物品：%s / %s" : "Items: %s / %s");
+        add("gui.magneticraft.fluid.tooltip", chinese ? "流体：%s / %s mB" : "Fluid: %s / %s mB");
+        add("gui.magneticraft.temperature_kelvin", chinese ? "%s K" : "%s K");
+        add("gui.magneticraft.temperature_celsius", chinese ? "%s °C" : "%s °C");
+        add("gui.magneticraft.voltage", chinese ? "%s V" : "%s V");
+        add("gui.magneticraft.inserter.whitelist", chinese ? "白" : "W");
+        add("gui.magneticraft.inserter.match_damage", chinese ? "损" : "D");
+        add("gui.magneticraft.inserter.match_tags", chinese ? "标" : "T");
+        add("gui.magneticraft.inserter.match_nbt", chinese ? "NBT" : "NBT");
+        add("gui.magneticraft.inserter.allow_stacking", chinese ? "组" : "S");
+        add("gui.magneticraft.inserter.reverse", chinese ? "反" : "R");
+        add("gui.magneticraft.shelving_summary", chinese ? "箱体：%s，可用槽位：%s" : "Chests: %s, available slots: %s");
+        add("gui.magneticraft.programmable.instruction", chinese ? "指令 %s" : "Instruction %s");
+        add("gui.magneticraft.programmable.upload", chinese ? "上传" : "Upload");
+        add("gui.magneticraft.programmable.page", chinese ? "页 %s/%s" : "Page %s/%s");
+        add("gui.magneticraft.programmable.counters", chinese ? "PC %s · 红石 %s" : "PC %s · RS %s");
+        add("gui.magneticraft.programmable.invalid_program", chinese ? "程序无效：%s" : "Invalid program: %s");
+        add("gui.magneticraft.programmable.fault.invalid_program_counter", chinese ? "故障：指令地址无效" : "Fault: invalid program counter");
+        add("gui.magneticraft.programmable.fault.invalid_register", chinese ? "故障：寄存器无效" : "Fault: invalid register");
+        add("gui.magneticraft.programmable.fault.invalid_memory_address", chinese ? "故障：内存地址无效" : "Fault: invalid memory address");
+        add("gui.magneticraft.programmable.fault.division_by_zero", chinese ? "故障：除数为零" : "Fault: division by zero");
+        add("gui.magneticraft.programmable.fault.unsupported_device_instruction", chinese ? "故障：设备指令不支持" : "Fault: unsupported device instruction");
+        add("gui.magneticraft.programmable.fault.invalid_snapshot", chinese ? "故障：状态快照无效" : "Fault: invalid snapshot");
+        add("gui.magneticraft.guide.title", chinese ? "磁场工艺指南" : "Magneticraft Guide");
+        add("gui.magneticraft.guide.search", chinese ? "搜索" : "Search");
+        add("gui.magneticraft.guide.no_results", chinese ? "没有匹配内容" : "No matching entries");
+        add("gui.magneticraft.guide.mode.structures", chinese ? "多方块结构" : "Multiblocks");
+        add("gui.magneticraft.guide.mode.opcodes", chinese ? "计算机指令" : "Computer Opcodes");
+        add("gui.magneticraft.guide.layer", chinese ? "层 %s/%s" : "Layer %s/%s");
+        add("gui.magneticraft.guide.yes", chinese ? "是" : "yes");
+        add("gui.magneticraft.guide.no", chinese ? "否" : "no");
+        add("gui.magneticraft.guide.none", chinese ? "无" : "none");
+        add("gui.magneticraft.guide.mirroring", chinese ? "支持镜像：%s" : "Mirroring: %s");
+        add("gui.magneticraft.guide.ports.items", chinese ? "物品槽：%s，大宗容量：%s" : "Item slots: %s, bulk: %s");
+        add("gui.magneticraft.guide.ports.energy", chinese ? "电力：%s，热力：%s" : "Electricity: %s, heat: %s");
+        add("gui.magneticraft.guide.ports.tanks", chinese ? "流体罐容量：%s mB" : "Tank capacities: %s mB");
+        add("gui.magneticraft.guide.opcode_signature", chinese ? "编号 %s · 操作数 %s" : "Code %s · Operands %s");
+        add("gui.magneticraft.guide.category.storage", chinese ? "存储" : "Storage");
+        add("gui.magneticraft.guide.category.processing", chinese ? "加工" : "Processing");
+        add("gui.magneticraft.guide.category.oil", chinese ? "石油" : "Oil");
+        add("gui.magneticraft.guide.category.energy", chinese ? "能源" : "Energy");
+        add("jei.magneticraft.advanced_processing", chinese ? "高级加工" : "Advanced Processing");
+        add("jei.magneticraft.chance", chinese ? "概率：%s%%" : "Chance: %s%%");
+        add("jei.magneticraft.conductivity", chinese ? "导热系数：%s" : "Conductivity: %s");
+        add("jei.magneticraft.duration", chinese ? "耗时：%s 刻" : "Duration: %s ticks");
+        add("jei.magneticraft.energy_per_tick", chinese ? "能耗：%s FE/t" : "Energy: %s FE/t");
+        add("jei.magneticraft.machine", chinese ? "机器：%s" : "Machine: %s");
+        add("jei.magneticraft.power", chinese ? "功率：%s FE/t" : "Power: %s FE/t");
+        add("jei.magneticraft.press_mode", chinese ? "压力模式：%s" : "Press mode: %s");
+        add("jei.magneticraft.required_level", chinese ? "所需等级：%s" : "Required level: %s");
+        add("jei.magneticraft.temperature", chinese ? "温度：%s K" : "Temperature: %s K");
+        add("jei.magneticraft.total_energy", chinese ? "能量：%s FE/mB" : "Energy: %s FE/mB");
+        add("material.magneticraft.tungsten", chinese ? "钨" : "Tungsten");
+        add(
+                "material.magneticraft.tungsten.flavor",
+                chinese ? "致密、坚韧，经久耐用。" : "Dense, stubborn, and built to last."
+        );
+        add(
+                "material.magneticraft.tungsten.encyclopedia",
+                chinese
+                        ? "提供高耐久与伤害，但会降低挖掘和攻击速度。"
+                        : "Grants high durability and damage at the cost of mining and attack speed."
+        );
+        add(
+                "material.magneticraft.tungsten.ranged",
+                chinese
+                        ? "提供高耐久与弹射物威力，但会降低拉弓速度和精准度。"
+                        : "Grants high durability and projectile power at the cost of draw speed and accuracy."
+        );
+        addGuideRule("ignore", "忽略", "Ignored");
+        addGuideRule("air", "空气", "Air");
+        addGuideRule("controller", "控制器", "Controller");
+        addGuideRule("base", "多方块基座", "Multiblock Base");
+        addGuideRule("grate", "格栅", "Grate");
+        addGuideRule("corrugated_iron", "波纹铁板", "Corrugated Iron");
+        addGuideRule("copper_coil", "铜线圈", "Copper Coil");
+        addGuideRule("bricks", "砖块", "Bricks");
+        addGuideRule("small_tank", "小型储罐", "Small Tank");
+        addGuideRule("striped", "警示条纹部件", "Striped Part");
+        addGuideRule("electric", "电气部件", "Electric Part");
+        addGuideRule("column_x", "X 轴立柱", "X-axis Column");
+        addGuideRule("column_y", "Y 轴立柱", "Y-axis Column");
+        addGuideRule("column_z", "Z 轴立柱", "Z-axis Column");
+        addGuideRule("unknown", "未知部件", "Unknown Part");
+    }
+
+    private void addGuideRule(String id, String chineseName, String englishName) {
+        add("gui.magneticraft.guide.rule." + id, chinese ? chineseName : englishName);
     }
 
     private static String opcodeEnglish(ComputerOpcode opcode) {

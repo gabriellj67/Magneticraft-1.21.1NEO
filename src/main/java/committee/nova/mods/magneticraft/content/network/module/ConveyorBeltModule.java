@@ -45,6 +45,7 @@ public final class ConveyorBeltModule implements MachineModule {
     private LazyOptional<IItemHandler> capability = LazyOptional.empty();
     private Lane nextLane = Lane.LEFT;
     private RedstoneControlMode redstoneMode = RedstoneControlMode.IGNORED;
+    private long clientSnapshotTick = Long.MIN_VALUE;
 
     public ConveyorBeltModule(ResourceLocation id, MachineModuleHost host, Supplier<Direction> facing) {
         this.id = Objects.requireNonNull(id);
@@ -66,6 +67,14 @@ public final class ConveyorBeltModule implements MachineModule {
 
     public RedstoneControlMode redstoneMode() {
         return redstoneMode;
+    }
+
+    public long clientSnapshotTick() {
+        return clientSnapshotTick;
+    }
+
+    public boolean clientMovementEnabled() {
+        return automationEnabled();
     }
 
     public void cycleRedstoneMode() {
@@ -179,6 +188,7 @@ public final class ConveyorBeltModule implements MachineModule {
     @Override
     public void loadClientData(CompoundTag tag) {
         load(tag);
+        clientSnapshotTick = host.level() == null ? Long.MIN_VALUE : host.level().getGameTime();
     }
 
     @Override

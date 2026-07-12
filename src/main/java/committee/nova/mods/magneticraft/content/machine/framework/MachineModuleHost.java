@@ -12,6 +12,15 @@ public interface MachineModuleHost {
 
     void markChangedAndSync();
 
+    /**
+     * Requests one coalesced update after all modules have ticked. Modules with
+     * parallel state (for example several tanks) should prefer this over sending
+     * one complete block-entity packet each.
+     */
+    default void requestClientSync() {
+        markChangedAndSync();
+    }
+
     @Nullable Level level();
 
     BlockPos position();

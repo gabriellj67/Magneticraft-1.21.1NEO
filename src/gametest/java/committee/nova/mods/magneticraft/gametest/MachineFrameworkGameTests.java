@@ -138,6 +138,15 @@ public final class MachineFrameworkGameTests {
         restoredFluid.load(fluidTag);
         helper.assertTrue(restoredFluid.tank().getFluidAmount() == 750, "Fluid module did not survive reload");
 
+        FluidTankModule emptyFluid = new FluidTankModule(
+                Magneticraft.id("empty_fluid"), host, 1_000, stack -> true, side -> true
+        );
+        CompoundTag emptyClientSnapshot = new CompoundTag();
+        emptyFluid.saveClientData(emptyClientSnapshot);
+        helper.assertFalse(emptyClientSnapshot.isEmpty(), "Empty fluid client snapshot was omitted");
+        restoredFluid.loadClientData(emptyClientSnapshot);
+        helper.assertTrue(restoredFluid.tank().isEmpty(), "Empty client snapshot left stale rendered fluid");
+
         GhostFilterModule filters = new GhostFilterModule(Magneticraft.id("filters"), host, 1);
         filters.setFilter(0, new ItemStack(Items.IRON_INGOT, 32));
         CompoundTag filterTag = new CompoundTag();

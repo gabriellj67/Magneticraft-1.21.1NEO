@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.content.machine.singleblock;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractMachineMenu;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.GhostFilterMenuAccess;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.GhostSlot;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
 import committee.nova.mods.magneticraft.content.machine.framework.module.GhostFilterModule;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMenus;
@@ -73,7 +74,9 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
         access = resolved == null
                 ? ContainerLevelAccess.NULL
                 : ContainerLevelAccess.create(playerInventory.player.level(), position);
-        data = resolved == null ? new SimpleContainerData(SingleBlockMachineBlockEntity.MENU_DATA_COUNT) : resolved.menuData();
+        data = knownMachine == null
+                ? new SimpleContainerData(SingleBlockMachineBlockEntity.MENU_DATA_COUNT)
+                : knownMachine.menuData();
         addDataSlots(data);
 
         IItemHandler inventory = resolved == null || resolved.inventory() == null
@@ -171,51 +174,51 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
     }
 
     public int energyStored() {
-        return data.get(0);
+        return Int32ContainerData.read(data, 0);
     }
 
     public int energyCapacity() {
-        return data.get(1);
+        return Int32ContainerData.read(data, 1);
     }
 
     public int progress() {
-        return data.get(2);
+        return Int32ContainerData.read(data, 2);
     }
 
     public int totalProgress() {
-        return data.get(3);
+        return Int32ContainerData.read(data, 3);
     }
 
     public double temperatureKelvin() {
-        return data.get(4) / 10.0D;
+        return Int32ContainerData.read(data, 4) / 10.0D;
     }
 
     public int primaryFluid() {
-        return data.get(5);
+        return Int32ContainerData.read(data, 5);
     }
 
     public int primaryCapacity() {
-        return data.get(6);
+        return Int32ContainerData.read(data, 6);
     }
 
     public int secondaryFluid() {
-        return data.get(7);
+        return Int32ContainerData.read(data, 7);
     }
 
     public int secondaryCapacity() {
-        return data.get(8);
+        return Int32ContainerData.read(data, 8);
     }
 
     public int flags() {
-        return data.get(9);
+        return Int32ContainerData.read(data, 9);
     }
 
     public double voltage() {
-        return data.get(10) / 10.0D;
+        return Int32ContainerData.read(data, 10) / 10.0D;
     }
 
     public int thermopileFlux() {
-        return data.get(11);
+        return Int32ContainerData.read(data, 11);
     }
 
     @Override

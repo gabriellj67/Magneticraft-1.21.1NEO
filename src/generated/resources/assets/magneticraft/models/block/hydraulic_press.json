@@ -1,8 +1,9 @@
 {
-  "parent": "minecraft:block/orientable",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/hydraulic_press_base.obj",
+  "mtl_override": "magneticraft:models/block/hydraulic_press_base.mtl",
   "textures": {
-    "front": "minecraft:block/polished_andesite",
-    "side": "minecraft:block/iron_block",
-    "top": "minecraft:block/iron_block"
+    "particle": "magneticraft:block/hydraulic_press"
   }
 }

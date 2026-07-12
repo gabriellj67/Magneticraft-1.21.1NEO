@@ -26,6 +26,8 @@ import java.util.Objects;
  * One sluice input and independently rolled outputs.
  */
 public final class SluiceRecipe implements Recipe<SimpleContainer> {
+    public static final int MAX_OUTPUTS = 10;
+
     private final ResourceLocation id;
     private final Ingredient input;
     private final List<ChanceOutput> outputs;
@@ -33,9 +35,7 @@ public final class SluiceRecipe implements Recipe<SimpleContainer> {
     public SluiceRecipe(ResourceLocation id, Ingredient input, List<ChanceOutput> outputs) {
         this.id = Objects.requireNonNull(id);
         this.input = Objects.requireNonNull(input);
-        if (outputs.isEmpty()) {
-            throw new IllegalArgumentException("A sluice recipe needs at least one output roll");
-        }
+        validateOutputCount(outputs.size());
         this.outputs = outputs.stream().map(ChanceOutput::copy).toList();
     }
 
@@ -86,6 +86,14 @@ public final class SluiceRecipe implements Recipe<SimpleContainer> {
         return outputs.stream().map(ChanceOutput::copy).toList();
     }
 
+    static void validateOutputCount(int count) {
+        if (count < 1 || count > MAX_OUTPUTS) {
+            throw new IllegalArgumentException(
+                    "A sluice recipe needs between 1 and " + MAX_OUTPUTS + " output rolls: " + count
+            );
+        }
+    }
+
     public record ChanceOutput(ItemStack stack, float chance) {
         public ChanceOutput {
             stack = stack.copy();
@@ -104,6 +112,7 @@ public final class SluiceRecipe implements Recipe<SimpleContainer> {
         public SluiceRecipe fromJson(ResourceLocation id, JsonObject json) {
             Ingredient input = Ingredient.fromJson(json.get("ingredient"));
             JsonArray array = GsonHelper.getAsJsonArray(json, "results");
+            validateOutputCount(array.size());
             List<ChanceOutput> outputs = new ArrayList<>(array.size());
             for (JsonElement element : array) {
                 JsonObject output = GsonHelper.convertToJsonObject(element, "result");
@@ -118,6 +127,7 @@ public final class SluiceRecipe implements Recipe<SimpleContainer> {
         public SluiceRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
             Ingredient input = Ingredient.fromNetwork(buffer);
             int size = buffer.readVarInt();
+            validateOutputCount(size);
             List<ChanceOutput> outputs = new ArrayList<>(size);
             for (int index = 0; index < size; index++) {
                 outputs.add(new ChanceOutput(buffer.readItem(), buffer.readFloat()));

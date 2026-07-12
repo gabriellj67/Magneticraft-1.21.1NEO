@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.machine.battery;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
 import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 public final class BatteryBlockEntity extends MachineBlockEntity implements MenuProvider {
     public static final int CAPACITY = 1_000_000;
     public static final int ITEM_TRANSFER_RATE = 500;
+    public static final int MENU_DATA_COUNT = 4;
     private static final int NETWORK_TRANSFER_RATE = 640;
 
     private final ItemInventoryModule inventory;
@@ -71,28 +73,7 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
                 NETWORK_TRANSFER_RATE,
                 true
         ));
-        data = new ContainerData() {
-            @Override
-            public int get(int index) {
-                return switch (index) {
-                    case 0 -> energy.getEnergyStored();
-                    case 1 -> energy.getMaxEnergyStored();
-                    default -> 0;
-                };
-            }
-
-            @Override
-            public void set(int index, int value) {
-                if (index == 0) {
-                    energy.setEnergyStored(value);
-                }
-            }
-
-            @Override
-            public int getCount() {
-                return 2;
-            }
-        };
+        data = Int32ContainerData.readOnly(energy::getEnergyStored, energy::getMaxEnergyStored);
     }
 
     public static void serverTick(Level level, BlockPos position, BlockState state, BatteryBlockEntity battery) {
@@ -102,6 +83,7 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
         if (charged > 0 || discharged > 0) {
             battery.markChanged();
         }
+        battery.finishServerTick();
     }
 
     public ItemInventoryModule inventory() {

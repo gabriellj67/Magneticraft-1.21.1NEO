@@ -1,5 +1,6 @@
 package committee.nova.mods.magneticraft.data;
 
+import committee.nova.mods.magneticraft.integration.tconstruct.TinkersConstructDataProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -44,6 +45,10 @@ public final class ModDataGenerators {
         generator.addProvider(
                 event.includeClient(),
                 new AdvancedGuideDataProvider(output, AdvancedGuideDataProvider.computerOpcodes())
+        );
+        generator.addProvider(
+                event.includeClient() || event.includeServer(),
+                new TinkersConstructDataProvider(output)
         );
 
         ModBlockTagsProvider blockTags = new ModBlockTagsProvider(output, lookupProvider, existingFileHelper);

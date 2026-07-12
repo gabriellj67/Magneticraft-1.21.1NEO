@@ -20,8 +20,12 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class MachineBlockEntity extends BlockEntity implements MachineModuleHost {
     public static final String MODULES_TAG = "modules";
+    private static final int CLIENT_STATE_SYNC_INTERVAL = 4;
 
     private final MachineModuleContainer modules = new MachineModuleContainer();
+    private int lastClientStateHash;
+    private boolean hasClientStateHash;
+    private boolean clientSyncRequested;
 
     protected MachineBlockEntity(BlockEntityType<?> type, BlockPos position, BlockState state) {
         super(type, position, state);
@@ -33,6 +37,14 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
 
     protected final void tickModules() {
         modules.values().forEach(MachineModule::serverTick);
+    }
+
+    /** Flushes module and renderer snapshot requests as one complete BE packet. */
+    protected final void finishServerTick() {
+        if (clientSyncRequested) {
+            clientSyncRequested = false;
+            markChangedAndSync();
+        }
     }
 
     @Override
@@ -91,6 +103,23 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
     protected void loadClientData(CompoundTag tag) {
     }
 
+    /**
+     * Sends changing visual state at a bounded cadence. Call after the machine
+     * logic tick with a hash containing only fields consumed by world renderers.
+     */
+    protected final void syncClientState(int stateHash) {
+        Level currentLevel = getLevel();
+        if (currentLevel == null || currentLevel.isClientSide
+                || currentLevel.getGameTime() % CLIENT_STATE_SYNC_INTERVAL != 0L) {
+            return;
+        }
+        if (!hasClientStateHash || lastClientStateHash != stateHash) {
+            lastClientStateHash = stateHash;
+            hasClientStateHash = true;
+            requestClientSync();
+        }
+    }
+
     @Nullable
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
@@ -146,6 +175,12 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
                 && currentLevel.hasChunk(worldPosition.getX() >> 4, worldPosition.getZ() >> 4)) {
             currentLevel.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
+    }
+
+    @Override
+    public final void requestClientSync() {
+        setChanged();
+        clientSyncRequested = true;
     }
 
     @Nullable
