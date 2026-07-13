@@ -26,6 +26,7 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
     public static final GuideRepository INSTANCE = new GuideRepository();
     private static final int SUPPORTED_SCHEMA = 1;
     private static final ResourceLocation OPCODE_GUIDE = Magneticraft.id("guide/computer_opcodes.json");
+    private static final ResourceLocation PORTABLE_ITEM_GUIDE = Magneticraft.id("guide/items/portable_electric.json");
 
     private volatile PreparedGuideData data = PreparedGuideData.EMPTY;
 
@@ -38,6 +39,10 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
 
     public List<OpcodeGuide> opcodes() {
         return data.opcodes();
+    }
+
+    public List<ItemGuide> items() {
+        return data.items();
     }
 
     @Override
@@ -54,7 +59,10 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         List<OpcodeGuide> opcodes = resourceManager.getResource(OPCODE_GUIDE)
                 .map(this::readOpcodes)
                 .orElseGet(List::of);
-        return new PreparedGuideData(multiblocks, opcodes);
+        List<ItemGuide> items = resourceManager.getResource(PORTABLE_ITEM_GUIDE)
+                .map(this::readItems)
+                .orElseGet(List::of);
+        return new PreparedGuideData(multiblocks, opcodes, items);
     }
 
     @Override
@@ -114,6 +122,33 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
             Magneticraft.LOGGER.warn("Skipping invalid opcode guide {}", OPCODE_GUIDE, exception);
             return List.of();
         }
+    }
+
+    private List<ItemGuide> readItems(Resource resource) {
+        try (Reader reader = resource.openAsReader()) {
+            return parseItems(PORTABLE_ITEM_GUIDE, GsonHelper.parse(reader));
+        } catch (IOException | RuntimeException exception) {
+            Magneticraft.LOGGER.warn("Skipping invalid portable-item guide {}", PORTABLE_ITEM_GUIDE, exception);
+            return List.of();
+        }
+    }
+
+    static List<ItemGuide> parseItems(ResourceLocation file, JsonObject root) {
+        requireSchema(file, root);
+        List<ItemGuide> items = new ArrayList<>();
+        for (JsonElement element : GsonHelper.getAsJsonArray(root, "items")) {
+            JsonObject item = element.getAsJsonObject();
+            items.add(new ItemGuide(
+                    parseId(file, GsonHelper.getAsString(item, "id")),
+                    GsonHelper.getAsString(item, "translation_key"),
+                    GsonHelper.getAsString(item, "description"),
+                    nonNegativeInt(item, "capacity_fe"),
+                    nonNegativeInt(item, "break_cost_fe"),
+                    nonNegativeInt(item, "attack_cost_fe"),
+                    nonNegativeInt(item, "use_cost_fe")
+            ));
+        }
+        return List.copyOf(items);
     }
 
     private static List<List<String>> readLayers(ResourceLocation file, JsonArray layerElements) {
@@ -228,12 +263,34 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
     public record OpcodeGuide(String id, int code, int operandCount, String descriptionKey) {
     }
 
-    protected record PreparedGuideData(List<MultiblockGuide> multiblocks, List<OpcodeGuide> opcodes) {
-        private static final PreparedGuideData EMPTY = new PreparedGuideData(List.of(), List.of());
+    public record ItemGuide(
+            ResourceLocation id,
+            String translationKey,
+            String descriptionKey,
+            int capacityFe,
+            int breakCostFe,
+            int attackCostFe,
+            int useCostFe
+    ) {
+        public ItemGuide {
+            capacityFe = Math.max(0, capacityFe);
+            breakCostFe = Math.max(0, breakCostFe);
+            attackCostFe = Math.max(0, attackCostFe);
+            useCostFe = Math.max(0, useCostFe);
+        }
+    }
+
+    protected record PreparedGuideData(
+            List<MultiblockGuide> multiblocks,
+            List<OpcodeGuide> opcodes,
+            List<ItemGuide> items
+    ) {
+        private static final PreparedGuideData EMPTY = new PreparedGuideData(List.of(), List.of(), List.of());
 
         protected PreparedGuideData {
             multiblocks = List.copyOf(multiblocks);
             opcodes = List.copyOf(opcodes);
+            items = List.copyOf(items);
         }
     }
 }

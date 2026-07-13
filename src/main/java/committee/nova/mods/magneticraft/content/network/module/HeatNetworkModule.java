@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.network.module;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.heat.HeatLink;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
@@ -10,12 +11,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
  * Persisted lossless thermal node.
  */
-public final class HeatNetworkModule extends AbstractPhysicalNetworkModule {
+public final class HeatNetworkModule extends AbstractPhysicalNetworkModule implements ThermalDiagnosticSource {
     private static final String INTERNAL_ENERGY_TAG = "internal_energy_joules";
 
     private final HeatNode node;
@@ -40,6 +42,13 @@ public final class HeatNetworkModule extends AbstractPhysicalNetworkModule {
 
     public HeatNode node() {
         return node;
+    }
+
+    @Override
+    public Optional<ThermalReading> thermalReading(Direction side) {
+        return isSideEnabled(side)
+                ? Optional.of(new ThermalReading(node.temperatureKelvin()))
+                : Optional.empty();
     }
 
     @Override

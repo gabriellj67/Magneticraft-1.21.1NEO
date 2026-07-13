@@ -1,5 +1,8 @@
 package committee.nova.mods.magneticraft.content.machine.framework;
 
+import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -15,10 +18,12 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 /**
  * Base block entity that owns module identity, persistence and capability lifecycle.
  */
-public abstract class MachineBlockEntity extends BlockEntity implements MachineModuleHost {
+public abstract class MachineBlockEntity extends BlockEntity implements MachineModuleHost, DiagnosticHost {
     public static final String MODULES_TAG = "modules";
     private static final int CLIENT_STATE_SYNC_INTERVAL = 4;
 
@@ -37,6 +42,32 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
 
     protected final void tickModules() {
         modules.values().forEach(MachineModule::serverTick);
+    }
+
+    @Override
+    public final Optional<ElectricalDiagnosticSource.ElectricalReading> electricalReading(Direction side) {
+        for (MachineModule module : modules.values()) {
+            if (module instanceof ElectricalDiagnosticSource source) {
+                Optional<ElectricalDiagnosticSource.ElectricalReading> reading = source.electricalReading(side);
+                if (reading.isPresent()) {
+                    return reading;
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public final Optional<ThermalDiagnosticSource.ThermalReading> thermalReading(Direction side) {
+        for (MachineModule module : modules.values()) {
+            if (module instanceof ThermalDiagnosticSource source) {
+                Optional<ThermalDiagnosticSource.ThermalReading> reading = source.thermalReading(side);
+                if (reading.isPresent()) {
+                    return reading;
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     /** Flushes module and renderer snapshot requests as one complete BE packet. */

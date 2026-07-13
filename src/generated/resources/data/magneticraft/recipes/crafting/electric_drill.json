@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": {
+      "tag": "forge:gems/diamond"
+    },
+    "B": {
+      "tag": "forge:ingots/copper"
+    },
+    "C": {
+      "item": "magneticraft:motor"
+    },
+    "D": {
+      "tag": "forge:ingots/iron"
+    },
+    "E": {
+      "item": "magneticraft:battery_item_low"
+    }
+  },
+  "pattern": [
+    "AAB",
+    "ACD",
+    "BDE"
+  ],
+  "result": {
+    "item": "magneticraft:electric_drill"
+  },
+  "show_notification": true
+}

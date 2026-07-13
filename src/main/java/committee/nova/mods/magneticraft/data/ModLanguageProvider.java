@@ -46,6 +46,12 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModMachineBlocks.GRATE.get(), chinese ? "格栅" : "Grate");
         add(ModMachineBlocks.ELECTRIC_FURNACE.get(), chinese ? "电炉" : "Electric Furnace");
         add(ModMachineItems.LOW_BATTERY.get(), chinese ? "小型电池" : "Low-Capacity Battery");
+        add(ModMachineItems.MEDIUM_BATTERY.get(), chinese ? "中型电池" : "Medium-Capacity Battery");
+        add(ModMachineItems.ELECTRIC_DRILL.get(), chinese ? "电钻" : "Electric Drill");
+        add(ModMachineItems.ELECTRIC_CHAINSAW.get(), chinese ? "电锯" : "Electric Chainsaw");
+        add(ModMachineItems.ELECTRIC_PISTON.get(), chinese ? "电动活塞" : "Electric Piston");
+        add(ModMachineItems.VOLTMETER.get(), chinese ? "电压表" : "Voltmeter");
+        add(ModMachineItems.THERMOMETER.get(), chinese ? "温度计" : "Thermometer");
         add(ModMachineItems.INSERTER_SPEED_UPGRADE.get(), chinese ? "机械臂速度升级" : "Inserter Speed Upgrade");
         add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂整组升级" : "Inserter Stack Upgrade");
         add("container.magneticraft.battery", chinese ? "电池" : "Battery");
@@ -80,6 +86,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.fluid_side_mode.passive", chinese ? "被动输入" : "Passive input");
         add("message.magneticraft.fluid_side_mode.active", chinese ? "主动输出" : "Active output");
         add("message.magneticraft.fluid_side_mode.disabled", chinese ? "禁用" : "Disabled");
+        add("message.magneticraft.voltmeter", chinese ? "%s V · %s A · %s W" : "%s V · %s A · %s W");
+        add("message.magneticraft.thermometer", chinese ? "%s K" : "%s K");
+        add("tooltip.magneticraft.energy", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
 
         ModItems.materials().forEach((form, metals) -> metals.forEach((metal, holder) ->
                 add(holder.get(), chinese ? form.chineseName(metal) : form.englishName(metal))
@@ -191,6 +200,32 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.no_results", chinese ? "没有匹配内容" : "No matching entries");
         add("gui.magneticraft.guide.mode.structures", chinese ? "多方块结构" : "Multiblocks");
         add("gui.magneticraft.guide.mode.opcodes", chinese ? "计算机指令" : "Computer Opcodes");
+        add("gui.magneticraft.guide.mode.items", chinese ? "便携设备" : "Portable Equipment");
+        add("gui.magneticraft.guide.capacity", chinese ? "容量：%s FE" : "Capacity: %s FE");
+        add("gui.magneticraft.guide.break_cost", chinese ? "破坏耗能：%s FE" : "Block cost: %s FE");
+        add("gui.magneticraft.guide.attack_cost", chinese ? "攻击耗能：%s FE" : "Attack cost: %s FE");
+        add("gui.magneticraft.guide.use_cost", chinese ? "使用耗能：%s FE" : "Use cost: %s FE");
+        add("guide.magneticraft.item.battery_item_low.description", chinese
+                ? "便携式 250 kFE 电池，可在电池方块中充放电。"
+                : "A portable 250 kFE cell that charges and discharges in the battery block.");
+        add("guide.magneticraft.item.battery_item_medium.description", chinese
+                ? "容量为小型电池十倍的 2.5 MFE 便携电池。"
+                : "A 2.5 MFE portable cell with ten times the low battery's capacity.");
+        add("guide.magneticraft.item.electric_drill.description", chinese
+                ? "以钻石级采掘能力高速开采镐类与铲类方块；电量不足时退化为徒手速度。"
+                : "Mines pickaxe and shovel blocks at diamond tier; without enough energy it falls back to hand speed.");
+        add("guide.magneticraft.item.electric_chainsaw.description", chinese
+                ? "高速切割木材、树叶、藤蔓、植物、仙人掌与蜘蛛网。"
+                : "Rapidly cuts wood, leaves, vines, plants, cactus, and cobwebs.");
+        add("guide.magneticraft.item.electric_piston.description", chinese
+                ? "命中六格内方块后反向推动使用者，也可将目标实体推离。"
+                : "Pushes its user backward after targeting a block within six blocks, or pushes a targeted entity away.");
+        add("guide.magneticraft.item.voltmeter.description", chinese
+                ? "读取电力节点本刻的电压、带符号净电流与功率。"
+                : "Reads voltage, signed net current, and power from an electrical node for the current tick.");
+        add("guide.magneticraft.item.thermometer.description", chinese
+                ? "读取热力节点的开尔文温度。"
+                : "Reads a thermal node's temperature in kelvin.");
         add("gui.magneticraft.guide.layer", chinese ? "层 %s/%s" : "Layer %s/%s");
         add("gui.magneticraft.guide.yes", chinese ? "是" : "yes");
         add("gui.magneticraft.guide.no", chinese ? "否" : "no");

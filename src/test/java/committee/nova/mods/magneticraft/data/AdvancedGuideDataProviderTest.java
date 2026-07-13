@@ -3,6 +3,9 @@ package committee.nova.mods.magneticraft.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
+import committee.nova.mods.magneticraft.content.item.ElectricPistonItem;
+import committee.nova.mods.magneticraft.content.item.ElectricToolItem;
+import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -125,6 +128,35 @@ class AdvancedGuideDataProviderTest {
             assertEquals(opcode.operandCount(), entry.operandCount());
             assertEquals(opcode.descriptionTranslationKey(), entry.descriptionTranslationKey());
         }
+    }
+
+    @Test
+    void portableItemGuideCapturesTheRestoredEnergyContracts() {
+        JsonArray items = AdvancedGuideDataProvider.portableItemGuide().getAsJsonArray("items");
+
+        assertEquals(7, items.size());
+        assertEquals(7, items.asList().stream()
+                .map(element -> element.getAsJsonObject().get("id").getAsString())
+                .distinct()
+                .count());
+        JsonObject mediumBattery = item(items, "magneticraft:battery_item_medium");
+        assertEquals(MediumBatteryItem.CAPACITY, mediumBattery.get("capacity_fe").getAsInt());
+        JsonObject drill = item(items, "magneticraft:electric_drill");
+        assertEquals(ElectricToolItem.CAPACITY, drill.get("capacity_fe").getAsInt());
+        assertEquals(ElectricToolItem.BLOCK_BREAK_COST, drill.get("break_cost_fe").getAsInt());
+        assertEquals(ElectricToolItem.ATTACK_COST, drill.get("attack_cost_fe").getAsInt());
+        JsonObject piston = item(items, "magneticraft:electric_piston");
+        assertEquals(ElectricPistonItem.PUSH_COST, piston.get("use_cost_fe").getAsInt());
+        JsonObject voltmeter = item(items, "magneticraft:voltmeter");
+        assertEquals(0, voltmeter.get("capacity_fe").getAsInt());
+    }
+
+    private static JsonObject item(JsonArray items, String id) {
+        return items.asList().stream()
+                .map(element -> element.getAsJsonObject())
+                .filter(element -> element.get("id").getAsString().equals(id))
+                .findFirst()
+                .orElseThrow();
     }
 
     private static void assertOffset(JsonObject offset, int x, int y, int z) {

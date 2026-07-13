@@ -30,6 +30,12 @@ final class ModItemModelProvider extends ItemModelProvider {
                 .forEach(this::basicItem);
         withExistingParent(ModItems.GUIDE_BOOK.getId().getPath(), mcLoc("item/book"));
         basicItem(ModMachineItems.LOW_BATTERY.get());
+        basicItem(ModMachineItems.MEDIUM_BATTERY.get());
+        handheld(ModMachineItems.ELECTRIC_DRILL);
+        handheld(ModMachineItems.ELECTRIC_CHAINSAW);
+        handheld(ModMachineItems.ELECTRIC_PISTON);
+        handheld(ModMachineItems.VOLTMETER);
+        handheld(ModMachineItems.THERMOMETER);
         withExistingParent(ModMachineItems.INSERTER_SPEED_UPGRADE.getId().getPath(), mcLoc("item/generated"))
                 .texture("layer0", mcLoc("item/sugar"));
         withExistingParent(ModMachineItems.INSERTER_STACK_UPGRADE.getId().getPath(), mcLoc("item/generated"))
@@ -49,5 +55,11 @@ final class ModItemModelProvider extends ItemModelProvider {
                     .fluid(family.source().get())
                     .end();
         }
+    }
+
+    private void handheld(RegistryObject<? extends net.minecraft.world.item.Item> item) {
+        String path = item.getId().getPath();
+        withExistingParent(path, mcLoc("item/handheld"))
+                .texture("layer0", modLoc("item/" + path));
     }
 }

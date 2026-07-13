@@ -1,0 +1,68 @@
+{
+  "items": [
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 250000,
+      "description": "guide.magneticraft.item.battery_item_low.description",
+      "id": "magneticraft:battery_item_low",
+      "translation_key": "item.magneticraft.battery_item_low",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 2500000,
+      "description": "guide.magneticraft.item.battery_item_medium.description",
+      "id": "magneticraft:battery_item_medium",
+      "translation_key": "item.magneticraft.battery_item_medium",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 2000,
+      "break_cost_fe": 1000,
+      "capacity_fe": 512000,
+      "description": "guide.magneticraft.item.electric_drill.description",
+      "id": "magneticraft:electric_drill",
+      "translation_key": "item.magneticraft.electric_drill",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 2000,
+      "break_cost_fe": 1000,
+      "capacity_fe": 512000,
+      "description": "guide.magneticraft.item.electric_chainsaw.description",
+      "id": "magneticraft:electric_chainsaw",
+      "translation_key": "item.magneticraft.electric_chainsaw",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 2000,
+      "break_cost_fe": 0,
+      "capacity_fe": 512000,
+      "description": "guide.magneticraft.item.electric_piston.description",
+      "id": "magneticraft:electric_piston",
+      "translation_key": "item.magneticraft.electric_piston",
+      "use_cost_fe": 4000
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.voltmeter.description",
+      "id": "magneticraft:voltmeter",
+      "translation_key": "item.magneticraft.voltmeter",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.thermometer.description",
+      "id": "magneticraft:thermometer",
+      "translation_key": "item.magneticraft.thermometer",
+      "use_cost_fe": 0
+    }
+  ],
+  "schema_version": 1
+}

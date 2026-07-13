@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Resource-pack-driven guide with searchable structures and VM opcodes.
+ * Resource-pack-driven guide with searchable structures, portable equipment and VM opcodes.
  */
 public final class GuideScreen extends Screen {
     private static final int SIDEBAR_WIDTH = 150;
@@ -72,10 +72,10 @@ public final class GuideScreen extends Screen {
         graphics.fill(SIDEBAR_WIDTH + 4, 34, width - 4, height - 34, 0xE61B2026);
         graphics.drawString(font, title, 12, 10, 0xFFE6EDF3, false);
         hoveredLegend = Component.empty();
-        if (mode == Mode.STRUCTURES) {
-            renderStructures(graphics, mouseX, mouseY);
-        } else {
-            renderOpcodes(graphics);
+        switch (mode) {
+            case STRUCTURES -> renderStructures(graphics, mouseX, mouseY);
+            case ITEMS -> renderItems(graphics);
+            case OPCODES -> renderOpcodes(graphics);
         }
         updateButtons();
         super.render(graphics, mouseX, mouseY, partialTick);
@@ -203,6 +203,52 @@ public final class GuideScreen extends Screen {
         );
     }
 
+    private void renderItems(GuiGraphics graphics) {
+        List<GuideRepository.ItemGuide> items = filteredItems();
+        if (items.isEmpty()) {
+            graphics.drawString(
+                    font,
+                    Component.translatable("gui.magneticraft.guide.no_results"),
+                    12,
+                    54,
+                    0xFF8B949E,
+                    false
+            );
+            return;
+        }
+        selectedIndex = Math.max(0, Math.min(selectedIndex, items.size() - 1));
+        GuideRepository.ItemGuide selected = items.get(selectedIndex);
+        renderEntryList(graphics, items.stream()
+                .map(item -> Component.translatable(item.translationKey()))
+                .toList());
+
+        int contentLeft = SIDEBAR_WIDTH + 12;
+        int contentWidth = Math.max(80, width - contentLeft - 16);
+        graphics.drawString(
+                font,
+                Component.translatable(selected.translationKey()),
+                contentLeft,
+                44,
+                0xFFE6EDF3,
+                false
+        );
+        Component description = Component.translatable(selected.descriptionKey());
+        graphics.drawWordWrap(font, description, contentLeft, 62, contentWidth, 0xFFB8C0C8);
+        int cursorY = 62 + Math.max(1, font.split(description, contentWidth).size()) * 9 + 8;
+        cursorY = renderItemStat(graphics, "gui.magneticraft.guide.capacity", selected.capacityFe(), contentLeft, cursorY);
+        cursorY = renderItemStat(graphics, "gui.magneticraft.guide.break_cost", selected.breakCostFe(), contentLeft, cursorY);
+        cursorY = renderItemStat(graphics, "gui.magneticraft.guide.attack_cost", selected.attackCostFe(), contentLeft, cursorY);
+        renderItemStat(graphics, "gui.magneticraft.guide.use_cost", selected.useCostFe(), contentLeft, cursorY);
+    }
+
+    private int renderItemStat(GuiGraphics graphics, String translationKey, int value, int x, int y) {
+        if (value <= 0) {
+            return y;
+        }
+        graphics.drawString(font, Component.translatable(translationKey, value), x, y, 0xFF79C0FF, false);
+        return y + 12;
+    }
+
     private void renderEntryList(GuiGraphics graphics, List<? extends Component> entries) {
         int visible = Math.max(1, (height - 90) / 11);
         int first = Math.max(0, Math.min(selectedIndex - visible / 2, entries.size() - visible));
@@ -247,7 +293,8 @@ public final class GuideScreen extends Screen {
     }
 
     private void toggleMode() {
-        mode = mode == Mode.STRUCTURES ? Mode.OPCODES : Mode.STRUCTURES;
+        Mode[] modes = Mode.values();
+        mode = modes[(mode.ordinal() + 1) % modes.length];
         selectedIndex = 0;
         layer = 0;
         modeButton.setMessage(mode.title());
@@ -255,7 +302,11 @@ public final class GuideScreen extends Screen {
     }
 
     private void select(int amount) {
-        int size = mode == Mode.STRUCTURES ? filteredStructures().size() : filteredOpcodes().size();
+        int size = switch (mode) {
+            case STRUCTURES -> filteredStructures().size();
+            case ITEMS -> filteredItems().size();
+            case OPCODES -> filteredOpcodes().size();
+        };
         if (size == 0) {
             return;
         }
@@ -281,7 +332,11 @@ public final class GuideScreen extends Screen {
         nextLayer.visible = structureMode;
         previousLayer.active = structureMode && !filteredStructures().isEmpty();
         nextLayer.active = previousLayer.active;
-        boolean hasEntries = structureMode ? !filteredStructures().isEmpty() : !filteredOpcodes().isEmpty();
+        boolean hasEntries = switch (mode) {
+            case STRUCTURES -> !filteredStructures().isEmpty();
+            case ITEMS -> !filteredItems().isEmpty();
+            case OPCODES -> !filteredOpcodes().isEmpty();
+        };
         previousEntry.active = hasEntries;
         nextEntry.active = hasEntries;
     }
@@ -301,6 +356,16 @@ public final class GuideScreen extends Screen {
                 .filter(opcode -> query.isEmpty()
                         || opcode.id().toLowerCase(Locale.ROOT).contains(query)
                         || Component.translatable(opcode.descriptionKey()).getString().toLowerCase(Locale.ROOT).contains(query))
+                .toList();
+    }
+
+    private List<GuideRepository.ItemGuide> filteredItems() {
+        String query = query();
+        return GuideRepository.INSTANCE.items().stream()
+                .filter(item -> query.isEmpty()
+                        || item.id().toString().toLowerCase(Locale.ROOT).contains(query)
+                        || Component.translatable(item.translationKey()).getString().toLowerCase(Locale.ROOT).contains(query)
+                        || Component.translatable(item.descriptionKey()).getString().toLowerCase(Locale.ROOT).contains(query))
                 .toList();
     }
 
@@ -328,6 +393,7 @@ public final class GuideScreen extends Screen {
 
     private enum Mode {
         STRUCTURES("gui.magneticraft.guide.mode.structures"),
+        ITEMS("gui.magneticraft.guide.mode.items"),
         OPCODES("gui.magneticraft.guide.mode.opcodes");
 
         private final String titleKey;

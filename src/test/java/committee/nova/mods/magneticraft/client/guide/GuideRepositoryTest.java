@@ -16,6 +16,10 @@ class GuideRepositoryTest {
             "magneticraft",
             "guide/multiblocks/test.json"
     );
+    private static final ResourceLocation ITEM_FILE = ResourceLocation.fromNamespaceAndPath(
+            "magneticraft",
+            "guide/items/portable_electric.json"
+    );
 
     @Test
     void parsesMirroringAndPortSummary() {
@@ -51,6 +55,36 @@ class GuideRepositoryTest {
         assertFalse(guide.ports().electricity());
         assertFalse(guide.ports().heat());
         assertTrue(guide.ports().fluidTankCapacitiesMb().isEmpty());
+    }
+
+    @Test
+    void parsesPortableItemContractsAndClampsMalformedNegativeCosts() {
+        JsonObject root = JsonParser.parseString("""
+                {
+                  "schema_version": 1,
+                  "items": [
+                    {
+                      "id": "magneticraft:electric_drill",
+                      "translation_key": "item.magneticraft.electric_drill",
+                      "description": "guide.magneticraft.item.electric_drill.description",
+                      "capacity_fe": 512000,
+                      "break_cost_fe": 1000,
+                      "attack_cost_fe": 2000,
+                      "use_cost_fe": -1
+                    }
+                  ]
+                }
+                """).getAsJsonObject();
+
+        List<GuideRepository.ItemGuide> items = GuideRepository.parseItems(ITEM_FILE, root);
+
+        assertEquals(1, items.size());
+        GuideRepository.ItemGuide drill = items.get(0);
+        assertEquals("magneticraft:electric_drill", drill.id().toString());
+        assertEquals(512_000, drill.capacityFe());
+        assertEquals(1_000, drill.breakCostFe());
+        assertEquals(2_000, drill.attackCostFe());
+        assertEquals(0, drill.useCostFe());
     }
 
     private static JsonObject baseGuide() {

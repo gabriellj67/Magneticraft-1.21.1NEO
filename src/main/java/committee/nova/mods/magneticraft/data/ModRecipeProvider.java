@@ -79,6 +79,7 @@ final class ModRecipeProvider extends RecipeProvider {
         addHammerRecipes(consumer);
         addSmeltingRecipes(consumer);
         addMachineCraftingRecipes(consumer);
+        addPortableElectricRecipes(consumer);
         addSingleBlockCraftingRecipes(consumer);
         addCrushingRecipes(consumer);
         addSluiceRecipes(consumer);
@@ -554,6 +555,75 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('M', ModItems.component(CraftingComponent.MOTOR).get())
                 .unlockedBy("has_motor", has(ModItems.component(CraftingComponent.MOTOR).get()))
                 .save(consumer, id("crafting/conveyor_belt"));
+    }
+
+    private void addPortableElectricRecipes(Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineItems.MEDIUM_BATTERY.get())
+                .pattern(" A ")
+                .pattern("BCB")
+                .pattern("BCB")
+                .define('A', ModTags.Items.ingot(Metal.COPPER))
+                .define('B', ModMachineItems.LOW_BATTERY.get())
+                .define('C', ModTags.Items.lightPlate(Metal.LEAD))
+                .unlockedBy("has_battery_item_low", has(ModMachineItems.LOW_BATTERY.get()))
+                .save(consumer, id("crafting/battery_item_medium"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModMachineItems.ELECTRIC_DRILL.get())
+                .pattern("AAB")
+                .pattern("ACD")
+                .pattern("BDE")
+                .define('A', Tags.Items.GEMS_DIAMOND)
+                .define('B', ModTags.Items.ingot(Metal.COPPER))
+                .define('C', component(CraftingComponent.MOTOR))
+                .define('D', Tags.Items.INGOTS_IRON)
+                .define('E', ModMachineItems.LOW_BATTERY.get())
+                .unlockedBy("has_motor", has(component(CraftingComponent.MOTOR)))
+                .save(consumer, id("crafting/electric_drill"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModMachineItems.ELECTRIC_CHAINSAW.get())
+                .pattern("AB ")
+                .pattern("BCD")
+                .pattern(" DE")
+                .define('A', Tags.Items.GEMS_DIAMOND)
+                .define('B', ModTags.Items.ingot(Metal.COPPER))
+                .define('C', component(CraftingComponent.MOTOR))
+                .define('D', Tags.Items.INGOTS_IRON)
+                .define('E', ModMachineItems.LOW_BATTERY.get())
+                .unlockedBy("has_motor", has(component(CraftingComponent.MOTOR)))
+                .save(consumer, id("crafting/electric_chainsaw"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModMachineItems.ELECTRIC_PISTON.get())
+                .pattern("AB ")
+                .pattern("BCD")
+                .pattern(" DE")
+                .define('A', Blocks.PISTON)
+                .define('B', ModTags.Items.ingot(Metal.COPPER))
+                .define('C', component(CraftingComponent.MOTOR))
+                .define('D', Tags.Items.INGOTS_IRON)
+                .define('E', ModMachineItems.LOW_BATTERY.get())
+                .unlockedBy("has_motor", has(component(CraftingComponent.MOTOR)))
+                .save(consumer, id("crafting/electric_piston"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModMachineItems.VOLTMETER.get())
+                .pattern("ABA")
+                .pattern("ACA")
+                .pattern("ADA")
+                .define('A', Tags.Items.INGOTS_GOLD)
+                .define('B', Items.PAPER)
+                .define('C', Tags.Items.DUSTS_REDSTONE)
+                .define('D', ModTags.Items.ingot(Metal.COPPER))
+                .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
+                .save(consumer, id("crafting/voltmeter"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModMachineItems.THERMOMETER.get())
+                .pattern("ABA")
+                .pattern("ABA")
+                .pattern("ACA")
+                .define('A', Blocks.GLASS)
+                .define('B', Tags.Items.DUSTS_REDSTONE)
+                .define('C', Tags.Items.INGOTS_IRON)
+                .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
+                .save(consumer, id("crafting/thermometer"));
     }
 
     private void addCrushingRecipes(Consumer<FinishedRecipe> consumer) {
