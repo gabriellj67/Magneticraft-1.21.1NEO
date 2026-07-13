@@ -21,7 +21,7 @@
       "symbol": "M"
     },
     {
-      "block": "magneticraft:electric_multiblock_part",
+      "block": "magneticraft:electrical_machine_casing",
       "rule": "electric",
       "symbol": "E"
     }

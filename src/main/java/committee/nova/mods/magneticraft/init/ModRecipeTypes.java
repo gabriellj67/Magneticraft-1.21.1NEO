@@ -15,20 +15,20 @@ import net.minecraftforge.registries.RegistryObject;
  */
 public final class ModRecipeTypes {
     public static final RegistryObject<RecipeType<CrushingRecipe>> CRUSHING_TYPE =
-            ModRegistries.RECIPE_TYPES.register("crushing", () -> new RecipeType<>() {
+            ModRegistries.RECIPE_TYPES.register("crushing_table", () -> new RecipeType<>() {
                 @Override
                 public String toString() {
-                    return "magneticraft:crushing";
+                    return "magneticraft:crushing_table";
                 }
             });
     public static final RegistryObject<RecipeSerializer<CrushingRecipe>> CRUSHING_SERIALIZER =
-            ModRegistries.RECIPE_SERIALIZERS.register("crushing", CrushingRecipe.Serializer::new);
-    public static final RegistryObject<RecipeType<SluiceRecipe>> SLUICE_TYPE = type("sluice");
+            ModRegistries.RECIPE_SERIALIZERS.register("crushing_table", CrushingRecipe.Serializer::new);
+    public static final RegistryObject<RecipeType<SluiceRecipe>> SLUICE_TYPE = type("sluice_box");
     public static final RegistryObject<RecipeSerializer<SluiceRecipe>> SLUICE_SERIALIZER =
-            ModRegistries.RECIPE_SERIALIZERS.register("sluice", SluiceRecipe.Serializer::new);
-    public static final RegistryObject<RecipeType<GasificationRecipe>> GASIFICATION_TYPE = type("gasification");
+            ModRegistries.RECIPE_SERIALIZERS.register("sluice_box", SluiceRecipe.Serializer::new);
+    public static final RegistryObject<RecipeType<GasificationRecipe>> GASIFICATION_TYPE = type("gasification_unit");
     public static final RegistryObject<RecipeSerializer<GasificationRecipe>> GASIFICATION_SERIALIZER =
-            ModRegistries.RECIPE_SERIALIZERS.register("gasification", GasificationRecipe.Serializer::new);
+            ModRegistries.RECIPE_SERIALIZERS.register("gasification_unit", GasificationRecipe.Serializer::new);
     public static final RegistryObject<RecipeType<ThermopileRecipe>> THERMOPILE_TYPE = type("thermopile");
     public static final RegistryObject<RecipeSerializer<ThermopileRecipe>> THERMOPILE_SERIALIZER =
             ModRegistries.RECIPE_SERIALIZERS.register("thermopile", ThermopileRecipe.Serializer::new);

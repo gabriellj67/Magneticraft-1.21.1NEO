@@ -122,6 +122,9 @@ public final class FluidPipeModule extends AbstractPhysicalNetworkModule {
     @Override
     protected void loadNetworkData(CompoundTag tag) {
         node.set(tag.getString(FLUID_KEY_TAG), tag.getInt(AMOUNT_TAG));
+        for (Direction direction : Direction.values()) {
+            sideModes[direction.ordinal()] = SideMode.PASSIVE;
+        }
         int[] modes = tag.getIntArray(SIDE_MODES_TAG);
         for (Direction direction : Direction.values()) {
             if (direction.ordinal() < modes.length) {

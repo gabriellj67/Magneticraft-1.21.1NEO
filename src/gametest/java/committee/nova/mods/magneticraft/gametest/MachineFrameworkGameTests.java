@@ -89,6 +89,27 @@ public final class MachineFrameworkGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE)
+    public static void batteryRejectsMissingAndFutureRootSchemas(GameTestHelper helper) {
+        helper.setBlock(TEST_POS, ModMachineBlocks.BATTERY.get());
+        BatteryBlockEntity battery = requireBlockEntity(helper, TEST_POS, BatteryBlockEntity.class);
+
+        seedBatteryPersistentState(battery);
+        CompoundTag missingSchema = battery.saveWithoutMetadata();
+        missingSchema.remove("schema_version");
+        helper.assertFalse(missingSchema.getCompound("modules").isEmpty(), "Missing-schema fixture lost its module payload");
+        battery.load(missingSchema);
+        assertBatteryPersistentStateReset(helper, battery, "Missing root schema");
+
+        seedBatteryPersistentState(battery);
+        CompoundTag futureSchema = battery.saveWithoutMetadata();
+        futureSchema.putInt("schema_version", Integer.MAX_VALUE);
+        helper.assertFalse(futureSchema.getCompound("modules").isEmpty(), "Future-schema fixture lost its module payload");
+        battery.load(futureSchema);
+        assertBatteryPersistentStateReset(helper, battery, "Future root schema");
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE, timeoutTicks = 20)
     public static void batteryChargesPortableCellAtLegacyRate(GameTestHelper helper) {
         helper.setBlock(TEST_POS, ModMachineBlocks.BATTERY.get());
@@ -276,6 +297,25 @@ public final class MachineFrameworkGameTests {
         BlockEntity blockEntity = helper.getBlockEntity(relativePosition);
         helper.assertTrue(type.isInstance(blockEntity), "Missing block entity " + type.getSimpleName());
         return type.cast(blockEntity);
+    }
+
+    private static void seedBatteryPersistentState(BatteryBlockEntity battery) {
+        battery.energy().setEnergyStored(12_345);
+        battery.electricity().node().setEnergyJoules(321.0D);
+        battery.inventory().setStackInSlot(0, new ItemStack(ModMachineItems.LOW_BATTERY.get()));
+    }
+
+    private static void assertBatteryPersistentStateReset(
+            GameTestHelper helper,
+            BatteryBlockEntity battery,
+            String scenario
+    ) {
+        helper.assertTrue(battery.energy().getEnergyStored() == 0, scenario + " retained Forge Energy");
+        helper.assertTrue(
+                battery.electricity().node().energyJoules() == 0.0D,
+                scenario + " retained electrical-network energy"
+        );
+        helper.assertTrue(battery.inventory().getStackInSlot(0).isEmpty(), scenario + " retained inventory");
     }
 
     private static final class TestGhostMenu extends AbstractContainerMenu implements GhostFilterMenuAccess {

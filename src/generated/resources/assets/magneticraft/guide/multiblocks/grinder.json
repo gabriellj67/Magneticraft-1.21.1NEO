@@ -36,12 +36,12 @@
       "symbol": "M"
     },
     {
-      "block": "magneticraft:multiblock_base",
+      "block": "magneticraft:machine_casing",
       "rule": "base",
       "symbol": "#"
     },
     {
-      "block": "magneticraft:grate",
+      "block": "magneticraft:iron_grate",
       "rule": "grate",
       "symbol": "G"
     },
@@ -56,7 +56,7 @@
       "symbol": "C"
     },
     {
-      "block": "magneticraft:striped_multiblock_part",
+      "block": "magneticraft:striped_machine_casing",
       "rule": "striped",
       "symbol": "S"
     }

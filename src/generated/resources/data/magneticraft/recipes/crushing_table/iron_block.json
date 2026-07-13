@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "item": "minecraft:iron_block"
+  },
+  "required_level": 1,
+  "result": {
+    "count": 5,
+    "item": "magneticraft:iron_light_plate"
+  }
+}

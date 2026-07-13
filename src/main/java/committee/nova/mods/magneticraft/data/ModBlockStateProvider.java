@@ -56,14 +56,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockWithItem(crushingTable, crushingModel);
 
         Block battery = ModMachineBlocks.BATTERY.get();
-        ModelFile batteryModel = objModel("battery", "battery", modLoc("block/battery"));
+        ModelFile batteryModel = objModel("battery_box", "battery_box", modLoc("block/battery_box"));
         horizontalBlock(battery, batteryModel);
         simpleBlockItem(battery, batteryModel);
 
         Block grate = ModMachineBlocks.GRATE.get();
         simpleBlockWithItem(
                 grate,
-                models().cubeAll("grate", modLoc("block/grate"))
+                models().cubeAll("iron_grate", modLoc("block/iron_grate"))
                         .renderType(ResourceLocation.fromNamespaceAndPath("minecraft", "cutout"))
         );
 
@@ -111,7 +111,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         conduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable", mcLoc("block/copper_block"));
         conduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe", mcLoc("block/iron_block"));
         conduitBlock(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), "insulated_heat_pipe", mcLoc("block/black_wool"));
-        conduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_pipe", mcLoc("block/iron_block"));
+        conduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_fluid_pipe", mcLoc("block/iron_block"));
         conduitBlock(ModNetworkBlocks.PNEUMATIC_TUBE.get(), "pneumatic_tube", mcLoc("block/light_gray_concrete"));
         conduitBlock(
                 ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
@@ -123,7 +123,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         BlockModelBuilder heatSinkModel = models().getBuilder("heat_sink")
                 .texture("particle", mcLoc("block/iron_block"))
                 .texture("metal", mcLoc("block/iron_block"))
-                .texture("face", modLoc("block/grate"));
+                .texture("face", modLoc("block/iron_grate"));
         heatSinkModel.element().from(2, 2, 2).to(14, 14, 14).textureAll("#metal").end();
         for (int x = 1; x <= 13; x += 3) {
             heatSinkModel.element().from(x, 0, 0).to(x + 1, 16, 2).textureAll("#metal").end();
@@ -145,7 +145,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         simpleBlockWithItem(
                 ModAdvancedBlocks.MULTIBLOCK_BASE.get(),
-                models().cubeAll("multiblock_base", mcLoc("block/iron_block"))
+                models().cubeAll("machine_casing", mcLoc("block/iron_block"))
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.CORRUGATED_IRON.get(),
@@ -157,15 +157,15 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.MULTIBLOCK_COLUMN.get(),
-                models().cubeAll("multiblock_column", mcLoc("block/iron_block"))
+                models().cubeAll("machine_support_column", mcLoc("block/iron_block"))
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(),
-                models().cubeAll("striped_multiblock_part", mcLoc("block/yellow_concrete"))
+                models().cubeAll("striped_machine_casing", mcLoc("block/yellow_concrete"))
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(),
-                models().cubeAll("electric_multiblock_part", mcLoc("block/redstone_block"))
+                models().cubeAll("electrical_machine_casing", mcLoc("block/redstone_block"))
         );
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {

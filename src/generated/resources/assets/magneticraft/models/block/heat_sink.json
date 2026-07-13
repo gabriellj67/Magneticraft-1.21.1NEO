@@ -226,7 +226,7 @@
     }
   ],
   "textures": {
-    "face": "magneticraft:block/grate",
+    "face": "magneticraft:block/iron_grate",
     "metal": "minecraft:block/iron_block",
     "particle": "minecraft:block/iron_block"
   }

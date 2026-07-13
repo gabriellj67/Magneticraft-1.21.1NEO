@@ -1,0 +1,12 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 10,
+  "fluid_result": {
+    "amount": 50,
+    "fluid": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "item": "minecraft:beetroot"
+  },
+  "minimum_temperature": 473.15
+}

@@ -3,7 +3,7 @@
   "category": "redstone",
   "key": {
     "B": {
-      "item": "magneticraft:multiblock_base"
+      "item": "magneticraft:machine_casing"
     },
     "C": {
       "item": "magneticraft:copper_coil"

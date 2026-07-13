@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": {
+      "item": "magneticraft:machine_casing"
+    },
+    "C": {
+      "item": "magneticraft:copper_coil"
+    },
+    "M": {
+      "item": "minecraft:chest"
+    }
+  },
+  "pattern": [
+    "BBB",
+    "CMC",
+    "BBB"
+  ],
+  "result": {
+    "item": "magneticraft:shipping_container"
+  },
+  "show_notification": true
+}

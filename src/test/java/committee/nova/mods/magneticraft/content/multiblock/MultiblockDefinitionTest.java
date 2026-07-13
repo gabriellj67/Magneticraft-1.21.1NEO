@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MultiblockDefinitionTest {
-    private static final List<String> LEGACY_IDS = List.of(
-            "big_combustion_chamber",
-            "big_electric_furnace",
-            "big_steam_boiler",
-            "container",
+    private static final List<String> FROZEN_IDS = List.of(
+            "industrial_combustion_chamber",
+            "industrial_electric_furnace",
+            "industrial_steam_boiler",
+            "shipping_container",
             "grinder",
             "hydraulic_press",
             "oil_heater",
@@ -34,11 +34,11 @@ class MultiblockDefinitionTest {
             "steam_engine",
             "steam_turbine"
     );
-    private static final Map<String, String> LEGACY_SHAPES = Map.ofEntries(
-            Map.entry("big_combustion_chamber", "3,2,4@1,0,0|bMb/bbb/bbb/.R.;bbb/bbb/bbb/.R."),
-            Map.entry("big_electric_furnace", "3,2,3@1,0,0|YMY/GGG/YGY;YGY/GCG/YGY"),
-            Map.entry("big_steam_boiler", "3,4,3@1,0,0|#M#/###/###;RRR/RRR/RRR;RRR/RRR/RRR;RRR/RRR/RRR"),
-            Map.entry("container", "3,3,7@1,0,0|RMR/RRR/RRR/RRR/RRR/RRR/RRR;RRR/RAR/RAR/RAR/RAR/RAR/RRR;RRR/RRR/RRR/RRR/RRR/RRR/RRR"),
+    private static final Map<String, String> FROZEN_SHAPES = Map.ofEntries(
+            Map.entry("industrial_combustion_chamber", "3,2,4@1,0,0|bMb/bbb/bbb/.R.;bbb/bbb/bbb/.R."),
+            Map.entry("industrial_electric_furnace", "3,2,3@1,0,0|YMY/GGG/YGY;YGY/GCG/YGY"),
+            Map.entry("industrial_steam_boiler", "3,4,3@1,0,0|#M#/###/###;RRR/RRR/RRR;RRR/RRR/RRR;RRR/RRR/RRR"),
+            Map.entry("shipping_container", "3,3,7@1,0,0|RMR/RRR/RRR/RRR/RRR/RRR/RRR;RRR/RAR/RAR/RAR/RAR/RAR/RRR;RRR/RRR/RRR/RRR/RRR/RRR/RRR"),
             Map.entry("grinder", "3,4,3@1,0,0|#M#/###/###;RGR/GCG/RGR;RGR/G#G/RGR;SSS/S#S/SSS"),
             Map.entry("hydraulic_press", "3,5,3@1,0,0|GMG/GGG/GGG;GGG/CRC/GGG;.../YSY/...;.../YRY/...;.../XXX/..."),
             Map.entry("oil_heater", "3,3,3@1,0,0|YMY/ZZZ/ZZZ;YYY/RRR/RRR;YYY/RRR/RRR"),
@@ -59,7 +59,7 @@ class MultiblockDefinitionTest {
                 .map(MultiblockDefinition::id)
                 .toList();
 
-        assertEquals(LEGACY_IDS, actual);
+        assertEquals(FROZEN_IDS, actual);
         assertEquals(actual.size(), new HashSet<>(actual).size());
     }
 
@@ -89,7 +89,7 @@ class MultiblockDefinitionTest {
             String snapshot = definition.size().x() + "," + definition.size().y() + "," + definition.size().z()
                     + "@" + definition.center().x() + "," + definition.center().y() + "," + definition.center().z()
                     + "|" + layers;
-            assertEquals(LEGACY_SHAPES.get(definition.id()), snapshot, definition.id());
+            assertEquals(FROZEN_SHAPES.get(definition.id()), snapshot, definition.id());
         }
     }
 

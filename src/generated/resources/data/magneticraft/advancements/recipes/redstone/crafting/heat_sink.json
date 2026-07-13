@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_grate": {
+    "has_iron_grate": {
       "conditions": {
         "items": [
           {
             "items": [
-              "magneticraft:grate"
+              "magneticraft:iron_grate"
             ]
           }
         ]
@@ -22,7 +22,7 @@
   },
   "requirements": [
     [
-      "has_grate",
+      "has_iron_grate",
       "has_the_recipe"
     ]
   ],

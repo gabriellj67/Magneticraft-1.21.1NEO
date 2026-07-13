@@ -76,6 +76,47 @@ public final class AdvancedSystemsGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 80)
+    public static void incompatibleControllerSchemaResetsAndRevalidatesFormation(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.GRINDER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Grinder did not form before schema reset");
+        controller.setOwner(player.getUUID());
+        controller.inventory().setStackInSlot(0, new ItemStack(Items.COBBLESTONE));
+        controller.energy().setEnergyStored(5_000);
+        AdvancedMultiblockBlockEntity.serverTick(
+                helper.getLevel(), helper.absolutePos(CONTROLLER), controller.getBlockState(), controller
+        );
+        helper.assertTrue(controller.working(), "Grinder did not enter working state before schema reset");
+        helper.assertFalse(controller.inventory().getStackInSlot(0).isEmpty(), "Grinder lost its input before schema reset");
+        helper.assertTrue(controller.energy().getEnergyStored() > 0, "Grinder lost all energy before schema reset");
+        helper.assertTrue(controller.progress() > 0, "Grinder did not advance before schema reset");
+        helper.assertTrue(controller.totalProgress() > 0, "Grinder did not retain its active recipe before schema reset");
+        helper.assertTrue(player.getUUID().equals(controller.owner()), "Grinder did not retain its owner before schema reset");
+
+        CompoundTag incompatible = controller.saveWithoutMetadata();
+        incompatible.putInt("schema_version", 2);
+        controller.load(incompatible);
+
+        helper.assertTrue(controller.inventory().getStackInSlot(0).isEmpty(), "Schema reset retained grinder inventory");
+        helper.assertTrue(controller.energy().getEnergyStored() == 0, "Schema reset retained grinder energy");
+        helper.assertTrue(controller.progress() == 0, "Schema reset retained grinder progress");
+        helper.assertTrue(controller.totalProgress() == 0, "Schema reset retained grinder recipe duration");
+        helper.assertTrue(controller.owner() == null, "Schema reset retained grinder ownership");
+        helper.assertTrue(controller.formed(), "Schema reset lost the controller block's formation claim");
+        helper.assertFalse(controller.operational(), "Schema reset trusted formation without revalidation");
+        helper.assertFalse(controller.working(), "Schema reset retained stale working state");
+        AdvancedMultiblockBlockEntity.serverTick(
+                helper.getLevel(), helper.absolutePos(CONTROLLER), controller.getBlockState(), controller
+        );
+        helper.assertTrue(controller.operational(), "Schema reset did not revalidate the intact structure");
+        clear(helper, occupied);
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE, timeoutTicks = 200)
     public static void rotationsMirrorsAndChunkBoundaryUseTheSameDefinition(GameTestHelper helper) {
         Player player = helper.makeMockSurvivalPlayer();

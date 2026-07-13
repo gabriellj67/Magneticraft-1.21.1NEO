@@ -66,7 +66,7 @@
       "symbol": "R"
     },
     {
-      "block": "magneticraft:multiblock_column",
+      "block": "magneticraft:machine_support_column",
       "properties": {
         "axis": "y"
       },
@@ -74,7 +74,7 @@
       "symbol": "Y"
     },
     {
-      "block": "magneticraft:multiblock_column",
+      "block": "magneticraft:machine_support_column",
       "properties": {
         "axis": "z"
       },
@@ -96,7 +96,7 @@
       {
         "accepted_fluids": [
           "magneticraft:steam",
-          "magneticraft:hot_crude",
+          "magneticraft:heated_crude_oil",
           "magneticraft:heavy_oil",
           "magneticraft:light_oil",
           "magneticraft:lpg"
@@ -127,7 +127,7 @@
           "magneticraft:heavy_oil",
           "magneticraft:oil_residue",
           "magneticraft:diesel",
-          "magneticraft:plastic"
+          "magneticraft:liquid_plastic"
         ],
         "access": {
           "left": "output",
@@ -140,7 +140,7 @@
       {
         "accepted_fluids": [
           "magneticraft:light_oil",
-          "magneticraft:fuel",
+          "magneticraft:fuel_oil",
           "magneticraft:kerosene",
           "magneticraft:naphtha"
         ],

@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_electric_multiblock_part": {
+    "has_electrical_machine_casing": {
       "conditions": {
         "items": [
           {
             "items": [
-              "magneticraft:electric_multiblock_part"
+              "magneticraft:electrical_machine_casing"
             ]
           }
         ]
@@ -22,7 +22,7 @@
   },
   "requirements": [
     [
-      "has_electric_multiblock_part",
+      "has_electrical_machine_casing",
       "has_the_recipe"
     ]
   ],

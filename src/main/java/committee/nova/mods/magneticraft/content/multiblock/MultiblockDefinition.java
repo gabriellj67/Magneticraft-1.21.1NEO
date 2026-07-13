@@ -13,7 +13,7 @@ import java.util.List;
  */
 public enum MultiblockDefinition {
     BIG_COMBUSTION_CHAMBER(
-            "big_combustion_chamber", "Big Combustion Chamber", "大型燃烧室",
+            "industrial_combustion_chamber", "Industrial Combustion Chamber", "工业燃烧室",
             new StructureOffset(3, 2, 4), new StructureOffset(1, 0, 0),
             layers(
                     layer("bMb", "bbb", "bbb", ".R."),
@@ -21,7 +21,7 @@ public enum MultiblockDefinition {
             )
     ),
     BIG_ELECTRIC_FURNACE(
-            "big_electric_furnace", "Big Electric Furnace", "大型电炉",
+            "industrial_electric_furnace", "Industrial Electric Furnace", "工业电炉",
             new StructureOffset(3, 2, 3), new StructureOffset(1, 0, 0),
             layers(
                     layer("YMY", "GGG", "YGY"),
@@ -29,7 +29,7 @@ public enum MultiblockDefinition {
             )
     ),
     BIG_STEAM_BOILER(
-            "big_steam_boiler", "Big Steam Boiler", "大型蒸汽锅炉",
+            "industrial_steam_boiler", "Industrial Steam Boiler", "工业蒸汽锅炉",
             new StructureOffset(3, 4, 3), new StructureOffset(1, 0, 0),
             layers(
                     layer("#M#", "###", "###"),
@@ -39,7 +39,7 @@ public enum MultiblockDefinition {
             )
     ),
     CONTAINER(
-            "container", "Container", "集装箱",
+            "shipping_container", "Shipping Container", "货运集装箱",
             new StructureOffset(3, 3, 7), new StructureOffset(1, 0, 0),
             layers(
                     layer("RMR", "RRR", "RRR", "RRR", "RRR", "RRR", "RRR"),

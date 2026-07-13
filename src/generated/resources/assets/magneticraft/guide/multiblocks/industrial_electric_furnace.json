@@ -1,0 +1,63 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "processing",
+  "controller": "magneticraft:industrial_electric_furnace",
+  "id": "magneticraft:industrial_electric_furnace",
+  "layers": [
+    [
+      "YMY",
+      "GGG",
+      "YGY"
+    ],
+    [
+      "YGY",
+      "GCG",
+      "YGY"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:industrial_electric_furnace",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:iron_grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": true,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 2
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 2,
+    "z": 3
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.industrial_electric_furnace"
+}

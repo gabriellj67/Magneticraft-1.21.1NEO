@@ -1,0 +1,12 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 10,
+  "fluid_result": {
+    "amount": 30,
+    "fluid": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "tag": "minecraft:saplings"
+  },
+  "minimum_temperature": 453.15
+}

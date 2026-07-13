@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/gold"
+    },
+    "C": {
+      "tag": "magneticraft:light_plates/lead"
+    },
+    "D": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "CDC",
+    "ABA"
+  ],
+  "result": {
+    "item": "magneticraft:forge_energy_transformer"
+  },
+  "show_notification": true
+}

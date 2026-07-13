@@ -42,11 +42,11 @@ final class ModLanguageProvider extends LanguageProvider {
         );
         add(ModCreativeTabs.TRANSLATION_KEY, chinese ? "磁场工艺" : "Magneticraft");
         add(ModMachineBlocks.CRUSHING_TABLE.get(), chinese ? "压碎台" : "Crushing Table");
-        add(ModMachineBlocks.BATTERY.get(), chinese ? "电池" : "Battery");
-        add(ModMachineBlocks.GRATE.get(), chinese ? "格栅" : "Grate");
+        add(ModMachineBlocks.BATTERY.get(), chinese ? "电池箱" : "Battery Box");
+        add(ModMachineBlocks.GRATE.get(), chinese ? "铁格栅" : "Iron Grate");
         add(ModMachineBlocks.ELECTRIC_FURNACE.get(), chinese ? "电炉" : "Electric Furnace");
-        add(ModMachineItems.LOW_BATTERY.get(), chinese ? "小型电池" : "Low-Capacity Battery");
-        add(ModMachineItems.MEDIUM_BATTERY.get(), chinese ? "中型电池" : "Medium-Capacity Battery");
+        add(ModMachineItems.LOW_BATTERY.get(), chinese ? "低压电池" : "Low-Voltage Battery");
+        add(ModMachineItems.MEDIUM_BATTERY.get(), chinese ? "中压电池" : "Medium-Voltage Battery");
         add(ModMachineItems.ELECTRIC_DRILL.get(), chinese ? "电钻" : "Electric Drill");
         add(ModMachineItems.ELECTRIC_CHAINSAW.get(), chinese ? "电锯" : "Electric Chainsaw");
         add(ModMachineItems.ELECTRIC_PISTON.get(), chinese ? "电动活塞" : "Electric Piston");
@@ -54,7 +54,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModMachineItems.THERMOMETER.get(), chinese ? "温度计" : "Thermometer");
         add(ModMachineItems.INSERTER_SPEED_UPGRADE.get(), chinese ? "机械臂速度升级" : "Inserter Speed Upgrade");
         add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂整组升级" : "Inserter Stack Upgrade");
-        add("container.magneticraft.battery", chinese ? "电池" : "Battery");
+        add("container.magneticraft.battery_box", chinese ? "电池箱" : "Battery Box");
         add("container.magneticraft.electric_furnace", chinese ? "电炉" : "Electric Furnace");
         ModMachineBlocks.machines().forEach((definition, holder) -> {
             add(holder.get(), chinese ? definition.chineseName() : definition.englishName());
@@ -71,7 +71,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModNetworkBlocks.HEAT_PIPE.get(), chinese ? "热管" : "Heat Pipe");
         add(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), chinese ? "保温热管" : "Insulated Heat Pipe");
         add(ModNetworkBlocks.HEAT_SINK.get(), chinese ? "散热器" : "Heat Sink");
-        add(ModNetworkBlocks.IRON_PIPE.get(), chinese ? "铁管" : "Iron Pipe");
+        add(ModNetworkBlocks.IRON_PIPE.get(), chinese ? "铁质流体管" : "Iron Fluid Pipe");
         add(ModNetworkBlocks.PNEUMATIC_TUBE.get(), chinese ? "气动管" : "Pneumatic Tube");
         add(ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(), chinese ? "气动限制管" : "Pneumatic Restriction Tube");
         add(ModNetworkBlocks.CONVEYOR_BELT.get(), chinese ? "传送带" : "Conveyor Belt");
@@ -114,12 +114,12 @@ final class ModLanguageProvider extends LanguageProvider {
             add(ModFluids.get(definition).bucket().get(), chinese ? name + "桶" : name + " Bucket");
         }
 
-        add(ModAdvancedBlocks.MULTIBLOCK_BASE.get(), chinese ? "多方块基座" : "Multiblock Base");
+        add(ModAdvancedBlocks.MULTIBLOCK_BASE.get(), chinese ? "机器外壳" : "Machine Casing");
         add(ModAdvancedBlocks.CORRUGATED_IRON.get(), chinese ? "波纹铁板" : "Corrugated Iron");
         add(ModAdvancedBlocks.COPPER_COIL.get(), chinese ? "铜线圈" : "Copper Coil");
-        add(ModAdvancedBlocks.MULTIBLOCK_COLUMN.get(), chinese ? "多方块立柱" : "Multiblock Column");
-        add(ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(), chinese ? "警示条纹部件" : "Striped Multiblock Part");
-        add(ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(), chinese ? "电气多方块部件" : "Electric Multiblock Part");
+        add(ModAdvancedBlocks.MULTIBLOCK_COLUMN.get(), chinese ? "机器支撑柱" : "Machine Support Column");
+        add(ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(), chinese ? "警示条纹机器外壳" : "Striped Machine Casing");
+        add(ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(), chinese ? "电气机器外壳" : "Electrical Machine Casing");
         add(ModAdvancedBlocks.OIL_DEPOSIT.get(), chinese ? "地下油藏" : "Oil Deposit");
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             add(
@@ -205,10 +205,10 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.break_cost", chinese ? "破坏耗能：%s FE" : "Block cost: %s FE");
         add("gui.magneticraft.guide.attack_cost", chinese ? "攻击耗能：%s FE" : "Attack cost: %s FE");
         add("gui.magneticraft.guide.use_cost", chinese ? "使用耗能：%s FE" : "Use cost: %s FE");
-        add("guide.magneticraft.item.battery_item_low.description", chinese
+        add("guide.magneticraft.item.low_voltage_battery.description", chinese
                 ? "便携式 250 kFE 电池，可在电池方块中充放电。"
                 : "A portable 250 kFE cell that charges and discharges in the battery block.");
-        add("guide.magneticraft.item.battery_item_medium.description", chinese
+        add("guide.magneticraft.item.medium_voltage_battery.description", chinese
                 ? "容量为小型电池十倍的 2.5 MFE 便携电池。"
                 : "A 2.5 MFE portable cell with ten times the low battery's capacity.");
         add("guide.magneticraft.item.electric_drill.description", chinese
@@ -270,17 +270,17 @@ final class ModLanguageProvider extends LanguageProvider {
         addGuideRule("ignore", "忽略", "Ignored");
         addGuideRule("air", "空气", "Air");
         addGuideRule("controller", "控制器", "Controller");
-        addGuideRule("base", "多方块基座", "Multiblock Base");
-        addGuideRule("grate", "格栅", "Grate");
+        addGuideRule("base", "机器外壳", "Machine Casing");
+        addGuideRule("grate", "铁格栅", "Iron Grate");
         addGuideRule("corrugated_iron", "波纹铁板", "Corrugated Iron");
         addGuideRule("copper_coil", "铜线圈", "Copper Coil");
         addGuideRule("bricks", "砖块", "Bricks");
         addGuideRule("small_tank", "小型储罐", "Small Tank");
-        addGuideRule("striped", "警示条纹部件", "Striped Part");
-        addGuideRule("electric", "电气部件", "Electric Part");
-        addGuideRule("column_x", "X 轴立柱", "X-axis Column");
-        addGuideRule("column_y", "Y 轴立柱", "Y-axis Column");
-        addGuideRule("column_z", "Z 轴立柱", "Z-axis Column");
+        addGuideRule("striped", "警示条纹机器外壳", "Striped Machine Casing");
+        addGuideRule("electric", "电气机器外壳", "Electrical Machine Casing");
+        addGuideRule("column_x", "X 轴机器支撑柱", "X-axis Machine Support Column");
+        addGuideRule("column_y", "Y 轴机器支撑柱", "Y-axis Machine Support Column");
+        addGuideRule("column_z", "Z 轴机器支撑柱", "Z-axis Machine Support Column");
         addGuideRule("unknown", "未知部件", "Unknown Part");
     }
 

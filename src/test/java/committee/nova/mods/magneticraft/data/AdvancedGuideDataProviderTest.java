@@ -78,7 +78,7 @@ class AdvancedGuideDataProviderTest {
         assertEquals("feed_input", feed.get("role").getAsString());
         assertEquals(16_000, feed.get("capacity_mb").getAsInt());
         assertEquals("input", feed.getAsJsonObject("access").get("front").getAsString());
-        assertTrue(feed.getAsJsonArray("accepted_fluids").toString().contains("magneticraft:hot_crude"));
+        assertTrue(feed.getAsJsonArray("accepted_fluids").toString().contains("magneticraft:heated_crude_oil"));
 
         JsonObject processSteam = tanks.get(1).getAsJsonObject();
         assertEquals("process_steam_input", processSteam.get("role").getAsString());
@@ -139,7 +139,7 @@ class AdvancedGuideDataProviderTest {
                 .map(element -> element.getAsJsonObject().get("id").getAsString())
                 .distinct()
                 .count());
-        JsonObject mediumBattery = item(items, "magneticraft:battery_item_medium");
+        JsonObject mediumBattery = item(items, "magneticraft:medium_voltage_battery");
         assertEquals(MediumBatteryItem.CAPACITY, mediumBattery.get("capacity_fe").getAsInt());
         JsonObject drill = item(items, "magneticraft:electric_drill");
         assertEquals(ElectricToolItem.CAPACITY, drill.get("capacity_fe").getAsInt());

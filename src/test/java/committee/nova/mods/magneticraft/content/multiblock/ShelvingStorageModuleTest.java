@@ -60,6 +60,24 @@ class ShelvingStorageModuleTest {
         assertEquals(Items.DIAMOND, restored.getStackInSlot(647).getItem());
     }
 
+    @Test
+    void resetClearsBothHandlersWithoutChangingConfiguredSizes() {
+        ShelvingStorageModule module = module();
+        assertTrue(module.installChest(new ItemStack(Items.CHEST)));
+        assertTrue(module.insertItem(0, new ItemStack(Items.DIAMOND, 8), false).isEmpty());
+
+        module.resetPersistentState();
+
+        assertEquals(0, module.installedChests());
+        assertEquals(0, module.getSlots());
+        CompoundTag reset = new CompoundTag();
+        module.save(reset);
+        assertEquals(ShelvingStorageModule.MAX_STORAGE_SLOTS,
+                reset.getCompound("storage").getInt("Size"));
+        assertEquals(ShelvingStorageModule.MAX_CHESTS,
+                reset.getCompound("chests").getInt("Size"));
+    }
+
     private static ShelvingStorageModule module() {
         return new ShelvingStorageModule(
                 ResourceLocation.fromNamespaceAndPath("magneticraft", "test_shelving"),

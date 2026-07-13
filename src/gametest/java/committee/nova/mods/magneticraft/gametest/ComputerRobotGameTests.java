@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -67,6 +68,38 @@ public final class ComputerRobotGameTests {
         helper.assertTrue(restored.vm().lastResult() == 12, "Last device result did not survive reload");
         helper.assertTrue(restored.redstoneOutput() == 12, "Redstone output did not survive reload");
         helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void preResetComputerPayloadIsDiscardedWithoutFault(GameTestHelper helper) {
+        ComputerBlockEntity computer = placeComputer(helper);
+        BlockPos lampPosition = DEVICE_POSITION.relative(Direction.EAST);
+        helper.setBlock(lampPosition, Blocks.REDSTONE_LAMP);
+        computer.setOwner(UUID.randomUUID());
+        helper.assertTrue(computer.tryReplaceProgram(0L, List.of(
+                instruction(ComputerOpcode.SET_REDSTONE, 9, 0),
+                instruction(ComputerOpcode.HALT, 0, 0)
+        )), "Computer rejected its reset probe program");
+        helper.assertTrue(computer.vm().executeTick(computer) == 1, "Reset probe did not execute");
+        helper.assertTrue(computer.redstoneOutput() == 9, "Reset probe did not change redstone state");
+        helper.assertTrue(helper.getBlockState(lampPosition).getValue(RedstoneLampBlock.LIT),
+                "Reset probe did not power its neighboring lamp");
+
+        CompoundTag incompatible = computer.saveWithoutMetadata();
+        incompatible.remove("schema_version");
+        computer.load(incompatible);
+
+        helper.assertTrue(computer.owner() == null, "Incompatible payload retained its owner");
+        helper.assertTrue(computer.programRevision() == 0L, "Incompatible payload retained its revision");
+        helper.assertTrue(computer.program().isEmpty(), "Incompatible payload retained its program");
+        helper.assertFalse(computer.vm().running(), "Incompatible payload kept the VM running");
+        helper.assertTrue(computer.vm().fault() == VmFault.NONE, "Contract reset created a corruption fault");
+        helper.assertTrue(computer.redstoneOutput() == 0, "Incompatible payload retained redstone output");
+        helper.runAfterDelay(5, () -> {
+            helper.assertFalse(helper.getBlockState(lampPosition).getValue(RedstoneLampBlock.LIT),
+                    "Schema reset left the neighboring lamp powered");
+            helper.succeed();
+        });
     }
 
     @GameTest(template = TEMPLATE)

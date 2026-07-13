@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/battery_box",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/battery_box"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/battery_box",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/battery_box",
+      "y": 270
+    }
+  }
+}

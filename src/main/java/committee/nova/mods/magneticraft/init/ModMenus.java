@@ -14,7 +14,7 @@ import net.minecraftforge.registries.RegistryObject;
  */
 public final class ModMenus {
     public static final RegistryObject<MenuType<BatteryMenu>> BATTERY =
-            ModRegistries.MENU_TYPES.register("battery", () -> IForgeMenuType.create(BatteryMenu::new));
+            ModRegistries.MENU_TYPES.register("battery_box", () -> IForgeMenuType.create(BatteryMenu::new));
     public static final RegistryObject<MenuType<ElectricFurnaceMenu>> ELECTRIC_FURNACE =
             ModRegistries.MENU_TYPES.register(
                     "electric_furnace",

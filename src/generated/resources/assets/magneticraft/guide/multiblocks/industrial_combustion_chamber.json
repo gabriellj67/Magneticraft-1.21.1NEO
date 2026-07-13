@@ -1,0 +1,82 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "energy",
+  "controller": "magneticraft:industrial_combustion_chamber",
+  "id": "magneticraft:industrial_combustion_chamber",
+  "layers": [
+    [
+      "bMb",
+      "bbb",
+      "bbb",
+      ".R."
+    ],
+    [
+      "bbb",
+      "bbb",
+      "bbb",
+      ".R."
+    ]
+  ],
+  "legend": [
+    {
+      "ignored": true,
+      "rule": "ignore",
+      "symbol": "."
+    },
+    {
+      "block": "magneticraft:industrial_combustion_chamber",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "minecraft:bricks",
+      "rule": "bricks",
+      "symbol": "b"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": false,
+    "fluid_tank_capacities_mb": [
+      4000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "@magneticraft:fluid_fuel"
+        ],
+        "access": {
+          "back": "input",
+          "down": "output",
+          "front": "input",
+          "left": "input",
+          "right": "input",
+          "unsided": "both",
+          "up": "input"
+        },
+        "capacity_mb": 4000,
+        "index": 0,
+        "role": "fluid_fuel"
+      }
+    ],
+    "heat": true,
+    "inventory_slots": 1
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 2,
+    "z": 4
+  },
+  "supports_mirroring": true,
+  "translation_key": "block.magneticraft.industrial_combustion_chamber"
+}

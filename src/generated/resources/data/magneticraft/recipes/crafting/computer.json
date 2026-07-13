@@ -3,7 +3,7 @@
   "category": "redstone",
   "key": {
     "C": {
-      "item": "magneticraft:electric_multiblock_part"
+      "item": "magneticraft:electrical_machine_casing"
     },
     "I": {
       "tag": "forge:ingots/iron"

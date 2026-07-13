@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:fluid_fuel",
+  "duration": 10000,
+  "fluid": "magneticraft:crude_oil",
+  "power": 30.0
+}

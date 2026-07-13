@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public final class OilDepositBlockEntity extends BlockEntity {
     public static final int DEFAULT_RESERVE_MILLIBUCKETS = 4_000_000;
-    private static final String REMAINING_TAG = "remaining_millibuckets";
 
     private int remaining = DEFAULT_RESERVE_MILLIBUCKETS;
 
@@ -35,14 +34,12 @@ public final class OilDepositBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
-        tag.putInt(REMAINING_TAG, remaining);
+        OilDepositPersistence.write(tag, remaining);
     }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
-        remaining = tag.contains(REMAINING_TAG)
-                ? Math.max(0, tag.getInt(REMAINING_TAG))
-                : DEFAULT_RESERVE_MILLIBUCKETS;
+        remaining = OilDepositPersistence.read(tag);
     }
 }

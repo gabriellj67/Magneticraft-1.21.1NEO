@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": {
+    "item": "magneticraft:limestone_cobblestone"
+  },
+  "result": {
+    "item": "magneticraft:burnt_limestone_cobblestone"
+  }
+}

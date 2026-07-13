@@ -6,7 +6,7 @@
       "tag": "forge:glass"
     },
     "B": {
-      "item": "magneticraft:grate"
+      "item": "magneticraft:iron_grate"
     }
   },
   "pattern": [

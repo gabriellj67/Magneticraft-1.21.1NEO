@@ -17,9 +17,9 @@ import java.util.List;
  */
 public final class ModMachineItems {
     public static final RegistryObject<Item> LOW_BATTERY =
-            ModRegistries.ITEMS.register("battery_item_low", LowBatteryItem::new);
+            ModRegistries.ITEMS.register("low_voltage_battery", LowBatteryItem::new);
     public static final RegistryObject<Item> MEDIUM_BATTERY =
-            ModRegistries.ITEMS.register("battery_item_medium", MediumBatteryItem::new);
+            ModRegistries.ITEMS.register("medium_voltage_battery", MediumBatteryItem::new);
     public static final RegistryObject<Item> ELECTRIC_DRILL =
             ModRegistries.ITEMS.register("electric_drill", ElectricDrillItem::new);
     public static final RegistryObject<Item> ELECTRIC_CHAINSAW =

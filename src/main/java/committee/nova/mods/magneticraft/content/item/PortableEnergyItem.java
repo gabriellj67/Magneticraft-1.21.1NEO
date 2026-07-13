@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.item;
 
 import committee.nova.mods.magneticraft.system.energy.PortableEnergyState;
+import committee.nova.mods.magneticraft.system.energy.PortableEnergyPayload;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -26,7 +27,6 @@ import java.util.List;
 public class PortableEnergyItem extends Item {
     public static final int TRANSFER_RATE = 500;
 
-    private static final int DATA_VERSION = 1;
     private static final int BAR_COLOR = 0x43D96B;
     private static final String ENERGY_TOOLTIP = "tooltip.magneticraft.energy";
 
@@ -105,9 +105,6 @@ public class PortableEnergyItem extends Item {
     }
 
     private static final class EnergyProvider implements ICapabilitySerializable<CompoundTag>, IEnergyStorage {
-        private static final String DATA_VERSION_TAG = "data_version";
-        private static final String ENERGY_TAG = "energy";
-
         private final LazyOptional<IEnergyStorage> capability = LazyOptional.of(() -> this);
         private final int capacity;
         private final PortableEnergyState state;
@@ -125,16 +122,12 @@ public class PortableEnergyItem extends Item {
 
         @Override
         public CompoundTag serializeNBT() {
-            CompoundTag tag = new CompoundTag();
-            tag.putInt(DATA_VERSION_TAG, DATA_VERSION);
-            tag.putInt(ENERGY_TAG, state.energy());
-            return tag;
+            return PortableEnergyPayload.write(state.energy());
         }
 
         @Override
         public void deserializeNBT(CompoundTag tag) {
-            // Missing data_version is the legacy v0 layout, which already used the stable energy key.
-            state.load(tag.getInt(ENERGY_TAG));
+            state.load(PortableEnergyPayload.readEnergyOrDefault(tag, capacity));
         }
 
         @Override

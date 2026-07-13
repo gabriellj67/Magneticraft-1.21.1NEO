@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "item": "magneticraft:limestone"
+  },
+  "required_level": 0,
+  "result": {
+    "item": "magneticraft:limestone_cobblestone"
+  }
+}

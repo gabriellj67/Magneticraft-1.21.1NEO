@@ -6,10 +6,18 @@ import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.SulfurItem;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.material.Metal;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
+import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModItems;
+import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModMachineItems;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -19,7 +27,9 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
@@ -31,8 +41,14 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryObject;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Runtime contracts for the stateless content and fluid families migrated in task two.
@@ -42,6 +58,59 @@ import java.util.List;
 public final class BaseContentGameTests {
     private static final String TEMPLATE = "base_content";
     private static final BlockPos TEST_POS = new BlockPos(1, 1, 1);
+    private static final Set<String> FORBIDDEN_LEGACY_IDS = Set.of(
+            "ores",
+            "storage_blocks",
+            "tile_limestone",
+            "cobbled_limestone",
+            "cobbled_burnt_limestone",
+            "ingots",
+            "nuggets",
+            "light_plates",
+            "heavy_plates",
+            "chunks",
+            "dusts",
+            "rocky_chunks",
+            "crafting",
+            "multiblock_parts",
+            "battery_item_low",
+            "battery_item_medium",
+            "battery",
+            "grate",
+            "box",
+            "relay",
+            "filter",
+            "transposer",
+            "rf_heater",
+            "rf_transformer",
+            "iron_pipe",
+            "connector",
+            "energy_receiver",
+            "multiblock_base",
+            "electric_multiblock_part",
+            "striped_multiblock_part",
+            "multiblock_column",
+            "big_combustion_chamber",
+            "big_electric_furnace",
+            "big_steam_boiler",
+            "container",
+            "infinite_energy",
+            "oil",
+            "hot_crude",
+            "plastic",
+            "fuel",
+            "crushing_hit",
+            "crushing_final",
+            "water_flow",
+            "water_flow_end",
+            "crushing",
+            "sluice",
+            "gasification",
+            "broken_gear",
+            "iron_gear",
+            "steel_gear",
+            "tungsten_gear"
+    );
 
     private BaseContentGameTests() {
     }
@@ -97,6 +166,82 @@ public final class BaseContentGameTests {
     public static void liquidAndLegacyGasBucketsRoundTrip(GameTestHelper helper) {
         assertBucketRoundTrip(helper, FluidDefinition.OIL, new BlockPos(1, 1, 1));
         assertBucketRoundTrip(helper, FluidDefinition.STEAM, new BlockPos(1, 1, 2));
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void fluidFamiliesUseFrozenRuntimeIds(GameTestHelper helper) {
+        for (FluidDefinition definition : FluidDefinition.values()) {
+            ModFluids.FluidFamily family = ModFluids.get(definition);
+            ResourceLocation baseId = Magneticraft.id(definition.id());
+            ResourceLocation flowingId = Magneticraft.id(definition.id() + "_flowing");
+            ResourceLocation bucketId = Magneticraft.id(definition.id() + "_bucket");
+
+            assertRegistryEntry(helper, "fluid type", ForgeRegistries.FLUID_TYPES.get(), family.type(), baseId);
+            assertRegistryEntry(helper, "source fluid", ForgeRegistries.FLUIDS, family.source(), baseId);
+            assertRegistryEntry(helper, "flowing fluid", ForgeRegistries.FLUIDS, family.flowing(), flowingId);
+            assertRegistryEntry(helper, "fluid block", ForgeRegistries.BLOCKS, family.block(), baseId);
+            assertRegistryEntry(helper, "fluid bucket", ForgeRegistries.ITEMS, family.bucket(), bucketId);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void definitionDrivenContentUsesFrozenRuntimeIds(GameTestHelper helper) {
+        for (BaseBlockDefinition definition : BaseBlockDefinition.values()) {
+            assertBlockItemId(helper, definition.id(), ModBlocks.get(definition));
+        }
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            assertBlockItemId(helper, definition.id(), ModMachineBlocks.machine(definition));
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            assertBlockItemId(helper, definition.id(), ModAdvancedBlocks.controller(definition));
+        }
+        ModItems.materials().forEach((form, entries) -> entries.forEach(
+                (metal, item) -> assertItemId(helper, form.id(metal), item)
+        ));
+        for (CraftingComponent component : CraftingComponent.values()) {
+            assertItemId(helper, component.id(), ModItems.component(component));
+        }
+        for (HammerType type : HammerType.values()) {
+            assertItemId(helper, type.id(), ModItems.hammer(type));
+        }
+
+        assertItemId(helper, "guide_book", ModItems.GUIDE_BOOK);
+        assertItemId(helper, "low_voltage_battery", ModMachineItems.LOW_BATTERY);
+        assertItemId(helper, "medium_voltage_battery", ModMachineItems.MEDIUM_BATTERY);
+        assertItemId(helper, "electric_drill", ModMachineItems.ELECTRIC_DRILL);
+        assertItemId(helper, "electric_chainsaw", ModMachineItems.ELECTRIC_CHAINSAW);
+        assertItemId(helper, "electric_piston", ModMachineItems.ELECTRIC_PISTON);
+        assertItemId(helper, "voltmeter", ModMachineItems.VOLTMETER);
+        assertItemId(helper, "thermometer", ModMachineItems.THERMOMETER);
+        assertItemId(helper, "inserter_speed_upgrade", ModMachineItems.INSERTER_SPEED_UPGRADE);
+        assertItemId(helper, "inserter_stack_upgrade", ModMachineItems.INSERTER_STACK_UPGRADE);
+        assertItemId(helper, "wrench", ModNetworkItems.WRENCH);
+        assertBlockItemId(helper, "computer", ModComputerContent.COMPUTER);
+        assertBlockItemId(helper, "mining_robot", ModComputerContent.MINING_ROBOT);
+        assertItemId(helper, "floppy_disk", ModComputerContent.FLOPPY_DISK);
+
+        assertPublicContentRegistryObjectsAreBound(helper, ModMachineBlocks.class);
+        assertPublicContentRegistryObjectsAreBound(helper, ModMachineItems.class);
+        assertPublicContentRegistryObjectsAreBound(helper, ModNetworkBlocks.class);
+        assertPublicContentRegistryObjectsAreBound(helper, ModNetworkItems.class);
+        assertPublicContentRegistryObjectsAreBound(helper, ModAdvancedBlocks.class);
+        assertPublicContentRegistryObjectsAreBound(helper, ModComputerContent.class);
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void renamedLegacyIdsAreAbsentFromRuntimeRegistries(GameTestHelper helper) {
+        assertNoForbiddenIds(helper, "blocks", ForgeRegistries.BLOCKS.getKeys());
+        assertNoForbiddenIds(helper, "items", ForgeRegistries.ITEMS.getKeys());
+        assertNoForbiddenIds(helper, "fluid types", ForgeRegistries.FLUID_TYPES.get().getKeys());
+        assertNoForbiddenIds(helper, "fluids", ForgeRegistries.FLUIDS.getKeys());
+        assertNoForbiddenIds(helper, "block entity types", ForgeRegistries.BLOCK_ENTITY_TYPES.getKeys());
+        assertNoForbiddenIds(helper, "menus", ForgeRegistries.MENU_TYPES.getKeys());
+        assertNoForbiddenIds(helper, "recipe types", ForgeRegistries.RECIPE_TYPES.getKeys());
+        assertNoForbiddenIds(helper, "recipe serializers", ForgeRegistries.RECIPE_SERIALIZERS.getKeys());
+        assertNoForbiddenIds(helper, "sounds", ForgeRegistries.SOUND_EVENTS.getKeys());
         helper.succeed();
     }
 
@@ -190,6 +335,123 @@ public final class BaseContentGameTests {
         );
         helper.assertTrue(pickedUp.is(bucket), definition.id() + " returned the wrong bucket");
         helper.assertTrue(helper.getLevel().getFluidState(absolutePos).isEmpty(), definition.id() + " remained after pickup");
+    }
+
+    private static void assertBlockItemId(
+            GameTestHelper helper,
+            String expectedPath,
+            RegistryObject<? extends Block> blockObject
+    ) {
+        ResourceLocation expectedId = Magneticraft.id(expectedPath);
+        assertRegistryEntry(helper, "block", ForgeRegistries.BLOCKS, blockObject, expectedId);
+        Item blockItem = blockObject.get().asItem();
+        helper.assertTrue(blockItem != Items.AIR, expectedId + " is missing its block item");
+        helper.assertTrue(
+                expectedId.equals(ForgeRegistries.ITEMS.getKey(blockItem)),
+                expectedId + " block item has runtime ID " + ForgeRegistries.ITEMS.getKey(blockItem)
+        );
+        helper.assertTrue(
+                ForgeRegistries.ITEMS.getValue(expectedId) == blockItem,
+                expectedId + " does not resolve to its block item"
+        );
+    }
+
+    private static void assertItemId(
+            GameTestHelper helper,
+            String expectedPath,
+            RegistryObject<? extends Item> itemObject
+    ) {
+        assertRegistryEntry(
+                helper,
+                "item",
+                ForgeRegistries.ITEMS,
+                itemObject,
+                Magneticraft.id(expectedPath)
+        );
+    }
+
+    private static <T> void assertRegistryEntry(
+            GameTestHelper helper,
+            String kind,
+            IForgeRegistry<T> registry,
+            RegistryObject<? extends T> entry,
+            ResourceLocation expectedId
+    ) {
+        T value = entry.get();
+        helper.assertTrue(
+                expectedId.equals(entry.getId()),
+                kind + " registry object expected " + expectedId + " but declares " + entry.getId()
+        );
+        helper.assertTrue(
+                expectedId.equals(registry.getKey(value)),
+                kind + " " + expectedId + " has runtime ID " + registry.getKey(value)
+        );
+        helper.assertTrue(
+                registry.getValue(expectedId) == value,
+                kind + " " + expectedId + " does not resolve to its registered value"
+        );
+    }
+
+    private static void assertPublicContentRegistryObjectsAreBound(GameTestHelper helper, Class<?> owner) {
+        for (Field field : owner.getDeclaredFields()) {
+            if (!Modifier.isPublic(field.getModifiers())
+                    || !Modifier.isStatic(field.getModifiers())
+                    || !RegistryObject.class.isAssignableFrom(field.getType())) {
+                continue;
+            }
+            try {
+                RegistryObject<?> entry = (RegistryObject<?>) field.get(null);
+                Object value = entry.get();
+                ResourceLocation runtimeId = runtimeRegistryId(value);
+                if (runtimeId == null) {
+                    continue;
+                }
+                helper.assertTrue(
+                        entry.getId().equals(runtimeId),
+                        owner.getSimpleName() + "." + field.getName()
+                                + " declares " + entry.getId() + " but is registered as " + runtimeId
+                );
+                if (value instanceof Block block && block.asItem() != Items.AIR) {
+                    helper.assertTrue(
+                            runtimeId.equals(ForgeRegistries.ITEMS.getKey(block.asItem())),
+                            runtimeId + " block and block item IDs diverged"
+                    );
+                }
+            } catch (IllegalAccessException exception) {
+                throw new AssertionError("Cannot inspect " + owner.getName() + "." + field.getName(), exception);
+            }
+        }
+    }
+
+    private static ResourceLocation runtimeRegistryId(Object value) {
+        if (value instanceof Block block) {
+            return ForgeRegistries.BLOCKS.getKey(block);
+        }
+        if (value instanceof Item item) {
+            return ForgeRegistries.ITEMS.getKey(item);
+        }
+        if (value instanceof net.minecraft.world.level.material.Fluid fluid) {
+            return ForgeRegistries.FLUIDS.getKey(fluid);
+        }
+        if (value instanceof FluidType fluidType) {
+            return ForgeRegistries.FLUID_TYPES.get().getKey(fluidType);
+        }
+        return null;
+    }
+
+    private static void assertNoForbiddenIds(
+            GameTestHelper helper,
+            String registryName,
+            Iterable<ResourceLocation> ids
+    ) {
+        for (ResourceLocation id : ids) {
+            if (Magneticraft.MOD_ID.equals(id.getNamespace())) {
+                helper.assertTrue(
+                        !FORBIDDEN_LEGACY_IDS.contains(id.getPath()),
+                        registryName + " still contains forbidden legacy ID " + id
+                );
+            }
+        }
     }
 
     private static void assertRecipeResult(

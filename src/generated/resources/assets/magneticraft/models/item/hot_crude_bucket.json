@@ -1,5 +1,0 @@
-{
-  "parent": "forge:item/bucket",
-  "fluid": "magneticraft:hot_crude",
-  "loader": "forge:fluid_container"
-}

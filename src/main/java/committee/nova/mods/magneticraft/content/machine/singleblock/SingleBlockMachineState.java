@@ -8,6 +8,7 @@ import net.minecraft.nbt.Tag;
  * Durable, loader-independent runtime state shared by the single-block behavior strategies.
  */
 final class SingleBlockMachineState {
+    private static final int DEFAULT_INSERTER_FLAGS = (1 << 2) | (1 << 3);
     private static final String PROGRESS_TAG = "progress";
     private static final String TOTAL_PROGRESS_TAG = "total_progress";
     private static final String BURN_PROGRESS_TAG = "burn_progress";
@@ -94,9 +95,9 @@ final class SingleBlockMachineState {
         working = tag.getBoolean(WORKING_TAG);
         doorOpen = tag.getBoolean(DOOR_OPEN_TAG);
         tankExportEnabled = tag.getBoolean(TANK_EXPORT_ENABLED_TAG);
-        if (tag.contains(INSERTER_FLAGS_TAG, Tag.TAG_INT)) {
-            loadInserterFlags(tag.getInt(INSERTER_FLAGS_TAG));
-        }
+        loadInserterFlags(tag.contains(INSERTER_FLAGS_TAG, Tag.TAG_INT)
+                ? tag.getInt(INSERTER_FLAGS_TAG)
+                : DEFAULT_INSERTER_FLAGS);
         activeRecipe = tag.getString(ACTIVE_RECIPE_TAG);
         double loadedFlux = tag.getDouble(THERMOPILE_FLUX_TAG);
         thermopileFlux = Double.isFinite(loadedFlux) ? Math.max(0.0D, loadedFlux) : 0.0D;

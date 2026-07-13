@@ -9,7 +9,7 @@
       "tag": "forge:ingots/copper"
     },
     "C": {
-      "item": "magneticraft:grate"
+      "item": "magneticraft:iron_grate"
     },
     "D": {
       "item": "magneticraft:fine_copper_wire"

@@ -13,10 +13,23 @@ import org.jetbrains.annotations.Nullable;
 public interface MachineModule {
     ResourceLocation id();
 
+    /** Schema owned by this module's namespaced persistence payload. */
+    default int persistenceSchemaVersion() {
+        return 1;
+    }
+
     default void load(CompoundTag tag) {
     }
 
     default void save(CompoundTag tag) {
+    }
+
+    /**
+     * Restores this module to the defaults represented by an empty payload.
+     * Persistence routing calls this instead of exposing incompatible or missing payloads.
+     */
+    default void resetPersistentState() {
+        load(new CompoundTag());
     }
 
     default void loadClientData(CompoundTag tag) {

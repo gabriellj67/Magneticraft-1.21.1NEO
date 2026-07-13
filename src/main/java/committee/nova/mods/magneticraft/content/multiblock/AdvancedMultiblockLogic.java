@@ -444,7 +444,7 @@ final class AdvancedMultiblockLogic {
     private OilHeaterBatch oilHeaterBatch(FluidStack input) {
         if (input.getFluid().defaultFluidState().is(FluidTags.WATER)) {
             return new OilHeaterBatch(
-                    Magneticraft.id("oil_heater/water"),
+                    Magneticraft.id("oil_heater/water_to_steam"),
                     1,
                     new FluidStack(ModFluids.get(FluidDefinition.STEAM).source().get(), 10),
                     1,
@@ -453,7 +453,7 @@ final class AdvancedMultiblockLogic {
         }
         if (input.getFluid() == ModFluids.get(FluidDefinition.OIL).source().get()) {
             return new OilHeaterBatch(
-                    Magneticraft.id("oil_heater/oil"),
+                    Magneticraft.id("oil_heater/crude_oil_to_heated_crude_oil"),
                     10,
                     new FluidStack(ModFluids.get(FluidDefinition.HOT_CRUDE).source().get(), 100),
                     2,
@@ -465,29 +465,29 @@ final class AdvancedMultiblockLogic {
 
     private RefineryBatch refineryBatch(FluidStack input) {
         if (input.getFluid() == ModFluids.get(FluidDefinition.STEAM).source().get()) {
-            return refineryBatch("steam", 10, 2,
+            return refineryBatch("steam_to_water", 10, 2,
                     new FluidStack(Fluids.WATER, 1), FluidStack.EMPTY, FluidStack.EMPTY);
         }
         if (input.getFluid() == ModFluids.get(FluidDefinition.HOT_CRUDE).source().get()) {
-            return refineryBatch("hot_crude", 100, 1,
+            return refineryBatch("heated_crude_oil_fractionation", 100, 1,
                     fluid(FluidDefinition.HEAVY_OIL, 4),
                     fluid(FluidDefinition.LIGHT_OIL, 3),
                     fluid(FluidDefinition.LPG, 3));
         }
         if (input.getFluid() == ModFluids.get(FluidDefinition.HEAVY_OIL).source().get()) {
-            return refineryBatch("heavy_oil", 10, 1,
+            return refineryBatch("heavy_oil_fractionation", 10, 1,
                     fluid(FluidDefinition.OIL_RESIDUE, 4),
                     fluid(FluidDefinition.FUEL, 5),
                     fluid(FluidDefinition.LUBRICANT, 1));
         }
         if (input.getFluid() == ModFluids.get(FluidDefinition.LIGHT_OIL).source().get()) {
-            return refineryBatch("light_oil", 10, 1,
+            return refineryBatch("light_oil_fractionation", 10, 1,
                     fluid(FluidDefinition.DIESEL, 5),
                     fluid(FluidDefinition.KEROSENE, 2),
                     fluid(FluidDefinition.GASOLINE, 3));
         }
         if (input.getFluid() == ModFluids.get(FluidDefinition.LPG).source().get()) {
-            return refineryBatch("lpg", 10, 1,
+            return refineryBatch("lpg_fractionation", 10, 1,
                     fluid(FluidDefinition.PLASTIC, 5),
                     fluid(FluidDefinition.NAPHTHA, 2),
                     fluid(FluidDefinition.NATURAL_GAS, 3));

@@ -4,18 +4,18 @@
       "attack_cost_fe": 0,
       "break_cost_fe": 0,
       "capacity_fe": 250000,
-      "description": "guide.magneticraft.item.battery_item_low.description",
-      "id": "magneticraft:battery_item_low",
-      "translation_key": "item.magneticraft.battery_item_low",
+      "description": "guide.magneticraft.item.low_voltage_battery.description",
+      "id": "magneticraft:low_voltage_battery",
+      "translation_key": "item.magneticraft.low_voltage_battery",
       "use_cost_fe": 0
     },
     {
       "attack_cost_fe": 0,
       "break_cost_fe": 0,
       "capacity_fe": 2500000,
-      "description": "guide.magneticraft.item.battery_item_medium.description",
-      "id": "magneticraft:battery_item_medium",
-      "translation_key": "item.magneticraft.battery_item_medium",
+      "description": "guide.magneticraft.item.medium_voltage_battery.description",
+      "id": "magneticraft:medium_voltage_battery",
+      "translation_key": "item.magneticraft.medium_voltage_battery",
       "use_cost_fe": 0
     },
     {

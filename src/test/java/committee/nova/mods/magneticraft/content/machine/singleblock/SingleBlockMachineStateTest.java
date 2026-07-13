@@ -56,4 +56,25 @@ class SingleBlockMachineStateTest {
         assertFalse(state.toggleInserterFlag(99));
         assertEquals(flags, state.inserterFlags());
     }
+
+    @Test
+    void emptyPayloadRestoresDefaultsAfterPriorState() {
+        SingleBlockMachineState state = new SingleBlockMachineState();
+        state.progress = 12;
+        state.working = true;
+        state.tankExportEnabled = true;
+        state.activeRecipe = "magneticraft:test";
+        assertTrue(state.toggleInserterFlag(0));
+        assertTrue(state.toggleInserterFlag(2));
+        assertTrue(state.toggleInserterFlag(3));
+        assertTrue(state.toggleInserterFlag(5));
+
+        state.load(new CompoundTag());
+
+        assertEquals(0, state.progress);
+        assertFalse(state.working);
+        assertFalse(state.tankExportEnabled);
+        assertEquals("", state.activeRecipe);
+        assertEquals((1 << 2) | (1 << 3), state.inserterFlags());
+    }
 }

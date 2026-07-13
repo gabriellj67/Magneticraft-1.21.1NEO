@@ -14,11 +14,11 @@ import java.util.Locale;
 @ZenCodeType.Name("mods.magneticraft.Recipes")
 public final class MagneticraftCraftTweakerRecipes {
     private static final IRecipeManager<?> CRUSHING =
-            new MagneticraftRecipeManager<>("crushing", ModRecipeTypes.CRUSHING_TYPE::get);
+            new MagneticraftRecipeManager<>("crushing_table", ModRecipeTypes.CRUSHING_TYPE::get);
     private static final IRecipeManager<?> SLUICE =
-            new MagneticraftRecipeManager<>("sluice", ModRecipeTypes.SLUICE_TYPE::get);
+            new MagneticraftRecipeManager<>("sluice_box", ModRecipeTypes.SLUICE_TYPE::get);
     private static final IRecipeManager<?> GASIFICATION =
-            new MagneticraftRecipeManager<>("gasification", ModRecipeTypes.GASIFICATION_TYPE::get);
+            new MagneticraftRecipeManager<>("gasification_unit", ModRecipeTypes.GASIFICATION_TYPE::get);
     private static final IRecipeManager<?> THERMOPILE =
             new MagneticraftRecipeManager<>("thermopile", ModRecipeTypes.THERMOPILE_TYPE::get);
     private static final IRecipeManager<?> FLUID_FUEL =
@@ -47,9 +47,9 @@ public final class MagneticraftCraftTweakerRecipes {
             normalized = normalized.substring(Magneticraft.MOD_ID.length() + 1);
         }
         return switch (normalized) {
-            case "crushing" -> CRUSHING;
-            case "sluice" -> SLUICE;
-            case "gasification" -> GASIFICATION;
+            case "crushing_table" -> CRUSHING;
+            case "sluice_box" -> SLUICE;
+            case "gasification_unit" -> GASIFICATION;
             case "thermopile" -> THERMOPILE;
             case "fluid_fuel" -> FLUID_FUEL;
             case "advanced_processing" -> ADVANCED_PROCESSING;

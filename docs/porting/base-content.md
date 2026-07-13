@@ -62,10 +62,10 @@ The US-spelling Forge aliases `ingots/aluminum`, `nuggets/aluminum` and
 | `storage_blocks` | pyrite/sulfur | `magneticraft:sulfur_block` |
 | `limestone` | normal | `magneticraft:limestone` |
 | `limestone` | brick | `magneticraft:limestone_bricks` |
-| `limestone` | cobble | `magneticraft:cobbled_limestone` |
+| `limestone` | cobblestone | `magneticraft:limestone_cobblestone` |
 | `burnt_limestone` | normal | `magneticraft:burnt_limestone` |
 | `burnt_limestone` | brick | `magneticraft:burnt_limestone_bricks` |
-| `burnt_limestone` | cobble | `magneticraft:cobbled_burnt_limestone` |
+| `burnt_limestone` | cobblestone | `magneticraft:burnt_limestone_cobblestone` |
 | `tile_limestone` | normal | `magneticraft:limestone_tiles` |
 | `tile_limestone` | inverted | `magneticraft:inverted_limestone_tiles` |
 
@@ -106,19 +106,19 @@ the arbitrary values used by the legacy Forge fluid API.
 | ID | Temperature | Density | Viscosity | Legacy gaseous flag |
 |---|---:|---:|---:|---|
 | steam | 373 | 1 | 10 | yes |
-| oil | 298 | 1100 | 2000 | no |
-| hot_crude | 873 | 10 | 20 | yes |
+| crude_oil | 298 | 1100 | 2000 | no |
+| heated_crude_oil | 873 | 10 | 20 | yes |
 | lpg | 298 | 300 | 1000 | no |
 | light_oil | 298 | 700 | 1000 | no |
 | heavy_oil | 298 | 800 | 1000 | no |
 | natural_gas | 298 | 1 | 10 | yes |
 | naphtha | 298 | 800 | 1000 | no |
-| plastic | 298 | 900 | 1000 | no |
+| liquid_plastic | 298 | 900 | 1000 | no |
 | gasoline | 298 | 500 | 1000 | no |
 | kerosene | 298 | 600 | 1000 | no |
 | diesel | 298 | 700 | 1000 | no |
 | lubricant | 298 | 600 | 1000 | no |
-| fuel | 298 | 700 | 1000 | no |
+| fuel_oil | 298 | 700 | 1000 | no |
 | oil_residue | 298 | 800 | 2000 | no |
 | wood_gas | 373 | 1 | 10 | yes |
 

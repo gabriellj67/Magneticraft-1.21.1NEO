@@ -1,0 +1,12 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 30,
+  "fluid_result": {
+    "amount": 50,
+    "fluid": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "tag": "forge:chests/wooden"
+  },
+  "minimum_temperature": 473.15
+}

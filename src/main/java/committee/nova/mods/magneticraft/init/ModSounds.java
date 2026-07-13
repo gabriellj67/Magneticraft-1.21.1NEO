@@ -8,8 +8,8 @@ import net.minecraftforge.registries.RegistryObject;
  * Crushing-table sound events.
  */
 public final class ModSounds {
-    public static final RegistryObject<SoundEvent> CRUSHING_HIT = register("crushing_hit");
-    public static final RegistryObject<SoundEvent> CRUSHING_FINAL = register("crushing_final");
+    public static final RegistryObject<SoundEvent> CRUSHING_HIT = register("crushing_table_hit");
+    public static final RegistryObject<SoundEvent> CRUSHING_FINAL = register("crushing_table_complete");
 
     private ModSounds() {
     }

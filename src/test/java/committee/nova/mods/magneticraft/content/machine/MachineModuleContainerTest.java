@@ -13,24 +13,42 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MachineModuleContainerTest {
     @Test
-    void stableIdsRouteNbtAndUnknownOrMissingNodesAreIgnored() {
+    void stableIdsRouteOnlyCurrentSchemaAndResetMissingOrIncompatibleNodes() {
         ResourceLocation id = Magneticraft.id("test_module");
         MachineModuleContainer modules = new MachineModuleContainer();
         CountingModule module = modules.add(new CountingModule(id));
 
         CompoundTag saved = modules.save();
         assertTrue(saved.contains(id.toString()));
-        assertEquals(42, saved.getCompound(id.toString()).getInt("value"));
+        CompoundTag savedModule = saved.getCompound(id.toString());
+        assertEquals(1, savedModule.getInt("schema_version"));
+        assertEquals(42, savedModule.getInt("value"));
         assertThrows(IllegalArgumentException.class, () -> modules.add(new CountingModule(id)));
-
-        CompoundTag unknownOnly = new CompoundTag();
-        unknownOnly.put("other:unknown", new CompoundTag());
-        modules.load(unknownOnly);
-        assertEquals(0, module.loadCount, "Missing known nodes must retain module defaults");
 
         modules.load(saved);
         assertEquals(1, module.loadCount);
         assertEquals(42, module.loadedValue);
+
+        CompoundTag unknownOnly = new CompoundTag();
+        unknownOnly.put("other:unknown", new CompoundTag());
+        modules.load(unknownOnly);
+        assertEquals(2, module.loadCount);
+        assertEquals(0, module.loadedValue, "Missing known nodes must reset to defaults");
+
+        CompoundTag legacyRoot = new CompoundTag();
+        CompoundTag legacyModule = new CompoundTag();
+        legacyModule.putInt("value", 99);
+        legacyRoot.put(id.toString(), legacyModule);
+        modules.load(legacyRoot);
+        assertEquals(3, module.loadCount);
+        assertEquals(0, module.loadedValue, "Missing schema version must not expose the legacy payload");
+
+        CompoundTag futureRoot = saved.copy();
+        futureRoot.getCompound(id.toString()).putInt("schema_version", 2);
+        futureRoot.getCompound(id.toString()).putInt("value", 99);
+        modules.load(futureRoot);
+        assertEquals(4, module.loadCount);
+        assertEquals(0, module.loadedValue, "Unsupported schema version must reset to defaults");
     }
 
     private static final class CountingModule implements MachineModule {

@@ -36,7 +36,7 @@
       "symbol": "M"
     },
     {
-      "block": "magneticraft:multiblock_base",
+      "block": "magneticraft:machine_casing",
       "rule": "base",
       "symbol": "#"
     },

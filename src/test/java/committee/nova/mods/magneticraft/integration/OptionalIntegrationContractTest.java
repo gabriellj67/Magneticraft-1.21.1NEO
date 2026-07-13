@@ -76,9 +76,9 @@ class OptionalIntegrationContractTest {
         ));
 
         for (String type : List.of(
-                "crushing",
-                "sluice",
-                "gasification",
+                "crushing_table",
+                "sluice_box",
+                "gasification_unit",
                 "thermopile",
                 "fluid_fuel",
                 "advanced_processing"

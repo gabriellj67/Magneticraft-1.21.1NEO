@@ -28,7 +28,7 @@ public final class ModAdvancedBlocks {
             new EnumMap<>(MultiblockDefinition.class);
 
     public static final RegistryObject<Block> MULTIBLOCK_BASE = register(
-            "multiblock_base",
+            "machine_casing",
             () -> new Block(partProperties())
     );
     public static final RegistryObject<Block> CORRUGATED_IRON = register(
@@ -40,15 +40,15 @@ public final class ModAdvancedBlocks {
             () -> new Block(partProperties())
     );
     public static final RegistryObject<Block> MULTIBLOCK_COLUMN = register(
-            "multiblock_column",
+            "machine_support_column",
             () -> new RotatedPillarBlock(partProperties())
     );
     public static final RegistryObject<Block> STRIPED_MULTIBLOCK_PART = register(
-            "striped_multiblock_part",
+            "striped_machine_casing",
             () -> new Block(partProperties())
     );
     public static final RegistryObject<Block> ELECTRIC_MULTIBLOCK_PART = register(
-            "electric_multiblock_part",
+            "electrical_machine_casing",
             () -> new Block(partProperties())
     );
     public static final RegistryObject<Block> OIL_DEPOSIT = ModRegistries.BLOCKS.register(

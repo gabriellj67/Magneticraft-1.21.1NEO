@@ -15,7 +15,7 @@
       "tag": "forge:ingots/iron"
     },
     "E": {
-      "item": "magneticraft:battery_item_low"
+      "item": "magneticraft:low_voltage_battery"
     }
   },
   "pattern": [

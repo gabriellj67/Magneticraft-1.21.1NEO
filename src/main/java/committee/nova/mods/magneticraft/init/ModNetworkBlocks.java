@@ -41,7 +41,7 @@ public final class ModNetworkBlocks {
             () -> new HeatSinkBlock(machineProperties())
     );
     public static final RegistryObject<Block> IRON_PIPE = register(
-            "iron_pipe",
+            "iron_fluid_pipe",
             () -> new IronPipeBlock(conduitProperties(MapColor.METAL))
     );
     public static final RegistryObject<Block> PNEUMATIC_TUBE = register(

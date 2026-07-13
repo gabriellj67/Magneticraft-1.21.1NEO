@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkNode;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
@@ -75,7 +76,11 @@ public final class HeatNetworkModule extends AbstractPhysicalNetworkModule imple
 
     @Override
     protected void loadNetworkData(CompoundTag tag) {
-        node.setInternalEnergyJoules(tag.getDouble(INTERNAL_ENERGY_TAG));
+        if (tag.contains(INTERNAL_ENERGY_TAG, Tag.TAG_ANY_NUMERIC)) {
+            node.setInternalEnergyJoules(tag.getDouble(INTERNAL_ENERGY_TAG));
+        } else {
+            node.setTemperature(HeatNode.AMBIENT_TEMPERATURE_KELVIN);
+        }
     }
 
     @Override

@@ -28,8 +28,6 @@ import java.util.UUID;
  * Durable owner and VM state shared by computers and mining robots.
  */
 public abstract class ProgrammableBlockEntity extends MachineBlockEntity implements ComputerDevice, MenuProvider {
-    private static final int VM_FORMAT_VERSION = 1;
-    private static final String VM_VERSION_TAG = "vm_version";
     private static final String PROGRAM_TAG = "program";
     private static final String PROGRAM_COUNTER_TAG = "program_counter";
     private static final String REGISTERS_TAG = "registers";
@@ -191,7 +189,6 @@ public abstract class ProgrammableBlockEntity extends MachineBlockEntity impleme
 
     @Override
     protected final void saveMachineData(CompoundTag tag) {
-        tag.putInt(VM_VERSION_TAG, VM_FORMAT_VERSION);
         ProgramNbt.writeProgram(tag, PROGRAM_TAG, vm.program());
         tag.putInt(PROGRAM_COUNTER_TAG, vm.programCounter());
         tag.putIntArray(REGISTERS_TAG, vm.copyRegisters());
@@ -212,11 +209,6 @@ public abstract class ProgrammableBlockEntity extends MachineBlockEntity impleme
         owner = tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
         programRevision = Math.max(0L, tag.getLong(PROGRAM_REVISION_TAG));
         redstoneOutput = Math.max(0, Math.min(15, tag.getInt(REDSTONE_OUTPUT_TAG)));
-        if (tag.getInt(VM_VERSION_TAG) != VM_FORMAT_VERSION) {
-            vm.restore(List.of(), 0, new int[0], new int[0], false, VmFault.INVALID_SNAPSHOT, 0);
-            loadProgrammableData(tag);
-            return;
-        }
         Optional<List<ComputerInstruction>> restoredProgram = ProgramNbt.readProgram(tag, PROGRAM_TAG);
         if (restoredProgram.isEmpty()) {
             vm.restore(List.of(), 0, new int[0], new int[0], false, VmFault.INVALID_SNAPSHOT, 0);
@@ -233,6 +225,16 @@ public abstract class ProgrammableBlockEntity extends MachineBlockEntity impleme
                 tag.getInt(LAST_RESULT_TAG)
         );
         loadProgrammableData(tag);
+    }
+
+    @Override
+    protected final void resetMachineData() {
+        owner = null;
+        programRevision = 0L;
+        setRedstoneOutput(0);
+        clientRunning = false;
+        vm.replaceProgram(List.of());
+        loadProgrammableData(new CompoundTag());
     }
 
     protected void saveProgrammableData(CompoundTag tag) {

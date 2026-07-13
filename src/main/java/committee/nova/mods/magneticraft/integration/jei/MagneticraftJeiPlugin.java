@@ -26,9 +26,9 @@ import net.minecraft.world.item.crafting.RecipeManager;
 /** Optional JEI entry point. JEI owns discovery, so the common mod never links these API types. */
 @JeiPlugin
 public final class MagneticraftJeiPlugin implements IModPlugin {
-    public static final RecipeType<CrushingRecipe> CRUSHING = type("crushing", CrushingRecipe.class);
-    public static final RecipeType<SluiceRecipe> SLUICE = type("sluice", SluiceRecipe.class);
-    public static final RecipeType<GasificationRecipe> GASIFICATION = type("gasification", GasificationRecipe.class);
+    public static final RecipeType<CrushingRecipe> CRUSHING = type("crushing_table", CrushingRecipe.class);
+    public static final RecipeType<SluiceRecipe> SLUICE = type("sluice_box", SluiceRecipe.class);
+    public static final RecipeType<GasificationRecipe> GASIFICATION = type("gasification_unit", GasificationRecipe.class);
     public static final RecipeType<ThermopileRecipe> THERMOPILE = type("thermopile", ThermopileRecipe.class);
     public static final RecipeType<FluidFuelRecipe> FLUID_FUEL = type("fluid_fuel", FluidFuelRecipe.class);
     public static final RecipeType<AdvancedProcessingRecipe> ADVANCED_PROCESSING =

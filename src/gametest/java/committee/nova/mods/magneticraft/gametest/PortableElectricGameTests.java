@@ -61,7 +61,7 @@ public final class PortableElectricGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void portableEnergyTransferAndVersionedNbtRemainCompatible(GameTestHelper helper) {
+    public static void portableEnergyTransferAndSchemaResetRemainStable(GameTestHelper helper) {
         ItemStack medium = new ItemStack(ModMachineItems.MEDIUM_BATTERY.get());
         IEnergyStorage mediumEnergy = energy(medium);
         helper.assertTrue(mediumEnergy.getMaxEnergyStored() == 2_500_000, "Medium battery has the wrong capacity");
@@ -81,26 +81,26 @@ public final class PortableElectricGameTests {
         CompoundTag saved = medium.save(new CompoundTag());
         CompoundTag energyData = findEnergyData(saved);
         helper.assertTrue(energyData != null, "Serialized ItemStack lost its energy capability data");
-        helper.assertTrue(energyData.getInt("data_version") == 1, "Portable energy data version is not 1");
+        helper.assertTrue(energyData.getInt("schema_version") == 1, "Portable energy schema version is not 1");
         helper.assertTrue(energyData.getInt("energy") == 500, "Portable energy used an unstable NBT key");
 
         CompoundTag legacy = saved.copy();
         CompoundTag legacyEnergy = findEnergyData(legacy);
         helper.assertTrue(legacyEnergy != null, "Could not locate legacy energy payload");
-        legacyEnergy.remove("data_version");
+        legacyEnergy.remove("schema_version");
         legacyEnergy.putInt("energy", 12_345);
         ItemStack restoredLegacy = ItemStack.of(legacy);
-        helper.assertTrue(energy(restoredLegacy).getEnergyStored() == 12_345,
-                "Versionless v0 portable energy data did not load");
+        helper.assertTrue(energy(restoredLegacy).getEnergyStored() == 0,
+                "Versionless portable energy data survived the 0.2.0 reset");
 
         ItemStack low = new ItemStack(ModMachineItems.LOW_BATTERY.get());
         charge(low, 12_345);
         CompoundTag legacyLow = low.save(new CompoundTag());
         CompoundTag legacyLowEnergy = findEnergyData(legacyLow);
         helper.assertTrue(legacyLowEnergy != null, "Could not locate low-battery energy payload");
-        legacyLowEnergy.remove("data_version");
-        helper.assertTrue(energy(ItemStack.of(legacyLow)).getEnergyStored() == 12_345,
-                "Low battery did not load its versionless v0 energy data");
+        legacyLowEnergy.remove("schema_version");
+        helper.assertTrue(energy(ItemStack.of(legacyLow)).getEnergyStored() == 0,
+                "Low battery retained its versionless energy data");
 
         CompoundTag oversized = saved.copy();
         findEnergyData(oversized).putInt("energy", Integer.MAX_VALUE);
@@ -116,16 +116,16 @@ public final class PortableElectricGameTests {
                 "Negative portable energy was not clamped");
         CompoundTag future = saved.copy();
         CompoundTag futureEnergy = findEnergyData(future);
-        futureEnergy.putInt("data_version", 99);
+        futureEnergy.putInt("schema_version", 99);
         futureEnergy.putInt("energy", 456);
-        helper.assertTrue(energy(ItemStack.of(future)).getEnergyStored() == 456,
-                "Future portable energy data did not load safely");
+        helper.assertTrue(energy(ItemStack.of(future)).getEnergyStored() == 0,
+                "Unknown portable energy schema did not reset safely");
 
         ItemStack copied = medium.copy();
         helper.assertTrue(energy(copied).getEnergyStored() == 500, "ItemStack copy lost portable energy");
         CompoundTag copiedData = findEnergyData(copied.save(new CompoundTag()));
-        helper.assertTrue(copiedData != null && copiedData.getInt("data_version") == 1,
-                "ItemStack copy lost the portable energy data version");
+        helper.assertTrue(copiedData != null && copiedData.getInt("schema_version") == 1,
+                "ItemStack copy lost the portable energy schema version");
 
         var tooltip = new ArrayList<net.minecraft.network.chat.Component>();
         medium.getItem().appendHoverText(medium, null, tooltip, TooltipFlag.NORMAL);
@@ -396,8 +396,8 @@ public final class PortableElectricGameTests {
 
     @GameTest(template = TEMPLATE)
     public static void portableEquipmentRecipesAreRegistered(GameTestHelper helper) {
-        assertRecipe(helper, "battery_item_low", ModMachineItems.LOW_BATTERY.get());
-        assertRecipe(helper, "battery_item_medium", ModMachineItems.MEDIUM_BATTERY.get());
+        assertRecipe(helper, "low_voltage_battery", ModMachineItems.LOW_BATTERY.get());
+        assertRecipe(helper, "medium_voltage_battery", ModMachineItems.MEDIUM_BATTERY.get());
         assertRecipe(helper, "electric_drill", ModMachineItems.ELECTRIC_DRILL.get());
         assertRecipe(helper, "electric_chainsaw", ModMachineItems.ELECTRIC_CHAINSAW.get());
         assertRecipe(helper, "electric_piston", ModMachineItems.ELECTRIC_PISTON.get());

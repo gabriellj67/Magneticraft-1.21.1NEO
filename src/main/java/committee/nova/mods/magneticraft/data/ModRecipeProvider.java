@@ -98,7 +98,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('I', Tags.Items.INGOTS_IRON)
                 .define('S', Tags.Items.STONE)
                 .unlockedBy("has_iron_ingot", has(Tags.Items.INGOTS_IRON))
-                .save(consumer, id("crafting/multiblock_base"));
+                .save(consumer, id("crafting/machine_casing"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.CORRUGATED_IRON.get(), 4)
                 .pattern("III")
@@ -121,15 +121,15 @@ final class ModRecipeProvider extends RecipeProvider {
                 .pattern("I")
                 .define('I', Tags.Items.INGOTS_IRON)
                 .define('B', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
-                .unlockedBy("has_multiblock_base", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
-                .save(consumer, id("crafting/multiblock_column"));
+                .unlockedBy("has_machine_casing", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                .save(consumer, id("crafting/machine_support_column"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(), 4)
                 .pattern("YBY")
                 .define('Y', Tags.Items.DYES_YELLOW)
                 .define('B', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
-                .unlockedBy("has_multiblock_base", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
-                .save(consumer, id("crafting/striped_multiblock_part"));
+                .unlockedBy("has_machine_casing", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                .save(consumer, id("crafting/striped_machine_casing"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(), 4)
                 .pattern("RWR")
@@ -138,8 +138,8 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('R', Tags.Items.DUSTS_REDSTONE)
                 .define('W', component(CraftingComponent.FINE_COPPER_WIRE))
                 .define('B', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
-                .unlockedBy("has_multiblock_base", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
-                .save(consumer, id("crafting/electric_multiblock_part"));
+                .unlockedBy("has_machine_casing", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                .save(consumer, id("crafting/electrical_machine_casing"));
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             ShapedRecipeBuilder.shaped(
@@ -152,7 +152,7 @@ final class ModRecipeProvider extends RecipeProvider {
                     .define('B', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
                     .define('C', ModAdvancedBlocks.COPPER_COIL.get())
                     .define('M', controllerMarker(definition))
-                    .unlockedBy("has_multiblock_base", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                    .unlockedBy("has_machine_casing", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
                     .save(consumer, id("crafting/" + definition.id()));
         }
 
@@ -164,7 +164,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('R', Tags.Items.DUSTS_REDSTONE)
                 .define('Q', Tags.Items.GEMS_QUARTZ)
                 .define('C', ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get())
-                .unlockedBy("has_electric_multiblock_part", has(ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get()))
+                .unlockedBy("has_electrical_machine_casing", has(ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get()))
                 .save(consumer, id("crafting/computer"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModComputerContent.MINING_ROBOT.get())
@@ -444,7 +444,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', ModTags.Items.ingot(Metal.LEAD))
                 .define('D', ModTags.Items.SULFUR_DUST)
                 .unlockedBy("has_sulfur", has(ModTags.Items.SULFUR_DUST))
-                .save(consumer, id("crafting/battery_item_low"));
+                .save(consumer, id("crafting/low_voltage_battery"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModMachineBlocks.GRATE.get(), 4)
                 .pattern(" A ")
@@ -453,7 +453,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('A', Blocks.IRON_BARS)
                 .define('B', Tags.Items.STONE)
                 .unlockedBy("has_iron_bars", has(Blocks.IRON_BARS))
-                .save(consumer, id("crafting/grate"));
+                .save(consumer, id("crafting/iron_grate"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineBlocks.BATTERY.get())
                 .pattern("AAA")
@@ -463,8 +463,8 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('B', ModTags.Items.lightPlate(Metal.IRON))
                 .define('C', ModMachineBlocks.GRATE.get())
                 .define('D', Tags.Items.INGOTS_IRON)
-                .unlockedBy("has_battery_item_low", has(ModMachineItems.LOW_BATTERY.get()))
-                .save(consumer, id("crafting/battery"));
+                .unlockedBy("has_low_voltage_battery", has(ModMachineItems.LOW_BATTERY.get()))
+                .save(consumer, id("crafting/battery_box"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineBlocks.ELECTRIC_FURNACE.get())
                 .pattern("ABA")
@@ -517,7 +517,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('I', Tags.Items.INGOTS_IRON)
                 .define('C', ModTags.Items.ingot(Metal.COPPER))
                 .define('G', ModMachineBlocks.GRATE.get())
-                .unlockedBy("has_grate", has(ModMachineBlocks.GRATE.get()))
+                .unlockedBy("has_iron_grate", has(ModMachineBlocks.GRATE.get()))
                 .save(consumer, id("crafting/heat_sink"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.IRON_PIPE.get(), 8)
@@ -526,7 +526,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .pattern("III")
                 .define('I', ModTags.Items.lightPlate(Metal.IRON))
                 .unlockedBy("has_iron_light_plate", has(ModTags.Items.lightPlate(Metal.IRON)))
-                .save(consumer, id("crafting/iron_pipe"));
+                .save(consumer, id("crafting/iron_fluid_pipe"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.PNEUMATIC_TUBE.get(), 8)
                 .pattern("IGI")
@@ -565,8 +565,8 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('A', ModTags.Items.ingot(Metal.COPPER))
                 .define('B', ModMachineItems.LOW_BATTERY.get())
                 .define('C', ModTags.Items.lightPlate(Metal.LEAD))
-                .unlockedBy("has_battery_item_low", has(ModMachineItems.LOW_BATTERY.get()))
-                .save(consumer, id("crafting/battery_item_medium"));
+                .unlockedBy("has_low_voltage_battery", has(ModMachineItems.LOW_BATTERY.get()))
+                .save(consumer, id("crafting/medium_voltage_battery"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModMachineItems.ELECTRIC_DRILL.get())
                 .pattern("AAB")
@@ -677,7 +677,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .pattern("ABA").pattern("BAB").pattern("ABA")
                 .define('A', Tags.Items.RODS_WOODEN).define('B', ItemTags.PLANKS)
                 .unlockedBy("has_planks", has(ItemTags.PLANKS))
-                .save(consumer, id("crafting/box"));
+                .save(consumer, id("crafting/wooden_crate"));
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.SLUICE_BOX))
                 .pattern("AB ").pattern("CAB").pattern("DDD")
                 .define('A', ItemTags.PLANKS).define('B', Tags.Items.RODS_WOODEN)
@@ -693,7 +693,7 @@ final class ModRecipeProvider extends RecipeProvider {
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.SMALL_TANK))
                 .pattern("AAA").pattern("ABA").pattern("AAA")
                 .define('A', Tags.Items.GLASS).define('B', ModMachineBlocks.GRATE.get())
-                .unlockedBy("has_grate", has(ModMachineBlocks.GRATE.get()))
+                .unlockedBy("has_iron_grate", has(ModMachineBlocks.GRATE.get()))
                 .save(consumer, id("crafting/small_tank"));
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, machine(SingleBlockMachineDefinition.FEEDING_TROUGH))
                 .pattern("A A").pattern("B B").pattern("ABA")
@@ -740,7 +740,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', ModMachineBlocks.GRATE.get()).define('D', Tags.Items.DUSTS_REDSTONE)
                 .define('E', Tags.Items.INGOTS_GOLD)
                 .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
-                .save(consumer, id("crafting/rf_heater"));
+                .save(consumer, id("crafting/forge_energy_heater"));
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.GASIFICATION_UNIT))
                 .pattern("AAA").pattern("ABA").pattern("AAA")
                 .define('A', Tags.Items.INGOTS_IRON).define('B', ModTags.Items.lightPlate(Metal.TUNGSTEN))
@@ -767,7 +767,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('A', ModTags.Items.lightPlate(Metal.IRON)).define('B', ModTags.Items.lightPlate(Metal.GOLD))
                 .define('C', ModTags.Items.lightPlate(Metal.LEAD)).define('D', Blocks.REDSTONE_BLOCK)
                 .unlockedBy("has_redstone_block", has(Blocks.REDSTONE_BLOCK))
-                .save(consumer, id("crafting/rf_transformer"));
+                .save(consumer, id("crafting/forge_energy_transformer"));
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.ELECTRIC_ENGINE))
                 .pattern("AAA").pattern(" B ").pattern("CDC")
                 .define('A', Tags.Items.INGOTS_COPPER).define('B', Tags.Items.GLASS)
@@ -834,14 +834,14 @@ final class ModRecipeProvider extends RecipeProvider {
             outputs.add(chance(Blocks.COBBLESTONE, 0.15F));
             SingleBlockRecipeBuilder.sluice(
                     consumer,
-                    id("sluice/" + metal.id() + "_rocky_chunk"),
+                    id("sluice_box/" + metal.id() + "_rocky_chunk"),
                     Ingredient.of(ModItems.material(MaterialForm.ROCKY_CHUNK, metal).get()),
                     outputs
             );
         }
         SingleBlockRecipeBuilder.sluice(
                 consumer,
-                id("sluice/gravel"),
+                id("sluice_box/gravel"),
                 Ingredient.of(Blocks.GRAVEL),
                 List.of(chance(Items.FLINT, 1.0F), chance(Items.FLINT, 0.15F))
         );
@@ -851,7 +851,7 @@ final class ModRecipeProvider extends RecipeProvider {
             gold.add(chance(Items.GOLD_NUGGET, chance));
             chance *= 0.5F;
         }
-        SingleBlockRecipeBuilder.sluice(consumer, id("sluice/sand"), Ingredient.of(Blocks.SAND), gold);
+        SingleBlockRecipeBuilder.sluice(consumer, id("sluice_box/sand"), Ingredient.of(Blocks.SAND), gold);
     }
 
     private void addGasificationRecipes(Consumer<FinishedRecipe> consumer) {
@@ -889,7 +889,7 @@ final class ModRecipeProvider extends RecipeProvider {
     ) {
         SingleBlockRecipeBuilder.gasification(
                 consumer,
-                id("gasification/" + name),
+                id("gasification_unit/" + name),
                 input,
                 itemOutput,
                 new FluidStack(fluid, fluidAmount),
@@ -1009,7 +1009,7 @@ final class ModRecipeProvider extends RecipeProvider {
             int requiredLevel
     ) {
         CrushingRecipeBuilder.crushing(input, new ItemStack(output, count), requiredLevel)
-                .save(consumer, id("crushing/" + name));
+                .save(consumer, id("crushing_table/" + name));
     }
 
     private void addMaterialConversions(Consumer<FinishedRecipe> consumer) {
@@ -1224,7 +1224,7 @@ final class ModRecipeProvider extends RecipeProvider {
         );
         smelt(
                 consumer,
-                "cobbled_limestone",
+                "limestone_cobblestone",
                 block(BaseBlockDefinition.COBBLED_LIMESTONE),
                 block(BaseBlockDefinition.COBBLED_BURNT_LIMESTONE),
                 1

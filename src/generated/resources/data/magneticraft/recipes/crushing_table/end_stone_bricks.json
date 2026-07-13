@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "item": "minecraft:end_stone_bricks"
+  },
+  "required_level": 0,
+  "result": {
+    "item": "minecraft:end_stone"
+  }
+}

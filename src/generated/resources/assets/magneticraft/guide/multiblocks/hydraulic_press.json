@@ -46,7 +46,7 @@
       "symbol": "M"
     },
     {
-      "block": "magneticraft:grate",
+      "block": "magneticraft:iron_grate",
       "rule": "grate",
       "symbol": "G"
     },
@@ -61,7 +61,7 @@
       "symbol": "C"
     },
     {
-      "block": "magneticraft:multiblock_column",
+      "block": "magneticraft:machine_support_column",
       "properties": {
         "axis": "x"
       },
@@ -69,7 +69,7 @@
       "symbol": "X"
     },
     {
-      "block": "magneticraft:multiblock_column",
+      "block": "magneticraft:machine_support_column",
       "properties": {
         "axis": "y"
       },
@@ -77,7 +77,7 @@
       "symbol": "Y"
     },
     {
-      "block": "magneticraft:striped_multiblock_part",
+      "block": "magneticraft:striped_machine_casing",
       "rule": "striped",
       "symbol": "S"
     }

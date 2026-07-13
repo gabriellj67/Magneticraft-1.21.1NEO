@@ -29,7 +29,7 @@ public final class ModBlockEntities {
             );
     public static final RegistryObject<BlockEntityType<BatteryBlockEntity>> BATTERY =
             ModRegistries.BLOCK_ENTITY_TYPES.register(
-                    "battery",
+                    "battery_box",
                     () -> BlockEntityType.Builder.of(
                             BatteryBlockEntity::new,
                             ModMachineBlocks.BATTERY.get()
@@ -70,7 +70,7 @@ public final class ModBlockEntities {
             );
     public static final RegistryObject<BlockEntityType<IronPipeBlockEntity>> IRON_PIPE =
             ModRegistries.BLOCK_ENTITY_TYPES.register(
-                    "iron_pipe",
+                    "iron_fluid_pipe",
                     () -> BlockEntityType.Builder.of(
                             IronPipeBlockEntity::new,
                             ModNetworkBlocks.IRON_PIPE.get()

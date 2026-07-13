@@ -10,19 +10,19 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "magneticraft:fluid/oil_still"
+      "resource": "magneticraft:fluid/crude_oil_still"
     },
     {
       "type": "minecraft:single",
-      "resource": "magneticraft:fluid/oil_flow"
+      "resource": "magneticraft:fluid/crude_oil_flow"
     },
     {
       "type": "minecraft:single",
-      "resource": "magneticraft:fluid/hot_crude_still"
+      "resource": "magneticraft:fluid/heated_crude_oil_still"
     },
     {
       "type": "minecraft:single",
-      "resource": "magneticraft:fluid/hot_crude_flow"
+      "resource": "magneticraft:fluid/heated_crude_oil_flow"
     },
     {
       "type": "minecraft:single",
@@ -66,11 +66,11 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "magneticraft:fluid/plastic_still"
+      "resource": "magneticraft:fluid/liquid_plastic_still"
     },
     {
       "type": "minecraft:single",
-      "resource": "magneticraft:fluid/plastic_flow"
+      "resource": "magneticraft:fluid/liquid_plastic_flow"
     },
     {
       "type": "minecraft:single",
@@ -106,11 +106,11 @@
     },
     {
       "type": "minecraft:single",
-      "resource": "magneticraft:fluid/fuel_still"
+      "resource": "magneticraft:fluid/fuel_oil_still"
     },
     {
       "type": "minecraft:single",
-      "resource": "magneticraft:fluid/fuel_flow"
+      "resource": "magneticraft:fluid/fuel_oil_flow"
     },
     {
       "type": "minecraft:single",

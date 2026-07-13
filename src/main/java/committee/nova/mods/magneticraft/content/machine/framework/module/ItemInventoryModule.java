@@ -28,6 +28,7 @@ public final class ItemInventoryModule implements MachineModule {
 
     private final ResourceLocation id;
     private final MachineModuleHost host;
+    private final int configuredSlots;
     private final BiPredicate<Integer, ItemStack> validator;
     private final Function<Direction, SlotAccess> accessBySide;
     private final ItemStackHandler handler;
@@ -43,6 +44,7 @@ public final class ItemInventoryModule implements MachineModule {
     ) {
         this.id = Objects.requireNonNull(id);
         this.host = Objects.requireNonNull(host);
+        this.configuredSlots = slots;
         this.validator = Objects.requireNonNull(validator);
         this.accessBySide = Objects.requireNonNull(accessBySide);
         this.handler = new ItemStackHandler(slots) {
@@ -72,6 +74,11 @@ public final class ItemInventoryModule implements MachineModule {
     @Override
     public void save(CompoundTag tag) {
         tag.merge(handler.serializeNBT());
+    }
+
+    @Override
+    public void resetPersistentState() {
+        handler.deserializeNBT(new ItemStackHandler(configuredSlots).serializeNBT());
     }
 
     @Override

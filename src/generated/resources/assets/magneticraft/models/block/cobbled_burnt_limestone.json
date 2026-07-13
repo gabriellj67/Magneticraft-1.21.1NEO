@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "magneticraft:block/cobbled_burnt_limestone"
-  }
-}

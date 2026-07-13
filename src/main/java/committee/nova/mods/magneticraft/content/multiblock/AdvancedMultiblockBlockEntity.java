@@ -514,6 +514,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     protected void loadMachineData(CompoundTag tag) {
         formed = tag.getBoolean(FORMED_TAG);
         structureReady = false;
+        validationDelay = 1;
         mirrored = tag.getBoolean(MIRRORED_TAG);
         owner = tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
         progress = Math.max(0, tag.getInt(PROGRESS_TAG));
@@ -527,6 +528,15 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         activeRecipe = tag.contains(ACTIVE_RECIPE_TAG)
                 ? ResourceLocation.tryParse(tag.getString(ACTIVE_RECIPE_TAG))
                 : null;
+        working = false;
+    }
+
+    @Override
+    protected void resetMachineData() {
+        super.resetMachineData();
+        // Formation is world-derived state. Preserve only the controller block's
+        // claim, then force a full structure validation before processing resumes.
+        formed = getBlockState().getValue(AdvancedMultiblockBlock.FORMED);
     }
 
     @Override

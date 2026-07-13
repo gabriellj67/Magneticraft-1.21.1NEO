@@ -119,7 +119,7 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("container.magneticraft.battery");
+        return Component.translatable("container.magneticraft.battery_box");
     }
 
     @Nullable

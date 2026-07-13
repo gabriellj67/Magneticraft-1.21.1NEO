@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/iron_fluid_pipe"
+    }
+  }
+}

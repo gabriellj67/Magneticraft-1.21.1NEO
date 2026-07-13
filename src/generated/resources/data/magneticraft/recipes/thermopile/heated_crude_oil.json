@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "magneticraft:heated_crude_oil",
+  "conductivity": 1.72458394412348,
+  "temperature": 873.0
+}

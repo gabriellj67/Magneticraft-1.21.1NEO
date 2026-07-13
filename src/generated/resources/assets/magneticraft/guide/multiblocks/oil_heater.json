@@ -36,7 +36,7 @@
       "symbol": "R"
     },
     {
-      "block": "magneticraft:multiblock_column",
+      "block": "magneticraft:machine_support_column",
       "properties": {
         "axis": "y"
       },
@@ -44,7 +44,7 @@
       "symbol": "Y"
     },
     {
-      "block": "magneticraft:multiblock_column",
+      "block": "magneticraft:machine_support_column",
       "properties": {
         "axis": "z"
       },
@@ -62,7 +62,7 @@
     "fluid_tanks": [
       {
         "accepted_fluids": [
-          "magneticraft:oil",
+          "magneticraft:crude_oil",
           "#minecraft:water"
         ],
         "access": {
@@ -75,7 +75,7 @@
       },
       {
         "accepted_fluids": [
-          "magneticraft:hot_crude",
+          "magneticraft:heated_crude_oil",
           "magneticraft:steam"
         ],
         "access": {

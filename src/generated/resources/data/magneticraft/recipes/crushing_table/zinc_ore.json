@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "tag": "forge:ores/zinc"
+  },
+  "required_level": 1,
+  "result": {
+    "item": "magneticraft:zinc_rocky_chunk"
+  }
+}

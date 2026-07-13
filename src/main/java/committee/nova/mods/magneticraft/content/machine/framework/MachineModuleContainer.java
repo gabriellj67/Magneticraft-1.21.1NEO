@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.machine.framework;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collection;
@@ -12,6 +13,8 @@ import java.util.Map;
  * Loader-independent module identity and NBT routing.
  */
 public final class MachineModuleContainer {
+    static final String SCHEMA_VERSION_TAG = "schema_version";
+
     private final Map<ResourceLocation, MachineModule> modules = new LinkedHashMap<>();
 
     public <T extends MachineModule> T add(T module) {
@@ -27,6 +30,7 @@ public final class MachineModuleContainer {
         modules.forEach((id, module) -> {
             CompoundTag moduleTag = new CompoundTag();
             module.save(moduleTag);
+            moduleTag.putInt(SCHEMA_VERSION_TAG, module.persistenceSchemaVersion());
             root.put(id.toString(), moduleTag);
         });
         return root;
@@ -35,10 +39,22 @@ public final class MachineModuleContainer {
     public void load(CompoundTag root) {
         modules.forEach((id, module) -> {
             String key = id.toString();
-            if (root.contains(key, CompoundTag.TAG_COMPOUND)) {
-                module.load(root.getCompound(key));
+            if (!root.contains(key, Tag.TAG_COMPOUND)) {
+                module.resetPersistentState();
+                return;
             }
+            CompoundTag moduleTag = root.getCompound(key);
+            if (!moduleTag.contains(SCHEMA_VERSION_TAG, Tag.TAG_INT)
+                    || moduleTag.getInt(SCHEMA_VERSION_TAG) != module.persistenceSchemaVersion()) {
+                module.resetPersistentState();
+                return;
+            }
+            module.load(moduleTag);
         });
+    }
+
+    void resetPersistentState() {
+        modules.values().forEach(MachineModule::resetPersistentState);
     }
 
     public Collection<MachineModule> values() {

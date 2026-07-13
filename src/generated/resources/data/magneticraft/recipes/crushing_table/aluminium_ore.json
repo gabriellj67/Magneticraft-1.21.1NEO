@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "tag": "forge:ores/aluminium"
+  },
+  "required_level": 1,
+  "result": {
+    "item": "magneticraft:aluminium_rocky_chunk"
+  }
+}

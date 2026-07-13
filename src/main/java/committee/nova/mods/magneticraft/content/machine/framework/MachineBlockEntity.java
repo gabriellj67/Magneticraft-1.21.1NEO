@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnos
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -25,6 +26,8 @@ import java.util.Optional;
  */
 public abstract class MachineBlockEntity extends BlockEntity implements MachineModuleHost, DiagnosticHost {
     public static final String MODULES_TAG = "modules";
+    static final String SCHEMA_VERSION_TAG = "schema_version";
+    static final int INITIAL_SCHEMA_VERSION = 1;
     private static final int CLIENT_STATE_SYNC_INTERVAL = 4;
 
     private final MachineModuleContainer modules = new MachineModuleContainer();
@@ -81,6 +84,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
+        writeSchemaVersion(tag, persistenceSchemaVersion());
         tag.put(MODULES_TAG, modules.save());
         saveMachineData(tag);
     }
@@ -88,6 +92,11 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
+        if (!hasSchema(tag, persistenceSchemaVersion())) {
+            modules.resetPersistentState();
+            resetMachineData();
+            return;
+        }
         modules.load(tag.getCompound(MODULES_TAG));
         loadMachineData(tag);
     }
@@ -96,6 +105,25 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
     }
 
     protected void loadMachineData(CompoundTag tag) {
+    }
+
+    /** Restores local state without reading an incompatible persistence payload. */
+    protected void resetMachineData() {
+        loadMachineData(new CompoundTag());
+    }
+
+    /** Schema owned by the concrete block entity's root persistence payload. */
+    protected int persistenceSchemaVersion() {
+        return INITIAL_SCHEMA_VERSION;
+    }
+
+    static void writeSchemaVersion(CompoundTag tag, int schemaVersion) {
+        tag.putInt(SCHEMA_VERSION_TAG, schemaVersion);
+    }
+
+    static boolean hasSchema(CompoundTag tag, int schemaVersion) {
+        return tag.contains(SCHEMA_VERSION_TAG, Tag.TAG_INT)
+                && tag.getInt(SCHEMA_VERSION_TAG) == schemaVersion;
     }
 
     @Override

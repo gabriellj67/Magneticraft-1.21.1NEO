@@ -38,11 +38,11 @@ public final class ModMachineBlocks {
                     .sound(SoundType.WOOD))
     );
     public static final RegistryObject<Block> BATTERY = register(
-            "battery",
+            "battery_box",
             () -> new BatteryBlock(machineProperties())
     );
     public static final RegistryObject<Block> GRATE = register(
-            "grate",
+            "iron_grate",
             () -> new Block(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
                     .requiresCorrectToolForDrops()

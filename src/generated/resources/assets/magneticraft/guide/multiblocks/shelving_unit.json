@@ -28,7 +28,7 @@
       "symbol": "M"
     },
     {
-      "block": "magneticraft:grate",
+      "block": "magneticraft:iron_grate",
       "rule": "grate",
       "symbol": "G"
     }

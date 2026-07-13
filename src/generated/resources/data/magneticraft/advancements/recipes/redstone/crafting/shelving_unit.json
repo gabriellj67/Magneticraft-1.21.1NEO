@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_multiblock_base": {
+    "has_machine_casing": {
       "conditions": {
         "items": [
           {
             "items": [
-              "magneticraft:multiblock_base"
+              "magneticraft:machine_casing"
             ]
           }
         ]
@@ -22,7 +22,7 @@
   },
   "requirements": [
     [
-      "has_multiblock_base",
+      "has_machine_casing",
       "has_the_recipe"
     ]
   ],

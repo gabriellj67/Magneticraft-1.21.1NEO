@@ -151,7 +151,7 @@ class GeneratedDataContractTest {
             }
         }
         expectedSmelting.add(recipe("smelting/limestone"));
-        expectedSmelting.add(recipe("smelting/cobbled_limestone"));
+        expectedSmelting.add(recipe("smelting/limestone_cobblestone"));
         assertEquals(46, expectedSmelting.size());
         expectedSmelting.forEach(GeneratedDataContractTest::assertFile);
 
@@ -165,7 +165,7 @@ class GeneratedDataContractTest {
 
     @Test
     void machineFrameworkDataAndAssetsAreComplete() throws IOException {
-        for (String block : Set.of("crushing_table", "battery", "grate", "electric_furnace")) {
+        for (String block : Set.of("crushing_table", "battery_box", "iron_grate", "electric_furnace")) {
             assertFile(ASSETS.resolve("blockstates/" + block + ".json"));
             assertFile(ASSETS.resolve("models/block/" + block + ".json"));
             assertFile(ASSETS.resolve("models/item/" + block + ".json"));
@@ -173,16 +173,16 @@ class GeneratedDataContractTest {
         }
         for (String texture : Set.of(
                 "crushing_table_top", "crushing_table_side", "crushing_table_bottom",
-                "battery", "grate", "electric_furnace_side", "electric_furnace_front",
+                "battery_box", "iron_grate", "electric_furnace_side", "electric_furnace_front",
                 "electric_furnace_front_on"
         )) {
             assertPng(SOURCE_TEXTURES.resolve("block/" + texture + ".png"));
         }
-        assertObjModel("battery", "battery", "battery");
-        assertItemAssetsAndTranslation("battery_item_low", readObject(ASSETS.resolve("lang/en_us.json")));
+        assertObjModel("battery_box", "battery_box", "battery_box");
+        assertItemAssetsAndTranslation("low_voltage_battery", readObject(ASSETS.resolve("lang/en_us.json")));
 
         for (String recipe : Set.of(
-                "crushing_table", "battery_item_low", "grate", "battery", "electric_furnace"
+                "crushing_table", "low_voltage_battery", "iron_grate", "battery_box", "electric_furnace"
         )) {
             assertFile(recipe("crafting/" + recipe));
         }
@@ -193,19 +193,20 @@ class GeneratedDataContractTest {
         );
         assertFalse(Files.exists(recipe("crafting/electric_furnace_temporary")));
 
-        Path crushingDirectory = DATA.resolve("recipes/crushing");
+        Path crushingDirectory = DATA.resolve("recipes/crushing_table");
         try (Stream<Path> paths = Files.list(crushingDirectory)) {
             assertTrue(paths.filter(Files::isRegularFile).count() >= 20, "Legacy crushing catalogue is incomplete");
         }
-        JsonObject blazeRod = readObject(recipe("crushing/blaze_rod"));
-        assertEquals("magneticraft:crushing", blazeRod.get("type").getAsString());
+        JsonObject blazeRod = readObject(recipe("crushing_table/blaze_rod"));
+        assertEquals("magneticraft:crushing_table", blazeRod.get("type").getAsString());
         assertEquals(5, blazeRod.getAsJsonObject("result").get("count").getAsInt());
 
         JsonObject sounds = readObject(Path.of("src/main/resources/assets/magneticraft/sounds.json"));
-        assertEquals(3, sounds.getAsJsonObject("crushing_hit").getAsJsonArray("sounds").size());
-        assertEquals(2, sounds.getAsJsonObject("crushing_final").getAsJsonArray("sounds").size());
+        assertEquals(3, sounds.getAsJsonObject("crushing_table_hit").getAsJsonArray("sounds").size());
+        assertEquals(2, sounds.getAsJsonObject("crushing_table_complete").getAsJsonArray("sounds").size());
         for (String sample : Set.of(
-                "crushing_hit1", "crushing_hit2", "crushing_hit3", "crushing_final1", "crushing_final2"
+                "crushing_table_hit1", "crushing_table_hit2", "crushing_table_hit3",
+                "crushing_table_complete1", "crushing_table_complete2"
         )) {
             assertFile(Path.of("src/main/resources/assets/magneticraft/sounds/" + sample + ".ogg"));
         }
@@ -220,7 +221,7 @@ class GeneratedDataContractTest {
                 "heat_pipe",
                 "insulated_heat_pipe",
                 "heat_sink",
-                "iron_pipe",
+                "iron_fluid_pipe",
                 "pneumatic_tube",
                 "pneumatic_restriction_tube",
                 "conveyor_belt"
@@ -283,13 +284,13 @@ class GeneratedDataContractTest {
         assertFalse(Files.exists(ASSETS.resolve("models/item/air_bubble.json")));
         assertFalse(Files.exists(DATA.resolve("loot_tables/blocks/air_bubble.json")));
 
-        assertRecipeDirectory("sluice", 16, "magneticraft:sluice");
-        assertRecipeDirectory("gasification", 19, "magneticraft:gasification");
+        assertRecipeDirectory("sluice_box", 16, "magneticraft:sluice_box");
+        assertRecipeDirectory("gasification_unit", 19, "magneticraft:gasification_unit");
         assertRecipeDirectory("thermopile", 33, "magneticraft:thermopile");
         assertRecipeDirectory("fluid_fuel", 10, "magneticraft:fluid_fuel");
-        JsonObject sand = readObject(recipe("sluice/sand"));
+        JsonObject sand = readObject(recipe("sluice_box/sand"));
         assertEquals(9, sand.getAsJsonArray("results").size());
-        JsonObject log = readObject(recipe("gasification/00_logs"));
+        JsonObject log = readObject(recipe("gasification_unit/00_logs"));
         assertEquals("minecraft:charcoal", log.getAsJsonObject("item_result").get("item").getAsString());
         assertEquals(150, log.getAsJsonObject("fluid_result").get("amount").getAsInt());
         JsonObject snow = readObject(recipe("thermopile/snow_layer_8"));
@@ -305,12 +306,12 @@ class GeneratedDataContractTest {
         JsonObject chinese = readObject(ASSETS.resolve("lang/zh_cn.json"));
 
         for (String part : Set.of(
-                "multiblock_base",
+                "machine_casing",
                 "corrugated_iron",
                 "copper_coil",
-                "multiblock_column",
-                "striped_multiblock_part",
-                "electric_multiblock_part"
+                "machine_support_column",
+                "striped_machine_casing",
+                "electrical_machine_casing"
         )) {
             assertFile(ASSETS.resolve("blockstates/" + part + ".json"));
             assertFile(ASSETS.resolve("models/block/" + part + ".json"));

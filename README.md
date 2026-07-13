@@ -5,24 +5,29 @@ Forge 47.4.20. The Nova/Magneticraft 1.12 codebase is the behavioral authority;
 the implementation is being rebuilt around modern Forge registration, data
 generation, persistence, networking, and rendering contracts.
 
-The port targets new worlds. Importing worlds or NBT from older Magneticraft
-versions is not supported.
+The `0.2.0` line is a one-time destructive contract reset. It does not load
+worlds, item data, registry IDs or NBT written by Magneticraft 1.12 or any
+earlier 1.20.1 build. Start a new world and do not install it over an existing
+Magneticraft save. Registry IDs and versioned persistence envelopes are frozen
+from `0.2.0`; later releases may only add forward migrations.
 
 ## Current status
 
-The repository is the `0.1.0` first-release candidate covering the registered 1.20.1
-catalog: materials and fluids, physical electricity/heat/fluid/logistics
-networks, single-block automation, sixteen advanced multiblocks, world
-generation, programmable computers and mining robots. Client screens, guide
-data, static OBJ assets and bounded dynamic block-entity renderers are included.
+The repository is the `0.2.0` governance and contract-freeze baseline for the
+complete gameplay rebuild. Existing 1.20.1 implementations are candidates:
+each later 0.x stage keeps code only after it passes the Nova 1.12 behavior
+contract, otherwise it is selectively rebuilt.
 
-JEI, CraftTweaker and Tinkers' Construct support is optional. Magneticraft does
-not embed their classes or require them in a base installation. Strut Your Stuff
-was evaluated for future point-to-point electrical structures, but is not a
-runtime dependency because the current release has no matching long-span wire
-consumer.
+JEI, CraftTweaker and Tinkers' Construct support is currently optional.
+Magneticraft does not embed their classes or require them in a base
+installation. Jade support is not implemented in `0.2.0`; it is planned as an
+isolated optional integration for `0.8.0`. Strut Your Stuff was evaluated for
+future point-to-point electrical structures, but is not a runtime dependency
+because the current release has no matching long-span wire consumer.
 
-See the [base-content migration map](docs/porting/base-content.md),
+See the [authoritative migration matrix](docs/porting/migration-matrix.md),
+[machine-readable registry map](docs/porting/registry-id-map.json),
+[base-content migration map](docs/porting/base-content.md),
 [machine framework notes](docs/porting/machine-framework.md) and
 [legacy model inventory](docs/MODEL_CONVERSION.md) for stable IDs and explicit
 conversion boundaries. The Chinese
@@ -79,9 +84,11 @@ Optional development runtimes are opt-in and may be combined:
 ./gradlew.bat runClient -Penable_jei_runtime=true -Penable_crafttweaker_runtime=true -Penable_tconstruct_runtime=true --no-daemon
 ```
 
-The target is new worlds. Legacy Magneticraft world/NBT import and currently
-unregistered content such as electric poles, Tesla towers and sloped conveyors
-remain outside this release.
+The target is new worlds. The complete staged scope, future restoration targets
+and intentional exclusions are fixed by the migration matrix. Sloped and
+vertical conveyors, unused historical gears, unfinished kiln prototypes,
+BuildCraft integration and unrestricted computer TCP/SSL access remain
+intentionally excluded.
 
 ## License and provenance
 

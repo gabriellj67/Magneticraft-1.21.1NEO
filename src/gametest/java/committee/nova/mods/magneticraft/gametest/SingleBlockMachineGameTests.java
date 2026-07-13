@@ -17,6 +17,7 @@ import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
+import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -83,7 +84,7 @@ public final class SingleBlockMachineGameTests {
     @GameTest(template = TEMPLATE)
     public static void customRecipeSerializersLoadRepresentativeRuntimeRecipes(GameTestHelper helper) {
         var recipeManager = helper.getLevel().getRecipeManager();
-        var sluiceRecipe = recipeManager.byKey(Magneticraft.id("sluice/gravel")).orElse(null);
+        var sluiceRecipe = recipeManager.byKey(Magneticraft.id("sluice_box/gravel")).orElse(null);
         helper.assertTrue(sluiceRecipe instanceof SluiceRecipe, "Sluice serializer did not load its runtime recipe");
         helper.assertTrue(
                 ((SluiceRecipe) sluiceRecipe).matches(new SimpleContainer(new ItemStack(Items.GRAVEL)), helper.getLevel()),
@@ -91,7 +92,7 @@ public final class SingleBlockMachineGameTests {
         );
         helper.assertFalse(((SluiceRecipe) sluiceRecipe).outputs().isEmpty(), "Sluice runtime recipe lost its outputs");
 
-        var gasificationRecipe = recipeManager.byKey(Magneticraft.id("gasification/00_logs")).orElse(null);
+        var gasificationRecipe = recipeManager.byKey(Magneticraft.id("gasification_unit/00_logs")).orElse(null);
         helper.assertTrue(
                 gasificationRecipe instanceof GasificationRecipe,
                 "Gasification serializer did not load its runtime recipe"
@@ -183,6 +184,60 @@ public final class SingleBlockMachineGameTests {
                 restored.primaryTank().tank().getFluid().getFluid() == Fluids.WATER,
                 "Small tank fluid type did not round-trip"
         );
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void incompatibleRootSchemaResetsSingleBlockModulesAndLocalState(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FABRICATOR, Direction.NORTH));
+        SingleBlockMachineBlockEntity fabricator = requireMachine(helper, CENTER);
+        fabricator.inventory().setStackInSlot(0, new ItemStack(Items.OAK_PLANKS, 8));
+        fabricator.filters().setFilter(0, new ItemStack(Items.OAK_PLANKS));
+        CompoundTag futureFabricator = fabricator.saveWithoutMetadata();
+        futureFabricator.putInt("schema_version", Integer.MAX_VALUE);
+        fabricator.load(futureFabricator);
+        helper.assertTrue(fabricator.inventory().getStackInSlot(0).isEmpty(), "Future schema retained fabricator inventory");
+        helper.assertTrue(fabricator.filters().getFilter(0).isEmpty(), "Future schema retained fabricator filter configuration");
+        helper.assertTrue(fabricator.progress() == 0, "Future schema retained single-block progress");
+        helper.assertTrue(fabricator.totalProgress() == 0, "Future schema retained single-block recipe duration");
+        helper.assertFalse(fabricator.working(), "Future schema retained single-block working state");
+
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.ELECTRIC_HEATER, Direction.NORTH));
+        SingleBlockMachineBlockEntity heater = requireMachine(helper, CENTER);
+        heater.energy().setEnergyStored(12_345);
+        heater.electricity().node().setEnergyJoules(321.0D);
+        heater.heat().node().setTemperature(650.0D);
+        CompoundTag missingHeaterSchema = heater.saveWithoutMetadata();
+        missingHeaterSchema.remove("schema_version");
+        heater.load(missingHeaterSchema);
+        helper.assertTrue(heater.energy().getEnergyStored() == 0, "Missing schema retained heater Forge Energy");
+        helper.assertTrue(
+                heater.electricity().node().energyJoules() == 0.0D,
+                "Missing schema retained heater electrical energy"
+        );
+        helper.assertTrue(
+                Math.abs(heater.heat().node().temperatureKelvin() - HeatNode.AMBIENT_TEMPERATURE_KELVIN) < 1.0E-6D,
+                "Missing schema did not restore ambient heater temperature"
+        );
+
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.SMALL_TANK, Direction.NORTH));
+        SingleBlockMachineBlockEntity tank = requireMachine(helper, CENTER);
+        tank.primaryTank().tank().fill(new FluidStack(Fluids.WATER, 12_345), IFluidHandler.FluidAction.EXECUTE);
+        tank.claimForMultiblock(helper.absolutePos(CENTER.above()));
+        CompoundTag futureTank = tank.saveWithoutMetadata();
+        futureTank.putInt("schema_version", Integer.MAX_VALUE);
+        tank.load(futureTank);
+        helper.assertTrue(tank.primaryTank().tank().isEmpty(), "Future schema retained small-tank fluid");
+        helper.assertFalse(tank.claimedByMultiblock(), "Future schema retained a stale multiblock claim");
+
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.INSERTER, Direction.NORTH));
+        SingleBlockMachineBlockEntity inserter = requireMachine(helper, CENTER);
+        inserter.toggleInserterFlag(0);
+        helper.assertTrue(inserter.inserterFlags() != 12, "Inserter fixture did not change its configuration");
+        CompoundTag missingInserterSchema = inserter.saveWithoutMetadata();
+        missingInserterSchema.remove("schema_version");
+        inserter.load(missingInserterSchema);
+        helper.assertTrue(inserter.inserterFlags() == 12, "Missing schema retained inserter configuration");
         helper.succeed();
     }
 

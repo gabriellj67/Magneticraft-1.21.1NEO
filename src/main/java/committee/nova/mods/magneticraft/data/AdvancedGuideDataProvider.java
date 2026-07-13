@@ -117,8 +117,8 @@ final class AdvancedGuideDataProvider implements DataProvider {
         JsonObject root = new JsonObject();
         root.addProperty("schema_version", SCHEMA_VERSION);
         JsonArray items = new JsonArray();
-        items.add(portableItem("battery_item_low", LowBatteryItem.CAPACITY, 0, 0, 0));
-        items.add(portableItem("battery_item_medium", MediumBatteryItem.CAPACITY, 0, 0, 0));
+        items.add(portableItem("low_voltage_battery", LowBatteryItem.CAPACITY, 0, 0, 0));
+        items.add(portableItem("medium_voltage_battery", MediumBatteryItem.CAPACITY, 0, 0, 0));
         items.add(portableItem(
                 "electric_drill",
                 ElectricToolItem.CAPACITY,
@@ -233,14 +233,14 @@ final class AdvancedGuideDataProvider implements DataProvider {
             case IGNORE -> entry.addProperty("ignored", true);
             case AIR -> entry.addProperty("block", "minecraft:air");
             case CONTROLLER -> entry.addProperty("block", Magneticraft.MOD_ID + ":" + definition.id());
-            case BASE -> entry.addProperty("block", "magneticraft:multiblock_base");
-            case GRATE -> entry.addProperty("block", "magneticraft:grate");
+            case BASE -> entry.addProperty("block", "magneticraft:machine_casing");
+            case GRATE -> entry.addProperty("block", "magneticraft:iron_grate");
             case CORRUGATED_IRON -> entry.addProperty("block", "magneticraft:corrugated_iron");
             case COPPER_COIL -> entry.addProperty("block", "magneticraft:copper_coil");
             case BRICKS -> entry.addProperty("block", "minecraft:bricks");
             case SMALL_TANK -> entry.addProperty("block", "magneticraft:small_tank");
-            case STRIPED -> entry.addProperty("block", "magneticraft:striped_multiblock_part");
-            case ELECTRIC -> entry.addProperty("block", "magneticraft:electric_multiblock_part");
+            case STRIPED -> entry.addProperty("block", "magneticraft:striped_machine_casing");
+            case ELECTRIC -> entry.addProperty("block", "magneticraft:electrical_machine_casing");
             case COLUMN_X -> addColumn(entry, "x");
             case COLUMN_Y -> addColumn(entry, "y");
             case COLUMN_Z -> addColumn(entry, "z");
@@ -248,7 +248,7 @@ final class AdvancedGuideDataProvider implements DataProvider {
     }
 
     private static void addColumn(JsonObject entry, String axis) {
-        entry.addProperty("block", "magneticraft:multiblock_column");
+        entry.addProperty("block", "magneticraft:machine_support_column");
         JsonObject properties = new JsonObject();
         properties.addProperty("axis", axis);
         entry.add("properties", properties);

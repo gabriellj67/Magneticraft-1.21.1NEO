@@ -17,19 +17,17 @@ import java.util.Optional;
  * Portable bounded program storage. Execution state remains owned by the target machine.
  */
 public final class FloppyDiskItem extends Item {
-    private static final String PROGRAM_TAG = "program";
-
     public FloppyDiskItem(Properties properties) {
         super(properties.stacksTo(1));
     }
 
     public static void storeProgram(ItemStack stack, List<ComputerInstruction> program) {
-        ProgramNbt.writeProgram(stack.getOrCreateTag(), PROGRAM_TAG, program);
+        FloppyDiskPersistence.write(stack.getOrCreateTag(), program);
     }
 
     public static Optional<List<ComputerInstruction>> readProgram(ItemStack stack) {
         CompoundTag tag = stack.getTag();
-        return tag == null ? Optional.of(List.of()) : ProgramNbt.readProgram(tag, PROGRAM_TAG);
+        return tag == null ? Optional.of(List.of()) : FloppyDiskPersistence.read(tag);
     }
 
     @Override

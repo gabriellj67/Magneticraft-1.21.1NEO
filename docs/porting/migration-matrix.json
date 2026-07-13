@@ -1,0 +1,1210 @@
+{
+  "schema_version": 1,
+  "authority": {
+    "legacy_project": "Nova-Committee/Magneticraft",
+    "legacy_commit": "4108ca9bb332d11965c30e0c592b310d0858f251",
+    "legacy_role": "observable_behavior_and_released_assets",
+    "current_code_role": "candidate_implementation_only",
+    "target_minecraft": "1.20.1",
+    "target_forge": "47.4.20",
+    "target_java": 17,
+    "registry_projection": "docs/porting/registry-id-map.json",
+    "legacy_json_recipe_manifest_count": 137,
+    "legacy_json_recipe_manifest_sha256": "368528dacda59382b4db906b2a4e9eb05b75871de9d342b92607498c729ab012",
+    "legacy_json_recipe_content_manifest_sha256": "22169dbd3f31e7e6d61d9bd1bab09ae048d1dcd762c9a8c58620c82b9f3c1813",
+    "legacy_english_guide_manifest_count": 52,
+    "legacy_english_guide_manifest_sha256": "87242cee863635855a905c21278ba0c87e9d74a0e314f125bdaa48b51b96827a",
+    "legacy_english_guide_content_manifest_sha256": "628c16fb7164cfdcca98a4122b03f144dcd0db2517bd785be9b72c63eff2d9f8"
+  },
+  "compatibility": {
+    "breaking_reset_release": "0.2.0",
+    "legacy_1_12_world_import": false,
+    "pre_0_2_0_worlds_supported": false,
+    "pre_0_2_0_items_supported": false,
+    "java_api_binary_compatibility": false,
+    "id_and_persistence_contract_frozen_from": "0.2.0",
+    "later_schema_changes": "forward_migration_only",
+    "required_languages": ["en_us", "zh_cn"],
+    "optional_integrations": ["jei", "crafttweaker", "tconstruct", "jade"],
+    "mandatory_optional_mods": []
+  },
+  "acceptance_case_registry": {
+    "id_inventory_order": "lexicographic_unique",
+    "id_count": 134,
+    "id_sha256": "b112929efa296f0adc8043a60155cde95843768a30b58656422e3587821c406d",
+    "resolution_rule": "Every referenced acceptance ID resolves by its first token after MIG to exactly one route; the pinned inventory prevents silent label drift.",
+    "routes": [
+      {
+        "id": "registry-contract-junit",
+        "tokens": ["REGISTRY", "REG", "STATE", "TAG", "INTERNAL"],
+        "harness": "junit",
+        "locator": "src/test/java/committee/nova/mods/magneticraft/porting/MigrationMatrixContractTest.java"
+      },
+      {
+        "id": "data-contract-junit",
+        "tokens": ["ASSET", "CRAFTING", "GUIDE", "RECIPE", "RUNDATA", "SLUICE", "SOUND"],
+        "harness": "junit_and_gradle_gate",
+        "locator": "src/test/java/committee/nova/mods/magneticraft/data;runData"
+      },
+      {
+        "id": "persistence-junit",
+        "tokens": ["FLOPPY", "NBT"],
+        "harness": "junit_and_gametest",
+        "locator": "src/test/java/committee/nova/mods/magneticraft;src/gametest/java/committee/nova/mods/magneticraft/gametest"
+      },
+      {
+        "id": "electricity-gametest",
+        "tokens": ["CHARGER", "ELECTRIC", "FE", "PORTABLE", "SERVER", "TESLA", "TOOL", "WIRE"],
+        "harness": "gametest",
+        "locator": "src/gametest/java/committee/nova/mods/magneticraft/gametest/PortableElectricGameTests.java;src/gametest/java/committee/nova/mods/magneticraft/gametest/AdvancedSystemsGameTests.java"
+      },
+      {
+        "id": "transport-gametest",
+        "tokens": ["CONVEYOR", "FLUID", "HEAT", "INSERTER", "LOGISTICS", "PHYSICS", "TRANSFER"],
+        "harness": "junit_and_gametest",
+        "locator": "src/test/java/committee/nova/mods/magneticraft/content/network;src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java"
+      },
+      {
+        "id": "machine-gametest",
+        "tokens": ["MANUAL", "MISC", "OIL", "SINGLE", "WATER"],
+        "harness": "gametest",
+        "locator": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java"
+      },
+      {
+        "id": "multiblock-worldgen-gametest",
+        "tokens": ["MULTIBLOCK", "WORLDGEN"],
+        "harness": "junit_and_gametest",
+        "locator": "src/gametest/java/committee/nova/mods/magneticraft/gametest/AdvancedSystemsGameTests.java;src/test/java/committee/nova/mods/magneticraft/content/multiblock"
+      },
+      {
+        "id": "computer-robot-gametest",
+        "tokens": ["COMPUTER", "PACKET", "ROBOT"],
+        "harness": "junit_and_gametest",
+        "locator": "src/gametest/java/committee/nova/mods/magneticraft/gametest/ComputerRobotGameTests.java;src/test/java/committee/nova/mods/magneticraft/content/computer"
+      },
+      {
+        "id": "optional-integration-matrix",
+        "tokens": ["JADE", "OPTIONAL"],
+        "harness": "junit_and_runtime_matrix",
+        "locator": "src/test/java/committee/nova/mods/magneticraft/integration/OptionalIntegrationContractTest.java;0.8.0 optional-mod matrix"
+      },
+      {
+        "id": "release-manual-and-performance",
+        "tokens": ["CREATIVE", "PERF", "VISUAL"],
+        "harness": "runtime_benchmark_and_visual_checklist",
+        "locator": "docs/porting/release-readiness.md"
+      }
+    ]
+  },
+  "decision_values": ["retain_rename", "rebuild", "exclude"],
+  "registry_contract": {
+    "decision_source": "docs/porting/registry-id-map.json",
+    "coverage": [
+      "public blocks and BlockItems",
+      "visible metadata item variants",
+      "persistent hidden block-state variants",
+      "items and item presets",
+      "fluids and their Forge adapter families",
+      "sound events",
+      "owned block entity, menu and recipe identifiers",
+      "explicit shared-infrastructure exceptions",
+      "explicit exclusions"
+    ],
+    "acceptance_tests": ["MIG-REGISTRY-PROJECTION-001", "MIG-REGISTRY-NAMING-001", "MIG-REGISTRY-UNIQUE-001"]
+  },
+  "normalized_recipe_contracts": {
+    "join_rule": "legacy_json_groups and programmatic_groups are keyed by their group id; every enumerated recipe member inherits exactly one joined data-path and behavior contract",
+    "legacy_json_groups": {
+      "recipe-governance-and-base": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["governance.id_freeze"]},
+      "recipe-electricity-portables": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["electricity.portable_devices"]},
+      "recipe-transport": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["transport.conveyor", "transport.inserter", "transport.heat_fluid_pressure"]},
+      "recipe-single-block-machines": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["machines.single_block_catalog"]},
+      "recipe-multiblocks": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["multiblock.structure_and_ownership"]},
+      "recipe-computers": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["computer.languages_and_budget", "computer.disk_and_robot_security"]},
+      "recipe-guide": {"data_paths": ["data/magneticraft/recipes/crafting/guide_book.json"], "behavior_contract_ids": ["guides.bilingual_closure"]},
+      "recipe-unused-gears": {"data_paths": [".references/nova-1.12/src/main/resources/assets/magneticraft/recipes/{legacy_member}"], "behavior_contract_ids": ["governance.id_freeze"]},
+      "recipe-hammers": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["machines.single_block_catalog"]}
+    },
+    "programmatic_groups": {
+      "crushing_table": {"data_paths": ["data/magneticraft/recipes/crushing_table/{variant}.json"], "behavior_contract_ids": ["machines.single_block_catalog"]},
+      "sluice_box": {"data_paths": ["data/magneticraft/recipes/sluice_box/{variant}.json"], "behavior_contract_ids": ["machines.single_block_catalog"]},
+      "gasification_unit": {"data_paths": ["data/magneticraft/recipes/gasification_unit/{variant}.json"], "behavior_contract_ids": ["machines.single_block_catalog"]},
+      "thermopile": {"data_paths": ["data/magneticraft/recipes/thermopile/{variant}.json"], "behavior_contract_ids": ["machines.single_block_catalog"]},
+      "fluid_fuel": {"data_paths": ["data/magneticraft/recipes/fluid_fuel/{variant}.json"], "behavior_contract_ids": ["machines.single_block_catalog", "multiblock.structure_and_ownership"]},
+      "smelting": {"data_paths": ["data/magneticraft/recipes/smelting/{variant}.json"], "behavior_contract_ids": ["governance.id_freeze"]},
+      "advanced_processing": {"data_paths": ["data/magneticraft/recipes/advanced_processing/{machine}_{variant}.json"], "behavior_contract_ids": ["multiblock.structure_and_ownership"]},
+      "oil_heater": {"data_paths": ["data/magneticraft/recipes/advanced_processing/oil_heater_{variant}.json"], "behavior_contract_ids": ["multiblock.structure_and_ownership"]},
+      "refinery": {"data_paths": ["data/magneticraft/recipes/advanced_processing/refinery_{variant}.json"], "behavior_contract_ids": ["multiblock.structure_and_ownership"]},
+      "optional_ore_dictionary_machine_recipes": {"data_paths": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#optional_ore_dictionary_branches"], "behavior_contract_ids": ["integrations.optional_isolation"]},
+      "external_named_fluid_fuels": {"data_paths": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerFluidFuels"], "behavior_contract_ids": ["integrations.optional_isolation"]}
+    }
+  },
+  "legacy_json_recipes": {
+    "source_root": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes",
+    "inventory": [
+      "airlock_normal.json",
+      "battery_item_low_normal.json",
+      "battery_item_medium_normal.json",
+      "battery_north.json",
+      "big_combustion_chamber_inactive_north.json",
+      "big_electric_furnace_inactive_north.json",
+      "big_steam_boiler_inactive_north.json",
+      "box.json",
+      "brick_furnace_off_north.json",
+      "burnt_limestone.json",
+      "combustion_chamber_north.json",
+      "computer_north.json",
+      "connector_down.json",
+      "container_inactive_north.json",
+      "conveyor_belt_north.json",
+      "copper_coil_normal.json",
+      "crafting_alternator.json",
+      "crafting_coil.json",
+      "crafting_magnet.json",
+      "crafting_mesh.json",
+      "crafting_motor.json",
+      "crafting_string_fabric.json",
+      "crafting_sulfur_from_block.json",
+      "crushing_table_normal.json",
+      "electric_cable_normal.json",
+      "electric_cable_normal_1.json",
+      "electric_cable_normal_2.json",
+      "electric_cable_normal_3.json",
+      "electric_cable_normal_4.json",
+      "electric_cable_normal_5.json",
+      "electric_chainsaw_normal.json",
+      "electric_drill_normal.json",
+      "electric_engine_down.json",
+      "electric_furnace_off_north.json",
+      "electric_heater_off.json",
+      "electric_piston_normal.json",
+      "electric_pole_north.json",
+      "electric_pole_transformer_north.json",
+      "energy_receiver_down.json",
+      "fabricator_normal.json",
+      "feeding_trough_center_north.json",
+      "filter_down.json",
+      "floppy_disk_asm.json",
+      "floppy_disk_editor.json",
+      "floppy_disk_forth.json",
+      "floppy_disk_lisp.json",
+      "floppy_disk_shell.json",
+      "floppy_disk_user.json",
+      "gasification_unit_normal.json",
+      "grinder_inactive_north.json",
+      "guide_book_normal.json",
+      "heat_pipe_normal.json",
+      "heat_sink_down.json",
+      "hydraulic_press_inactive_north.json",
+      "ingots_aluminium.json",
+      "ingots_cobalt.json",
+      "ingots_cobalt_from_block.json",
+      "ingots_copper.json",
+      "ingots_copper_from_block.json",
+      "ingots_lead.json",
+      "ingots_lead_from_block.json",
+      "ingots_mithril.json",
+      "ingots_nickel.json",
+      "ingots_osmium.json",
+      "ingots_silver.json",
+      "ingots_steel.json",
+      "ingots_tin.json",
+      "ingots_tungsten.json",
+      "ingots_tungsten_from_block.json",
+      "ingots_zinc.json",
+      "inserter_north.json",
+      "inserter_upgrade_speed.json",
+      "inserter_upgrade_stack.json",
+      "insulated_heat_pipe_normal.json",
+      "insulated_heat_pipe_normal_1.json",
+      "iron_gear_normal.json",
+      "iron_hammer_normal.json",
+      "iron_pipe_normal.json",
+      "limestone.json",
+      "mining_robot_north.json",
+      "multiblock_column_axis_y.json",
+      "multiblock_parts_base.json",
+      "multiblock_parts_copper_coil.json",
+      "multiblock_parts_corrugated_iron.json",
+      "multiblock_parts_electric.json",
+      "multiblock_parts_grate.json",
+      "multiblock_parts_striped.json",
+      "nuggets_aluminium.json",
+      "nuggets_cobalt.json",
+      "nuggets_copper.json",
+      "nuggets_lead.json",
+      "nuggets_mithril.json",
+      "nuggets_nickel.json",
+      "nuggets_osmium.json",
+      "nuggets_silver.json",
+      "nuggets_steel.json",
+      "nuggets_tin.json",
+      "nuggets_tungsten.json",
+      "nuggets_zinc.json",
+      "oil_heater_inactive_north.json",
+      "pneumatic_restriction_tube_normal.json",
+      "pneumatic_tube_normal.json",
+      "pumpjack_inactive_north.json",
+      "refinery_inactive_north.json",
+      "relay_down.json",
+      "rf_heater_off.json",
+      "rf_transformer_normal.json",
+      "shelving_unit_inactive_north.json",
+      "sieve_inactive_north.json",
+      "sluice_box_center_north.json",
+      "small_tank_normal.json",
+      "solar_mirror_inactive_north.json",
+      "solar_panel_inactive_north.json",
+      "solar_tower_inactive_north.json",
+      "steam_boiler_normal.json",
+      "steam_engine_inactive_north.json",
+      "steam_turbine_inactive_north.json",
+      "steel_gear_normal.json",
+      "steel_hammer_normal.json",
+      "stone_hammer_normal.json",
+      "storage_blocks_cobalt.json",
+      "storage_blocks_copper.json",
+      "storage_blocks_lead.json",
+      "storage_blocks_pyrite.json",
+      "storage_blocks_tungsten.json",
+      "tesla_tower_bottom.json",
+      "thermometer_normal.json",
+      "thermopile_normal.json",
+      "tile_limestone.json",
+      "tile_limestone_inverted.json",
+      "transposer_down.json",
+      "tube_light.json",
+      "tungsten_gear_normal.json",
+      "voltmeter.json",
+      "water_generator.json",
+      "wind_turbine_north.json",
+      "wrench_normal.json"
+    ],
+    "decision_groups": [
+      {
+        "id": "recipe-governance-and-base",
+        "members": ["burnt_limestone.json", "crafting_alternator.json", "crafting_coil.json", "crafting_magnet.json", "crafting_mesh.json", "crafting_motor.json", "crafting_string_fabric.json", "crafting_sulfur_from_block.json", "ingots_aluminium.json", "ingots_cobalt.json", "ingots_cobalt_from_block.json", "ingots_copper.json", "ingots_copper_from_block.json", "ingots_lead.json", "ingots_lead_from_block.json", "ingots_mithril.json", "ingots_nickel.json", "ingots_osmium.json", "ingots_silver.json", "ingots_steel.json", "ingots_tin.json", "ingots_tungsten.json", "ingots_tungsten_from_block.json", "ingots_zinc.json", "nuggets_aluminium.json", "nuggets_cobalt.json", "nuggets_copper.json", "nuggets_lead.json", "nuggets_mithril.json", "nuggets_nickel.json", "nuggets_osmium.json", "nuggets_silver.json", "nuggets_steel.json", "nuggets_tin.json", "nuggets_tungsten.json", "nuggets_zinc.json", "storage_blocks_cobalt.json", "storage_blocks_copper.json", "storage_blocks_lead.json", "storage_blocks_pyrite.json", "storage_blocks_tungsten.json", "tile_limestone.json", "tile_limestone_inverted.json", "multiblock_column_axis_y.json", "multiblock_parts_base.json", "multiblock_parts_copper_coil.json", "multiblock_parts_corrugated_iron.json", "multiblock_parts_electric.json", "multiblock_parts_grate.json", "multiblock_parts_striped.json", "tube_light.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/burnt_limestone_bricks.json", "data/magneticraft/recipes/crafting/alternator.json", "data/magneticraft/recipes/crafting/fine_copper_wire.json", "data/magneticraft/recipes/crafting/magnet.json", "data/magneticraft/recipes/crafting/iron_mesh.json", "data/magneticraft/recipes/crafting/motor.json", "data/magneticraft/recipes/crafting/fabric_mesh.json", "data/magneticraft/recipes/crafting/sulfur_block_to_material.json", "data/magneticraft/recipes/crafting/aluminium_ingot_from_material.json", "data/magneticraft/recipes/crafting/cobalt_ingot_from_material.json", "data/magneticraft/recipes/crafting/cobalt_block_to_material.json", "data/magneticraft/recipes/crafting/copper_ingot_from_material.json", "data/minecraft/recipes/copper_ingot_from_copper_block.json", "data/magneticraft/recipes/crafting/lead_ingot_from_material.json", "data/magneticraft/recipes/crafting/lead_block_to_material.json", "data/magneticraft/recipes/crafting/mithril_ingot_from_material.json", "data/magneticraft/recipes/crafting/nickel_ingot_from_material.json", "data/magneticraft/recipes/crafting/osmium_ingot_from_material.json", "data/magneticraft/recipes/crafting/silver_ingot_from_material.json", "data/magneticraft/recipes/crafting/steel_ingot_from_material.json", "data/magneticraft/recipes/crafting/tin_ingot_from_material.json", "data/magneticraft/recipes/crafting/tungsten_ingot_from_material.json", "data/magneticraft/recipes/crafting/tungsten_block_to_material.json", "data/magneticraft/recipes/crafting/zinc_ingot_from_material.json", "data/magneticraft/recipes/crafting/aluminium_ingot_to_material.json", "data/magneticraft/recipes/crafting/cobalt_ingot_to_material.json", "data/magneticraft/recipes/crafting/copper_ingot_to_material.json", "data/magneticraft/recipes/crafting/lead_ingot_to_material.json", "data/magneticraft/recipes/crafting/mithril_ingot_to_material.json", "data/magneticraft/recipes/crafting/nickel_ingot_to_material.json", "data/magneticraft/recipes/crafting/osmium_ingot_to_material.json", "data/magneticraft/recipes/crafting/silver_ingot_to_material.json", "data/magneticraft/recipes/crafting/steel_ingot_to_material.json", "data/magneticraft/recipes/crafting/tin_ingot_to_material.json", "data/magneticraft/recipes/crafting/tungsten_ingot_to_material.json", "data/magneticraft/recipes/crafting/zinc_ingot_to_material.json", "data/magneticraft/recipes/crafting/cobalt_block_from_material.json", "data/minecraft/recipes/copper_block.json", "data/magneticraft/recipes/crafting/lead_block_from_material.json", "data/magneticraft/recipes/crafting/sulfur_block_from_material.json", "data/magneticraft/recipes/crafting/tungsten_block_from_material.json", "data/magneticraft/recipes/crafting/limestone_tiles.json", "data/magneticraft/recipes/crafting/inverted_limestone_tiles.json", "data/magneticraft/recipes/crafting/machine_support_column.json", "data/magneticraft/recipes/crafting/machine_casing.json", "data/magneticraft/recipes/crafting/copper_coil.json", "data/magneticraft/recipes/crafting/corrugated_iron.json", "data/magneticraft/recipes/crafting/electrical_machine_casing.json", "data/magneticraft/recipes/crafting/iron_grate.json", "data/magneticraft/recipes/crafting/striped_machine_casing.json", "data/magneticraft/recipes/crafting/tube_light.json"],
+        "disposition": "retain_rename",
+        "stage": "0.2.0",
+        "target_rule": "Generate one canonical crafting recipe under data/magneticraft/recipes/crafting using the registry projection; metadata compression/decompression recipes use <material>_<form> semantics.",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes",
+        "acceptance_tests": ["MIG-RECIPE-BASE-001", "MIG-RUNDATA-IDEMPOTENT-001"]
+      },
+      {
+        "id": "recipe-electricity-portables",
+        "members": ["battery_item_low_normal.json", "battery_item_medium_normal.json", "connector_down.json", "copper_coil_normal.json", "electric_cable_normal.json", "electric_cable_normal_1.json", "electric_cable_normal_2.json", "electric_cable_normal_3.json", "electric_cable_normal_4.json", "electric_cable_normal_5.json", "electric_chainsaw_normal.json", "electric_drill_normal.json", "electric_piston_normal.json", "electric_pole_north.json", "electric_pole_transformer_north.json", "energy_receiver_down.json", "tesla_tower_bottom.json", "thermometer_normal.json", "voltmeter.json", "wind_turbine_north.json", "wrench_normal.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/low_voltage_battery.json", "data/magneticraft/recipes/crafting/medium_voltage_battery.json", "data/magneticraft/recipes/crafting/electric_connector.json", "data/magneticraft/recipes/crafting/copper_wire_coil.json", "data/magneticraft/recipes/crafting/electric_cable.json", "data/magneticraft/recipes/crafting/electric_cable.json", "data/magneticraft/recipes/crafting/electric_cable.json", "data/magneticraft/recipes/crafting/electric_cable.json", "data/magneticraft/recipes/crafting/electric_cable.json", "data/magneticraft/recipes/crafting/electric_cable.json", "data/magneticraft/recipes/crafting/electric_chainsaw.json", "data/magneticraft/recipes/crafting/electric_drill.json", "data/magneticraft/recipes/crafting/electric_piston.json", "data/magneticraft/recipes/crafting/electric_pole.json", "data/magneticraft/recipes/crafting/electric_pole_transformer.json", "data/magneticraft/recipes/crafting/wireless_energy_receiver.json", "data/magneticraft/recipes/crafting/tesla_tower.json", "data/magneticraft/recipes/crafting/thermometer.json", "data/magneticraft/recipes/crafting/voltmeter.json", "data/magneticraft/recipes/crafting/wind_turbine.json", "data/magneticraft/recipes/crafting/wrench.json"],
+        "disposition": "rebuild",
+        "stage": "0.3.0",
+        "target_rule": "Generate canonical recipes from the frozen target IDs; the six cable and two heat-pipe alternatives may merge through Forge tags without changing accepted ingredients.",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes",
+        "acceptance_tests": ["MIG-RECIPE-ELECTRIC-001"]
+      },
+      {
+        "id": "recipe-transport",
+        "members": ["conveyor_belt_north.json", "filter_down.json", "heat_pipe_normal.json", "heat_sink_down.json", "inserter_north.json", "inserter_upgrade_speed.json", "inserter_upgrade_stack.json", "insulated_heat_pipe_normal.json", "insulated_heat_pipe_normal_1.json", "iron_pipe_normal.json", "pneumatic_restriction_tube_normal.json", "pneumatic_tube_normal.json", "relay_down.json", "small_tank_normal.json", "transposer_down.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/conveyor_belt.json", "data/magneticraft/recipes/crafting/pneumatic_filter.json", "data/magneticraft/recipes/crafting/heat_pipe.json", "data/magneticraft/recipes/crafting/heat_sink.json", "data/magneticraft/recipes/crafting/inserter.json", "data/magneticraft/recipes/crafting/inserter_speed_upgrade.json", "data/magneticraft/recipes/crafting/inserter_stack_upgrade.json", "data/magneticraft/recipes/crafting/insulated_heat_pipe.json", "data/magneticraft/recipes/crafting/insulated_heat_pipe.json", "data/magneticraft/recipes/crafting/iron_fluid_pipe.json", "data/magneticraft/recipes/crafting/pneumatic_restriction_tube.json", "data/magneticraft/recipes/crafting/pneumatic_tube.json", "data/magneticraft/recipes/crafting/pneumatic_relay.json", "data/magneticraft/recipes/crafting/small_tank.json", "data/magneticraft/recipes/crafting/pneumatic_transposer.json"],
+        "disposition": "rebuild",
+        "stage": "0.4.0",
+        "target_rule": "Generate canonical transport-domain recipes from the frozen target IDs and tags.",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes",
+        "acceptance_tests": ["MIG-RECIPE-TRANSPORT-001"]
+      },
+      {
+        "id": "recipe-single-block-machines",
+        "members": ["airlock_normal.json", "battery_north.json", "box.json", "brick_furnace_off_north.json", "combustion_chamber_north.json", "crushing_table_normal.json", "electric_engine_down.json", "electric_furnace_off_north.json", "electric_heater_off.json", "fabricator_normal.json", "feeding_trough_center_north.json", "gasification_unit_normal.json", "rf_heater_off.json", "rf_transformer_normal.json", "sluice_box_center_north.json", "steam_boiler_normal.json", "thermopile_normal.json", "water_generator.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/airlock.json", "data/magneticraft/recipes/crafting/battery_box.json", "data/magneticraft/recipes/crafting/wooden_crate.json", "data/magneticraft/recipes/crafting/brick_furnace.json", "data/magneticraft/recipes/crafting/combustion_chamber.json", "data/magneticraft/recipes/crafting/crushing_table.json", "data/magneticraft/recipes/crafting/electric_engine.json", "data/magneticraft/recipes/crafting/electric_furnace.json", "data/magneticraft/recipes/crafting/electric_heater.json", "data/magneticraft/recipes/crafting/fabricator.json", "data/magneticraft/recipes/crafting/feeding_trough.json", "data/magneticraft/recipes/crafting/gasification_unit.json", "data/magneticraft/recipes/crafting/forge_energy_heater.json", "data/magneticraft/recipes/crafting/forge_energy_transformer.json", "data/magneticraft/recipes/crafting/sluice_box.json", "data/magneticraft/recipes/crafting/steam_boiler.json", "data/magneticraft/recipes/crafting/thermopile.json", "data/magneticraft/recipes/crafting/water_generator.json"],
+        "disposition": "rebuild",
+        "stage": "0.5.0",
+        "target_rule": "Generate one recipe per canonical machine ID; battery, box and RF names resolve through the frozen registry projection.",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes",
+        "acceptance_tests": ["MIG-RECIPE-SINGLE-MACHINE-001"]
+      },
+      {
+        "id": "recipe-multiblocks",
+        "members": ["big_combustion_chamber_inactive_north.json", "big_electric_furnace_inactive_north.json", "big_steam_boiler_inactive_north.json", "container_inactive_north.json", "grinder_inactive_north.json", "hydraulic_press_inactive_north.json", "oil_heater_inactive_north.json", "pumpjack_inactive_north.json", "refinery_inactive_north.json", "shelving_unit_inactive_north.json", "sieve_inactive_north.json", "solar_mirror_inactive_north.json", "solar_panel_inactive_north.json", "solar_tower_inactive_north.json", "steam_engine_inactive_north.json", "steam_turbine_inactive_north.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/industrial_combustion_chamber.json", "data/magneticraft/recipes/crafting/industrial_electric_furnace.json", "data/magneticraft/recipes/crafting/industrial_steam_boiler.json", "data/magneticraft/recipes/crafting/shipping_container.json", "data/magneticraft/recipes/crafting/grinder.json", "data/magneticraft/recipes/crafting/hydraulic_press.json", "data/magneticraft/recipes/crafting/oil_heater.json", "data/magneticraft/recipes/crafting/pumpjack.json", "data/magneticraft/recipes/crafting/refinery.json", "data/magneticraft/recipes/crafting/shelving_unit.json", "data/magneticraft/recipes/crafting/sieve.json", "data/magneticraft/recipes/crafting/solar_mirror.json", "data/magneticraft/recipes/crafting/solar_panel.json", "data/magneticraft/recipes/crafting/solar_tower.json", "data/magneticraft/recipes/crafting/steam_engine.json", "data/magneticraft/recipes/crafting/steam_turbine.json"],
+        "disposition": "rebuild",
+        "stage": "0.6.0",
+        "target_rule": "Generate one controller recipe per released multiblock using the frozen canonical controller and casing IDs.",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes",
+        "acceptance_tests": ["MIG-RECIPE-MULTIBLOCK-001"]
+      },
+      {
+        "id": "recipe-computers",
+        "members": ["computer_north.json", "floppy_disk_asm.json", "floppy_disk_editor.json", "floppy_disk_forth.json", "floppy_disk_lisp.json", "floppy_disk_shell.json", "floppy_disk_user.json", "mining_robot_north.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/computer.json", "data/magneticraft/recipes/crafting/floppy_disk_asm.json", "data/magneticraft/recipes/crafting/floppy_disk_editor.json", "data/magneticraft/recipes/crafting/floppy_disk_forth.json", "data/magneticraft/recipes/crafting/floppy_disk_lisp.json", "data/magneticraft/recipes/crafting/floppy_disk_shell.json", "data/magneticraft/recipes/crafting/floppy_disk.json", "data/magneticraft/recipes/crafting/mining_robot.json"],
+        "disposition": "rebuild",
+        "stage": "0.7.0",
+        "target_rule": "Generate computer and robot recipes plus one deterministic preset recipe for every released disk that had a recipe; BASIC remains available through its preset/admin surface even though the snapshot has no BASIC crafting JSON.",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes",
+        "acceptance_tests": ["MIG-RECIPE-COMPUTER-001"]
+      },
+      {
+        "id": "recipe-guide",
+        "members": ["guide_book_normal.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/guide_book.json"],
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "target_rule": "Generate data/magneticraft/recipes/crafting/guide_book.json.",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes/guide_book_normal.json",
+        "acceptance_tests": ["MIG-RECIPE-GUIDE-001"]
+      },
+      {
+        "id": "recipe-unused-gears",
+        "members": ["iron_gear_normal.json", "steel_gear_normal.json", "tungsten_gear_normal.json"],
+        "target_paths": [null, null, null],
+        "disposition": "exclude",
+        "stage": "0.2.0",
+        "target_rule": "No target recipe or item is generated.",
+        "source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/Upgrades.kt",
+        "acceptance_tests": ["MIG-RECIPE-GEAR-EXCLUDED-001"]
+      },
+      {
+        "id": "recipe-hammers",
+        "members": ["iron_hammer_normal.json", "steel_hammer_normal.json", "stone_hammer_normal.json", "limestone.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/iron_hammer.json", "data/magneticraft/recipes/crafting/steel_hammer.json", "data/magneticraft/recipes/crafting/stone_hammer.json", "data/magneticraft/recipes/crafting/limestone_bricks.json"],
+        "disposition": "retain_rename",
+        "stage": "0.2.0",
+        "target_rule": "Generate canonical hammer and limestone recipes without metadata suffixes.",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/recipes",
+        "acceptance_tests": ["MIG-RECIPE-TOOLS-001"]
+      }
+    ]
+  },
+  "programmatic_recipe_groups": [
+    {
+      "id": "crushing_table",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerCrushingTableRecipes",
+      "target_type": "magneticraft:crushing_table",
+      "target_path_template": "data/magneticraft/recipes/crushing_table/{variant}.json",
+      "variants": ["aluminium_ore", "blaze_rod", "bone", "burnt_limestone", "cobalt_ore", "copper_block", "copper_ore", "creeper_head", "dark_prismarine", "end_stone_bricks", "galena_ore", "gold_block", "gold_ore", "iron_block", "iron_ore", "lead_block", "lead_ore", "limestone", "mithril_ore", "mossy_stone_bricks", "nickel_ore", "osmium_ore", "polished_andesite", "polished_diorite", "polished_granite", "pyrite_ore", "silver_ore", "skeleton_skull", "steel_ingot", "stone", "stone_bricks", "tin_ore", "tungsten_block", "tungsten_ore", "zinc_ore", "zombie_head"],
+      "disposition": "rebuild",
+      "stage": "0.5.0",
+      "acceptance_tests": ["MIG-RECIPE-CRUSHING-001"]
+    },
+    {
+      "id": "sluice_box",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerSluiceBoxRecipes",
+      "target_type": "magneticraft:sluice_box",
+      "target_path_template": "data/magneticraft/recipes/sluice_box/{variant}.json",
+      "variants": ["aluminium_rocky_chunk", "cobalt_rocky_chunk", "copper_rocky_chunk", "galena_rocky_chunk", "gold_rocky_chunk", "gravel", "iron_rocky_chunk", "lead_rocky_chunk", "mithril_rocky_chunk", "nickel_rocky_chunk", "osmium_rocky_chunk", "sand", "silver_rocky_chunk", "tin_rocky_chunk", "tungsten_rocky_chunk", "zinc_rocky_chunk"],
+      "disposition": "rebuild",
+      "stage": "0.5.0",
+      "acceptance_tests": ["MIG-RECIPE-SLUICE-001"]
+    },
+    {
+      "id": "gasification_unit",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerGasifierRecipes",
+      "target_type": "magneticraft:gasification_unit",
+      "target_path_template": "data/magneticraft/recipes/gasification_unit/{variant}.json",
+      "variants": ["00_logs", "10_planks", "11_stairs", "12_fences", "13_doors", "14_slabs", "15_trapdoors", "20_saplings", "21_leaves", "30_hay", "31_cactus", "32_chest", "40_stick", "41_wheat", "42_sugar_cane", "43_nether_wart", "44_carrot", "45_potato", "46_beetroot"],
+      "disposition": "rebuild",
+      "stage": "0.5.0",
+      "acceptance_tests": ["MIG-RECIPE-GASIFICATION-001"]
+    },
+    {
+      "id": "thermopile",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerThermopileRecipes",
+      "target_type": "magneticraft:thermopile",
+      "target_path_template": "data/magneticraft/recipes/thermopile/{variant}.json",
+      "variants": ["diesel", "fire", "fuel_oil", "gasoline", "heavy_oil", "heated_crude_oil", "ice", "jack_o_lantern", "kerosene", "lava", "light_oil", "lpg", "lubricant", "magma_block", "naphtha", "natural_gas", "crude_oil", "oil_residue", "packed_ice", "liquid_plastic", "snow_block", "snow_layer_1", "snow_layer_2", "snow_layer_3", "snow_layer_4", "snow_layer_5", "snow_layer_6", "snow_layer_7", "snow_layer_8", "steam", "torch", "water", "wood_gas"],
+      "disposition": "rebuild",
+      "stage": "0.5.0",
+      "acceptance_tests": ["MIG-RECIPE-THERMOPILE-001"]
+    },
+    {
+      "id": "fluid_fuel",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerFluidFuels",
+      "target_type": "magneticraft:fluid_fuel",
+      "target_path_template": "data/magneticraft/recipes/fluid_fuel/{variant}.json",
+      "variants": ["diesel", "fuel_oil", "gasoline", "heavy_oil", "kerosene", "light_oil", "naphtha", "natural_gas", "crude_oil", "wood_gas"],
+      "disposition": "rebuild",
+      "stage": "0.5.0",
+      "acceptance_tests": ["MIG-RECIPE-FLUID-FUEL-001"]
+    },
+    {
+      "id": "smelting",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerFurnaceRecipes",
+      "target_type": "minecraft:smelting",
+      "target_path_template": "data/magneticraft/recipes/smelting/{variant}.json",
+      "variants": ["aluminium_chunk", "aluminium_dust", "aluminium_rocky_chunk", "cobalt_chunk", "cobalt_dust", "cobalt_ore", "cobalt_rocky_chunk", "limestone_cobblestone", "copper_chunk", "copper_dust", "copper_rocky_chunk", "galena_ore", "galena_rocky_chunk", "gold_chunk", "gold_dust", "gold_rocky_chunk", "iron_chunk", "iron_dust", "iron_rocky_chunk", "lead_chunk", "lead_dust", "lead_rocky_chunk", "limestone", "mithril_chunk", "mithril_dust", "mithril_rocky_chunk", "nickel_chunk", "nickel_dust", "nickel_rocky_chunk", "osmium_chunk", "osmium_dust", "osmium_rocky_chunk", "silver_chunk", "silver_dust", "silver_rocky_chunk", "steel_dust", "tin_chunk", "tin_dust", "tin_rocky_chunk", "tungsten_chunk", "tungsten_dust", "tungsten_ore", "tungsten_rocky_chunk", "zinc_chunk", "zinc_dust", "zinc_rocky_chunk"],
+      "expected_recipe_count": 46,
+      "disposition": "retain_rename",
+      "stage": "0.2.0",
+      "acceptance_tests": ["MIG-RECIPE-SMELTING-001"]
+    },
+    {
+      "id": "advanced_processing",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#grinder_sieve_hydraulic_press",
+      "target_type": "magneticraft:advanced_processing",
+      "target_path_template": "data/magneticraft/recipes/advanced_processing/{machine}_{variant}.json",
+      "variants": ["grinder_aluminium_ingot", "grinder_aluminium_ore", "grinder_blaze_rod", "grinder_bone", "grinder_burnt_limestone", "grinder_coal_ore", "grinder_cobalt_ingot", "grinder_cobalt_ore", "grinder_cobblestone", "grinder_copper_ingot", "grinder_copper_ore", "grinder_diamond_ore", "grinder_emerald_ore", "grinder_galena_ore", "grinder_glowstone", "grinder_gold_ingot", "grinder_gold_ore", "grinder_iron_ingot", "grinder_iron_ore", "grinder_lapis_ore", "grinder_lead_ingot", "grinder_lead_ore", "grinder_limestone", "grinder_mithril_ingot", "grinder_mithril_ore", "grinder_nether_quartz_ore", "grinder_nickel_ingot", "grinder_nickel_ore", "grinder_osmium_ingot", "grinder_osmium_ore", "grinder_pyrite_ore", "grinder_quartz_block", "grinder_red_sandstone", "grinder_redstone_ore", "grinder_sandstone", "grinder_silver_ingot", "grinder_silver_ore", "grinder_steel_ingot", "grinder_sugar_cane", "grinder_tin_ingot", "grinder_tin_ore", "grinder_tungsten_ingot", "grinder_tungsten_ore", "grinder_wool", "grinder_zinc_ingot", "grinder_zinc_ore", "hydraulic_press_copper_heavy_plate", "hydraulic_press_copper_light_plate", "hydraulic_press_end_stone_bricks", "hydraulic_press_gold_heavy_plate", "hydraulic_press_gold_light_plate", "hydraulic_press_ice", "hydraulic_press_iron_heavy_plate", "hydraulic_press_iron_light_plate", "hydraulic_press_lead_heavy_plate", "hydraulic_press_lead_light_plate", "hydraulic_press_mossy_stone_bricks", "hydraulic_press_polished_andesite", "hydraulic_press_polished_diorite", "hydraulic_press_polished_granite", "hydraulic_press_prismarine_bricks", "hydraulic_press_smooth_red_sandstone", "hydraulic_press_smooth_sandstone", "hydraulic_press_steel_heavy_plate", "hydraulic_press_steel_light_plate", "hydraulic_press_stone", "hydraulic_press_stone_bricks", "hydraulic_press_tungsten_heavy_plate", "hydraulic_press_tungsten_light_plate", "sieve_aluminium_rocky_chunk", "sieve_cobalt_rocky_chunk", "sieve_copper_rocky_chunk", "sieve_galena_rocky_chunk", "sieve_gold_rocky_chunk", "sieve_gravel", "sieve_iron_rocky_chunk", "sieve_lead_rocky_chunk", "sieve_mithril_rocky_chunk", "sieve_nickel_rocky_chunk", "sieve_osmium_rocky_chunk", "sieve_sand", "sieve_silver_rocky_chunk", "sieve_soul_sand", "sieve_tin_rocky_chunk", "sieve_tungsten_rocky_chunk", "sieve_zinc_rocky_chunk"],
+      "expected_recipe_count": 86,
+      "disposition": "rebuild",
+      "stage": "0.6.0",
+      "acceptance_tests": ["MIG-RECIPE-ADVANCED-001"]
+    },
+    {
+      "id": "oil_heater",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#addOilHeaterRecipe",
+      "target_type": "magneticraft:advanced_processing",
+      "target_path_template": "data/magneticraft/recipes/advanced_processing/oil_heater_{variant}.json",
+      "variants": ["water_to_steam", "crude_oil_to_heated_crude_oil"],
+      "merged_legacy_inputs": {"crude_oil_to_heated_crude_oil": ["oil", "crude_oil"]},
+      "disposition": "rebuild",
+      "stage": "0.6.0",
+      "acceptance_tests": ["MIG-RECIPE-OIL-HEATER-001"]
+    },
+    {
+      "id": "refinery",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#addRefineryRecipe",
+      "target_type": "magneticraft:advanced_processing",
+      "target_path_template": "data/magneticraft/recipes/advanced_processing/refinery_{variant}.json",
+      "variants": ["steam_to_water", "heated_crude_oil_fractionation", "heavy_oil_fractionation", "light_oil_fractionation", "lpg_fractionation"],
+      "disposition": "rebuild",
+      "stage": "0.6.0",
+      "acceptance_tests": ["MIG-RECIPE-REFINERY-001"]
+    },
+    {
+      "id": "optional_ore_dictionary_machine_recipes",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#optional_ore_dictionary_branches",
+      "legacy_variants": ["thermal_foundation_materials", "immersive_engineering_sawdust_and_dusts", "third_party_ore_variants"],
+      "target_type": "",
+      "target_path_template": "",
+      "disposition": "exclude",
+      "stage": "0.8.0",
+      "acceptance_tests": ["MIG-RECIPE-OPTIONAL-OREDICT-EXCLUDED-001"]
+    },
+    {
+      "id": "external_named_fluid_fuels",
+      "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerFluidFuels",
+      "legacy_variants": ["crude_oil_alias", "plantoil", "biodiesel", "tree_oil", "refined_fuel", "refined_oil", "biofuel"],
+      "target_type": "",
+      "target_path_template": "",
+      "disposition": "exclude",
+      "stage": "0.8.0",
+      "acceptance_tests": ["MIG-RECIPE-EXTERNAL-FLUID-EXCLUDED-001"]
+    }
+  ],
+  "legacy_guides": {
+    "source_root": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us",
+    "inventory": [
+      "1-getting-started.md",
+      "2-machines.md",
+      "3-multiblocks.md",
+      "4-world-generation.md",
+      "5-computers.md",
+      "6-electricity.md",
+      "7-heat.md",
+      "computer/0-noobs.md",
+      "computer/1-forth.md",
+      "computer/2-lisp.md",
+      "computer/3-shell.md",
+      "electricity/1-fundamentals.md",
+      "electricity/2-conversion-rates.md",
+      "electricity/3-transportation.md",
+      "index.md",
+      "machines/1-generators.md",
+      "machines/2-processing-machines.md",
+      "machines/3-transport.md",
+      "machines/4-utilities.md",
+      "machines/generators/2.1-combustion-chamber.md",
+      "machines/generators/2.2-steam-boiler.md",
+      "machines/generators/2-steam-engine.md",
+      "machines/generators/3-thermopile.md",
+      "machines/generators/4-wind-turbine.md",
+      "machines/generators/5-solar-panel.md",
+      "machines/generators/6.1-solar-mirror.md",
+      "machines/generators/6-solar-tower.md",
+      "machines/processing_machines/10-gasification-unit.md",
+      "machines/processing_machines/11-furnace.md",
+      "machines/processing_machines/12-combustion-chamber.md",
+      "machines/processing_machines/13-steam-boiler.md",
+      "machines/processing_machines/14-steam-turbine.md",
+      "machines/processing_machines/1-crushing-table.md",
+      "machines/processing_machines/2-sluice-box.md",
+      "machines/processing_machines/3-grinder.md",
+      "machines/processing_machines/4-sieve.md",
+      "machines/processing_machines/5-hydraulic-press.md",
+      "machines/processing_machines/6-pumpjack.md",
+      "machines/processing_machines/7-electric-furnace.md",
+      "machines/processing_machines/8-oil-heater.md",
+      "machines/processing_machines/9-refinery.md",
+      "machines/transport/1-inserters.md",
+      "machines/transport/2-conveyor-belts.md",
+      "machines/transport/3-fluid-pipes.md",
+      "machines/transport/4-heat-pipes.md",
+      "machines/utilities/1-shelving-unit.md",
+      "machines/utilities/2-shipping-container.md",
+      "machines/utilities/3-water-generator.md",
+      "machines/utilities/4-airlock.md",
+      "machines/utilities/5-feeding-trough.md",
+      "machines/utilities/6-copper-tank.md",
+      "machines/utilities/7-fabricator.md"
+    ],
+    "pages": [
+      {
+        "legacy_path": "1-getting-started.md",
+        "target_page_id": "magneticraft:getting_started",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/getting_started.md", "zh_cn": "assets/magneticraft/guide/zh_cn/getting_started.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/1-getting-started.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "2-machines.md",
+        "target_page_id": "magneticraft:machines",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/2-machines.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "3-multiblocks.md",
+        "target_page_id": "magneticraft:multiblocks",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/multiblocks.md", "zh_cn": "assets/magneticraft/guide/zh_cn/multiblocks.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/3-multiblocks.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "4-world-generation.md",
+        "target_page_id": "magneticraft:world_generation",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/world_generation.md", "zh_cn": "assets/magneticraft/guide/zh_cn/world_generation.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/4-world-generation.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "5-computers.md",
+        "target_page_id": "magneticraft:computers",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/computers.md", "zh_cn": "assets/magneticraft/guide/zh_cn/computers.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/5-computers.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "6-electricity.md",
+        "target_page_id": "magneticraft:electricity",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/electricity.md", "zh_cn": "assets/magneticraft/guide/zh_cn/electricity.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/6-electricity.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "7-heat.md",
+        "target_page_id": "magneticraft:heat",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/heat.md", "zh_cn": "assets/magneticraft/guide/zh_cn/heat.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/7-heat.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "computer/0-noobs.md",
+        "target_page_id": "magneticraft:computers/getting_started",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/computers/getting_started.md", "zh_cn": "assets/magneticraft/guide/zh_cn/computers/getting_started.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/computer/0-noobs.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "computer/1-forth.md",
+        "target_page_id": "magneticraft:computers/forth",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/computers/forth.md", "zh_cn": "assets/magneticraft/guide/zh_cn/computers/forth.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/computer/1-forth.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "computer/2-lisp.md",
+        "target_page_id": "magneticraft:computers/lisp",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/computers/lisp.md", "zh_cn": "assets/magneticraft/guide/zh_cn/computers/lisp.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/computer/2-lisp.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "computer/3-shell.md",
+        "target_page_id": "magneticraft:computers/shell",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/computers/shell.md", "zh_cn": "assets/magneticraft/guide/zh_cn/computers/shell.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/computer/3-shell.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "electricity/1-fundamentals.md",
+        "target_page_id": "magneticraft:electricity/fundamentals",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/electricity/fundamentals.md", "zh_cn": "assets/magneticraft/guide/zh_cn/electricity/fundamentals.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/electricity/1-fundamentals.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "electricity/2-conversion-rates.md",
+        "target_page_id": "magneticraft:electricity/conversion_rates",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/electricity/conversion_rates.md", "zh_cn": "assets/magneticraft/guide/zh_cn/electricity/conversion_rates.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/electricity/2-conversion-rates.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "electricity/3-transportation.md",
+        "target_page_id": "magneticraft:electricity/transportation",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/electricity/transportation.md", "zh_cn": "assets/magneticraft/guide/zh_cn/electricity/transportation.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/electricity/3-transportation.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "index.md",
+        "target_page_id": "magneticraft:index",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/index.md", "zh_cn": "assets/magneticraft/guide/zh_cn/index.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/index.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/1-generators.md",
+        "target_page_id": "magneticraft:machines/generators",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/1-generators.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/2-processing-machines.md",
+        "target_page_id": "magneticraft:machines/processing",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/2-processing-machines.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/3-transport.md",
+        "target_page_id": "magneticraft:machines/transport",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/transport.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/transport.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/3-transport.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/4-utilities.md",
+        "target_page_id": "magneticraft:machines/utilities",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/utilities.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/utilities.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/4-utilities.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/generators/2.1-combustion-chamber.md",
+        "target_page_id": "magneticraft:machines/generators/combustion_chamber",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators/combustion_chamber.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators/combustion_chamber.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/generators/2.1-combustion-chamber.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/generators/2.2-steam-boiler.md",
+        "target_page_id": "magneticraft:machines/generators/steam_boiler",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators/steam_boiler.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators/steam_boiler.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/generators/2.2-steam-boiler.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/generators/2-steam-engine.md",
+        "target_page_id": "magneticraft:machines/generators/steam_engine",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators/steam_engine.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators/steam_engine.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/generators/2-steam-engine.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/generators/3-thermopile.md",
+        "target_page_id": "magneticraft:machines/generators/thermopile",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators/thermopile.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators/thermopile.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/generators/3-thermopile.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/generators/4-wind-turbine.md",
+        "target_page_id": "magneticraft:machines/generators/wind_turbine",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators/wind_turbine.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators/wind_turbine.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/generators/4-wind-turbine.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/generators/5-solar-panel.md",
+        "target_page_id": "magneticraft:machines/generators/solar_panel",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators/solar_panel.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators/solar_panel.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/generators/5-solar-panel.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/generators/6.1-solar-mirror.md",
+        "target_page_id": "magneticraft:machines/generators/solar_mirror",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators/solar_mirror.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators/solar_mirror.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/generators/6.1-solar-mirror.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/generators/6-solar-tower.md",
+        "target_page_id": "magneticraft:machines/generators/solar_tower",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/generators/solar_tower.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/generators/solar_tower.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/generators/6-solar-tower.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/10-gasification-unit.md",
+        "target_page_id": "magneticraft:machines/processing/gasification_unit",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/gasification_unit.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/gasification_unit.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/10-gasification-unit.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/11-furnace.md",
+        "target_page_id": "magneticraft:machines/processing/industrial_electric_furnace",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/industrial_electric_furnace.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/industrial_electric_furnace.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/11-furnace.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/12-combustion-chamber.md",
+        "target_page_id": "magneticraft:machines/processing/industrial_combustion_chamber",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/industrial_combustion_chamber.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/industrial_combustion_chamber.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/12-combustion-chamber.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/13-steam-boiler.md",
+        "target_page_id": "magneticraft:machines/processing/industrial_steam_boiler",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/industrial_steam_boiler.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/industrial_steam_boiler.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/13-steam-boiler.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/14-steam-turbine.md",
+        "target_page_id": "magneticraft:machines/processing/steam_turbine",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/steam_turbine.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/steam_turbine.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/14-steam-turbine.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/1-crushing-table.md",
+        "target_page_id": "magneticraft:machines/processing/crushing_table",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/crushing_table.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/crushing_table.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/1-crushing-table.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/2-sluice-box.md",
+        "target_page_id": "magneticraft:machines/processing/sluice_box",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/sluice_box.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/sluice_box.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/2-sluice-box.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/3-grinder.md",
+        "target_page_id": "magneticraft:machines/processing/grinder",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/grinder.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/grinder.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/3-grinder.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/4-sieve.md",
+        "target_page_id": "magneticraft:machines/processing/sieve",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/sieve.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/sieve.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/4-sieve.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/5-hydraulic-press.md",
+        "target_page_id": "magneticraft:machines/processing/hydraulic_press",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/hydraulic_press.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/hydraulic_press.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/5-hydraulic-press.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/6-pumpjack.md",
+        "target_page_id": "magneticraft:machines/processing/pumpjack",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/pumpjack.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/pumpjack.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/6-pumpjack.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/7-electric-furnace.md",
+        "target_page_id": "magneticraft:machines/processing/electric_furnace",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/electric_furnace.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/electric_furnace.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/7-electric-furnace.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/8-oil-heater.md",
+        "target_page_id": "magneticraft:machines/processing/oil_heater",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/oil_heater.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/oil_heater.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/8-oil-heater.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/processing_machines/9-refinery.md",
+        "target_page_id": "magneticraft:machines/processing/refinery",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/processing/refinery.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/processing/refinery.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/processing_machines/9-refinery.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/transport/1-inserters.md",
+        "target_page_id": "magneticraft:machines/transport/inserters",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/transport/inserters.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/transport/inserters.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/transport/1-inserters.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/transport/2-conveyor-belts.md",
+        "target_page_id": "magneticraft:machines/transport/conveyor_belts",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/transport/conveyor_belts.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/transport/conveyor_belts.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/transport/2-conveyor-belts.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/transport/3-fluid-pipes.md",
+        "target_page_id": "magneticraft:machines/transport/fluid_pipes",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/transport/fluid_pipes.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/transport/fluid_pipes.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/transport/3-fluid-pipes.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/transport/4-heat-pipes.md",
+        "target_page_id": "magneticraft:machines/transport/heat_pipes",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/transport/heat_pipes.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/transport/heat_pipes.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/transport/4-heat-pipes.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/utilities/1-shelving-unit.md",
+        "target_page_id": "magneticraft:machines/utilities/shelving_unit",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/utilities/shelving_unit.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/utilities/shelving_unit.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/utilities/1-shelving-unit.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/utilities/2-shipping-container.md",
+        "target_page_id": "magneticraft:machines/utilities/shipping_container",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/utilities/shipping_container.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/utilities/shipping_container.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/utilities/2-shipping-container.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/utilities/3-water-generator.md",
+        "target_page_id": "magneticraft:machines/utilities/water_generator",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/utilities/water_generator.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/utilities/water_generator.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/utilities/3-water-generator.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/utilities/4-airlock.md",
+        "target_page_id": "magneticraft:machines/utilities/airlock",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/utilities/airlock.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/utilities/airlock.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/utilities/4-airlock.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/utilities/5-feeding-trough.md",
+        "target_page_id": "magneticraft:machines/utilities/feeding_trough",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/utilities/feeding_trough.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/utilities/feeding_trough.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/utilities/5-feeding-trough.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      },
+      {
+        "legacy_path": "machines/utilities/6-copper-tank.md",
+        "disposition": "exclude",
+        "stage": "0.2.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/utilities/6-copper-tank.md",
+        "evidence": "The released guide page contains only TODO, and the pinned Kotlin snapshot has no copper_tank registration or gameplay implementation.",
+        "notes": "Prototype-only documentation has no target page or bilingual resource.",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-COPPER-TANK-EXCLUDED-001"]
+      },
+      {
+        "legacy_path": "machines/utilities/7-fabricator.md",
+        "target_page_id": "magneticraft:machines/utilities/fabricator",
+        "target_resources": {"en_us": "assets/magneticraft/guide/en_us/machines/utilities/fabricator.md", "zh_cn": "assets/magneticraft/guide/zh_cn/machines/utilities/fabricator.md"},
+        "disposition": "rebuild",
+        "stage": "0.8.0",
+        "source": ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/utilities/7-fabricator.md",
+        "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+      }
+    ],
+    "disposition": "rebuild",
+    "stage": "0.8.0",
+    "target_rule": "Every retained inventory path maps to one semantic guide page in both en_us and zh_cn; explicitly excluded prototype-only pages have no target page or resource, and section numbering is navigation metadata rather than a registry ID.",
+    "behavior_contract_ids": ["guides.bilingual_closure"],
+    "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+  },
+  "behavior_contracts": [
+    {
+      "id": "governance.id_freeze",
+      "legacy_sources": ["PORTING_SOURCES.md", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features"],
+      "disposition": "retain_rename",
+      "stage": "0.2.0",
+      "contract": "Every legacy content identity has exactly one retained, rebuilt or excluded decision; no legacy alias or missing mapping is accepted after the destructive reset.",
+      "acceptance_tests": ["MIG-REGISTRY-PROJECTION-001", "MIG-REGISTRY-UNASSIGNED-001"]
+    },
+    {
+      "id": "persistence.versioned_envelopes",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules", "src/main/java/committee/nova/mods/magneticraft/content/machine/framework"],
+      "disposition": "rebuild",
+      "stage": "0.2.0",
+      "contract": "Owned tags use lower_snake_case and a local schema_version; block entities own local state, level connections use SavedData, runtime graphs are rebuildable, and pre-0.2 data is not read.",
+      "acceptance_tests": ["MIG-NBT-SCHEMA-001", "MIG-NBT-ROUNDTRIP-001"]
+    },
+    {
+      "id": "simulation.server_authority",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules"],
+      "disposition": "rebuild",
+      "stage": "0.2.0",
+      "contract": "Simulation, connection edits, tool energy use and processing mutate state only on the logical server; clients receive bounded display state.",
+      "acceptance_tests": ["MIG-SERVER-AUTHORITY-001"]
+    },
+    {
+      "id": "physics.domain_separation",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/energy", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/heat", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/pneumatic"],
+      "disposition": "rebuild",
+      "stage": "0.3.0",
+      "contract": "Electricity, heat, fluids, pressure and logistics remain independent physical domains; Forge Energy is an adapter at exactly 1 J = 1 FE.",
+      "acceptance_tests": ["MIG-PHYSICS-DOMAINS-001", "MIG-FE-RATIO-001"]
+    },
+    {
+      "id": "electricity.adjacent_network",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleElectricity.kt", ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/electricity"],
+      "disposition": "rebuild",
+      "stage": "0.3.0",
+      "contract": "Voltage, current, resistance and stored energy conserve energy across adjacent conductors; FE conversion is explicit and instantaneous diagnostics never mutate the graph.",
+      "acceptance_tests": ["MIG-ELECTRIC-CONSERVATION-001", "MIG-ELECTRIC-DIAGNOSTIC-001"]
+    },
+    {
+      "id": "electricity.long_distance_network",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_conductors"],
+      "disposition": "rebuild",
+      "stage": "0.3.0",
+      "contract": "Connectors span at most 8 blocks and pole links at most 16; unloaded endpoints pause, chunks are never force-loaded, dimensions never connect, broken endpoints remove edges, and connections persist in SavedData.",
+      "acceptance_tests": ["MIG-WIRE-DISTANCE-001", "MIG-WIRE-UNLOAD-001", "MIG-WIRE-BREAK-001"]
+    },
+    {
+      "id": "electricity.portable_devices",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ElectricItems.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ToolItems.kt"],
+      "disposition": "rebuild",
+      "stage": "0.3.0",
+      "contract": "Low/medium batteries, drill, chainsaw, piston, voltmeter and thermometer use new versioned payloads; actions and energy costs are server-validated and charging slots obey transfer limits.",
+      "acceptance_tests": ["MIG-PORTABLE-SERVER-001", "MIG-PORTABLE-ENERGY-001", "MIG-CHARGER-001"]
+    },
+    {
+      "id": "transport.heat_fluid_pressure",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleHeat.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModulePipe.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModulePneumaticTube.kt"],
+      "disposition": "rebuild",
+      "stage": "0.4.0",
+      "contract": "Transfers happen exactly once, simulation calls have no side effects, blocked routes apply backpressure, and unloaded boundaries pause without loss or force loading.",
+      "acceptance_tests": ["MIG-TRANSFER-EXACTLY-ONCE-001", "MIG-TRANSFER-SIMULATE-001", "MIG-TRANSFER-UNLOAD-001"]
+    },
+    {
+      "id": "transport.conveyor",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleConveyorBelt.kt", ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/transport/2-conveyor-belts.md"],
+      "disposition": "rebuild",
+      "stage": "0.4.0",
+      "contract": "An internal item model supports right-click insertion/removal, automatic output, backpressure and horizontal auto-corners; slopes and vertical conveyors remain excluded.",
+      "acceptance_tests": ["MIG-CONVEYOR-ONCE-001", "MIG-CONVEYOR-CORNER-001", "MIG-CONVEYOR-EXCLUDED-SLOPE-001"]
+    },
+    {
+      "id": "transport.inserter",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/Upgrades.kt"],
+      "disposition": "rebuild",
+      "stage": "0.4.0",
+      "contract": "Inserters preserve filtering and direction; speed and stack upgrades are the only retained upgrade items and affect only documented consumers.",
+      "acceptance_tests": ["MIG-INSERTER-FILTER-001", "MIG-INSERTER-UPGRADE-001"]
+    },
+    {
+      "id": "machines.single_block_catalog",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines"],
+      "disposition": "rebuild",
+      "stage": "0.5.0",
+      "contract": "Crushing table, wooden crate, sluice box, fabricator, feeding trough, water generator, battery box, electric furnace, airlock, thermopile, combustion chamber, steam boiler, electric/FE heaters, gasification unit, brick furnace, electric engine and automation each define recipes, slots/sides, redstone, persistence, menu sync, JEI/CT data, bilingual guide and GameTest contracts.",
+      "acceptance_tests": ["MIG-SINGLE-MACHINE-CATALOG-001"]
+    },
+    {
+      "id": "machines.creative_admin",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt#infiniteEnergy", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/ores/Blocks.kt#oilSource"],
+      "disposition": "rebuild",
+      "stage": "0.5.0",
+      "contract": "Intentional creative/admin devices, including infinite energy and oil-deposit placement, remain available while internal gaps and moving placeholders never enter normal obtainable content.",
+      "acceptance_tests": ["MIG-CREATIVE-ADMIN-001", "MIG-INTERNAL-NOT-OBTAINABLE-001"]
+    },
+    {
+      "id": "multiblock.structure_and_ownership",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/multiblocks"],
+      "disposition": "rebuild",
+      "stage": "0.6.0",
+      "contract": "All sixteen released structures preserve layout, orientation, ports, tanks, recipes, energy and form/unform rules; unloaded members pause without force loading or false teardown, and ownership prevents duplicate drops or inventory loss.",
+      "acceptance_tests": ["MIG-MULTIBLOCK-16-001", "MIG-MULTIBLOCK-UNLOAD-001", "MIG-MULTIBLOCK-NODUPE-001"]
+    },
+    {
+      "id": "worldgen.ores_limestone_oil",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/worldgen"],
+      "disposition": "rebuild",
+      "stage": "0.6.0",
+      "contract": "Released ore, limestone and finite oil-deposit generation feeds pumpjack, oil heating, refinery, solar, steam and storage progression without exposing internal placeholders as drops.",
+      "acceptance_tests": ["MIG-WORLDGEN-ORE-001", "MIG-WORLDGEN-OIL-001"]
+    },
+    {
+      "id": "computer.languages_and_budget",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/computer", ".references/nova-1.12/src/main/resources/assets/magneticraft/cpu"],
+      "disposition": "rebuild",
+      "stage": "0.7.0",
+      "contract": "A pure-Java bounded Forth core, Lisp layer and Shell preserve released semantics including BIOS and user/basic/editor/asm/forth/lisp/shell media, with hard program length, memory, per-tick instruction and upload limits.",
+      "acceptance_tests": ["MIG-COMPUTER-FORTH-001", "MIG-COMPUTER-LISP-001", "MIG-COMPUTER-SHELL-001", "MIG-COMPUTER-BUDGET-001"]
+    },
+    {
+      "id": "computer.disk_and_robot_security",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ComputerItems.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/computers"],
+      "disposition": "rebuild",
+      "stage": "0.7.0",
+      "contract": "Versioned disks recover from corruption safely; computer and robot device commands are server-validated for distance, permission, chunk state, replay and budget, and unload resumes without duplication.",
+      "acceptance_tests": ["MIG-FLOPPY-CORRUPTION-001", "MIG-ROBOT-PERMISSION-001", "MIG-ROBOT-UNLOAD-001", "MIG-PACKET-REPLAY-001"]
+    },
+    {
+      "id": "computer.outbound_network",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/computer/DeviceNetworkCard.kt"],
+      "disposition": "exclude",
+      "stage": "0.7.0",
+      "contract": "The legacy unrestricted TCP/SSL network card and arbitrary outbound socket access are not restored.",
+      "acceptance_tests": ["MIG-COMPUTER-NETWORK-EXCLUDED-001"]
+    },
+    {
+      "id": "integrations.optional_isolation",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/integration", "PORTING_SOURCES.md"],
+      "disposition": "rebuild",
+      "stage": "0.8.0",
+      "contract": "JEI, CraftTweaker, TConstruct and Jade remain compile-isolated and optional; a base installation never links their classes, while BuildCraft integration remains excluded.",
+      "acceptance_tests": ["MIG-OPTIONAL-BASE-001", "MIG-OPTIONAL-EACH-001", "MIG-OPTIONAL-ALL-001"]
+    },
+    {
+      "id": "integrations.jade_privacy",
+      "legacy_sources": ["https://jademc.readthedocs.io/en/latest/plugins20/getting-started/", "https://modrinth.com/mod/jade/version/11.13.1%2Bforge"],
+      "disposition": "rebuild",
+      "stage": "0.8.0",
+      "contract": "Jade 11.13.1+forge uses an isolated plugin and server data provider for progress, energy, physical readings, tanks and multiblock state; it never exposes programs or hidden inventory.",
+      "acceptance_tests": ["MIG-JADE-ABSENT-001", "MIG-JADE-PRESENT-001", "MIG-JADE-PRIVACY-001"]
+    },
+    {
+      "id": "guides.bilingual_closure",
+      "legacy_sources": [".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us"],
+      "disposition": "rebuild",
+      "stage": "0.8.0",
+      "contract": "Every retained gameplay path has symmetric en_us and zh_cn navigation, structure, recipe and fault guidance; excluded prototypes are identified as unavailable rather than documented as working.",
+      "acceptance_tests": ["MIG-GUIDE-COVERAGE-001", "MIG-GUIDE-LANGUAGE-SYMMETRY-001"]
+    },
+    {
+      "id": "performance.network_vm_render",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems"],
+      "disposition": "rebuild",
+      "stage": "0.9.0",
+      "contract": "A stable 1024-node network does not rebuild topology every tick, logistics search stops at 4096 visited nodes, and VM plus rendering work obey explicit budgets.",
+      "acceptance_tests": ["MIG-PERF-NETWORK-1024-001", "MIG-PERF-LOGISTICS-4096-001", "MIG-PERF-VM-RENDER-001"]
+    },
+    {
+      "id": "release.visual_fidelity",
+      "legacy_sources": [".references/nova-1.12/src/main/resources/assets/magneticraft/models", ".references/nova-1.12/src/main/resources/assets/magneticraft/textures"],
+      "disposition": "rebuild",
+      "stage": "1.0.0",
+      "contract": "Legacy MCX/glTF assets are converted offline; static geometry is baked and dynamic state uses bounded BERs, with no runtime legacy model loader.",
+      "acceptance_tests": ["MIG-VISUAL-STATIC-001", "MIG-VISUAL-DYNAMIC-001", "MIG-ASSET-NO-MISSING-001"]
+    }
+  ],
+  "quality_gate": [
+    "compileJava",
+    "runData twice with no second-run resource diff",
+    "test",
+    "runGameTestServer",
+    "build",
+    "runServer smoke",
+    "runClient smoke"
+  ]
+}

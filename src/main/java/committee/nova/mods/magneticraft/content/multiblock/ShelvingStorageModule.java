@@ -70,6 +70,7 @@ public final class ShelvingStorageModule implements MachineModule, IItemHandler 
 
     @Override
     public void load(CompoundTag tag) {
+        resetPersistentState();
         if (tag.contains(STORAGE_TAG, CompoundTag.TAG_COMPOUND)) {
             storage.deserializeNBT(tag.getCompound(STORAGE_TAG));
         }
@@ -90,6 +91,12 @@ public final class ShelvingStorageModule implements MachineModule, IItemHandler 
     public void save(CompoundTag tag) {
         tag.put(STORAGE_TAG, storage.serializeNBT());
         tag.put(CHESTS_TAG, chests.serializeNBT());
+    }
+
+    @Override
+    public void resetPersistentState() {
+        storage.deserializeNBT(new ItemStackHandler(MAX_STORAGE_SLOTS).serializeNBT());
+        chests.deserializeNBT(new ItemStackHandler(MAX_CHESTS).serializeNBT());
     }
 
     @Override
