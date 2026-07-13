@@ -142,6 +142,13 @@ final class AdvancedGuideDataProvider implements DataProvider {
         ));
         items.add(portableItem("voltmeter", 0, 0, 0, 0));
         items.add(portableItem("thermometer", 0, 0, 0, 0));
+        items.add(electricEquipmentItem("copper_wire_coil", false));
+        items.add(electricEquipmentItem("electric_connector", true));
+        items.add(electricEquipmentItem("electric_pole", true));
+        items.add(electricEquipmentItem("electric_pole_transformer", true));
+        items.add(electricEquipmentItem("tesla_tower", true));
+        items.add(electricEquipmentItem("wireless_energy_receiver", true));
+        items.add(electricEquipmentItem("wind_turbine", true));
         root.add("items", items);
         return root;
     }
@@ -161,6 +168,14 @@ final class AdvancedGuideDataProvider implements DataProvider {
         item.addProperty("break_cost_fe", breakCostFe);
         item.addProperty("attack_cost_fe", attackCostFe);
         item.addProperty("use_cost_fe", useCostFe);
+        return item;
+    }
+
+    private static JsonObject electricEquipmentItem(String id, boolean blockItem) {
+        JsonObject item = portableItem(id, 0, 0, 0, 0);
+        if (blockItem) {
+            item.addProperty("translation_key", "block.magneticraft." + id);
+        }
         return item;
     }
 

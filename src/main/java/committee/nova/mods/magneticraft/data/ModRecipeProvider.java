@@ -80,6 +80,7 @@ final class ModRecipeProvider extends RecipeProvider {
         addSmeltingRecipes(consumer);
         addMachineCraftingRecipes(consumer);
         addPortableElectricRecipes(consumer);
+        addLongDistanceElectricRecipes(consumer);
         addSingleBlockCraftingRecipes(consumer);
         addCrushingRecipes(consumer);
         addSluiceRecipes(consumer);
@@ -624,6 +625,74 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', Tags.Items.INGOTS_IRON)
                 .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
                 .save(consumer, id("crafting/thermometer"));
+    }
+
+    private void addLongDistanceElectricRecipes(Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_CONNECTOR.get(), 8)
+                .pattern(" A ")
+                .pattern("BCB")
+                .define('A', Tags.Items.INGOTS_IRON)
+                .define('B', Tags.Items.STONE)
+                .define('C', Tags.Items.INGOTS_COPPER)
+                .unlockedBy("has_copper_ingot", has(Tags.Items.INGOTS_COPPER))
+                .save(consumer, id("crafting/electric_connector"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModNetworkItems.COPPER_WIRE_COIL.get())
+                .pattern(" A ")
+                .pattern("ABA")
+                .pattern(" A ")
+                .define('A', Tags.Items.INGOTS_COPPER)
+                .define('B', ModTags.Items.lightPlate(Metal.IRON))
+                .unlockedBy("has_iron_light_plate", has(ModTags.Items.lightPlate(Metal.IRON)))
+                .save(consumer, id("crafting/copper_wire_coil"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_POLE.get(), 3)
+                .pattern("AAA")
+                .pattern(" B ")
+                .pattern(" B ")
+                .define('A', ModNetworkBlocks.ELECTRIC_CONNECTOR.get())
+                .define('B', ItemTags.LOGS)
+                .unlockedBy("has_electric_connector", has(ModNetworkBlocks.ELECTRIC_CONNECTOR.get()))
+                .save(consumer, id("crafting/electric_pole"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), 2)
+                .pattern(" A ")
+                .pattern("BCB")
+                .pattern("BCB")
+                .define('A', ModNetworkBlocks.ELECTRIC_CONNECTOR.get())
+                .define('B', ModTags.Items.ingot(Metal.LEAD))
+                .define('C', ModTags.Items.lightPlate(Metal.COPPER))
+                .unlockedBy("has_electric_connector", has(ModNetworkBlocks.ELECTRIC_CONNECTOR.get()))
+                .save(consumer, id("crafting/electric_pole_transformer"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.TESLA_TOWER.get())
+                .pattern("ABA")
+                .pattern("ACA")
+                .pattern("ABA")
+                .define('A', component(CraftingComponent.FINE_COPPER_WIRE))
+                .define('B', Tags.Items.INGOTS_IRON)
+                .define('C', ModTags.Items.lightPlate(Metal.IRON))
+                .unlockedBy("has_fine_copper_wire", has(component(CraftingComponent.FINE_COPPER_WIRE)))
+                .save(consumer, id("crafting/tesla_tower"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get())
+                .pattern(" A ")
+                .pattern("A A")
+                .pattern(" B ")
+                .define('A', Tags.Items.INGOTS_COPPER)
+                .define('B', ModNetworkBlocks.ELECTRIC_CABLE.get())
+                .unlockedBy("has_electric_cable", has(ModNetworkBlocks.ELECTRIC_CABLE.get()))
+                .save(consumer, id("crafting/wireless_energy_receiver"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.WIND_TURBINE.get())
+                .pattern("ABA")
+                .pattern("BCB")
+                .pattern("ABA")
+                .define('A', component(CraftingComponent.FABRIC_MESH))
+                .define('B', ModTags.Items.lightPlate(Metal.IRON))
+                .define('C', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
+                .unlockedBy("has_machine_casing", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
+                .save(consumer, id("crafting/wind_turbine"));
     }
 
     private void addCrushingRecipes(Consumer<FinishedRecipe> consumer) {

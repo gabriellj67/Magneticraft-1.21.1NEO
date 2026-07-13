@@ -83,9 +83,9 @@ class MigrationMatrixContractTest {
     private static final int DERIVED_RUNTIME_ID_COUNT = 80;
     private static final String DERIVED_RUNTIME_ID_SHA256 =
             "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451";
-    private static final int SUPPORTING_REGISTRY_ID_COUNT = 33;
+    private static final int SUPPORTING_REGISTRY_ID_COUNT = 39;
     private static final String SUPPORTING_REGISTRY_ID_SHA256 =
-            "7aae78cef42c8bd88d33728144699935c6ff97babf86484a000100ff24406de2";
+            "4d866daa5ef2239e9d55f139efc9313b972c7aef6ce88bfa6815f5fdaa1eb38c";
     private static final int FORBIDDEN_RUNTIME_ID_COUNT = 51;
     private static final String FORBIDDEN_RUNTIME_ID_SHA256 =
             "2dd45be9e2de079ee8c833139c481e9127269b554e4208bb57962f64aecddb11";
@@ -153,6 +153,12 @@ class MigrationMatrixContractTest {
                     "magneticraft:battery_box",
                     "magneticraft:electric_furnace",
                     "magneticraft:electric_cable",
+                    "magneticraft:electric_connector",
+                    "magneticraft:electric_pole",
+                    "magneticraft:electric_pole_transformer",
+                    "magneticraft:tesla_tower",
+                    "magneticraft:wireless_energy_receiver",
+                    "magneticraft:wind_turbine",
                     "magneticraft:heat_pipe",
                     "magneticraft:heat_sink",
                     "magneticraft:iron_fluid_pipe",
@@ -1233,10 +1239,20 @@ class MigrationMatrixContractTest {
             String id = contract.get("id").getAsString();
             assertTrue(ids.add(id), "Duplicate behavior contract: " + id);
             assertDecision(contract.get("disposition").getAsString(), id);
-            assertStage(contract.get("stage").getAsString(), id);
+            String stage = contract.get("stage").getAsString();
+            assertStage(stage, id);
             assertNonBlank(contract, "contract");
             assertNonEmpty(contract.getAsJsonArray("legacy_sources"), id);
             assertNonEmpty(contract.getAsJsonArray("acceptance_tests"), id);
+            if (stage.equals("0.3.0")) {
+                assertNonBlank(contract, "evidence");
+                String[] evidence = contract.get("evidence").getAsString().split("#", 2);
+                assertEquals(2, evidence.length, "0.3.0 evidence must include a stable heading anchor: " + id);
+                Path evidencePath = Path.of(evidence[0]);
+                assertTrue(Files.isRegularFile(evidencePath), "Missing 0.3.0 evidence document: " + evidencePath);
+                assertTrue(Files.readString(evidencePath).contains("## " + evidence[1]),
+                        "Missing 0.3.0 evidence heading for " + id + ": " + evidence[1]);
+            }
         }
         assertTrue(ids.contains("electricity.long_distance_network"));
         assertTrue(ids.contains("computer.outbound_network"));

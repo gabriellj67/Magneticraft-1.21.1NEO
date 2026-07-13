@@ -58,20 +58,16 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
-                new ElectricalNode(0.5D, 125.0D, 0.001D),
-                0.001D,
-                8.0D,
+                new ElectricalNode(1.0D, 125.0D, 0.001D),
                 this::canAccessEnergy
         ));
         addModule(new ElectricalEnergyBridgeModule(
                 Magneticraft.id("electricity_bridge"),
-                this,
                 electricity,
                 energy,
                 90.0D,
                 90.0D,
-                NETWORK_TRANSFER_RATE,
-                true
+                NETWORK_TRANSFER_RATE
         ));
         data = Int32ContainerData.readOnly(energy::getEnergyStored, energy::getMaxEnergyStored);
     }

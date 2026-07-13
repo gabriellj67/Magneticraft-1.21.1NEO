@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "magneticraft:block/electric_connector",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "magneticraft:block/electric_connector",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/electric_connector",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "magneticraft:block/electric_connector",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "magneticraft:block/electric_connector"
+    },
+    "facing=west": {
+      "model": "magneticraft:block/electric_connector",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

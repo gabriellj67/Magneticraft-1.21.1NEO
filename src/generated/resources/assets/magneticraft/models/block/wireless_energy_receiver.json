@@ -1,0 +1,73 @@
+{
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      },
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        5,
+        11
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#face"
+        },
+        "east": {
+          "texture": "#face"
+        },
+        "north": {
+          "texture": "#face"
+        },
+        "south": {
+          "texture": "#face"
+        },
+        "up": {
+          "texture": "#face"
+        },
+        "west": {
+          "texture": "#face"
+        }
+      },
+      "from": [
+        3,
+        5,
+        3
+      ],
+      "to": [
+        13,
+        8,
+        13
+      ]
+    }
+  ],
+  "textures": {
+    "body": "minecraft:block/copper_block",
+    "face": "minecraft:block/redstone_block",
+    "particle": "minecraft:block/copper_block"
+  }
+}

@@ -65,6 +65,10 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModMachineBlocks.TUBE_LIGHT.get());
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                ModNetworkBlocks.TESLA_TOWER.get(),
+                ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(),
+                ModNetworkBlocks.WIND_TURBINE.get(),
                 ModNetworkBlocks.HEAT_PIPE.get(),
                 ModNetworkBlocks.INSULATED_HEAT_PIPE.get(),
                 ModNetworkBlocks.HEAT_SINK.get(),
@@ -75,6 +79,10 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
         );
         tag(BlockTags.NEEDS_STONE_TOOL).add(
                 ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                ModNetworkBlocks.TESLA_TOWER.get(),
+                ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(),
+                ModNetworkBlocks.WIND_TURBINE.get(),
                 ModNetworkBlocks.HEAT_PIPE.get(),
                 ModNetworkBlocks.INSULATED_HEAT_PIPE.get(),
                 ModNetworkBlocks.HEAT_SINK.get(),
@@ -82,6 +90,10 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 ModNetworkBlocks.PNEUMATIC_TUBE.get(),
                 ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
                 ModNetworkBlocks.CONVEYOR_BELT.get()
+        );
+        tag(BlockTags.MINEABLE_WITH_AXE).add(
+                ModNetworkBlocks.ELECTRIC_POLE.get(),
+                ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get()
         );
         ModAdvancedBlocks.blockItems().forEach(item -> {
             Block block = Block.byItem(item.get());

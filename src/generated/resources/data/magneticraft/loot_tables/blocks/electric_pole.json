@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "block": "magneticraft:electric_pole",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "segment": "base"
+          }
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "magneticraft:electric_pole"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "magneticraft:blocks/electric_pole"
+}

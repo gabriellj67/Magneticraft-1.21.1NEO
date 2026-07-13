@@ -322,6 +322,7 @@ public final class AdvancedSystemsGameTests {
         helper.assertTrue(recoveryPort.extractItem(0, 1, false).is(Items.COBBLESTONE),
                 "Back service port could not recover grinder input");
         recoveryPort.insertItem(0, new ItemStack(Items.COBBLESTONE), false);
+        controller.electricity().node().setVoltage(60.0D);
         controller.energy().setEnergyStored(5_000);
 
         for (int tick = 0; tick < 60; tick++) {

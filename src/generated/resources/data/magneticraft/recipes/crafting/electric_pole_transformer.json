@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "item": "magneticraft:electric_connector"
+    },
+    "B": {
+      "tag": "forge:ingots/lead"
+    },
+    "C": {
+      "tag": "magneticraft:light_plates/copper"
+    }
+  },
+  "pattern": [
+    " A ",
+    "BCB",
+    "BCB"
+  ],
+  "result": {
+    "count": 2,
+    "item": "magneticraft:electric_pole_transformer"
+  },
+  "show_notification": true
+}

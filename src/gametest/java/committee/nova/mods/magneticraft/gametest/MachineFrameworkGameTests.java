@@ -77,9 +77,10 @@ public final class MachineFrameworkGameTests {
 
         helper.setBlock(TEST_POS, ModMachineBlocks.ELECTRIC_FURNACE.get());
         ElectricFurnaceBlockEntity furnace = requireBlockEntity(helper, TEST_POS, ElectricFurnaceBlockEntity.class);
-        var furnaceEnergy = furnace.getCapability(ForgeCapabilities.ENERGY, Direction.UP).orElseThrow(AssertionError::new);
-        helper.assertTrue(furnaceEnergy.canReceive(), "Electric furnace cannot receive external energy");
-        helper.assertFalse(furnaceEnergy.canExtract(), "Electric furnace leaks internal energy externally");
+        helper.assertFalse(
+                furnace.getCapability(ForgeCapabilities.ENERGY, Direction.UP).isPresent(),
+                "Electric furnace exposed direct Forge Energy capability"
+        );
         var furnaceItems = furnace.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).orElseThrow(AssertionError::new);
         helper.assertTrue(furnaceItems.insertItem(1, new ItemStack(Items.IRON_INGOT), true).getCount() == 1, "Output slot accepted automation input");
 
@@ -115,6 +116,7 @@ public final class MachineFrameworkGameTests {
         helper.setBlock(TEST_POS, ModMachineBlocks.BATTERY.get());
         BatteryBlockEntity battery = requireBlockEntity(helper, TEST_POS, BatteryBlockEntity.class);
         ItemStack cell = new ItemStack(ModMachineItems.LOW_BATTERY.get());
+        battery.electricity().node().setVoltage(90.0D);
         battery.energy().setEnergyStored(2_000);
         battery.inventory().setStackInSlot(0, cell);
 

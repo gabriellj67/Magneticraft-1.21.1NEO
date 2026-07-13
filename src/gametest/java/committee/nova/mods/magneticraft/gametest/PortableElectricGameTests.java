@@ -11,6 +11,7 @@ import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBl
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
+import committee.nova.mods.magneticraft.init.ModCreativeTabs;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
@@ -31,6 +32,7 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
@@ -41,10 +43,12 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Runtime contracts for restored portable electrical equipment and diagnostics.
@@ -65,16 +69,16 @@ public final class PortableElectricGameTests {
         ItemStack medium = new ItemStack(ModMachineItems.MEDIUM_BATTERY.get());
         IEnergyStorage mediumEnergy = energy(medium);
         helper.assertTrue(mediumEnergy.getMaxEnergyStored() == 2_500_000, "Medium battery has the wrong capacity");
-        helper.assertTrue(mediumEnergy.receiveEnergy(10_000, true) == PortableEnergyItem.TRANSFER_RATE,
-                "Energy simulation ignored the 500 FE/t transfer limit");
+        helper.assertTrue(mediumEnergy.receiveEnergy(10_000, true) == 10_000,
+                "Portable energy simulation retained an external transfer limit");
         helper.assertTrue(mediumEnergy.getEnergyStored() == 0, "Energy simulation mutated the battery");
-        helper.assertTrue(mediumEnergy.receiveEnergy(10_000, false) == PortableEnergyItem.TRANSFER_RATE,
-                "Energy insertion ignored the 500 FE/t transfer limit");
-        helper.assertTrue(mediumEnergy.extractEnergy(10_000, true) == PortableEnergyItem.TRANSFER_RATE,
-                "Energy extraction simulation ignored the 500 FE/t transfer limit");
-        helper.assertTrue(mediumEnergy.getEnergyStored() == 500, "Energy extraction simulation mutated the battery");
-        helper.assertTrue(mediumEnergy.extractEnergy(10_000, false) == PortableEnergyItem.TRANSFER_RATE,
-                "Energy extraction ignored the 500 FE/t transfer limit");
+        helper.assertTrue(mediumEnergy.receiveEnergy(10_000, false) == 10_000,
+                "Portable energy insertion retained an external transfer limit");
+        helper.assertTrue(mediumEnergy.extractEnergy(10_000, true) == 10_000,
+                "Portable energy extraction simulation retained an external transfer limit");
+        helper.assertTrue(mediumEnergy.getEnergyStored() == 10_000, "Energy extraction simulation mutated the battery");
+        helper.assertTrue(mediumEnergy.extractEnergy(10_000, false) == 10_000,
+                "Portable energy extraction retained an external transfer limit");
         helper.assertTrue(mediumEnergy.getEnergyStored() == 0, "Energy extraction removed the wrong amount");
         mediumEnergy.receiveEnergy(500, false);
 
@@ -134,6 +138,12 @@ public final class PortableElectricGameTests {
                         && tooltip.get(0).getString().contains("2500000"),
                 "Portable energy tooltip omitted the stored energy or capacity");
         helper.assertTrue(medium.getItem().isBarVisible(medium), "Partially charged battery hid its energy bar");
+        ItemStack emptyLow = new ItemStack(ModMachineItems.LOW_BATTERY.get());
+        helper.assertFalse(emptyLow.getItem().isBarVisible(emptyLow), "Empty battery displayed an energy bar");
+        ItemStack fullLow = new ItemStack(ModMachineItems.LOW_BATTERY.get());
+        energy(fullLow).receiveEnergy(((PortableEnergyItem) fullLow.getItem()).capacity(), false);
+        helper.assertTrue(fullLow.getItem().isBarVisible(fullLow), "Fully charged battery hid its energy bar");
+        assertPortableCreativeVariants(helper);
 
         ItemStack drill = new ItemStack(ModMachineItems.ELECTRIC_DRILL.get());
         charge(drill, 2_000);
@@ -147,6 +157,7 @@ public final class PortableElectricGameTests {
     public static void bothPortableBatteriesWorkInChargeAndDischargeSlots(GameTestHelper helper) {
         helper.setBlock(SECOND, ModMachineBlocks.BATTERY.get());
         BatteryBlockEntity battery = require(helper, SECOND, BatteryBlockEntity.class);
+        battery.electricity().node().setVoltage(90.0D);
 
         ItemStack medium = new ItemStack(ModMachineItems.MEDIUM_BATTERY.get());
         battery.energy().setEnergyStored(1_000);
@@ -188,13 +199,17 @@ public final class PortableElectricGameTests {
     public static void electricToolsRetainLegacyMiningAndAttackBehavior(GameTestHelper helper) {
         ElectricDrillItem drillItem = (ElectricDrillItem) ModMachineItems.ELECTRIC_DRILL.get();
         ItemStack drill = new ItemStack(drillItem);
-        charge(drill, 4_000);
+        charge(drill, 5_000);
         helper.assertTrue(drillItem.getDestroySpeed(drill, Blocks.STONE.defaultBlockState()) == 44.0F,
                 "Electric drill lost its pickaxe speed");
         helper.assertTrue(drillItem.getDestroySpeed(drill, Blocks.DIRT.defaultBlockState()) == 15.0F,
                 "Electric drill lost its shovel speed");
+        helper.assertTrue(drillItem.getDestroySpeed(drill, Blocks.CAKE.defaultBlockState()) == 15.0F,
+                "Electric drill lost its legacy cake speed");
         helper.assertTrue(drillItem.isCorrectToolForDrops(drill, Blocks.OBSIDIAN.defaultBlockState()),
                 "Electric drill lost diamond-tier harvesting");
+        helper.assertTrue(drillItem.isCorrectToolForDrops(drill, Blocks.CAKE.defaultBlockState()),
+                "Powered electric drill could not harvest an arbitrary block");
 
         Player miner = helper.makeMockSurvivalPlayer();
         helper.setBlock(FIRST, Blocks.STONE);
@@ -202,7 +217,18 @@ public final class PortableElectricGameTests {
         var minedState = helper.getLevel().getBlockState(absolute);
         helper.assertTrue(helper.getLevel().destroyBlock(absolute, false, miner), "Test block was not actually destroyed");
         drillItem.mineBlock(drill, helper.getLevel(), minedState, absolute, miner);
-        helper.assertTrue(energy(drill).getEnergyStored() == 3_000, "Successful block break consumed the wrong energy");
+        helper.assertTrue(energy(drill).getEnergyStored() == 4_000, "Successful block break consumed the wrong energy");
+
+        miner.getAbilities().instabuild = true;
+        helper.setBlock(SECOND, Blocks.STONE);
+        BlockPos creativeBlock = helper.absolutePos(SECOND);
+        var creativeState = helper.getLevel().getBlockState(creativeBlock);
+        helper.assertTrue(helper.getLevel().destroyBlock(creativeBlock, false, miner),
+                "Creative test block was not actually destroyed");
+        drillItem.mineBlock(drill, helper.getLevel(), creativeState, creativeBlock, miner);
+        helper.assertTrue(energy(drill).getEnergyStored() == 3_000,
+                "Creative block break did not consume electric-tool energy");
+        miner.getAbilities().instabuild = false;
 
         Zombie target = helper.spawnWithNoFreeWill(EntityType.ZOMBIE, 1, 1, 1);
         float health = target.getHealth();
@@ -211,6 +237,8 @@ public final class PortableElectricGameTests {
                 "Electric drill dealt the wrong bonus damage");
         helper.assertTrue(energy(drill).getEnergyStored() == 1_000, "Electric drill attack consumed the wrong energy");
         drillItem.consumeEnergy(drill, 1_000);
+        helper.assertFalse(drillItem.isCorrectToolForDrops(drill, Blocks.CAKE.defaultBlockState()),
+                "Empty electric drill retained arbitrary-block harvesting");
         helper.assertTrue(drillItem.getDestroySpeed(drill, Blocks.STONE.defaultBlockState()) == 1.0F,
                 "Empty electric drill did not fall back to hand speed");
         health = target.getHealth();
@@ -273,7 +301,7 @@ public final class PortableElectricGameTests {
         player.setItemInHand(InteractionHand.MAIN_HAND, piston);
         helper.setBlock(THIRD, Blocks.STONE);
         Vec3 targetCenter = Vec3.atCenterOf(helper.absolutePos(THIRD));
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, targetCenter);
+        player.lookAt(EntityAnchorArgument.Anchor.FEET, targetCenter);
         player.setDeltaMovement(Vec3.ZERO);
         player.fallDistance = 8.0F;
         var useResult = pistonItem.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
@@ -283,9 +311,16 @@ public final class PortableElectricGameTests {
         helper.assertTrue(player.fallDistance == 0.0F, "Electric piston did not reset fall distance");
         helper.assertTrue(energy(piston).getEnergyStored() == 0, "Self push consumed the wrong energy");
 
+        player.setDeltaMovement(Vec3.ZERO);
+        helper.assertTrue(pistonItem.use(helper.getLevel(), player, InteractionHand.MAIN_HAND)
+                        .getResult() == InteractionResult.PASS,
+                "Empty electric piston did not return PASS for a block ray hit");
+        helper.assertTrue(player.getDeltaMovement().equals(Vec3.ZERO),
+                "Empty electric piston changed player velocity");
+
         Vec3 stopped = target.getDeltaMovement();
         helper.assertTrue(
-                pistonItem.interactLivingEntity(piston, player, target, InteractionHand.MAIN_HAND) == InteractionResult.FAIL,
+                pistonItem.interactLivingEntity(piston, player, target, InteractionHand.MAIN_HAND) == InteractionResult.PASS,
                 "Empty electric piston accepted another entity push"
         );
         helper.assertTrue(target.getDeltaMovement().equals(stopped), "Empty electric piston changed target velocity");
@@ -294,7 +329,7 @@ public final class PortableElectricGameTests {
         charge(sneakingPiston, 4_000);
         player.setItemInHand(InteractionHand.MAIN_HAND, sneakingPiston);
         player.setShiftKeyDown(true);
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, targetCenter);
+        player.lookAt(EntityAnchorArgument.Anchor.FEET, targetCenter);
         player.setDeltaMovement(Vec3.ZERO);
         helper.assertTrue(pistonItem.use(helper.getLevel(), player, InteractionHand.MAIN_HAND)
                         .getResult().consumesAction(),
@@ -308,7 +343,7 @@ public final class PortableElectricGameTests {
         charge(missPiston, 4_000);
         player.setItemInHand(InteractionHand.MAIN_HAND, missPiston);
         player.setShiftKeyDown(false);
-        player.lookAt(EntityAnchorArgument.Anchor.EYES, player.getEyePosition().add(0.0D, 10.0D, 0.0D));
+        player.lookAt(EntityAnchorArgument.Anchor.FEET, player.position().add(0.0D, 10.0D, 0.0D));
         player.setDeltaMovement(Vec3.ZERO);
         helper.assertTrue(pistonItem.use(helper.getLevel(), player, InteractionHand.MAIN_HAND)
                         .getResult() == InteractionResult.PASS,
@@ -321,7 +356,7 @@ public final class PortableElectricGameTests {
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 20)
-    public static void diagnosticReadingsExposeSignedCurrentAndKelvin(GameTestHelper helper) {
+    public static void diagnosticReadingsExposeAbsoluteCurrentAndCelsiusInstrumentUse(GameTestHelper helper) {
         helper.setBlock(FIRST, ModNetworkBlocks.ELECTRIC_CABLE.get());
         helper.setBlock(SECOND, ModNetworkBlocks.ELECTRIC_CABLE.get());
         helper.setBlock(THIRD, ModNetworkBlocks.HEAT_PIPE.get());
@@ -340,10 +375,10 @@ public final class PortableElectricGameTests {
                     .orElseThrow(AssertionError::new);
             ElectricalDiagnosticSource.ElectricalReading targetReading = target.electricalReading(Direction.UP)
                     .orElseThrow(AssertionError::new);
-            helper.assertTrue(sourceReading.currentAmps() < 0.0D, "Electrical source current was not negative");
+            helper.assertTrue(sourceReading.currentAmps() > 0.0D, "Electrical source current was not absolute throughput");
             helper.assertTrue(targetReading.currentAmps() > 0.0D, "Electrical target current was not positive");
-            helper.assertTrue(Math.abs(sourceReading.currentAmps() + targetReading.currentAmps()) < 1.0E-9D,
-                    "Electrical diagnostic current was not conserved");
+            helper.assertTrue(Math.abs(sourceReading.currentAmps() - targetReading.currentAmps()) < 1.0E-9D,
+                    "Electrical diagnostic throughput was not conserved");
             helper.assertTrue(Math.abs(sourceReading.powerWatts()
                     - sourceReading.voltageVolts() * sourceReading.currentAmps()) < 1.0E-9D,
                     "Electrical diagnostic power did not match V*A");
@@ -373,9 +408,12 @@ public final class PortableElectricGameTests {
                     FIRST
             );
             DiagnosticInteractionEvents.onRightClickBlock(handledEvent);
-            helper.assertTrue(handledEvent.isCanceled()
-                            && handledEvent.getCancellationResult().consumesAction(),
-                    "Diagnostic event did not preempt the target block interaction");
+            helper.assertFalse(handledEvent.isCanceled(),
+                    "Diagnostic event canceled the target block interaction");
+            helper.assertTrue(handledEvent.getUseBlock() != Event.Result.DENY,
+                    "Diagnostic event denied the target block interaction");
+            helper.assertTrue(handledEvent.getUseItem() == Event.Result.DENY,
+                    "Diagnostic event allowed a duplicate item-use reading");
 
             helper.setBlock(THIRD, Blocks.STONE);
             helper.assertTrue(instrumentUse(helper, player, ModMachineItems.THERMOMETER.get(), THIRD) == InteractionResult.PASS,
@@ -389,6 +427,8 @@ public final class PortableElectricGameTests {
             DiagnosticInteractionEvents.onRightClickBlock(passEvent);
             helper.assertFalse(passEvent.isCanceled(),
                     "Diagnostic event preempted an unsupported target");
+            helper.assertTrue(passEvent.getUseBlock() != Event.Result.DENY,
+                    "Diagnostic event denied an unsupported target block interaction");
             player.discard();
             helper.succeed();
         });
@@ -407,8 +447,8 @@ public final class PortableElectricGameTests {
     }
 
     private static void assertInstrumentUse(GameTestHelper helper, Player player, Item item, BlockPos relativePosition) {
-        helper.assertTrue(instrumentUse(helper, player, item, relativePosition).consumesAction(),
-                item + " did not handle its diagnostic target");
+        helper.assertTrue(instrumentUse(helper, player, item, relativePosition) == InteractionResult.PASS,
+                item + " did not return PASS after reading its diagnostic target");
     }
 
     private static InteractionResult instrumentUse(
@@ -446,6 +486,30 @@ public final class PortableElectricGameTests {
                 .orElseThrow(() -> new AssertionError("Missing recipe " + id));
         helper.assertTrue(recipe.getResultItem(helper.getLevel().registryAccess()).is(expected),
                 id + " returned the wrong item");
+    }
+
+    private static void assertPortableCreativeVariants(GameTestHelper helper) {
+        CreativeModeTab tab = ModCreativeTabs.MAIN.get();
+        tab.buildContents(new CreativeModeTab.ItemDisplayParameters(
+                helper.getLevel().enabledFeatures(),
+                true,
+                helper.getLevel().registryAccess()
+        ));
+        for (Item item : List.of(
+                ModMachineItems.LOW_BATTERY.get(),
+                ModMachineItems.MEDIUM_BATTERY.get(),
+                ModMachineItems.ELECTRIC_DRILL.get(),
+                ModMachineItems.ELECTRIC_CHAINSAW.get(),
+                ModMachineItems.ELECTRIC_PISTON.get()
+        )) {
+            List<ItemStack> variants = tab.getDisplayItems().stream().filter(stack -> stack.is(item)).toList();
+            helper.assertTrue(variants.size() == 2, item + " did not expose empty and full creative variants");
+            int capacity = ((PortableEnergyItem) item).capacity();
+            helper.assertTrue(variants.stream().anyMatch(stack -> energy(stack).getEnergyStored() == 0),
+                    item + " omitted its empty creative variant");
+            helper.assertTrue(variants.stream().anyMatch(stack -> energy(stack).getEnergyStored() == capacity),
+                    item + " omitted its fully charged creative variant");
+        }
     }
 
     private static IEnergyStorage energy(ItemStack stack) {

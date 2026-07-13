@@ -25,8 +25,6 @@ import java.util.List;
  * Shared Forge Energy storage for portable Magneticraft items.
  */
 public class PortableEnergyItem extends Item {
-    public static final int TRANSFER_RATE = 500;
-
     private static final int BAR_COLOR = 0x43D96B;
     private static final String ENERGY_TOOLTIP = "tooltip.magneticraft.energy";
 
@@ -54,7 +52,7 @@ public class PortableEnergyItem extends Item {
     }
 
     /**
-     * Atomically consumes an internal action cost, without the external transfer-rate limit.
+     * Atomically consumes an internal action cost.
      */
     public final boolean consumeEnergy(ItemStack stack, int amount) {
         if (amount < 0) {
@@ -80,7 +78,7 @@ public class PortableEnergyItem extends Item {
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        return energyStored(stack) < capacity;
+        return energyStored(stack) > 0;
     }
 
     @Override
@@ -111,7 +109,7 @@ public class PortableEnergyItem extends Item {
 
         private EnergyProvider(int capacity) {
             this.capacity = capacity;
-            state = new PortableEnergyState(capacity, TRANSFER_RATE);
+            state = new PortableEnergyState(capacity);
         }
 
         @NotNull

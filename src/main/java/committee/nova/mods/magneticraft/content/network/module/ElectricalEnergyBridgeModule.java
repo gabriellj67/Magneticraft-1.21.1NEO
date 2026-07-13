@@ -1,7 +1,6 @@
 package committee.nova.mods.magneticraft.content.network.module;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
-import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
 import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import net.minecraft.resources.ResourceLocation;
 
@@ -11,36 +10,36 @@ import java.util.Objects;
  * Explicit 1J:1FE boundary between Magneticraft voltage and an existing FE buffer.
  */
 public final class ElectricalEnergyBridgeModule implements MachineModule {
+    private static final double CHARGE_RAMP_VOLTS = 10.0D;
+
     private final ResourceLocation id;
-    private final MachineModuleHost host;
     private final ElectricalNetworkModule electricity;
     private final EnergyStorageModule energy;
-    private final double receiveThresholdVolts;
+    private final double chargeThresholdVolts;
     private final double dischargeThresholdVolts;
     private final int maxTransfer;
-    private final boolean canDischarge;
 
     public ElectricalEnergyBridgeModule(
             ResourceLocation id,
-            MachineModuleHost host,
             ElectricalNetworkModule electricity,
             EnergyStorageModule energy,
-            double receiveThresholdVolts,
+            double chargeThresholdVolts,
             double dischargeThresholdVolts,
-            int maxTransfer,
-            boolean canDischarge
+            int maxTransfer
     ) {
-        if (receiveThresholdVolts < 0.0 || dischargeThresholdVolts < 0.0 || maxTransfer < 0) {
+        if (!Double.isFinite(chargeThresholdVolts)
+                || !Double.isFinite(dischargeThresholdVolts)
+                || chargeThresholdVolts < dischargeThresholdVolts
+                || dischargeThresholdVolts < 0.0
+                || maxTransfer < 0) {
             throw new IllegalArgumentException("Invalid electrical bridge limits");
         }
         this.id = Objects.requireNonNull(id);
-        this.host = Objects.requireNonNull(host);
         this.electricity = Objects.requireNonNull(electricity);
         this.energy = Objects.requireNonNull(energy);
-        this.receiveThresholdVolts = receiveThresholdVolts;
+        this.chargeThresholdVolts = chargeThresholdVolts;
         this.dischargeThresholdVolts = dischargeThresholdVolts;
         this.maxTransfer = maxTransfer;
-        this.canDischarge = canDischarge;
     }
 
     @Override
@@ -50,48 +49,40 @@ public final class ElectricalEnergyBridgeModule implements MachineModule {
 
     @Override
     public void serverTick() {
-        if (!electricity.hasConnections() && electricity.node().energyJoules() > 0.0D) {
+        double voltage = electricity.node().voltage();
+        if (voltage > chargeThresholdVolts) {
             chargeFeBuffer();
-        } else if (electricity.node().voltage() >= receiveThresholdVolts) {
-            chargeFeBuffer();
-        } else if (canDischarge
-                && electricity.hasConnections()
-                && electricity.node().voltage() < dischargeThresholdVolts) {
+        } else if (voltage < dischargeThresholdVolts) {
             dischargeFeBuffer();
         }
     }
 
     private void chargeFeBuffer() {
-        int room = energy.receiveEnergy(maxTransfer, true);
-        int available = (int) Math.floor(electricity.node().removeEnergy(room, true));
-        int accepted = energy.receiveEnergy(available, true);
-        if (accepted <= 0) {
+        double ramp = Math.min(
+                1.0D,
+                (electricity.node().voltage() - chargeThresholdVolts) / CHARGE_RAMP_VOLTS
+        );
+        int rate = (int) Math.floor(ramp * maxTransfer);
+        int room = energy.receiveEnergy(rate, true);
+        int transferred = wholeJoules(electricity.node().removeEnergy(room, true));
+        if (transferred <= 0) {
             return;
         }
-        double removed = electricity.node().removeEnergy(accepted, false);
-        int inserted = energy.receiveEnergy((int) Math.floor(removed), false);
-        if (inserted > 0) {
-            host.markChanged();
-        }
+        electricity.node().removeEnergy(transferred, false);
+        energy.receiveEnergy(transferred, false);
     }
 
     private void dischargeFeBuffer() {
-        double targetEnergy = electricity.node().capacitance()
-                * dischargeThresholdVolts
-                * dischargeThresholdVolts;
-        int requested = (int) Math.min(
-                maxTransfer,
-                Math.ceil(Math.max(0.0, targetEnergy - electricity.node().energyJoules()))
-        );
-        int available = energy.extractEnergy(requested, true);
-        int accepted = (int) Math.floor(electricity.node().addEnergy(available, true));
-        if (accepted <= 0) {
+        int available = energy.extractEnergy(maxTransfer, true);
+        int transferred = wholeJoules(electricity.node().addEnergy(available, true));
+        if (transferred <= 0) {
             return;
         }
-        int extracted = energy.extractEnergy(accepted, false);
-        double inserted = electricity.node().addEnergy(extracted, false);
-        if (inserted > 0.0) {
-            host.markChanged();
-        }
+        energy.extractEnergy(transferred, false);
+        electricity.node().addEnergy(transferred, false);
+    }
+
+    private static int wholeJoules(double joules) {
+        return (int) Math.min(Integer.MAX_VALUE, Math.floor(Math.max(0.0D, joules)));
     }
 }

@@ -134,8 +134,8 @@ class AdvancedGuideDataProviderTest {
     void portableItemGuideCapturesTheRestoredEnergyContracts() {
         JsonArray items = AdvancedGuideDataProvider.portableItemGuide().getAsJsonArray("items");
 
-        assertEquals(7, items.size());
-        assertEquals(7, items.asList().stream()
+        assertEquals(14, items.size());
+        assertEquals(14, items.asList().stream()
                 .map(element -> element.getAsJsonObject().get("id").getAsString())
                 .distinct()
                 .count());
@@ -149,6 +149,20 @@ class AdvancedGuideDataProviderTest {
         assertEquals(ElectricPistonItem.PUSH_COST, piston.get("use_cost_fe").getAsInt());
         JsonObject voltmeter = item(items, "magneticraft:voltmeter");
         assertEquals(0, voltmeter.get("capacity_fe").getAsInt());
+        for (String id : List.of(
+                "copper_wire_coil",
+                "electric_connector",
+                "electric_pole",
+                "electric_pole_transformer",
+                "tesla_tower",
+                "wireless_energy_receiver",
+                "wind_turbine"
+        )) {
+            JsonObject equipment = item(items, "magneticraft:" + id);
+            assertEquals(0, equipment.get("capacity_fe").getAsInt());
+            assertEquals("guide.magneticraft.item." + id + ".description",
+                    equipment.get("description").getAsString());
+        }
     }
 
     private static JsonObject item(JsonArray items, String id) {

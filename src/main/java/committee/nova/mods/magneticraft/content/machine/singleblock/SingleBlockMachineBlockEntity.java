@@ -431,8 +431,6 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                             Magneticraft.id("electricity"),
                             this,
                             new ElectricalNode(1.0D, 125.0D, 0.001D),
-                            0.001D,
-                            8.0D,
                             side -> true
                     ));
             default -> null;
@@ -466,16 +464,16 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         }
         switch (definition) {
             case ELECTRIC_HEATER -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), this, createdElectricity, createdEnergy,
-                    60.0D, 60.0D, 640, false
+                    Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
+                    60.0D, 60.0D, 640
             ));
             case RF_TRANSFORMER -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), this, createdElectricity, createdEnergy,
-                    126.0D, 120.0D, 100, true
+                    Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
+                    126.0D, 120.0D, 100
             ));
             case ELECTRIC_ENGINE -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), this, createdElectricity, createdEnergy,
-                    60.0D, 60.0D, 1_000, false
+                    Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
+                    60.0D, 60.0D, 1_000
             ));
             default -> {
             }

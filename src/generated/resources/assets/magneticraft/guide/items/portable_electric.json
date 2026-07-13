@@ -62,6 +62,69 @@
       "id": "magneticraft:thermometer",
       "translation_key": "item.magneticraft.thermometer",
       "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.copper_wire_coil.description",
+      "id": "magneticraft:copper_wire_coil",
+      "translation_key": "item.magneticraft.copper_wire_coil",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_connector.description",
+      "id": "magneticraft:electric_connector",
+      "translation_key": "block.magneticraft.electric_connector",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_pole.description",
+      "id": "magneticraft:electric_pole",
+      "translation_key": "block.magneticraft.electric_pole",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_pole_transformer.description",
+      "id": "magneticraft:electric_pole_transformer",
+      "translation_key": "block.magneticraft.electric_pole_transformer",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.tesla_tower.description",
+      "id": "magneticraft:tesla_tower",
+      "translation_key": "block.magneticraft.tesla_tower",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.wireless_energy_receiver.description",
+      "id": "magneticraft:wireless_energy_receiver",
+      "translation_key": "block.magneticraft.wireless_energy_receiver",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.wind_turbine.description",
+      "id": "magneticraft:wind_turbine",
+      "translation_key": "block.magneticraft.wind_turbine",
+      "use_cost_fe": 0
     }
   ],
   "schema_version": 1

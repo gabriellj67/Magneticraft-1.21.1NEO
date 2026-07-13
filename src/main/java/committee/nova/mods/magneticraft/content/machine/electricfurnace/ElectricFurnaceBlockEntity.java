@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class ElectricFurnaceBlockEntity extends MachineBlockEntity implements MenuProvider {
     public static final int ENERGY_CAPACITY = 10_000;
-    private static final int MAX_INPUT = 640;
+    private static final int NETWORK_TRANSFER_RATE = 200;
 
     private final ItemInventoryModule inventory;
     private final EnergyStorageModule energy;
@@ -46,29 +46,25 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
                 Magneticraft.id("energy_storage"),
                 this,
                 ENERGY_CAPACITY,
-                MAX_INPUT,
+                NETWORK_TRANSFER_RATE,
                 ElectricFurnaceProcessModule.MAX_CONSUMPTION_PER_TICK,
-                side -> true,
-                true,
+                side -> false,
+                false,
                 false
         ));
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
                 new ElectricalNode(1.0D, 125.0D, 0.001D),
-                0.001D,
-                8.0D,
                 side -> true
         ));
         addModule(new ElectricalEnergyBridgeModule(
                 Magneticraft.id("electricity_bridge"),
-                this,
                 electricity,
                 energy,
                 60.0D,
                 60.0D,
-                MAX_INPUT,
-                false
+                NETWORK_TRANSFER_RATE
         ));
         process = addModule(new ElectricFurnaceProcessModule(
                 Magneticraft.id("processing"),

@@ -1,7 +1,7 @@
 package committee.nova.mods.magneticraft.system.network.electric;
 
 /**
- * Conservative one-tick transfer across a resistive electrical edge.
+ * One-tick RC charge balancing across a resistive electrical edge.
  */
 public final class ElectricalLink {
     private static final double EPSILON = 1.0E-9;
@@ -12,42 +12,62 @@ public final class ElectricalLink {
     public static Transfer transfer(
             ElectricalNode first,
             ElectricalNode second,
-            double edgeResistance,
-            double maxCurrent
+            double distance
     ) {
-        if (edgeResistance < 0.0 || maxCurrent < 0.0) {
-            throw new IllegalArgumentException("Electrical edge limits must be non-negative");
+        if (!Double.isFinite(distance) || distance <= 0.0) {
+            throw new IllegalArgumentException("Electrical edge distance must be positive and finite");
         }
-        ElectricalNode source = first.voltage() >= second.voltage() ? first : second;
-        ElectricalNode target = source == first ? second : first;
-        double difference = source.voltage() - target.voltage();
-        if (difference <= EPSILON || maxCurrent <= EPSILON) {
+        double firstVoltage = first.voltage();
+        double secondVoltage = second.voltage();
+        double voltageDifference = firstVoltage - secondVoltage;
+        if (Math.abs(voltageDifference) <= EPSILON) {
             return Transfer.ZERO;
         }
 
-        double resistance = Math.max(EPSILON, source.resistance() + target.resistance() + edgeResistance);
-        double current = Math.min(maxCurrent, difference / resistance);
-        double gross = Math.min(source.energyJoules(), current * source.voltage());
-        if (gross <= EPSILON) {
+        double equivalentCapacitance = 1.0 / (1.0 / first.capacitance() + 1.0 / second.capacitance());
+        double resistance = (first.resistance() + second.resistance()) * distance;
+        double response = resistance == 0.0
+                ? 1.0
+                : -Math.expm1(-1.0 / (resistance * equivalentCapacitance));
+        double equilibriumVoltage = (
+                firstVoltage * first.capacitance() + secondVoltage * second.capacitance()
+        ) / (first.capacitance() + second.capacitance());
+        double desiredCurrent = response
+                * (equilibriumVoltage - secondVoltage)
+                * second.capacitance()
+                / first.capacitance()
+                * equivalentCapacitance
+                * 2.0;
+
+        // The legacy equation can overshoot for unlike capacitances. Stop at the
+        // shared-voltage equilibrium so a bounded port never manufactures energy.
+        double equilibriumCharge = equivalentCapacitance * voltageDifference;
+        double balancedCurrent = Math.copySign(
+                Math.min(Math.abs(desiredCurrent), Math.abs(equilibriumCharge)),
+                desiredCurrent
+        );
+        double acceptedByFirst = first.applyCharge(-balancedCurrent, true);
+        double acceptedBySecond = second.applyCharge(balancedCurrent, true);
+        double currentMagnitude = Math.min(Math.abs(acceptedByFirst), Math.abs(acceptedBySecond));
+        if (currentMagnitude <= EPSILON) {
             return Transfer.ZERO;
         }
+        double current = Math.copySign(currentMagnitude, balancedCurrent);
 
-        double theoreticalLoss = Math.min(gross, current * current * resistance);
-        double lossFraction = theoreticalLoss / gross;
-        double targetRoom = target.maxEnergyJoules() - target.energyJoules();
-        double grossForRoom = lossFraction >= 1.0 - EPSILON
-                ? 0.0
-                : targetRoom / (1.0 - lossFraction);
-        double usedGross = Math.min(gross, grossForRoom);
-        double loss = usedGross * lossFraction;
-        double delivered = usedGross - loss;
-        if (delivered <= EPSILON) {
-            return Transfer.ZERO;
-        }
+        double firstBefore = first.energyJoules();
+        double secondBefore = second.energyJoules();
+        first.applyCharge(-current, false);
+        second.applyCharge(current, false);
 
-        source.removeEnergy(usedGross, false);
-        target.addEnergy(delivered, false);
-        return new Transfer(usedGross, delivered, loss, current, source == first);
+        boolean firstWasSource = current > 0.0;
+        double withdrawn = firstWasSource
+                ? firstBefore - first.energyJoules()
+                : secondBefore - second.energyJoules();
+        double delivered = firstWasSource
+                ? second.energyJoules() - secondBefore
+                : first.energyJoules() - firstBefore;
+        double loss = Math.max(0.0, withdrawn - delivered);
+        return new Transfer(withdrawn, delivered, loss, currentMagnitude, firstWasSource);
     }
 
     public record Transfer(

@@ -62,7 +62,7 @@ public final class VoltmeterItem extends Item {
                     true
             );
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.PASS;
     }
 
     private static String format(double value) {

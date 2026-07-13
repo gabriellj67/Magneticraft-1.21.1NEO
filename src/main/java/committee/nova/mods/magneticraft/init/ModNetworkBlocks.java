@@ -1,6 +1,12 @@
 package committee.nova.mods.magneticraft.init;
 
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlock;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlock;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleTransformerBlockItem;
+import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock;
+import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyReceiverBlock;
+import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlock;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlock;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlock;
 import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlock;
@@ -27,6 +33,27 @@ public final class ModNetworkBlocks {
     public static final RegistryObject<Block> ELECTRIC_CABLE = register(
             "electric_cable",
             () -> new ElectricCableBlock(conduitProperties(MapColor.COLOR_ORANGE))
+    );
+    public static final RegistryObject<Block> ELECTRIC_CONNECTOR = register(
+            "electric_connector",
+            () -> new ElectricConnectorBlock(machineProperties().noOcclusion())
+    );
+    public static final RegistryObject<Block> ELECTRIC_POLE = register(
+            "electric_pole",
+            () -> new ElectricPoleBlock(poleProperties(), false)
+    );
+    public static final RegistryObject<Block> ELECTRIC_POLE_TRANSFORMER = registerTransformerPole();
+    public static final RegistryObject<Block> TESLA_TOWER = register(
+            "tesla_tower",
+            () -> new TeslaTowerBlock(machineProperties().noOcclusion())
+    );
+    public static final RegistryObject<Block> WIRELESS_ENERGY_RECEIVER = register(
+            "wireless_energy_receiver",
+            () -> new WirelessEnergyReceiverBlock(machineProperties().noOcclusion())
+    );
+    public static final RegistryObject<Block> WIND_TURBINE = register(
+            "wind_turbine",
+            () -> new WindTurbineBlock(machineProperties().noOcclusion())
     );
     public static final RegistryObject<Block> HEAT_PIPE = register(
             "heat_pipe",
@@ -78,6 +105,18 @@ public final class ModNetworkBlocks {
         return block;
     }
 
+    private static RegistryObject<Block> registerTransformerPole() {
+        RegistryObject<Block> block = ModRegistries.BLOCKS.register(
+                "electric_pole_transformer",
+                () -> new ElectricPoleBlock(poleProperties(), true)
+        );
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                "electric_pole_transformer",
+                () -> new ElectricPoleTransformerBlockItem((ElectricPoleBlock) block.get(), new Item.Properties())
+        ));
+        return block;
+    }
+
     private static BlockBehaviour.Properties conduitProperties(MapColor color) {
         return BlockBehaviour.Properties.of()
                 .mapColor(color)
@@ -93,5 +132,13 @@ public final class ModNetworkBlocks {
                 .requiresCorrectToolForDrops()
                 .strength(3.5F, 10.0F)
                 .sound(SoundType.METAL);
+    }
+
+    private static BlockBehaviour.Properties poleProperties() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.WOOD)
+                .strength(2.5F, 6.0F)
+                .sound(SoundType.WOOD)
+                .noOcclusion();
     }
 }

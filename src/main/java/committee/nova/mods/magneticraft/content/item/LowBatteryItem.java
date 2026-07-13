@@ -5,7 +5,6 @@ package committee.nova.mods.magneticraft.content.item;
  */
 public final class LowBatteryItem extends PortableEnergyItem {
     public static final int CAPACITY = 250_000;
-    public static final int TRANSFER_RATE = PortableEnergyItem.TRANSFER_RATE;
 
     public LowBatteryItem() {
         super(CAPACITY);

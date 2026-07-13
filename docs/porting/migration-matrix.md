@@ -2,6 +2,9 @@
 
 本目录中的 [`migration-matrix.json`](migration-matrix.json) 是 Nova 1.12 固定快照到 Forge 1.20.1 的权威行为矩阵；[`registry-id-map.json`](registry-id-map.json) 是其注册命名投影。当前 1.20.1 代码只作为候选实现，不能覆盖旧版可观察行为证据。
 
+0.3.0 电力阶段的逐项源码位置、产品覆盖决策和验收路由见
+[`electricity-0.3-evidence.md`](electricity-0.3-evidence.md)。
+
 ## 冻结边界
 
 - 目标平台固定为 Minecraft 1.20.1、Forge 47.4.20、Java 17。

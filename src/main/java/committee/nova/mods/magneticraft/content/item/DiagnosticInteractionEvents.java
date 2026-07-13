@@ -1,15 +1,15 @@
 package committee.nova.mods.magneticraft.content.item;
 
 import committee.nova.mods.magneticraft.Magneticraft;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * Gives diagnostic instruments priority over machine block menus and direct interactions.
+ * Reads diagnostic instruments before block use without preempting the target block interaction.
  */
 @Mod.EventBusSubscriber(modid = Magneticraft.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class DiagnosticInteractionEvents {
@@ -19,16 +19,15 @@ public final class DiagnosticInteractionEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         Item item = event.getEntity().getItemInHand(event.getHand()).getItem();
-        InteractionResult result;
         if (item instanceof VoltmeterItem) {
-            result = VoltmeterItem.inspect(
+            VoltmeterItem.inspect(
                     event.getLevel(),
                     event.getPos(),
                     event.getHitVec().getDirection(),
                     event.getEntity()
             );
         } else if (item instanceof ThermometerItem) {
-            result = ThermometerItem.inspect(
+            ThermometerItem.inspect(
                     event.getLevel(),
                     event.getPos(),
                     event.getHitVec().getDirection(),
@@ -37,9 +36,6 @@ public final class DiagnosticInteractionEvents {
         } else {
             return;
         }
-        if (result.consumesAction()) {
-            event.setCancellationResult(result);
-            event.setCanceled(true);
-        }
+        event.setUseItem(Event.Result.DENY);
     }
 }

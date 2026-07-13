@@ -1047,34 +1047,38 @@
     },
     {
       "id": "physics.domain_separation",
-      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/energy", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/heat", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/pneumatic"],
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/energy", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/heat", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/pneumatic", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModulePipe.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleConveyorBelt.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/config/Config.kt"],
       "disposition": "rebuild",
       "stage": "0.3.0",
       "contract": "Electricity, heat, fluids, pressure and logistics remain independent physical domains; Forge Energy is an adapter at exactly 1 J = 1 FE.",
+      "evidence": "docs/porting/electricity-0.3-evidence.md#domain-separation",
       "acceptance_tests": ["MIG-PHYSICS-DOMAINS-001", "MIG-FE-RATIO-001"]
     },
     {
       "id": "electricity.adjacent_network",
-      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleElectricity.kt", ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/electricity"],
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/internal/energy/ElectricNode.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/internal/energy/ElectricConnection.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleElectricity.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ToolItems.kt", ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/electricity"],
       "disposition": "rebuild",
       "stage": "0.3.0",
       "contract": "Voltage, current, resistance and stored energy conserve energy across adjacent conductors; FE conversion is explicit and instantaneous diagnostics never mutate the graph.",
+      "evidence": "docs/porting/electricity-0.3-evidence.md#adjacent-network",
       "acceptance_tests": ["MIG-ELECTRIC-CONSERVATION-001", "MIG-ELECTRIC-DIAGNOSTIC-001"]
     },
     {
       "id": "electricity.long_distance_network",
-      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_conductors"],
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_conductors/TileEntities.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleElectricity.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleTeslaTower.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleWindTurbine.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ToolItems.kt"],
       "disposition": "rebuild",
       "stage": "0.3.0",
       "contract": "Connectors span at most 8 blocks and pole links at most 16; unloaded endpoints pause, chunks are never force-loaded, dimensions never connect, broken endpoints remove edges, and connections persist in SavedData.",
+      "evidence": "docs/porting/electricity-0.3-evidence.md#long-distance-network",
       "acceptance_tests": ["MIG-WIRE-DISTANCE-001", "MIG-WIRE-UNLOAD-001", "MIG-WIRE-BREAK-001"]
     },
     {
       "id": "electricity.portable_devices",
-      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ElectricItems.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ToolItems.kt"],
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ElectricItems.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/ToolItems.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/items/ElectricItemBase.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/config/Config.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/TileEntitys.kt"],
       "disposition": "rebuild",
       "stage": "0.3.0",
       "contract": "Low/medium batteries, drill, chainsaw, piston, voltmeter and thermometer use new versioned payloads; actions and energy costs are server-validated and charging slots obey transfer limits.",
+      "evidence": "docs/porting/electricity-0.3-evidence.md#portable-devices",
       "acceptance_tests": ["MIG-PORTABLE-SERVER-001", "MIG-PORTABLE-ENERGY-001", "MIG-CHARGER-001"]
     },
     {

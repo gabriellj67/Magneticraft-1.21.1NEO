@@ -7,6 +7,10 @@ import committee.nova.mods.magneticraft.content.machine.electricfurnace.Electric
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlock;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
+import committee.nova.mods.magneticraft.content.network.electric.PoleSegment;
+import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock;
+import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerPart;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
@@ -19,6 +23,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
+import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.client.model.generators.loaders.ObjModelBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -109,6 +114,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         conduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable", mcLoc("block/copper_block"));
+        registerLongDistanceElectricModels();
         conduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe", mcLoc("block/iron_block"));
         conduitBlock(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), "insulated_heat_pipe", mcLoc("block/black_wool"));
         conduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_fluid_pipe", mcLoc("block/iron_block"));
@@ -257,5 +263,107 @@ final class ModBlockStateProvider extends BlockStateProvider {
         model.element().from(0, 5, 5).to(5, 11, 11).textureAll("#all").end();
         model.element().from(11, 5, 5).to(16, 11, 11).textureAll("#all").end();
         simpleBlockWithItem(block, model);
+    }
+
+    private void registerLongDistanceElectricModels() {
+        wallMountedEndpoint(
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                "electric_connector",
+                mcLoc("block/copper_block"),
+                mcLoc("block/iron_block")
+        );
+        wallMountedEndpoint(
+                ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(),
+                "wireless_energy_receiver",
+                mcLoc("block/copper_block"),
+                mcLoc("block/redstone_block")
+        );
+
+        poleModels(ModNetworkBlocks.ELECTRIC_POLE.get(), "electric_pole", false);
+        poleModels(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), "electric_pole_transformer", true);
+
+        Block teslaTower = ModNetworkBlocks.TESLA_TOWER.get();
+        ModelFile teslaBottom = teslaPartModel("tesla_tower_bottom", 2, 14);
+        ModelFile teslaMiddle = teslaPartModel("tesla_tower_middle", 5, 11);
+        ModelFile teslaTop = teslaTopModel();
+        getVariantBuilder(teslaTower).forAllStates(state -> {
+            TeslaTowerPart part = state.getValue(TeslaTowerBlock.PART);
+            return ConfiguredModel.builder().modelFile(switch (part) {
+                case BOTTOM -> teslaBottom;
+                case MIDDLE -> teslaMiddle;
+                case TOP -> teslaTop;
+            }).build();
+        });
+        simpleBlockItem(teslaTower, teslaBottom);
+
+        Block windTurbine = ModNetworkBlocks.WIND_TURBINE.get();
+        ModelFile turbineModel = models().orientable(
+                "wind_turbine",
+                mcLoc("block/iron_block"),
+                mcLoc("block/quartz_block_side"),
+                mcLoc("block/copper_block")
+        );
+        horizontalBlock(windTurbine, state -> turbineModel);
+        simpleBlockItem(windTurbine, turbineModel);
+    }
+
+    private void wallMountedEndpoint(
+            Block block,
+            String name,
+            ResourceLocation bodyTexture,
+            ResourceLocation faceTexture
+    ) {
+        BlockModelBuilder model = models().getBuilder(name)
+                .texture("particle", bodyTexture)
+                .texture("body", bodyTexture)
+                .texture("face", faceTexture);
+        model.element().from(5, 0, 5).to(11, 5, 11).textureAll("#body").end();
+        model.element().from(3, 5, 3).to(13, 8, 13).textureAll("#face").end();
+        directionalBlock(block, model);
+        simpleBlockItem(block, model);
+    }
+
+    private void poleModels(Block block, String name, boolean transformer) {
+        ModelFile post = models().getBuilder(name + "_post")
+                .texture("particle", mcLoc("block/oak_log"))
+                .texture("wood", mcLoc("block/oak_log"))
+                .element().from(6, 0, 6).to(10, 16, 10).textureAll("#wood").end();
+        BlockModelBuilder base = models().getBuilder(name + "_base")
+                .texture("particle", mcLoc("block/oak_log"))
+                .texture("wood", mcLoc("block/oak_log"))
+                .texture("metal", transformer ? mcLoc("block/copper_block") : mcLoc("block/iron_block"));
+        base.element().from(6, 0, 6).to(10, 16, 10).textureAll("#wood").end();
+        base.element().from(1, 10, 5).to(15, 14, 11).textureAll("#wood").end();
+        base.element().from(2, 14, 6).to(5, 16, 10).textureAll("#metal").end();
+        base.element().from(11, 14, 6).to(14, 16, 10).textureAll("#metal").end();
+        if (transformer) {
+            base.element().from(4, 3, 4).to(12, 10, 12).textureAll("#metal").end();
+        }
+        getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(state.getValue(ElectricPoleBlock.SEGMENT) == PoleSegment.BASE ? base : post)
+                .build());
+        simpleBlockItem(block, base);
+    }
+
+    private ModelFile teslaPartModel(String name, int min, int max) {
+        BlockModelBuilder model = models().getBuilder(name)
+                .texture("particle", mcLoc("block/copper_block"))
+                .texture("copper", mcLoc("block/copper_block"))
+                .texture("iron", mcLoc("block/iron_block"));
+        model.element().from(min, 0, min).to(max, 16, max).textureAll("#iron").end();
+        model.element().from(0, 1, 7).to(16, 4, 9).textureAll("#copper").end();
+        model.element().from(7, 1, 0).to(9, 4, 16).textureAll("#copper").end();
+        return model;
+    }
+
+    private ModelFile teslaTopModel() {
+        BlockModelBuilder model = models().getBuilder("tesla_tower_top")
+                .texture("particle", mcLoc("block/copper_block"))
+                .texture("copper", mcLoc("block/copper_block"))
+                .texture("iron", mcLoc("block/iron_block"));
+        model.element().from(6, 0, 6).to(10, 9, 10).textureAll("#iron").end();
+        model.element().from(2, 7, 2).to(14, 11, 14).textureAll("#copper").end();
+        model.element().from(5, 11, 5).to(11, 16, 11).textureAll("#copper").end();
+        return model;
     }
 }

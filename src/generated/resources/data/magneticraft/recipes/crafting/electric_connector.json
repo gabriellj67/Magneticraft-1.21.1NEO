@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "forge:ingots/iron"
+    },
+    "B": {
+      "tag": "forge:stone"
+    },
+    "C": {
+      "tag": "forge:ingots/copper"
+    }
+  },
+  "pattern": [
+    " A ",
+    "BCB"
+  ],
+  "result": {
+    "count": 8,
+    "item": "magneticraft:electric_connector"
+  },
+  "show_notification": true
+}

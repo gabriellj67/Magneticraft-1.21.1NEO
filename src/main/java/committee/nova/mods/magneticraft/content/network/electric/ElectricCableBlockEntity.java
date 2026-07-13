@@ -22,8 +22,6 @@ public final class ElectricCableBlockEntity extends NetworkComponentBlockEntity 
                 Magneticraft.id("electricity"),
                 this,
                 new ElectricalNode(0.25D, 125.0D, 0.001D),
-                0.001D,
-                8.0D,
                 side -> true
         ));
     }

@@ -3,10 +3,15 @@ package committee.nova.mods.magneticraft.init;
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.crushingtable.CrushingTableBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyReceiverBlockEntity;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlockEntity;
@@ -49,6 +54,54 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             ElectricCableBlockEntity::new,
                             ModNetworkBlocks.ELECTRIC_CABLE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<ElectricConnectorBlockEntity>> ELECTRIC_CONNECTOR =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "electric_connector",
+                    () -> BlockEntityType.Builder.of(
+                            ElectricConnectorBlockEntity::new,
+                            ModNetworkBlocks.ELECTRIC_CONNECTOR.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<ElectricPoleBlockEntity>> ELECTRIC_POLE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "electric_pole",
+                    () -> BlockEntityType.Builder.of(
+                            ElectricPoleBlockEntity::new,
+                            ModNetworkBlocks.ELECTRIC_POLE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<ElectricPoleBlockEntity>> ELECTRIC_POLE_TRANSFORMER =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "electric_pole_transformer",
+                    () -> BlockEntityType.Builder.of(
+                            ElectricPoleBlockEntity::new,
+                            ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<TeslaTowerBlockEntity>> TESLA_TOWER =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "tesla_tower",
+                    () -> BlockEntityType.Builder.of(
+                            TeslaTowerBlockEntity::new,
+                            ModNetworkBlocks.TESLA_TOWER.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<WirelessEnergyReceiverBlockEntity>> WIRELESS_ENERGY_RECEIVER =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "wireless_energy_receiver",
+                    () -> BlockEntityType.Builder.of(
+                            WirelessEnergyReceiverBlockEntity::new,
+                            ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<WindTurbineBlockEntity>> WIND_TURBINE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "wind_turbine",
+                    () -> BlockEntityType.Builder.of(
+                            WindTurbineBlockEntity::new,
+                            ModNetworkBlocks.WIND_TURBINE.get()
                     ).build(null)
             );
     public static final RegistryObject<BlockEntityType<HeatPipeBlockEntity>> HEAT_PIPE =

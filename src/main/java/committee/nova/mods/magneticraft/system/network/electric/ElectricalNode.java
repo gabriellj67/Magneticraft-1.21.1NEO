@@ -8,9 +8,17 @@ public final class ElectricalNode {
     private final double maxVoltage;
     private final double resistance;
     private double energyJoules;
+    private double pendingChargeThroughput;
+    private double activeTickChargeThroughput;
+    private double lastCompletedTickCurrentAmps;
+    private boolean networkTickActive;
 
     public ElectricalNode(double capacitance, double maxVoltage, double resistance) {
-        if (!(capacitance > 0.0) || !(maxVoltage > 0.0) || resistance < 0.0) {
+        if (!isPositiveFinite(capacitance)
+                || !isPositiveFinite(maxVoltage)
+                || !Double.isFinite(resistance)
+                || resistance < 0.0
+                || !Double.isFinite(capacitance * maxVoltage * maxVoltage)) {
             throw new IllegalArgumentException("Invalid electrical node limits");
         }
         this.capacitance = capacitance;
@@ -42,18 +50,38 @@ public final class ElectricalNode {
         return resistance;
     }
 
+    /**
+     * Applies charge in coulombs and returns the signed amount accepted by this bounded node.
+     */
+    public double applyCharge(double coulombs, boolean simulate) {
+        double requested = finite(coulombs);
+        double voltage = voltage();
+        double targetVoltage = Math.max(0.0, Math.min(maxVoltage, voltage + requested / capacitance));
+        double accepted = capacitance * (targetVoltage - voltage);
+        if (!simulate && accepted != 0.0) {
+            energyJoules = capacitance * targetVoltage * targetVoltage;
+            recordChargeThroughput(Math.abs(accepted));
+        }
+        return accepted;
+    }
+
     public double addEnergy(double joules, boolean simulate) {
-        double accepted = Math.min(nonNegative(joules), maxEnergyJoules() - energyJoules);
-        if (!simulate) {
+        double room = Math.max(0.0, maxEnergyJoules() - energyJoules);
+        double accepted = Math.min(nonNegative(joules), room);
+        if (!simulate && accepted > 0.0) {
+            double initialVoltage = voltage();
             energyJoules += accepted;
+            recordVoltageChange(initialVoltage);
         }
         return accepted;
     }
 
     public double removeEnergy(double joules, boolean simulate) {
         double removed = Math.min(nonNegative(joules), energyJoules);
-        if (!simulate) {
+        if (!simulate && removed > 0.0) {
+            double initialVoltage = voltage();
             energyJoules -= removed;
+            recordVoltageChange(initialVoltage);
         }
         return removed;
     }
@@ -67,11 +95,49 @@ public final class ElectricalNode {
         setEnergyJoules(capacitance * bounded * bounded);
     }
 
+    public void beginNetworkTick() {
+        if (networkTickActive) {
+            throw new IllegalStateException("Electrical node network tick already active");
+        }
+        activeTickChargeThroughput = pendingChargeThroughput;
+        pendingChargeThroughput = 0.0;
+        networkTickActive = true;
+    }
+
+    public void completeNetworkTick() {
+        if (!networkTickActive) {
+            throw new IllegalStateException("Electrical node network tick is not active");
+        }
+        lastCompletedTickCurrentAmps = activeTickChargeThroughput;
+        activeTickChargeThroughput = 0.0;
+        networkTickActive = false;
+    }
+
+    public double lastCompletedTickCurrentAmps() {
+        return lastCompletedTickCurrentAmps;
+    }
+
+    private void recordVoltageChange(double initialVoltage) {
+        recordChargeThroughput(capacitance * Math.abs(voltage() - initialVoltage));
+    }
+
+    private void recordChargeThroughput(double charge) {
+        if (networkTickActive) {
+            activeTickChargeThroughput += charge;
+        } else {
+            pendingChargeThroughput += charge;
+        }
+    }
+
     private static double nonNegative(double value) {
         return Math.max(0.0, finite(value));
     }
 
     private static double finite(double value) {
         return Double.isFinite(value) ? value : 0.0;
+    }
+
+    private static boolean isPositiveFinite(double value) {
+        return Double.isFinite(value) && value > 0.0;
     }
 }

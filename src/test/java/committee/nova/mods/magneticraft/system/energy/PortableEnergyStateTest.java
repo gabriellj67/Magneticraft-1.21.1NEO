@@ -9,24 +9,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PortableEnergyStateTest {
     @Test
-    void externalTransfersAreRateLimitedAndSimulationIsReadOnly() {
-        PortableEnergyState state = new PortableEnergyState(2_500_000, 500);
+    void externalTransfersAreOnlyCapacityLimitedAndSimulationIsReadOnly() {
+        PortableEnergyState state = new PortableEnergyState(2_500_000);
 
-        assertEquals(500, state.receive(10_000, true));
+        assertEquals(10_000, state.receive(10_000, true));
         assertEquals(0, state.energy());
-        assertEquals(500, state.receive(10_000, false));
-        assertEquals(500, state.energy());
-        assertEquals(500, state.extract(10_000, true));
-        assertEquals(500, state.energy());
-        assertEquals(500, state.extract(10_000, false));
+        assertEquals(10_000, state.receive(10_000, false));
+        assertEquals(10_000, state.energy());
+        assertEquals(10_000, state.extract(10_000, true));
+        assertEquals(10_000, state.energy());
+        assertEquals(10_000, state.extract(10_000, false));
         assertEquals(0, state.energy());
         assertEquals(0, state.receive(-1, false));
         assertEquals(0, state.extract(-1, false));
     }
 
     @Test
-    void internalConsumptionIsAtomicAndNotTransferLimited() {
-        PortableEnergyState state = new PortableEnergyState(512_000, 500);
+    void internalConsumptionIsAtomic() {
+        PortableEnergyState state = new PortableEnergyState(512_000);
         state.load(4_000);
 
         assertFalse(state.consume(4_001));
@@ -39,7 +39,7 @@ class PortableEnergyStateTest {
 
     @Test
     void loadedValuesAreClampedToTheValidRange() {
-        PortableEnergyState state = new PortableEnergyState(250_000, 500);
+        PortableEnergyState state = new PortableEnergyState(250_000);
 
         state.load(Integer.MAX_VALUE);
         assertEquals(250_000, state.energy());
@@ -49,7 +49,6 @@ class PortableEnergyStateTest {
 
     @Test
     void invalidConfigurationIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> new PortableEnergyState(0, 500));
-        assertThrows(IllegalArgumentException.class, () -> new PortableEnergyState(1, 0));
+        assertThrows(IllegalArgumentException.class, () -> new PortableEnergyState(0));
     }
 }

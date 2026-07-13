@@ -5,22 +5,17 @@ package committee.nova.mods.magneticraft.system.energy;
  */
 public final class PortableEnergyState {
     private final int capacity;
-    private final int transferRate;
     private int energy;
 
-    public PortableEnergyState(int capacity, int transferRate) {
+    public PortableEnergyState(int capacity) {
         if (capacity <= 0) {
             throw new IllegalArgumentException("Energy capacity must be positive");
         }
-        if (transferRate <= 0) {
-            throw new IllegalArgumentException("Energy transfer rate must be positive");
-        }
         this.capacity = capacity;
-        this.transferRate = transferRate;
     }
 
     public int receive(int requested, boolean simulate) {
-        int accepted = Math.min(Math.max(requested, 0), Math.min(transferRate, capacity - energy));
+        int accepted = Math.min(Math.max(requested, 0), capacity - energy);
         if (!simulate) {
             energy += accepted;
         }
@@ -28,7 +23,7 @@ public final class PortableEnergyState {
     }
 
     public int extract(int requested, boolean simulate) {
-        int extracted = Math.min(Math.max(requested, 0), Math.min(transferRate, energy));
+        int extracted = Math.min(Math.max(requested, 0), energy);
         if (!simulate) {
             energy -= extracted;
         }

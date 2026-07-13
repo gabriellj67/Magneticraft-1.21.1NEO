@@ -42,6 +42,8 @@ final class ModItemModelProvider extends ItemModelProvider {
                 .texture("layer0", mcLoc("block/oak_planks"));
         withExistingParent(ModNetworkItems.WRENCH.getId().getPath(), mcLoc("item/handheld"))
                 .texture("layer0", mcLoc("item/iron_hoe"));
+        withExistingParent(ModNetworkItems.COPPER_WIRE_COIL.getId().getPath(), mcLoc("item/handheld"))
+                .texture("layer0", mcLoc("item/copper_ingot"));
         withExistingParent(ModComputerContent.FLOPPY_DISK.getId().getPath(), mcLoc("item/generated"))
                 .texture("layer0", mcLoc("item/paper"));
 

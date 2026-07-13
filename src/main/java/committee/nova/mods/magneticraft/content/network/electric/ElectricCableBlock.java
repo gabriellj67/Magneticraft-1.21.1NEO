@@ -22,6 +22,7 @@ public final class ElectricCableBlock extends ConduitBlock {
     @Override
     protected boolean connectsVisuallyTo(BlockState neighbor) {
         return neighbor.is(ModNetworkBlocks.ELECTRIC_CABLE.get())
+                || neighbor.is(ModNetworkBlocks.ELECTRIC_CONNECTOR.get())
                 || neighbor.is(ModMachineBlocks.BATTERY.get())
                 || neighbor.is(ModMachineBlocks.ELECTRIC_FURNACE.get());
     }

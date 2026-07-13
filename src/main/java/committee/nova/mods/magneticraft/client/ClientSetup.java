@@ -32,6 +32,9 @@ public final class ClientSetup {
             BlockEntityRenderers.register(ModBlockEntities.CRUSHING_TABLE.get(), CrushingTableRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.CONVEYOR_BELT.get(), ConveyorBeltRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.PNEUMATIC_TUBE.get(), PneumaticTubeRenderer::new);
+            BlockEntityRenderers.register(ModBlockEntities.ELECTRIC_CONNECTOR.get(), LongDistanceWireRenderer::new);
+            BlockEntityRenderers.register(ModBlockEntities.ELECTRIC_POLE.get(), LongDistanceWireRenderer::new);
+            BlockEntityRenderers.register(ModBlockEntities.ELECTRIC_POLE_TRANSFORMER.get(), LongDistanceWireRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.SINGLE_BLOCK_MACHINE.get(), SingleBlockMachineRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.ADVANCED_MULTIBLOCK.get(), AdvancedMultiblockRenderer::new);
             BlockEntityRenderers.register(ModComputerContent.COMPUTER_BLOCK_ENTITY.get(), ComputerRenderer::new);

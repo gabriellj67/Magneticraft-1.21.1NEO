@@ -67,7 +67,14 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.tank_export_enabled", chinese ? "储罐底部主动输出已启用" : "Tank bottom export enabled");
         add("message.magneticraft.tank_export_disabled", chinese ? "储罐底部主动输出已禁用" : "Tank bottom export disabled");
         add(ModNetworkItems.WRENCH.get(), chinese ? "扳手" : "Wrench");
+        add(ModNetworkItems.COPPER_WIRE_COIL.get(), chinese ? "铜线卷" : "Copper Wire Coil");
         add(ModNetworkBlocks.ELECTRIC_CABLE.get(), chinese ? "电缆" : "Electric Cable");
+        add(ModNetworkBlocks.ELECTRIC_CONNECTOR.get(), chinese ? "电力连接器" : "Electric Connector");
+        add(ModNetworkBlocks.ELECTRIC_POLE.get(), chinese ? "电线杆" : "Electric Pole");
+        add(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), chinese ? "变压器电线杆" : "Transformer Electric Pole");
+        add(ModNetworkBlocks.TESLA_TOWER.get(), chinese ? "特斯拉塔" : "Tesla Tower");
+        add(ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(), chinese ? "无线能量接收器" : "Wireless Energy Receiver");
+        add(ModNetworkBlocks.WIND_TURBINE.get(), chinese ? "风力涡轮机" : "Wind Turbine");
         add(ModNetworkBlocks.HEAT_PIPE.get(), chinese ? "热管" : "Heat Pipe");
         add(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), chinese ? "保温热管" : "Insulated Heat Pipe");
         add(ModNetworkBlocks.HEAT_SINK.get(), chinese ? "散热器" : "Heat Sink");
@@ -87,7 +94,21 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.fluid_side_mode.active", chinese ? "主动输出" : "Active output");
         add("message.magneticraft.fluid_side_mode.disabled", chinese ? "禁用" : "Disabled");
         add("message.magneticraft.voltmeter", chinese ? "%s V · %s A · %s W" : "%s V · %s A · %s W");
-        add("message.magneticraft.thermometer", chinese ? "%s K" : "%s K");
+        add("message.magneticraft.thermometer", chinese ? "%s °C" : "%s °C");
+        add("message.magneticraft.voltage", chinese ? "电压：%s V" : "Voltage: %s V");
+        add("message.magneticraft.long_distance_connections", chinese
+                ? "长距离连接：%s"
+                : "Long-distance connections: %s");
+        add("text.magneticraft.wire_connect.updated_position", chinese
+                ? "已选择端点：%s, %s, %s"
+                : "Selected endpoint: %s, %s, %s");
+        add("text.magneticraft.wire_connect.success", chinese ? "导线连接成功" : "Wire connected");
+        add("text.magneticraft.wire_connect.too_far", chinese ? "两个端点距离过远" : "The endpoints are too far apart");
+        add("text.magneticraft.wire_connect.not_a_connector", chinese ? "目标不是已加载的导线端点" : "The target is not a loaded wire endpoint");
+        add("text.magneticraft.wire_connect.invalid_connector", chinese ? "两个端点类型或维度不兼容" : "The endpoints have incompatible types or dimensions");
+        add("text.magneticraft.wire_connect.same_connector", chinese ? "不能将端点连接到自身" : "An endpoint cannot connect to itself");
+        add("text.magneticraft.wire_connect.already_connected", chinese ? "两个端点已经连接" : "The endpoints are already connected");
+        add("text.magneticraft.wire_connect.no_other_connector", chinese ? "请先潜行右击选择第一个端点" : "Sneak-use a first endpoint before connecting");
         add("tooltip.magneticraft.energy", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
 
         ModItems.materials().forEach((form, metals) -> metals.forEach((metal, holder) ->
@@ -200,7 +221,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.no_results", chinese ? "没有匹配内容" : "No matching entries");
         add("gui.magneticraft.guide.mode.structures", chinese ? "多方块结构" : "Multiblocks");
         add("gui.magneticraft.guide.mode.opcodes", chinese ? "计算机指令" : "Computer Opcodes");
-        add("gui.magneticraft.guide.mode.items", chinese ? "便携设备" : "Portable Equipment");
+        add("gui.magneticraft.guide.mode.items", chinese ? "电气设备" : "Electrical Equipment");
         add("gui.magneticraft.guide.capacity", chinese ? "容量：%s FE" : "Capacity: %s FE");
         add("gui.magneticraft.guide.break_cost", chinese ? "破坏耗能：%s FE" : "Block cost: %s FE");
         add("gui.magneticraft.guide.attack_cost", chinese ? "攻击耗能：%s FE" : "Attack cost: %s FE");
@@ -221,11 +242,32 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "命中六格内方块后反向推动使用者，也可将目标实体推离。"
                 : "Pushes its user backward after targeting a block within six blocks, or pushes a targeted entity away.");
         add("guide.magneticraft.item.voltmeter.description", chinese
-                ? "读取电力节点本刻的电压、带符号净电流与功率。"
-                : "Reads voltage, signed net current, and power from an electrical node for the current tick.");
+                ? "读取电力节点本刻的电压、绝对电流吞吐与功率。"
+                : "Reads voltage, absolute current throughput, and power from an electrical node for the current tick.");
         add("guide.magneticraft.item.thermometer.description", chinese
-                ? "读取热力节点的开尔文温度。"
-                : "Reads a thermal node's temperature in kelvin.");
+                ? "以一位小数的摄氏度读取热力节点温度。"
+                : "Reads a thermal node's temperature in Celsius with one decimal place.");
+        add("guide.magneticraft.item.copper_wire_coil.description", chinese
+                ? "潜行右击选择第一个端点，再右击兼容端点建立连接；潜行对空气使用可清除选择。线卷不会被消耗。"
+                : "Sneak-use a first endpoint, then use a compatible endpoint to connect them; sneak-use in air clears the selection. The coil is reusable.");
+        add("guide.magneticraft.item.electric_connector.description", chinese
+                ? "壁挂式长距离端点，连接距离上限为 8 格，并可将 60–120 V 电力按 1 J = 1 FE 输出到背后的设备。"
+                : "A wall-mounted endpoint with an 8-block wire limit that exports 60-120 V electricity behind it at 1 J = 1 FE.");
+        add("guide.magneticraft.item.electric_pole.description", chinese
+                ? "五格高的三线电线杆，最多连接 16 格外的兼容电线杆。只有顶部控制部件保存和传输电力。"
+                : "A five-block, three-wire pole that connects compatible poles up to 16 blocks away. Only its top controller stores and transfers power.");
+        add("guide.magneticraft.item.electric_pole_transformer.description", chinese
+                ? "对完整普通电线杆使用以升级结构；同时提供电线杆与连接器端口，在两种长距离线路之间传递电力。"
+                : "Use on a complete normal pole to upgrade it; it exposes both pole and connector ports to bridge the two long-distance line types.");
+        add("guide.magneticraft.item.tesla_tower.description", chinese
+                ? "三格高的无线发射塔。电压达到 60 V 后，可在 32 格范围内每刻传输最多 500 J。"
+                : "A three-block wireless transmitter. At 60 V or more it transfers up to 500 J per tick within 32 blocks.");
+        add("guide.magneticraft.item.wireless_energy_receiver.description", chinese
+                ? "接收特斯拉塔电力，并按电压向背后的 Forge Energy 设备输出 0–400 FE/t。"
+                : "Receives Tesla-tower power and exports 0-400 FE/t, scaled by voltage, to a Forge Energy device behind it.");
+        add("guide.magneticraft.item.wind_turbine.description", chinese
+                ? "风力发电机最高产生 200 J/t。叶轮平面与前方 16 格需要保持开阔；扫描不会加载区块。"
+                : "Generates up to 200 J/t. Keep the rotor plane and 16 blocks ahead clear; its scan never loads chunks.");
         add("gui.magneticraft.guide.layer", chinese ? "层 %s/%s" : "Layer %s/%s");
         add("gui.magneticraft.guide.yes", chinese ? "是" : "yes");
         add("gui.magneticraft.guide.no", chinese ? "否" : "no");

@@ -18,6 +18,7 @@ import java.util.Locale;
  * Server-authoritative read-only probe for Magneticraft thermal nodes.
  */
 public final class ThermometerItem extends Item {
+    private static final double CELSIUS_OFFSET = 273.15D;
     private static final String MESSAGE_KEY = "message.magneticraft.thermometer";
 
     public ThermometerItem() {
@@ -53,14 +54,14 @@ public final class ThermometerItem extends Item {
         if (!level.isClientSide) {
             ThermalDiagnosticSource.ThermalReading value = reading.get();
             player.displayClientMessage(
-                    Component.translatable(MESSAGE_KEY, format(value.temperatureKelvin())),
+                    Component.translatable(MESSAGE_KEY, formatCelsius(value.temperatureKelvin())),
                     true
             );
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.PASS;
     }
 
-    private static String format(double value) {
-        return String.format(Locale.ROOT, "%.2f", value);
+    private static String formatCelsius(double kelvin) {
+        return String.format(Locale.ROOT, "%.1f", kelvin - CELSIUS_OFFSET);
     }
 }

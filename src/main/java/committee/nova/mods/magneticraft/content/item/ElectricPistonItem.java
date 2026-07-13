@@ -50,7 +50,7 @@ public final class ElectricPistonItem extends ElectricToolItem {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         Vec3 look = player.getViewVector(1.0F).normalize();
-        Vec3 start = player.getEyePosition();
+        Vec3 start = player.position();
         BlockHitResult hit = level.clip(new ClipContext(
                 start,
                 start.add(look.scale(RAY_DISTANCE)),
@@ -62,11 +62,11 @@ public final class ElectricPistonItem extends ElectricToolItem {
             return InteractionResultHolder.pass(stack);
         }
         if (!hasEnergy(stack, PUSH_COST)) {
-            return InteractionResultHolder.fail(stack);
+            return InteractionResultHolder.pass(stack);
         }
         if (!level.isClientSide) {
             if (!consumeEnergy(stack, PUSH_COST)) {
-                return InteractionResultHolder.fail(stack);
+                return InteractionResultHolder.pass(stack);
             }
             double force = player.isShiftKeyDown() ? SNEAKING_FORCE : NORMAL_FORCE;
             player.push(-look.x * force, -look.y * force, -look.z * force);
@@ -85,12 +85,12 @@ public final class ElectricPistonItem extends ElectricToolItem {
             InteractionHand hand
     ) {
         if (!hasEnergy(stack, PUSH_COST)) {
-            return InteractionResult.FAIL;
+            return InteractionResult.PASS;
         }
         Level level = player.level();
         if (!level.isClientSide) {
             if (!consumeEnergy(stack, PUSH_COST)) {
-                return InteractionResult.FAIL;
+                return InteractionResult.PASS;
             }
             Vec3 direction = target.position().subtract(player.position());
             if (direction.lengthSqr() < 1.0E-8D) {

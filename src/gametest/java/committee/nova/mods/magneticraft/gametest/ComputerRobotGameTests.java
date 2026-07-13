@@ -191,6 +191,7 @@ public final class ComputerRobotGameTests {
         );
         helper.setBlock(target, Blocks.AIR);
         robot.setOwner(owner);
+        robot.electricity().node().setVoltage(90.0D);
         robot.energy().setEnergyStored(5_000);
         robot.inventory().setStackInSlot(0, new ItemStack(Items.IRON_INGOT, 7));
         helper.assertTrue(robot.tryReplaceProgram(0L, program), "Robot rejected its movement program");

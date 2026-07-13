@@ -77,19 +77,15 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
                 Magneticraft.id("electricity"),
                 this,
                 new ElectricalNode(0.5D, 125.0D, 0.001D),
-                0.001D,
-                8.0D,
                 side -> true
         ));
         addModule(new ElectricalEnergyBridgeModule(
                 Magneticraft.id("electricity_bridge"),
-                this,
                 electricity,
                 energy,
                 90.0D,
                 90.0D,
-                1_000,
-                false
+                1_000
         ));
     }
 
