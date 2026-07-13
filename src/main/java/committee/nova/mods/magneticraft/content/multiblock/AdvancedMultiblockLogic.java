@@ -1,5 +1,7 @@
 package committee.nova.mods.magneticraft.content.multiblock;
 
+import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
+
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.FluidFuelRecipe;
@@ -120,7 +122,8 @@ final class AdvancedMultiblockLogic {
         if (machine.heat() == null || machine.heat().node().temperatureKelvin() <= 3_773.15D) {
             return;
         }
-        double excessTemperature = machine.heat().node().temperatureKelvin() - 293.15D;
+        double excessTemperature = machine.heat().node().temperatureKelvin()
+                - HeatNode.AMBIENT_TEMPERATURE_KELVIN;
         machine.heat().node().removeHeat(excessTemperature * 0.25D, false);
         machine.markChanged();
     }
@@ -305,7 +308,7 @@ final class AdvancedMultiblockLogic {
         }
         double excessHeat = Math.max(
                 0.0D,
-                (machine.heat().node().temperatureKelvin() - 293.15D)
+                (machine.heat().node().temperatureKelvin() - HeatNode.AMBIENT_TEMPERATURE_KELVIN)
                         * machine.heat().node().heatCapacityJoulesPerKelvin()
         );
         if (excessHeat > 0.0D) {

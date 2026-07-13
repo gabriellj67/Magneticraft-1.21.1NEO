@@ -93,15 +93,23 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         ModMachineBlocks.machines().forEach((definition, holder) -> {
             Block block = holder.get();
-            ResourceLocation texture = definition.isWooden()
-                    ? mcLoc("block/oak_planks")
-                    : switch (definition) {
-                        case COMBUSTION_CHAMBER, BRICK_FURNACE -> mcLoc("block/bricks");
-                        case STEAM_BOILER, SMALL_TANK, WATER_GENERATOR -> mcLoc("block/iron_block");
-                        case AIRLOCK -> mcLoc("block/glass");
-                        default -> mcLoc("block/smooth_stone");
-                    };
-            simpleBlockWithItem(block, models().cubeAll(definition.id(), texture));
+            if (definition == SingleBlockMachineDefinition.RELAY
+                    || definition == SingleBlockMachineDefinition.FILTER
+                    || definition == SingleBlockMachineDefinition.TRANSPOSER) {
+                ModelFile model = pneumaticEndpointModel(definition);
+                directionalBlock(block, model);
+                simpleBlockItem(block, model);
+            } else {
+                ResourceLocation texture = definition.isWooden()
+                        ? mcLoc("block/oak_planks")
+                        : switch (definition) {
+                            case COMBUSTION_CHAMBER, BRICK_FURNACE -> mcLoc("block/bricks");
+                            case STEAM_BOILER, SMALL_TANK, WATER_GENERATOR -> mcLoc("block/iron_block");
+                            case AIRLOCK -> mcLoc("block/glass");
+                            default -> mcLoc("block/smooth_stone");
+                        };
+                simpleBlockWithItem(block, models().cubeAll(definition.id(), texture));
+            }
         });
         simpleBlock(
                 ModMachineBlocks.AIR_BUBBLE.get(),
@@ -115,9 +123,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         conduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable", mcLoc("block/copper_block"));
         registerLongDistanceElectricModels();
-        conduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe", mcLoc("block/iron_block"));
-        conduitBlock(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), "insulated_heat_pipe", mcLoc("block/black_wool"));
-        conduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_fluid_pipe", mcLoc("block/iron_block"));
+        conduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe", mcLoc("block/iron_block"), 4);
+        conduitBlock(
+                ModNetworkBlocks.INSULATED_HEAT_PIPE.get(),
+                "insulated_heat_pipe",
+                mcLoc("block/black_wool"),
+                3
+        );
+        conduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_fluid_pipe", mcLoc("block/iron_block"), 4);
         conduitBlock(ModNetworkBlocks.PNEUMATIC_TUBE.get(), "pneumatic_tube", mcLoc("block/light_gray_concrete"));
         conduitBlock(
                 ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
@@ -130,12 +143,12 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 .texture("particle", mcLoc("block/iron_block"))
                 .texture("metal", mcLoc("block/iron_block"))
                 .texture("face", modLoc("block/iron_grate"));
-        heatSinkModel.element().from(2, 2, 2).to(14, 14, 14).textureAll("#metal").end();
+        heatSinkModel.element().from(0, 11, 0).to(16, 13, 16).textureAll("#metal").end();
         for (int x = 1; x <= 13; x += 3) {
-            heatSinkModel.element().from(x, 0, 0).to(x + 1, 16, 2).textureAll("#metal").end();
+            heatSinkModel.element().from(x, 14, 1).to(x + 1, 16, 15).textureAll("#metal").end();
         }
-        heatSinkModel.element().from(2, 2, 0).to(14, 14, 2).textureAll("#face").end();
-        horizontalBlock(heatSink, heatSinkModel);
+        heatSinkModel.element().from(2, 13, 2).to(14, 14, 14).textureAll("#face").end();
+        directionalBlock(heatSink, heatSinkModel);
         simpleBlockItem(heatSink, heatSinkModel);
 
         Block conveyor = ModNetworkBlocks.CONVEYOR_BELT.get();
@@ -222,6 +235,25 @@ final class ModBlockStateProvider extends BlockStateProvider {
         model.element().from(minX, 0, minZ).to(maxX, 12, maxZ).textureAll("#side").end();
     }
 
+    private ModelFile pneumaticEndpointModel(SingleBlockMachineDefinition definition) {
+        ResourceLocation side = switch (definition) {
+            case RELAY -> mcLoc("block/polished_andesite");
+            case FILTER -> mcLoc("block/iron_block");
+            case TRANSPOSER -> mcLoc("block/deepslate_tiles");
+            default -> throw new IllegalArgumentException("Not a pneumatic endpoint: " + definition);
+        };
+        ResourceLocation front = switch (definition) {
+            case RELAY -> mcLoc("block/copper_block");
+            case FILTER -> modLoc("block/iron_grate");
+            case TRANSPOSER -> mcLoc("block/dispenser_front");
+            default -> throw new IllegalArgumentException("Not a pneumatic endpoint: " + definition);
+        };
+        ResourceLocation back = definition == SingleBlockMachineDefinition.FILTER
+                ? mcLoc("block/copper_block")
+                : mcLoc("block/iron_block");
+        return models().cube(definition.id(), back, front, side, side, side, side);
+    }
+
     private ModelFile advancedControllerModel(MultiblockDefinition definition, boolean formed) {
         String generatedName = definition.id() + (formed ? "_formed" : "");
         return switch (definition) {
@@ -252,16 +284,21 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void conduitBlock(Block block, String name, ResourceLocation texture) {
+        conduitBlock(block, name, texture, 5);
+    }
+
+    private void conduitBlock(Block block, String name, ResourceLocation texture, int insetPixels) {
+        int far = 16 - insetPixels;
         BlockModelBuilder model = models().getBuilder(name)
                 .texture("particle", texture)
                 .texture("all", texture);
-        model.element().from(5, 5, 5).to(11, 11, 11).textureAll("#all").end();
-        model.element().from(5, 0, 5).to(11, 5, 11).textureAll("#all").end();
-        model.element().from(5, 11, 5).to(11, 16, 11).textureAll("#all").end();
-        model.element().from(5, 5, 0).to(11, 11, 5).textureAll("#all").end();
-        model.element().from(5, 5, 11).to(11, 11, 16).textureAll("#all").end();
-        model.element().from(0, 5, 5).to(5, 11, 11).textureAll("#all").end();
-        model.element().from(11, 5, 5).to(16, 11, 11).textureAll("#all").end();
+        model.element().from(insetPixels, insetPixels, insetPixels).to(far, far, far).textureAll("#all").end();
+        model.element().from(insetPixels, 0, insetPixels).to(far, insetPixels, far).textureAll("#all").end();
+        model.element().from(insetPixels, far, insetPixels).to(far, 16, far).textureAll("#all").end();
+        model.element().from(insetPixels, insetPixels, 0).to(far, far, insetPixels).textureAll("#all").end();
+        model.element().from(insetPixels, insetPixels, far).to(far, far, 16).textureAll("#all").end();
+        model.element().from(0, insetPixels, insetPixels).to(insetPixels, far, far).textureAll("#all").end();
+        model.element().from(far, insetPixels, insetPixels).to(16, far, far).textureAll("#all").end();
         simpleBlockWithItem(block, model);
     }
 

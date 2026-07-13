@@ -1,6 +1,6 @@
 {
   "type": "magneticraft:thermopile",
   "block": "magneticraft:heavy_oil",
-  "conductivity": 206.18556701030832,
+  "conductivity": 13333.333333335355,
   "temperature": 298.0
 }

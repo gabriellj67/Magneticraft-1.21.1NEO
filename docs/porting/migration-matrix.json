@@ -30,8 +30,8 @@
   },
   "acceptance_case_registry": {
     "id_inventory_order": "lexicographic_unique",
-    "id_count": 134,
-    "id_sha256": "b112929efa296f0adc8043a60155cde95843768a30b58656422e3587821c406d",
+    "id_count": 137,
+    "id_sha256": "5fc8b5ab5d6417f877579554c192ba5b29239f1aa30fa2544419b49de182e70d",
     "resolution_rule": "Every referenced acceptance ID resolves by its first token after MIG to exactly one route; the pinned inventory prevents silent label drift.",
     "routes": [
       {
@@ -62,7 +62,7 @@
         "id": "transport-gametest",
         "tokens": ["CONVEYOR", "FLUID", "HEAT", "INSERTER", "LOGISTICS", "PHYSICS", "TRANSFER"],
         "harness": "junit_and_gametest",
-        "locator": "src/test/java/committee/nova/mods/magneticraft/content/network;src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java"
+        "locator": "src/test/java/committee/nova/mods/magneticraft;src/gametest/java/committee/nova/mods/magneticraft/gametest"
       },
       {
         "id": "machine-gametest",
@@ -117,7 +117,7 @@
     "legacy_json_groups": {
       "recipe-governance-and-base": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["governance.id_freeze"]},
       "recipe-electricity-portables": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["electricity.portable_devices"]},
-      "recipe-transport": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["transport.conveyor", "transport.inserter", "transport.heat_fluid_pressure"]},
+      "recipe-transport": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["transport.conveyor", "transport.inserter", "transport.heat_fluid_pressure", "transport.pneumatic_logistics"]},
       "recipe-single-block-machines": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["machines.single_block_catalog"]},
       "recipe-multiblocks": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["multiblock.structure_and_ownership"]},
       "recipe-computers": {"data_paths": ["data/magneticraft/recipes/crafting/{semantic_id}.json"], "behavior_contract_ids": ["computer.languages_and_budget", "computer.disk_and_robot_security"]},
@@ -304,7 +304,7 @@
       {
         "id": "recipe-transport",
         "members": ["conveyor_belt_north.json", "filter_down.json", "heat_pipe_normal.json", "heat_sink_down.json", "inserter_north.json", "inserter_upgrade_speed.json", "inserter_upgrade_stack.json", "insulated_heat_pipe_normal.json", "insulated_heat_pipe_normal_1.json", "iron_pipe_normal.json", "pneumatic_restriction_tube_normal.json", "pneumatic_tube_normal.json", "relay_down.json", "small_tank_normal.json", "transposer_down.json"],
-        "target_paths": ["data/magneticraft/recipes/crafting/conveyor_belt.json", "data/magneticraft/recipes/crafting/pneumatic_filter.json", "data/magneticraft/recipes/crafting/heat_pipe.json", "data/magneticraft/recipes/crafting/heat_sink.json", "data/magneticraft/recipes/crafting/inserter.json", "data/magneticraft/recipes/crafting/inserter_speed_upgrade.json", "data/magneticraft/recipes/crafting/inserter_stack_upgrade.json", "data/magneticraft/recipes/crafting/insulated_heat_pipe.json", "data/magneticraft/recipes/crafting/insulated_heat_pipe.json", "data/magneticraft/recipes/crafting/iron_fluid_pipe.json", "data/magneticraft/recipes/crafting/pneumatic_restriction_tube.json", "data/magneticraft/recipes/crafting/pneumatic_tube.json", "data/magneticraft/recipes/crafting/pneumatic_relay.json", "data/magneticraft/recipes/crafting/small_tank.json", "data/magneticraft/recipes/crafting/pneumatic_transposer.json"],
+        "target_paths": ["data/magneticraft/recipes/crafting/conveyor_belt.json", "data/magneticraft/recipes/crafting/pneumatic_filter.json", "data/magneticraft/recipes/crafting/heat_pipe.json", "data/magneticraft/recipes/crafting/heat_sink.json", "data/magneticraft/recipes/crafting/inserter.json", "data/magneticraft/recipes/crafting/inserter_speed_upgrade.json", "data/magneticraft/recipes/crafting/inserter_stack_upgrade.json", "data/magneticraft/recipes/crafting/insulated_heat_pipe.json", "data/magneticraft/recipes/crafting/insulated_heat_pipe_from_components.json", "data/magneticraft/recipes/crafting/iron_fluid_pipe.json", "data/magneticraft/recipes/crafting/pneumatic_restriction_tube.json", "data/magneticraft/recipes/crafting/pneumatic_tube.json", "data/magneticraft/recipes/crafting/pneumatic_relay.json", "data/magneticraft/recipes/crafting/small_tank.json", "data/magneticraft/recipes/crafting/pneumatic_transposer.json"],
         "disposition": "rebuild",
         "stage": "0.4.0",
         "target_rule": "Generate canonical transport-domain recipes from the frozen target IDs and tags.",
@@ -1083,26 +1083,38 @@
     },
     {
       "id": "transport.heat_fluid_pressure",
-      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleHeat.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModulePipe.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModulePneumaticTube.kt"],
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/misc/Heat.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleHeat.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModulePipe.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleFluidExporter.kt"],
       "disposition": "rebuild",
       "stage": "0.4.0",
       "contract": "Transfers happen exactly once, simulation calls have no side effects, blocked routes apply backpressure, and unloaded boundaries pause without loss or force loading.",
-      "acceptance_tests": ["MIG-TRANSFER-EXACTLY-ONCE-001", "MIG-TRANSFER-SIMULATE-001", "MIG-TRANSFER-UNLOAD-001"]
+      "evidence": "docs/porting/transport-0.4-evidence.md#热域",
+      "acceptance_tests": ["MIG-TRANSFER-EXACTLY-ONCE-001", "MIG-TRANSFER-SIMULATE-001", "MIG-TRANSFER-UNLOAD-001", "MIG-HEAT-LEGACY-001", "MIG-FLUID-COMPONENT-001"]
+    },
+    {
+      "id": "transport.pneumatic_logistics",
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/internal/pneumatic/PneumaticUtils.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/internal/pneumatic/PneumaticBuffer.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/internal/pneumatic/PneumaticBoxStorage.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModulePneumaticTube.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModulePneumaticEndpoint.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleRelay.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleFilter.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleTransposer.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleItemFilter.kt"],
+      "disposition": "rebuild",
+      "stage": "0.4.0",
+      "contract": "Pneumatic payloads use bounded persisted queues, legacy weighted routing and fair first-hop selection; searches visit at most 4096 loaded nodes, blocked outputs apply backpressure, and unloaded boundaries pause without loss or force loading.",
+      "evidence": "docs/porting/transport-0.4-evidence.md#气动物流",
+      "acceptance_tests": ["MIG-LOGISTICS-ROUTE-001", "MIG-TRANSFER-EXACTLY-ONCE-001", "MIG-TRANSFER-SIMULATE-001", "MIG-TRANSFER-UNLOAD-001"]
     },
     {
       "id": "transport.conveyor",
-      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleConveyorBelt.kt", ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/transport/2-conveyor-belts.md"],
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleConveyorBelt.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/api/conveyorbelt/Route.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/conveyorbelt/BitMap.kt", ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us/machines/transport/2-conveyor-belts.md"],
       "disposition": "rebuild",
       "stage": "0.4.0",
       "contract": "An internal item model supports right-click insertion/removal, automatic output, backpressure and horizontal auto-corners; slopes and vertical conveyors remain excluded.",
+      "evidence": "docs/porting/transport-0.4-evidence.md#传送带与机械臂",
       "acceptance_tests": ["MIG-CONVEYOR-ONCE-001", "MIG-CONVEYOR-CORNER-001", "MIG-CONVEYOR-EXCLUDED-SLOPE-001"]
     },
     {
       "id": "transport.inserter",
-      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/Upgrades.kt"],
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/systems/tilemodules/ModuleInserter.kt", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/items/Upgrades.kt"],
       "disposition": "rebuild",
       "stage": "0.4.0",
       "contract": "Inserters preserve filtering and direction; speed and stack upgrades are the only retained upgrade items and affect only documented consumers.",
+      "evidence": "docs/porting/transport-0.4-evidence.md#传送带与机械臂",
       "acceptance_tests": ["MIG-INSERTER-FILTER-001", "MIG-INSERTER-UPGRADE-001"]
     },
     {

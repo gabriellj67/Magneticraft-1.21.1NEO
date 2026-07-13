@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.network.heat;
 
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.system.network.heat.HeatPipeContactDamage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +15,7 @@ public final class HeatPipeBlock extends ConduitBlock {
     private final boolean insulated;
 
     public HeatPipeBlock(Properties properties, boolean insulated) {
-        super(properties);
+        super(properties, insulated ? 3 : 4);
         this.insulated = insulated;
     }
 
@@ -31,9 +32,9 @@ public final class HeatPipeBlock extends ConduitBlock {
                 && entity instanceof LivingEntity living
                 && level.getBlockEntity(position) instanceof HeatPipeBlockEntity pipe) {
             double celsius = pipe.heat().node().temperatureKelvin() - 273.15D;
-            if (celsius >= 80.0D) {
-                float damage = (float) Math.min(10.0D, 0.5D + (celsius - 80.0D) / 250.0D);
-                living.hurt(level.damageSources().hotFloor(), damage);
+            float damage = HeatPipeContactDamage.atCelsius(celsius);
+            if (damage > 0.0F) {
+                living.hurt(level.damageSources().onFire(), damage);
             }
         }
         super.entityInside(state, level, position, entity);

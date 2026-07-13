@@ -65,7 +65,7 @@ public final class ModNetworkBlocks {
     );
     public static final RegistryObject<Block> HEAT_SINK = register(
             "heat_sink",
-            () -> new HeatSinkBlock(machineProperties())
+            () -> new HeatSinkBlock(machineProperties().noOcclusion())
     );
     public static final RegistryObject<Block> IRON_PIPE = register(
             "iron_fluid_pipe",

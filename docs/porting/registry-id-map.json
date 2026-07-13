@@ -148,7 +148,7 @@
       "block_item:limestone": {"data_path_profile": "block_item", "behavior_contract_ids": ["governance.id_freeze", "worldgen.ores_limestone_oil"]},
       "block_item:burnt_limestone": {"data_path_profile": "block_item", "behavior_contract_ids": ["governance.id_freeze"]},
       "block_item:tile_limestone": {"data_path_profile": "block_item", "behavior_contract_ids": ["governance.id_freeze"]},
-      "block_item:automatic_machines": {"data_path_profile": "block_item", "behavior_contract_ids": ["transport.conveyor", "transport.inserter"]},
+      "block_item:automatic_machines": {"data_path_profile": "block_item", "behavior_contract_ids": ["transport.conveyor", "transport.inserter", "transport.pneumatic_logistics"]},
       "block_item:fluid_machines": {"data_path_profile": "block_item", "behavior_contract_ids": ["transport.heat_fluid_pressure"]},
       "block_item:heat_machines": {"data_path_profile": "block_item", "behavior_contract_ids": ["transport.heat_fluid_pressure", "machines.single_block_catalog"]},
       "block_item:manual_machines": {"data_path_profile": "block_item", "behavior_contract_ids": ["machines.single_block_catalog"]},
@@ -298,7 +298,7 @@
       "disposition": "retain_rename",
       "stage": "0.4.0",
       "source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/Blocks.kt",
-      "acceptance_tests": ["MIG-LOGISTICS-REG-001", "MIG-WATER-GENERATOR-001"],
+      "acceptance_tests": ["MIG-LOGISTICS-REG-001", "MIG-LOGISTICS-ROUTE-001", "MIG-WATER-GENERATOR-001"],
       "notes": "water_generator is retained because the released machine actively supplies adjacent tanks; relay/filter/transposer are qualified as pneumatic devices."
     },
     {

@@ -59,9 +59,9 @@ class MigrationMatrixContractTest {
             "22169dbd3f31e7e6d61d9bd1bab09ae048d1dcd762c9a8c58620c82b9f3c1813";
     private static final String LEGACY_GUIDE_CONTENT_MANIFEST_SHA256 =
             "628c16fb7164cfdcca98a4122b03f144dcd0db2517bd785be9b72c63eff2d9f8";
-    private static final int ACCEPTANCE_CASE_COUNT = 134;
+    private static final int ACCEPTANCE_CASE_COUNT = 137;
     private static final String ACCEPTANCE_CASE_SHA256 =
-            "b112929efa296f0adc8043a60155cde95843768a30b58656422e3587821c406d";
+            "5fc8b5ab5d6417f877579554c192ba5b29239f1aa30fa2544419b49de182e70d";
     private static final int MAPPING_LEAF_COUNT = 147;
     private static final String MAPPING_LEAF_SHA256 =
             "5068ab14ee3f8324e7dc947b58ce7b24e114e8a59882289df31a5df67fa7d6e8";
@@ -1244,14 +1244,14 @@ class MigrationMatrixContractTest {
             assertNonBlank(contract, "contract");
             assertNonEmpty(contract.getAsJsonArray("legacy_sources"), id);
             assertNonEmpty(contract.getAsJsonArray("acceptance_tests"), id);
-            if (stage.equals("0.3.0")) {
+            if (stage.equals("0.3.0") || stage.equals("0.4.0")) {
                 assertNonBlank(contract, "evidence");
                 String[] evidence = contract.get("evidence").getAsString().split("#", 2);
-                assertEquals(2, evidence.length, "0.3.0 evidence must include a stable heading anchor: " + id);
+                assertEquals(2, evidence.length, stage + " evidence must include a stable heading anchor: " + id);
                 Path evidencePath = Path.of(evidence[0]);
-                assertTrue(Files.isRegularFile(evidencePath), "Missing 0.3.0 evidence document: " + evidencePath);
+                assertTrue(Files.isRegularFile(evidencePath), "Missing " + stage + " evidence document: " + evidencePath);
                 assertTrue(Files.readString(evidencePath).contains("## " + evidence[1]),
-                        "Missing 0.3.0 evidence heading for " + id + ": " + evidence[1]);
+                        "Missing " + stage + " evidence heading for " + id + ": " + evidence[1]);
             }
         }
         assertTrue(ids.contains("electricity.long_distance_network"));

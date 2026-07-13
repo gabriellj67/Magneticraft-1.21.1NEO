@@ -4,21 +4,32 @@ import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBl
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public final class HeatSinkBlock extends NetworkComponentBlock {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    private static final VoxelShape[] SHAPES = new VoxelShape[]{
+            box(0, 0, 0, 16, 5, 16),
+            box(0, 11, 0, 16, 16, 16),
+            box(0, 0, 0, 16, 16, 5),
+            box(0, 0, 11, 16, 16, 16),
+            box(0, 0, 0, 5, 16, 16),
+            box(11, 0, 0, 16, 16, 16)
+    };
 
     public HeatSinkBlock(Properties properties) {
         super(properties);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.DOWN));
     }
 
     @Nullable
@@ -30,7 +41,17 @@ public final class HeatSinkBlock extends NetworkComponentBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return defaultBlockState().setValue(FACING, context.getClickedFace().getOpposite());
+    }
+
+    @Override
+    public VoxelShape getShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos position,
+            CollisionContext context
+    ) {
+        return SHAPES[state.getValue(FACING).ordinal()];
     }
 
     @Override

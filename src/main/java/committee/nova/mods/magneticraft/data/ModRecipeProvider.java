@@ -494,66 +494,72 @@ final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_fine_copper_wire", has(ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get()))
                 .save(consumer, id("crafting/electric_cable"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.HEAT_PIPE.get(), 8)
-                .pattern("III")
-                .pattern("   ")
-                .pattern("III")
-                .define('I', Tags.Items.INGOTS_IRON)
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.HEAT_PIPE.get(), 5)
+                .pattern(" A ")
+                .pattern("ABA")
+                .pattern(" A ")
+                .define('A', Tags.Items.INGOTS_IRON)
+                .define('B', ModTags.Items.lightPlate(Metal.COPPER))
                 .unlockedBy("has_iron_ingot", has(Tags.Items.INGOTS_IRON))
                 .save(consumer, id("crafting/heat_pipe"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), 8)
-                .pattern("WWW")
-                .pattern("PPP")
-                .pattern("WWW")
-                .define('W', ItemTags.WOOL)
-                .define('P', ModNetworkBlocks.HEAT_PIPE.get())
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), 5)
+                .pattern("ABA")
+                .pattern("BBB")
+                .pattern("ABA")
+                .define('A', Items.BRICK)
+                .define('B', ModNetworkBlocks.HEAT_PIPE.get())
                 .unlockedBy("has_heat_pipe", has(ModNetworkBlocks.HEAT_PIPE.get()))
                 .save(consumer, id("crafting/insulated_heat_pipe"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.HEAT_SINK.get())
-                .pattern("III")
-                .pattern("CGC")
-                .pattern("III")
-                .define('I', Tags.Items.INGOTS_IRON)
-                .define('C', ModTags.Items.ingot(Metal.COPPER))
-                .define('G', ModMachineBlocks.GRATE.get())
-                .unlockedBy("has_iron_grate", has(ModMachineBlocks.GRATE.get()))
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), 5)
+                .pattern("ABA")
+                .pattern("BCB")
+                .pattern("ABA")
+                .define('A', Items.BRICK)
+                .define('B', Tags.Items.INGOTS_IRON)
+                .define('C', ModTags.Items.lightPlate(Metal.COPPER))
+                .unlockedBy("has_copper_light_plate", has(ModTags.Items.lightPlate(Metal.COPPER)))
+                .save(consumer, id("crafting/insulated_heat_pipe_from_components"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.HEAT_SINK.get(), 2)
+                .pattern("AAA")
+                .pattern("BBB")
+                .define('A', Tags.Items.INGOTS_IRON)
+                .define('B', ModTags.Items.lightPlate(Metal.IRON))
+                .unlockedBy("has_iron_light_plate", has(ModTags.Items.lightPlate(Metal.IRON)))
                 .save(consumer, id("crafting/heat_sink"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.IRON_PIPE.get(), 8)
-                .pattern("III")
-                .pattern("   ")
-                .pattern("III")
-                .define('I', ModTags.Items.lightPlate(Metal.IRON))
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.IRON_PIPE.get(), 12)
+                .pattern(" C ")
+                .pattern("ABA")
+                .pattern(" C ")
+                .define('A', ModTags.Items.lightPlate(Metal.IRON))
+                .define('B', Tags.Items.GLASS)
+                .define('C', Tags.Items.INGOTS_IRON)
                 .unlockedBy("has_iron_light_plate", has(ModTags.Items.lightPlate(Metal.IRON)))
                 .save(consumer, id("crafting/iron_fluid_pipe"));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.PNEUMATIC_TUBE.get(), 8)
-                .pattern("IGI")
-                .pattern("G G")
-                .pattern("IGI")
-                .define('I', Tags.Items.NUGGETS_IRON)
+                .pattern("AGA")
+                .define('A', ModTags.Items.lightPlate(Metal.COPPER))
                 .define('G', Tags.Items.GLASS)
-                .unlockedBy("has_glass", has(Tags.Items.GLASS))
+                .unlockedBy("has_copper_light_plate", has(ModTags.Items.lightPlate(Metal.COPPER)))
                 .save(consumer, id("crafting/pneumatic_tube"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(), 8)
-                .pattern("RRR")
-                .pattern("TTT")
-                .pattern("RRR")
-                .define('R', Tags.Items.DUSTS_REDSTONE)
-                .define('T', ModNetworkBlocks.PNEUMATIC_TUBE.get())
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get())
+                .requires(ModNetworkBlocks.PNEUMATIC_TUBE.get())
+                .requires(Tags.Items.INGOTS_IRON)
                 .unlockedBy("has_pneumatic_tube", has(ModNetworkBlocks.PNEUMATIC_TUBE.get()))
                 .save(consumer, id("crafting/pneumatic_restriction_tube"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.CONVEYOR_BELT.get(), 4)
-                .pattern("III")
-                .pattern("RMR")
-                .pattern("III")
-                .define('I', ModTags.Items.lightPlate(Metal.IRON))
-                .define('R', Tags.Items.DUSTS_REDSTONE)
-                .define('M', ModItems.component(CraftingComponent.MOTOR).get())
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.CONVEYOR_BELT.get(), 12)
+                .pattern("BAB")
+                .pattern("BCB")
+                .pattern("B B")
+                .define('A', ModTags.Items.lightPlate(Metal.IRON))
+                .define('B', Tags.Items.INGOTS_IRON)
+                .define('C', ModItems.component(CraftingComponent.MOTOR).get())
                 .unlockedBy("has_motor", has(ModItems.component(CraftingComponent.MOTOR).get()))
                 .save(consumer, id("crafting/conveyor_belt"));
     }
@@ -783,7 +789,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_water_bucket", has(Items.WATER_BUCKET))
                 .save(consumer, id("crafting/water_generator"));
         automationEndpoint(consumer, SingleBlockMachineDefinition.RELAY, ModTags.Items.lightPlate(Metal.IRON));
-        automationEndpoint(consumer, SingleBlockMachineDefinition.FILTER, component(CraftingComponent.FABRIC_MESH));
+        automationEndpoint(consumer, SingleBlockMachineDefinition.FILTER, component(CraftingComponent.IRON_MESH));
         automationEndpoint(consumer, SingleBlockMachineDefinition.TRANSPOSER, component(CraftingComponent.MOTOR));
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, machine(SingleBlockMachineDefinition.COMBUSTION_CHAMBER))

@@ -2,20 +2,20 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "P": {
-      "item": "magneticraft:heat_pipe"
+    "A": {
+      "item": "minecraft:brick"
     },
-    "W": {
-      "tag": "minecraft:wool"
+    "B": {
+      "item": "magneticraft:heat_pipe"
     }
   },
   "pattern": [
-    "WWW",
-    "PPP",
-    "WWW"
+    "ABA",
+    "BBB",
+    "ABA"
   ],
   "result": {
-    "count": 8,
+    "count": 5,
     "item": "magneticraft:insulated_heat_pipe"
   },
   "show_notification": true

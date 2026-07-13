@@ -1,6 +1,6 @@
 {
   "type": "magneticraft:thermopile",
   "block": "minecraft:lava",
-  "conductivity": 0.9931966032676168,
+  "conductivity": 0.9981534161800668,
   "temperature": 1300.0
 }

@@ -1,6 +1,11 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "minecraft:block/smooth_stone"
+    "down": "minecraft:block/iron_block",
+    "east": "minecraft:block/polished_andesite",
+    "north": "minecraft:block/polished_andesite",
+    "south": "minecraft:block/polished_andesite",
+    "up": "minecraft:block/copper_block",
+    "west": "minecraft:block/polished_andesite"
   }
 }

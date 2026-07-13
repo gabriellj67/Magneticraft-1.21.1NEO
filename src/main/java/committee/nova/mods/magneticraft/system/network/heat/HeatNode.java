@@ -5,7 +5,7 @@ package committee.nova.mods.magneticraft.system.network.heat;
  */
 public final class HeatNode {
     public static final double IDEAL_GAS_CONSTANT = 8.3144598;
-    public static final double AMBIENT_TEMPERATURE_KELVIN = 293.15;
+    public static final double AMBIENT_TEMPERATURE_KELVIN = 298.15D;
     public static final double IRON_MOLAR_MASS_GRAMS = 55.845;
 
     private final double massKilograms;

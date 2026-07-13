@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class IronPipeBlock extends ConduitBlock {
     public IronPipeBlock(Properties properties) {
-        super(properties);
+        super(properties, 4);
     }
 
     @Nullable

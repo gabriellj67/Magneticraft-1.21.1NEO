@@ -1,13 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_iron_grate": {
+    "has_iron_light_plate": {
       "conditions": {
         "items": [
           {
-            "items": [
-              "magneticraft:iron_grate"
-            ]
+            "tag": "magneticraft:light_plates/iron"
           }
         ]
       },
@@ -22,7 +20,7 @@
   },
   "requirements": [
     [
-      "has_iron_grate",
+      "has_iron_light_plate",
       "has_the_recipe"
     ]
   ],

@@ -7,6 +7,8 @@ import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -41,7 +43,26 @@ public final class IronPipeBlockEntity extends NetworkComponentBlockEntity {
                     Component.translatable("message.magneticraft.redstone_mode." + pipe.redstoneMode().name().toLowerCase())
             );
         }
-        pipe.cycleSideMode(side);
+        Level level = getLevel();
+        BlockPos neighborPosition = getBlockPos().relative(side);
+        boolean pipeNeighbor = false;
+        if (level instanceof ServerLevel serverLevel) {
+            var chunk = serverLevel.getChunkSource().getChunkNow(
+                    neighborPosition.getX() >> 4,
+                    neighborPosition.getZ() >> 4
+            );
+            pipeNeighbor = chunk != null && chunk.getBlockEntity(neighborPosition) instanceof IronPipeBlockEntity;
+        }
+        if (pipeNeighbor) {
+            pipe.setSideMode(
+                    side,
+                    pipe.sideMode(side) == FluidPipeModule.SideMode.DISABLED
+                            ? FluidPipeModule.SideMode.PASSIVE
+                            : FluidPipeModule.SideMode.DISABLED
+            );
+        } else {
+            pipe.cycleSideMode(side);
+        }
         return Component.translatable(
                 "message.magneticraft.fluid_side_mode",
                 Component.translatable("direction.minecraft." + side.getName()),

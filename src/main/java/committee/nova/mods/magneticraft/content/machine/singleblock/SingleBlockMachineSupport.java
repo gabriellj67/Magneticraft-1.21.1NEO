@@ -7,7 +7,9 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Sluic
 import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -20,6 +22,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -89,10 +92,18 @@ final class SingleBlockMachineSupport {
             FluidTankModule source,
             int maximum
     ) {
-        if (maximum <= 0 || machine.getLevel() == null) {
+        if (maximum <= 0 || !(machine.getLevel() instanceof ServerLevel level)) {
             return 0;
         }
-        BlockEntity targetEntity = machine.getLevel().getBlockEntity(machine.getBlockPos().relative(direction));
+        BlockPos targetPosition = machine.getBlockPos().relative(direction);
+        var targetChunk = level.getChunkSource().getChunkNow(
+                targetPosition.getX() >> 4,
+                targetPosition.getZ() >> 4
+        );
+        if (targetChunk == null) {
+            return 0;
+        }
+        BlockEntity targetEntity = targetChunk.getBlockEntity(targetPosition);
         if (targetEntity == null) {
             return 0;
         }
@@ -126,12 +137,16 @@ final class SingleBlockMachineSupport {
             ItemStack stack,
             boolean whitelist
     ) {
-        if (machine.filters() == null || stack.isEmpty()) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        int filterSlots = machine.filters() == null ? 0 : machine.filters().size();
+        if (filterSlots == 0) {
             return !stack.isEmpty();
         }
         boolean anyFilter = false;
         boolean matched = false;
-        for (int slot = 0; slot < machine.filters().size(); slot++) {
+        for (int slot = 0; slot < filterSlots; slot++) {
             ItemStack filter = machine.filters().getFilter(slot);
             if (filter.isEmpty()) {
                 continue;
@@ -143,7 +158,7 @@ final class SingleBlockMachineSupport {
             }
         }
         if (!anyFilter) {
-            return true;
+            return machine.definition() == SingleBlockMachineDefinition.INSERTER ? !whitelist : true;
         }
         return whitelist ? matched : !matched;
     }
@@ -206,6 +221,28 @@ final class SingleBlockMachineSupport {
     static boolean isInserterUpgrade(ItemStack stack) {
         return stack.is(ModMachineItems.INSERTER_SPEED_UPGRADE.get())
                 || stack.is(ModMachineItems.INSERTER_STACK_UPGRADE.get());
+    }
+
+    static List<InserterAccess> inserterInventoryAccesses(BlockPos origin, Direction direction) {
+        BlockPos sameLevel = origin.relative(direction);
+        return List.of(
+                new InserterAccess(sameLevel, Direction.UP, true),
+                new InserterAccess(sameLevel.below(), Direction.UP, true),
+                new InserterAccess(sameLevel, direction.getOpposite(), false)
+        );
+    }
+
+    static List<BlockPos> inserterGroundPickupPositions(BlockPos origin, Direction direction) {
+        BlockPos sameLevel = origin.relative(direction);
+        return List.of(sameLevel.below(), sameLevel);
+    }
+
+    static List<BlockPos> inserterGroundDropPositions(BlockPos origin, Direction direction) {
+        BlockPos sameLevel = origin.relative(direction);
+        return List.of(sameLevel.below(), sameLevel);
+    }
+
+    record InserterAccess(BlockPos position, Direction side, boolean includeMinecarts) {
     }
 
     private static boolean matchesFilter(SingleBlockMachineState state, ItemStack filter, ItemStack stack) {

@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBlockEntity;
 import committee.nova.mods.magneticraft.content.network.module.ConveyorBeltModule;
+import committee.nova.mods.magneticraft.content.network.module.ConveyorRoute;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -37,11 +38,14 @@ public final class ConveyorBeltRenderer implements BlockEntityRenderer<ConveyorB
         );
         int seed = 0;
         for (ConveyorBeltModule.ParcelView parcel : belt.belt().parcels()) {
-            float progress = Math.min(ConveyorBeltModule.MAX_PROGRESS, parcel.progress() + interpolationTicks);
-            double along = progress / ConveyorBeltModule.MAX_PROGRESS - 0.5D;
-            double laneOffset = parcel.lane() == ConveyorBeltModule.Lane.LEFT ? -0.18D : 0.18D;
-            double x = 0.5D + facing.getStepX() * along + lateral.getStepX() * laneOffset;
-            double z = 0.5D + facing.getStepZ() * along + lateral.getStepZ() * laneOffset;
+            float interpolatedProgress = parcel.locked()
+                    ? parcel.progress()
+                    : parcel.progress() + interpolationTicks * parcel.route().speedPixelsPerTick();
+            ConveyorRoute.PixelPosition position = parcel.route().position(interpolatedProgress);
+            double along = 0.5D - position.z() / ConveyorBeltModule.MAX_PROGRESS;
+            double lateralOffset = position.x() / ConveyorBeltModule.MAX_PROGRESS - 0.5D;
+            double x = 0.5D + facing.getStepX() * along + lateral.getStepX() * lateralOffset;
+            double z = 0.5D + facing.getStepZ() * along + lateral.getStepZ() * lateralOffset;
 
             poseStack.pushPose();
             poseStack.translate(x, 0.28D, z);

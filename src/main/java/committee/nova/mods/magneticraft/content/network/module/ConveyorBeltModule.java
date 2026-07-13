@@ -22,21 +22,33 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * Server-authoritative two-lane conveyor inventory and movement simulation.
+ * Server-authoritative horizontal conveyor inventory, routing and collision
+ * simulation. Sloped and vertical paths are intentionally excluded.
  */
 public final class ConveyorBeltModule implements MachineModule {
     public static final int MAX_PROGRESS = 16;
     public static final int MIN_SPACING = 4;
     public static final int MAX_PARCELS = 16;
 
+    private static final int MANUAL_INSERT_PROGRESS = 2;
+    private static final int OPEN_END_LIMIT = 13;
+    private static final int CONNECTED_BELT_LIMIT = 15;
+
     private static final String PARCELS_TAG = "parcels";
     private static final String NEXT_LANE_TAG = "next_lane";
     private static final String REDSTONE_MODE_TAG = "redstone_mode";
+    private static final String ITEM_TAG = "item";
+    private static final String ROUTE_TAG = "route";
+    private static final String LEGACY_LANE_TAG = "lane";
+    private static final String PROGRESS_TAG = "progress";
+    private static final String LOCKED_TAG = "locked";
 
     private final ResourceLocation id;
     private final MachineModuleHost host;
@@ -61,7 +73,7 @@ public final class ConveyorBeltModule implements MachineModule {
 
     public List<ParcelView> parcels() {
         return parcels.stream()
-                .map(parcel -> new ParcelView(parcel.stack.copy(), parcel.lane, parcel.progress))
+                .map(parcel -> new ParcelView(parcel.stack.copy(), parcel.route, parcel.progress, parcel.locked))
                 .toList();
     }
 
@@ -83,17 +95,20 @@ public final class ConveyorBeltModule implements MachineModule {
     }
 
     public boolean insert(ItemStack stack, boolean simulate) {
-        Lane lane = nextLane;
-        if (!canEnter(lane) && canEnter(lane.other())) {
-            lane = lane.other();
+        ConveyorRoute route = nextLane.route();
+        if (!canEnter(route, MANUAL_INSERT_PROGRESS)
+                && canEnter(nextLane.other().route(), MANUAL_INSERT_PROGRESS)) {
+            route = nextLane.other().route();
         }
-        if (!canEnter(lane) || stack.isEmpty() || parcels.size() >= MAX_PARCELS) {
+        if (stack.isEmpty()
+                || parcels.size() >= MAX_PARCELS
+                || !canEnter(route, MANUAL_INSERT_PROGRESS)) {
             return false;
         }
         if (!simulate) {
             long tick = host.level() == null ? Long.MIN_VALUE : host.level().getGameTime();
-            parcels.add(new Parcel(stack.copy(), lane, 0, tick));
-            nextLane = lane.other();
+            parcels.add(new Parcel(stack.copy(), route, MANUAL_INSERT_PROGRESS, tick, false));
+            nextLane = route.leftSide() ? Lane.RIGHT : Lane.LEFT;
             host.markChangedAndSync();
         }
         return true;
@@ -123,37 +138,56 @@ public final class ConveyorBeltModule implements MachineModule {
                 || parcels.isEmpty()) {
             return;
         }
+
         long gameTime = level.getGameTime();
+        OutputTarget output = outputTarget(level);
+        int movementLimit = output.kind == OutputKind.BELT ? CONNECTED_BELT_LIMIT : OPEN_END_LIMIT;
+        ConveyorOccupancy occupancy = occupancy();
         boolean changed = false;
+        boolean visualChanged = false;
         boolean structural = false;
 
-        for (Lane lane : Lane.values()) {
-            List<Parcel> laneParcels = parcels.stream()
-                    .filter(parcel -> parcel.lane == lane)
-                    .sorted(Comparator.comparingInt((Parcel parcel) -> parcel.progress).reversed())
-                    .toList();
-            int nextProgress = Integer.MAX_VALUE;
-            for (Parcel parcel : laneParcels) {
-                if (parcel.lastMovedTick == gameTime) {
-                    nextProgress = parcel.progress;
+        Iterator<Parcel> iterator = parcels.iterator();
+        while (iterator.hasNext()) {
+            Parcel parcel = iterator.next();
+            if (parcel.lastMovedTick == gameTime) {
+                continue;
+            }
+            parcel.lastMovedTick = gameTime;
+
+            if (parcel.progress > movementLimit) {
+                TransferOutcome outcome = transfer(output, parcel, gameTime);
+                if (outcome.remove()) {
+                    occupancy.unmark(parcel.route, parcel.progress);
+                    iterator.remove();
+                    structural = true;
                     continue;
                 }
-                parcel.lastMovedTick = gameTime;
-                if (parcel.progress >= MAX_PROGRESS) {
-                    if (transfer(level, parcel, gameTime)) {
-                        parcels.remove(parcel);
-                        structural = true;
-                        continue;
-                    }
-                } else if (nextProgress - parcel.progress > MIN_SPACING) {
-                    parcel.progress++;
-                    changed = true;
+                if (outcome.remaining() != null) {
+                    parcel.stack = outcome.remaining();
+                    structural = true;
                 }
-                nextProgress = parcel.progress;
+                visualChanged |= parcel.setLocked(true);
+                continue;
+            }
+
+            int nextProgress = Math.min(
+                    MAX_PROGRESS,
+                    parcel.progress + parcel.route.speedPixelsPerTick()
+            );
+            occupancy.unmark(parcel.route, parcel.progress);
+            if (occupancy.isFree(parcel.route, nextProgress)) {
+                parcel.progress = nextProgress;
+                occupancy.mark(parcel.route, parcel.progress);
+                visualChanged |= parcel.setLocked(false);
+                changed = true;
+            } else {
+                occupancy.mark(parcel.route, parcel.progress);
+                visualChanged |= parcel.setLocked(true);
             }
         }
 
-        if (structural || (changed && gameTime % 4L == 0L)) {
+        if (structural || visualChanged || (changed && gameTime % 4L == 0L)) {
             host.markChangedAndSync();
         } else if (changed) {
             host.markChanged();
@@ -166,7 +200,7 @@ public final class ConveyorBeltModule implements MachineModule {
         ListTag stored = tag.getList(PARCELS_TAG, Tag.TAG_COMPOUND);
         for (int index = 0; index < stored.size() && parcels.size() < MAX_PARCELS; index++) {
             Parcel parcel = Parcel.load(stored.getCompound(index));
-            if (!parcel.stack.isEmpty()) {
+            if (!parcel.stack.isEmpty() && canEnter(parcel.route, parcel.progress)) {
                 parcels.add(parcel);
             }
         }
@@ -215,48 +249,143 @@ public final class ConveyorBeltModule implements MachineModule {
         return LazyOptional.empty();
     }
 
-    private boolean transfer(ServerLevel level, Parcel parcel, long gameTime) {
-        BlockPos targetPosition = host.position().relative(facing.get());
-        BlockEntity blockEntity = level.getBlockEntity(targetPosition);
-        if (blockEntity instanceof ConveyorBeltBlockEntity belt
-                && belt.facing() != facing.get().getOpposite()) {
-            return belt.belt().acceptFromBelt(parcel.stack, parcel.lane, gameTime);
+    private TransferOutcome transfer(OutputTarget output, Parcel parcel, long gameTime) {
+        if (output.kind == OutputKind.BELT && output.belt != null) {
+            return output.belt.belt().acceptFromBelt(
+                    parcel.stack,
+                    facing.get(),
+                    parcel.route,
+                    gameTime
+            ) ? TransferOutcome.REMOVE : TransferOutcome.BLOCKED;
         }
-        if (blockEntity == null) {
-            return false;
+        if (output.kind != OutputKind.INVENTORY || output.handler == null) {
+            return TransferOutcome.BLOCKED;
         }
-        IItemHandler handler = blockEntity
-                .getCapability(ForgeCapabilities.ITEM_HANDLER, facing.get().getOpposite())
-                .orElse(null);
-        if (handler == null || !ItemHandlerTransactions.acceptsAll(handler, parcel.stack)) {
-            return false;
+        ItemStack remainder = ItemHandlerTransactions.insertAfterFullSimulation(output.handler, parcel.stack);
+        if (remainder.getCount() >= parcel.stack.getCount()) {
+            return TransferOutcome.BLOCKED;
         }
-        return ItemHandlerTransactions.insert(handler, parcel.stack, false).isEmpty();
+        return remainder.isEmpty() ? TransferOutcome.REMOVE : new TransferOutcome(false, remainder);
     }
 
-    private boolean acceptFromBelt(ItemStack stack, Lane lane, long gameTime) {
-        if (!canEnter(lane) || stack.isEmpty() || parcels.size() >= MAX_PARCELS) {
+    private boolean acceptFromBelt(
+            ItemStack stack,
+            Direction sourceFacing,
+            ConveyorRoute previousRoute,
+            long gameTime
+    ) {
+        if (!(host.level() instanceof ServerLevel level) || stack.isEmpty() || parcels.size() >= MAX_PARCELS) {
             return false;
         }
-        parcels.add(new Parcel(stack.copy(), lane, 0, gameTime));
+        Optional<ConveyorRoute> route = ConveyorRoute.resolveIncoming(
+                incomingDirection(sourceFacing),
+                previousRoute,
+                isCorner(level)
+        );
+        if (route.isEmpty() || !canEnter(route.get(), 0)) {
+            return false;
+        }
+        parcels.add(new Parcel(stack.copy(), route.get(), 0, gameTime, false));
         host.markChangedAndSync();
         return true;
     }
 
-    private boolean canEnter(Lane lane) {
-        return parcels.stream().noneMatch(parcel -> parcel.lane == lane && parcel.progress < MIN_SPACING);
+    private ConveyorRoute.IncomingDirection incomingDirection(Direction sourceFacing) {
+        Direction receiverFacing = facing.get();
+        if (sourceFacing == receiverFacing) {
+            return ConveyorRoute.IncomingDirection.SAME;
+        }
+        if (sourceFacing == receiverFacing.getOpposite()) {
+            return ConveyorRoute.IncomingDirection.OPPOSITE;
+        }
+        return sourceFacing == receiverFacing.getClockWise()
+                ? ConveyorRoute.IncomingDirection.CLOCKWISE
+                : ConveyorRoute.IncomingDirection.COUNTER_CLOCKWISE;
+    }
+
+    private boolean isCorner(ServerLevel level) {
+        Direction direction = facing.get();
+        ConveyorBeltBlockEntity back = loadedBelt(level, host.position().relative(direction.getOpposite()));
+        ConveyorBeltBlockEntity front = loadedBelt(level, host.position().relative(direction));
+        ConveyorBeltBlockEntity left = loadedBelt(level, host.position().relative(direction.getCounterClockWise()));
+        ConveyorBeltBlockEntity right = loadedBelt(level, host.position().relative(direction.getClockWise()));
+        boolean hasBack = back != null && back.facing() == direction;
+        boolean hasLeft = left != null && left.facing() == direction.getClockWise();
+        boolean hasRight = right != null && right.facing() == direction.getCounterClockWise();
+        return !hasBack && front != null && (hasLeft ^ hasRight);
+    }
+
+    private OutputTarget outputTarget(ServerLevel level) {
+        Direction direction = facing.get();
+        BlockPos frontPosition = host.position().relative(direction);
+        var frontChunk = level.getChunkSource().getChunkNow(
+                frontPosition.getX() >> 4,
+                frontPosition.getZ() >> 4
+        );
+        if (frontChunk == null) {
+            return OutputTarget.BLOCKED;
+        }
+
+        BlockEntity frontEntity = frontChunk.getBlockEntity(frontPosition);
+        if (frontEntity instanceof ConveyorBeltBlockEntity belt) {
+            return !belt.isRemoved() && belt.facing() != direction.getOpposite()
+                    ? OutputTarget.belt(belt)
+                    : OutputTarget.BLOCKED;
+        }
+        if (frontEntity != null && !frontEntity.isRemoved()) {
+            return inventoryTarget(frontEntity, direction.getOpposite());
+        }
+        if (!frontChunk.getBlockState(frontPosition).isAir()) {
+            return OutputTarget.BLOCKED;
+        }
+
+        BlockPos belowFront = frontPosition.below();
+        BlockEntity belowEntity = frontChunk.getBlockEntity(belowFront);
+        if (belowEntity == null || belowEntity.isRemoved() || belowEntity instanceof ConveyorBeltBlockEntity) {
+            return OutputTarget.BLOCKED;
+        }
+        return inventoryTarget(belowEntity, direction.getOpposite());
+    }
+
+    private static OutputTarget inventoryTarget(BlockEntity blockEntity, Direction side) {
+        IItemHandler handler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, side).orElse(null);
+        return handler == null ? OutputTarget.BLOCKED : OutputTarget.inventory(handler);
+    }
+
+    @Nullable
+    private static ConveyorBeltBlockEntity loadedBelt(ServerLevel level, BlockPos position) {
+        var chunk = level.getChunkSource().getChunkNow(position.getX() >> 4, position.getZ() >> 4);
+        if (chunk == null) {
+            return null;
+        }
+        BlockEntity blockEntity = chunk.getBlockEntity(position);
+        return blockEntity instanceof ConveyorBeltBlockEntity belt && !belt.isRemoved() ? belt : null;
+    }
+
+    private boolean canEnter(ConveyorRoute route, int progress) {
+        return occupancy().isFree(route, progress);
+    }
+
+    private ConveyorOccupancy occupancy() {
+        ConveyorOccupancy occupancy = new ConveyorOccupancy();
+        parcels.forEach(parcel -> occupancy.mark(parcel.route, parcel.progress));
+        return occupancy;
     }
 
     private boolean automationEnabled() {
         return host.level() == null || redstoneMode.allows(host.level().hasNeighborSignal(host.position()));
     }
 
-    public enum Lane {
+    private enum Lane {
         LEFT,
         RIGHT;
 
-        public Lane other() {
+        private Lane other() {
             return this == LEFT ? RIGHT : LEFT;
+        }
+
+        private ConveyorRoute route() {
+            return this == LEFT ? ConveyorRoute.LEFT_FORWARD : ConveyorRoute.RIGHT_FORWARD;
         }
 
         private static Lane byOrdinal(int ordinal) {
@@ -264,49 +393,100 @@ public final class ConveyorBeltModule implements MachineModule {
         }
     }
 
-    public record ParcelView(ItemStack stack, Lane lane, int progress) {
+    public record ParcelView(ItemStack stack, ConveyorRoute route, int progress, boolean locked) {
     }
 
     private static final class Parcel {
-        private final ItemStack stack;
-        private final Lane lane;
+        private ItemStack stack;
+        private final ConveyorRoute route;
         private int progress;
         private long lastMovedTick;
+        private boolean locked;
 
-        private Parcel(ItemStack stack, Lane lane, int progress, long lastMovedTick) {
+        private Parcel(
+                ItemStack stack,
+                ConveyorRoute route,
+                int progress,
+                long lastMovedTick,
+                boolean locked
+        ) {
             this.stack = stack;
-            this.lane = lane;
+            this.route = route;
             this.progress = Math.max(0, Math.min(MAX_PROGRESS, progress));
             this.lastMovedTick = lastMovedTick;
+            this.locked = locked;
+        }
+
+        private boolean setLocked(boolean value) {
+            if (locked == value) {
+                return false;
+            }
+            locked = value;
+            return true;
         }
 
         private CompoundTag save() {
             CompoundTag tag = new CompoundTag();
-            tag.put("item", stack.save(new CompoundTag()));
-            tag.putInt("lane", lane.ordinal());
-            tag.putInt("progress", progress);
+            tag.put(ITEM_TAG, stack.save(new CompoundTag()));
+            tag.putInt(ROUTE_TAG, route.ordinal());
+            tag.putInt(PROGRESS_TAG, progress);
+            tag.putBoolean(LOCKED_TAG, locked);
             return tag;
         }
 
         private static Parcel load(CompoundTag tag) {
+            ConveyorRoute fallback = tag.getInt(LEGACY_LANE_TAG) == Lane.RIGHT.ordinal()
+                    ? ConveyorRoute.RIGHT_FORWARD
+                    : ConveyorRoute.LEFT_FORWARD;
+            ConveyorRoute route = tag.contains(ROUTE_TAG, Tag.TAG_INT)
+                    ? ConveyorRoute.byOrdinalOrDefault(tag.getInt(ROUTE_TAG), fallback)
+                    : fallback;
             return new Parcel(
-                    ItemStack.of(tag.getCompound("item")),
-                    Lane.byOrdinal(tag.getInt("lane")),
-                    tag.getInt("progress"),
-                    Long.MIN_VALUE
+                    ItemStack.of(tag.getCompound(ITEM_TAG)),
+                    route,
+                    tag.getInt(PROGRESS_TAG),
+                    Long.MIN_VALUE,
+                    tag.getBoolean(LOCKED_TAG)
             );
         }
+    }
+
+    private enum OutputKind {
+        BLOCKED,
+        BELT,
+        INVENTORY
+    }
+
+    private record OutputTarget(
+            OutputKind kind,
+            @Nullable ConveyorBeltBlockEntity belt,
+            @Nullable IItemHandler handler
+    ) {
+        private static final OutputTarget BLOCKED = new OutputTarget(OutputKind.BLOCKED, null, null);
+
+        private static OutputTarget belt(ConveyorBeltBlockEntity belt) {
+            return new OutputTarget(OutputKind.BELT, belt, null);
+        }
+
+        private static OutputTarget inventory(IItemHandler handler) {
+            return new OutputTarget(OutputKind.INVENTORY, null, handler);
+        }
+    }
+
+    private record TransferOutcome(boolean remove, @Nullable ItemStack remaining) {
+        private static final TransferOutcome REMOVE = new TransferOutcome(true, null);
+        private static final TransferOutcome BLOCKED = new TransferOutcome(false, null);
     }
 
     private final class BeltItemHandler implements IItemHandler {
         @Override
         public int getSlots() {
-            return 1;
+            return parcels.size() + 1;
         }
 
         @Override
         public ItemStack getStackInSlot(int slot) {
-            return ItemStack.EMPTY;
+            return validParcelSlot(slot) ? parcels.get(slot - 1).stack.copy() : ItemStack.EMPTY;
         }
 
         @Override
@@ -329,7 +509,21 @@ public final class ConveyorBeltModule implements MachineModule {
 
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return ItemStack.EMPTY;
+            if (!validParcelSlot(slot) || amount <= 0) {
+                return ItemStack.EMPTY;
+            }
+            Parcel parcel = parcels.get(slot - 1);
+            int extractedCount = Math.min(amount, parcel.stack.getCount());
+            ItemStack extracted = parcel.stack.copyWithCount(extractedCount);
+            if (!simulate) {
+                if (extractedCount >= parcel.stack.getCount()) {
+                    parcels.remove(slot - 1);
+                } else {
+                    parcel.stack.shrink(extractedCount);
+                }
+                host.markChangedAndSync();
+            }
+            return extracted;
         }
 
         @Override
@@ -340,6 +534,10 @@ public final class ConveyorBeltModule implements MachineModule {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             return slot == 0 && !stack.isEmpty();
+        }
+
+        private boolean validParcelSlot(int slot) {
+            return slot > 0 && slot <= parcels.size();
         }
     }
 }

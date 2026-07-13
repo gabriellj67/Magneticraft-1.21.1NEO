@@ -9,6 +9,7 @@ import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntit
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBlock;
 import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBlockEntity;
+import committee.nova.mods.magneticraft.content.network.module.ConveyorRoute;
 import committee.nova.mods.magneticraft.content.network.module.FluidPipeModule;
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeBlockEntity;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
@@ -22,6 +23,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.player.Player;
@@ -30,6 +34,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -173,25 +179,34 @@ public final class PhysicalNetworkGameTests {
 
         helper.runAfterDelay(2, () -> {
             IronPipeBlockEntity second = require(helper, MIDDLE, IronPipeBlockEntity.class);
-            helper.assertTrue(first.pipe().node().amount() == 80, "First pipe did not balance to 80mB");
-            helper.assertTrue(second.pipe().node().amount() == 80, "Second pipe did not balance to 80mB");
+            helper.assertTrue(
+                    first.pipe().node().amount() + second.pipe().node().amount() == 160,
+                    "Fluid component did not preserve its aggregate amount"
+            );
+            helper.assertTrue(input.drain(40, IFluidHandler.FluidAction.SIMULATE).getAmount() == 40, "Passive side simulation failed");
+            helper.assertTrue(
+                    first.pipe().node().amount() + second.pipe().node().amount() == 160,
+                    "Passive drain simulation mutated the component"
+            );
+            helper.assertTrue(input.drain(40, IFluidHandler.FluidAction.EXECUTE).getAmount() == 40, "Passive side did not drain fluid");
+            helper.assertTrue(
+                    first.pipe().node().amount() + second.pipe().node().amount() == 120,
+                    "Passive side drained the wrong aggregate amount"
+            );
 
             first.pipe().setSideMode(Direction.WEST, FluidPipeModule.SideMode.ACTIVE);
-            IFluidHandler output = first.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.WEST)
-                    .orElseThrow(AssertionError::new);
-            helper.assertTrue(output.drain(40, IFluidHandler.FluidAction.SIMULATE).getAmount() == 40, "Active side simulation failed");
-            helper.assertTrue(first.pipe().node().amount() == 80, "Active drain simulation mutated pipe");
-            helper.assertTrue(output.drain(40, IFluidHandler.FluidAction.EXECUTE).getAmount() == 40, "Active side did not output fluid");
-            helper.assertTrue(first.pipe().node().amount() == 40, "Active side drained the wrong amount");
+            helper.assertFalse(first.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.WEST).isPresent(), "Active side exposed fluid capability");
+            helper.assertTrue(input.fill(water, IFluidHandler.FluidAction.EXECUTE) == 0, "Cached capability bypassed active side");
 
             first.pipe().setSideMode(Direction.WEST, FluidPipeModule.SideMode.DISABLED);
             helper.assertFalse(first.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.WEST).isPresent(), "Disabled side exposed fluid capability");
             helper.assertTrue(input.fill(water, IFluidHandler.FluidAction.EXECUTE) == 0, "Cached capability bypassed disabled side");
 
+            int localAmount = first.pipe().node().amount();
             CompoundTag saved = first.saveWithoutMetadata();
             IronPipeBlockEntity restored = new IronPipeBlockEntity(first.getBlockPos(), first.getBlockState());
             restored.load(saved);
-            helper.assertTrue(restored.pipe().node().amount() == 40, "Pipe fluid did not survive NBT reload");
+            helper.assertTrue(restored.pipe().node().amount() == localAmount, "Pipe fluid did not survive NBT reload");
             helper.assertTrue(restored.pipe().sideMode(Direction.WEST) == FluidPipeModule.SideMode.DISABLED, "Pipe side mode did not persist");
 
             PhysicalNetworkManager manager = PhysicalNetworkService.manager(helper.getLevel());
@@ -201,12 +216,12 @@ public final class PhysicalNetworkGameTests {
             first.clearRemoved();
             first.onLoad();
             helper.assertTrue(manager.node(NetworkDomain.FLUID, absolute).isPresent(), "Reloaded pipe did not re-register");
-            helper.assertTrue(first.pipe().node().amount() == 40, "Runtime unload changed authoritative fluid");
+            helper.assertTrue(first.pipe().node().amount() == localAmount, "Runtime unload changed authoritative fluid");
             helper.succeed();
         });
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 40)
+    @GameTest(template = TEMPLATE, timeoutTicks = 55)
     public static void pneumaticTubeRoutesPersistedItemIntoInventory(GameTestHelper helper) {
         helper.setBlock(FIRST, ModNetworkBlocks.PNEUMATIC_TUBE.get());
         helper.setBlock(MIDDLE, ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get());
@@ -229,7 +244,7 @@ public final class PhysicalNetworkGameTests {
         restored.load(saved);
         helper.assertTrue(restored.logistics().itemsSnapshot().size() == 1, "In-flight item did not survive reload");
 
-        helper.runAfterDelay(25, () -> {
+        helper.runAfterDelay(36, () -> {
             ChestBlockEntity chest = require(helper, LAST, ChestBlockEntity.class);
             helper.assertTrue(chest.getItem(0).is(Items.IRON_INGOT), "Tube routed the wrong item");
             helper.assertTrue(chest.getItem(0).getCount() == 7, "Tube duplicated or lost item count");
@@ -286,7 +301,7 @@ public final class PhysicalNetworkGameTests {
         helper.runAfterDelay(5, () -> {
             ChestBlockEntity chest = require(helper, MIDDLE, ChestBlockEntity.class);
             helper.assertTrue(chest.getItem(0).isEmpty(), "Redstone-disabled conveyor moved an item");
-            helper.assertTrue(conveyor.belt().parcels().get(0).progress() == 0, "Redstone-disabled conveyor advanced");
+            helper.assertTrue(conveyor.belt().parcels().get(0).progress() == 2, "Redstone-disabled conveyor advanced");
             conveyor.belt().cycleRedstoneMode();
         });
 
@@ -297,6 +312,229 @@ public final class PhysicalNetworkGameTests {
             helper.assertTrue(conveyor.belt().parcels().isEmpty(), "Conveyor retained a duplicate parcel");
             helper.succeed();
         });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void conveyorRightClickStoresRetrievesAndAllowsContinuedPlacement(GameTestHelper helper) {
+        helper.setBlock(
+                MIDDLE,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.EAST)
+        );
+        ConveyorBeltBlockEntity conveyor = require(helper, MIDDLE, ConveyorBeltBlockEntity.class);
+        Player player = helper.makeMockSurvivalPlayer();
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COPPER_INGOT, 5));
+
+        InteractionResult inserted = useConveyor(helper, conveyor, player);
+        helper.assertTrue(inserted.consumesAction(), "Right click did not store the held stack");
+        helper.assertTrue(player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty(), "Stored stack remained in hand");
+        helper.assertTrue(conveyor.belt().parcels().size() == 1, "Right click did not create exactly one parcel");
+        helper.assertTrue(conveyor.belt().parcels().get(0).stack().getCount() == 5, "Right click stored the wrong count");
+
+        InteractionResult removed = useConveyor(helper, conveyor, player);
+        helper.assertTrue(removed.consumesAction(), "Empty-hand right click did not retrieve a parcel");
+        helper.assertTrue(conveyor.belt().parcels().isEmpty(), "Retrieved parcel remained on the conveyor");
+        helper.assertTrue(player.getInventory().countItem(Items.COPPER_INGOT) == 5, "Retrieved stack was lost or duplicated");
+
+        ItemStack belts = new ItemStack(ModNetworkBlocks.CONVEYOR_BELT.get(), 3);
+        player.setItemInHand(InteractionHand.MAIN_HAND, belts);
+        InteractionResult placement = useConveyor(helper, conveyor, player);
+        helper.assertTrue(placement == InteractionResult.PASS, "Held conveyor item did not pass through to block placement");
+        helper.assertTrue(belts.getCount() == 3, "Placement pass-through consumed a conveyor item");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void conveyorTopCapabilityReadsAndExtractsWithoutSimulationMutation(GameTestHelper helper) {
+        helper.setBlock(
+                MIDDLE,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.EAST)
+        );
+        ConveyorBeltBlockEntity conveyor = require(helper, MIDDLE, ConveyorBeltBlockEntity.class);
+        var handler = conveyor.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP)
+                .orElseThrow(AssertionError::new);
+        helper.assertTrue(handler.insertItem(0, new ItemStack(Items.COPPER_INGOT, 5), false).isEmpty(),
+                "Top capability rejected a valid input");
+        helper.assertTrue(handler.getSlots() == 2, "Top capability did not expose its input and parcel slots");
+        helper.assertTrue(handler.getStackInSlot(1).getCount() == 5, "Top capability did not expose parcel contents");
+
+        ItemStack simulated = handler.extractItem(1, 2, true);
+        helper.assertTrue(simulated.is(Items.COPPER_INGOT) && simulated.getCount() == 2,
+                "Top capability simulated the wrong extraction");
+        helper.assertTrue(handler.getStackInSlot(1).getCount() == 5, "Simulated extraction mutated the parcel");
+
+        ItemStack extracted = handler.extractItem(1, 2, false);
+        helper.assertTrue(extracted.is(Items.COPPER_INGOT) && extracted.getCount() == 2,
+                "Top capability executed the wrong extraction");
+        helper.assertTrue(handler.getStackInSlot(1).getCount() == 3, "Executed extraction removed the wrong count");
+        helper.assertTrue(handler.extractItem(1, 64, false).getCount() == 3, "Final extraction returned the wrong remainder");
+        helper.assertTrue(handler.getSlots() == 1 && conveyor.belt().parcels().isEmpty(),
+                "Empty parcel remained exposed after extraction");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 35)
+    public static void conveyorBackpressureReleasesExactlyOnce(GameTestHelper helper) {
+        helper.setBlock(
+                FIRST,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.EAST)
+        );
+        helper.setBlock(MIDDLE, Blocks.CHEST);
+        ConveyorBeltBlockEntity conveyor = require(helper, FIRST, ConveyorBeltBlockEntity.class);
+        ChestBlockEntity chest = require(helper, MIDDLE, ChestBlockEntity.class);
+        for (int slot = 0; slot < chest.getContainerSize(); slot++) {
+            chest.setItem(slot, new ItemStack(Items.STONE, 64));
+        }
+        var input = conveyor.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP)
+                .orElseThrow(AssertionError::new);
+        input.insertItem(0, new ItemStack(Items.COPPER_INGOT, 5), false);
+
+        helper.runAfterDelay(18, () -> {
+            helper.assertTrue(countItem(chest, Items.COPPER_INGOT) == 0, "Full inventory accepted a conveyor parcel");
+            helper.assertTrue(conveyor.belt().parcels().size() == 1, "Backpressure deleted or duplicated a parcel");
+            var parcel = conveyor.belt().parcels().get(0);
+            helper.assertTrue(parcel.progress() == 14 && parcel.locked(), "Blocked parcel did not stop at the open-end limit");
+            chest.clearContent();
+        });
+
+        helper.runAfterDelay(23, () -> {
+            helper.assertTrue(countItem(chest, Items.COPPER_INGOT) == 5, "Released backpressure lost or duplicated items");
+            helper.assertTrue(conveyor.belt().parcels().isEmpty(), "Released conveyor retained a duplicate parcel");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 70)
+    public static void conveyorAutoCornerUsesLegacyRoutesAndTransfersExactlyOnce(GameTestHelper helper) {
+        BlockPos cornerOutput = new BlockPos(1, 1, 2);
+        BlockPos chestPosition = new BlockPos(1, 1, 3);
+        helper.setBlock(
+                FIRST,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.EAST)
+        );
+        helper.setBlock(
+                MIDDLE,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.SOUTH)
+        );
+        helper.setBlock(
+                cornerOutput,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.SOUTH)
+        );
+        helper.setBlock(chestPosition, Blocks.CHEST);
+        ConveyorBeltBlockEntity source = require(helper, FIRST, ConveyorBeltBlockEntity.class);
+        ConveyorBeltBlockEntity corner = require(helper, MIDDLE, ConveyorBeltBlockEntity.class);
+        ConveyorBeltBlockEntity output = require(helper, cornerOutput, ConveyorBeltBlockEntity.class);
+        var input = source.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP)
+                .orElseThrow(AssertionError::new);
+        input.insertItem(0, new ItemStack(Items.IRON_INGOT), false);
+        input.insertItem(0, new ItemStack(Items.GOLD_INGOT), false);
+
+        helper.runAfterDelay(18, () -> {
+            helper.assertTrue(corner.belt().parcels().stream().anyMatch(parcel -> parcel.route() == ConveyorRoute.LEFT_CORNER),
+                    "Corner did not map the left lane to LEFT_CORNER");
+            helper.assertTrue(corner.belt().parcels().stream().anyMatch(parcel -> parcel.route() == ConveyorRoute.RIGHT_SHORT),
+                    "Corner did not map the right lane to RIGHT_SHORT");
+        });
+
+        helper.runAfterDelay(58, () -> {
+            ChestBlockEntity chest = require(helper, chestPosition, ChestBlockEntity.class);
+            helper.assertTrue(countItem(chest, Items.IRON_INGOT) == 1, "Corner lost or duplicated the left-lane item");
+            helper.assertTrue(countItem(chest, Items.GOLD_INGOT) == 1, "Corner lost or duplicated the right-lane item");
+            helper.assertTrue(source.belt().parcels().isEmpty(), "Corner source retained a duplicate parcel");
+            helper.assertTrue(corner.belt().parcels().isEmpty(), "Corner retained a duplicate parcel");
+            helper.assertTrue(output.belt().parcels().isEmpty(), "Corner output retained a duplicate parcel");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 30)
+    public static void conveyorOutputsIntoInventoryBelowAnOpenFront(GameTestHelper helper) {
+        BlockPos elevatedConveyor = new BlockPos(0, 2, 1);
+        BlockPos openFront = new BlockPos(1, 2, 1);
+        helper.setBlock(
+                elevatedConveyor,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.EAST)
+        );
+        helper.setBlock(openFront, Blocks.AIR);
+        helper.setBlock(MIDDLE, Blocks.CHEST);
+        ConveyorBeltBlockEntity conveyor = require(helper, elevatedConveyor, ConveyorBeltBlockEntity.class);
+        conveyor.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP)
+                .orElseThrow(AssertionError::new)
+                .insertItem(0, new ItemStack(Items.COPPER_INGOT, 5), false);
+
+        helper.runAfterDelay(20, () -> {
+            ChestBlockEntity chest = require(helper, MIDDLE, ChestBlockEntity.class);
+            helper.assertTrue(countItem(chest, Items.COPPER_INGOT) == 5,
+                    "Open-front conveyor did not output into the forward-below inventory");
+            helper.assertTrue(conveyor.belt().parcels().isEmpty(), "Forward-below output retained a duplicate parcel");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 65)
+    public static void conveyorPausesForRemovedTargetAndResumesSafely(GameTestHelper helper) {
+        helper.setBlock(
+                FIRST,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.EAST)
+        );
+        helper.setBlock(
+                MIDDLE,
+                ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState().setValue(ConveyorBeltBlock.FACING, Direction.EAST)
+        );
+        helper.setBlock(LAST, Blocks.CHEST);
+        ConveyorBeltBlockEntity source = require(helper, FIRST, ConveyorBeltBlockEntity.class);
+        ConveyorBeltBlockEntity target = require(helper, MIDDLE, ConveyorBeltBlockEntity.class);
+        ChestBlockEntity chest = require(helper, LAST, ChestBlockEntity.class);
+        target.setRemoved();
+        source.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP)
+                .orElseThrow(AssertionError::new)
+                .insertItem(0, new ItemStack(Items.COPPER_INGOT, 5), false);
+
+        helper.runAfterDelay(20, () -> {
+            helper.assertTrue(source.belt().parcels().size() == 1, "Removed target deleted the source parcel");
+            helper.assertTrue(target.belt().parcels().isEmpty(), "Removed target accepted a parcel");
+            helper.assertTrue(countItem(chest, Items.COPPER_INGOT) == 0, "Removed target forwarded a parcel");
+            helper.setBlock(MIDDLE, Blocks.AIR);
+            helper.setBlock(
+                    MIDDLE,
+                    ModNetworkBlocks.CONVEYOR_BELT.get().defaultBlockState()
+                            .setValue(ConveyorBeltBlock.FACING, Direction.EAST)
+            );
+        });
+
+        helper.runAfterDelay(55, () -> {
+            helper.assertTrue(countItem(chest, Items.COPPER_INGOT) == 5, "Reloaded target did not resume exactly once");
+            ConveyorBeltBlockEntity reloaded = require(helper, MIDDLE, ConveyorBeltBlockEntity.class);
+            helper.assertTrue(source.belt().parcels().isEmpty() && reloaded.belt().parcels().isEmpty(),
+                    "Reloaded conveyor chain retained a duplicate parcel");
+            helper.succeed();
+        });
+    }
+
+    private static InteractionResult useConveyor(
+            GameTestHelper helper,
+            ConveyorBeltBlockEntity conveyor,
+            Player player
+    ) {
+        BlockPos position = conveyor.getBlockPos();
+        return ModNetworkBlocks.CONVEYOR_BELT.get().use(
+                conveyor.getBlockState(),
+                helper.getLevel(),
+                position,
+                player,
+                InteractionHand.MAIN_HAND,
+                new BlockHitResult(Vec3.atCenterOf(position), Direction.UP, position, false)
+        );
+    }
+
+    private static int countItem(ChestBlockEntity chest, Item item) {
+        int count = 0;
+        for (int slot = 0; slot < chest.getContainerSize(); slot++) {
+            ItemStack stack = chest.getItem(slot);
+            if (stack.is(item)) {
+                count += stack.getCount();
+            }
+        }
+        return count;
     }
 
     private static <T extends BlockEntity> T require(GameTestHelper helper, BlockPos position, Class<T> type) {

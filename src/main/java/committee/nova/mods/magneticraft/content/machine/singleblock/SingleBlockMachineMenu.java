@@ -104,7 +104,7 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
                 addGrid(inventory, 0, 3, 3, 62, 84, true);
             }
             case INSERTER -> {
-                addMachineSlot(inventory, 0, 26, 35, true);
+                addMachineSlot(inventory, 0, 26, 35, false);
                 addMachineSlot(inventory, 1, 26, 57, true);
                 addMachineSlot(inventory, 2, 44, 57, true);
                 addGhostGrid(filters, 3, 3, 92, 18);

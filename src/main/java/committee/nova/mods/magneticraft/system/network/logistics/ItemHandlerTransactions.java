@@ -21,4 +21,13 @@ public final class ItemHandlerTransactions {
     public static boolean acceptsAll(IItemHandler handler, ItemStack stack) {
         return insert(handler, stack, true).isEmpty();
     }
+
+    /**
+     * Commits only after a full simulated acceptance. A handler that changes
+     * between simulation and execution may still return a partial remainder;
+     * callers must retain that remainder as the authoritative source payload.
+     */
+    public static ItemStack insertAfterFullSimulation(IItemHandler handler, ItemStack stack) {
+        return acceptsAll(handler, stack) ? insert(handler, stack, false) : stack.copy();
+    }
 }

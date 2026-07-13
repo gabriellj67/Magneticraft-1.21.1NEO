@@ -1,7 +1,7 @@
 package committee.nova.mods.magneticraft.content.network.module;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
-import committee.nova.mods.magneticraft.system.network.fluid.FluidLink;
+import committee.nova.mods.magneticraft.system.network.fluid.FluidComponentStorage;
 import committee.nova.mods.magneticraft.system.network.fluid.FluidNode;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkManager;
@@ -21,12 +21,15 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * A 160mB pipe cell with explicit input/output/disabled side adapters.
+ * A durable 160mB pipe cell whose passive adapter views the loaded component.
  */
 public final class FluidPipeModule extends AbstractPhysicalNetworkModule {
     private static final String FLUID_KEY_TAG = "fluid_key";
@@ -109,14 +112,8 @@ public final class FluidPipeModule extends AbstractPhysicalNetworkModule {
 
     @Override
     public void exchangeWith(PhysicalNetworkNode other) {
-        if (!(other instanceof FluidPipeModule pipe)) {
-            return;
-        }
-        FluidLink.Transfer transfer = FluidLink.transfer(node, pipe.node, Math.min(maxRate, pipe.maxRate));
-        if (transfer.moved()) {
-            markStateChanged();
-            pipe.markStateChanged();
-        }
+        // Legacy iron pipes expose their member tanks as one concatenated view;
+        // fluid is not redistributed merely because a network edge ticks.
     }
 
     @Override
@@ -164,7 +161,7 @@ public final class FluidPipeModule extends AbstractPhysicalNetworkModule {
         if (capability == ForgeCapabilities.FLUID_HANDLER
                 && side != null
                 && isSideEnabled(side)
-                && sideMode(side) != SideMode.DISABLED) {
+                && sideMode(side) == SideMode.PASSIVE) {
             LazyOptional<IFluidHandler> result = capabilities.get(side);
             return result == null ? LazyOptional.empty() : result.cast();
         }
@@ -173,51 +170,51 @@ public final class FluidPipeModule extends AbstractPhysicalNetworkModule {
 
     private boolean pullFrom(ServerLevel level, Direction direction) {
         IFluidHandler handler = adjacentHandler(level, direction);
-        if (handler == null || node.amount() >= node.capacity()) {
+        ComponentView component = componentView();
+        if (handler == null || component.isEmpty()) {
             return false;
         }
         FluidStack offered = handler.drain(maxRate, IFluidHandler.FluidAction.SIMULATE);
         if (offered.isEmpty()) {
             return false;
         }
-        int accepted = node.fill(fluidKey(offered), offered.getAmount(), true);
+        int accepted = component.fill(fluidKey(offered), offered.getAmount(), true);
         if (accepted <= 0) {
             return false;
         }
         FluidStack requested = offered.copy();
         requested.setAmount(accepted);
         FluidStack drained = handler.drain(requested, IFluidHandler.FluidAction.EXECUTE);
-        int filled = node.fill(fluidKey(drained), drained.getAmount(), false);
+        int filled = component.fill(fluidKey(drained), drained.getAmount(), false);
         if (filled < drained.getAmount()) {
             FluidStack restore = drained.copy();
             restore.setAmount(drained.getAmount() - filled);
             handler.fill(restore, IFluidHandler.FluidAction.EXECUTE);
-        }
-        if (filled > 0) {
-            markStateChanged();
         }
         return filled > 0;
     }
 
     private boolean pushTo(ServerLevel level, Direction direction) {
         IFluidHandler handler = adjacentHandler(level, direction);
-        FluidStack available = fluidStack(Math.min(maxRate, node.amount()));
-        if (handler == null || available.isEmpty()) {
+        ComponentView component = componentView();
+        FluidComponentStorage.Drain available = component.drainAny(maxRate, true);
+        FluidStack offered = fluidStack(available.fluidKey(), available.amount());
+        if (handler == null || offered.isEmpty()) {
             return false;
         }
-        int accepted = handler.fill(available, IFluidHandler.FluidAction.SIMULATE);
+        int accepted = Math.min(
+                available.amount(),
+                handler.fill(offered, IFluidHandler.FluidAction.SIMULATE)
+        );
         if (accepted <= 0) {
             return false;
         }
-        int drained = node.drain(node.fluidKey(), accepted, false);
-        FluidStack executing = available.copy();
+        int drained = component.drain(available.fluidKey(), accepted, false);
+        FluidStack executing = offered.copy();
         executing.setAmount(drained);
         int filled = handler.fill(executing, IFluidHandler.FluidAction.EXECUTE);
         if (filled < drained) {
-            node.fill(fluidKey(executing), drained - filled, false);
-        }
-        if (filled > 0) {
-            markStateChanged();
+            component.fill(available.fluidKey(), drained - filled, false);
         }
         return filled > 0;
     }
@@ -225,18 +222,22 @@ public final class FluidPipeModule extends AbstractPhysicalNetworkModule {
     @Nullable
     private IFluidHandler adjacentHandler(ServerLevel level, Direction direction) {
         BlockPos target = position().relative(direction);
-        BlockEntity blockEntity = level.getBlockEntity(target);
+        var targetChunk = level.getChunkSource().getChunkNow(target.getX() >> 4, target.getZ() >> 4);
+        if (targetChunk == null) {
+            return null;
+        }
+        BlockEntity blockEntity = targetChunk.getBlockEntity(target);
         if (blockEntity == null) {
             return null;
         }
         return blockEntity.getCapability(ForgeCapabilities.FLUID_HANDLER, direction.getOpposite()).orElse(null);
     }
 
-    private FluidStack fluidStack(int amount) {
-        if (node.isEmpty() || amount <= 0) {
+    private static FluidStack fluidStack(String fluidKey, int amount) {
+        if (fluidKey.isBlank() || amount <= 0) {
             return FluidStack.EMPTY;
         }
-        ResourceLocation id = ResourceLocation.tryParse(node.fluidKey());
+        ResourceLocation id = ResourceLocation.tryParse(fluidKey);
         if (id == null) {
             return FluidStack.EMPTY;
         }
@@ -250,6 +251,22 @@ public final class FluidPipeModule extends AbstractPhysicalNetworkModule {
         }
         ResourceLocation id = ForgeRegistries.FLUIDS.getKey(stack.getFluid());
         return id == null ? "" : id.toString();
+    }
+
+    private ComponentView componentView() {
+        PhysicalNetworkManager current = manager();
+        if (current == null
+                || current.node(NetworkDomain.FLUID, position()).orElse(null) != this) {
+            return new ComponentView(List.of());
+        }
+        List<Long> positions = new ArrayList<>(current.component(NetworkDomain.FLUID, position()));
+        positions.sort(Comparator.naturalOrder());
+        List<FluidPipeModule> members = positions.stream()
+                .map(key -> current.node(NetworkDomain.FLUID, BlockPos.of(key)).orElse(null))
+                .filter(FluidPipeModule.class::isInstance)
+                .map(FluidPipeModule.class::cast)
+                .toList();
+        return new ComponentView(members);
     }
 
     public enum SideMode {
@@ -275,66 +292,127 @@ public final class FluidPipeModule extends AbstractPhysicalNetworkModule {
 
         @Override
         public int getTanks() {
-            return 1;
+            return available() ? componentView().storage.tankCount() : 0;
         }
 
         @Override
         public FluidStack getFluidInTank(int tank) {
-            return tank == 0 ? fluidStack(node.amount()) : FluidStack.EMPTY;
+            if (!available()) {
+                return FluidStack.EMPTY;
+            }
+            FluidComponentStorage storage = componentView().storage;
+            return tank >= 0 && tank < storage.tankCount()
+                    ? fluidStack(storage.fluidKey(tank), storage.amount(tank))
+                    : FluidStack.EMPTY;
         }
 
         @Override
         public int getTankCapacity(int tank) {
-            return tank == 0 ? node.capacity() : 0;
+            if (!available()) {
+                return 0;
+            }
+            FluidComponentStorage storage = componentView().storage;
+            return tank >= 0 && tank < storage.tankCount() ? storage.capacity(tank) : 0;
         }
 
         @Override
         public boolean isFluidValid(int tank, FluidStack stack) {
-            return tank == 0 && sideMode(side) == SideMode.PASSIVE && isSideEnabled(side);
+            if (!available() || stack.isEmpty()) {
+                return false;
+            }
+            FluidComponentStorage storage = componentView().storage;
+            return tank >= 0
+                    && tank < storage.tankCount()
+                    && storage.isFluidValid(tank, fluidKey(stack));
         }
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
-            if (!automationEnabled()
-                    || sideMode(side) != SideMode.PASSIVE
-                    || resource.isEmpty()
-                    || !isSideEnabled(side)) {
+            if (!available() || resource.isEmpty()) {
                 return 0;
             }
-            int accepted = node.fill(fluidKey(resource), resource.getAmount(), action.simulate());
-            if (accepted > 0 && action.execute()) {
-                markStateChanged();
-            }
-            return accepted;
+            return componentView().fill(fluidKey(resource), resource.getAmount(), action.simulate());
         }
 
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
-            if (!automationEnabled()
-                    || sideMode(side) != SideMode.ACTIVE
-                    || resource.isEmpty()
-                    || !isSideEnabled(side)
-                    || !fluidKey(resource).equals(node.fluidKey())) {
+            if (!available() || resource.isEmpty()) {
                 return FluidStack.EMPTY;
             }
-            return drain(resource.getAmount(), action);
+            String key = fluidKey(resource);
+            int drained = componentView().drain(key, resource.getAmount(), action.simulate());
+            return fluidStack(key, drained);
         }
 
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
-            if (!automationEnabled()
-                    || sideMode(side) != SideMode.ACTIVE
-                    || !isSideEnabled(side)
-                    || node.isEmpty()) {
+            if (!available()) {
                 return FluidStack.EMPTY;
             }
-            FluidStack result = fluidStack(Math.min(maxDrain, node.amount()));
-            int drained = node.drain(node.fluidKey(), result.getAmount(), action.simulate());
-            result.setAmount(drained);
-            if (drained > 0 && action.execute()) {
-                markStateChanged();
+            FluidComponentStorage.Drain drained = componentView().drainAny(maxDrain, action.simulate());
+            return fluidStack(drained.fluidKey(), drained.amount());
+        }
+
+        private boolean available() {
+            return sideMode(side) == SideMode.PASSIVE && isSideEnabled(side);
+        }
+    }
+
+    private final class ComponentView {
+        private final List<FluidPipeModule> members;
+        private final FluidComponentStorage storage;
+
+        private ComponentView(List<FluidPipeModule> members) {
+            this.members = List.copyOf(members);
+            storage = new FluidComponentStorage(this.members.stream().map(FluidPipeModule::node).toList());
+        }
+
+        private boolean isEmpty() {
+            return members.isEmpty();
+        }
+
+        private int fill(String key, int amount, boolean simulate) {
+            int[] before = snapshot();
+            int filled = storage.fill(key, amount, simulate);
+            if (!simulate && filled > 0) {
+                markChanges(before);
             }
-            return result;
+            return filled;
+        }
+
+        private int drain(String key, int amount, boolean simulate) {
+            int[] before = snapshot();
+            int drained = storage.drain(key, amount, simulate);
+            if (!simulate && drained > 0) {
+                markChanges(before);
+            }
+            return drained;
+        }
+
+        private FluidComponentStorage.Drain drainAny(int amount, boolean simulate) {
+            int[] before = snapshot();
+            FluidComponentStorage.Drain drained = storage.drainAny(amount, simulate);
+            if (!simulate && drained.amount() > 0) {
+                markChanges(before);
+            }
+            return drained;
+        }
+
+        private int[] snapshot() {
+            int[] amounts = new int[members.size()];
+            for (int index = 0; index < members.size(); index++) {
+                amounts[index] = members.get(index).node.amount();
+            }
+            return amounts;
+        }
+
+        private void markChanges(int[] before) {
+            for (int index = 0; index < members.size(); index++) {
+                FluidPipeModule member = members.get(index);
+                if (member.node.amount() != before[index]) {
+                    member.markStateChanged();
+                }
+            }
         }
     }
 }

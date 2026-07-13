@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_glass": {
+    "has_copper_light_plate": {
       "conditions": {
         "items": [
           {
-            "tag": "forge:glass"
+            "tag": "magneticraft:light_plates/copper"
           }
         ]
       },
@@ -20,7 +20,7 @@
   },
   "requirements": [
     [
-      "has_glass",
+      "has_copper_light_plate",
       "has_the_recipe"
     ]
   ],

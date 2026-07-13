@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.network.logistics;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModTags;
 import net.minecraft.core.BlockPos;
@@ -56,7 +57,13 @@ public final class ConveyorBeltBlock extends NetworkComponentBlock {
             return InteractionResult.PASS;
         }
         ItemStack held = player.getItemInHand(hand);
+        if (held.is(ModNetworkBlocks.CONVEYOR_BELT.get().asItem())) {
+            return InteractionResult.PASS;
+        }
         if (held.isEmpty()) {
+            if (conveyor.belt().parcels().isEmpty()) {
+                return InteractionResult.PASS;
+            }
             if (!level.isClientSide) {
                 ItemStack removed = conveyor.belt().removeLast();
                 if (!removed.isEmpty() && !player.getInventory().add(removed)) {
@@ -67,8 +74,9 @@ public final class ConveyorBeltBlock extends NetworkComponentBlock {
         }
         boolean accepts = conveyor.belt().insert(held, true);
         if (accepts && !level.isClientSide) {
-            conveyor.belt().insert(held, false);
-            player.setItemInHand(hand, ItemStack.EMPTY);
+            if (conveyor.belt().insert(held, false)) {
+                player.setItemInHand(hand, ItemStack.EMPTY);
+            }
         }
         return accepts ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
     }

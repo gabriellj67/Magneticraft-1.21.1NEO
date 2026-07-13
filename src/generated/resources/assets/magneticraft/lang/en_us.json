@@ -359,7 +359,7 @@
   "message.magneticraft.fluid_side_mode": "%s port: %s",
   "message.magneticraft.fluid_side_mode.active": "Active output",
   "message.magneticraft.fluid_side_mode.disabled": "Disabled",
-  "message.magneticraft.fluid_side_mode.passive": "Passive input",
+  "message.magneticraft.fluid_side_mode.passive": "Passive I/O",
   "message.magneticraft.hydraulic_press_mode": "Hydraulic press mode: %s",
   "message.magneticraft.hydraulic_press_mode.heavy": "heavy",
   "message.magneticraft.hydraulic_press_mode.light": "light",
@@ -375,6 +375,9 @@
   "message.magneticraft.multiblock_not_mirrored": "Structure mirroring disabled",
   "message.magneticraft.multiblock_status": "%s: %s",
   "message.magneticraft.multiblock_unloaded": "Structure position %s is in an unloaded chunk",
+  "message.magneticraft.pneumatic_endpoint.blocked": "Pneumatic endpoint output blocked; payload retained",
+  "message.magneticraft.pneumatic_endpoint.filter_rejected": "Item does not match the pneumatic filter samples",
+  "message.magneticraft.pneumatic_endpoint.unloaded": "Target chunk unloaded; pneumatic transfer paused",
   "message.magneticraft.redstone_mode": "Redstone control: %s",
   "message.magneticraft.redstone_mode.ignored": "Ignored",
   "message.magneticraft.redstone_mode.requires_no_signal": "Requires no signal",
@@ -398,5 +401,6 @@
   "text.magneticraft.wire_connect.too_far": "The endpoints are too far apart",
   "text.magneticraft.wire_connect.updated_position": "Selected endpoint: %s, %s, %s",
   "tooltip.magneticraft.energy": "Energy: %s / %s FE",
-  "tooltip.magneticraft.floppy_disk.instructions": "%s instructions stored"
+  "tooltip.magneticraft.floppy_disk.instructions": "%s instructions stored",
+  "tooltip.magneticraft.small_tank.line_0": "Holding %s mB of %s"
 }

@@ -2,17 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
+    "A": {
+      "tag": "magneticraft:light_plates/copper"
+    },
     "G": {
       "tag": "forge:glass"
-    },
-    "I": {
-      "tag": "forge:nuggets/iron"
     }
   },
   "pattern": [
-    "IGI",
-    "G G",
-    "IGI"
+    "AGA"
   ],
   "result": {
     "count": 8,

@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.network.module;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
+import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeBlockEntity;
 import committee.nova.mods.magneticraft.system.network.logistics.ItemHandlerTransactions;
 import committee.nova.mods.magneticraft.system.network.logistics.LogisticsNetworkNode;
 import committee.nova.mods.magneticraft.system.network.logistics.LogisticsRouteDecision;
@@ -34,9 +35,10 @@ import java.util.Optional;
 public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule implements LogisticsNetworkNode {
     public static final int MAX_PROGRESS = 128;
     public static final int CENTER_PROGRESS = MAX_PROGRESS / 2;
-    public static final int PROGRESS_PER_TICK = 16;
+    /** Eight ticks to the center and eight more to the exit. */
+    public static final int PROGRESS_PER_TICK = 8;
     public static final int MAX_PAYLOADS = 64;
-    public static final int MAX_ROUTE_VISITS = 4_096;
+    public static final int MAX_ROUTE_VISITS = PhysicalNetworkManager.MAX_LOGISTICS_ROUTE_VISITS;
 
     private static final String ITEMS_TAG = "items";
     private static final String ROUTE_CURSOR_TAG = "route_cursor";
@@ -136,20 +138,14 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
             if (item.progress < CENTER_PROGRESS) {
                 item.progress = Math.min(CENTER_PROGRESS, item.progress + PROGRESS_PER_TICK);
                 changed = true;
+                if (item.progress == CENTER_PROGRESS) {
+                    structuralChange |= chooseRoute(manager, item);
+                }
+                // Reaching the center and entering the outgoing half are distinct tick phases.
+                continue;
             }
             if (item.progress == CENTER_PROGRESS && item.outgoing == null) {
-                Optional<LogisticsRouteDecision> route = manager.findLogisticsRoute(
-                        position(),
-                        item.incoming,
-                        item.stack,
-                        routeCursor,
-                        MAX_ROUTE_VISITS
-                );
-                if (route.isPresent()) {
-                    item.outgoing = route.get().direction();
-                    routeCursor++;
-                    structuralChange = true;
-                }
+                structuralChange |= chooseRoute(manager, item);
             }
             if (item.outgoing != null && item.progress < MAX_PROGRESS) {
                 item.progress = Math.min(MAX_PROGRESS, item.progress + PROGRESS_PER_TICK);
@@ -157,12 +153,16 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
             }
             if (item.progress >= MAX_PROGRESS && item.outgoing != null) {
                 TransferOutcome outcome = transferOut(manager, item, gameTime);
-                if (outcome.remove()) {
+                if (outcome.status() == TransferStatus.REMOVED) {
                     removed.add(item);
                     structuralChange = true;
-                } else if (outcome.remaining() != null) {
+                } else if (outcome.status() == TransferStatus.PARTIAL) {
                     item.stack = outcome.remaining();
                     item.progress = MAX_PROGRESS;
+                    structuralChange = true;
+                } else if (outcome.status() == TransferStatus.INVALID_ROUTE) {
+                    item.outgoing = null;
+                    item.progress = CENTER_PROGRESS;
                     structuralChange = true;
                 }
             }
@@ -176,6 +176,22 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
         } else if (changed) {
             markStateChanged();
         }
+    }
+
+    private boolean chooseRoute(PhysicalNetworkManager manager, TravelingItem item) {
+        Optional<LogisticsRouteDecision> route = manager.findLogisticsRoute(
+                position(),
+                item.incoming,
+                item.stack,
+                routeCursor,
+                MAX_ROUTE_VISITS
+        );
+        if (route.isEmpty()) {
+            return false;
+        }
+        item.outgoing = route.get().direction();
+        routeCursor++;
+        return true;
     }
 
     @Override
@@ -237,16 +253,35 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
         BlockPos targetPosition = position().relative(direction);
         PhysicalNetworkNode targetNode = manager.node(NetworkDomain.LOGISTICS, targetPosition).orElse(null);
         if (targetNode instanceof LogisticsTubeModule tube) {
+            if (!manager.neighbors(NetworkDomain.LOGISTICS, position()).contains(targetPosition.asLong())) {
+                return TransferOutcome.INVALID_ROUTE;
+            }
             boolean accepted = tube.enqueue(item.stack, direction.getOpposite(), gameTime);
             return accepted ? TransferOutcome.REMOVE : TransferOutcome.BLOCKED;
         }
 
-        IItemHandler handler = adjacentHandler(manager.level(), direction);
-        if (handler == null || !ItemHandlerTransactions.acceptsAll(handler, item.stack)) {
+        var targetChunk = manager.level().getChunkSource()
+                .getChunkNow(targetPosition.getX() >> 4, targetPosition.getZ() >> 4);
+        if (targetChunk == null) {
+            return TransferOutcome.UNLOADED;
+        }
+        BlockEntity targetEntity = targetChunk.getBlockEntity(targetPosition);
+        if (targetEntity instanceof PneumaticTubeBlockEntity) {
+            return TransferOutcome.INVALID_ROUTE;
+        }
+        IItemHandler handler = targetEntity == null
+                ? null
+                : targetEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
+        if (handler == null) {
+            return TransferOutcome.INVALID_ROUTE;
+        }
+        ItemStack remainder = ItemHandlerTransactions.insertAfterFullSimulation(handler, item.stack);
+        if (remainder.getCount() >= item.stack.getCount()) {
             return TransferOutcome.BLOCKED;
         }
-        ItemStack remainder = ItemHandlerTransactions.insert(handler, item.stack, false);
-        return remainder.isEmpty() ? TransferOutcome.REMOVE : new TransferOutcome(false, remainder);
+        return remainder.isEmpty()
+                ? TransferOutcome.REMOVE
+                : new TransferOutcome(TransferStatus.PARTIAL, remainder);
     }
 
     private boolean enqueue(ItemStack stack, Direction incoming, long gameTime) {
@@ -262,8 +297,13 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
 
     @Nullable
     private IItemHandler adjacentHandler(ServerLevel level, Direction direction) {
-        BlockEntity blockEntity = level.getBlockEntity(position().relative(direction));
-        if (blockEntity == null) {
+        BlockPos target = position().relative(direction);
+        var targetChunk = level.getChunkSource().getChunkNow(target.getX() >> 4, target.getZ() >> 4);
+        if (targetChunk == null) {
+            return null;
+        }
+        BlockEntity blockEntity = targetChunk.getBlockEntity(target);
+        if (blockEntity == null || blockEntity instanceof PneumaticTubeBlockEntity) {
             return null;
         }
         return blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
@@ -320,9 +360,19 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
         }
     }
 
-    private record TransferOutcome(boolean remove, @Nullable ItemStack remaining) {
-        private static final TransferOutcome REMOVE = new TransferOutcome(true, null);
-        private static final TransferOutcome BLOCKED = new TransferOutcome(false, null);
+    private enum TransferStatus {
+        REMOVED,
+        PARTIAL,
+        BLOCKED,
+        UNLOADED,
+        INVALID_ROUTE
+    }
+
+    private record TransferOutcome(TransferStatus status, @Nullable ItemStack remaining) {
+        private static final TransferOutcome REMOVE = new TransferOutcome(TransferStatus.REMOVED, null);
+        private static final TransferOutcome BLOCKED = new TransferOutcome(TransferStatus.BLOCKED, null);
+        private static final TransferOutcome UNLOADED = new TransferOutcome(TransferStatus.UNLOADED, null);
+        private static final TransferOutcome INVALID_ROUTE = new TransferOutcome(TransferStatus.INVALID_ROUTE, null);
     }
 
     private final class TubeItemHandler implements IItemHandler {

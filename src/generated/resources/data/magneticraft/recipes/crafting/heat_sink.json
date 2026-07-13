@@ -2,22 +2,19 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "C": {
-      "tag": "forge:ingots/copper"
-    },
-    "G": {
-      "item": "magneticraft:iron_grate"
-    },
-    "I": {
+    "A": {
       "tag": "forge:ingots/iron"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/iron"
     }
   },
   "pattern": [
-    "III",
-    "CGC",
-    "III"
+    "AAA",
+    "BBB"
   ],
   "result": {
+    "count": 2,
     "item": "magneticraft:heat_sink"
   },
   "show_notification": true

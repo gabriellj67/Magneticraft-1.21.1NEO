@@ -359,7 +359,7 @@
   "message.magneticraft.fluid_side_mode": "%s 端口：%s",
   "message.magneticraft.fluid_side_mode.active": "主动输出",
   "message.magneticraft.fluid_side_mode.disabled": "禁用",
-  "message.magneticraft.fluid_side_mode.passive": "被动输入",
+  "message.magneticraft.fluid_side_mode.passive": "被动接口",
   "message.magneticraft.hydraulic_press_mode": "液压机模式：%s",
   "message.magneticraft.hydraulic_press_mode.heavy": "重压",
   "message.magneticraft.hydraulic_press_mode.light": "轻压",
@@ -375,6 +375,9 @@
   "message.magneticraft.multiblock_not_mirrored": "结构镜像已禁用",
   "message.magneticraft.multiblock_status": "%s：%s",
   "message.magneticraft.multiblock_unloaded": "结构位置 %s 所在区块未加载",
+  "message.magneticraft.pneumatic_endpoint.blocked": "气动端点输出受阻，载荷已保留",
+  "message.magneticraft.pneumatic_endpoint.filter_rejected": "物品不符合气动过滤样本",
+  "message.magneticraft.pneumatic_endpoint.unloaded": "目标区块未加载，气动传输已暂停",
   "message.magneticraft.redstone_mode": "红石控制：%s",
   "message.magneticraft.redstone_mode.ignored": "忽略",
   "message.magneticraft.redstone_mode.requires_no_signal": "需要无信号",
@@ -398,5 +401,6 @@
   "text.magneticraft.wire_connect.too_far": "两个端点距离过远",
   "text.magneticraft.wire_connect.updated_position": "已选择端点：%s, %s, %s",
   "tooltip.magneticraft.energy": "能量：%s / %s FE",
-  "tooltip.magneticraft.floppy_disk.instructions": "已存储 %s 条指令"
+  "tooltip.magneticraft.floppy_disk.instructions": "已存储 %s 条指令",
+  "tooltip.magneticraft.small_tank.line_0": "装有 %s mB %s"
 }

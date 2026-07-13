@@ -1,6 +1,11 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "minecraft:block/smooth_stone"
+    "down": "minecraft:block/copper_block",
+    "east": "minecraft:block/iron_block",
+    "north": "minecraft:block/iron_block",
+    "south": "minecraft:block/iron_block",
+    "up": "magneticraft:block/iron_grate",
+    "west": "minecraft:block/iron_block"
   }
 }

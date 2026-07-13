@@ -1,10 +1,12 @@
 package committee.nova.mods.magneticraft.content.machine.singleblock;
 
+import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
+
 /**
  * Loader-independent numerical contracts shared by machine runtime and datagen.
  */
 public final class SingleBlockMachineMath {
-    public static final double AMBIENT_TEMPERATURE_KELVIN = 293.15D;
+    public static final double AMBIENT_TEMPERATURE_KELVIN = HeatNode.AMBIENT_TEMPERATURE_KELVIN;
 
     private SingleBlockMachineMath() {
     }

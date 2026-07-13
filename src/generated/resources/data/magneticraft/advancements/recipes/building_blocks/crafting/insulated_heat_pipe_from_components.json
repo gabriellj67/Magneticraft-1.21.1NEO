@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_copper_light_plate": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "magneticraft:light_plates/copper"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/insulated_heat_pipe_from_components"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_copper_light_plate",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/insulated_heat_pipe_from_components"
+    ]
+  },
+  "sends_telemetry_event": false
+}

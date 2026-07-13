@@ -235,6 +235,51 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + block), block);
             assertTrue(chinese.has("block.magneticraft." + block), block);
         }
+        JsonObject heatSinkModel = readObject(ASSETS.resolve("models/block/heat_sink.json"));
+        for (JsonElement element : heatSinkModel.getAsJsonArray("elements")) {
+            JsonObject geometry = element.getAsJsonObject();
+            assertTrue(geometry.getAsJsonArray("from").get(1).getAsInt() >= 11,
+                    "The unrotated heat sink model must occupy the facing=up slab");
+            assertTrue(geometry.getAsJsonArray("to").get(1).getAsInt() <= 16,
+                    "The unrotated heat sink model exceeds the facing=up slab");
+        }
+        JsonObject conveyorRecipe = readObject(recipe("crafting/conveyor_belt"));
+        assertEquals(
+                List.of("BAB", "BCB", "B B"),
+                conveyorRecipe.getAsJsonArray("pattern").asList().stream()
+                        .map(JsonElement::getAsString)
+                        .toList()
+        );
+        assertEquals(
+                "magneticraft:light_plates/iron",
+                conveyorRecipe.getAsJsonObject("key").getAsJsonObject("A").get("tag").getAsString()
+        );
+        assertEquals(
+                "forge:ingots/iron",
+                conveyorRecipe.getAsJsonObject("key").getAsJsonObject("B").get("tag").getAsString()
+        );
+        assertEquals(
+                "magneticraft:motor",
+                conveyorRecipe.getAsJsonObject("key").getAsJsonObject("C").get("item").getAsString()
+        );
+        assertEquals(12, conveyorRecipe.getAsJsonObject("result").get("count").getAsInt());
+        JsonObject pneumaticTube = readObject(recipe("crafting/pneumatic_tube"));
+        assertEquals(List.of("AGA"), pneumaticTube.getAsJsonArray("pattern").asList().stream()
+                .map(JsonElement::getAsString)
+                .toList());
+        assertEquals(
+                "magneticraft:light_plates/copper",
+                pneumaticTube.getAsJsonObject("key").getAsJsonObject("A").get("tag").getAsString()
+        );
+        assertEquals(8, pneumaticTube.getAsJsonObject("result").get("count").getAsInt());
+        JsonObject restrictionTube = readObject(recipe("crafting/pneumatic_restriction_tube"));
+        assertEquals("minecraft:crafting_shapeless", restrictionTube.get("type").getAsString());
+        assertEquals(2, restrictionTube.getAsJsonArray("ingredients").size());
+        JsonObject pneumaticFilter = readObject(recipe("crafting/pneumatic_filter"));
+        assertEquals(
+                "magneticraft:iron_mesh",
+                pneumaticFilter.getAsJsonObject("key").getAsJsonObject("C").get("item").getAsString()
+        );
         JsonObject wrench = readObject(ASSETS.resolve("models/item/wrench.json"));
         assertEquals("minecraft:item/handheld", wrench.get("parent").getAsString());
         assertEquals("minecraft:item/iron_hoe", wrench.getAsJsonObject("textures").get("layer0").getAsString());
@@ -275,6 +320,33 @@ class GeneratedDataContractTest {
             if (definition != SingleBlockMachineDefinition.INFINITE_ENERGY) {
                 assertFile(recipe("crafting/" + id));
             }
+        }
+        for (SingleBlockMachineDefinition endpoint : Set.of(
+                SingleBlockMachineDefinition.RELAY,
+                SingleBlockMachineDefinition.FILTER,
+                SingleBlockMachineDefinition.TRANSPOSER
+        )) {
+            String id = endpoint.id();
+            JsonObject variants = readObject(ASSETS.resolve("blockstates/" + id + ".json"))
+                    .getAsJsonObject("variants");
+            Set<String> facings = variants.keySet().stream()
+                    .map(key -> key.split(","))
+                    .flatMap(java.util.Arrays::stream)
+                    .filter(property -> property.startsWith("facing="))
+                    .collect(java.util.stream.Collectors.toSet());
+            assertEquals(6, facings.size(), id + " must render all six endpoint facings");
+
+            JsonObject textures = readObject(ASSETS.resolve("models/block/" + id + ".json"))
+                    .getAsJsonObject("textures");
+            assertTrue(textures.has("up") && textures.has("down") && textures.has("east"),
+                    id + " must distinguish front, back and side faces");
+            assertFalse(textures.get("up").equals(textures.get("down")), id + " front/back texture");
+            assertFalse(textures.get("up").equals(textures.get("east")), id + " front/side texture");
+        }
+        for (String status : Set.of("blocked", "unloaded", "filter_rejected")) {
+            String key = "message.magneticraft.pneumatic_endpoint." + status;
+            assertTrue(english.has(key), key);
+            assertTrue(chinese.has(key), key);
         }
         for (String id : Set.of("tube_light", "inserter_speed_upgrade", "inserter_stack_upgrade")) {
             assertFile(ASSETS.resolve("models/item/" + id + ".json"));

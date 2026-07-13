@@ -14,8 +14,6 @@ import net.minecraft.world.level.block.state.BlockState;
  * Directional ambient heat sink with no hidden network loss elsewhere.
  */
 public final class HeatSinkBlockEntity extends NetworkComponentBlockEntity {
-    private static final double DISSIPATION_WATTS_PER_KELVIN = 5.0D;
-
     private final HeatNetworkModule heat;
 
     public HeatSinkBlockEntity(BlockPos position, BlockState state) {
@@ -38,7 +36,7 @@ public final class HeatSinkBlockEntity extends NetworkComponentBlockEntity {
     protected void tickComponent() {
         double difference = heat.node().temperatureKelvin() - HeatNode.AMBIENT_TEMPERATURE_KELVIN;
         if (difference > 0.0D) {
-            double removed = heat.node().removeHeat(difference * DISSIPATION_WATTS_PER_KELVIN, false);
+            double removed = heat.node().removeHeat(difference, false);
             if (removed > 0.0D) {
                 markChanged();
             }

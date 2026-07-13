@@ -11,6 +11,8 @@ import net.minecraft.server.level.ServerLevel;
 
 import java.util.EnumMap;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,11 +23,22 @@ import net.minecraft.world.item.ItemStack;
  * Per-dimension runtime topology. Node state remains owned by block entities.
  */
 public final class PhysicalNetworkManager {
+    public static final int MAX_LOGISTICS_ROUTE_VISITS = 4_096;
+    private static final int MAX_LOGISTICS_ROUTE_CACHE_ENTRIES = 4_096;
+
     private final ServerLevel level;
     private final Map<NetworkDomain, IncrementalGraph<Long, PhysicalNetworkNode>> graphs =
             new EnumMap<>(NetworkDomain.class);
     private long lastTick = Long.MIN_VALUE;
     private long edgeTicks;
+    private long logisticsCacheTopologyVersion = Long.MIN_VALUE;
+    private final Map<LogisticsCacheKey, CachedLogisticsRoute> logisticsRouteCache =
+            new LinkedHashMap<>(64, 0.75F, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<LogisticsCacheKey, CachedLogisticsRoute> eldest) {
+                    return size() > MAX_LOGISTICS_ROUTE_CACHE_ENTRIES;
+                }
+            };
 
     PhysicalNetworkManager(ServerLevel level) {
         this.level = level;
@@ -132,6 +145,13 @@ public final class PhysicalNetworkManager {
             return Optional.empty();
         }
 
+        int visitLimit = Math.max(1, Math.min(maxVisited, MAX_LOGISTICS_ROUTE_VISITS));
+        long topologyVersion = graph.metrics().topologyVersion();
+        if (logisticsCacheTopologyVersion != topologyVersion) {
+            logisticsRouteCache.clear();
+            logisticsCacheTopologyVersion = topologyVersion;
+        }
+
         List<Direction> localOutputs = startNode.acceptingExternalOutputs(stack).stream()
                 .filter(direction -> direction != incoming)
                 .toList();
@@ -141,29 +161,64 @@ public final class PhysicalNetworkManager {
         }
 
         long blockedFirst = incoming == null ? Long.MIN_VALUE : start.relative(incoming).asLong();
+        List<Long> firstNeighbors = orderedFirstNeighbors(graph, start, blockedFirst);
+        long preferredFirst = firstNeighbors.isEmpty()
+                ? Long.MIN_VALUE
+                : firstNeighbors.get(Math.floorMod(roundRobinOffset, firstNeighbors.size()));
+        LogisticsCacheKey cacheKey = new LogisticsCacheKey(start.asLong(), incoming, preferredFirst, visitLimit);
+        CachedLogisticsRoute cached = logisticsRouteCache.get(cacheKey);
+        if (cached != null && cached.matches(graph, stack, topologyVersion)) {
+            return Optional.of(new LogisticsRouteDecision(cached.direction(), false, 0, false));
+        }
+
         WeightedPathfinder.SearchResult<Long> result = searchLogisticsRoute(
                 graph,
                 start,
                 stack,
                 blockedFirst,
-                maxVisited
+                preferredFirst,
+                visitLimit
         );
         if (result.path().isEmpty() && incoming != null && !result.truncated()) {
-            result = searchLogisticsRoute(graph, start, stack, Long.MIN_VALUE, maxVisited);
+            firstNeighbors = orderedFirstNeighbors(graph, start, Long.MIN_VALUE);
+            preferredFirst = firstNeighbors.isEmpty()
+                    ? Long.MIN_VALUE
+                    : firstNeighbors.get(Math.floorMod(roundRobinOffset, firstNeighbors.size()));
+            cacheKey = new LogisticsCacheKey(start.asLong(), incoming, preferredFirst, visitLimit);
+            cached = logisticsRouteCache.get(cacheKey);
+            if (cached != null && cached.matches(graph, stack, topologyVersion)) {
+                return Optional.of(new LogisticsRouteDecision(cached.direction(), false, 0, false));
+            }
+            result = searchLogisticsRoute(
+                    graph,
+                    start,
+                    stack,
+                    Long.MIN_VALUE,
+                    preferredFirst,
+                    visitLimit
+            );
         }
         if (result.path().isEmpty() || result.path().get().size() < 2) {
             return Optional.empty();
         }
         BlockPos next = BlockPos.of(result.path().get().get(1));
         Direction direction = directionBetween(start, next);
-        return direction == null
-                ? Optional.empty()
-                : Optional.of(new LogisticsRouteDecision(
-                        direction,
-                        false,
-                        result.visitedNodes(),
-                        result.truncated()
-                ));
+        if (direction == null) {
+            return Optional.empty();
+        }
+        long destination = result.path().get().get(result.path().get().size() - 1);
+        logisticsRouteCache.put(
+                cacheKey,
+                new CachedLogisticsRoute(
+                        stack.copy(), direction, start.asLong(), next.asLong(), destination, topologyVersion
+                )
+        );
+        return Optional.of(new LogisticsRouteDecision(
+                direction,
+                false,
+                result.visitedNodes(),
+                result.truncated()
+        ));
     }
 
     private WeightedPathfinder.SearchResult<Long> searchLogisticsRoute(
@@ -171,6 +226,7 @@ public final class PhysicalNetworkManager {
             BlockPos start,
             ItemStack stack,
             long blockedFirst,
+            long preferredFirst,
             int maxVisited
     ) {
         return WeightedPathfinder.find(
@@ -181,19 +237,45 @@ public final class PhysicalNetworkManager {
                 },
                 key -> {
                     ArrayList<WeightedPathfinder.WeightedEdge<Long>> edges = new ArrayList<>();
-                    for (long neighbor : graph.neighbors(key)) {
+                    for (long neighbor : orderedNeighbors(graph, key)) {
                         if (key == start.asLong() && neighbor == blockedFirst) {
                             continue;
                         }
                         LogisticsNetworkNode node = logisticsNode(graph, neighbor);
                         if (node != null) {
-                            edges.add(new WeightedPathfinder.WeightedEdge<>(neighbor, 1 + node.routingWeight()));
+                            int baseCost = key == start.asLong()
+                                    ? (neighbor == preferredFirst ? 0 : 1)
+                                    : 2;
+                            edges.add(new WeightedPathfinder.WeightedEdge<>(neighbor, baseCost + node.routingWeight()));
                         }
                     }
                     return edges;
                 },
                 maxVisited
         );
+    }
+
+    private static List<Long> orderedFirstNeighbors(
+            IncrementalGraph<Long, PhysicalNetworkNode> graph,
+            BlockPos start,
+            long blockedFirst
+    ) {
+        return orderedNeighbors(graph, start.asLong()).stream()
+                .filter(neighbor -> neighbor != blockedFirst)
+                .toList();
+    }
+
+    private static List<Long> orderedNeighbors(
+            IncrementalGraph<Long, PhysicalNetworkNode> graph,
+            long key
+    ) {
+        BlockPos position = BlockPos.of(key);
+        return graph.neighbors(key).stream()
+                .sorted(Comparator.comparingInt(neighbor -> {
+                    Direction direction = directionBetween(position, BlockPos.of(neighbor));
+                    return direction == null ? Integer.MAX_VALUE : direction.ordinal();
+                }))
+                .toList();
     }
 
     private void refreshAt(NetworkDomain domain, BlockPos position) {
@@ -238,5 +320,32 @@ public final class PhysicalNetworkManager {
             }
         }
         return null;
+    }
+
+    private record LogisticsCacheKey(long start, Direction incoming, long preferredFirst, int visitLimit) {
+    }
+
+    private record CachedLogisticsRoute(
+            ItemStack stack,
+            Direction direction,
+            long startNode,
+            long firstNode,
+            long destination,
+            long topologyVersion
+    ) {
+        private boolean matches(
+                IncrementalGraph<Long, PhysicalNetworkNode> graph,
+                ItemStack candidate,
+                long currentTopologyVersion
+        ) {
+            if (topologyVersion != currentTopologyVersion
+                    || stack.getCount() != candidate.getCount()
+                    || !ItemStack.isSameItemSameTags(stack, candidate)
+                    || !graph.neighbors(startNode).contains(firstNode)) {
+                return false;
+            }
+            LogisticsNetworkNode destinationNode = logisticsNode(graph, destination);
+            return destinationNode != null && !destinationNode.acceptingExternalOutputs(candidate).isEmpty();
+        }
     }
 }

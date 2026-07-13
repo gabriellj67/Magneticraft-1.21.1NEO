@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.content.machine.electricfurnace.Electric
 import committee.nova.mods.magneticraft.content.machine.singleblock.AirBubbleBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SmallTankBlockItem;
 import committee.nova.mods.magneticraft.content.machine.singleblock.TubeLightBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -77,10 +78,7 @@ public final class ModMachineBlocks {
 
     static {
         for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
-            RegistryObject<Block> block = register(
-                    definition.id(),
-                    () -> new SingleBlockMachineBlock(definition, machineProperties(definition))
-            );
+            RegistryObject<Block> block = registerMachine(definition);
             MACHINES.put(definition, block);
         }
     }
@@ -110,6 +108,20 @@ public final class ModMachineBlocks {
     private static RegistryObject<Block> register(String id, Supplier<Block> factory) {
         RegistryObject<Block> block = ModRegistries.BLOCKS.register(id, factory);
         BLOCK_ITEMS.add(ModRegistries.ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties())));
+        return block;
+    }
+
+    private static RegistryObject<Block> registerMachine(SingleBlockMachineDefinition definition) {
+        RegistryObject<Block> block = ModRegistries.BLOCKS.register(
+                definition.id(),
+                () -> new SingleBlockMachineBlock(definition, machineProperties(definition))
+        );
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                definition.id(),
+                () -> definition == SingleBlockMachineDefinition.SMALL_TANK
+                        ? new SmallTankBlockItem(block.get(), new Item.Properties())
+                        : new BlockItem(block.get(), new Item.Properties())
+        ));
         return block;
     }
 

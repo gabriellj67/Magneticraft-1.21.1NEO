@@ -1,6 +1,11 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "minecraft:block/smooth_stone"
+    "down": "minecraft:block/iron_block",
+    "east": "minecraft:block/deepslate_tiles",
+    "north": "minecraft:block/deepslate_tiles",
+    "south": "minecraft:block/deepslate_tiles",
+    "up": "minecraft:block/dispenser_front",
+    "west": "minecraft:block/deepslate_tiles"
   }
 }

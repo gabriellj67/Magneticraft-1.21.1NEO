@@ -8,7 +8,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -35,10 +38,14 @@ final class SingleBlockAutomationLogic {
         if (machine.definition() == SingleBlockMachineDefinition.SMALL_TANK
                 && state.tankExportEnabled
                 && machine.primaryTank() != null) {
-            SingleBlockMachineSupport.pushFluid(machine, Direction.DOWN, machine.primaryTank(), 1_000);
-        } else if (machine.definition() == SingleBlockMachineDefinition.FILTER
-                && level.getGameTime() % 5L == 0L) {
-            pushBufferedInventory(SingleBlockMachineSupport.facing(machine), 0);
+            SingleBlockMachineSupport.pushFluid(
+                    machine,
+                    Direction.DOWN,
+                    machine.primaryTank(),
+                    machine.primaryTank().tank().getFluidAmount()
+            );
+        } else if (machine.definition() == SingleBlockMachineDefinition.FILTER) {
+            tickPneumaticFilter(level);
         }
     }
 
@@ -104,9 +111,11 @@ final class SingleBlockAutomationLogic {
         }
         ItemStack carried = machine.inventory().getStackInSlot(0);
         if (!carried.isEmpty()) {
-            if (deliverInserterStack(level, carried)) {
-                machine.inventory().setStackInSlot(0, ItemStack.EMPTY);
+            ItemStack remainder = deliverInserterStack(level, carried);
+            if (remainder.getCount() < carried.getCount()) {
+                machine.inventory().setStackInSlot(0, remainder);
                 state.cooldown = inserterDelay();
+                state.working = true;
                 machine.markChangedAndSync();
             }
             return;
@@ -143,12 +152,28 @@ final class SingleBlockAutomationLogic {
     }
 
     void tickRelay(ServerLevel level) {
-        if (level.getGameTime() % 5L == 0L && machine.inventory() != null) {
-            for (int slot = 0; slot < machine.inventory().slots(); slot++) {
-                if (pushBufferedInventory(SingleBlockMachineSupport.facing(machine), slot)) {
-                    return;
-                }
+        if (level.getGameTime() % 5L != 0L
+                || machine.inventory() == null
+                || machine.pneumaticEndpoint() == null) {
+            return;
+        }
+        ejectPneumaticOutput(level);
+        PneumaticEndpointModule endpoint = machine.pneumaticEndpoint();
+        if (!endpoint.canBufferOutput()) {
+            return;
+        }
+        for (int slot = 0; slot < machine.inventory().slots(); slot++) {
+            ItemStack candidate = machine.inventory().extractInternal(slot, 64, true);
+            if (candidate.isEmpty()) {
+                continue;
             }
+            ItemStack extracted = machine.inventory().extractInternal(slot, candidate.getCount(), false);
+            if (!endpoint.enqueueOutput(extracted)) {
+                machine.inventory().menuHandler().insertItem(slot, extracted, false);
+                return;
+            }
+            state.working = true;
+            return;
         }
     }
 
@@ -156,30 +181,40 @@ final class SingleBlockAutomationLogic {
         if (level.getGameTime() % 5L != 0L) {
             return;
         }
-        Direction output = SingleBlockMachineSupport.facing(machine);
-        Direction input = output.getOpposite();
-        IItemHandler target = SingleBlockMachineSupport.adjacentItemHandler(machine, output);
-        if (target == null) {
+        if (machine.pneumaticEndpoint() == null) {
             return;
         }
-        IItemHandler source = SingleBlockMachineSupport.adjacentItemHandler(machine, input);
+        ejectPneumaticOutput(level);
+        PneumaticEndpointModule endpoint = machine.pneumaticEndpoint();
+        if (!endpoint.canBufferOutput()) {
+            return;
+        }
+        Direction input = SingleBlockMachineSupport.facing(machine).getOpposite();
+        IItemHandler source = loadedBlockHandler(level, machine.getBlockPos().relative(input), input.getOpposite());
         if (source != null) {
-            transferFromInventory(source, target);
+            if (bufferFromInventory(source, endpoint)) {
+                state.working = true;
+            }
+            return;
+        }
+        if (!isChunkLoaded(level, machine.getBlockPos().relative(input))) {
             return;
         }
         AABB area = new AABB(machine.getBlockPos().relative(input));
         for (ItemEntity itemEntity : level.getEntitiesOfClass(ItemEntity.class, area, ItemEntity::isAlive)) {
             ItemStack candidate = itemEntity.getItem();
-            if (!SingleBlockMachineSupport.filterAllows(machine, state, candidate, true)
-                    || !ItemHandlerTransactions.acceptsAll(target, candidate)) {
+            if (!SingleBlockMachineSupport.filterAllows(machine, state, candidate, true)) {
                 continue;
             }
-            ItemStack remainder = ItemHandlerTransactions.insert(target, candidate.copy(), false);
-            if (remainder.isEmpty()) {
-                itemEntity.discard();
-            } else {
-                itemEntity.setItem(remainder);
+            int moved = Math.min(64, candidate.getCount());
+            if (!endpoint.enqueueOutput(candidate.copyWithCount(moved))) {
+                return;
             }
+            candidate.shrink(moved);
+            if (candidate.isEmpty()) {
+                itemEntity.discard();
+            }
+            state.working = true;
             return;
         }
     }
@@ -193,22 +228,109 @@ final class SingleBlockAutomationLogic {
         }
     }
 
-    private void transferFromInventory(IItemHandler source, IItemHandler target) {
+    private boolean bufferFromInventory(IItemHandler source, PneumaticEndpointModule endpoint) {
         for (int slot = 0; slot < source.getSlots(); slot++) {
             ItemStack candidate = source.extractItem(slot, 64, true);
             if (candidate.isEmpty()
-                    || !SingleBlockMachineSupport.filterAllows(machine, state, candidate, true)
-                    || !ItemHandlerTransactions.acceptsAll(target, candidate)) {
+                    || !SingleBlockMachineSupport.filterAllows(machine, state, candidate, true)) {
                 continue;
             }
             ItemStack extracted = source.extractItem(slot, candidate.getCount(), false);
-            ItemStack remainder = ItemHandlerTransactions.insert(target, extracted, false);
-            if (!remainder.isEmpty()) {
-                source.insertItem(slot, remainder, false);
+            if (!endpoint.enqueueOutput(extracted)) {
+                source.insertItem(slot, extracted, false);
+                return false;
             }
             machine.markChanged();
+            return true;
+        }
+        return false;
+    }
+
+    private void tickPneumaticFilter(ServerLevel level) {
+        PneumaticEndpointModule endpoint = machine.pneumaticEndpoint();
+        if (endpoint == null) {
             return;
         }
+        endpoint.moveInputsToOutput();
+        // Forward-compatible migration of the pre-0.4 single-slot implementation.
+        if (machine.inventory() != null && endpoint.canBufferOutput()) {
+            ItemStack legacyBuffer = machine.inventory().getStackInSlot(0);
+            if (!legacyBuffer.isEmpty()) {
+                ItemStack extracted = machine.inventory().extractInternal(0, legacyBuffer.getCount(), false);
+                if (!endpoint.enqueueOutput(extracted)) {
+                    machine.inventory().menuHandler().insertItem(0, extracted, false);
+                }
+            }
+        }
+        if (level.getGameTime() % 5L == 0L) {
+            ejectPneumaticOutput(level);
+        }
+    }
+
+    private void ejectPneumaticOutput(ServerLevel level) {
+        PneumaticEndpointModule endpoint = machine.pneumaticEndpoint();
+        if (endpoint == null) {
+            return;
+        }
+        for (int payload = 0; payload < PneumaticEndpointModule.MAX_PAYLOADS; payload++) {
+            ItemStack stack = endpoint.outputHead();
+            if (stack == null) {
+                endpoint.clearOutputBlocked();
+                return;
+            }
+            ItemStack remainder = insertOrDropPneumaticOutput(level, stack);
+            if (remainder.getCount() >= stack.getCount()) {
+                endpoint.markOutputBlocked();
+                return;
+            }
+            endpoint.replaceOutputHead(remainder);
+            state.working = true;
+            if (!remainder.isEmpty()) {
+                endpoint.markOutputBlocked();
+                return;
+            }
+        }
+    }
+
+    private ItemStack insertOrDropPneumaticOutput(ServerLevel level, ItemStack stack) {
+        Direction output = SingleBlockMachineSupport.facing(machine);
+        BlockPos target = machine.getBlockPos().relative(output);
+        if (!isChunkLoaded(level, target)) {
+            return stack;
+        }
+        BlockEntity targetEntity = loadedBlockEntity(level, target);
+        if (targetEntity != null) {
+            IItemHandler handler = targetEntity
+                    .getCapability(ForgeCapabilities.ITEM_HANDLER, output.getOpposite())
+                    .orElse(null);
+            if (handler == null) {
+                return stack;
+            }
+            ItemStack simulated = ItemHandlerTransactions.insert(handler, stack.copy(), true);
+            if (simulated.getCount() >= stack.getCount()) {
+                return stack;
+            }
+            return ItemHandlerTransactions.insert(handler, stack.copy(), false);
+        }
+
+        BlockState targetState = level.getBlockState(target);
+        if (!targetState.getCollisionShape(level, target).isEmpty()
+                || !level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+            return stack;
+        }
+        ItemEntity entity = new ItemEntity(
+                level,
+                target.getX() + 0.5D,
+                target.getY() + 0.5D,
+                target.getZ() + 0.5D,
+                stack.copy()
+        );
+        entity.setDeltaMovement(
+                output.getStepX() * 0.15D,
+                output.getStepY() * 0.15D,
+                output.getStepZ() * 0.15D
+        );
+        return level.addFreshEntity(entity) ? ItemStack.EMPTY : stack;
     }
 
     private void finishSluice(ServerLevel level) {
@@ -239,97 +361,164 @@ final class SingleBlockAutomationLogic {
         machine.markChangedAndSync();
     }
 
-    private boolean pushBufferedInventory(Direction output, int slot) {
-        if (machine.inventory() == null) {
-            return false;
-        }
-        ItemStack stack = machine.inventory().getStackInSlot(slot);
-        IItemHandler target = SingleBlockMachineSupport.adjacentItemHandler(machine, output);
-        if (stack.isEmpty() || target == null || !ItemHandlerTransactions.acceptsAll(target, stack)) {
-            return false;
-        }
-        ItemStack extracted = machine.inventory().extractInternal(slot, stack.getCount(), false);
-        ItemStack remainder = ItemHandlerTransactions.insert(target, extracted, false);
-        if (!remainder.isEmpty()) {
-            machine.inventory().menuHandler().insertItem(slot, remainder, false);
-        }
-        machine.markChanged();
-        return remainder.isEmpty();
-    }
-
     private ItemStack extractForInserter(ServerLevel level) {
         Direction sourceDirection = SingleBlockMachineSupport.facing(machine);
         int maximum = inserterStackSize();
-        for (BlockPos sourcePosition : List.of(
-                machine.getBlockPos().relative(sourceDirection),
-                machine.getBlockPos().relative(sourceDirection).below()
-        )) {
-            BlockEntity sourceEntity = level.getBlockEntity(sourcePosition);
-            if (sourceEntity == null) {
-                continue;
-            }
-            IItemHandler source = sourceEntity
-                    .getCapability(ForgeCapabilities.ITEM_HANDLER, sourceDirection.getOpposite())
-                    .orElse(null);
-            if (source == null) {
-                continue;
-            }
+        for (IItemHandler source : inserterHandlers(level, sourceDirection)) {
             for (int slot = 0; slot < source.getSlots(); slot++) {
                 ItemStack candidate = source.extractItem(slot, maximum, true);
-                if (!candidate.isEmpty()
-                        && SingleBlockMachineSupport.filterAllows(machine, state, candidate, state.inserterWhitelist)) {
-                    return source.extractItem(slot, candidate.getCount(), false);
+                if (candidate.isEmpty()
+                        || !SingleBlockMachineSupport.filterAllows(
+                        machine,
+                        state,
+                        candidate,
+                        state.inserterWhitelist
+                )) {
+                    continue;
+                }
+                int accepted = acceptedByInserterDestination(level, candidate);
+                if (accepted > 0) {
+                    return source.extractItem(slot, Math.min(accepted, candidate.getCount()), false);
                 }
             }
         }
         if (state.inserterGrabItems) {
-            AABB area = new AABB(machine.getBlockPos().relative(sourceDirection));
-            for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, area, ItemEntity::isAlive)) {
-                ItemStack stack = entity.getItem();
-                if (!SingleBlockMachineSupport.filterAllows(machine, state, stack, state.inserterWhitelist)) {
+            for (BlockPos sourcePosition : SingleBlockMachineSupport.inserterGroundPickupPositions(
+                    machine.getBlockPos(), sourceDirection
+            )) {
+                if (!isChunkLoaded(level, sourcePosition)) {
                     continue;
                 }
-                int moved = Math.min(maximum, stack.getCount());
-                ItemStack result = stack.copyWithCount(moved);
-                stack.shrink(moved);
-                if (stack.isEmpty()) {
-                    entity.discard();
+                AABB area = new AABB(sourcePosition);
+                for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, area, ItemEntity::isAlive)) {
+                    ItemStack stack = entity.getItem();
+                    if (!SingleBlockMachineSupport.filterAllows(
+                            machine,
+                            state,
+                            stack,
+                            state.inserterWhitelist
+                    )) {
+                        continue;
+                    }
+                    ItemStack offered = stack.copyWithCount(Math.min(maximum, stack.getCount()));
+                    int moved = acceptedByInserterDestination(level, offered);
+                    if (moved <= 0) {
+                        continue;
+                    }
+                    ItemStack result = stack.copyWithCount(Math.min(moved, offered.getCount()));
+                    stack.shrink(result.getCount());
+                    if (stack.isEmpty()) {
+                        entity.discard();
+                    }
+                    return result;
                 }
-                return result;
             }
         }
         return ItemStack.EMPTY;
     }
 
-    private boolean deliverInserterStack(ServerLevel level, ItemStack stack) {
+    private ItemStack deliverInserterStack(ServerLevel level, ItemStack stack) {
         Direction output = SingleBlockMachineSupport.facing(machine).getOpposite();
-        for (BlockPos targetPosition : List.of(
-                machine.getBlockPos().relative(output),
-                machine.getBlockPos().relative(output).below()
-        )) {
-            BlockEntity targetEntity = level.getBlockEntity(targetPosition);
-            if (targetEntity == null) {
-                continue;
-            }
-            IItemHandler target = targetEntity
-                    .getCapability(ForgeCapabilities.ITEM_HANDLER, output.getOpposite())
-                    .orElse(null);
-            if (target != null && ItemHandlerTransactions.acceptsAll(target, stack)) {
-                return ItemHandlerTransactions.insert(target, stack, false).isEmpty();
+        for (IItemHandler target : inserterHandlers(level, output)) {
+            ItemStack simulated = ItemHandlerTransactions.insert(target, stack.copy(), true);
+            if (simulated.getCount() < stack.getCount()) {
+                return ItemHandlerTransactions.insert(target, stack.copy(), false);
             }
         }
-        if (state.inserterDropItems) {
-            BlockPos target = machine.getBlockPos().relative(output);
-            level.addFreshEntity(new ItemEntity(
+        BlockPos dropPosition = state.inserterDropItems ? inserterDropPosition(level, output) : null;
+        if (dropPosition != null) {
+            boolean spawned = level.addFreshEntity(new ItemEntity(
                     level,
-                    target.getX() + 0.5D,
-                    target.getY() + 0.5D,
-                    target.getZ() + 0.5D,
+                    dropPosition.getX() + 0.5D,
+                    dropPosition.getY() + 0.5D,
+                    dropPosition.getZ() + 0.5D,
                     stack.copy()
             ));
-            return true;
+            return spawned ? ItemStack.EMPTY : stack;
         }
-        return false;
+        return stack;
+    }
+
+    private int acceptedByInserterDestination(ServerLevel level, ItemStack stack) {
+        Direction output = SingleBlockMachineSupport.facing(machine).getOpposite();
+        for (IItemHandler target : inserterHandlers(level, output)) {
+            ItemStack remainder = ItemHandlerTransactions.insert(target, stack.copy(), true);
+            int accepted = stack.getCount() - remainder.getCount();
+            if (accepted > 0) {
+                return accepted;
+            }
+        }
+        return state.inserterDropItems && inserterDropPosition(level, output) != null ? stack.getCount() : 0;
+    }
+
+    private List<IItemHandler> inserterHandlers(ServerLevel level, Direction direction) {
+        java.util.ArrayList<IItemHandler> handlers = new java.util.ArrayList<>();
+        for (SingleBlockMachineSupport.InserterAccess accessor
+                : SingleBlockMachineSupport.inserterInventoryAccesses(machine.getBlockPos(), direction)) {
+            BlockPos position = accessor.position();
+            if (!isChunkLoaded(level, position)) {
+                continue;
+            }
+            if (accessor.includeMinecarts()) {
+                AABB area = new AABB(position);
+                for (AbstractMinecartContainer minecart : level.getEntitiesOfClass(
+                        AbstractMinecartContainer.class,
+                        area,
+                        AbstractMinecartContainer::isAlive
+                )) {
+                    IItemHandler handler = minecart
+                            .getCapability(ForgeCapabilities.ITEM_HANDLER, accessor.side())
+                            .orElse(null);
+                    if (handler != null) {
+                        handlers.add(handler);
+                    }
+                }
+            }
+            IItemHandler blockHandler = loadedBlockHandler(level, position, accessor.side());
+            if (blockHandler != null) {
+                handlers.add(blockHandler);
+            }
+        }
+        return List.copyOf(handlers);
+    }
+
+    @javax.annotation.Nullable
+    private BlockPos inserterDropPosition(ServerLevel level, Direction output) {
+        for (BlockPos target : SingleBlockMachineSupport.inserterGroundDropPositions(
+                machine.getBlockPos(), output
+        )) {
+            if (canInserterDropAt(level, target)) {
+                return target;
+            }
+        }
+        return null;
+    }
+
+    private boolean canInserterDropAt(ServerLevel level, BlockPos target) {
+        if (!isChunkLoaded(level, target)
+                || !level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)
+                || !level.getBlockState(target).getCollisionShape(level, target).isEmpty()) {
+            return false;
+        }
+        return level.getEntitiesOfClass(ItemEntity.class, new AABB(target), ItemEntity::isAlive).isEmpty();
+    }
+
+    @javax.annotation.Nullable
+    private static IItemHandler loadedBlockHandler(ServerLevel level, BlockPos position, Direction side) {
+        BlockEntity blockEntity = loadedBlockEntity(level, position);
+        return blockEntity == null
+                ? null
+                : blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, side).orElse(null);
+    }
+
+    @javax.annotation.Nullable
+    private static BlockEntity loadedBlockEntity(ServerLevel level, BlockPos position) {
+        var chunk = level.getChunkSource().getChunkNow(position.getX() >> 4, position.getZ() >> 4);
+        return chunk == null ? null : chunk.getBlockEntity(position);
+    }
+
+    private static boolean isChunkLoaded(ServerLevel level, BlockPos position) {
+        return level.getChunkSource().getChunkNow(position.getX() >> 4, position.getZ() >> 4) != null;
     }
 
     private int inserterDelay() {

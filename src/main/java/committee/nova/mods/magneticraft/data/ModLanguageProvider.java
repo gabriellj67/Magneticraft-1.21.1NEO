@@ -63,6 +63,18 @@ final class ModLanguageProvider extends LanguageProvider {
                     chinese ? definition.chineseName() : definition.englishName()
             );
         });
+        add(
+                "message.magneticraft.pneumatic_endpoint.blocked",
+                chinese ? "气动端点输出受阻，载荷已保留" : "Pneumatic endpoint output blocked; payload retained"
+        );
+        add(
+                "message.magneticraft.pneumatic_endpoint.unloaded",
+                chinese ? "目标区块未加载，气动传输已暂停" : "Target chunk unloaded; pneumatic transfer paused"
+        );
+        add(
+                "message.magneticraft.pneumatic_endpoint.filter_rejected",
+                chinese ? "物品不符合气动过滤样本" : "Item does not match the pneumatic filter samples"
+        );
         add(ModMachineBlocks.TUBE_LIGHT.get(), chinese ? "管灯" : "Tube Light");
         add("message.magneticraft.tank_export_enabled", chinese ? "储罐底部主动输出已启用" : "Tank bottom export enabled");
         add("message.magneticraft.tank_export_disabled", chinese ? "储罐底部主动输出已禁用" : "Tank bottom export disabled");
@@ -90,7 +102,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.redstone_mode.requires_signal", chinese ? "需要信号" : "Requires signal");
         add("message.magneticraft.redstone_mode.requires_no_signal", chinese ? "需要无信号" : "Requires no signal");
         add("message.magneticraft.fluid_side_mode", chinese ? "%s 端口：%s" : "%s port: %s");
-        add("message.magneticraft.fluid_side_mode.passive", chinese ? "被动输入" : "Passive input");
+        add("message.magneticraft.fluid_side_mode.passive", chinese ? "被动接口" : "Passive I/O");
         add("message.magneticraft.fluid_side_mode.active", chinese ? "主动输出" : "Active output");
         add("message.magneticraft.fluid_side_mode.disabled", chinese ? "禁用" : "Disabled");
         add("message.magneticraft.voltmeter", chinese ? "%s V · %s A · %s W" : "%s V · %s A · %s W");
@@ -110,6 +122,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add("text.magneticraft.wire_connect.already_connected", chinese ? "两个端点已经连接" : "The endpoints are already connected");
         add("text.magneticraft.wire_connect.no_other_connector", chinese ? "请先潜行右击选择第一个端点" : "Sneak-use a first endpoint before connecting");
         add("tooltip.magneticraft.energy", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
+        add("tooltip.magneticraft.small_tank.line_0", chinese
+                ? "装有 %s mB %s"
+                : "Holding %s mB of %s");
 
         ModItems.materials().forEach((form, metals) -> metals.forEach((metal, holder) ->
                 add(holder.get(), chinese ? form.chineseName(metal) : form.englishName(metal))

@@ -2,17 +2,20 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "I": {
+    "A": {
       "tag": "forge:ingots/iron"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/copper"
     }
   },
   "pattern": [
-    "III",
-    "   ",
-    "III"
+    " A ",
+    "ABA",
+    " A "
   ],
   "result": {
-    "count": 8,
+    "count": 5,
     "item": "magneticraft:heat_pipe"
   },
   "show_notification": true

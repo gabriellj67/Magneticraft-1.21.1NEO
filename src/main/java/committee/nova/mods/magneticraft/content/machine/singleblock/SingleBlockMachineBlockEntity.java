@@ -55,6 +55,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     @Nullable
     private final GhostFilterModule filters;
     @Nullable
+    private final PneumaticEndpointModule pneumaticEndpoint;
+    @Nullable
     private final FluidTankModule primaryTank;
     @Nullable
     private final FluidTankModule secondaryTank;
@@ -81,6 +83,16 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         filters = definition.ghostSlots() == 0
                 ? null
                 : addModule(new GhostFilterModule(Magneticraft.id("filters"), this, definition.ghostSlots()));
+        pneumaticEndpoint = switch (definition) {
+            case RELAY, FILTER, TRANSPOSER -> addModule(new PneumaticEndpointModule(
+                    Magneticraft.id("pneumatic_endpoint"),
+                    this,
+                    definition == SingleBlockMachineDefinition.FILTER,
+                    () -> facing().getOpposite(),
+                    stack -> SingleBlockMachineSupport.filterAllows(this, this.state, stack, true)
+            ));
+            default -> null;
+        };
         inventory = definition.inventorySlots() == 0
                 ? null
                 : addModule(new ItemInventoryModule(
@@ -163,6 +175,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     @Nullable
     public GhostFilterModule filters() {
         return filters;
+    }
+
+    @Nullable
+    PneumaticEndpointModule pneumaticEndpoint() {
+        return pneumaticEndpoint;
     }
 
     @Nullable
@@ -262,20 +279,27 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
 
     public void dropContents(Level level) {
         onBroken();
-        if (inventory == null) {
-            return;
-        }
-        for (int slot = 0; slot < inventory.slots(); slot++) {
-            ItemStack stack = inventory.extractInternal(slot, Integer.MAX_VALUE, false);
-            if (!stack.isEmpty()) {
-                net.minecraft.world.Containers.dropItemStack(
-                        level,
-                        worldPosition.getX() + 0.5D,
-                        worldPosition.getY() + 0.5D,
-                        worldPosition.getZ() + 0.5D,
-                        stack
-                );
+        if (pneumaticEndpoint != null) {
+            for (ItemStack stack : pneumaticEndpoint.removeAllItems()) {
+                dropStack(level, stack);
             }
+        }
+        if (inventory != null) {
+            for (int slot = 0; slot < inventory.slots(); slot++) {
+                dropStack(level, inventory.extractInternal(slot, Integer.MAX_VALUE, false));
+            }
+        }
+    }
+
+    private void dropStack(Level level, ItemStack stack) {
+        if (!stack.isEmpty()) {
+            net.minecraft.world.Containers.dropItemStack(
+                    level,
+                    worldPosition.getX() + 0.5D,
+                    worldPosition.getY() + 0.5D,
+                    worldPosition.getZ() + 0.5D,
+                    stack
+            );
         }
     }
 
@@ -484,7 +508,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         return switch (definition) {
             case SLUICE_BOX -> slot == 0 && SingleBlockMachineSupport.findSluiceRecipe(this, stack).isPresent();
             case FEEDING_TROUGH -> slot == 0 && SingleBlockMachineSupport.isTroughFood(stack);
-            case INSERTER -> slot == 0
+            case INSERTER -> (slot == 0 && !SingleBlockMachineSupport.isInserterUpgrade(stack))
                     || (slot >= 1 && slot <= 2 && SingleBlockMachineSupport.isInserterUpgrade(stack));
             case FILTER -> slot == 0 && SingleBlockMachineSupport.filterAllows(this, state, stack, true);
             case COMBUSTION_CHAMBER -> slot == 0 && SingleBlockMachineSupport.isCombustionFuel(stack);
@@ -500,13 +524,10 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     private ItemInventoryModule.SlotAccess inventoryAccess(@Nullable Direction side) {
         int[] all = allSlots(definition.inventorySlots());
         return switch (definition) {
-            case SLUICE_BOX, FEEDING_TROUGH -> new ItemInventoryModule.SlotAccess(new int[0], new int[0]);
+            case SLUICE_BOX, FEEDING_TROUGH, INSERTER, FILTER -> ItemInventoryModule.NONE;
             case RELAY -> side == facing()
                     ? new ItemInventoryModule.SlotAccess(new int[0], new int[0])
                     : new ItemInventoryModule.SlotAccess(all, all);
-            case FILTER -> side == facing().getOpposite()
-                    ? new ItemInventoryModule.SlotAccess(new int[]{0}, new int[0])
-                    : new ItemInventoryModule.SlotAccess(new int[0], new int[0]);
             case GASIFICATION_UNIT, BRICK_FURNACE -> new ItemInventoryModule.SlotAccess(new int[]{0}, new int[]{1});
             default -> new ItemInventoryModule.SlotAccess(all, all);
         };

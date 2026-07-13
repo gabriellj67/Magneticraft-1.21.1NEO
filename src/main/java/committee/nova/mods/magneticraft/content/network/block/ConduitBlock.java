@@ -13,18 +13,28 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Compact conduit collision shape with arms only toward compatible neighbors.
  */
 public abstract class ConduitBlock extends NetworkComponentBlock {
-    private static final VoxelShape CENTER = Block.box(5, 5, 5, 11, 11, 11);
-    private static final VoxelShape[] ARMS = new VoxelShape[]{
-            Block.box(5, 0, 5, 11, 5, 11),
-            Block.box(5, 11, 5, 11, 16, 11),
-            Block.box(5, 5, 0, 11, 11, 5),
-            Block.box(5, 5, 11, 11, 11, 16),
-            Block.box(0, 5, 5, 5, 11, 11),
-            Block.box(11, 5, 5, 16, 11, 11)
-    };
+    private final VoxelShape center;
+    private final VoxelShape[] arms;
 
     protected ConduitBlock(Properties properties) {
+        this(properties, 5);
+    }
+
+    protected ConduitBlock(Properties properties, int insetPixels) {
         super(properties);
+        if (insetPixels <= 0 || insetPixels >= 8) {
+            throw new IllegalArgumentException("Conduit inset must be between 1 and 7 pixels");
+        }
+        int far = 16 - insetPixels;
+        center = Block.box(insetPixels, insetPixels, insetPixels, far, far, far);
+        arms = new VoxelShape[]{
+                Block.box(insetPixels, 0, insetPixels, far, insetPixels, far),
+                Block.box(insetPixels, far, insetPixels, far, 16, far),
+                Block.box(insetPixels, insetPixels, 0, far, far, insetPixels),
+                Block.box(insetPixels, insetPixels, far, far, far, 16),
+                Block.box(0, insetPixels, insetPixels, insetPixels, far, far),
+                Block.box(far, insetPixels, insetPixels, 16, far, far)
+        };
     }
 
     @Override
@@ -34,10 +44,10 @@ public abstract class ConduitBlock extends NetworkComponentBlock {
             BlockPos position,
             CollisionContext context
     ) {
-        VoxelShape shape = CENTER;
+        VoxelShape shape = center;
         for (Direction direction : Direction.values()) {
             if (connectsVisuallyTo(level.getBlockState(position.relative(direction)))) {
-                shape = Shapes.or(shape, ARMS[direction.ordinal()]);
+                shape = Shapes.or(shape, arms[direction.ordinal()]);
             }
         }
         return shape;
