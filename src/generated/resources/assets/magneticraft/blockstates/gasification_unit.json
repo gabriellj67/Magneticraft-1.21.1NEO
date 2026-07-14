@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "magneticraft:block/gasification_unit"
+      "model": "magneticraft:block/gasification_unit_world"
     }
   }
 }

@@ -52,6 +52,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     public static final int SLUICE_MAX_ITEMS = 10;
     public static final int SLUICE_DURATION = 80;
     private static final String MULTIBLOCK_CONTROLLER_TAG = "multiblock_controller";
+    private static final String DISPLAY_ITEM_TAG = "display_item";
 
     private final SingleBlockMachineDefinition definition;
     @Nullable
@@ -189,7 +190,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
         if (state.getValue(SingleBlockMachineBlock.LIT) != shouldBeLit) {
             level.setBlock(position, state.setValue(SingleBlockMachineBlock.LIT, shouldBeLit), Block.UPDATE_ALL);
         }
-        machine.syncClientState(visualStateHash(machine.state.progress, machine.state.totalProgress, machine.state.working));
+        machine.syncClientState(visualStateHash(machine));
         machine.finishServerTick();
     }
 
@@ -256,6 +257,14 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
 
     public boolean working() {
         return state.working;
+    }
+
+    public boolean doorOpen() {
+        return state.doorOpen;
+    }
+
+    public boolean tankExportEnabled() {
+        return state.tankExportEnabled;
     }
 
     public int inserterFlags() {
@@ -416,15 +425,48 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Override
     protected void saveClientData(CompoundTag tag) {
         state.save(tag);
+        ItemStack displayItem = displayItem();
+        if (!displayItem.isEmpty()) {
+            tag.put(DISPLAY_ITEM_TAG, displayItem.save(new CompoundTag()));
+        }
     }
 
     @Override
     protected void loadClientData(CompoundTag tag) {
         state.load(tag);
+        if (rendersInventoryItem() && inventory != null) {
+            inventory.setStackInSlot(
+                    0,
+                    tag.contains(DISPLAY_ITEM_TAG) ? ItemStack.of(tag.getCompound(DISPLAY_ITEM_TAG)) : ItemStack.EMPTY
+            );
+        }
     }
 
-    private static int visualStateHash(int progress, int totalProgress, boolean working) {
-        return 31 * (31 * progress + totalProgress) + (working ? 1 : 0);
+    private static int visualStateHash(SingleBlockMachineBlockEntity machine) {
+        SingleBlockMachineState state = machine.state;
+        int hash = 31 * (31 * state.progress + state.totalProgress) + (state.working ? 1 : 0);
+        hash = 31 * hash + (state.doorOpen ? 1 : 0);
+        hash = 31 * hash + (state.tankExportEnabled ? 1 : 0);
+        if (machine.definition == SingleBlockMachineDefinition.GASIFICATION_UNIT && machine.heat != null) {
+            hash = 31 * hash + (int) Math.floor(machine.heat.node().temperatureKelvin() / 5.0D);
+        }
+        ItemStack displayItem = machine.displayItem();
+        if (!displayItem.isEmpty()) {
+            hash = 31 * hash + displayItem.getItem().hashCode();
+            hash = 31 * hash + displayItem.getCount();
+            hash = 31 * hash + (displayItem.getTag() == null ? 0 : displayItem.getTag().hashCode());
+        }
+        return hash;
+    }
+
+    private ItemStack displayItem() {
+        return rendersInventoryItem() && inventory != null ? inventory.getStackInSlot(0) : ItemStack.EMPTY;
+    }
+
+    private boolean rendersInventoryItem() {
+        return definition == SingleBlockMachineDefinition.SLUICE_BOX
+                || definition == SingleBlockMachineDefinition.FEEDING_TROUGH
+                || definition == SingleBlockMachineDefinition.INSERTER;
     }
 
     private FluidTankModule[] createFluidTanks() {

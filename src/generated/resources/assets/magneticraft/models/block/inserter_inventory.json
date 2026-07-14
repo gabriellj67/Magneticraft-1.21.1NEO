@@ -7,21 +7,17 @@
         0
       ],
       "scale": [
-        0.625,
-        0.625,
-        0.625
+        0.57829654,
+        0.57829654,
+        0.57829654
       ],
       "translation": [
         0,
-        2.9769626,
-        1.7187499
+        -0.3235709,
+        -0.18681373
       ]
     }
   },
-  "include_nodes": [
-    "Base1",
-    "Base2"
-  ],
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/inserter.gltf",
   "textures": {

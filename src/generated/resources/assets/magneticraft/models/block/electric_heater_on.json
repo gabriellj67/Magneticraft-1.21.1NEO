@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "magneticraft:blocks/electric_machines/heater_off",
+    "end": "magneticraft:blocks/electric_machines/heater_on",
     "side": "magneticraft:blocks/electric_machines/heater"
   }
 }

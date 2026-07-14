@@ -1,0 +1,31 @@
+{
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "translation": [
+        -0.71291363,
+        1.6366831,
+        0.16518164
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/sluice_box_inv.mcx",
+  "textures": {
+    "particle": "magneticraft:blocks/machines/table_sieve_bottom"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

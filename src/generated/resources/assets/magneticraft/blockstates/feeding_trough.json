@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "magneticraft:block/feeding_trough"
+      "model": "magneticraft:block/feeding_trough_world"
     }
   }
 }

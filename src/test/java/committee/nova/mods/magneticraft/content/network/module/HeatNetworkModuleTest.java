@@ -36,6 +36,33 @@ class HeatNetworkModuleTest {
         assertEquals(HeatNode.AMBIENT_TEMPERATURE_KELVIN, node.temperatureKelvin(), 0.000_001D);
     }
 
+    @Test
+    void clientPayloadCarriesTheCurrentTemperature() {
+        HeatNode sourceNode = new HeatNode(10.0D, 0.5D);
+        HeatNetworkModule source = new HeatNetworkModule(
+                Magneticraft.id("source_heat"),
+                new TestHost(),
+                sourceNode,
+                1_000.0D,
+                ignored -> true
+        );
+        HeatNode targetNode = new HeatNode(10.0D, 0.5D);
+        HeatNetworkModule target = new HeatNetworkModule(
+                Magneticraft.id("target_heat"),
+                new TestHost(),
+                targetNode,
+                1_000.0D,
+                ignored -> true
+        );
+
+        sourceNode.setTemperature(723.15D);
+        CompoundTag tag = new CompoundTag();
+        source.saveClientData(tag);
+        target.loadClientData(tag);
+
+        assertEquals(723.15D, targetNode.temperatureKelvin(), 0.000_001D);
+    }
+
     private static final class TestHost implements MachineModuleHost {
         @Override
         public void markChanged() {

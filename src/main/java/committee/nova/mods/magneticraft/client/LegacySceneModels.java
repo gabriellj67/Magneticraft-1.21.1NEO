@@ -7,6 +7,8 @@ import committee.nova.mods.magneticraft.client.model.ModelSceneSelection;
 import committee.nova.mods.magneticraft.client.model.ModelTransform;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.Set;
 
@@ -37,6 +39,18 @@ final class LegacySceneModels {
     );
     static final Part ELECTRIC_POLE = mcx("electric_pole", ModelSceneSelection.ALL);
     static final Part ELECTRIC_POLE_TRANSFORMER = mcx("electric_pole_transformer", ModelSceneSelection.ALL);
+    static final Part SLUICE_BOX_BODY = mcx("sluice_box", excludeNodes("gravel"));
+    static final Part SLUICE_BOX_GRAVEL = mcx("sluice_box", includeNodes("gravel"));
+    static final Part SLUICE_BOX_WATER = mcx("sluice_box_water", ModelSceneSelection.ALL);
+    static final Part FEEDING_TROUGH = mcx("feeding_trough", ModelSceneSelection.ALL);
+    static final Part SMALL_TANK_SHELL = mcx("small_tank", includeNodes("top"));
+    static final Part SMALL_TANK_BASE = mcx("small_tank", includeNodes("base"));
+    static final Part COMBUSTION_CHAMBER_BODY = mcx("combustion_chamber", excludeNodes("Door"));
+    static final Part COMBUSTION_CHAMBER_DOOR = mcx("combustion_chamber", includeNodes("Door"));
+    static final Part STEAM_BOILER = mcx("steam_boiler", ModelSceneSelection.ALL);
+    static final Part GASIFICATION_UNIT = mcx("gasification_unit", ModelSceneSelection.ALL);
+    static final Part INSERTER = gltf("inserter", excludeSubtrees("item"));
+    static final Part ELECTRIC_ENGINE = gltf("electric_engine", ModelSceneSelection.ALL);
     static final Part INSERTER_MOVING = gltf("inserter", includeSubtrees("level1"));
     static final Part ELECTRIC_ENGINE_MOVING = gltf(
             "electric_engine",
@@ -113,6 +127,46 @@ final class LegacySceneModels {
                 buffers,
                 packedLight,
                 packedOverlay
+        );
+    }
+
+    @Nullable
+    static Matrix4f nodeTransform(
+            Part part,
+            String animationName,
+            double animationSeconds,
+            String nodeName
+    ) {
+        return LegacySceneRenderer.nodeTransform(
+                part.source,
+                part.sourceTransform,
+                animationName,
+                animationSeconds,
+                nodeName
+        );
+    }
+
+    static void render(
+            Part part,
+            String animationName,
+            double animationSeconds,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay,
+            LegacySceneRenderer.RenderStyle style
+    ) {
+        LegacySceneRenderer.render(
+                part.source,
+                part.selection,
+                part.sourceTransform,
+                animationName,
+                animationSeconds,
+                poseStack,
+                buffers,
+                packedLight,
+                packedOverlay,
+                style
         );
     }
 

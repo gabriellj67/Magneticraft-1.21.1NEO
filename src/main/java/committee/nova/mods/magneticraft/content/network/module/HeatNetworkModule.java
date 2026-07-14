@@ -20,6 +20,7 @@ import java.util.function.Predicate;
  */
 public final class HeatNetworkModule extends AbstractPhysicalNetworkModule implements ThermalDiagnosticSource {
     private static final String INTERNAL_ENERGY_TAG = "internal_energy_joules";
+    private static final String CLIENT_TEMPERATURE_TAG = "temperature_kelvin";
 
     private final HeatNode node;
     private final double maxTransferWatts;
@@ -86,5 +87,17 @@ public final class HeatNetworkModule extends AbstractPhysicalNetworkModule imple
     @Override
     protected void saveNetworkData(CompoundTag tag) {
         tag.putDouble(INTERNAL_ENERGY_TAG, node.internalEnergyJoules());
+    }
+
+    @Override
+    public void loadClientData(CompoundTag tag) {
+        if (tag.contains(CLIENT_TEMPERATURE_TAG, Tag.TAG_ANY_NUMERIC)) {
+            node.setTemperature(tag.getDouble(CLIENT_TEMPERATURE_TAG));
+        }
+    }
+
+    @Override
+    public void saveClientData(CompoundTag tag) {
+        tag.putDouble(CLIENT_TEMPERATURE_TAG, node.temperatureKelvin());
     }
 }

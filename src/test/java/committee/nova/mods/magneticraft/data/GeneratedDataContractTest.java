@@ -439,10 +439,27 @@ class GeneratedDataContractTest {
     void singleBlockMachineDataRecipesAndAssetsAreComplete() throws IOException {
         JsonObject english = readObject(ASSETS.resolve("lang/en_us.json"));
         JsonObject chinese = readObject(ASSETS.resolve("lang/zh_cn.json"));
+        Set<SingleBlockMachineDefinition> renderedMachines = Set.of(
+                SingleBlockMachineDefinition.SLUICE_BOX,
+                SingleBlockMachineDefinition.FEEDING_TROUGH,
+                SingleBlockMachineDefinition.SMALL_TANK,
+                SingleBlockMachineDefinition.COMBUSTION_CHAMBER,
+                SingleBlockMachineDefinition.STEAM_BOILER,
+                SingleBlockMachineDefinition.GASIFICATION_UNIT,
+                SingleBlockMachineDefinition.INSERTER,
+                SingleBlockMachineDefinition.ELECTRIC_ENGINE
+        );
         for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
             String id = definition.id();
             assertFile(ASSETS.resolve("blockstates/" + id + ".json"));
-            assertFile(ASSETS.resolve("models/block/" + id + ".json"));
+            if (renderedMachines.contains(definition)) {
+                JsonObject worldModel = readObject(ASSETS.resolve("models/block/" + id + "_world.json"));
+                assertFalse(worldModel.has("loader"), id + " world geometry belongs to the block-entity renderer");
+                assertFalse(worldModel.has("elements"), id + " world model must not duplicate the full legacy scene");
+                assertFile(ASSETS.resolve("models/block/" + id + "_inventory.json"));
+            } else {
+                assertFile(ASSETS.resolve("models/block/" + id + ".json"));
+            }
             assertFile(ASSETS.resolve("models/item/" + id + ".json"));
             assertFile(DATA.resolve("loot_tables/blocks/" + id + ".json"));
             assertTrue(english.has("block.magneticraft." + id), id);
@@ -489,16 +506,58 @@ class GeneratedDataContractTest {
 
             JsonObject textures = readObject(ASSETS.resolve("models/block/" + id + ".json"))
                     .getAsJsonObject("textures");
-            assertTrue(textures.has("up") && textures.has("down") && textures.has("east"),
+            assertTrue(textures.has("north") && textures.has("south") && textures.has("east"),
                     id + " must distinguish front, back and side faces");
-            assertFalse(textures.get("up").equals(textures.get("down")), id + " front/back texture");
-            assertFalse(textures.get("up").equals(textures.get("east")), id + " front/side texture");
+            assertFalse(textures.get("north").equals(textures.get("south")), id + " front/back texture");
+            assertFalse(textures.get("north").equals(textures.get("east")), id + " front/side texture");
         }
         for (String status : Set.of("blocked", "unloaded", "filter_rejected")) {
             String key = "message.magneticraft.pneumatic_endpoint." + status;
             assertTrue(english.has(key), key);
             assertTrue(chinese.has(key), key);
         }
+        Map.ofEntries(
+                Map.entry("wooden_crate", Map.of("all", "magneticraft:blocks/machines/box")),
+                Map.entry("fabricator", Map.of(
+                        "down", "magneticraft:blocks/machines/fabricator_bottom",
+                        "up", "magneticraft:blocks/machines/fabricator_top",
+                        "north", "magneticraft:blocks/machines/fabricator_side"
+                )),
+                Map.entry("water_generator", Map.of("all", "magneticraft:blocks/machines/water_generator")),
+                Map.entry("electric_heater", Map.of(
+                        "side", "magneticraft:blocks/electric_machines/heater",
+                        "end", "magneticraft:blocks/electric_machines/heater_off"
+                )),
+                Map.entry("electric_heater_on", Map.of("end", "magneticraft:blocks/electric_machines/heater_on")),
+                Map.entry("forge_energy_heater", Map.of(
+                        "side", "magneticraft:blocks/electric_machines/rf_heater",
+                        "end", "magneticraft:blocks/electric_machines/rf_heater_off"
+                )),
+                Map.entry("forge_energy_heater_on", Map.of(
+                        "end", "magneticraft:blocks/electric_machines/rf_heater_on"
+                )),
+                Map.entry("brick_furnace", Map.of(
+                        "side", "magneticraft:blocks/heat_machines/brick_furnace",
+                        "top", "magneticraft:blocks/heat_machines/brick_furnace_top",
+                        "front", "magneticraft:blocks/heat_machines/brick_furnace_front"
+                )),
+                Map.entry("brick_furnace_on", Map.of(
+                        "front", "magneticraft:blocks/heat_machines/brick_furnace_front_on"
+                )),
+                Map.entry("infinite_energy_source", Map.of(
+                        "side", "magneticraft:blocks/electric_machines/infinite_energy",
+                        "end", "magneticraft:blocks/electric_machines/infinite_energy_top"
+                )),
+                Map.entry("airlock", Map.of("all", "magneticraft:blocks/machines/airlock")),
+                Map.entry("thermopile", Map.of(
+                        "side", "magneticraft:blocks/electric_machines/thermopile",
+                        "end", "magneticraft:blocks/electric_machines/thermopile_top"
+                )),
+                Map.entry("forge_energy_transformer", Map.of(
+                        "side", "magneticraft:blocks/electric_machines/rf_transformer",
+                        "end", "magneticraft:blocks/electric_machines/rf_transformer_top"
+                ))
+        ).forEach((model, textures) -> assertModelTexturesUnchecked(model, textures));
         for (String id : Set.of("tube_light", "inserter_speed_upgrade", "inserter_stack_upgrade")) {
             assertFile(ASSETS.resolve("models/item/" + id + ".json"));
             assertTrue(english.has((id.equals("tube_light") ? "block" : "item") + ".magneticraft." + id), id);
@@ -683,6 +742,16 @@ class GeneratedDataContractTest {
     private static void assertLegacySceneModelUnchecked(String generatedName, String format, String sourceName) {
         try {
             assertLegacySceneModel(generatedName, format, sourceName);
+        } catch (IOException exception) {
+            throw new java.io.UncheckedIOException(exception);
+        }
+    }
+
+    private static void assertModelTexturesUnchecked(String generatedName, Map<String, String> expectedTextures) {
+        try {
+            JsonObject textures = readObject(ASSETS.resolve("models/block/" + generatedName + ".json"))
+                    .getAsJsonObject("textures");
+            expectedTextures.forEach((key, value) -> assertEquals(value, textures.get(key).getAsString(), generatedName));
         } catch (IOException exception) {
             throw new java.io.UncheckedIOException(exception);
         }

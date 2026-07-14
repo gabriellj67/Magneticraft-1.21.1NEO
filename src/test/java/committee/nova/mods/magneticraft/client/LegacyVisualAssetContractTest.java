@@ -54,8 +54,8 @@ class LegacyVisualAssetContractTest {
                 assertTrue(Files.isRegularFile(RUNTIME_ASSETS.resolve(source.replace(".gltf", ".bin"))), source);
             }
         }
-        assertEquals(59, identifiers.size(), "历史视觉清单不应被静默缩减");
-        assertEquals(45, sources.size(), "共享源模型应保持去重后的固定数量");
+        assertEquals(61, identifiers.size(), "历史视觉清单不应被静默缩减");
+        assertEquals(47, sources.size(), "共享源模型应保持去重后的固定数量");
     }
 
     @Test
@@ -92,9 +92,16 @@ class LegacyVisualAssetContractTest {
     @Test
     void generatedStaticModelsUseTheRuntimeSceneLoader() throws IOException {
         assertRuntimeModel("battery_box", "magneticraft:models/block/mcx/battery.mcx");
-        assertRuntimeModel("electric_engine", "magneticraft:models/block/gltf/electric_engine.gltf");
         assertRuntimeModel("pneumatic_tube", "magneticraft:models/block/gltf/pneumatic_tube_inv.gltf");
         assertRuntimeModel("computer", "magneticraft:models/block/mcx/computer.mcx");
+        assertRuntimeModel("sluice_box_inventory", "magneticraft:models/block/mcx/sluice_box_inv.mcx");
+        assertRuntimeModel("feeding_trough_inventory", "magneticraft:models/block/mcx/feeding_trough_inv.mcx");
+        assertRuntimeModel("small_tank_inventory", "magneticraft:models/block/mcx/small_tank.mcx");
+        assertRuntimeModel("combustion_chamber_inventory", "magneticraft:models/block/mcx/combustion_chamber.mcx");
+        assertRuntimeModel("steam_boiler_inventory", "magneticraft:models/block/mcx/steam_boiler.mcx");
+        assertRuntimeModel("gasification_unit_inventory", "magneticraft:models/block/mcx/gasification_unit.mcx");
+        assertRuntimeModel("inserter_inventory", "magneticraft:models/block/gltf/inserter.gltf");
+        assertRuntimeModel("electric_engine_inventory", "magneticraft:models/block/gltf/electric_engine.gltf");
     }
 
     private static void assertRuntimeModel(String name, String source) throws IOException {

@@ -10,17 +10,18 @@
         0.625,
         0.625,
         0.625
+      ],
+      "translation": [
+        0.052700575,
+        2.679096,
+        1.60763
       ]
     }
   },
-  "exclude_subtrees": [
-    "Group 18",
-    "piston"
-  ],
   "loader": "magneticraft:legacy_scene",
-  "model": "magneticraft:models/block/gltf/electric_engine.gltf",
+  "model": "magneticraft:models/block/mcx/feeding_trough_inv.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/electric_machines/electric_engine"
+    "particle": "magneticraft:blocks/machines/feeding_trough"
   },
   "translation": [
     0.0,

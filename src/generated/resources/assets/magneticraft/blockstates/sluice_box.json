@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "magneticraft:block/sluice_box"
+      "model": "magneticraft:block/sluice_box_world"
     }
   }
 }

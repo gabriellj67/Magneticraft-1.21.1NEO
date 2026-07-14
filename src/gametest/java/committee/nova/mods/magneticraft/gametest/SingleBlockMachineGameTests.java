@@ -370,7 +370,11 @@ public final class SingleBlockMachineGameTests {
     @GameTest(template = TEMPLATE, timeoutTicks = 430)
     public static void feedingTroughUsesPositionPhaseAndLegacyOneItemBoundary(GameTestHelper helper) {
         helper.killAllEntitiesOfClass(Animal.class);
-        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FEEDING_TROUGH, Direction.EAST));
+        SingleBlockMachineBlock block = (SingleBlockMachineBlock) ModMachineBlocks
+                .machine(SingleBlockMachineDefinition.FEEDING_TROUGH).get();
+        BlockState primary = machineState(SingleBlockMachineDefinition.FEEDING_TROUGH, Direction.EAST);
+        helper.setBlock(CENTER, primary);
+        block.setPlacedBy(helper.getLevel(), helper.absolutePos(CENTER), primary, null, ItemStack.EMPTY);
         SingleBlockMachineBlockEntity trough = requireMachine(helper, CENTER);
         trough.inventory().setStackInSlot(0, new ItemStack(Items.WHEAT));
         Cow cow = spawnAnimal(helper, EntityType.COW, CENTER.north());

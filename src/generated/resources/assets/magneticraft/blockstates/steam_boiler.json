@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "magneticraft:block/steam_boiler"
+      "model": "magneticraft:block/steam_boiler_world"
     }
   }
 }

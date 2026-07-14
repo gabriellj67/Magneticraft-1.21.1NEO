@@ -90,6 +90,22 @@ class LegacyDynamicSceneContractTest {
     @Test
     void releasedNamedPartsPartitionBodiesWithoutDuplicateGeometry() throws Exception {
         assertPartition(
+                parseMcx("sluice_box"),
+                new ModelSceneSelection(Set.of(), Set.of(), Set.of("gravel"), Set.of()),
+                new ModelSceneSelection(Set.of("gravel"), Set.of(), Set.of(), Set.of())
+        );
+        assertPartition(
+                parseMcx("combustion_chamber"),
+                new ModelSceneSelection(Set.of(), Set.of(), Set.of("Door"), Set.of()),
+                new ModelSceneSelection(Set.of("Door"), Set.of(), Set.of(), Set.of())
+        );
+        assertPartition(
+                parseGltf("inserter"),
+                new ModelSceneSelection(Set.of(), Set.of(), Set.of(), Set.of("item")),
+                new ModelSceneSelection(Set.of(), Set.of("item"), Set.of(), Set.of()),
+                false
+        );
+        assertPartition(
                 parseGltf("big_combustion_chamber"),
                 new ModelSceneSelection(Set.of(), Set.of(), Set.of(), Set.of("fire_on", "fire_off")),
                 new ModelSceneSelection(Set.of(), Set.of("fire_on", "fire_off"), Set.of(), Set.of())
@@ -137,6 +153,15 @@ class LegacyDynamicSceneContractTest {
             ModelSceneSelection body,
             ModelSceneSelection moving
     ) {
+        assertPartition(scene, body, moving, true);
+    }
+
+    private static void assertPartition(
+            ModelScene scene,
+            ModelSceneSelection body,
+            ModelSceneSelection moving,
+            boolean movingHasGeometry
+    ) {
         Set<Integer> bodyNodes = body.select(scene);
         Set<Integer> movingNodes = moving.select(scene);
         assertTrue(bodyNodes.stream().noneMatch(movingNodes::contains));
@@ -144,7 +169,11 @@ class LegacyDynamicSceneContractTest {
         combined.addAll(movingNodes);
         assertEquals(ModelSceneSelection.ALL.select(scene), combined);
         assertSelectionHasGeometry(scene, body);
-        assertSelectionHasGeometry(scene, moving);
+        if (movingHasGeometry) {
+            assertSelectionHasGeometry(scene, moving);
+        } else {
+            assertFalse(movingNodes.isEmpty());
+        }
     }
 
     private static ModelScene parseMcx(String name) throws Exception {

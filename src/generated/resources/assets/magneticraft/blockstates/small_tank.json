@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "magneticraft:block/small_tank"
+      "model": "magneticraft:block/small_tank_world"
     }
   }
 }

@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube_column",
   "textures": {
-    "all": "minecraft:block/smooth_stone"
+    "end": "magneticraft:blocks/electric_machines/thermopile_top",
+    "side": "magneticraft:blocks/electric_machines/thermopile"
   }
 }

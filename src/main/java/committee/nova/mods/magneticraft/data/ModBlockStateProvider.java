@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.client.model.ModelTransform;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlock;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlock;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
@@ -69,7 +70,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 modLoc("blocks/electric_machines/battery"),
                 ModelSceneSelection.ALL
         );
-        horizontalBlock(battery, batteryModel);
+        legacyHorizontalBlock(battery, batteryModel, 180);
         simpleBlockItem(battery, batteryModel);
 
         Block grate = ModMachineBlocks.GRATE.get();
@@ -80,44 +81,27 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         Block electricFurnace = ModMachineBlocks.ELECTRIC_FURNACE.get();
-        ModelFile furnaceOff = mcxModel(
+        ResourceLocation electricFurnaceTexture = modLoc("blocks/electric_machines/electric_furnace");
+        ModelFile furnaceOff = models().orientable(
                 "electric_furnace",
-                "electric_furnace",
-                modLoc("blocks/electric_machines/electric_furnace"),
-                ModelSceneSelection.ALL
+                electricFurnaceTexture,
+                modLoc("blocks/electric_machines/electric_furnace_front"),
+                electricFurnaceTexture
         );
-        ModelFile furnaceOn = furnaceOff;
+        ModelFile furnaceOn = models().orientable(
+                "electric_furnace_on",
+                electricFurnaceTexture,
+                modLoc("blocks/electric_machines/electric_furnace_front_on"),
+                electricFurnaceTexture
+        );
         horizontalBlock(
                 electricFurnace,
                 state -> state.getValue(ElectricFurnaceBlock.LIT) ? furnaceOn : furnaceOff
         );
         simpleBlockItem(electricFurnace, furnaceOff);
 
-        ModMachineBlocks.machines().forEach((definition, holder) -> {
-            Block block = holder.get();
-            ModelFile historicalModel = historicalSingleBlockModel(definition);
-            if (historicalModel != null) {
-                registerSingleBlockMachineModel(block, definition, historicalModel);
-                return;
-            }
-            if (definition == SingleBlockMachineDefinition.RELAY
-                    || definition == SingleBlockMachineDefinition.FILTER
-                    || definition == SingleBlockMachineDefinition.TRANSPOSER) {
-                ModelFile model = pneumaticEndpointModel(definition);
-                directionalBlock(block, model);
-                simpleBlockItem(block, model);
-            } else {
-                ResourceLocation texture = definition.isWooden()
-                        ? mcLoc("block/oak_planks")
-                        : switch (definition) {
-                            case COMBUSTION_CHAMBER, BRICK_FURNACE -> mcLoc("block/bricks");
-                            case STEAM_BOILER, SMALL_TANK, WATER_GENERATOR -> mcLoc("block/iron_block");
-                            case AIRLOCK -> mcLoc("block/glass");
-                            default -> mcLoc("block/smooth_stone");
-                        };
-                simpleBlockWithItem(block, models().cubeAll(definition.id(), texture));
-            }
-        });
+        ModMachineBlocks.machines().forEach((definition, holder) ->
+                registerSingleBlockMachineModel(holder.get(), definition));
         simpleBlock(
                 ModMachineBlocks.AIR_BUBBLE.get(),
                 models().cubeAll("air_bubble", mcLoc("block/white_stained_glass"))
@@ -243,47 +227,184 @@ final class ModBlockStateProvider extends BlockStateProvider {
         }
     }
 
-    private ModelFile historicalSingleBlockModel(SingleBlockMachineDefinition definition) {
-        return switch (definition) {
-            case COMBUSTION_CHAMBER -> mcxModel(
-                    definition.id(), "combustion_chamber", modLoc("blocks/machines/combustion_gen_top"),
-                    ModelSceneSelection.ALL
+    private void registerSingleBlockMachineModel(Block block, SingleBlockMachineDefinition definition) {
+        switch (definition) {
+            case BOX -> simpleBlockWithItem(
+                    block,
+                    models().cubeAll(definition.id(), modLoc("blocks/machines/box"))
             );
-            case STEAM_BOILER -> mcxModel(
-                    definition.id(), "steam_boiler", modLoc("blocks/machines/boiler"),
-                    ModelSceneSelection.ALL
+            case FABRICATOR -> simpleBlockWithItem(block, models().cube(
+                    definition.id(),
+                    modLoc("blocks/machines/fabricator_bottom"),
+                    modLoc("blocks/machines/fabricator_top"),
+                    modLoc("blocks/machines/fabricator_side"),
+                    modLoc("blocks/machines/fabricator_side"),
+                    modLoc("blocks/machines/fabricator_side"),
+                    modLoc("blocks/machines/fabricator_side")
+            ));
+            case WATER_GENERATOR -> simpleBlockWithItem(
+                    block,
+                    models().cubeAll(definition.id(), modLoc("blocks/machines/water_generator"))
             );
-            case SMALL_TANK -> mcxModel(
-                    definition.id(), "small_tank", modLoc("blocks/fluid_machines/small_tank"),
-                    ModelSceneSelection.ALL
+            case ELECTRIC_HEATER -> registerLitColumn(
+                    block,
+                    definition.id(),
+                    modLoc("blocks/electric_machines/heater"),
+                    modLoc("blocks/electric_machines/heater_off"),
+                    modLoc("blocks/electric_machines/heater_on")
             );
-            case GASIFICATION_UNIT -> mcxModel(
-                    definition.id(), "gasification_unit", modLoc("blocks/machines/gasification_unit"),
-                    ModelSceneSelection.ALL
+            case RF_HEATER -> registerLitColumn(
+                    block,
+                    definition.id(),
+                    modLoc("blocks/electric_machines/rf_heater"),
+                    modLoc("blocks/electric_machines/rf_heater_off"),
+                    modLoc("blocks/electric_machines/rf_heater_on")
             );
-            case INSERTER -> gltfModel(
-                    definition.id(), "inserter", modLoc("blocks/machines/inserter"),
-                    new ModelSceneSelection(Set.of("Base1", "Base2"), Set.of(), Set.of(), Set.of())
+            case BRICK_FURNACE -> registerLitHorizontal(
+                    block,
+                    definition.id(),
+                    modLoc("blocks/heat_machines/brick_furnace"),
+                    modLoc("blocks/heat_machines/brick_furnace_top"),
+                    modLoc("blocks/heat_machines/brick_furnace_front"),
+                    modLoc("blocks/heat_machines/brick_furnace_front_on")
             );
-            case ELECTRIC_ENGINE -> gltfModel(
-                    definition.id(), "electric_engine", modLoc("blocks/electric_machines/electric_engine"),
-                    new ModelSceneSelection(Set.of(), Set.of(), Set.of(), Set.of("Group 18", "piston"))
+            case INFINITE_ENERGY -> simpleBlockWithItem(
+                    block,
+                    models().cubeColumn(
+                            definition.id(),
+                            modLoc("blocks/electric_machines/infinite_energy"),
+                            modLoc("blocks/electric_machines/infinite_energy_top")
+                    )
             );
-            default -> null;
-        };
+            case AIRLOCK -> simpleBlockWithItem(
+                    block,
+                    models().cubeAll(definition.id(), modLoc("blocks/machines/airlock"))
+            );
+            case THERMOPILE -> simpleBlockWithItem(
+                    block,
+                    models().cubeColumn(
+                            definition.id(),
+                            modLoc("blocks/electric_machines/thermopile"),
+                            modLoc("blocks/electric_machines/thermopile_top")
+                    )
+            );
+            case RF_TRANSFORMER -> simpleBlockWithItem(
+                    block,
+                    models().cubeColumn(
+                            definition.id(),
+                            modLoc("blocks/electric_machines/rf_transformer"),
+                            modLoc("blocks/electric_machines/rf_transformer_top")
+                    )
+            );
+            case RELAY, FILTER, TRANSPOSER -> registerPneumaticEndpoint(block, definition);
+            case SLUICE_BOX -> registerRenderedMachine(
+                    block,
+                    definition,
+                    modLoc("blocks/machines/table_sieve_bottom"),
+                    mcxModel(definition.id() + "_inventory", "sluice_box_inv",
+                            modLoc("blocks/machines/table_sieve_bottom"), ModelSceneSelection.ALL)
+            );
+            case FEEDING_TROUGH -> registerRenderedMachine(
+                    block,
+                    definition,
+                    modLoc("blocks/machines/feeding_trough"),
+                    mcxModel(definition.id() + "_inventory", "feeding_trough_inv",
+                            modLoc("blocks/machines/feeding_trough"), ModelSceneSelection.ALL)
+            );
+            case SMALL_TANK -> registerRenderedMachine(
+                    block,
+                    definition,
+                    modLoc("blocks/fluid_machines/small_tank_in"),
+                    mcxModel(definition.id() + "_inventory", "small_tank",
+                            modLoc("blocks/fluid_machines/small_tank_in"), ModelSceneSelection.ALL)
+            );
+            case COMBUSTION_CHAMBER -> registerRenderedMachine(
+                    block,
+                    definition,
+                    modLoc("blocks/machines/combustion_gen_side1"),
+                    mcxModel(definition.id() + "_inventory", "combustion_chamber",
+                            modLoc("blocks/machines/combustion_gen_side1"), ModelSceneSelection.ALL)
+            );
+            case STEAM_BOILER -> registerRenderedMachine(
+                    block,
+                    definition,
+                    modLoc("blocks/machines/boiler"),
+                    mcxModel(definition.id() + "_inventory", "steam_boiler",
+                            modLoc("blocks/machines/boiler"), ModelSceneSelection.ALL)
+            );
+            case GASIFICATION_UNIT -> registerRenderedMachine(
+                    block,
+                    definition,
+                    modLoc("blocks/machines/gasification_unit"),
+                    mcxModel(definition.id() + "_inventory", "gasification_unit",
+                            modLoc("blocks/machines/gasification_unit"), ModelSceneSelection.ALL)
+            );
+            case INSERTER -> registerRenderedMachine(
+                    block,
+                    definition,
+                    modLoc("blocks/machines/inserter"),
+                    gltfModel(definition.id() + "_inventory", "inserter",
+                            modLoc("blocks/machines/inserter"), ModelSceneSelection.ALL)
+            );
+            case ELECTRIC_ENGINE -> registerRenderedMachine(
+                    block,
+                    definition,
+                    modLoc("blocks/electric_machines/electric_engine"),
+                    gltfModel(definition.id() + "_inventory", "electric_engine",
+                            modLoc("blocks/electric_machines/electric_engine"), ModelSceneSelection.ALL)
+            );
+        }
     }
 
-    private void registerSingleBlockMachineModel(
+    private void registerRenderedMachine(
             Block block,
             SingleBlockMachineDefinition definition,
-            ModelFile model
+            ResourceLocation particle,
+            ModelFile inventoryModel
     ) {
-        if (definition.facingMode() == SingleBlockMachineDefinition.FacingMode.NONE) {
-            simpleBlock(block, model);
-        } else {
-            directionalBlock(block, model);
-        }
-        simpleBlockItem(block, model);
+        simpleBlock(block, emptyModel(definition.id() + "_world", particle));
+        simpleBlockItem(block, inventoryModel);
+    }
+
+    private void registerLitColumn(
+            Block block,
+            String name,
+            ResourceLocation side,
+            ResourceLocation endOff,
+            ResourceLocation endOn
+    ) {
+        ModelFile off = models().cubeColumn(name, side, endOff);
+        ModelFile on = models().cubeColumn(name + "_on", side, endOn);
+        getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(state.getValue(SingleBlockMachineBlock.LIT) ? on : off)
+                .build());
+        simpleBlockItem(block, off);
+    }
+
+    private void registerLitHorizontal(
+            Block block,
+            String name,
+            ResourceLocation side,
+            ResourceLocation top,
+            ResourceLocation frontOff,
+            ResourceLocation frontOn
+    ) {
+        ModelFile off = models().orientable(name, side, frontOff, top);
+        ModelFile on = models().orientable(name + "_on", side, frontOn, top);
+        getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(state.getValue(SingleBlockMachineBlock.LIT) ? on : off)
+                .rotationY(vanillaHorizontalRotation(state.getValue(SingleBlockMachineBlock.FACING)))
+                .build());
+        simpleBlockItem(block, off);
+    }
+
+    private static int vanillaHorizontalRotation(Direction facing) {
+        return switch (facing) {
+            case EAST -> 90;
+            case SOUTH -> 180;
+            case WEST -> 270;
+            default -> 0;
+        };
     }
 
     private void legacyConduitBlock(Block block, String artifactName) {
@@ -460,23 +581,55 @@ final class ModBlockStateProvider extends BlockStateProvider {
         return new ModelSceneSelection(Set.of(names), Set.of(), Set.of(), Set.of());
     }
 
-    private ModelFile pneumaticEndpointModel(SingleBlockMachineDefinition definition) {
-        ResourceLocation side = switch (definition) {
-            case RELAY -> mcLoc("block/polished_andesite");
-            case FILTER -> mcLoc("block/iron_block");
-            case TRANSPOSER -> mcLoc("block/deepslate_tiles");
+    private void registerPneumaticEndpoint(Block block, SingleBlockMachineDefinition definition) {
+        String texture = switch (definition) {
+            case RELAY -> "relay";
+            case FILTER -> "filter";
+            case TRANSPOSER -> "transposer";
             default -> throw new IllegalArgumentException("Not a pneumatic endpoint: " + definition);
         };
-        ResourceLocation front = switch (definition) {
-            case RELAY -> mcLoc("block/copper_block");
-            case FILTER -> modLoc("block/iron_grate");
-            case TRANSPOSER -> mcLoc("block/dispenser_front");
-            default -> throw new IllegalArgumentException("Not a pneumatic endpoint: " + definition);
-        };
-        ResourceLocation back = definition == SingleBlockMachineDefinition.FILTER
-                ? mcLoc("block/copper_block")
-                : mcLoc("block/iron_block");
-        return models().cube(definition.id(), back, front, side, side, side, side);
+        ResourceLocation side = modLoc("blocks/machines/" + texture + "_side");
+        ModelFile model = models().withExistingParent(definition.id(), modLoc("block/pneumatic_endpoint"))
+                .texture("particle", modLoc("blocks/machines/" + texture + "_front"))
+                .texture("down", side)
+                .texture("up", side)
+                .texture("north", modLoc("blocks/machines/" + texture + "_front"))
+                .texture("east", side)
+                .texture("south", modLoc("blocks/machines/" + texture + "_back"))
+                .texture("west", side);
+        getVariantBuilder(block).forAllStates(state -> {
+            Direction facing = state.getValue(SingleBlockMachineBlock.FACING);
+            int rotationX = switch (facing) {
+                case DOWN -> 90;
+                case UP -> 270;
+                default -> 0;
+            };
+            int rotationY = switch (facing) {
+                case DOWN, UP, EAST -> 90;
+                case SOUTH -> 180;
+                case WEST -> 270;
+                default -> 0;
+            };
+            return ConfiguredModel.builder()
+                    .modelFile(model)
+                    .rotationX(rotationX)
+                    .rotationY(rotationY)
+                    .build();
+        });
+        simpleBlockItem(block, model);
+    }
+
+    private void legacyHorizontalBlock(Block block, ModelFile model, int offset) {
+        getVariantBuilder(block).forAllStates(state -> {
+            Direction facing = state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING);
+            int rotation = Math.floorMod(switch (facing) {
+                case SOUTH -> 180;
+                case WEST -> 90;
+                case EAST -> 270;
+                default -> 0;
+            } + offset, 360);
+            return ConfiguredModel.builder().modelFile(model).rotationY(rotation).build();
+        });
     }
 
     private ModelFile advancedControllerItemModel(MultiblockDefinition definition) {

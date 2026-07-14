@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "front": "magneticraft:blocks/heat_machines/brick_furnace_front",
+    "front": "magneticraft:blocks/heat_machines/brick_furnace_front_on",
     "side": "magneticraft:blocks/heat_machines/brick_furnace",
     "top": "magneticraft:blocks/heat_machines/brick_furnace_top"
   }

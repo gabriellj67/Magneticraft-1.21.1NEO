@@ -59,7 +59,7 @@ class LegacySourceModelParserContractTest {
             assertFalse(scene.nodes().isEmpty(), () -> source + " contains no parsed nodes");
         }
 
-        assertEquals(31, mcxCount);
+        assertEquals(33, mcxCount);
         assertEquals(14, gltfCount);
         assertEquals(511, gltfNodes);
         assertEquals(354, gltfReferencedPrimitives.size());
