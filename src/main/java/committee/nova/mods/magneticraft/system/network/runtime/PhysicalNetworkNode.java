@@ -15,6 +15,11 @@ public interface PhysicalNetworkNode {
 
     Set<Direction> connectionSides();
 
+    /** Resolves a position-only proxy to the authoritative state-owning node. */
+    default PhysicalNetworkNode transferNode() {
+        return this;
+    }
+
     default boolean canConnect(Direction side, PhysicalNetworkNode other) {
         return domain() == other.domain()
                 && connectionSides().contains(side)

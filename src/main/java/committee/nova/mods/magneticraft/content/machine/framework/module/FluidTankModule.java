@@ -206,6 +206,14 @@ public final class FluidTankModule implements MachineModule {
         return tank;
     }
 
+    /** Creates a non-owning view used by an exact multiblock structure port. */
+    public IFluidHandler portHandler(TankAccess access) {
+        if (access == null || access == TankAccess.NONE) {
+            throw new IllegalArgumentException("A multiblock fluid port must expose input or output");
+        }
+        return new RestrictedFluidHandler(tank, access);
+    }
+
     private FluidStack infiniteDrain(@Nullable FluidStack requested, int maximum) {
         FluidStack source = infiniteSource == null ? FluidStack.EMPTY : infiniteSource.get();
         if (source == null || source.isEmpty() || maximum <= 0

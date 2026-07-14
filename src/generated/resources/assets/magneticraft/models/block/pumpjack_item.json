@@ -1,0 +1,31 @@
+{
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.104166664,
+        0.104166664,
+        0.104166664
+      ],
+      "translation": [
+        1.7677674,
+        -1.7322352,
+        -3.0413475
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/pumpjack.mcx",
+  "textures": {
+    "particle": "minecraft:block/iron_block"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

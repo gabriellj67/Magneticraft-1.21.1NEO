@@ -1,31 +1,6 @@
 {
-  "display": {
-    "gui": {
-      "rotation": [
-        30,
-        225,
-        0
-      ],
-      "scale": [
-        0.20833333,
-        0.20833333,
-        0.20833333
-      ],
-      "translation": [
-        0,
-        -2.8867514,
-        -1.6666665
-      ]
-    }
-  },
-  "loader": "magneticraft:legacy_scene",
-  "model": "magneticraft:models/block/mcx/solar_tower.mcx",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "particle": "minecraft:block/iron_block"
-  },
-  "translation": [
-    0.0,
-    0.0,
-    0.0
-  ]
+    "all": "minecraft:block/iron_block"
+  }
 }

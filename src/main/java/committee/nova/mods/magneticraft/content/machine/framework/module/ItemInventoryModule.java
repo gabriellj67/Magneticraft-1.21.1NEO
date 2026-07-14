@@ -126,6 +126,14 @@ public final class ItemInventoryModule implements MachineModule {
         return handler.extractItem(slot, amount, simulate);
     }
 
+    /** Creates a non-owning view used by an exact multiblock structure port. */
+    public IItemHandler portHandler(SlotAccess access) {
+        if (access == null || access.isEmpty()) {
+            throw new IllegalArgumentException("A multiblock item port must expose insertion or extraction");
+        }
+        return new RestrictedItemHandler(handler, access);
+    }
+
     private LazyOptional<IItemHandler> viewFor(@Nullable Direction side) {
         SlotAccess access = accessBySide.apply(side);
         if (access == null || access.isEmpty()) {

@@ -1,0 +1,31 @@
+{
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.08928572,
+        0.08928572,
+        0.08928572
+      ],
+      "translation": [
+        0,
+        -1.2371793,
+        -0.7142857
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/container.mcx",
+  "textures": {
+    "particle": "minecraft:block/iron_block"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

@@ -9,6 +9,7 @@ import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlo
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockCell;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockRule;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockTransform;
 import committee.nova.mods.magneticraft.content.multiblock.StructureOffset;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
@@ -17,6 +18,10 @@ import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -415,6 +420,149 @@ public final class AdvancedSystemsGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 80)
+    public static void formedGapForwardsOnlyExactOilHeaterFluidPorts(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.OIL_HEATER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Oil heater did not form");
+
+        MultiblockPortLayout.Port inputPort = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.FLUID && port.target() == 0)
+                .findFirst()
+                .orElseThrow();
+        Direction inputSide = inputPort.worldSide(controller.facing());
+        BlockPos inputPosition = inputPort.worldPosition(controller);
+        IFluidHandler input = helper.getLevel().getBlockEntity(inputPosition)
+                .getCapability(ForgeCapabilities.FLUID_HANDLER, inputSide)
+                .orElseThrow(AssertionError::new);
+        helper.assertFalse(helper.getLevel().getBlockEntity(inputPosition)
+                        .getCapability(ForgeCapabilities.FLUID_HANDLER, inputSide.getOpposite()).isPresent(),
+                "Oil input gap exposed a non-port face");
+        int filled = input.fill(
+                new FluidStack(ModFluids.get(FluidDefinition.OIL).source().get(), 250),
+                IFluidHandler.FluidAction.EXECUTE
+        );
+        helper.assertTrue(filled == 250 && controller.tank(0).tank().getFluidAmount() == 250,
+                "Oil input gap did not forward into controller tank 0");
+
+        MultiblockPortLayout.Port outputPort = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.FLUID && port.target() == 1)
+                .findFirst()
+                .orElseThrow();
+        controller.tank(1).tank().fill(
+                new FluidStack(ModFluids.get(FluidDefinition.HOT_CRUDE).source().get(), 180),
+                IFluidHandler.FluidAction.EXECUTE
+        );
+        IFluidHandler output = helper.getLevel().getBlockEntity(outputPort.worldPosition(controller))
+                .getCapability(ForgeCapabilities.FLUID_HANDLER, outputPort.worldSide(controller.facing()))
+                .orElseThrow(AssertionError::new);
+        helper.assertTrue(output.fill(
+                new FluidStack(ModFluids.get(FluidDefinition.HOT_CRUDE).source().get(), 10),
+                IFluidHandler.FluidAction.EXECUTE
+        ) == 0, "Oil heater output accepted input");
+        helper.assertTrue(output.drain(180, IFluidHandler.FluidAction.EXECUTE).getAmount() == 180,
+                "Oil heater output gap did not drain controller tank 1");
+        clear(helper, occupied);
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 80)
+    public static void formedGapForwardsExactGrinderItemSlots(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.GRINDER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Grinder did not form");
+
+        MultiblockPortLayout.Port inputPort = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.ITEM
+                        && port.itemAccess().canInsert(0)
+                        && !port.worldPosition(controller).equals(controller.getBlockPos()))
+                .findFirst()
+                .orElseThrow();
+        IItemHandler input = helper.getLevel().getBlockEntity(inputPort.worldPosition(controller))
+                .getCapability(ForgeCapabilities.ITEM_HANDLER, inputPort.worldSide(controller.facing()))
+                .orElseThrow(AssertionError::new);
+        helper.assertTrue(input.insertItem(0, new ItemStack(Items.COBBLESTONE), false).isEmpty(),
+                "Grinder input gap rejected a valid recipe item");
+        helper.assertTrue(controller.inventory().getStackInSlot(0).is(Items.COBBLESTONE),
+                "Grinder input gap did not change controller slot 0");
+        helper.assertTrue(input.extractItem(1, 1, false).isEmpty(),
+                "Grinder input gap exposed an output slot");
+
+        controller.inventory().setStackInSlot(1, new ItemStack(Items.GRAVEL, 2));
+        MultiblockPortLayout.Port outputPort = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.ITEM
+                        && port.itemAccess().canExtract(1))
+                .findFirst()
+                .orElseThrow();
+        IItemHandler output = helper.getLevel().getBlockEntity(outputPort.worldPosition(controller))
+                .getCapability(ForgeCapabilities.ITEM_HANDLER, outputPort.worldSide(controller.facing()))
+                .orElseThrow(AssertionError::new);
+        helper.assertTrue(output.insertItem(0, new ItemStack(Items.COBBLESTONE), false).getCount() == 1,
+                "Grinder output gap accepted input");
+        helper.assertTrue(output.extractItem(1, 2, false).getCount() == 2,
+                "Grinder output gap did not extract controller slot 1");
+        clear(helper, occupied);
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void exactGrinderElectricalPortConnectsAndTransfers(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.GRINDER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Grinder did not form");
+        MultiblockPortLayout.Port port = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(candidate -> candidate.kind() == MultiblockPortLayout.Kind.ELECTRICITY)
+                .findFirst()
+                .orElseThrow();
+        Direction outward = port.worldSide(controller.facing());
+        BlockPos cablePosition = port.worldPosition(controller).relative(outward);
+        helper.getLevel().setBlock(cablePosition, ModNetworkBlocks.ELECTRIC_CABLE.get().defaultBlockState(),
+                net.minecraft.world.level.block.Block.UPDATE_ALL);
+        ElectricCableBlockEntity cable = (ElectricCableBlockEntity) helper.getLevel().getBlockEntity(cablePosition);
+        cable.electricity().node().setEnergyJoules(2_000.0D);
+
+        helper.runAfterDelay(20, () -> {
+            var manager = PhysicalNetworkService.manager(helper.getLevel());
+            helper.assertTrue(manager.component(NetworkDomain.ELECTRICITY, cablePosition).size() == 2,
+                    "Grinder port proxy did not join the cable component");
+            helper.assertTrue(controller.electricity().node().energyJoules() > 0.0D
+                            || controller.energy().getEnergyStored() > 0,
+                    "Grinder port proxy did not transfer electrical energy");
+            helper.getLevel().setBlock(cablePosition, Blocks.AIR.defaultBlockState(),
+                    net.minecraft.world.level.block.Block.UPDATE_ALL);
+            clear(helper, occupied);
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 40)
+    public static void unformedHologramTogglePersists(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        helper.setBlock(CONTROLLER, ModAdvancedBlocks.controller(MultiblockDefinition.SOLAR_PANEL)
+                .get().defaultBlockState());
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.hologramEnabled(), "New controller did not default to hologram enabled");
+        controller.toggleHologram(player);
+        helper.assertFalse(controller.hologramEnabled(), "Hologram toggle did not disable projection");
+        CompoundTag saved = controller.saveWithoutMetadata();
+        AdvancedMultiblockBlockEntity restored = new AdvancedMultiblockBlockEntity(
+                controller.getBlockPos(), controller.getBlockState()
+        );
+        restored.load(saved);
+        helper.assertFalse(restored.hologramEnabled(), "Hologram toggle did not persist");
+        helper.setBlock(CONTROLLER, Blocks.AIR);
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE, timeoutTicks = 40)
     public static void frozenTankClaimCannotBeOverwritten(GameTestHelper helper) {
         BlockPos tankPosition = new BlockPos(4, 2, 4);
@@ -486,15 +634,24 @@ public final class AdvancedSystemsGameTests {
         );
         AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
         helper.assertTrue(controller.tryForm(player), "Grinder did not form");
-        IItemHandler recoveryPort = controller.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.SOUTH)
+        MultiblockPortLayout.Port inputPort = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.ITEM
+                        && port.itemAccess().canInsert(0)
+                        && !port.worldPosition(controller).equals(controller.getBlockPos()))
+                .findFirst()
+                .orElseThrow();
+        IItemHandler inputHandler = helper.getLevel().getBlockEntity(inputPort.worldPosition(controller))
+                .getCapability(ForgeCapabilities.ITEM_HANDLER, inputPort.worldSide(controller.facing()))
                 .orElseThrow(AssertionError::new);
-        ItemStack invalid = recoveryPort.insertItem(0, new ItemStack(Items.DIRT), false);
+        ItemStack invalid = inputHandler.insertItem(0, new ItemStack(Items.DIRT), false);
         helper.assertTrue(invalid.getCount() == 1, "Grinder accepted an item with no grinder recipe");
-        helper.assertTrue(recoveryPort.insertItem(0, new ItemStack(Items.COBBLESTONE), false).isEmpty(),
+        helper.assertTrue(inputHandler.insertItem(0, new ItemStack(Items.COBBLESTONE), false).isEmpty(),
                 "Grinder rejected its generated cobblestone recipe");
-        helper.assertTrue(recoveryPort.extractItem(0, 1, false).is(Items.COBBLESTONE),
-                "Back service port could not recover grinder input");
-        recoveryPort.insertItem(0, new ItemStack(Items.COBBLESTONE), false);
+        helper.assertTrue(inputHandler.extractItem(0, 1, false).isEmpty(),
+                "Grinder input port exposed extraction");
+        helper.assertTrue(controller.inventory().extractInternal(0, 1, false).is(Items.COBBLESTONE),
+                "Grinder internal input could not be reset for processing check");
+        inputHandler.insertItem(0, new ItemStack(Items.COBBLESTONE), false);
         controller.electricity().node().setVoltage(60.0D);
         controller.energy().setEnergyStored(5_000);
 
@@ -772,16 +929,19 @@ public final class AdvancedSystemsGameTests {
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 160)
-    public static void combustionFluidPortRejectsInvalidFluidAndAllowsRecovery(GameTestHelper helper) {
+    public static void combustionFluidPortRejectsInvalidFluidAndOutput(GameTestHelper helper) {
         Player player = helper.makeMockSurvivalPlayer();
         List<BlockPos> occupied = build(
                 helper, MultiblockDefinition.BIG_COMBUSTION_CHAMBER, CONTROLLER, Direction.NORTH, false
         );
         AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
         helper.assertTrue(controller.tryForm(player), "Big combustion chamber did not form");
-        IFluidHandler input = controller.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.UP)
-                .orElseThrow(AssertionError::new);
-        IFluidHandler recovery = controller.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
+        MultiblockPortLayout.Port inputPort = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.FLUID)
+                .findFirst()
+                .orElseThrow();
+        IFluidHandler input = helper.getLevel().getBlockEntity(inputPort.worldPosition(controller))
+                .getCapability(ForgeCapabilities.FLUID_HANDLER, inputPort.worldSide(controller.facing()))
                 .orElseThrow(AssertionError::new);
         helper.assertTrue(input.fill(
                 new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 100),
@@ -791,8 +951,8 @@ public final class AdvancedSystemsGameTests {
                 new FluidStack(ModFluids.get(FluidDefinition.FUEL).source().get(), 100),
                 IFluidHandler.FluidAction.EXECUTE
         ) == 100, "Combustion chamber rejected a generated fluid fuel");
-        helper.assertTrue(recovery.drain(100, IFluidHandler.FluidAction.EXECUTE).getAmount() == 100,
-                "Bottom service port could not recover fluid fuel");
+        helper.assertTrue(input.drain(100, IFluidHandler.FluidAction.EXECUTE).isEmpty(),
+                "Combustion chamber input exposed output");
         clear(helper, occupied);
         helper.succeed();
     }

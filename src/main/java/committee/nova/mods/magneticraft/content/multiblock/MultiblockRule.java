@@ -57,6 +57,28 @@ public enum MultiblockRule {
         };
     }
 
+    /** Returns the exact block state represented by this structure rule in a hologram. */
+    public BlockState previewState(Direction facing) {
+        return switch (this) {
+            case IGNORE, AIR, CONTROLLER -> Blocks.AIR.defaultBlockState();
+            case BASE -> ModAdvancedBlocks.MULTIBLOCK_BASE.get().defaultBlockState();
+            case GRATE -> ModMachineBlocks.GRATE.get().defaultBlockState();
+            case CORRUGATED_IRON -> ModAdvancedBlocks.CORRUGATED_IRON.get().defaultBlockState();
+            case COPPER_COIL -> ModAdvancedBlocks.COPPER_COIL.get().defaultBlockState();
+            case COLUMN_X -> ModAdvancedBlocks.MULTIBLOCK_COLUMN.get().defaultBlockState()
+                    .setValue(RotatedPillarBlock.AXIS, rotatedAxis(Direction.Axis.X, facing));
+            case COLUMN_Y -> ModAdvancedBlocks.MULTIBLOCK_COLUMN.get().defaultBlockState()
+                    .setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
+            case COLUMN_Z -> ModAdvancedBlocks.MULTIBLOCK_COLUMN.get().defaultBlockState()
+                    .setValue(RotatedPillarBlock.AXIS, rotatedAxis(Direction.Axis.Z, facing));
+            case BRICKS -> Blocks.BRICKS.defaultBlockState();
+            case SMALL_TANK -> ModMachineBlocks.machine(SingleBlockMachineDefinition.SMALL_TANK)
+                    .get().defaultBlockState();
+            case STRIPED -> ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get().defaultBlockState();
+            case ELECTRIC -> ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get().defaultBlockState();
+        };
+    }
+
     public static MultiblockRule bySymbol(char symbol) {
         for (MultiblockRule rule : values()) {
             if (rule.symbol == symbol) {

@@ -1,31 +1,6 @@
 {
-  "display": {
-    "gui": {
-      "rotation": [
-        30,
-        225,
-        0
-      ],
-      "scale": [
-        0.125,
-        0.125,
-        0.125
-      ],
-      "translation": [
-        0,
-        -3.4641018,
-        -1.9999999
-      ]
-    }
-  },
-  "loader": "magneticraft:legacy_scene",
-  "model": "magneticraft:models/block/gltf/hydraulic_press.gltf",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "particle": "minecraft:block/iron_block"
-  },
-  "translation": [
-    0.0,
-    0.0,
-    0.0
-  ]
+    "all": "minecraft:block/iron_block"
+  }
 }

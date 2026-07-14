@@ -494,6 +494,8 @@
   "message.magneticraft.hydraulic_press_mode.medium": "中压",
   "message.magneticraft.long_distance_connections": "长距离连接：%s",
   "message.magneticraft.multiblock_formed": "%s 已组装",
+  "message.magneticraft.multiblock_hologram_disabled": "多方块全息投影已关闭",
+  "message.magneticraft.multiblock_hologram_enabled": "多方块全息投影已开启",
   "message.magneticraft.multiblock_invalid": "多方块结构无效",
   "message.magneticraft.multiblock_member_conflict": "结构部件已属于另一个多方块",
   "message.magneticraft.multiblock_mirrored": "结构镜像已启用",

@@ -97,7 +97,9 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
             return InteractionResult.CONSUME;
         }
         if (!controller.formed()) {
-            controller.tryForm(serverPlayer);
+            if (!controller.tryForm(serverPlayer)) {
+                controller.toggleHologram(serverPlayer);
+            }
         } else if (player.isShiftKeyDown()) {
             controller.cycleHydraulicMode(serverPlayer);
         } else if (controller.canManage(serverPlayer)) {

@@ -59,7 +59,7 @@ public final class HeatNetworkModule extends AbstractPhysicalNetworkModule imple
 
     @Override
     public void exchangeWith(PhysicalNetworkNode other) {
-        if (!(other instanceof HeatNetworkModule heat)) {
+        if (!(other.transferNode() instanceof HeatNetworkModule heat)) {
             return;
         }
         HeatLink.Transfer transfer = HeatLink.transfer(

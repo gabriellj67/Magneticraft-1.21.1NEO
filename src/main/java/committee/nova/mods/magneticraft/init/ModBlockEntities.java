@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlockEntity;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlockEntity;
@@ -34,6 +35,14 @@ public final class ModBlockEntities {
             SINGLE_BLOCK_MACHINES = new EnumMap<>(SingleBlockMachineDefinition.class);
     private static final Map<MultiblockDefinition, RegistryObject<BlockEntityType<AdvancedMultiblockBlockEntity>>>
             ADVANCED_MULTIBLOCKS = new EnumMap<>(MultiblockDefinition.class);
+    public static final RegistryObject<BlockEntityType<MultiblockGapBlockEntity>> MULTIBLOCK_GAP =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "multiblock_gap",
+                    () -> BlockEntityType.Builder.of(
+                            MultiblockGapBlockEntity::new,
+                            ModAdvancedBlocks.MULTIBLOCK_GAP.get()
+                    ).build(null)
+            );
 
     public static final RegistryObject<BlockEntityType<CrushingTableBlockEntity>> CRUSHING_TABLE =
             ModRegistries.BLOCK_ENTITY_TYPES.register(

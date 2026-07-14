@@ -1,31 +1,6 @@
 {
-  "display": {
-    "gui": {
-      "rotation": [
-        30,
-        225,
-        0
-      ],
-      "scale": [
-        0.125,
-        0.125,
-        0.125
-      ],
-      "translation": [
-        -1.4142127,
-        0.38926947,
-        -4.674235
-      ]
-    }
-  },
-  "loader": "magneticraft:legacy_scene",
-  "model": "magneticraft:models/block/gltf/steam_turbine.gltf",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "particle": "minecraft:block/iron_block"
-  },
-  "translation": [
-    0.0,
-    0.0,
-    0.0
-  ]
+    "all": "minecraft:block/iron_block"
+  }
 }

@@ -549,8 +549,11 @@ class GeneratedDataContractTest {
             String id = definition.id();
             JsonObject blockState = readObject(ASSETS.resolve("blockstates/" + id + ".json"));
             assertEquals(8, blockState.getAsJsonObject("variants").size(), id + " state coverage");
-            assertFile(ASSETS.resolve("models/block/" + id + ".json"));
+            JsonObject controllerModel = readObject(ASSETS.resolve("models/block/" + id + ".json"));
+            assertEquals("minecraft:block/cube_all", controllerModel.get("parent").getAsString(), id);
+            assertFalse(controllerModel.has("loader"), id + " world model must not obscure the hologram");
             assertFile(ASSETS.resolve("models/block/" + id + "_formed.json"));
+            assertFile(ASSETS.resolve("models/block/" + id + "_item.json"));
             assertFile(ASSETS.resolve("models/item/" + id + ".json"));
             assertFile(DATA.resolve("loot_tables/blocks/" + id + ".json"));
             assertFile(recipe("crafting/" + id));
@@ -579,9 +582,9 @@ class GeneratedDataContractTest {
                 "steam_turbine", "steam_turbine"
         );
         advancedMcxModels.forEach((generated, source) ->
-                assertLegacySceneModelUnchecked(generated, "mcx", source));
+                assertLegacySceneModelUnchecked(generated + "_item", "mcx", source));
         advancedGltfModels.forEach((generated, source) ->
-                assertLegacySceneModelUnchecked(generated, "gltf", source));
+                assertLegacySceneModelUnchecked(generated + "_item", "gltf", source));
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             JsonObject formed = readObject(ASSETS.resolve(
                     "models/block/" + definition.id() + "_formed.json"

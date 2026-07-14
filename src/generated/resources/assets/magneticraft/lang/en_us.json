@@ -494,6 +494,8 @@
   "message.magneticraft.hydraulic_press_mode.medium": "medium",
   "message.magneticraft.long_distance_connections": "Long-distance connections: %s",
   "message.magneticraft.multiblock_formed": "%s formed",
+  "message.magneticraft.multiblock_hologram_disabled": "Multiblock hologram disabled",
+  "message.magneticraft.multiblock_hologram_enabled": "Multiblock hologram enabled",
   "message.magneticraft.multiblock_invalid": "Invalid multiblock structure",
   "message.magneticraft.multiblock_member_conflict": "A structure member belongs to another multiblock",
   "message.magneticraft.multiblock_mirrored": "Structure mirroring enabled",

@@ -1,0 +1,31 @@
+{
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.20833333,
+        0.20833333,
+        0.20833333
+      ],
+      "translation": [
+        0,
+        -0.529729,
+        -5.7491493
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/oil_heater.mcx",
+  "textures": {
+    "particle": "minecraft:block/iron_block"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

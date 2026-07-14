@@ -196,13 +196,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
-            ModelFile idle = advancedControllerModel(definition, false);
-            ModelFile formed = advancedControllerModel(definition, true);
+            ModelFile idle = models().cubeAll(definition.id(), mcLoc("block/iron_block"));
+            ModelFile formed = emptyModel(definition.id() + "_formed", mcLoc("block/iron_block"));
+            ModelFile item = advancedControllerItemModel(definition);
             horizontalBlock(
                     controller,
                     state -> state.getValue(AdvancedMultiblockBlock.FORMED) ? formed : idle
             );
-            simpleBlockItem(controller, idle);
+            simpleBlockItem(controller, item);
         }
 
         simpleBlockWithItem(
@@ -478,11 +479,8 @@ final class ModBlockStateProvider extends BlockStateProvider {
         return models().cube(definition.id(), back, front, side, side, side, side);
     }
 
-    private ModelFile advancedControllerModel(MultiblockDefinition definition, boolean formed) {
-        String generatedName = definition.id() + (formed ? "_formed" : "");
-        if (formed) {
-            return emptyModel(generatedName, mcLoc("block/iron_block"));
-        }
+    private ModelFile advancedControllerItemModel(MultiblockDefinition definition) {
+        String generatedName = definition.id() + "_item";
         return switch (definition) {
             case BIG_COMBUSTION_CHAMBER -> advancedGltfModel(generatedName, "big_combustion_chamber");
             case BIG_ELECTRIC_FURNACE -> advancedGltfModel(generatedName, "big_electric_furnace");

@@ -32,16 +32,20 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -63,6 +67,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private static final String SOLAR_TOWER_TAG = "solar_tower";
     private static final String HYDRAULIC_MODE_TAG = "hydraulic_mode";
     private static final String STRUCTURE_SNAPSHOT_TAG = "structure_snapshot";
+    private static final String HOLOGRAM_ENABLED_TAG = "hologram_enabled";
 
     private final MultiblockDefinition definition;
     @Nullable
@@ -81,8 +86,11 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private final AdvancedMultiblockLogic logic;
     private final ContainerData menuData;
     private final MultiblockStructureSnapshot structureSnapshot = new MultiblockStructureSnapshot();
+    private final Map<MultiblockPortLayout.Port, LazyOptional<?>> portCapabilities = new HashMap<>();
+    private List<MultiblockExternalPortService.ExternalNode> externalPortNodes = List.of();
     private boolean formed;
     private boolean structureReady;
+    private boolean hologramEnabled = true;
     private boolean mirrored;
     @Nullable
     private UUID owner;
@@ -178,6 +186,23 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         return formed;
     }
 
+    public boolean hologramEnabled() {
+        return hologramEnabled;
+    }
+
+    public void toggleHologram(Player player) {
+        if (formed || !canManage(player)) {
+            return;
+        }
+        hologramEnabled = !hologramEnabled;
+        markChangedAndSync();
+        player.displayClientMessage(Component.translatable(
+                hologramEnabled
+                        ? "message.magneticraft.multiblock_hologram_enabled"
+                        : "message.magneticraft.multiblock_hologram_disabled"
+        ), true);
+    }
+
     public boolean operational() {
         return formed && structureReady && validate().valid();
     }
@@ -188,6 +213,11 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
 
     public Direction facing() {
         return getBlockState().getValue(AdvancedMultiblockBlock.FACING);
+    }
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        return MultiblockBounds.renderBounds(worldPosition, facing(), mirrored, definition);
     }
 
     @Nullable
@@ -476,7 +506,66 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 || capability == ForgeCapabilities.ENERGY)) {
             return LazyOptional.empty();
         }
+        if (side != null && exposesExactPorts(capability)) {
+            return portCapability(worldPosition, side, capability);
+        }
         return super.getCapability(capability, side);
+    }
+
+    public <T> LazyOptional<T> portCapability(
+            BlockPos position,
+            Direction side,
+            Capability<T> capability
+    ) {
+        if (!operational()) {
+            return LazyOptional.empty();
+        }
+        MultiblockPortLayout.Kind kind;
+        if (capability == ForgeCapabilities.ITEM_HANDLER) {
+            kind = MultiblockPortLayout.Kind.ITEM;
+        } else if (capability == ForgeCapabilities.FLUID_HANDLER) {
+            kind = MultiblockPortLayout.Kind.FLUID;
+        } else {
+            return LazyOptional.empty();
+        }
+        MultiblockPortLayout.Port port = MultiblockPortLayout.find(this, position, side, kind).orElse(null);
+        if (port == null) {
+            return LazyOptional.empty();
+        }
+        LazyOptional<?> result = portCapabilities.computeIfAbsent(port, this::createPortCapability);
+        return result.cast();
+    }
+
+    private boolean exposesExactPorts(Capability<?> capability) {
+        MultiblockPortLayout.Kind kind = capability == ForgeCapabilities.ITEM_HANDLER
+                ? MultiblockPortLayout.Kind.ITEM
+                : capability == ForgeCapabilities.FLUID_HANDLER
+                ? MultiblockPortLayout.Kind.FLUID
+                : null;
+        return kind != null && MultiblockPortLayout.ports(definition).stream()
+                .anyMatch(port -> port.kind() == kind);
+    }
+
+    private LazyOptional<?> createPortCapability(MultiblockPortLayout.Port port) {
+        return switch (port.kind()) {
+            case ITEM -> inventory == null
+                    ? LazyOptional.empty()
+                    : LazyOptional.of(() -> inventory.portHandler(port.itemAccess()));
+            case FLUID -> {
+                FluidTankModule tank = tank(port.target());
+                yield tank == null
+                        ? LazyOptional.empty()
+                        : LazyOptional.of(() -> tank.portHandler(port.fluidAccess()));
+            }
+            default -> LazyOptional.empty();
+        };
+    }
+
+    @Override
+    public void invalidateCaps() {
+        portCapabilities.values().forEach(LazyOptional::invalidate);
+        portCapabilities.clear();
+        super.invalidateCaps();
     }
 
     public MultiblockValidationResult validate() {
@@ -515,6 +604,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     @Override
     protected void saveMachineData(CompoundTag tag) {
         tag.putBoolean(FORMED_TAG, formed);
+        tag.putBoolean(HOLOGRAM_ENABLED_TAG, hologramEnabled);
         tag.putBoolean(MIRRORED_TAG, mirrored);
         if (owner != null) {
             tag.putUUID(OWNER_TAG, owner);
@@ -540,6 +630,8 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     protected void loadMachineData(CompoundTag tag) {
         formed = tag.getBoolean(FORMED_TAG);
         structureReady = false;
+        hologramEnabled = !tag.contains(HOLOGRAM_ENABLED_TAG)
+                || tag.getBoolean(HOLOGRAM_ENABLED_TAG);
         mirrored = tag.getBoolean(MIRRORED_TAG);
         owner = tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
         progress = Math.max(0, tag.getInt(PROGRESS_TAG));
@@ -573,6 +665,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     @Override
     protected void saveClientData(CompoundTag tag) {
         tag.putBoolean(FORMED_TAG, formed);
+        tag.putBoolean(HOLOGRAM_ENABLED_TAG, hologramEnabled);
         tag.putBoolean(MIRRORED_TAG, mirrored);
         tag.putBoolean(WORKING_TAG, working);
         tag.putInt(PROGRESS_TAG, progress);
@@ -586,6 +679,8 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     @Override
     protected void loadClientData(CompoundTag tag) {
         formed = tag.getBoolean(FORMED_TAG);
+        hologramEnabled = !tag.contains(HOLOGRAM_ENABLED_TAG)
+                || tag.getBoolean(HOLOGRAM_ENABLED_TAG);
         mirrored = tag.getBoolean(MIRRORED_TAG);
         working = tag.getBoolean(WORKING_TAG);
         progress = Math.max(0, tag.getInt(PROGRESS_TAG));
@@ -811,7 +906,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 Magneticraft.id("advanced_electricity"),
                 this,
                 new ElectricalNode(1.0D, 125.0D, 0.001D),
-                side -> operational()
+                side -> operational() && MultiblockPortLayout.supports(
+                        this, worldPosition, NetworkDomain.ELECTRICITY, side
+                )
         ));
     }
 
@@ -825,7 +922,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 this,
                 new HeatNode(1.0D, 73.0D),
                 Double.MAX_VALUE,
-                side -> operational()
+                side -> operational() && MultiblockPortLayout.supports(
+                        this, worldPosition, NetworkDomain.HEAT, side
+                )
         ));
     }
 
@@ -921,6 +1020,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             if (heat != null) {
                 heat.onLoad();
             }
+            if (level instanceof ServerLevel serverLevel) {
+                externalPortNodes = MultiblockExternalPortService.register(serverLevel, this);
+            }
         }
     }
 
@@ -992,6 +1094,10 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     }
 
     private void unregisterPhysicalModules() {
+        if (level instanceof ServerLevel serverLevel && !externalPortNodes.isEmpty()) {
+            MultiblockExternalPortService.unregister(serverLevel, externalPortNodes);
+            externalPortNodes = List.of();
+        }
         if (electricity != null) {
             electricity.onUnload();
         }

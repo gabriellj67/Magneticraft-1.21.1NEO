@@ -1,7 +1,7 @@
 package committee.nova.mods.magneticraft.content.network.pneumatic;
 
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
-import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.framework.NetworkConnectionHost;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import net.minecraft.core.BlockPos;
@@ -38,8 +38,8 @@ public final class PneumaticTubeBlock extends ConduitBlock {
     protected boolean connectsToMachine(LevelAccessor level, BlockPos position, Direction side) {
         BlockEntity blockEntity = level.getBlockEntity(position);
         return super.connectsToMachine(level, position, side)
-                || blockEntity instanceof MachineBlockEntity machine
-                && machine.supportsNetworkConnection(NetworkDomain.PRESSURE, side)
+                || blockEntity instanceof NetworkConnectionHost host
+                && host.supportsNetworkConnection(NetworkDomain.PRESSURE, side)
                 || blockEntity != null && blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, side).isPresent();
     }
 }

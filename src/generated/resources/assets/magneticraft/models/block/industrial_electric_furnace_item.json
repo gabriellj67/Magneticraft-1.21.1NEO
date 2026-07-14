@@ -1,0 +1,31 @@
+{
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.2777778,
+        0.2777778,
+        0.2777778
+      ],
+      "translation": [
+        0,
+        -1.9245011,
+        -1.111111
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/big_electric_furnace.gltf",
+  "textures": {
+    "particle": "minecraft:block/iron_block"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

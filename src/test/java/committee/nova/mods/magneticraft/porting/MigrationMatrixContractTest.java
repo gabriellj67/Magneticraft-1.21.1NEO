@@ -99,9 +99,9 @@ class MigrationMatrixContractTest {
     private static final int DERIVED_RUNTIME_ID_COUNT = 80;
     private static final String DERIVED_RUNTIME_ID_SHA256 =
             "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451";
-    private static final int SUPPORTING_REGISTRY_ID_COUNT = 118;
+    private static final int SUPPORTING_REGISTRY_ID_COUNT = 119;
     private static final String SUPPORTING_REGISTRY_ID_SHA256 =
-            "673d29f098fa4cd4f1f86eea5d68496d24841f4279e5f9cb7fc6684beca57063";
+            "2fa491f8f2d21d4632ec95cac8f7355254afbe3a603eccb8c036bbd682ab7268";
     private static final int FORBIDDEN_RUNTIME_ID_COUNT = 56;
     private static final String FORBIDDEN_RUNTIME_ID_SHA256 =
             "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d";
@@ -1887,6 +1887,7 @@ class MigrationMatrixContractTest {
                 namespaced("pneumatic_tube"),
                 namespaced("pneumatic_restriction_tube"),
                 namespaced("conveyor_belt"),
+                namespaced("multiblock_gap"),
                 namespaced("oil_deposit"),
                 namespaced("computer"),
                 namespaced("mining_robot")

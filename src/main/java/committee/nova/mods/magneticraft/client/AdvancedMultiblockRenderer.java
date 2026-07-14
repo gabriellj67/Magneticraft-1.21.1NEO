@@ -1,14 +1,27 @@
 package committee.nova.mods.magneticraft.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockCell;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockRule;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockTransform;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.ModelData;
 
 /**
  * Dynamic controller-local overlays for formed multiblocks. The renderer never
@@ -31,6 +44,7 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
             int packedOverlay
     ) {
         if (!machine.formed()) {
+            renderHologram(machine, poseStack, buffers);
             return;
         }
         int sceneLight = MachineRenderHelper.surroundingLight(
@@ -43,6 +57,163 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
         renderScene(machine, partialTick, poseStack, buffers, sceneLight, packedOverlay);
         renderFluids(machine, poseStack, buffers, sceneLight);
         poseStack.popPose();
+    }
+
+    private static void renderHologram(
+            AdvancedMultiblockBlockEntity machine,
+            PoseStack poseStack,
+            MultiBufferSource buffers
+    ) {
+        if (!machine.hologramEnabled() || machine.getLevel() == null) {
+            return;
+        }
+        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
+        BlockPos controller = machine.getBlockPos();
+        Direction facing = machine.facing();
+        for (MultiblockCell cell : machine.definition().requiredCells()) {
+            MultiblockRule rule = cell.rule();
+            if (rule == MultiblockRule.CONTROLLER || rule == MultiblockRule.IGNORE) {
+                continue;
+            }
+            BlockPos worldPosition = MultiblockTransform.worldPosition(
+                    controller, cell.offset(), machine.definition().center(), facing, machine.mirrored()
+            );
+            if (!machine.getLevel().hasChunk(
+                    worldPosition.getX() >> 4, worldPosition.getZ() >> 4)) {
+                continue;
+            }
+            BlockState actual = machine.getLevel().getBlockState(worldPosition);
+            boolean matches = rule.matches(actual, machine.getBlockState().getBlock(), facing);
+            int x = worldPosition.getX() - controller.getX();
+            int y = worldPosition.getY() - controller.getY();
+            int z = worldPosition.getZ() - controller.getZ();
+            if (matches) {
+                renderOutline(poseStack, buffers, x, y, z, 0.2F, 1.0F, 0.35F, 0.42F);
+                continue;
+            }
+            boolean obstructedAir = rule == MultiblockRule.AIR;
+            if (obstructedAir) {
+                renderOutline(poseStack, buffers, x, y, z, 1.0F, 0.2F, 0.2F, 0.9F);
+                continue;
+            }
+            BlockState preview = rule.previewState(facing);
+            float red = actual.isAir() ? 0.25F : 1.0F;
+            float green = actual.isAir() ? 0.9F : 0.2F;
+            float blue = actual.isAir() ? 1.0F : 0.2F;
+            renderGhostBlock(
+                    dispatcher, preview, x, y, z, red, green, blue,
+                    actual.isAir() ? 0.38F : 0.52F, poseStack, buffers
+            );
+            renderOutline(poseStack, buffers, x, y, z, red, green, blue, 0.85F);
+        }
+    }
+
+    private static void renderGhostBlock(
+            BlockRenderDispatcher dispatcher,
+            BlockState state,
+            int x,
+            int y,
+            int z,
+            float red,
+            float green,
+            float blue,
+            float alpha,
+            PoseStack poseStack,
+            MultiBufferSource buffers
+    ) {
+        poseStack.pushPose();
+        poseStack.translate(x + 0.01D, y + 0.01D, z + 0.01D);
+        poseStack.scale(0.98F, 0.98F, 0.98F);
+        BakedModel model = dispatcher.getBlockModel(state);
+        RenderType renderType = RenderType.translucentMovingBlock();
+        VertexConsumer consumer = new AlphaVertexConsumer(buffers.getBuffer(renderType), alpha);
+        dispatcher.getModelRenderer().renderModel(
+                poseStack.last(), consumer, state, model, red, green, blue,
+                LightTexture.FULL_BRIGHT, 0, ModelData.EMPTY, renderType
+        );
+        poseStack.popPose();
+    }
+
+    private static void renderOutline(
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int x,
+            int y,
+            int z,
+            float red,
+            float green,
+            float blue,
+            float alpha
+    ) {
+        poseStack.pushPose();
+        poseStack.translate(x, y, z);
+        LevelRenderer.renderLineBox(
+                poseStack, buffers.getBuffer(RenderType.lines()),
+                0.002D, 0.002D, 0.002D, 0.998D, 0.998D, 0.998D,
+                red, green, blue, alpha
+        );
+        poseStack.popPose();
+    }
+
+    private static final class AlphaVertexConsumer implements VertexConsumer {
+        private final VertexConsumer delegate;
+        private final float alpha;
+
+        private AlphaVertexConsumer(VertexConsumer delegate, float alpha) {
+            this.delegate = delegate;
+            this.alpha = alpha;
+        }
+
+        @Override
+        public VertexConsumer vertex(double x, double y, double z) {
+            delegate.vertex(x, y, z);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer color(int red, int green, int blue, int alpha) {
+            delegate.color(red, green, blue, Math.round(alpha * this.alpha));
+            return this;
+        }
+
+        @Override
+        public VertexConsumer uv(float u, float v) {
+            delegate.uv(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer overlayCoords(int u, int v) {
+            delegate.overlayCoords(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer uv2(int u, int v) {
+            delegate.uv2(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer normal(float x, float y, float z) {
+            delegate.normal(x, y, z);
+            return this;
+        }
+
+        @Override
+        public void endVertex() {
+            delegate.endVertex();
+        }
+
+        @Override
+        public void defaultColor(int red, int green, int blue, int alpha) {
+            delegate.defaultColor(red, green, blue, Math.round(alpha * this.alpha));
+        }
+
+        @Override
+        public void unsetDefaultColor() {
+            delegate.unsetDefaultColor();
+        }
     }
 
     /**

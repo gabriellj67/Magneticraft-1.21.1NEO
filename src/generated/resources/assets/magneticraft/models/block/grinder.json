@@ -1,31 +1,6 @@
 {
-  "display": {
-    "gui": {
-      "rotation": [
-        30,
-        225,
-        0
-      ],
-      "scale": [
-        0.15625,
-        0.15625,
-        0.15625
-      ],
-      "translation": [
-        0,
-        -3.2475953,
-        -1.8749999
-      ]
-    }
-  },
-  "loader": "magneticraft:legacy_scene",
-  "model": "magneticraft:models/block/gltf/grinder.gltf",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "particle": "minecraft:block/iron_block"
-  },
-  "translation": [
-    0.0,
-    0.0,
-    0.0
-  ]
+    "all": "minecraft:block/iron_block"
+  }
 }

@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.network.block;
 
-import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.framework.NetworkConnectionHost;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockExternalPortService;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -110,9 +111,15 @@ public abstract class ConduitBlock extends NetworkComponentBlock {
     }
 
     public static void refreshAround(Level level, BlockPos position) {
-        refreshConnections(level, position);
+        refreshConnectionsIfLoaded(level, position);
         for (Direction direction : Direction.values()) {
-            refreshConnections(level, position.relative(direction));
+            refreshConnectionsIfLoaded(level, position.relative(direction));
+        }
+    }
+
+    private static void refreshConnectionsIfLoaded(Level level, BlockPos position) {
+        if (level.hasChunk(position.getX() >> 4, position.getZ() >> 4)) {
+            refreshConnections(level, position);
         }
     }
 
@@ -137,8 +144,8 @@ public abstract class ConduitBlock extends NetworkComponentBlock {
 
     private boolean canConnect(LevelAccessor level, BlockPos position, Direction direction) {
         BlockEntity self = level.getBlockEntity(position);
-        if (self instanceof MachineBlockEntity machine
-                && !machine.supportsNetworkConnection(connectionDomain(), direction)) {
+        if (self instanceof NetworkConnectionHost host
+                && !host.supportsNetworkConnection(connectionDomain(), direction)) {
             return false;
         }
 
@@ -147,15 +154,18 @@ public abstract class ConduitBlock extends NetworkComponentBlock {
         Direction neighborSide = direction.getOpposite();
         if (connectsVisuallyTo(neighborState)) {
             BlockEntity neighbor = level.getBlockEntity(neighborPosition);
-            return !(neighbor instanceof MachineBlockEntity machine)
-                    || machine.supportsNetworkConnection(connectionDomain(), neighborSide);
+            return !(neighbor instanceof NetworkConnectionHost host)
+                    || host.supportsNetworkConnection(connectionDomain(), neighborSide);
         }
         return connectsToMachine(level, neighborPosition, neighborSide);
     }
 
     protected boolean connectsToMachine(LevelAccessor level, BlockPos position, Direction side) {
-        return level.getBlockEntity(position) instanceof MachineBlockEntity machine
-                && machine.supportsNetworkConnection(connectionDomain(), side);
+        return level.getBlockEntity(position) instanceof NetworkConnectionHost host
+                && host.supportsNetworkConnection(connectionDomain(), side)
+                || MultiblockExternalPortService.supports(
+                level, position, connectionDomain(), side
+        );
     }
 
     protected abstract NetworkDomain connectionDomain();

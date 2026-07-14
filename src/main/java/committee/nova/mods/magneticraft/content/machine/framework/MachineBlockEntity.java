@@ -26,7 +26,8 @@ import java.util.Optional;
 /**
  * Base block entity that owns module identity, persistence and capability lifecycle.
  */
-public abstract class MachineBlockEntity extends BlockEntity implements MachineModuleHost, DiagnosticHost {
+public abstract class MachineBlockEntity extends BlockEntity
+        implements MachineModuleHost, DiagnosticHost, NetworkConnectionHost {
     public static final String MODULES_TAG = "modules";
     static final String SCHEMA_VERSION_TAG = "schema_version";
     static final int INITIAL_SCHEMA_VERSION = 1;
@@ -50,6 +51,7 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
     }
 
     /** Returns whether one physical-network module exposes the requested face. */
+    @Override
     public final boolean supportsNetworkConnection(NetworkDomain domain, Direction side) {
         for (MachineModule module : modules.values()) {
             if (module instanceof PhysicalNetworkNode node

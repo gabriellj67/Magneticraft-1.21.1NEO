@@ -191,6 +191,8 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.multiblock_status", chinese ? "%s：%s" : "%s: %s");
         add("message.magneticraft.multiblock_mirrored_state", chinese ? "镜像" : "mirrored");
         add("message.magneticraft.multiblock_normal_state", chinese ? "标准" : "normal");
+        add("message.magneticraft.multiblock_hologram_enabled", chinese ? "多方块全息投影已开启" : "Multiblock hologram enabled");
+        add("message.magneticraft.multiblock_hologram_disabled", chinese ? "多方块全息投影已关闭" : "Multiblock hologram disabled");
         add("message.magneticraft.hydraulic_press_mode", chinese ? "液压机模式：%s" : "Hydraulic press mode: %s");
         add("message.magneticraft.hydraulic_press_mode.light", chinese ? "轻压" : "light");
         add("message.magneticraft.hydraulic_press_mode.medium", chinese ? "中压" : "medium");

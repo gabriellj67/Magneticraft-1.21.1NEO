@@ -67,7 +67,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
 
     @Override
     public void exchangeWith(PhysicalNetworkNode other) {
-        if (!(other instanceof ElectricalNetworkModule electrical)) {
+        if (!(other.transferNode() instanceof ElectricalNetworkModule electrical)) {
             return;
         }
         exchangeLongDistance(electrical, ADJACENT_DISTANCE);
