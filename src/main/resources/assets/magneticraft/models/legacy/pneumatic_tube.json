@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/pneumatic_tube.obj",
+  "mtl_override": "magneticraft:models/block/legacy/pneumatic_tube.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/machines/pneumatic_tube"
+  }
+}

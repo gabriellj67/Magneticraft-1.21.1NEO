@@ -1,6 +1,9 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/inserter_body.obj",
+  "mtl_override": "magneticraft:models/block/legacy/inserter_body.mtl",
   "textures": {
-    "all": "minecraft:block/smooth_stone"
+    "particle": "magneticraft:block/legacy/machines/inserter"
   }
 }

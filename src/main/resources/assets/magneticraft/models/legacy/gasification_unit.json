@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/gasification_unit.obj",
+  "mtl_override": "magneticraft:models/block/legacy/gasification_unit.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/machines/gasification_unit_top"
+  }
+}

@@ -23,4 +23,21 @@ class AnimationMathTest {
         assertEquals(0.0F, AnimationMath.boundedSnapshotAge(99L, 100L, -1.0F, 4.0F, true));
         assertEquals(1.0F, AnimationMath.boundedSnapshotAge(100L, 100L, 2.0F, 4.0F, true));
     }
+
+    @Test
+    void selectsAndWrapsOfflineBakedAnimationFrames() {
+        assertEquals(0, AnimationMath.bakedFrameIndex(0L, 0.0F, 8, 2.0F, true));
+        assertEquals(1, AnimationMath.bakedFrameIndex(1L, 1.0F, 8, 2.0F, true));
+        assertEquals(1, AnimationMath.bakedFrameIndex(2L, 0.0F, 8, 2.0F, true));
+        assertEquals(7, AnimationMath.bakedFrameIndex(15L, 0.0F, 8, 2.0F, true));
+        assertEquals(0, AnimationMath.bakedFrameIndex(16L, 0.0F, 8, 2.0F, true));
+    }
+
+    @Test
+    void freezesBakedFramesForInvalidOrIdleInputs() {
+        assertEquals(0, AnimationMath.bakedFrameIndex(7L, 0.5F, 8, 1.0F, false));
+        assertEquals(0, AnimationMath.bakedFrameIndex(7L, 0.5F, 1, 1.0F, true));
+        assertEquals(0, AnimationMath.bakedFrameIndex(7L, 0.5F, 8, 0.0F, true));
+        assertEquals(0, AnimationMath.bakedFrameIndex(7L, 0.5F, 8, Float.NaN, true));
+    }
 }

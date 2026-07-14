@@ -8,9 +8,9 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.List;
 
 /**
  * Dynamic controller-local overlays for formed multiblocks. The renderer never
@@ -18,6 +18,8 @@ import net.minecraft.world.item.Items;
  * interpolates visual transforms between bounded server updates.
  */
 public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<AdvancedMultiblockBlockEntity> {
+    static final int STEAM_TURBINE_BLADE_COUNT = 12;
+
     public AdvancedMultiblockRenderer(BlockEntityRendererProvider.Context context) {
     }
 
@@ -50,76 +52,183 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
     ) {
         long gameTime = machine.getLevel() == null ? 0L : machine.getLevel().getGameTime();
         double animationTick = gameTime % 1_048_576L + partialTick;
-        double phase = machine.working() ? animationTick : machine.progress();
         MultiblockDefinition definition = machine.definition();
         switch (definition) {
-            case GRINDER, SIEVE, STEAM_ENGINE, STEAM_TURBINE -> {
+            case GRINDER -> renderFrame(
+                    LegacyBakedModels.GRINDER,
+                    gameTime,
+                    partialTick,
+                    1.0F,
+                    machine.working(),
+                    0.0D,
+                    0.0D,
+                    -1.0D,
+                    poseStack,
+                    buffers,
+                    packedLight,
+                    packedOverlay
+            );
+            case SIEVE -> {
                 poseStack.pushPose();
-                poseStack.translate(0.5D, 0.72D, 0.5D);
-                poseStack.mulPose(Axis.YP.rotationDegrees((float) (phase * 18.0D % 360.0D)));
-                poseStack.scale(0.42F, 0.16F, 0.42F);
-                MachineRenderHelper.renderItem(new ItemStack(Items.IRON_INGOT), poseStack, buffers,
-                        packedLight, packedOverlay, definition.ordinal());
-                poseStack.popPose();
-            }
-            case HYDRAULIC_PRESS, PUMPJACK -> {
-                float travel = machine.working()
-                        ? (float) ((Math.sin(animationTick * 0.35D) + 1.0D) * 0.12D)
-                        : 0.0F;
-                poseStack.pushPose();
-                poseStack.translate(0.5D, 0.82D - travel, 0.5D);
-                poseStack.scale(0.34F, 0.52F, 0.34F);
-                MachineRenderHelper.renderItem(new ItemStack(Items.PISTON), poseStack, buffers,
-                        packedLight, packedOverlay, definition.ordinal());
-                poseStack.popPose();
-            }
-            case SOLAR_PANEL -> {
-                BlockPos target = machine.solarTowerPosition();
-                double x = target == null ? 0.0D : target.getX() - machine.getBlockPos().getX();
-                double y = target == null ? 1.0D : target.getY() - machine.getBlockPos().getY();
-                double z = target == null ? 1.0D : target.getZ() - machine.getBlockPos().getZ();
-                var facing = machine.facing();
-                var localRight = facing.getClockWise();
-                double localX = x * localRight.getStepX() + z * localRight.getStepZ();
-                double localZ = -(x * facing.getStepX() + z * facing.getStepZ());
-                float yaw = (float) Math.toDegrees(Math.atan2(localX, localZ));
-                float pitch = (float) -Math.toDegrees(
-                        Math.atan2(y, Math.max(0.001D, Math.hypot(localX, localZ)))
+                poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+                renderFrame(
+                        LegacyBakedModels.SIEVE,
+                        gameTime,
+                        partialTick,
+                        0.75F,
+                        machine.working(),
+                        0.0D,
+                        0.0D,
+                        2.0D,
+                        poseStack,
+                        buffers,
+                        packedLight,
+                        packedOverlay
                 );
-                poseStack.pushPose();
-                poseStack.translate(0.5D, 0.95D, 0.5D);
-                poseStack.mulPose(Axis.YP.rotationDegrees(yaw));
-                poseStack.mulPose(Axis.XP.rotationDegrees(pitch));
-                poseStack.scale(0.72F, 0.12F, 0.72F);
-                MachineRenderHelper.renderItem(new ItemStack(Items.DAYLIGHT_DETECTOR), poseStack, buffers,
-                        packedLight, packedOverlay, definition.ordinal());
                 poseStack.popPose();
             }
+            case HYDRAULIC_PRESS -> renderFrame(
+                    LegacyBakedModels.HYDRAULIC_PRESS,
+                    gameTime,
+                    partialTick,
+                    1.5F,
+                    machine.working(),
+                    0.0D,
+                    0.0D,
+                    -1.0D,
+                    poseStack,
+                    buffers,
+                    packedLight,
+                    packedOverlay
+            );
+            case STEAM_ENGINE -> renderFrame(
+                    LegacyBakedModels.STEAM_ENGINE,
+                    gameTime,
+                    partialTick,
+                    1.0F,
+                    machine.working(),
+                    -1.0D,
+                    0.0D,
+                    -1.0D,
+                    poseStack,
+                    buffers,
+                    packedLight,
+                    packedOverlay
+            );
+            case STEAM_TURBINE -> renderSteamTurbine(
+                    animationTick,
+                    machine.working(),
+                    poseStack,
+                    buffers,
+                    packedLight,
+                    packedOverlay
+            );
+            case SOLAR_PANEL -> renderSolarPanel(
+                    machine,
+                    gameTime,
+                    poseStack,
+                    buffers,
+                    packedLight,
+                    packedOverlay
+            );
             case BIG_COMBUSTION_CHAMBER -> {
                 if (machine.working()) {
                     poseStack.pushPose();
-                    poseStack.translate(0.5D, 0.42D, 0.5D);
-                    poseStack.scale(0.38F, 0.38F, 0.38F);
-                    MachineRenderHelper.renderItem(new ItemStack(Items.CAMPFIRE), poseStack, buffers,
-                            packedLight, packedOverlay, definition.ordinal());
-                    poseStack.popPose();
-                }
-            }
-            case BIG_ELECTRIC_FURNACE -> {
-                if (machine.working()) {
-                    double travel = animationTick * 0.055D % 0.72D - 0.36D;
-                    poseStack.pushPose();
-                    poseStack.translate(0.5D, 0.34D, 0.5D + travel);
-                    poseStack.scale(0.26F, 0.26F, 0.26F);
-                    MachineRenderHelper.renderItem(new ItemStack(Items.IRON_INGOT), poseStack, buffers,
-                            packedLight, packedOverlay, definition.ordinal());
+                    poseStack.translate(0.0D, 0.0D, -1.0D);
+                    MachineRenderHelper.renderBakedModel(
+                            LegacyBakedModels.BIG_COMBUSTION_CHAMBER_FIRE,
+                            poseStack,
+                            buffers,
+                            packedLight,
+                            packedOverlay
+                    );
                     poseStack.popPose();
                 }
             }
             default -> {
-                // Static-only definitions intentionally have no BER moving part.
+                // The released pumpjack, refinery and remaining definitions used static historical models.
             }
         }
+    }
+
+    private static void renderFrame(
+            List<ResourceLocation> frames,
+            long gameTime,
+            float partialTick,
+            float ticksPerFrame,
+            boolean working,
+            double x,
+            double y,
+            double z,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        poseStack.pushPose();
+        poseStack.translate(x, y, z);
+        MachineRenderHelper.renderBakedModel(
+                LegacyBakedModels.frame(frames, gameTime, partialTick, ticksPerFrame, working),
+                poseStack,
+                buffers,
+                packedLight,
+                packedOverlay
+        );
+        poseStack.popPose();
+    }
+
+    private static void renderSteamTurbine(
+            double animationTick,
+            boolean working,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        float angle = working ? (float) (animationTick * 18.0D % 360.0D) : 0.0F;
+        poseStack.pushPose();
+        poseStack.translate(0.5D, 1.5D, 0.0D);
+        for (int blade = 0; blade < STEAM_TURBINE_BLADE_COUNT; blade++) {
+            poseStack.pushPose();
+            poseStack.mulPose(Axis.ZP.rotationDegrees(angle + blade * 360.0F / STEAM_TURBINE_BLADE_COUNT));
+            poseStack.translate(-1.5D, -1.5D, 0.0D);
+            MachineRenderHelper.renderBakedModel(
+                    LegacyBakedModels.STEAM_TURBINE_BLADE,
+                    poseStack,
+                    buffers,
+                    packedLight,
+                    packedOverlay
+            );
+            poseStack.popPose();
+        }
+        poseStack.popPose();
+    }
+
+    private static void renderSolarPanel(
+            AdvancedMultiblockBlockEntity machine,
+            long gameTime,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        float normalizedDay = (gameTime % 24_000L) / 12_000.0F;
+        float angle = normalizedDay > 1.0F ? 0.0F : (normalizedDay * 2.0F - 1.0F) * 30.0F;
+        if (machine.facing().getAxisDirection() == net.minecraft.core.Direction.AxisDirection.POSITIVE) {
+            angle = -angle;
+        }
+        poseStack.pushPose();
+        poseStack.translate(0.5D, 0.6875D, 0.5D);
+        poseStack.mulPose(Axis.XP.rotationDegrees(angle));
+        poseStack.translate(-0.5D, -0.6875D, -0.5D);
+        MachineRenderHelper.renderBakedModel(
+                LegacyBakedModels.SOLAR_PANEL_TRACKING,
+                poseStack,
+                buffers,
+                packedLight,
+                packedOverlay
+        );
+        poseStack.popPose();
     }
 
     private static void renderFluids(

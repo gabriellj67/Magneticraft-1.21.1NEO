@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/big_steam_boiler.obj",
+  "mtl_override": "magneticraft:models/block/legacy/big_steam_boiler.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/multiblocks/big_steam_boiler"
+  }
+}

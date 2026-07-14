@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/insulated_heat_pipe.obj",
+  "mtl_override": "magneticraft:models/block/legacy/insulated_heat_pipe.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/fluid_machines/insulated_heat_pipe"
+  }
+}

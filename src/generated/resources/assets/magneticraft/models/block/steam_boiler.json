@@ -1,6 +1,9 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/steam_boiler.obj",
+  "mtl_override": "magneticraft:models/block/legacy/steam_boiler.mtl",
   "textures": {
-    "all": "minecraft:block/iron_block"
+    "particle": "magneticraft:block/legacy/machines/boiler"
   }
 }

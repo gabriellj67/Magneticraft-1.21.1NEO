@@ -1,73 +1,9 @@
 {
-  "elements": [
-    {
-      "faces": {
-        "down": {
-          "texture": "#body"
-        },
-        "east": {
-          "texture": "#body"
-        },
-        "north": {
-          "texture": "#body"
-        },
-        "south": {
-          "texture": "#body"
-        },
-        "up": {
-          "texture": "#body"
-        },
-        "west": {
-          "texture": "#body"
-        }
-      },
-      "from": [
-        5,
-        0,
-        5
-      ],
-      "to": [
-        11,
-        5,
-        11
-      ]
-    },
-    {
-      "faces": {
-        "down": {
-          "texture": "#face"
-        },
-        "east": {
-          "texture": "#face"
-        },
-        "north": {
-          "texture": "#face"
-        },
-        "south": {
-          "texture": "#face"
-        },
-        "up": {
-          "texture": "#face"
-        },
-        "west": {
-          "texture": "#face"
-        }
-      },
-      "from": [
-        3,
-        5,
-        3
-      ],
-      "to": [
-        13,
-        8,
-        13
-      ]
-    }
-  ],
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/electric_connector.obj",
+  "mtl_override": "magneticraft:models/block/legacy/electric_connector.mtl",
   "textures": {
-    "body": "minecraft:block/copper_block",
-    "face": "minecraft:block/iron_block",
-    "particle": "minecraft:block/copper_block"
+    "particle": "magneticraft:block/legacy/electric_connectors/connector"
   }
 }

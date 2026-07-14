@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/electric_pole_transformer.obj",
+  "mtl_override": "magneticraft:models/block/legacy/electric_pole_transformer.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/electric_connectors/electric_pole_transformer"
+  }
+}

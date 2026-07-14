@@ -92,7 +92,7 @@
         "id": "release-manual-and-performance",
         "tokens": ["CREATIVE", "PERF", "VISUAL"],
         "harness": "junit_gametest_runtime_matrix_and_visual_checklist",
-        "locator": "src/test/java/committee/nova/mods/magneticraft/system/network/IncrementalGraphTest.java;src/test/java/committee/nova/mods/magneticraft/system/network/runtime/PhysicalNetworkManagerLogisticsTest.java;src/test/java/committee/nova/mods/magneticraft/content/computer/vm/BoundedComputerVmTest.java;src/test/java/committee/nova/mods/magneticraft/client/ReleaseCandidateBudgetContractTest.java;src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java;docs/porting/0.9.0-release-candidate.md"
+        "locator": "src/test/java/committee/nova/mods/magneticraft/system/network/IncrementalGraphTest.java;src/test/java/committee/nova/mods/magneticraft/system/network/runtime/PhysicalNetworkManagerLogisticsTest.java;src/test/java/committee/nova/mods/magneticraft/content/computer/vm/BoundedComputerVmTest.java;src/test/java/committee/nova/mods/magneticraft/client/ReleaseCandidateBudgetContractTest.java;src/test/java/committee/nova/mods/magneticraft/client/LegacyVisualAssetContractTest.java;src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java;scripts/convert_legacy_models.py;docs/porting/1.0.0-visual-release.md"
       }
     ]
   },

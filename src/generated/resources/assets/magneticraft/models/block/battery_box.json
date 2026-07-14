@@ -1,9 +1,9 @@
 {
   "flip_v": true,
   "loader": "forge:obj",
-  "model": "magneticraft:models/block/battery_box.obj",
-  "mtl_override": "magneticraft:models/block/battery_box.mtl",
+  "model": "magneticraft:models/block/legacy/battery_box.obj",
+  "mtl_override": "magneticraft:models/block/legacy/battery_box.mtl",
   "textures": {
-    "particle": "magneticraft:block/battery_box"
+    "particle": "magneticraft:block/legacy/electric_machines/battery"
   }
 }

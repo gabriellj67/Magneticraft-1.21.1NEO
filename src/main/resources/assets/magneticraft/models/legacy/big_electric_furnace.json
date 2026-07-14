@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/big_electric_furnace.obj",
+  "mtl_override": "magneticraft:models/block/legacy/big_electric_furnace.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/multiblocks/big_electric_furnace_off"
+  }
+}

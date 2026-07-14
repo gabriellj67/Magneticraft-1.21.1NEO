@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/sieve_moving_frame_5.obj",
+  "mtl_override": "magneticraft:models/block/legacy/sieve_moving_frame_5.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/multiblocks/sieve"
+  }
+}

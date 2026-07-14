@@ -28,7 +28,7 @@ class HeatFluidGeneratedDataTest {
     }
 
     @Test
-    void generatedShapesCoverSixWaySinkAndLegacyPipeWidths() throws IOException {
+    void generatedShapesCoverSixWaySinkAndHistoricalPipeModels() throws IOException {
         JsonObject variants = read(ASSETS.resolve("blockstates/heat_sink.json")).getAsJsonObject("variants");
         assertEquals(Set.of(
                 "facing=down", "facing=up", "facing=north",
@@ -36,8 +36,8 @@ class HeatFluidGeneratedDataTest {
         ), variants.keySet());
 
         assertEquals(4, centerInset("heat_pipe"));
-        assertEquals(3, centerInset("insulated_heat_pipe"));
-        assertEquals(4, centerInset("iron_fluid_pipe"));
+        assertHistoricalModel("insulated_heat_pipe", "insulated_heat_pipe");
+        assertHistoricalModel("iron_fluid_pipe", "iron_fluid_pipe");
     }
 
     private static void assertRecipe(String name, int count, String... pattern) throws IOException {
@@ -60,6 +60,19 @@ class HeatFluidGeneratedDataTest {
         assertEquals(from.get(0).getAsInt(), from.get(1).getAsInt());
         assertEquals(from.get(1).getAsInt(), from.get(2).getAsInt());
         return from.get(0).getAsInt();
+    }
+
+    private static void assertHistoricalModel(String generatedName, String artifactName) throws IOException {
+        JsonObject model = read(ASSETS.resolve("models/block/" + generatedName + ".json"));
+        assertEquals("forge:obj", model.get("loader").getAsString());
+        assertEquals(
+                "magneticraft:models/block/legacy/" + artifactName + ".obj",
+                model.get("model").getAsString()
+        );
+        assertEquals(
+                "magneticraft:models/block/legacy/" + artifactName + ".mtl",
+                model.get("mtl_override").getAsString()
+        );
     }
 
     private static JsonObject read(Path path) throws IOException {

@@ -290,6 +290,63 @@ def verifyOptionalIntegrationIsolation = tasks.register("verifyOptionalIntegrati
     }
 }
 
+def verifyReleaseArtifact = tasks.register("verifyReleaseArtifact") {
+    dependsOn tasks.named("jar"), tasks.named("sourcesJar")
+    doLast {
+        def productionJar = tasks.named("jar", Jar).get().archiveFile.get().asFile
+        def sourcesJar = tasks.named("sourcesJar", Jar).get().archiveFile.get().asFile
+        if (!productionJar.name.contains("-${mod_version}.jar")) {
+            throw new GradleException("Production JAR does not carry release version ${mod_version}: ${productionJar.name}")
+        }
+
+        def archiveEntries = { File archive ->
+            def entries = []
+            new java.util.zip.ZipFile(archive).withCloseable { zip ->
+                def enumeration = zip.entries()
+                while (enumeration.hasMoreElements()) {
+                    entries.add(enumeration.nextElement().name)
+                }
+            }
+            entries
+        }
+        def binaryEntries = archiveEntries(productionJar)
+        def sourceEntries = archiveEntries(sourcesJar)
+        def requiredBinaryEntries = [
+                "META-INF/LICENSE",
+                "META-INF/PORTING_SOURCES.md",
+                "META-INF/mods.toml",
+                "assets/magneticraft/lang/en_us.json",
+                "assets/magneticraft/lang/zh_cn.json",
+                "assets/magneticraft/models/legacy/wind_turbine_rotor.json",
+                "assets/magneticraft/models/legacy/grinder_moving_frame_0.json"
+        ]
+        def missingEntries = requiredBinaryEntries.findAll { !binaryEntries.contains(it) }
+        if (!missingEntries.isEmpty()) {
+            throw new GradleException("Production JAR is missing release entries: ${missingEntries}")
+        }
+
+        def forbiddenPrefixes = [".references/", ".trellis/", "run/", "build/"]
+        def forbiddenExtensions = [".mcx", ".gltf", ".glb", ".bin"]
+        def forbiddenEntry = { String entry ->
+            forbiddenPrefixes.any(entry::startsWith)
+                    || forbiddenExtensions.any { entry.toLowerCase(Locale.ROOT).endsWith(it) }
+                    || entry.startsWith("com/cout970/modelloader/")
+        }
+        def leakedBinaryEntries = binaryEntries.findAll(forbiddenEntry)
+        def leakedSourceEntries = sourceEntries.findAll(forbiddenEntry)
+        if (!leakedBinaryEntries.isEmpty() || !leakedSourceEntries.isEmpty()) {
+            throw new GradleException(
+                    "Release archives contain forbidden inputs: binary=${leakedBinaryEntries.take(10)}, "
+                            + "sources=${leakedSourceEntries.take(10)}"
+            )
+        }
+        if (!sourceEntries.contains("META-INF/LICENSE")
+                || !sourceEntries.contains("META-INF/PORTING_SOURCES.md")) {
+            throw new GradleException("Sources JAR is missing license or provenance metadata")
+        }
+    }
+}
+
 tasks.named("check").configure {
-    dependsOn tasks.named("compileGameTestJava"), verifyOptionalIntegrationIsolation
+    dependsOn tasks.named("compileGameTestJava"), verifyOptionalIntegrationIsolation, verifyReleaseArtifact
 }

@@ -4,10 +4,10 @@
       "model": "magneticraft:block/tesla_tower_bottom"
     },
     "part=middle": {
-      "model": "magneticraft:block/tesla_tower_middle"
+      "model": "magneticraft:block/tesla_tower_member"
     },
     "part=top": {
-      "model": "magneticraft:block/tesla_tower_top"
+      "model": "magneticraft:block/tesla_tower_member"
     }
   }
 }

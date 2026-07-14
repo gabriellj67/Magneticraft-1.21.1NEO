@@ -1,8 +1,9 @@
 {
-  "parent": "minecraft:block/orientable",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/wind_turbine_hub.obj",
+  "mtl_override": "magneticraft:models/block/legacy/wind_turbine_hub.mtl",
   "textures": {
-    "front": "minecraft:block/quartz_block_side",
-    "side": "minecraft:block/iron_block",
-    "top": "minecraft:block/copper_block"
+    "particle": "magneticraft:block/legacy/electric_machines/wind_turbine"
   }
 }

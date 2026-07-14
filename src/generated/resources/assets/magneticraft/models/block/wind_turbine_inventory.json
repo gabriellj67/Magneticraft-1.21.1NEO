@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/wind_turbine_full.obj",
+  "mtl_override": "magneticraft:models/block/legacy/wind_turbine_full.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/electric_machines/wind_turbine"
+  }
+}

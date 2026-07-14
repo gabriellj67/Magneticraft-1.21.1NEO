@@ -19,4 +19,19 @@ public final class AnimationMath {
         float boundedPartialTick = Math.max(0.0F, Math.min(1.0F, partialTick));
         return Math.min(maximumTicks, elapsedTicks + boundedPartialTick);
     }
+
+    public static int bakedFrameIndex(
+            long currentGameTick,
+            float partialTick,
+            int frameCount,
+            float ticksPerFrame,
+            boolean moving
+    ) {
+        if (!moving || frameCount <= 1 || !Float.isFinite(ticksPerFrame) || ticksPerFrame <= 0.0F) {
+            return 0;
+        }
+        double boundedPartialTick = Math.max(0.0D, Math.min(1.0D, partialTick));
+        long absoluteFrame = (long) Math.floor((currentGameTick + boundedPartialTick) / ticksPerFrame);
+        return Math.floorMod(absoluteFrame, frameCount);
+    }
 }

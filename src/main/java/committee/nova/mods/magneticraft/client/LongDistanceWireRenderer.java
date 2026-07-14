@@ -2,6 +2,9 @@ package committee.nova.mods.magneticraft.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlockEntity;
 import committee.nova.mods.magneticraft.content.network.module.LongDistanceEndpointModule;
 import committee.nova.mods.magneticraft.content.network.module.LongDistanceWireHost;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -32,6 +35,7 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
             int packedLight,
             int packedOverlay
     ) {
+        renderHistoricalPole(endpoint, poseStack, buffers, packedLight, packedOverlay);
         BlockPos local = endpoint.getBlockPos();
         PoseStack.Pose pose = poseStack.last();
         VertexConsumer consumer = buffers.getBuffer(RenderType.lines());
@@ -42,6 +46,34 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
             }
             renderConnection(local, remote, connection.port().wireCount(), pose, consumer);
         }
+    }
+
+    private static void renderHistoricalPole(
+            BlockEntity endpoint,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        if (!(endpoint instanceof ElectricPoleBlockEntity pole)) {
+            return;
+        }
+        ElectricPoleBlock block = (ElectricPoleBlock) pole.getBlockState().getBlock();
+        int orientation = pole.getBlockState().getValue(ElectricPoleBlock.DIRECTION).ordinal();
+        poseStack.pushPose();
+        poseStack.translate(0.5D, 0.5D, 0.5D);
+        poseStack.mulPose(Axis.YP.rotationDegrees(orientation * 45.0F));
+        poseStack.translate(-0.5D, -0.5D, -0.5D);
+        MachineRenderHelper.renderBakedModel(
+                block.isTransformer()
+                        ? LegacyBakedModels.ELECTRIC_POLE_TRANSFORMER
+                        : LegacyBakedModels.ELECTRIC_POLE,
+                poseStack,
+                buffers,
+                packedLight,
+                packedOverlay
+        );
+        poseStack.popPose();
     }
 
     static boolean shouldRenderFrom(BlockPos local, BlockPos remote, boolean remoteWireHostLoaded) {

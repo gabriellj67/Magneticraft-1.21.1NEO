@@ -32,6 +32,19 @@ class ReleaseCandidateBudgetContractTest {
     }
 
     @Test
+    void historicalAnimationAndRendererWorkAreBounded() {
+        assertEquals(8, LegacyBakedModels.ANIMATION_FRAME_COUNT);
+        assertEquals(8, LegacyBakedModels.ELECTRIC_ENGINE.size());
+        assertEquals(8, LegacyBakedModels.INSERTER.size());
+        assertEquals(8, LegacyBakedModels.GRINDER.size());
+        assertEquals(8, LegacyBakedModels.HYDRAULIC_PRESS.size());
+        assertEquals(8, LegacyBakedModels.SIEVE.size());
+        assertEquals(8, LegacyBakedModels.STEAM_ENGINE.size());
+        assertEquals(17, LegacyBakedModels.REFERENCE_MODELS.size());
+        assertEquals(12, AdvancedMultiblockRenderer.STEAM_TURBINE_BLADE_COUNT);
+    }
+
+    @Test
     void endpointSnapshotAndWireGeometryHaveAConstantWorkCeiling() {
         LongDistanceEndpointModule endpoint = endpointLoadedWithConnections(80);
         assertEquals(64, endpoint.clientConnections().size());

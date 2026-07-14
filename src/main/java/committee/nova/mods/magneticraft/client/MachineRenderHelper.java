@@ -5,13 +5,19 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.client.RenderTypeHelper;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fluids.FluidStack;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -53,6 +59,37 @@ final class MachineRenderHelper {
                 Minecraft.getInstance().level,
                 seed
         );
+    }
+
+    static void renderBakedModel(
+            ResourceLocation modelId,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        Minecraft minecraft = Minecraft.getInstance();
+        BakedModel model = minecraft.getModelManager().getModel(modelId);
+        if (model == minecraft.getModelManager().getMissingModel()) {
+            return;
+        }
+        var state = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        for (RenderType renderType : model.getRenderTypes(state, RandomSource.create(42L), ModelData.EMPTY)) {
+            VertexConsumer consumer = buffers.getBuffer(RenderTypeHelper.getEntityRenderType(renderType, false));
+            minecraft.getBlockRenderer().getModelRenderer().renderModel(
+                    poseStack.last(),
+                    consumer,
+                    state,
+                    model,
+                    1.0F,
+                    1.0F,
+                    1.0F,
+                    packedLight,
+                    packedOverlay,
+                    ModelData.EMPTY,
+                    renderType
+            );
+        }
     }
 
     static void renderFluidSurface(

@@ -178,7 +178,7 @@ class GeneratedDataContractTest {
         )) {
             assertPng(SOURCE_TEXTURES.resolve("block/" + texture + ".png"));
         }
-        assertObjModel("battery_box", "battery_box", "battery_box");
+        assertLegacyObjModel("battery_box", "battery_box");
         assertItemAssetsAndTranslation("low_voltage_battery", readObject(ASSETS.resolve("lang/en_us.json")));
 
         for (String recipe : Set.of(
@@ -235,14 +235,12 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + block), block);
             assertTrue(chinese.has("block.magneticraft." + block), block);
         }
-        JsonObject heatSinkModel = readObject(ASSETS.resolve("models/block/heat_sink.json"));
-        for (JsonElement element : heatSinkModel.getAsJsonArray("elements")) {
-            JsonObject geometry = element.getAsJsonObject();
-            assertTrue(geometry.getAsJsonArray("from").get(1).getAsInt() >= 11,
-                    "The unrotated heat sink model must occupy the facing=up slab");
-            assertTrue(geometry.getAsJsonArray("to").get(1).getAsInt() <= 16,
-                    "The unrotated heat sink model exceeds the facing=up slab");
-        }
+        assertLegacyObjModel("heat_sink", "heat_sink");
+        JsonObject heatSinkVariants = readObject(ASSETS.resolve("blockstates/heat_sink.json"))
+                .getAsJsonObject("variants");
+        assertFalse(heatSinkVariants.getAsJsonObject("facing=down").has("x"));
+        assertEquals(180, heatSinkVariants.getAsJsonObject("facing=up").get("x").getAsInt());
+        assertEquals(270, heatSinkVariants.getAsJsonObject("facing=north").get("x").getAsInt());
         JsonObject conveyorRecipe = readObject(recipe("crafting/conveyor_belt"));
         assertEquals(
                 List.of("BAB", "BCB", "B B"),
@@ -452,7 +450,7 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + block), block);
             assertTrue(chinese.has("block.magneticraft." + block), block);
         }
-        assertObjModel("computer", "computer", "computer");
+        assertLegacyObjModel("computer", "computer_body");
         assertFile(ASSETS.resolve("models/item/floppy_disk.json"));
         assertFile(recipe("crafting/floppy_disk"));
         assertTrue(english.has("item.magneticraft.floppy_disk"));
@@ -517,6 +515,23 @@ class GeneratedDataContractTest {
         );
         assertEquals(
                 "magneticraft:models/block/" + sourceName + ".mtl",
+                model.get("mtl_override").getAsString()
+        );
+    }
+
+    private static void assertLegacyObjModel(String generatedName, String artifactName) throws IOException {
+        Path legacyModels = SOURCE_MODELS.resolve("block/legacy");
+        assertFile(legacyModels.resolve(artifactName + ".obj"));
+        assertFile(legacyModels.resolve(artifactName + ".mtl"));
+
+        JsonObject model = readObject(ASSETS.resolve("models/block/" + generatedName + ".json"));
+        assertEquals("forge:obj", model.get("loader").getAsString());
+        assertEquals(
+                "magneticraft:models/block/legacy/" + artifactName + ".obj",
+                model.get("model").getAsString()
+        );
+        assertEquals(
+                "magneticraft:models/block/legacy/" + artifactName + ".mtl",
                 model.get("mtl_override").getAsString()
         );
     }

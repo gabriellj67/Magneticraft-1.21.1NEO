@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/crushing_table.obj",
+  "mtl_override": "magneticraft:models/block/legacy/crushing_table.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/machines/crushing_table_bottom"
+  }
+}

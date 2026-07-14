@@ -1,163 +1,89 @@
-# Legacy model conversion inventory
+# 历史模型离线转换契约
 
-## Scope and authority
+## 权威来源
 
-This document is the release-time inventory for the client models in the fixed
-Nova Magneticraft 1.12 snapshot. The behavioral and asset authority is commit
-`4108ca9bb332d11965c30e0c592b310d0858f251` of
-`Nova-Committee/Magneticraft`, distributed with the GNU GPL v2 license text.
-The local port uses the SPDX expression `GPL-2.0-only`, so the listed assets may
-be adapted when their exact source path and
-conversion are recorded in `PORTING_SOURCES.md`.
+视觉资产以 Nova Magneticraft 1.12 固定提交
+`4108ca9bb332d11965c30e0c592b310d0858f251` 为权威，来源资产树的
+SHA-256 为
+`bc3937d85016780665a0fad9f4657da90c5e8747a44d379b2510c0d21f99711b`。
+上游与本项目均按 GPL-2.0-only 分发，具体来源登记见
+[`PORTING_SOURCES.md`](../PORTING_SOURCES.md)。被忽略的 `.references/`
+只用于本地审计，不是构建输入，也不会进入制品。
 
-The snapshot contains 44 MCX files, 21 glTF files and 23 OBJ files. MCX and
-glTF were loaded by the 1.12-only `com.cout970.modelloader` runtime. Forge
-1.20.1 cannot load either format directly. No compatibility model loader is
-shipped by this port: conversion is deterministic and offline, while runtime
-movement is implemented by a `BlockEntityRenderer` driven by synchronized
-machine state.
+固定快照包含 44 个 MCX、21 个 glTF 和 23 个旧 OBJ。MCX 与 glTF 曾由
+Minecraft 1.12 专用运行时加载器处理；1.20.1 运行时不包含该加载器，也不解析
+MCX、glTF 或外部 `.bin`。
 
-The 23 OBJ files are not referenced by the released 1.12 registrations. They
-are useful export sources, but the MCX/glTF model and the observable 1.12
-renderer remain authoritative when the two differ.
+## 可复现转换
 
-## Conversion rules
+机器可读清单位于 [`scripts/legacy_model_manifest.json`](../scripts/legacy_model_manifest.json)，
+转换器位于 [`scripts/convert_legacy_models.py`](../scripts/convert_legacy_models.py)。
+转换仅依赖 Python 3 标准库：
 
-- Static geometry uses generated vanilla models or Forge's OBJ loader.
-- Every copied OBJ receives a dedicated MTL. Old `magneticraft:blocks/...` and
-  `magneticraft:models/...` texture IDs are rewritten to the 1.20
-  `magneticraft:block/...` namespace.
-- MCX conversion preserves `parts[].name` and its quad range. Named moving
-  parts are exported separately instead of being baked into the static body.
-- glTF conversion consumes the matching external `.bin` offline. Static nodes
-  are exported to OBJ; animation channels are reduced to explicit progress,
-  speed, angle or boolean state consumed by the BER. Raw glTF parsing is never
-  performed on the render thread.
-- A multiblock controller may use a one-block static base model. Geometry that
-  spans the formed structure belongs to the BER and needs expanded render
-  bounds; it must not be hidden in an out-of-block baked model.
-- Inventory models contain only stable geometry. World-only fluids, moving
-  items, belts, rotors, doors and panels are excluded.
+```powershell
+py -3.14 scripts/convert_legacy_models.py
+py -3.14 scripts/convert_legacy_models.py --check
+```
 
-## MCX inventory (44)
+转换器在写入前验证完整来源资产树摘要，并独占以下生成目录：
 
-All paths below are relative to
-`assets/magneticraft/models/{block,item}/mcx/`.
+- `assets/magneticraft/models/block/legacy`：OBJ 与 MTL；
+- `assets/magneticraft/models/legacy`：Forge OBJ 模型 JSON；
+- `assets/magneticraft/textures/block/legacy`：去重后的历史纹理。
 
-| Assets | Purpose | Disposition |
+`--check` 在内存中重新生成全部文件，逐字节比较缺失、过期和意外文件。输出顺序、
+浮点序列化、材质名和 JSON 键顺序固定；重复执行不会产生差异。
+
+## 转换规则
+
+- MCX 的命名部件、顶点、UV、法线与面顺序保持稳定；可按部件名拆分静态主体和
+  动态部件。
+- glTF 2.0 的外部 buffer、accessor、节点层级、TRS/矩阵、材质和动画采样仅在
+  离线阶段解析。
+- 六组历史关键帧动画各采样为 8 个烘焙帧；运行时只按服务端同步的工作状态和
+  有界 tick 选择帧。
+- 旧 `magneticraft:blocks/...` 纹理地址统一转换为
+  `magneticraft:block/legacy/...`，不会覆盖冻结的注册 ID。
+- 稳定单方块主体与长距离设备直接由方块/物品烘焙模型引用。
+- 动态部件由有界 BER 引用已经烘焙的 OBJ；渲染线程不读取磁盘模型格式、不重建
+  网格，也不决定游戏逻辑。
+- 完整历史多方块外壳作为 `reference_baked` 进入模型烘焙注册和自动校验，用于
+  逐项视觉对比。世界中的实际结构块继续表达碰撞、破坏、端口和归属，避免用一个
+  控制器模型隐藏结构状态或产生重复几何；精确动态部件叠加在控制器 BER 中。
+
+## 动态资产映射
+
+| 内容 | 离线输出 | 运行时上限与状态来源 |
 |---|---|---|
-| `battery.mcx`, `computer.mcx` | Electrical storage and computer terminal bodies | Use the companion `block_battery.obj` and `computer.obj`. The computer's inserted disk remains a BER item. |
-| `conveyor_belt.mcx`, `conveyor_belt_base.mcx` | Complete belt item model and static belt chassis | Audited but not adopted. The legacy body is 0.8125 blocks high, while the accepted 1.20 collision is 4/16 and the parcel BER uses a 0.28-block item height. The generated low cuboid is the release implementation. |
-| `crushing_table.mcx` | Manual crushing-table body | Retain the generated cuboid model. Its companion OBJ names a unified texture that is absent from the fixed snapshot, while the released top/side/bottom textures are complete. |
-| `feeding_trough.mcx`, `feeding_trough_inv.mcx` | Trough world and inventory bodies | Companion `feeding_trough.obj` and `feeding_trough_tiny.obj` are candidates for a later static pass; food piles remain BER content. |
-| `solar_panel.mcx` | Solar-panel multiblock, including individually rotating panel groups | Use `solar_panel_base.obj` only for the static controller base. Export the 18 `PanelN-M` groups separately for the BER. |
-| `combustion_chamber.mcx` | Furnace body and `Door` group | Offline split into a static shell and a procedural door BER. |
-| `conveyor_belt_anim.mcx`, `conveyor_belt_corner_anim.mcx` | Moving straight and corner belt surfaces | Offline conversion is required only for animated belt rendering. Corner rendering remains deferred until corner transport behavior exists. |
-| `conveyor_belt_corner_base.mcx` | Corner belt chassis | Defer: the 1.20 block currently has horizontal facing only and no corner state. |
-| `container.mcx` | Bulk-storage multiblock body | Offline static conversion; render as formed multiblock geometry, not as an oversized controller model. |
-| `mining_robot.mcx` | Robot body, propellers and five drill groups | Offline split into body, `prop.*` and `drill.*`; movement and rotation are procedural BER transforms. |
-| `oil_heater.mcx`, `pumpjack.mcx`, `refinery.mcx` | Oil-processing multiblock bodies | The Nova 1.12 pumpjack/refinery renderers treat these meshes as static. The 1.20 release adds a synchronized procedural pumpjack overlay; refinery geometry remains static while its working/fluid state is rendered independently. Exact legacy mesh conversion is a fidelity follow-up. |
-| `shelving_unit.mcx` | Shelf frame and `Crate1` through `Crate24` | Offline split; the BER displays crate groups from the installed chest count. |
-| `sluice_box.mcx`, `sluice_box_inv.mcx`, `sluice_box_water.mcx` | Sluice body, gravel level and water surface | Offline split. The static body may be baked; gravel height and water sprite are BER layers. |
-| `small_tank.mcx` | Tank shell and base | Offline split. The fluid surface height and fluid sprite are BER state. |
-| `solar_mirror.mcx` | Mirror frame and tracking mirror group | Offline split; the mirror group tracks the sun and selected solar tower in the BER. |
-| `solar_tower.mcx`, `tube_light.mcx` | Solar receiver and decorative tube light | Offline static conversion is optional after P0 dynamic assets. |
-| `electric_cable.mcx`, `electric_furnace.mcx`, `gasification_unit.mcx`, `heat_sink.mcx`, `insulated_heat_pipe.mcx`, `iron_pipe.mcx`, `iron_pipe_dark.mcx`, `steam_boiler.mcx` | Simple machines and adjacent network geometry | Keep the current generated cuboid/multipart models. Only heat tint, if restored, needs a light dynamic layer. |
-| `connector.mcx`, `electric_pole.mcx`, `electric_pole_inv.mcx`, `electric_pole_transformer.mcx`, `electric_pole_transformer_inv.mcx` | Long-span electrical connector and pole family | Defer because these blocks are not registered in the current port. Companion OBJ exports remain available for a future task. |
-| `fluid_pipe.mcx`, `wind_turbine.mcx` | Removed fluid-pipe variant and wind generator | Defer until the corresponding gameplay content is restored. |
-| `broken_gear.mcx`, `iron_gear.mcx`, `steel_gear.mcx`, `tungsten_gear.mcx` | 3D upgrade-gear items | Defer because these item IDs are not registered. A generated item model is preferred unless 3D gears return as a confirmed requirement. |
+| 电动机、机械臂 | 主体 + 8 帧运动部件 | 每实例只选择 1 帧；服务端同步工作状态 |
+| 粉碎机、筛选机、液压机、蒸汽机 | 8 帧历史运动组件 | 每实例只选择 1 帧；未工作时固定第 0 帧 |
+| 蒸汽轮机 | 单片历史叶片 | 固定 12 片，程序化旋转，不动态扩容 |
+| 太阳能板 | 历史跟踪组件 | 使用世界日时与已同步朝向；无模型重解析 |
+| 风力涡轮机 | 静态轮毂 + 历史转子 | 使用服务端同步转速；96 格视距上限 |
+| 电脑 | 静态机身 + 屏幕 | 仅运行状态使用全亮屏幕，不显示程序内容 |
+| 采矿机器人 | 静态机身 + 螺旋桨/钻头 | 使用已同步移动和工作状态 |
+| 工业燃烧室 | 静态结构 + 火焰组件 | 仅工作状态渲染火焰 |
+| 长距离电力 | 电线杆/变压器静态模型 + 导线 | 每端点连接快照至多 64 条，导线至多 32 段 |
 
-## glTF inventory (21)
+流体液面、传送带物品和长距离导线继续使用专用有界 BER，因为它们是连续状态或
+运行时连接数据，不适合离线网格帧。
 
-All paths are relative to `assets/magneticraft/models/block/gltf/`. Each entry
-depends on its declared external buffer; `tesla_tower_inv.gltf` shares the
-world model's buffer.
+## 清单范围
 
-| Assets | Purpose | Disposition |
-|---|---|---|
-| `big_combustion_chamber.gltf` | Multiblock shell with `fire_on` and `fire_off` nodes | Export the shell and both status groups offline. Select the fire group from server-authoritative working state. |
-| `big_electric_furnace.gltf` | Furnace shell, dark interior and input/output belt assembly | Export static shell/interior groups. Texture state and belt motion are BER concerns. |
-| `electric_engine.gltf` | Piston engine with four effective animation channels | Export named nodes and drive a procedural progress animation. |
-| `grinder.gltf` | Grinder multiblock with three effective animation channels | Use `grinder_block.obj` only for the static controller base; convert the moving grinder assembly for the BER. |
-| `hydraulic_press.gltf` | Press multiblock with one effective animation channel | Use `hydraulic_press_base.obj` for the static base and the companion OBJ's `Rod`/`Head` groups for the BER. |
-| `inserter.gltf` | Inserter arm with ten transition animations and an item attachment node | Highest-risk conversion. Preserve transition names and reduce the animation curves to explicit arm transforms; do not bake the carried item. |
-| `sieve.gltf` | Sieve multiblock with three effective animation channels | Export static frame and moving sieve groups separately. `sifter.obj` is only a visual candidate, not runtime authority. |
-| `steam_engine.gltf` | Steam engine with 21 effective channels plus a separately transformed gearbox lid | Highest-risk multiblock conversion. Preserve node hierarchy and use synchronized speed/lid state in the BER. |
-| `steam_turbine.gltf` | Turbine shell and reusable blade group | Export shell and `blade.*` separately; rotate the repeated blade group procedurally. The single glTF channel is not used by the released renderer. |
-| `conveyor_belt_up_base.gltf`, `conveyor_belt_up_anim.gltf`, `conveyor_belt_down_base.gltf`, `conveyor_belt_down_anim.gltf` | Sloped belt chassis and moving surfaces | Defer until upward/downward conveyor behavior is implemented. |
-| `big_steam_boiler.gltf` | Static boiler multiblock shell | Current controller placeholder is sufficient for the first pass; convert later for visual fidelity. |
-| `pneumatic_tube.gltf`, `pneumatic_tube_inv.gltf`, `pneumatic_restriction_tube.gltf`, `pneumatic_restriction_tube_inv.gltf` | Connected tube parts and inventory variants | Keep the generated connected geometry and existing parcel BER. Their single animation channels are not behaviorally significant. |
-| `energy_receiver.gltf`, `tesla_tower.gltf`, `tesla_tower_inv.gltf` | Long-range electrical receiver and Tesla tower | Defer because these blocks are not registered in the current port. |
+清单目前包含 59 个逻辑资产：单方块主体、物品模型、结构模型、动态部件与完整
+参考外壳。转换出的 372 个确定性文件全部由契约测试覆盖。完整逐项列表以 JSON
+清单为唯一权威，文档不复制第二份易漂移清单。
 
-## OBJ inventory (23)
+明确排除且不会进入运行时资源：
 
-All paths are relative to `assets/magneticraft/models/block/obj/`. None of
-these paths is referenced by the released 1.12 block registration.
+- 4 个上下坡传送带 glTF；相应玩法未发布；
+- `broken/iron/steel/tungsten` 4 个无消费者历史齿轮 MCX；
+- 未完成窑炉原型及其他只有模型、没有完成玩法的内容。
 
-| Assets | Purpose | Disposition |
-|---|---|---|
-| `block_battery.obj` | Battery body | Reused as `battery.obj`; dedicated MTL already supplied. |
-| `computer.obj` | Computer body | Reused as the static computer model with a dedicated MTL. |
-| `conveyor_belt.obj` | Straight belt body | Not reused. Its 0.8125-block height conflicts with the accepted 4/16 collision and low parcel-render contract; changing that contract is outside Task 7. |
-| `crushing_table.obj` | Crushing-table body | Not reused: `crushing_table.mtl` references missing `blocks/machines/crushing_table`, so the complete generated top/side/bottom model is safer. |
-| `feeding_trough.obj`, `feeding_trough_tiny.obj` | World and inventory trough bodies | Valid later candidates; not part of the first static closure. |
-| `grinder.obj`, `grinder_block.obj` | Complete grinder and one-block controller base | Reuse only `grinder_block.obj` now. The full model includes moving groups and is reserved for BER conversion. |
-| `hydraulic_press.obj`, `hydraulic_press_base.obj` | Complete press and static base | Reuse only `hydraulic_press_base.obj` now. Split `Rod` and `Head` from the full OBJ for the BER later. |
-| `solar_panel.obj`, `solar_panel_base.obj` | Complete panel assembly and static energy-input base | Reuse only `solar_panel_base.obj` now. Its broken legacy `models/solar_panel` material reference is replaced with the released multiblock texture. |
-| `sifter.obj`, `table_sieve.obj` | Alternate sieve and table-sieve exports | Visual comparison candidates only; the released glTF/MCX models remain authoritative. |
-| `beehive_kiln.obj`, `kiln.obj`, `kiln_shelf.obj` | Unregistered kiln prototypes | Defer; no corresponding current content exists. |
-| `electric_connector.obj`, `electric_pole.obj`, `electric_pole_tiny.obj`, `pole_adapter.obj`, `pole_adapter_tiny.obj` | Unregistered long-span electrical family | Defer with the gameplay content. |
-| `incendiary_generator.obj` | Older combustion-generator export | Do not substitute it for `combustion_chamber.mcx` without an in-game equivalence review. |
+## 验收
 
-## Static assets integrated in this pass
-
-The following source geometry is intentionally limited to stable parts:
-
-- `computer.obj` and `computer.png`;
-- `grinder_block.obj` and `grinder.png`;
-- `hydraulic_press_base.obj` and `hydraulic_press.png`;
-- `solar_panel_base.obj` and the released multiblock `solar_panel.png`.
-
-Each OBJ has a local one-material MTL and is generated through the same Forge
-OBJ helper as the existing battery. The grinder, hydraulic press and solar
-panel models are controller-local bases only. The release supplies synchronized
-programmatic dynamic layers through `SingleBlockMachineRenderer`,
-`AdvancedMultiblockRenderer`, `ComputerRenderer` and `MiningRobotRenderer`.
-What remains deferred is a part-for-part conversion of the legacy MCX/glTF
-named meshes, not the BER or server-authoritative animation contract itself.
-
-## Current registered-content release disposition
-
-| Content class | Release implementation | Explicit boundary |
-|---|---|---|
-| Computer and stable controller bodies | Audited static OBJ/MTL plus generated item model | Inserted media and status are BER layers. |
-| Grinder, hydraulic press and solar panel | Controller-local static OBJ plus synchronized procedural BER | Exact named moving groups are a later visual-fidelity enhancement. |
-| Other registered machines and sixteen advanced multiblocks | Generated vanilla cuboids/multipart models plus bounded state-driven BER overlays | No runtime MCX/glTF parser or hidden structure-wide baked geometry. |
-| Pneumatic tubes and conveyors | Generated connection geometry plus existing parcel/item BER | Sloped/corner conveyors are not registered and remain outside the release. |
-| Electric poles, Tesla towers and long-span wires | Not registered | Reconsider Strut Your Stuff only when this gameplay family returns. |
-
-## Strut Your Stuff decision
-
-Strut Your Stuff commit `26a43d7c7de1cdbebefd2990ed2b15c150199dd0`
-targets Java 17, Minecraft 1.20.1 and Forge 47 as version
-`1.1.0+mc1.20.1`. It provides point-to-point strut collision, clipping,
-interaction and optional Flywheel rendering. It does not convert MCX/glTF,
-animate machine parts, render fluids or validate multiblocks.
-
-It is therefore not a Task 7 dependency. The current port has no registered
-electric-pole or other long-span strut consumer, while adding the library
-would expand the Mixin, optional Flywheel and load-matrix surface. The fixed
-snapshot declares MIT in mod metadata but contains no root license text, so no
-source or resource is copied. Re-evaluate it only if selectable, collidable
-long-span electrical wires become an explicit future requirement.
-
-## Release validation status
-
-The release gate ran `runData` twice, generated-resource contract tests,
-`build`, a dedicated server and client model-bakery/runtime smoke tests. The
-second unchanged datagen run wrote zero files, and client logs contained no
-missing Magneticraft OBJ, MTL, texture, material or blockstate diagnostics.
-See the [release-readiness report](porting/release-readiness.md) for counts,
-hashes and the optional-mod matrix. Manual screenshot comparison at every GUI
-scale and part-for-part legacy animation fidelity remain recommended visual QA,
-not an assertion made by this inventory.
+`LegacyVisualAssetContractTest` 验证固定来源、59 个唯一资产、8 帧预算、每个
+OBJ/MTL/JSON 输出、8 项排除及运行时不含 MCX/glTF/GLB/BIN。
+`ReleaseCandidateBudgetContractTest` 固定 8 帧、17 个参考模型、12 片轮机叶片和
+长距离导线顶点上限。客户端冒烟必须完成全部注册模型的资源烘焙，并且日志不得
+出现 Magneticraft 模型、材质或纹理加载错误。

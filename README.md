@@ -13,11 +13,12 @@ from `0.2.0`; later releases may only add forward migrations.
 
 ## Current status
 
-The repository is the `0.9.0` gameplay-alignment release candidate. Every
-published Nova 1.12 gameplay entry is assigned exactly once in the migration
-matrix, and every retained or rebuilt entry has executable evidence. The
-remaining `1.0.0` work is the final historical model, animation and release
-presentation pass; it does not reopen frozen registry or persistence contracts.
+The repository is the `1.0.0` complete gameplay migration. Every published
+Nova 1.12 gameplay entry is assigned exactly once in the migration matrix, and
+every retained or rebuilt entry has executable evidence. Historical MCX/glTF
+assets are converted offline to baked OBJ models; bounded renderers restore
+moving parts without shipping the legacy runtime loader. The frozen registry
+and persistence contracts remain unchanged from `0.2.0`.
 
 JEI, CraftTweaker, Tinkers' Construct and Jade support is optional.
 Magneticraft does not embed their classes or require them in a base
@@ -30,10 +31,11 @@ See the [authoritative migration matrix](docs/porting/migration-matrix.md),
 [machine-readable registry map](docs/porting/registry-id-map.json),
 [base-content migration map](docs/porting/base-content.md),
 [machine framework notes](docs/porting/machine-framework.md) and
-[legacy model inventory](docs/MODEL_CONVERSION.md) for stable IDs and explicit
+[legacy model contract](docs/MODEL_CONVERSION.md) for stable IDs and explicit
 conversion boundaries. The Chinese
-[0.9.0 release-candidate report](docs/porting/0.9.0-release-candidate.md)
-records the current automated and runtime evidence. The earlier
+[1.0.0 visual and release report](docs/porting/1.0.0-visual-release.md) and
+[release notes](docs/porting/1.0.0-release-notes.md) record the final scope and
+verification evidence. The earlier
 [release-readiness report](docs/porting/release-readiness.md) is retained only
 as a historical feasibility snapshot.
 
@@ -66,6 +68,7 @@ runtime dependency.
 ## Build and verification
 
 ```powershell
+py -3.14 scripts/convert_legacy_models.py --check
 ./gradlew.bat compileJava test --no-daemon
 ./gradlew.bat runData --no-daemon
 ./gradlew.bat runGameTestServer --no-daemon
@@ -74,10 +77,11 @@ runtime dependency.
 ./gradlew.bat runClient --no-daemon
 ```
 
-Generated resources are written to `src/generated/resources` and are part of
-the main resource source set. The 0.9.0 release-candidate report contains the
-recorded JUnit, GameTest, datagen, client/server and optional-mod matrix
-results; the commands above remain the reproducible local quality gate.
+Generated data resources are written to `src/generated/resources`; converted
+historical visual resources are owned by the manifest under
+`src/main/resources/assets/magneticraft`. Both are part of the main resource
+source set. The 1.0.0 report records JUnit, GameTest, deterministic conversion,
+datagen, client/server and optional-mod matrix results.
 
 Optional development runtimes are opt-in and may be combined:
 

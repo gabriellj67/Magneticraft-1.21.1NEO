@@ -1,0 +1,9 @@
+{
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/computer_body.obj",
+  "mtl_override": "magneticraft:models/block/legacy/computer_body.mtl",
+  "textures": {
+    "particle": "magneticraft:block/legacy/computers/computer1"
+  }
+}

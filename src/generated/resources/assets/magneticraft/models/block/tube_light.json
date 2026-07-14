@@ -1,6 +1,9 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/tube_light.obj",
+  "mtl_override": "magneticraft:models/block/legacy/tube_light.mtl",
   "textures": {
-    "all": "minecraft:block/glowstone"
+    "particle": "magneticraft:block/legacy/decoration/tube_light"
   }
 }

@@ -1,8 +1,9 @@
 {
-  "parent": "minecraft:block/orientable",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/electric_furnace.obj",
+  "mtl_override": "magneticraft:models/block/legacy/electric_furnace.mtl",
   "textures": {
-    "front": "magneticraft:block/electric_furnace_front",
-    "side": "magneticraft:block/electric_furnace_side",
-    "top": "magneticraft:block/electric_furnace_side"
+    "particle": "magneticraft:block/legacy/electric_machines/electric_furnace"
   }
 }

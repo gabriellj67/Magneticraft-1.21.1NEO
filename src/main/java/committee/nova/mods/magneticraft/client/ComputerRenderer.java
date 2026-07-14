@@ -6,10 +6,9 @@ import committee.nova.mods.magneticraft.content.computer.ProgrammableBlock;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.client.renderer.LightTexture;
 
-/** Renders the synchronized computer run-state indicator over the static OBJ body. */
+/** Renders the historical screen group with synchronized run-state illumination. */
 public final class ComputerRenderer implements BlockEntityRenderer<ComputerBlockEntity> {
     public ComputerRenderer(BlockEntityRendererProvider.Context context) {
     }
@@ -28,15 +27,12 @@ public final class ComputerRenderer implements BlockEntityRenderer<ComputerBlock
                 poseStack,
                 computer.getBlockState().getValue(ProgrammableBlock.FACING)
         );
-        poseStack.translate(0.5D, 0.60D, 0.165D);
-        poseStack.scale(0.12F, 0.12F, 0.12F);
-        MachineRenderHelper.renderItem(
-                new ItemStack(computer.visuallyRunning() ? Items.REDSTONE_TORCH : Items.REDSTONE),
+        MachineRenderHelper.renderBakedModel(
+                LegacyBakedModels.COMPUTER_SCREEN,
                 poseStack,
                 buffers,
-                packedLight,
-                packedOverlay,
-                (int) computer.getBlockPos().asLong()
+                computer.visuallyRunning() ? LightTexture.FULL_BRIGHT : packedLight,
+                packedOverlay
         );
         poseStack.popPose();
     }

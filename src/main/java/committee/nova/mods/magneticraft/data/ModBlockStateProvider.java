@@ -11,16 +11,17 @@ import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlo
 import committee.nova.mods.magneticraft.content.network.electric.PoleSegment;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerPart;
+import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlock;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
-import net.minecraft.data.PackOutput;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.core.Direction;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
@@ -44,24 +45,19 @@ final class ModBlockStateProvider extends BlockStateProvider {
         }
 
         Block crushingTable = ModMachineBlocks.CRUSHING_TABLE.get();
-        BlockModelBuilder crushingModel = models().getBuilder("crushing_table")
-                .texture("particle", modLoc("block/crushing_table_side"))
-                .texture("side", modLoc("block/crushing_table_side"))
-                .texture("bottom", modLoc("block/crushing_table_bottom"))
-                .texture("top", modLoc("block/crushing_table_top"));
-        crushingModel.element().from(1, 12, 1).to(15, 16, 15)
-                .allFaces((direction, face) -> face.texture(direction == Direction.UP
-                        ? "#top"
-                        : direction == Direction.DOWN ? "#bottom" : "#side"))
-                .end();
-        addCrushingTableLeg(crushingModel, 2, 2, 5, 5);
-        addCrushingTableLeg(crushingModel, 11, 2, 14, 5);
-        addCrushingTableLeg(crushingModel, 2, 11, 5, 14);
-        addCrushingTableLeg(crushingModel, 11, 11, 14, 14);
+        ModelFile crushingModel = legacyObjModel(
+                "crushing_table",
+                "crushing_table",
+                modLoc("block/legacy/machines/crushing_table_side")
+        );
         simpleBlockWithItem(crushingTable, crushingModel);
 
         Block battery = ModMachineBlocks.BATTERY.get();
-        ModelFile batteryModel = objModel("battery_box", "battery_box", modLoc("block/battery_box"));
+        ModelFile batteryModel = legacyObjModel(
+                "battery_box",
+                "battery_box",
+                modLoc("block/legacy/electric_machines/battery")
+        );
         horizontalBlock(battery, batteryModel);
         simpleBlockItem(battery, batteryModel);
 
@@ -73,18 +69,12 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         Block electricFurnace = ModMachineBlocks.ELECTRIC_FURNACE.get();
-        ModelFile furnaceOff = models().orientable(
+        ModelFile furnaceOff = legacyObjModel(
                 "electric_furnace",
-                modLoc("block/electric_furnace_side"),
-                modLoc("block/electric_furnace_front"),
-                modLoc("block/electric_furnace_side")
+                "electric_furnace",
+                modLoc("block/legacy/electric_machines/electric_furnace")
         );
-        ModelFile furnaceOn = models().orientable(
-                "electric_furnace_on",
-                modLoc("block/electric_furnace_side"),
-                modLoc("block/electric_furnace_front_on"),
-                modLoc("block/electric_furnace_side")
-        );
+        ModelFile furnaceOn = furnaceOff;
         horizontalBlock(
                 electricFurnace,
                 state -> state.getValue(ElectricFurnaceBlock.LIT) ? furnaceOn : furnaceOff
@@ -93,6 +83,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         ModMachineBlocks.machines().forEach((definition, holder) -> {
             Block block = holder.get();
+            ModelFile historicalModel = historicalSingleBlockModel(definition);
+            if (historicalModel != null) {
+                registerSingleBlockMachineModel(block, definition, historicalModel);
+                return;
+            }
             if (definition == SingleBlockMachineDefinition.RELAY
                     || definition == SingleBlockMachineDefinition.FILTER
                     || definition == SingleBlockMachineDefinition.TRANSPOSER) {
@@ -118,47 +113,36 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
         simpleBlockWithItem(
                 ModMachineBlocks.TUBE_LIGHT.get(),
-                models().cubeAll("tube_light", mcLoc("block/glowstone"))
+                legacyObjModel(
+                        "tube_light",
+                        "tube_light",
+                        modLoc("block/legacy/decoration/tube_light")
+                )
         );
 
-        conduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable", mcLoc("block/copper_block"));
+        legacyConduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable");
         registerLongDistanceElectricModels();
         conduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe", mcLoc("block/iron_block"), 4);
-        conduitBlock(
-                ModNetworkBlocks.INSULATED_HEAT_PIPE.get(),
-                "insulated_heat_pipe",
-                mcLoc("block/black_wool"),
-                3
-        );
-        conduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_fluid_pipe", mcLoc("block/iron_block"), 4);
-        conduitBlock(ModNetworkBlocks.PNEUMATIC_TUBE.get(), "pneumatic_tube", mcLoc("block/light_gray_concrete"));
-        conduitBlock(
-                ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
-                "pneumatic_restriction_tube",
-                mcLoc("block/red_concrete")
-        );
+        legacyConduitBlock(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), "insulated_heat_pipe");
+        legacyConduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_fluid_pipe");
+        legacyConduitBlock(ModNetworkBlocks.PNEUMATIC_TUBE.get(), "pneumatic_tube");
+        legacyConduitBlock(ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(), "pneumatic_restriction_tube");
 
         Block heatSink = ModNetworkBlocks.HEAT_SINK.get();
-        BlockModelBuilder heatSinkModel = models().getBuilder("heat_sink")
-                .texture("particle", mcLoc("block/iron_block"))
-                .texture("metal", mcLoc("block/iron_block"))
-                .texture("face", modLoc("block/iron_grate"));
-        heatSinkModel.element().from(0, 11, 0).to(16, 13, 16).textureAll("#metal").end();
-        for (int x = 1; x <= 13; x += 3) {
-            heatSinkModel.element().from(x, 14, 1).to(x + 1, 16, 15).textureAll("#metal").end();
-        }
-        heatSinkModel.element().from(2, 13, 2).to(14, 14, 14).textureAll("#face").end();
-        directionalBlock(heatSink, heatSinkModel);
+        ModelFile heatSinkModel = legacyObjModel(
+                "heat_sink",
+                "heat_sink",
+                modLoc("block/legacy/machines/heat_sink")
+        );
+        downFacingBlock(heatSink, heatSinkModel);
         simpleBlockItem(heatSink, heatSinkModel);
 
         Block conveyor = ModNetworkBlocks.CONVEYOR_BELT.get();
-        BlockModelBuilder conveyorModel = models().getBuilder("conveyor_belt")
-                .texture("particle", mcLoc("block/black_concrete"))
-                .texture("belt", mcLoc("block/black_concrete"))
-                .texture("rail", mcLoc("block/iron_block"));
-        conveyorModel.element().from(0, 0, 0).to(16, 3, 16).textureAll("#belt").end();
-        conveyorModel.element().from(0, 3, 0).to(2, 4, 16).textureAll("#rail").end();
-        conveyorModel.element().from(14, 3, 0).to(16, 4, 16).textureAll("#rail").end();
+        ModelFile conveyorModel = legacyObjModel(
+                "conveyor_belt",
+                "conveyor_belt",
+                modLoc("block/legacy/machines/conveyor_belt")
+        );
         horizontalBlock(conveyor, conveyorModel);
         simpleBlockItem(conveyor, conveyorModel);
 
@@ -208,16 +192,19 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         Block computer = ModComputerContent.COMPUTER.get();
-        ModelFile computerModel = objModel("computer", "computer", modLoc("block/computer"));
+        ModelFile computerModel = legacyObjModel(
+                "computer",
+                "computer_body",
+                modLoc("block/legacy/computers/computer1")
+        );
         horizontalBlock(computer, computerModel);
         simpleBlockItem(computer, computerModel);
 
         Block miningRobot = ModComputerContent.MINING_ROBOT.get();
-        ModelFile miningRobotModel = models().orientable(
+        ModelFile miningRobotModel = legacyObjModel(
                 "mining_robot",
-                mcLoc("block/copper_block"),
-                mcLoc("block/dispenser_front"),
-                mcLoc("block/iron_block")
+                "mining_robot_body",
+                modLoc("block/legacy/computers/mining_robot")
         );
         horizontalBlock(miningRobot, miningRobotModel);
         simpleBlockItem(miningRobot, miningRobotModel);
@@ -229,14 +216,57 @@ final class ModBlockStateProvider extends BlockStateProvider {
         }
     }
 
-    private static void addCrushingTableLeg(
-            BlockModelBuilder model,
-            int minX,
-            int minZ,
-            int maxX,
-            int maxZ
+    private ModelFile historicalSingleBlockModel(SingleBlockMachineDefinition definition) {
+        return switch (definition) {
+            case COMBUSTION_CHAMBER -> legacyObjModel(
+                    definition.id(), "combustion_chamber", modLoc("block/legacy/machines/combustion_gen_top")
+            );
+            case STEAM_BOILER -> legacyObjModel(
+                    definition.id(), "steam_boiler", modLoc("block/legacy/machines/boiler")
+            );
+            case SMALL_TANK -> legacyObjModel(
+                    definition.id(), "small_tank", modLoc("block/legacy/fluid_machines/small_tank")
+            );
+            case GASIFICATION_UNIT -> legacyObjModel(
+                    definition.id(), "gasification_unit", modLoc("block/legacy/machines/gasification_unit")
+            );
+            case INSERTER -> legacyObjModel(
+                    definition.id(), "inserter_body", modLoc("block/legacy/machines/inserter")
+            );
+            case ELECTRIC_ENGINE -> legacyObjModel(
+                    definition.id(), "electric_engine_body", modLoc("block/legacy/electric_machines/electric_engine")
+            );
+            default -> null;
+        };
+    }
+
+    private void registerSingleBlockMachineModel(
+            Block block,
+            SingleBlockMachineDefinition definition,
+            ModelFile model
     ) {
-        model.element().from(minX, 0, minZ).to(maxX, 12, maxZ).textureAll("#side").end();
+        if (definition.facingMode() == SingleBlockMachineDefinition.FacingMode.NONE) {
+            simpleBlock(block, model);
+        } else {
+            directionalBlock(block, model);
+        }
+        simpleBlockItem(block, model);
+    }
+
+    private void legacyConduitBlock(Block block, String artifactName) {
+        ModelFile model = legacyObjModel(
+                artifactName,
+                artifactName,
+                switch (artifactName) {
+                    case "electric_cable" -> modLoc("block/legacy/electric_connectors/electric_cable");
+                    case "insulated_heat_pipe" -> modLoc("block/legacy/fluid_machines/insulated_heat_pipe");
+                    case "iron_fluid_pipe" -> modLoc("block/legacy/fluid_machines/iron_pipe");
+                    case "pneumatic_tube", "pneumatic_restriction_tube" ->
+                            modLoc("block/legacy/machines/pneumatic_tube");
+                    default -> throw new IllegalArgumentException("Unknown historical conduit: " + artifactName);
+                }
+        );
+        simpleBlockWithItem(block, model);
     }
 
     private ModelFile pneumaticEndpointModel(SingleBlockMachineDefinition definition) {
@@ -307,104 +337,107 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void registerLongDistanceElectricModels() {
-        wallMountedEndpoint(
+        historicalDirectionalBlock(
                 ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
                 "electric_connector",
-                mcLoc("block/copper_block"),
-                mcLoc("block/iron_block")
+                modLoc("block/legacy/electric_connectors/connector")
         );
-        wallMountedEndpoint(
+        historicalDirectionalBlock(
                 ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(),
                 "wireless_energy_receiver",
-                mcLoc("block/copper_block"),
-                mcLoc("block/redstone_block")
+                modLoc("block/legacy/electric_connectors/energy_receiver")
         );
 
-        poleModels(ModNetworkBlocks.ELECTRIC_POLE.get(), "electric_pole", false);
-        poleModels(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), "electric_pole_transformer", true);
+        poleModels(ModNetworkBlocks.ELECTRIC_POLE.get(), "electric_pole");
+        poleModels(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), "electric_pole_transformer");
 
         Block teslaTower = ModNetworkBlocks.TESLA_TOWER.get();
-        ModelFile teslaBottom = teslaPartModel("tesla_tower_bottom", 2, 14);
-        ModelFile teslaMiddle = teslaPartModel("tesla_tower_middle", 5, 11);
-        ModelFile teslaTop = teslaTopModel();
+        ModelFile teslaBottom = legacyObjModel(
+                "tesla_tower_bottom",
+                "tesla_tower",
+                modLoc("block/legacy/electric_connectors/tesla_tower")
+        );
+        ModelFile teslaEmpty = emptyModel("tesla_tower_member", modLoc("block/legacy/electric_connectors/tesla_tower"));
         getVariantBuilder(teslaTower).forAllStates(state -> {
             TeslaTowerPart part = state.getValue(TeslaTowerBlock.PART);
             return ConfiguredModel.builder().modelFile(switch (part) {
                 case BOTTOM -> teslaBottom;
-                case MIDDLE -> teslaMiddle;
-                case TOP -> teslaTop;
+                case MIDDLE, TOP -> teslaEmpty;
             }).build();
         });
         simpleBlockItem(teslaTower, teslaBottom);
 
         Block windTurbine = ModNetworkBlocks.WIND_TURBINE.get();
-        ModelFile turbineModel = models().orientable(
+        ModelFile turbineModel = legacyObjModel(
                 "wind_turbine",
-                mcLoc("block/iron_block"),
-                mcLoc("block/quartz_block_side"),
-                mcLoc("block/copper_block")
+                "wind_turbine_hub",
+                modLoc("block/legacy/electric_machines/wind_turbine")
         );
         horizontalBlock(windTurbine, state -> turbineModel);
-        simpleBlockItem(windTurbine, turbineModel);
+        simpleBlockItem(
+                windTurbine,
+                legacyObjModel(
+                        "wind_turbine_inventory",
+                        "wind_turbine_full",
+                        modLoc("block/legacy/electric_machines/wind_turbine")
+                )
+        );
     }
 
-    private void wallMountedEndpoint(
+    private void historicalDirectionalBlock(
             Block block,
             String name,
-            ResourceLocation bodyTexture,
-            ResourceLocation faceTexture
+            ResourceLocation particleTexture
     ) {
-        BlockModelBuilder model = models().getBuilder(name)
-                .texture("particle", bodyTexture)
-                .texture("body", bodyTexture)
-                .texture("face", faceTexture);
-        model.element().from(5, 0, 5).to(11, 5, 11).textureAll("#body").end();
-        model.element().from(3, 5, 3).to(13, 8, 13).textureAll("#face").end();
+        ModelFile model = legacyObjModel(name, name, particleTexture);
         directionalBlock(block, model);
         simpleBlockItem(block, model);
     }
 
-    private void poleModels(Block block, String name, boolean transformer) {
-        ModelFile post = models().getBuilder(name + "_post")
-                .texture("particle", mcLoc("block/oak_log"))
-                .texture("wood", mcLoc("block/oak_log"))
-                .element().from(6, 0, 6).to(10, 16, 10).textureAll("#wood").end();
-        BlockModelBuilder base = models().getBuilder(name + "_base")
-                .texture("particle", mcLoc("block/oak_log"))
-                .texture("wood", mcLoc("block/oak_log"))
-                .texture("metal", transformer ? mcLoc("block/copper_block") : mcLoc("block/iron_block"));
-        base.element().from(6, 0, 6).to(10, 16, 10).textureAll("#wood").end();
-        base.element().from(1, 10, 5).to(15, 14, 11).textureAll("#wood").end();
-        base.element().from(2, 14, 6).to(5, 16, 10).textureAll("#metal").end();
-        base.element().from(11, 14, 6).to(14, 16, 10).textureAll("#metal").end();
-        if (transformer) {
-            base.element().from(4, 3, 4).to(12, 10, 12).textureAll("#metal").end();
-        }
+    /** Maps a historical model authored against the lower face to the six-way facing property. */
+    private void downFacingBlock(Block block, ModelFile model) {
+        getVariantBuilder(block).forAllStates(state -> {
+            Direction facing = state.getValue(HeatSinkBlock.FACING);
+            int rotationX = switch (facing) {
+                case DOWN -> 0;
+                case UP -> 180;
+                case NORTH, SOUTH, WEST, EAST -> 270;
+            };
+            int rotationY = switch (facing) {
+                case SOUTH -> 180;
+                case WEST -> 270;
+                case EAST -> 90;
+                default -> 0;
+            };
+            return ConfiguredModel.builder()
+                    .modelFile(model)
+                    .rotationX(rotationX)
+                    .rotationY(rotationY)
+                    .build();
+        });
+    }
+
+    private void poleModels(Block block, String name) {
+        ResourceLocation particle = modLoc("block/legacy/electric_connectors/" + name);
+        ModelFile empty = emptyModel(name + "_world", particle);
+        ModelFile inventory = legacyObjModel(name + "_inventory", name, particle);
         getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(state.getValue(ElectricPoleBlock.SEGMENT) == PoleSegment.BASE ? base : post)
+                .modelFile(empty)
                 .build());
-        simpleBlockItem(block, base);
+        simpleBlockItem(block, inventory);
     }
 
-    private ModelFile teslaPartModel(String name, int min, int max) {
-        BlockModelBuilder model = models().getBuilder(name)
-                .texture("particle", mcLoc("block/copper_block"))
-                .texture("copper", mcLoc("block/copper_block"))
-                .texture("iron", mcLoc("block/iron_block"));
-        model.element().from(min, 0, min).to(max, 16, max).textureAll("#iron").end();
-        model.element().from(0, 1, 7).to(16, 4, 9).textureAll("#copper").end();
-        model.element().from(7, 1, 0).to(9, 4, 16).textureAll("#copper").end();
-        return model;
+    private ModelFile emptyModel(String name, ResourceLocation particleTexture) {
+        return models().getBuilder(name).texture("particle", particleTexture);
     }
 
-    private ModelFile teslaTopModel() {
-        BlockModelBuilder model = models().getBuilder("tesla_tower_top")
-                .texture("particle", mcLoc("block/copper_block"))
-                .texture("copper", mcLoc("block/copper_block"))
-                .texture("iron", mcLoc("block/iron_block"));
-        model.element().from(6, 0, 6).to(10, 9, 10).textureAll("#iron").end();
-        model.element().from(2, 7, 2).to(14, 11, 14).textureAll("#copper").end();
-        model.element().from(5, 11, 5).to(11, 16, 11).textureAll("#copper").end();
-        return model;
+    private ModelFile legacyObjModel(String generatedName, String artifactName, ResourceLocation particleTexture) {
+        return models().getBuilder(generatedName)
+                .texture("particle", particleTexture)
+                .customLoader(ObjModelBuilder::begin)
+                .modelLocation(modLoc("models/block/legacy/" + artifactName + ".obj"))
+                .flipV(true)
+                .overrideMaterialLibrary(modLoc("models/block/legacy/" + artifactName + ".mtl"))
+                .end();
     }
 }

@@ -1,6 +1,9 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "flip_v": true,
+  "loader": "forge:obj",
+  "model": "magneticraft:models/block/legacy/combustion_chamber.obj",
+  "mtl_override": "magneticraft:models/block/legacy/combustion_chamber.mtl",
   "textures": {
-    "all": "minecraft:block/bricks"
+    "particle": "magneticraft:block/legacy/machines/combustion_gen_top"
   }
 }
