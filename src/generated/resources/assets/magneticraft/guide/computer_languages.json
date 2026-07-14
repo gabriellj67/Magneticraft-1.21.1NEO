@@ -1,0 +1,82 @@
+{
+  "languages": [
+    {
+      "commands": [
+        "MINE",
+        "FRONT",
+        "FORWARD",
+        "BACK",
+        "LEFT",
+        "RIGHT",
+        "UP",
+        "DOWN",
+        "SCAN"
+      ],
+      "examples": [
+        "2 5 + .",
+        "WORDS"
+      ],
+      "historical_version": "1.1",
+      "id": "forth"
+    },
+    {
+      "commands": [
+        "mine",
+        "front",
+        "back",
+        "left",
+        "right",
+        "up",
+        "down",
+        "scan"
+      ],
+      "examples": [
+        "(print 5)",
+        "(define x 5)",
+        "(env)"
+      ],
+      "historical_version": "2.0",
+      "id": "lisp"
+    },
+    {
+      "commands": [
+        "help",
+        "ls",
+        "cd",
+        "mkdir",
+        "rm",
+        "format",
+        "free",
+        "fs",
+        "cat",
+        "touch",
+        "write",
+        "update_disk",
+        "quarry"
+      ],
+      "examples": [
+        "help",
+        "quarry 10"
+      ],
+      "historical_version": "1.1",
+      "id": "shell"
+    }
+  ],
+  "limits": {
+    "device_calls_per_tick": 4,
+    "floppy_bytes": 131072,
+    "floppy_entries": 128,
+    "instructions_per_tick": 64,
+    "output_characters": 2048,
+    "quarry_max_size": 32,
+    "source_bytes": 8192
+  },
+  "schema_version": 1,
+  "security": {
+    "force_load_chunks": false,
+    "host_filesystem_access": false,
+    "menu_session_replay_protection": true,
+    "outbound_network_access": false,
+    "server_authoritative": true
+  }
+}

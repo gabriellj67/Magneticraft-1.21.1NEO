@@ -193,8 +193,14 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModComputerContent.MINING_ROBOT.get(), chinese ? "采矿机器人" : "Mining Robot");
         add(ModComputerContent.FLOPPY_DISK.get(), chinese ? "软盘" : "Floppy Disk");
         add("tooltip.magneticraft.floppy_disk.instructions", chinese ? "已存储 %s 条指令" : "%s instructions stored");
+        add("tooltip.magneticraft.floppy_disk.preset", chinese ? "介质：%s" : "Media: %s");
+        add("tooltip.magneticraft.floppy_disk.language", chinese ? "语言：%s" : "Language: %s");
+        add("tooltip.magneticraft.floppy_disk.storage", chinese ? "存储：%s/%s 字节" : "Storage: %s/%s bytes");
+        add("tooltip.magneticraft.floppy_disk.read_only", chinese ? "只读预置介质" : "Read-only preset media");
+        add("tooltip.magneticraft.floppy_disk.corrupt", chinese ? "损坏的软盘数据" : "Corrupt floppy data");
         add("message.magneticraft.computer.access_denied", chinese ? "无权管理此设备" : "Access denied");
         add("message.magneticraft.computer.floppy_written", chinese ? "程序已写入软盘" : "Program written to floppy disk");
+        add("message.magneticraft.computer.floppy_read_only", chinese ? "此预置软盘为只读介质" : "This preset floppy is read-only");
         add("message.magneticraft.computer.floppy_loaded", chinese ? "程序已从软盘载入" : "Program loaded from floppy disk");
         add("message.magneticraft.computer.floppy_invalid", chinese ? "软盘程序无效" : "Invalid floppy program");
         add("message.magneticraft.computer.fault", chinese ? "计算机故障：%s" : "Computer fault: %s");
@@ -227,7 +233,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.inserter.allow_stacking", chinese ? "组" : "S");
         add("gui.magneticraft.inserter.reverse", chinese ? "反" : "R");
         add("gui.magneticraft.shelving_summary", chinese ? "箱体：%s，可用槽位：%s" : "Chests: %s, available slots: %s");
-        add("gui.magneticraft.programmable.instruction", chinese ? "指令 %s" : "Instruction %s");
+        add("gui.magneticraft.programmable.instruction", chinese ? "代码行 %s" : "Source line %s");
         add("gui.magneticraft.programmable.upload", chinese ? "上传" : "Upload");
         add("gui.magneticraft.programmable.page", chinese ? "页 %s/%s" : "Page %s/%s");
         add("gui.magneticraft.programmable.counters", chinese ? "PC %s · 红石 %s" : "PC %s · RS %s");
@@ -237,6 +243,13 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.programmable.fault.invalid_memory_address", chinese ? "故障：内存地址无效" : "Fault: invalid memory address");
         add("gui.magneticraft.programmable.fault.division_by_zero", chinese ? "故障：除数为零" : "Fault: division by zero");
         add("gui.magneticraft.programmable.fault.unsupported_device_instruction", chinese ? "故障：设备指令不支持" : "Fault: unsupported device instruction");
+        add("gui.magneticraft.programmable.fault.invalid_source", chinese ? "故障：源程序无效" : "Fault: invalid source");
+        add("gui.magneticraft.programmable.fault.data_stack_underflow", chinese ? "故障：数据栈下溢" : "Fault: data stack underflow");
+        add("gui.magneticraft.programmable.fault.data_stack_overflow", chinese ? "故障：数据栈溢出" : "Fault: data stack overflow");
+        add("gui.magneticraft.programmable.fault.return_stack_overflow", chinese ? "故障：返回栈溢出" : "Fault: return stack overflow");
+        add("gui.magneticraft.programmable.fault.memory_exhausted", chinese ? "故障：内存耗尽" : "Fault: memory exhausted");
+        add("gui.magneticraft.programmable.fault.execution_limit", chinese ? "故障：执行预算耗尽" : "Fault: execution budget exhausted");
+        add("gui.magneticraft.programmable.fault.device_budget_exhausted", chinese ? "故障：设备调用预算耗尽" : "Fault: device-call budget exhausted");
         add("gui.magneticraft.programmable.fault.invalid_snapshot", chinese ? "故障：状态快照无效" : "Fault: invalid snapshot");
         add("gui.magneticraft.guide.title", chinese ? "磁场工艺指南" : "Magneticraft Guide");
         add("gui.magneticraft.guide.search", chinese ? "搜索" : "Search");

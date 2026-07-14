@@ -11,7 +11,7 @@ import java.util.Optional;
  * Narrow protocol for server-authoritative machine-menu actions.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "1";
+    private static final String PROTOCOL = "2";
     private static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(Magneticraft.id("machine"))
             .networkProtocolVersion(() -> PROTOCOL)

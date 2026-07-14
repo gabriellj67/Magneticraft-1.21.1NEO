@@ -1,11 +1,13 @@
 package committee.nova.mods.magneticraft.content.computer;
 
-import committee.nova.mods.magneticraft.content.computer.vm.ComputerInstruction;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptProgram;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
 import committee.nova.mods.magneticraft.content.computer.vm.VmFault;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractMachineMenu;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
 import committee.nova.mods.magneticraft.init.ModMenus;
-import committee.nova.mods.magneticraft.network.UploadComputerProgramMessage;
+import io.netty.handler.codec.DecoderException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,8 +20,6 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
-import java.util.List;
-
 /**
  * Server-authoritative editor snapshot and optional mining-robot inventory.
  */
@@ -31,15 +31,24 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
     private final ContainerLevelAccess access;
     private final boolean miningRobot;
     private final long revision;
-    private final List<ComputerInstruction> initialProgram;
+    private final long sessionToken;
+    private final ScriptLanguage initialLanguage;
+    private final String initialSource;
+    private final String initialOutput;
     private final ContainerData data;
     private final int machineSlots;
+    private int nextUploadSequence;
 
     public ProgrammableMenu(int containerId, Inventory playerInventory, FriendlyByteBuf buffer) {
         this(containerId, playerInventory, readOpeningData(buffer));
     }
 
-    public ProgrammableMenu(int containerId, Inventory playerInventory, ProgrammableBlockEntity programmable) {
+    public ProgrammableMenu(
+            int containerId,
+            Inventory playerInventory,
+            ProgrammableBlockEntity programmable,
+            long sessionToken
+    ) {
         this(
                 containerId,
                 playerInventory,
@@ -47,7 +56,9 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
                         programmable.getBlockPos(),
                         programmable instanceof MiningRobotBlockEntity,
                         programmable.programRevision(),
-                        programmable.program(),
+                        sessionToken,
+                        programmable.scriptProgram().orElseGet(() -> new ScriptProgram(ScriptLanguage.FORTH, "")),
+                        programmable.terminalOutput(),
                         programmable
                 )
         );
@@ -58,18 +69,21 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
         position = opening.position().immutable();
         miningRobot = opening.miningRobot();
         revision = opening.revision();
-        initialProgram = List.copyOf(opening.program());
+        sessionToken = opening.sessionToken();
+        initialLanguage = opening.program().language();
+        initialSource = opening.program().source();
+        initialOutput = opening.output();
         access = ContainerLevelAccess.create(playerInventory.player.level(), position);
 
         ProgrammableBlockEntity programmable = opening.programmable();
         data = programmable == null
                 ? new SimpleContainerData(PHYSICAL_DATA_COUNT)
                 : Int32ContainerData.readOnly(
-                        programmable.vm()::programCounter,
-                        () -> programmable.vm().running() ? 1 : 0,
-                        () -> programmable.vm().fault().ordinal(),
+                        programmable::activeProgramCounter,
+                        () -> programmable.activeRunning() ? 1 : 0,
+                        () -> programmable.activeFault().ordinal(),
                         programmable::redstoneOutput,
-                        programmable.vm()::lastResult,
+                        programmable::activeLastResult,
                         () -> programmable instanceof MiningRobotBlockEntity robot
                                 ? robot.energy().getEnergyStored()
                                 : 0,
@@ -115,8 +129,56 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
         return revision;
     }
 
-    public List<ComputerInstruction> initialProgram() {
-        return initialProgram;
+    public long sessionToken() {
+        return sessionToken;
+    }
+
+    public int nextUploadSequence() {
+        return nextUploadSequence;
+    }
+
+    public ScriptLanguage initialLanguage() {
+        return initialLanguage;
+    }
+
+    public String initialSource() {
+        return initialSource;
+    }
+
+    public String initialOutput() {
+        return initialOutput;
+    }
+
+    public boolean applyUpload(
+            Player sender,
+            BlockPos requestedPosition,
+            long requestedRevision,
+            long requestedSession,
+            int requestedSequence,
+            ScriptProgram program
+    ) {
+        if (sender == null
+                || program == null
+                || sender.level().isClientSide
+                || !sender.getAbilities().mayBuild
+                || !position.equals(requestedPosition)
+                || revision != requestedRevision
+                || sessionToken != requestedSession
+                || nextUploadSequence != requestedSequence
+                || !sender.level().getWorldBorder().isWithinBounds(position)
+                || !sender.level().hasChunk(position.getX() >> 4, position.getZ() >> 4)
+                || sender.distanceToSqr(position.getX() + 0.5D, position.getY() + 0.5D, position.getZ() + 0.5D)
+                > 64.0D
+                || !stillValid(sender)) {
+            return false;
+        }
+        if (!(sender.level().getBlockEntity(position) instanceof ProgrammableBlockEntity programmable)
+                || !programmable.canManage(sender)
+                || !programmable.tryReplaceScript(requestedRevision, program)) {
+            return false;
+        }
+        nextUploadSequence++;
+        return true;
     }
 
     public int programCounter() {
@@ -156,21 +218,37 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
 
     private static OpeningData readOpeningData(FriendlyByteBuf buffer) {
         boolean miningRobot = buffer.readBoolean();
-        UploadComputerProgramMessage snapshot = UploadComputerProgramMessage.decode(buffer);
-        return new OpeningData(
-                snapshot.position(),
-                miningRobot,
-                snapshot.expectedRevision(),
-                snapshot.program(),
-                null
-        );
+        BlockPos position = buffer.readBlockPos();
+        long revision = buffer.readVarLong();
+        long sessionToken = buffer.readLong();
+        ScriptLanguage language = ScriptLanguage.parse(buffer.readUtf(16))
+                .orElseThrow(() -> new DecoderException("Unknown computer language"));
+        try {
+            ScriptProgram program = new ScriptProgram(
+                    language,
+                    buffer.readUtf(ScriptRuntime.MAX_SOURCE_BYTES)
+            );
+            return new OpeningData(
+                    position,
+                    miningRobot,
+                    revision,
+                    sessionToken,
+                    program,
+                    buffer.readUtf(ScriptRuntime.MAX_OUTPUT_CHARACTERS),
+                    null
+            );
+        } catch (IllegalArgumentException exception) {
+            throw new DecoderException("Invalid computer menu snapshot", exception);
+        }
     }
 
     private record OpeningData(
             BlockPos position,
             boolean miningRobot,
             long revision,
-            List<ComputerInstruction> program,
+            long sessionToken,
+            ScriptProgram program,
+            String output,
             ProgrammableBlockEntity programmable
     ) {
     }

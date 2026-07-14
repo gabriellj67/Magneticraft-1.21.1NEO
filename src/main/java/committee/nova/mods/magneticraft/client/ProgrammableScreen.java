@@ -1,9 +1,9 @@
 package committee.nova.mods.magneticraft.client;
 
-import committee.nova.mods.magneticraft.content.computer.ComputerProgramText;
 import committee.nova.mods.magneticraft.content.computer.ProgrammableMenu;
-import committee.nova.mods.magneticraft.content.computer.vm.BoundedComputerVm;
-import committee.nova.mods.magneticraft.content.computer.vm.ComputerInstruction;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptProgram;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
 import committee.nova.mods.magneticraft.content.computer.vm.VmFault;
 import committee.nova.mods.magneticraft.network.ModNetwork;
 import committee.nova.mods.magneticraft.network.UploadComputerProgramMessage;
@@ -23,7 +23,8 @@ import java.util.Locale;
  */
 public final class ProgrammableScreen extends AbstractContainerScreen<ProgrammableMenu> {
     private static final int LINES_PER_PAGE = 8;
-    private static final int PAGE_COUNT = BoundedComputerVm.MAX_PROGRAM_LENGTH / LINES_PER_PAGE;
+    private static final int MAX_LINES = ScriptRuntime.MAX_SOURCE_BYTES + 1;
+    private static final int PAGE_COUNT = (MAX_LINES + LINES_PER_PAGE - 1) / LINES_PER_PAGE;
     static final int ROBOT_ENERGY_TOP = 96;
     static final int ROBOT_ENERGY_HEIGHT = 12;
     static final int STATE_TOP = 110;
@@ -32,8 +33,10 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
     private static final int STATE_LEFT = 166;
     private static final int STATE_WIDTH = 78;
 
-    private final List<String> lines = new ArrayList<>(BoundedComputerVm.MAX_PROGRAM_LENGTH);
+    private final List<String> lines = new ArrayList<>(MAX_LINES);
     private final List<EditBox> editors = new ArrayList<>(LINES_PER_PAGE);
+    private ScriptLanguage language;
+    private Button languageButton;
     private int page;
     private Component validationMessage = Component.empty();
 
@@ -43,10 +46,10 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
         imageHeight = 214;
         inventoryLabelX = 43;
         inventoryLabelY = 121;
-        for (ComputerInstruction instruction : menu.initialProgram()) {
-            lines.add(ComputerProgramText.format(instruction));
-        }
-        while (lines.size() < BoundedComputerVm.MAX_PROGRAM_LENGTH) {
+        language = menu.initialLanguage();
+        String normalizedSource = menu.initialSource().replace("\r\n", "\n").replace('\r', '\n');
+        lines.addAll(List.of(normalizedSource.split("\n", -1)));
+        while (lines.size() < MAX_LINES) {
             lines.add("");
         }
     }
@@ -64,7 +67,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     11,
                     Component.translatable("gui.magneticraft.programmable.instruction", row + 1)
             );
-            editor.setMaxLength(64);
+            editor.setMaxLength(ScriptRuntime.MAX_SOURCE_BYTES);
             editors.add(addRenderableWidget(editor));
         }
         addRenderableWidget(Button.builder(Component.literal("<"), ignored -> setPage(page - 1))
@@ -73,11 +76,14 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
         addRenderableWidget(Button.builder(Component.literal(">"), ignored -> setPage(page + 1))
                 .bounds(leftPos + 32, topPos + 110, 20, 18)
                 .build());
+        languageButton = addRenderableWidget(Button.builder(languageLabel(), ignored -> cycleLanguage())
+                .bounds(leftPos + 55, topPos + 110, 50, 18)
+                .build());
         addRenderableWidget(Button.builder(
                         Component.translatable("gui.magneticraft.programmable.upload"),
                         ignored -> uploadProgram()
                 )
-                .bounds(leftPos + 88, topPos + 110, 70, 18)
+                .bounds(leftPos + 108, topPos + 110, 50, 18)
                 .build());
         loadVisibleLines();
     }
@@ -130,14 +136,6 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
         }
         graphics.drawString(
                 font,
-                Component.translatable("gui.magneticraft.programmable.page", page + 1, PAGE_COUNT),
-                56,
-                116,
-                0xFFB8C0C8,
-                false
-        );
-        graphics.drawString(
-                font,
                 MachineScreenLayout.fitToWidth(font, stateLabel(), STATE_WIDTH),
                 STATE_LEFT,
                 STATE_TOP,
@@ -160,7 +158,16 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                 0xFFB8C0C8,
                 false
         );
-        if (!validationMessage.getString().isEmpty()) {
+        if (validationMessage.getString().isEmpty()) {
+            graphics.drawString(
+                    font,
+                    Component.translatable("gui.magneticraft.programmable.page", page + 1, PAGE_COUNT),
+                    8,
+                    101,
+                    0xFFB8C0C8,
+                    false
+            );
+        } else {
             graphics.drawString(font, validationMessage, 8, 101, 0xFFFF7B72, false);
         }
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFFB8C0C8, false);
@@ -209,10 +216,12 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
     private void uploadProgram() {
         saveVisibleLines();
         try {
-            List<ComputerInstruction> program = ComputerProgramText.parseLines(lines);
+            ScriptProgram program = new ScriptProgram(language, sourceFromEditor());
             ModNetwork.uploadComputerProgram(new UploadComputerProgramMessage(
                     menu.position(),
                     menu.revision(),
+                    menu.sessionToken(),
+                    menu.nextUploadSequence(),
                     program
             ));
             if (minecraft != null && minecraft.player != null) {
@@ -224,6 +233,25 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     exception.getMessage()
             );
         }
+    }
+
+    private String sourceFromEditor() {
+        int lastLine = lines.size() - 1;
+        while (lastLine >= 0 && lines.get(lastLine).isEmpty()) {
+            lastLine--;
+        }
+        return lastLine < 0 ? "" : String.join("\n", lines.subList(0, lastLine + 1));
+    }
+
+    private void cycleLanguage() {
+        ScriptLanguage[] languages = ScriptLanguage.values();
+        language = languages[(language.ordinal() + 1) % languages.length];
+        languageButton.setMessage(languageLabel());
+        validationMessage = Component.empty();
+    }
+
+    private Component languageLabel() {
+        return Component.literal(language.serializedName().toUpperCase(Locale.ROOT));
     }
 
     private Component stateLabel() {

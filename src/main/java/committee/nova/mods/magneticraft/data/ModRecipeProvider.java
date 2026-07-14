@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.computer.FloppyDiskItem;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
@@ -188,6 +190,21 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('P', Items.PAPER)
                 .unlockedBy("has_paper", has(Items.PAPER))
                 .save(consumer, id("crafting/floppy_disk"));
+
+        presetFloppy(consumer, "forth", List.of("AB"), ScriptLanguage.FORTH);
+        presetFloppy(consumer, "lisp", List.of("B", "A"), ScriptLanguage.LISP);
+        presetFloppy(consumer, "shell", List.of(" B", "A "), ScriptLanguage.SHELL);
+        presetFloppy(consumer, "editor", List.of("A ", " B"), null);
+        presetFloppy(consumer, "asm", List.of("A", "B"), null);
+    }
+
+    private void presetFloppy(
+            Consumer<FinishedRecipe> consumer,
+            String preset,
+            List<String> pattern,
+            @Nullable ScriptLanguage language
+    ) {
+        consumer.accept(new PresetFloppyRecipe(id("crafting/floppy_disk_" + preset), pattern, preset, language));
     }
 
     private void addAdvancedProcessingRecipes(Consumer<FinishedRecipe> consumer) {
@@ -1677,6 +1694,64 @@ final class ModRecipeProvider extends RecipeProvider {
         @Override
         public RecipeSerializer<?> getType() {
             return ModRecipeTypes.ADVANCED_PROCESSING_SERIALIZER.get();
+        }
+
+        @Nullable
+        @Override
+        public JsonObject serializeAdvancement() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public ResourceLocation getAdvancementId() {
+            return null;
+        }
+    }
+
+    private record PresetFloppyRecipe(
+            ResourceLocation id,
+            List<String> pattern,
+            String preset,
+            @Nullable ScriptLanguage language
+    ) implements FinishedRecipe {
+        private PresetFloppyRecipe {
+            pattern = List.copyOf(pattern);
+        }
+
+        @Override
+        public void serializeRecipeData(JsonObject json) {
+            json.addProperty("category", "misc");
+            JsonArray encodedPattern = new JsonArray();
+            pattern.forEach(encodedPattern::add);
+            json.add("pattern", encodedPattern);
+
+            JsonObject key = new JsonObject();
+            JsonObject disk = new JsonObject();
+            disk.addProperty("item", Magneticraft.id("floppy_disk").toString());
+            key.add("A", disk);
+            JsonObject redstone = new JsonObject();
+            redstone.addProperty("tag", Tags.Items.DUSTS_REDSTONE.location().toString());
+            key.add("B", redstone);
+            json.add("key", key);
+
+            ItemStack output = new ItemStack(ModComputerContent.FLOPPY_DISK.get());
+            FloppyDiskItem.configurePreset(output, preset, language);
+            JsonObject result = new JsonObject();
+            result.addProperty("item", Magneticraft.id("floppy_disk").toString());
+            result.addProperty("nbt", Objects.requireNonNull(output.getTag()).toString());
+            json.add("result", result);
+            json.addProperty("show_notification", true);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public RecipeSerializer<?> getType() {
+            return RecipeSerializer.SHAPED_RECIPE;
         }
 
         @Nullable

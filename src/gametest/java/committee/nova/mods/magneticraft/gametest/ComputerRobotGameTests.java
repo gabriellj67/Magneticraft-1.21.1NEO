@@ -4,11 +4,13 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.computer.ComputerBlockEntity;
 import committee.nova.mods.magneticraft.content.computer.MiningRobotBlockEntity;
 import committee.nova.mods.magneticraft.content.computer.ProgrammableBlock;
+import committee.nova.mods.magneticraft.content.computer.ProgrammableMenu;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptProgram;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerInstruction;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.computer.vm.VmFault;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
-import committee.nova.mods.magneticraft.network.UploadComputerProgramMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -103,6 +105,30 @@ public final class ComputerRobotGameTests {
     }
 
     @GameTest(template = TEMPLATE)
+    public static void scriptSnapshotRestoresRuntimeWithoutLeakingSourceToClientTag(GameTestHelper helper) {
+        ComputerBlockEntity computer = placeComputer(helper);
+        computer.setOwner(UUID.randomUUID());
+        ScriptProgram program = new ScriptProgram(ScriptLanguage.FORTH, "123 . begin again");
+        helper.assertTrue(computer.tryReplaceScript(0L, program), "Computer rejected its FORTH program");
+        helper.assertTrue(computer.scriptRuntime().executeTick(computer) == 64, "FORTH runtime ignored its tick budget");
+        helper.assertTrue(computer.scriptRuntime().running(), "Bounded FORTH loop stopped unexpectedly");
+
+        CompoundTag clientTag = computer.getUpdateTag();
+        helper.assertFalse(clientTag.toString().contains("123 . begin again"), "Client update tag leaked program source");
+        helper.assertFalse(clientTag.contains("script_runtime"), "Client update tag leaked script runtime state");
+        helper.assertFalse(clientTag.contains("program"), "Client update tag leaked legacy program state");
+
+        CompoundTag saved = computer.saveWithoutMetadata();
+        ComputerBlockEntity restored = new ComputerBlockEntity(computer.getBlockPos(), computer.getBlockState());
+        restored.load(saved);
+        helper.assertTrue(restored.scriptProgram().orElseThrow().equals(program), "Script source did not survive reload");
+        helper.assertTrue(restored.scriptRuntime().running(), "Script running state did not survive reload");
+        helper.assertTrue(restored.scriptRuntime().output().startsWith("123 "), "Terminal output did not survive reload");
+        helper.assertTrue(restored.activeFault() == VmFault.NONE, "Script reload introduced a fault");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
     public static void uploadRejectsNonOwnerAndStaleRevision(GameTestHelper helper) {
         ComputerBlockEntity computer = placeComputer(helper);
         Player sender = helper.makeMockSurvivalPlayer();
@@ -111,41 +137,114 @@ public final class ComputerRobotGameTests {
                 computer.getBlockPos().getY() + 0.5D,
                 computer.getBlockPos().getZ() + 0.5D
         );
-        List<ComputerInstruction> firstProgram = List.of(
-                instruction(ComputerOpcode.SET, 0, 1),
-                instruction(ComputerOpcode.HALT, 0, 0)
-        );
-        List<ComputerInstruction> replacement = List.of(
-                instruction(ComputerOpcode.SET, 0, 2),
-                instruction(ComputerOpcode.HALT, 0, 0)
-        );
+        ScriptProgram firstProgram = new ScriptProgram(ScriptLanguage.FORTH, "1 .");
+        ScriptProgram replacement = new ScriptProgram(ScriptLanguage.FORTH, "2 .");
+        long sessionToken = 0x4D_41_47_4EL;
+        ProgrammableMenu menu = new ProgrammableMenu(1, sender.getInventory(), computer, sessionToken);
+        sender.containerMenu = menu;
 
         computer.setOwner(UUID.randomUUID());
         helper.assertFalse(computer.canManage(sender), "Mock sender unexpectedly bypassed ownership");
-        boolean nonOwnerAccepted = UploadComputerProgramMessage.applyIfValid(
+        boolean nonOwnerAccepted = menu.applyUpload(
                 sender,
-                new UploadComputerProgramMessage(computer.getBlockPos(), 0L, firstProgram)
+                computer.getBlockPos(),
+                0L,
+                sessionToken,
+                0,
+                firstProgram
         );
         helper.assertFalse(nonOwnerAccepted, "Non-owner upload was accepted");
         helper.assertTrue(computer.programRevision() == 0L, "Rejected upload changed the revision");
-        helper.assertTrue(computer.program().isEmpty(), "Rejected upload changed the program");
+        helper.assertTrue(computer.scriptProgram().isEmpty(), "Rejected upload changed the program");
 
         computer.setOwner(sender.getUUID());
-        boolean ownerAccepted = UploadComputerProgramMessage.applyIfValid(
+        boolean ownerAccepted = menu.applyUpload(
                 sender,
-                new UploadComputerProgramMessage(computer.getBlockPos(), 0L, firstProgram)
+                computer.getBlockPos(),
+                0L,
+                sessionToken,
+                0,
+                firstProgram
         );
         helper.assertTrue(ownerAccepted, "Owner upload was rejected");
         helper.assertTrue(computer.programRevision() == 1L, "Accepted upload did not advance the revision");
 
-        boolean staleAccepted = UploadComputerProgramMessage.applyIfValid(
+        boolean replayAccepted = menu.applyUpload(
                 sender,
-                new UploadComputerProgramMessage(computer.getBlockPos(), 0L, replacement)
+                computer.getBlockPos(),
+                0L,
+                sessionToken,
+                0,
+                replacement
+        );
+        helper.assertFalse(replayAccepted, "Replayed upload sequence was accepted");
+
+        boolean staleAccepted = menu.applyUpload(
+                sender,
+                computer.getBlockPos(),
+                0L,
+                sessionToken,
+                1,
+                replacement
         );
         helper.assertFalse(staleAccepted, "Stale revision upload was accepted");
         helper.assertTrue(computer.programRevision() == 1L, "Stale upload changed the revision");
-        helper.assertTrue(computer.program().equals(firstProgram), "Stale upload replaced the program");
+        helper.assertTrue(computer.scriptProgram().orElseThrow().equals(firstProgram), "Stale upload replaced the program");
         helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 30)
+    public static void forthRobotMovementWaitsForHistoricalCooldownAndChargesEnergy(GameTestHelper helper) {
+        MiningRobotBlockEntity robot = placeRobot(helper);
+        robot.setOwner(UUID.randomUUID());
+        robot.electricity().node().setVoltage(90.0D);
+        robot.energy().setEnergyStored(2_000);
+        helper.assertTrue(
+                robot.tryReplaceScript(0L, new ScriptProgram(ScriptLanguage.FORTH, "front")),
+                "Robot rejected its FORTH movement program"
+        );
+
+        helper.runAfterDelay(4, () -> {
+            helper.assertTrue(helper.getBlockEntity(DEVICE_POSITION) instanceof MiningRobotBlockEntity,
+                    "Robot moved before the five-tick historical cooldown");
+        });
+        helper.runAfterDelay(9, () -> {
+            BlockPos target = DEVICE_POSITION.relative(Direction.NORTH);
+            helper.assertTrue(helper.getBlockEntity(target) instanceof MiningRobotBlockEntity,
+                    "Robot did not move after its cooldown");
+            MiningRobotBlockEntity moved = (MiningRobotBlockEntity) helper.getBlockEntity(target);
+            helper.assertTrue(moved.energy().getEnergyStored() == 1_500, "Robot movement charged the wrong energy cost");
+            helper.assertFalse(moved.activeRunning(), "Completed FORTH movement remained running");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 35)
+    public static void shellQuarryMinesOneCellWithoutDuplicatingDrops(GameTestHelper helper) {
+        MiningRobotBlockEntity robot = placeRobot(helper);
+        BlockPos target = DEVICE_POSITION.below();
+        helper.setBlock(target, Blocks.COBBLESTONE);
+        robot.setOwner(UUID.randomUUID());
+        robot.electricity().node().setVoltage(90.0D);
+        robot.energy().setEnergyStored(2_000);
+        helper.assertTrue(
+                robot.tryReplaceScript(0L, new ScriptProgram(ScriptLanguage.SHELL, "quarry 1")),
+                "Robot rejected its Shell quarry program"
+        );
+
+        helper.runAfterDelay(20, () -> {
+            helper.assertTrue(helper.getBlockState(target).isAir(), "One-cell quarry did not mine its target");
+            int drops = 0;
+            for (int slot = 0; slot < robot.inventory().slots(); slot++) {
+                if (robot.inventory().getStackInSlot(slot).is(Items.COBBLESTONE)) {
+                    drops += robot.inventory().getStackInSlot(slot).getCount();
+                }
+            }
+            helper.assertTrue(drops == 1, "One-cell quarry duplicated or lost its cobblestone drop: " + drops);
+            helper.assertTrue(robot.energy().getEnergyStored() == 1_800, "Quarry mining charged the wrong energy cost");
+            helper.assertFalse(robot.activeRunning(), "Completed Shell quarry remained running");
+            helper.succeed();
+        });
     }
 
     @GameTest(template = TEMPLATE)

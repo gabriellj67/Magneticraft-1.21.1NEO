@@ -10,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -24,6 +25,8 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 /**
  * Shared placement, ownership, floppy and redstone boundary for programmable blocks.
@@ -87,13 +90,26 @@ public abstract class ProgrammableBlock extends BaseEntityBlock {
         ItemStack held = player.getItemInHand(hand);
         if (held.getItem() instanceof FloppyDiskItem) {
             if (player.isShiftKeyDown()) {
-                FloppyDiskItem.storeProgram(held, programmable.program());
-                player.displayClientMessage(Component.translatable("message.magneticraft.computer.floppy_written"), true);
+                boolean stored = programmable.scriptProgram()
+                        .map(program -> FloppyDiskItem.storeScript(held, program, programmable.virtualDisk()))
+                        .orElseGet(() -> FloppyDiskItem.storeProgram(held, programmable.program()));
+                player.displayClientMessage(Component.translatable(stored
+                        ? "message.magneticraft.computer.floppy_written"
+                        : "message.magneticraft.computer.floppy_read_only"), true);
                 return InteractionResult.CONSUME;
             }
-            boolean loaded = FloppyDiskItem.readProgram(held)
-                    .map(program -> programmable.tryReplaceProgram(programmable.programRevision(), program))
-                    .orElse(false);
+            boolean loaded = FloppyDiskItem.readState(held).map(payload -> {
+                if (payload.scriptProgram().isPresent()) {
+                    boolean replaced = programmable.tryReplaceScript(
+                            programmable.programRevision(),
+                            payload.scriptProgram().orElseThrow()
+                    );
+                    return replaced && payload.disk().map(programmable::replaceVirtualDisk).orElse(true);
+                }
+                return payload.legacyProgram()
+                        .map(program -> programmable.tryReplaceProgram(programmable.programRevision(), program))
+                        .orElse(false);
+            }).orElse(false);
             player.displayClientMessage(
                     Component.translatable(loaded
                             ? "message.magneticraft.computer.floppy_loaded"
@@ -104,7 +120,20 @@ public abstract class ProgrammableBlock extends BaseEntityBlock {
         }
 
         if (player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openScreen(serverPlayer, programmable, programmable::writeMenuOpeningData);
+            long sessionToken = UUID.randomUUID().getLeastSignificantBits();
+            NetworkHooks.openScreen(
+                    serverPlayer,
+                    new SimpleMenuProvider(
+                            (containerId, inventory, menuPlayer) -> programmable.createMenuForSession(
+                                    containerId,
+                                    inventory,
+                                    menuPlayer,
+                                    sessionToken
+                            ),
+                            programmable.getDisplayName()
+                    ),
+                    buffer -> programmable.writeMenuOpeningData(buffer, sessionToken)
+            );
         }
         return InteractionResult.CONSUME;
     }

@@ -1,5 +1,7 @@
 package committee.nova.mods.magneticraft.init;
 
+import committee.nova.mods.magneticraft.content.computer.FloppyDiskItem;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.PortableEnergyItem;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockItem;
@@ -34,7 +36,9 @@ public final class ModCreativeTabs {
                                 .map(RegistryObject::get)
                                 .forEach(item -> acceptMachineItem(output, item));
                         ModNetworkItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
-                        ModComputerContent.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModComputerContent.creativeItems().stream()
+                                .map(RegistryObject::get)
+                                .forEach(item -> acceptComputerItem(output, item));
                         ModFluids.buckets().stream().map(RegistryObject::get).forEach(output::accept);
                     })
                     .build()
@@ -62,6 +66,30 @@ public final class ModCreativeTabs {
         if (item instanceof OilDepositBlockItem oilDeposit) {
             output.accept(oilDeposit.emptyStack());
         }
+    }
+
+    private static void acceptComputerItem(CreativeModeTab.Output output, Item item) {
+        output.accept(item);
+        if (!(item instanceof FloppyDiskItem)) {
+            return;
+        }
+        acceptFloppyPreset(output, item, "forth", ScriptLanguage.FORTH);
+        acceptFloppyPreset(output, item, "lisp", ScriptLanguage.LISP);
+        acceptFloppyPreset(output, item, "shell", ScriptLanguage.SHELL);
+        acceptFloppyPreset(output, item, "basic", null);
+        acceptFloppyPreset(output, item, "editor", null);
+        acceptFloppyPreset(output, item, "asm", null);
+    }
+
+    private static void acceptFloppyPreset(
+            CreativeModeTab.Output output,
+            Item item,
+            String preset,
+            ScriptLanguage language
+    ) {
+        ItemStack stack = new ItemStack(item);
+        FloppyDiskItem.configurePreset(stack, preset, language);
+        output.accept(stack);
     }
 
     public static void bootstrap() {

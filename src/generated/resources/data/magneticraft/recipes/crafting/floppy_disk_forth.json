@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "magneticraft:floppy_disk"
+    },
+    "B": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "AB"
+  ],
+  "result": {
+    "item": "magneticraft:floppy_disk",
+    "nbt": "{preset:\"forth\",read_only:1b,schema_version:2,script:{language:\"forth\",schema_version:1,source:\"\"}}"
+  },
+  "show_notification": true
+}

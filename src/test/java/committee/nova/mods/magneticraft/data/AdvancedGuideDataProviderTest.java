@@ -2,6 +2,9 @@ package committee.nova.mods.magneticraft.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import committee.nova.mods.magneticraft.content.computer.MiningRobotBlockEntity;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
+import committee.nova.mods.magneticraft.content.computer.runtime.VirtualDisk;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.item.ElectricPistonItem;
 import committee.nova.mods.magneticraft.content.item.ElectricToolItem;
@@ -20,6 +23,30 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdvancedGuideDataProviderTest {
+    @Test
+    void computerLanguageGuidePublishesHistoricalSurfacesAndSecurityBounds() {
+        JsonObject guide = AdvancedGuideDataProvider.computerLanguageGuide();
+        JsonObject limits = guide.getAsJsonObject("limits");
+        assertEquals(ScriptRuntime.MAX_SOURCE_BYTES, limits.get("source_bytes").getAsInt());
+        assertEquals(ScriptRuntime.MAX_INSTRUCTIONS_PER_TICK, limits.get("instructions_per_tick").getAsInt());
+        assertEquals(VirtualDisk.CAPACITY_BYTES, limits.get("floppy_bytes").getAsInt());
+        assertEquals(MiningRobotBlockEntity.MAX_QUARRY_SIZE, limits.get("quarry_max_size").getAsInt());
+
+        JsonArray languages = guide.getAsJsonArray("languages");
+        assertEquals(List.of("forth", "lisp", "shell"), languages.asList().stream()
+                .map(entry -> entry.getAsJsonObject().get("id").getAsString())
+                .toList());
+        assertTrue(languages.get(0).getAsJsonObject().getAsJsonArray("examples").toString().contains("2 5 + ."));
+        assertTrue(languages.get(2).getAsJsonObject().getAsJsonArray("commands").toString().contains("quarry"));
+
+        JsonObject security = guide.getAsJsonObject("security");
+        assertTrue(security.get("server_authoritative").getAsBoolean());
+        assertTrue(security.get("menu_session_replay_protection").getAsBoolean());
+        assertFalse(security.get("host_filesystem_access").getAsBoolean());
+        assertFalse(security.get("outbound_network_access").getAsBoolean());
+        assertFalse(security.get("force_load_chunks").getAsBoolean());
+    }
+
     @Test
     void singleBlockGuideCatalogueIsBilingualContractDataFromRuntimeDefinitions() {
         List<AdvancedGuideDataProvider.MachineGuideContract> machines =

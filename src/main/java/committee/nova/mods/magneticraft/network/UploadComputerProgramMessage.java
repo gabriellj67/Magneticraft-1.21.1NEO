@@ -1,70 +1,66 @@
 package committee.nova.mods.magneticraft.network;
 
-import committee.nova.mods.magneticraft.content.computer.ProgrammableBlockEntity;
 import committee.nova.mods.magneticraft.content.computer.ProgrammableMenu;
-import committee.nova.mods.magneticraft.content.computer.vm.BoundedComputerVm;
-import committee.nova.mods.magneticraft.content.computer.vm.ComputerInstruction;
-import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptProgram;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-/**
- * C2S intent that atomically replaces one nearby owned computer program.
- */
+/** C2S script replacement bound to one open, replay-protected programmable menu. */
 public record UploadComputerProgramMessage(
         BlockPos position,
         long expectedRevision,
-        List<ComputerInstruction> program
+        long sessionToken,
+        int sequence,
+        ScriptProgram program
 ) {
     public UploadComputerProgramMessage {
         position = Objects.requireNonNull(position, "position").immutable();
+        Objects.requireNonNull(program, "program");
         if (expectedRevision < 0L) {
             throw new IllegalArgumentException("Program revision must be non-negative");
         }
-        program = BoundedComputerVm.validatedProgramCopy(program);
+        if (sequence < 0) {
+            throw new IllegalArgumentException("Upload sequence must be non-negative");
+        }
     }
 
     public static void encode(UploadComputerProgramMessage message, FriendlyByteBuf buffer) {
         buffer.writeBlockPos(message.position);
         buffer.writeVarLong(message.expectedRevision);
-        buffer.writeVarInt(message.program.size());
-        for (ComputerInstruction instruction : message.program) {
-            buffer.writeVarInt(instruction.opcode().networkId());
-            buffer.writeVarInt(instruction.operandA());
-            buffer.writeVarInt(instruction.operandB());
-        }
+        buffer.writeLong(message.sessionToken);
+        buffer.writeVarInt(message.sequence);
+        buffer.writeUtf(message.program.language().serializedName(), 16);
+        buffer.writeUtf(message.program.source(), ScriptRuntime.MAX_SOURCE_BYTES);
     }
 
     public static UploadComputerProgramMessage decode(FriendlyByteBuf buffer) {
         BlockPos position = buffer.readBlockPos();
         long expectedRevision = buffer.readVarLong();
-        int instructionCount = buffer.readVarInt();
-        if (expectedRevision < 0L) {
-            throw new DecoderException("Negative computer program revision");
+        long sessionToken = buffer.readLong();
+        int sequence = buffer.readVarInt();
+        if (expectedRevision < 0L || sequence < 0) {
+            throw new DecoderException("Negative computer upload revision or sequence");
         }
-        if (instructionCount < 0 || instructionCount > BoundedComputerVm.MAX_PROGRAM_LENGTH) {
-            throw new DecoderException("Computer program exceeds instruction limit");
-        }
-        List<ComputerInstruction> program = new ArrayList<>(instructionCount);
-        for (int index = 0; index < instructionCount; index++) {
-            int opcodeId = buffer.readVarInt();
-            ComputerOpcode opcode = ComputerOpcode.fromNetworkId(opcodeId)
-                    .orElseThrow(() -> new DecoderException("Unknown computer opcode " + opcodeId));
-            program.add(new ComputerInstruction(opcode, buffer.readVarInt(), buffer.readVarInt()));
-        }
+        ScriptLanguage language = ScriptLanguage.parse(buffer.readUtf(16))
+                .orElseThrow(() -> new DecoderException("Unknown computer language"));
         try {
-            return new UploadComputerProgramMessage(position, expectedRevision, program);
+            return new UploadComputerProgramMessage(
+                    position,
+                    expectedRevision,
+                    sessionToken,
+                    sequence,
+                    new ScriptProgram(language, buffer.readUtf(ScriptRuntime.MAX_SOURCE_BYTES))
+            );
         } catch (IllegalArgumentException exception) {
-            throw new DecoderException("Invalid computer program operands", exception);
+            throw new DecoderException("Invalid computer script", exception);
         }
     }
 
@@ -78,36 +74,17 @@ public record UploadComputerProgramMessage(
         context.setPacketHandled(true);
     }
 
-    private static boolean applyFromOpenMenu(ServerPlayer sender, UploadComputerProgramMessage message) {
-        if (sender == null
-                || !(sender.containerMenu instanceof ProgrammableMenu menu)
-                || !menu.position().equals(message.position)
-                || menu.revision() != message.expectedRevision
-                || !menu.stillValid(sender)) {
-            return false;
-        }
-        return applyIfValid(sender, message);
-    }
-
-    public static boolean applyIfValid(Player sender, UploadComputerProgramMessage message) {
-        if (sender == null
-                || message == null
-                || sender.level().isClientSide
-                || !sender.getAbilities().mayBuild
-                || !sender.level().getWorldBorder().isWithinBounds(message.position)
-                || !sender.level().hasChunk(message.position.getX() >> 4, message.position.getZ() >> 4)
-                || sender.distanceToSqr(
-                        message.position.getX() + 0.5D,
-                        message.position.getY() + 0.5D,
-                        message.position.getZ() + 0.5D
-                ) > 64.0D) {
-            return false;
-        }
-        if (!(sender.level().getBlockEntity(message.position) instanceof ProgrammableBlockEntity programmable)
-                || !programmable.canManage(sender)
-                || programmable.programRevision() != message.expectedRevision) {
-            return false;
-        }
-        return programmable.tryReplaceProgram(message.expectedRevision, message.program);
+    static boolean applyFromOpenMenu(ServerPlayer sender, UploadComputerProgramMessage message) {
+        return sender != null
+                && message != null
+                && sender.containerMenu instanceof ProgrammableMenu menu
+                && menu.applyUpload(
+                sender,
+                message.position,
+                message.expectedRevision,
+                message.sessionToken,
+                message.sequence,
+                message.program
+        );
     }
 }

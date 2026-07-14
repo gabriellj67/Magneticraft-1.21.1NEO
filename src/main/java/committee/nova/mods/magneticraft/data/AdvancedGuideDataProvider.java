@@ -3,6 +3,10 @@ package committee.nova.mods.magneticraft.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.content.computer.MiningRobotBlockEntity;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
+import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
+import committee.nova.mods.magneticraft.content.computer.runtime.VirtualDisk;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.item.ElectricPistonItem;
 import committee.nova.mods.magneticraft.content.item.ElectricToolItem;
@@ -56,7 +60,7 @@ final class AdvancedGuideDataProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput output) {
         List<MachineGuideContract> machines = singleBlockMachineGuides();
         List<CompletableFuture<?>> writes = new ArrayList<>(
-                MultiblockDefinition.values().length + machines.size() + 2
+                MultiblockDefinition.values().length + machines.size() + 3
         );
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Path path = multiblockGuides.json(Magneticraft.id(definition.id()));
@@ -66,6 +70,11 @@ final class AdvancedGuideDataProvider implements DataProvider {
                 output,
                 opcodeGuide(opcodes),
                 guideFiles.json(Magneticraft.id("computer_opcodes"))
+        ));
+        writes.add(DataProvider.saveStable(
+                output,
+                computerLanguageGuide(),
+                guideFiles.json(Magneticraft.id("computer_languages"))
         ));
         writes.add(DataProvider.saveStable(
                 output,
@@ -124,6 +133,69 @@ final class AdvancedGuideDataProvider implements DataProvider {
         });
         root.add("opcodes", opcodes);
         return root;
+    }
+
+    static JsonObject computerLanguageGuide() {
+        JsonObject root = new JsonObject();
+        root.addProperty("schema_version", SCHEMA_VERSION);
+        JsonObject limits = new JsonObject();
+        limits.addProperty("source_bytes", ScriptRuntime.MAX_SOURCE_BYTES);
+        limits.addProperty("output_characters", ScriptRuntime.MAX_OUTPUT_CHARACTERS);
+        limits.addProperty("instructions_per_tick", ScriptRuntime.MAX_INSTRUCTIONS_PER_TICK);
+        limits.addProperty("device_calls_per_tick", ScriptRuntime.MAX_DEVICE_CALLS_PER_TICK);
+        limits.addProperty("floppy_bytes", VirtualDisk.CAPACITY_BYTES);
+        limits.addProperty("floppy_entries", VirtualDisk.MAX_ENTRIES);
+        limits.addProperty("quarry_max_size", MiningRobotBlockEntity.MAX_QUARRY_SIZE);
+        root.add("limits", limits);
+
+        JsonArray languages = new JsonArray();
+        languages.add(language(
+                ScriptLanguage.FORTH,
+                "1.1",
+                List.of("2 5 + .", "WORDS"),
+                List.of("MINE", "FRONT", "FORWARD", "BACK", "LEFT", "RIGHT", "UP", "DOWN", "SCAN")
+        ));
+        languages.add(language(
+                ScriptLanguage.LISP,
+                "2.0",
+                List.of("(print 5)", "(define x 5)", "(env)"),
+                List.of("mine", "front", "back", "left", "right", "up", "down", "scan")
+        ));
+        languages.add(language(
+                ScriptLanguage.SHELL,
+                "1.1",
+                List.of("help", "quarry 10"),
+                List.of("help", "ls", "cd", "mkdir", "rm", "format", "free", "fs", "cat", "touch",
+                        "write", "update_disk", "quarry")
+        ));
+        root.add("languages", languages);
+
+        JsonObject security = new JsonObject();
+        security.addProperty("server_authoritative", true);
+        security.addProperty("menu_session_replay_protection", true);
+        security.addProperty("host_filesystem_access", false);
+        security.addProperty("outbound_network_access", false);
+        security.addProperty("force_load_chunks", false);
+        root.add("security", security);
+        return root;
+    }
+
+    private static JsonObject language(
+            ScriptLanguage language,
+            String historicalVersion,
+            List<String> examples,
+            List<String> commands
+    ) {
+        JsonObject entry = new JsonObject();
+        entry.addProperty("id", language.serializedName());
+        entry.addProperty("historical_version", historicalVersion);
+        JsonArray encodedExamples = new JsonArray();
+        examples.forEach(encodedExamples::add);
+        entry.add("examples", encodedExamples);
+        JsonArray encodedCommands = new JsonArray();
+        commands.forEach(encodedCommands::add);
+        entry.add("commands", encodedCommands);
+        return entry;
     }
 
     static JsonObject portableItemGuide() {
