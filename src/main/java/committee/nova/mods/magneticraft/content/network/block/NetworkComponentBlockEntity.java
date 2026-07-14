@@ -16,6 +16,15 @@ public abstract class NetworkComponentBlockEntity extends MachineBlockEntity {
         super(type, position, state);
     }
 
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        Level level = getLevel();
+        if (level != null && !level.isClientSide && getBlockState().getBlock() instanceof ConduitBlock) {
+            ConduitBlock.refreshAround(level, getBlockPos());
+        }
+    }
+
     public final void serverTick() {
         tickModules();
         tickComponent();

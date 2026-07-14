@@ -1,8 +1,8 @@
 package committee.nova.mods.magneticraft.content.network.electric;
 
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
-import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,10 +20,12 @@ public final class ElectricCableBlock extends ConduitBlock {
     }
 
     @Override
+    protected NetworkDomain connectionDomain() {
+        return NetworkDomain.ELECTRICITY;
+    }
+
+    @Override
     protected boolean connectsVisuallyTo(BlockState neighbor) {
-        return neighbor.is(ModNetworkBlocks.ELECTRIC_CABLE.get())
-                || neighbor.is(ModNetworkBlocks.ELECTRIC_CONNECTOR.get())
-                || neighbor.is(ModMachineBlocks.BATTERY.get())
-                || neighbor.is(ModMachineBlocks.ELECTRIC_FURNACE.get());
+        return neighbor.is(ModNetworkBlocks.ELECTRIC_CABLE.get());
     }
 }

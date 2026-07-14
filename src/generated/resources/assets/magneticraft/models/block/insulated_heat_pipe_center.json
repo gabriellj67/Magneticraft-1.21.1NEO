@@ -1,0 +1,24 @@
+{
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ]
+    }
+  },
+  "include_nodes": [
+    "center"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/insulated_heat_pipe.mcx",
+  "textures": {
+    "particle": "magneticraft:blocks/fluid_machines/insulated_heat_pipe"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

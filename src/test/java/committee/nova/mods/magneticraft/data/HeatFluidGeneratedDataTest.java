@@ -35,7 +35,7 @@ class HeatFluidGeneratedDataTest {
                 "facing=south", "facing=west", "facing=east"
         ), variants.keySet());
 
-        assertEquals(4, centerInset("heat_pipe"));
+        assertHistoricalModel("heat_pipe", "iron_pipe_dark");
         assertHistoricalModel("insulated_heat_pipe", "insulated_heat_pipe");
         assertHistoricalModel("iron_fluid_pipe", "iron_pipe");
     }
@@ -49,17 +49,6 @@ class HeatFluidGeneratedDataTest {
         }
         JsonObject result = recipe.getAsJsonObject("result");
         assertEquals(count, result.has("count") ? result.get("count").getAsInt() : 1, name);
-    }
-
-    private static int centerInset(String model) throws IOException {
-        JsonArray from = read(ASSETS.resolve("models/block/" + model + ".json"))
-                .getAsJsonArray("elements")
-                .get(0)
-                .getAsJsonObject()
-                .getAsJsonArray("from");
-        assertEquals(from.get(0).getAsInt(), from.get(1).getAsInt());
-        assertEquals(from.get(1).getAsInt(), from.get(2).getAsInt());
-        return from.get(0).getAsInt();
     }
 
     private static void assertHistoricalModel(String generatedName, String artifactName) throws IOException {

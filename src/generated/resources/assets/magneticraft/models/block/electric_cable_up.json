@@ -1,0 +1,34 @@
+{
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        1.6666666,
+        1.6666666,
+        1.6666666
+      ],
+      "translation": [
+        0,
+        -7.2168784,
+        -4.166666
+      ]
+    }
+  },
+  "include_nodes": [
+    "up"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/electric_cable.mcx",
+  "textures": {
+    "particle": "magneticraft:blocks/electric_connectors/electric_cable"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

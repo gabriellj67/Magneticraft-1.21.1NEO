@@ -383,6 +383,59 @@ class GeneratedDataContractTest {
     }
 
     @Test
+    void conduitModelsRenderOnlyTheirConnectedNamedParts() throws IOException {
+        assertConduitMultipart("electric_cable", "center");
+        assertConduitMultipart("heat_pipe", "base");
+        assertConduitMultipart("insulated_heat_pipe", "center");
+        assertConduitMultipart("iron_fluid_pipe", "base");
+        assertConduitMultipart("pneumatic_tube", "center_full");
+        assertConduitMultipart("pneumatic_restriction_tube", "center_full");
+
+        assertEquals(
+                "magneticraft:models/block/mcx/iron_pipe_dark.mcx",
+                readObject(ASSETS.resolve("models/block/heat_pipe.json")).get("model").getAsString()
+        );
+        for (String pneumatic : Set.of("pneumatic_tube", "pneumatic_restriction_tube")) {
+            assertEquals(
+                    "magneticraft:models/block/gltf/" + pneumatic + "_inv.gltf",
+                    readObject(ASSETS.resolve("models/block/" + pneumatic + ".json")).get("model").getAsString()
+            );
+        }
+    }
+
+    private static void assertConduitMultipart(String id, String centerPart) throws IOException {
+        JsonObject blockState = readObject(ASSETS.resolve("blockstates/" + id + ".json"));
+        assertFalse(blockState.has("variants"), id + " must not use one always-connected variant");
+        JsonArray multipart = blockState.getAsJsonArray("multipart");
+        assertNotNull(multipart, id + " must use multipart connection models");
+
+        String centerModel = id + "_" + centerPart;
+        JsonObject center = readObject(ASSETS.resolve("models/block/" + centerModel + ".json"));
+        assertEquals(List.of(centerPart), strings(center.getAsJsonArray("include_nodes")), centerModel);
+
+        for (String direction : List.of("down", "up", "north", "south", "west", "east")) {
+            String modelName = id + "_" + direction;
+            boolean conditionalArm = multipart.asList().stream()
+                    .map(JsonElement::getAsJsonObject)
+                    .anyMatch(part -> part.has("when")
+                            && part.getAsJsonObject("when").has(direction)
+                            && "true".equals(part.getAsJsonObject("when").get(direction).getAsString())
+                            && ("magneticraft:block/" + modelName).equals(
+                            part.getAsJsonObject("apply").get("model").getAsString()
+                    ));
+            assertTrue(conditionalArm, modelName + " must require its matching connection state");
+
+            JsonObject arm = readObject(ASSETS.resolve("models/block/" + modelName + ".json"));
+            assertEquals(List.of(direction), strings(arm.getAsJsonArray("include_nodes")), modelName);
+        }
+    }
+
+    private static List<String> strings(JsonArray array) {
+        assertNotNull(array);
+        return array.asList().stream().map(JsonElement::getAsString).toList();
+    }
+
+    @Test
     void singleBlockMachineDataRecipesAndAssetsAreComplete() throws IOException {
         JsonObject english = readObject(ASSETS.resolve("lang/en_us.json"));
         JsonObject chinese = readObject(ASSETS.resolve("lang/zh_cn.json"));

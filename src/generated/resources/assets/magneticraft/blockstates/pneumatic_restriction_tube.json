@@ -1,7 +1,287 @@
 {
-  "variants": {
-    "": {
-      "model": "magneticraft:block/pneumatic_restriction_tube"
+  "multipart": [
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_full"
+      },
+      "when": {
+        "AND": [
+          {
+            "AND": [
+              {
+                "OR": [
+                  {
+                    "down": "true"
+                  },
+                  {
+                    "up": "true"
+                  },
+                  {
+                    "north": "false"
+                  },
+                  {
+                    "south": "false"
+                  },
+                  {
+                    "west": "true"
+                  },
+                  {
+                    "east": "true"
+                  }
+                ]
+              },
+              {
+                "OR": [
+                  {
+                    "down": "true"
+                  },
+                  {
+                    "up": "true"
+                  },
+                  {
+                    "north": "true"
+                  },
+                  {
+                    "south": "true"
+                  },
+                  {
+                    "west": "false"
+                  },
+                  {
+                    "east": "false"
+                  }
+                ]
+              },
+              {
+                "OR": [
+                  {
+                    "down": "false"
+                  },
+                  {
+                    "up": "false"
+                  },
+                  {
+                    "north": "true"
+                  },
+                  {
+                    "south": "true"
+                  },
+                  {
+                    "west": "true"
+                  },
+                  {
+                    "east": "true"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_east_h"
+      },
+      "when": {
+        "down": "false",
+        "east": "false",
+        "north": "true",
+        "south": "true",
+        "up": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_west_h"
+      },
+      "when": {
+        "down": "false",
+        "east": "false",
+        "north": "true",
+        "south": "true",
+        "up": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_up_h"
+      },
+      "when": {
+        "down": "false",
+        "east": "false",
+        "north": "true",
+        "south": "true",
+        "up": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_down_h"
+      },
+      "when": {
+        "down": "false",
+        "east": "false",
+        "north": "true",
+        "south": "true",
+        "up": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_north_h"
+      },
+      "when": {
+        "down": "false",
+        "east": "true",
+        "north": "false",
+        "south": "false",
+        "up": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_south_h"
+      },
+      "when": {
+        "down": "false",
+        "east": "true",
+        "north": "false",
+        "south": "false",
+        "up": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_up_v"
+      },
+      "when": {
+        "down": "false",
+        "east": "true",
+        "north": "false",
+        "south": "false",
+        "up": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_down_v"
+      },
+      "when": {
+        "down": "false",
+        "east": "true",
+        "north": "false",
+        "south": "false",
+        "up": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_north_v"
+      },
+      "when": {
+        "down": "true",
+        "east": "false",
+        "north": "false",
+        "south": "false",
+        "up": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_south_v"
+      },
+      "when": {
+        "down": "true",
+        "east": "false",
+        "north": "false",
+        "south": "false",
+        "up": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_east_v"
+      },
+      "when": {
+        "down": "true",
+        "east": "false",
+        "north": "false",
+        "south": "false",
+        "up": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_center_west_v"
+      },
+      "when": {
+        "down": "true",
+        "east": "false",
+        "north": "false",
+        "south": "false",
+        "up": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_down"
+      },
+      "when": {
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_up"
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_north"
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_south"
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_west"
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/pneumatic_restriction_tube_east"
+      },
+      "when": {
+        "east": "true"
+      }
     }
-  }
+  ]
 }

@@ -42,6 +42,7 @@ public abstract class NetworkComponentBlock extends BaseEntityBlock {
                     component.configure(hit.getDirection(), player.isSecondaryUseActive()),
                     true
             );
+            ConduitBlock.refreshAround(level, position);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }

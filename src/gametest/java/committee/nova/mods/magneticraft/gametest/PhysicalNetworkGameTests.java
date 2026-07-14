@@ -4,6 +4,8 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlock;
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
@@ -30,8 +32,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -41,6 +45,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+
+import java.util.Set;
 
 /**
  * Loaded-world topology, capability and persistence contracts for Task 4.
@@ -112,6 +118,63 @@ public final class PhysicalNetworkGameTests {
             );
             helper.succeed();
         });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void conduitArmsFollowPipeAndMachineConnections(GameTestHelper helper) {
+        Block[] conduits = {
+                ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                ModNetworkBlocks.HEAT_PIPE.get(),
+                ModNetworkBlocks.INSULATED_HEAT_PIPE.get(),
+                ModNetworkBlocks.IRON_PIPE.get(),
+                ModNetworkBlocks.PNEUMATIC_TUBE.get(),
+                ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get()
+        };
+        for (Block conduit : conduits) {
+            helper.setBlock(MIDDLE, Blocks.AIR);
+            helper.setBlock(LAST, Blocks.AIR);
+            helper.setBlock(MIDDLE, conduit);
+            refreshConduit(helper, MIDDLE);
+            assertConnections(helper, MIDDLE);
+
+            helper.setBlock(LAST, conduit);
+            refreshConduit(helper, LAST);
+            assertConnections(helper, MIDDLE, Direction.EAST);
+            assertConnections(helper, LAST, Direction.WEST);
+
+            helper.setBlock(LAST, Blocks.AIR);
+            refreshConduit(helper, LAST);
+            assertConnections(helper, MIDDLE);
+        }
+
+        helper.setBlock(MIDDLE, ModNetworkBlocks.ELECTRIC_CABLE.get());
+        helper.setBlock(
+                LAST,
+                ModMachineBlocks.BATTERY.get().defaultBlockState().setValue(BatteryBlock.FACING, Direction.EAST)
+        );
+        refreshConduit(helper, MIDDLE);
+        assertConnections(helper, MIDDLE, Direction.EAST);
+
+        helper.setBlock(MIDDLE, ModNetworkBlocks.HEAT_PIPE.get());
+        helper.setBlock(LAST, ModNetworkBlocks.HEAT_SINK.get());
+        refreshConduit(helper, MIDDLE);
+        assertConnections(helper, MIDDLE, Direction.EAST);
+
+        helper.setBlock(MIDDLE, ModNetworkBlocks.IRON_PIPE.get());
+        helper.setBlock(LAST, ModMachineBlocks.machine(SingleBlockMachineDefinition.SMALL_TANK).get());
+        refreshConduit(helper, MIDDLE);
+        assertConnections(helper, MIDDLE, Direction.EAST);
+
+        helper.setBlock(MIDDLE, ModNetworkBlocks.PNEUMATIC_TUBE.get());
+        helper.setBlock(LAST, Blocks.CHEST);
+        refreshConduit(helper, MIDDLE);
+        assertConnections(helper, MIDDLE, Direction.EAST);
+
+        helper.setBlock(MIDDLE, ModNetworkBlocks.ELECTRIC_CABLE.get());
+        helper.setBlock(LAST, Blocks.STONE);
+        refreshConduit(helper, MIDDLE);
+        assertConnections(helper, MIDDLE);
+        helper.succeed();
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 20)
@@ -508,6 +571,26 @@ public final class PhysicalNetworkGameTests {
                     "Reloaded conveyor chain retained a duplicate parcel");
             helper.succeed();
         });
+    }
+
+    private static void assertConnections(
+            GameTestHelper helper,
+            BlockPos position,
+            Direction... connectedDirections
+    ) {
+        Set<Direction> connected = Set.of(connectedDirections);
+        BlockState state = helper.getBlockState(position);
+        for (Direction direction : Direction.values()) {
+            boolean actual = state.getValue(ConduitBlock.property(direction));
+            helper.assertTrue(
+                    actual == connected.contains(direction),
+                    state.getBlock() + " connection " + direction + " was " + actual + ", expected " + connected
+            );
+        }
+    }
+
+    private static void refreshConduit(GameTestHelper helper, BlockPos position) {
+        ConduitBlock.refreshAround(helper.getLevel(), helper.absolutePos(position));
     }
 
     private static InteractionResult useConveyor(

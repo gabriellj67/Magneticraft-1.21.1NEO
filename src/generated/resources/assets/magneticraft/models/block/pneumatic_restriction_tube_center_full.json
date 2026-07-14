@@ -1,0 +1,29 @@
+{
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    }
+  },
+  "include_nodes": [
+    "center_full"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/pneumatic_restriction_tube.gltf",
+  "textures": {
+    "particle": "magneticraft:blocks/machines/pneumatic_tube"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

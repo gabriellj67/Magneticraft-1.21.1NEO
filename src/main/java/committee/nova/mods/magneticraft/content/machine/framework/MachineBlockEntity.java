@@ -3,6 +3,8 @@ package committee.nova.mods.magneticraft.content.machine.framework;
 import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -45,6 +47,18 @@ public abstract class MachineBlockEntity extends BlockEntity implements MachineM
 
     protected final void tickModules() {
         modules.values().forEach(MachineModule::serverTick);
+    }
+
+    /** Returns whether one physical-network module exposes the requested face. */
+    public final boolean supportsNetworkConnection(NetworkDomain domain, Direction side) {
+        for (MachineModule module : modules.values()) {
+            if (module instanceof PhysicalNetworkNode node
+                    && node.domain() == domain
+                    && node.connectionSides().contains(side)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

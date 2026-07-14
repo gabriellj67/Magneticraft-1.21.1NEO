@@ -93,7 +93,7 @@ class LegacyVisualAssetContractTest {
     void generatedStaticModelsUseTheRuntimeSceneLoader() throws IOException {
         assertRuntimeModel("battery_box", "magneticraft:models/block/mcx/battery.mcx");
         assertRuntimeModel("electric_engine", "magneticraft:models/block/gltf/electric_engine.gltf");
-        assertRuntimeModel("pneumatic_tube", "magneticraft:models/block/gltf/pneumatic_tube.gltf");
+        assertRuntimeModel("pneumatic_tube", "magneticraft:models/block/gltf/pneumatic_tube_inv.gltf");
         assertRuntimeModel("computer", "magneticraft:models/block/mcx/computer.mcx");
     }
 

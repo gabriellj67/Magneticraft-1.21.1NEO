@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.content.network.heat;
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.system.network.heat.HeatPipeContactDamage;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,9 +42,13 @@ public final class HeatPipeBlock extends ConduitBlock {
     }
 
     @Override
+    protected NetworkDomain connectionDomain() {
+        return NetworkDomain.HEAT;
+    }
+
+    @Override
     protected boolean connectsVisuallyTo(BlockState neighbor) {
         return neighbor.is(ModNetworkBlocks.HEAT_PIPE.get())
-                || neighbor.is(ModNetworkBlocks.INSULATED_HEAT_PIPE.get())
-                || neighbor.is(ModNetworkBlocks.HEAT_SINK.get());
+                || neighbor.is(ModNetworkBlocks.INSULATED_HEAT_PIPE.get());
     }
 }

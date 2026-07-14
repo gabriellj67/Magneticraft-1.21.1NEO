@@ -9,6 +9,7 @@ import committee.nova.mods.magneticraft.content.machine.electricfurnace.Electric
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlock;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
 import committee.nova.mods.magneticraft.content.network.electric.PoleSegment;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock;
@@ -29,6 +30,7 @@ import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.client.model.generators.MultiPartBlockStateBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.Set;
@@ -133,7 +135,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         legacyConduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable");
         registerLongDistanceElectricModels();
-        conduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe", mcLoc("block/iron_block"), 4);
+        legacyConduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe");
         legacyConduitBlock(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), "insulated_heat_pipe");
         legacyConduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_fluid_pipe");
         legacyConduitBlock(ModNetworkBlocks.PNEUMATIC_TUBE.get(), "pneumatic_tube");
@@ -286,19 +288,175 @@ final class ModBlockStateProvider extends BlockStateProvider {
     private void legacyConduitBlock(Block block, String artifactName) {
         ResourceLocation particle = switch (artifactName) {
                     case "electric_cable" -> modLoc("blocks/electric_connectors/electric_cable");
+                    case "heat_pipe" -> modLoc("blocks/fluid_machines/iron_pipe");
                     case "insulated_heat_pipe" -> modLoc("blocks/fluid_machines/insulated_heat_pipe");
                     case "iron_fluid_pipe" -> modLoc("blocks/fluid_machines/iron_pipe");
                     case "pneumatic_tube", "pneumatic_restriction_tube" ->
                             modLoc("blocks/machines/pneumatic_tube");
                     default -> throw new IllegalArgumentException("Unknown historical conduit: " + artifactName);
                 };
-        ModelFile model = switch (artifactName) {
-            case "pneumatic_tube", "pneumatic_restriction_tube" ->
-                    gltfModel(artifactName, artifactName, particle, ModelSceneSelection.ALL);
-            case "iron_fluid_pipe" -> mcxModel(artifactName, "iron_pipe", particle, ModelSceneSelection.ALL);
-            default -> mcxModel(artifactName, artifactName, particle, ModelSceneSelection.ALL);
+        String sourceName = switch (artifactName) {
+            case "heat_pipe", "iron_fluid_pipe" -> "iron_pipe";
+            default -> artifactName;
         };
-        simpleBlockWithItem(block, model);
+        String centerPart = switch (artifactName) {
+            case "heat_pipe", "iron_fluid_pipe" -> "base";
+            case "pneumatic_tube", "pneumatic_restriction_tube" -> "center_full";
+            default -> "center";
+        };
+
+        ModelFile inventory = switch (artifactName) {
+            case "pneumatic_tube", "pneumatic_restriction_tube" ->
+                    gltfModel(artifactName, artifactName + "_inv", particle, ModelSceneSelection.ALL);
+            case "heat_pipe" -> mcxModel(artifactName, "iron_pipe_dark", particle, ModelSceneSelection.ALL);
+            default -> mcxModel(artifactName, sourceName, particle, ModelSceneSelection.ALL);
+        };
+        simpleBlockItem(block, inventory);
+
+        if (artifactName.startsWith("pneumatic_")) {
+            pneumaticConduitBlock(block, artifactName, sourceName, particle);
+            return;
+        }
+
+        MultiPartBlockStateBuilder multipart = getMultipartBuilder(block);
+        multipart.part()
+                .modelFile(mcxPart(artifactName + "_" + centerPart, sourceName, particle, centerPart))
+                .addModel()
+                .end();
+        addConduitArms(multipart, artifactName, sourceName, particle, false);
+    }
+
+    private void pneumaticConduitBlock(
+            Block block,
+            String artifactName,
+            String sourceName,
+            ResourceLocation particle
+    ) {
+        MultiPartBlockStateBuilder multipart = getMultipartBuilder(block);
+        addPneumaticFullCenter(multipart, gltfPart(
+                artifactName + "_center_full", sourceName, particle, "center_full"
+        ));
+
+        addPneumaticStraightCenter(
+                multipart,
+                artifactName,
+                sourceName,
+                particle,
+                new boolean[]{false, false, true, true, false, false},
+                "center_east_h", "center_west_h", "center_up_h", "center_down_h"
+        );
+        addPneumaticStraightCenter(
+                multipart,
+                artifactName,
+                sourceName,
+                particle,
+                new boolean[]{false, false, false, false, true, true},
+                "center_north_h", "center_south_h", "center_up_v", "center_down_v"
+        );
+        addPneumaticStraightCenter(
+                multipart,
+                artifactName,
+                sourceName,
+                particle,
+                new boolean[]{true, true, false, false, false, false},
+                "center_north_v", "center_south_v", "center_east_v", "center_west_v"
+        );
+        addConduitArms(multipart, artifactName, sourceName, particle, true);
+    }
+
+    private void addConduitArms(
+            MultiPartBlockStateBuilder multipart,
+            String artifactName,
+            String sourceName,
+            ResourceLocation particle,
+            boolean gltf
+    ) {
+        for (Direction direction : Direction.values()) {
+            String partName = direction.getName();
+            ModelFile part = gltf
+                    ? gltfPart(artifactName + "_" + partName, sourceName, particle, partName)
+                    : mcxPart(artifactName + "_" + partName, sourceName, particle, partName);
+            multipart.part()
+                    .modelFile(part)
+                    .addModel()
+                    .condition(ConduitBlock.property(direction), true)
+                    .end();
+        }
+    }
+
+    private void addPneumaticStraightCenter(
+            MultiPartBlockStateBuilder multipart,
+            String artifactName,
+            String sourceName,
+            ResourceLocation particle,
+            boolean[] connections,
+            String... partNames
+    ) {
+        for (String partName : partNames) {
+            var part = multipart.part()
+                    .modelFile(gltfPart(artifactName + "_" + partName, sourceName, particle, partName))
+                    .addModel();
+            addExactConnections(part, connections);
+            part.end();
+        }
+    }
+
+    private void addPneumaticFullCenter(MultiPartBlockStateBuilder multipart, ModelFile model) {
+        var part = multipart.part().modelFile(model).addModel();
+        var allNonStraight = part.nestedGroup();
+        addNotExactConnections(
+                allNonStraight,
+                new boolean[]{false, false, true, true, false, false}
+        );
+        addNotExactConnections(
+                allNonStraight,
+                new boolean[]{false, false, false, false, true, true}
+        );
+        addNotExactConnections(
+                allNonStraight,
+                new boolean[]{true, true, false, false, false, false}
+        );
+        allNonStraight.end();
+        part.end();
+    }
+
+    private void addExactConnections(MultiPartBlockStateBuilder.PartBuilder part, boolean[] connections) {
+        for (int index = 0; index < Direction.values().length; index++) {
+            part.condition(ConduitBlock.property(Direction.values()[index]), connections[index]);
+        }
+    }
+
+    private void addNotExactConnections(
+            MultiPartBlockStateBuilder.PartBuilder.ConditionGroup parent,
+            boolean[] connections
+    ) {
+        var anyDifference = parent.nestedGroup().useOr();
+        for (int index = 0; index < Direction.values().length; index++) {
+            anyDifference.condition(ConduitBlock.property(Direction.values()[index]), !connections[index]);
+        }
+        anyDifference.endNestedGroup();
+    }
+
+    private ModelFile mcxPart(
+            String generatedName,
+            String sourceName,
+            ResourceLocation particle,
+            String partName
+    ) {
+        return mcxModel(generatedName, sourceName, particle, includeNodes(partName));
+    }
+
+    private ModelFile gltfPart(
+            String generatedName,
+            String sourceName,
+            ResourceLocation particle,
+            String partName
+    ) {
+        return gltfModel(generatedName, sourceName, particle, includeNodes(partName));
+    }
+
+    private static ModelSceneSelection includeNodes(String... names) {
+        return new ModelSceneSelection(Set.of(names), Set.of(), Set.of(), Set.of());
     }
 
     private ModelFile pneumaticEndpointModel(SingleBlockMachineDefinition definition) {
@@ -351,25 +509,6 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private ModelFile advancedGltfModel(String generatedName, String sourceName) {
         return gltfModel(generatedName, sourceName, mcLoc("block/iron_block"), ModelSceneSelection.ALL);
-    }
-
-    private void conduitBlock(Block block, String name, ResourceLocation texture) {
-        conduitBlock(block, name, texture, 5);
-    }
-
-    private void conduitBlock(Block block, String name, ResourceLocation texture, int insetPixels) {
-        int far = 16 - insetPixels;
-        BlockModelBuilder model = models().getBuilder(name)
-                .texture("particle", texture)
-                .texture("all", texture);
-        model.element().from(insetPixels, insetPixels, insetPixels).to(far, far, far).textureAll("#all").end();
-        model.element().from(insetPixels, 0, insetPixels).to(far, insetPixels, far).textureAll("#all").end();
-        model.element().from(insetPixels, far, insetPixels).to(far, 16, far).textureAll("#all").end();
-        model.element().from(insetPixels, insetPixels, 0).to(far, far, insetPixels).textureAll("#all").end();
-        model.element().from(insetPixels, insetPixels, far).to(far, far, 16).textureAll("#all").end();
-        model.element().from(0, insetPixels, insetPixels).to(insetPixels, far, far).textureAll("#all").end();
-        model.element().from(far, insetPixels, insetPixels).to(16, far, far).textureAll("#all").end();
-        simpleBlockWithItem(block, model);
     }
 
     private void registerLongDistanceElectricModels() {
