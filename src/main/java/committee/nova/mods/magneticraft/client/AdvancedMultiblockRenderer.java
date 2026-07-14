@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.core.Direction;
 
 /**
  * Dynamic controller-local overlays for formed multiblocks. The renderer never
@@ -38,10 +39,18 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
                 packedLight
         );
         poseStack.pushPose();
-        MachineRenderHelper.faceMachine(poseStack, machine.facing());
+        MachineRenderHelper.faceMachine(poseStack, legacyModelFacing(machine.facing()));
         renderScene(machine, partialTick, poseStack, buffers, sceneLight, packedOverlay);
         renderFluids(machine, poseStack, buffers, sceneLight);
         poseStack.popPose();
+    }
+
+    /**
+     * Legacy scenes use the 1.12 placement convention, which stored the player's
+     * horizontal facing. The current controller block stores its opposite.
+     */
+    static Direction legacyModelFacing(Direction controllerFacing) {
+        return controllerFacing.getOpposite();
     }
 
     private static void renderScene(
