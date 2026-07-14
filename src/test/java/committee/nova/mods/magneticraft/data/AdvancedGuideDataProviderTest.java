@@ -67,7 +67,7 @@ class AdvancedGuideDataProviderTest {
             assertEquals(AdvancedGuideDataProvider.SCHEMA_VERSION, guide.get("schema_version").getAsInt());
             assertEquals("magneticraft:" + definition.id(), guide.get("id").getAsString());
             assertEquals("magneticraft:" + definition.id(), guide.get("controller").getAsString());
-            assertTrue(guide.get("supports_mirroring").getAsBoolean());
+            assertFalse(guide.get("supports_mirroring").getAsBoolean());
             assertTrue(ids.add(guide.get("id").getAsString()));
 
             assertOffset(guide.getAsJsonObject("size"), definition.size().x(), definition.size().y(), definition.size().z());

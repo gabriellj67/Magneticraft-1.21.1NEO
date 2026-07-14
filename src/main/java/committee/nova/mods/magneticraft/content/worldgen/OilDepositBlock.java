@@ -2,6 +2,8 @@ package committee.nova.mods.magneticraft.content.worldgen;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -25,5 +27,13 @@ public final class OilDepositBlock extends BaseEntityBlock {
     @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
+    }
+
+    @Override
+    public void onRemove(BlockState oldState, Level level, BlockPos position, BlockState newState, boolean moving) {
+        if (!oldState.is(newState.getBlock()) && level instanceof ServerLevel serverLevel) {
+            OilDepositSavedData.get(serverLevel).remove(position);
+        }
+        super.onRemove(oldState, level, position, newState, moving);
     }
 }

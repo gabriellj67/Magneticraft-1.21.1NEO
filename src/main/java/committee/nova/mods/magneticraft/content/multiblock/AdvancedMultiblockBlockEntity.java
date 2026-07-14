@@ -60,7 +60,6 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private static final String BURN_POWER_TAG = "burn_power";
     private static final String SOLAR_TOWER_TAG = "solar_tower";
     private static final String HYDRAULIC_MODE_TAG = "hydraulic_mode";
-    private static final int VALIDATION_INTERVAL = 20;
 
     private final MultiblockDefinition definition;
     @Nullable
@@ -83,7 +82,6 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private boolean mirrored;
     @Nullable
     private UUID owner;
-    private int validationDelay;
     private int progress;
     private int totalProgress;
     private int burnTicks;
@@ -165,7 +163,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     }
 
     public boolean operational() {
-        return formed && structureReady;
+        return formed && structureReady && validate().valid();
     }
 
     public boolean mirrored() {
@@ -277,22 +275,15 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         }
     }
 
-    public void toggleMirrored(Player player) {
-        if (formed || !canManage(player)) {
-            return;
-        }
-        mirrored = !mirrored;
-        markChangedAndSync();
-        player.displayClientMessage(Component.translatable(
-                mirrored
-                        ? "message.magneticraft.multiblock_mirrored"
-                        : "message.magneticraft.multiblock_not_mirrored"
-        ), true);
-    }
-
     public boolean tryForm(Player player) {
         if (formed || !canManage(player) || !(level instanceof ServerLevel serverLevel)) {
             return false;
+        }
+        // Nova 1.12 exposed four rotations only. Keep the persisted flag solely
+        // so already formed 0.2-0.5 structures can finish loading compatibly.
+        if (mirrored) {
+            mirrored = false;
+            markChangedAndSync();
         }
         MultiblockValidationResult result = validate();
         if (!result.valid()) {
@@ -300,7 +291,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             return false;
         }
         List<BlockPos> members = members();
-        if (!MultiblockMembershipService.register(serverLevel, worldPosition, members)) {
+        if (!canClaimMemberCapabilities()
+                || !MultiblockMembershipService.register(
+                serverLevel, worldPosition, definition, members)) {
             player.displayClientMessage(Component.translatable(
                     "message.magneticraft.multiblock_member_conflict"
             ), false);
@@ -325,7 +318,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
 
     public void onMemberBroken(BlockPos member) {
         if (!member.equals(worldPosition)) {
-            validationDelay = 1;
+            setStructureReady(false);
         }
     }
 
@@ -336,6 +329,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         blockEntityTag.remove("y");
         blockEntityTag.remove("z");
         blockEntityTag.putBoolean(FORMED_TAG, false);
+        blockEntityTag.putBoolean(MIRRORED_TAG, false);
         blockEntityTag.remove(OWNER_TAG);
         blockEntityTag.remove(SOLAR_TOWER_TAG);
         if (definition == MultiblockDefinition.SHELVING_UNIT) {
@@ -343,6 +337,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             modules.remove(Magneticraft.id("advanced_shelving_inventory").toString());
             blockEntityTag.put(MachineBlockEntity.MODULES_TAG, modules);
         }
+        logic.stripPortableState(blockEntityTag);
         stack.addTagElement("BlockEntityTag", blockEntityTag);
     }
 
@@ -436,6 +431,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             }
         }
         return (energy != null && energy.getEnergyStored() > 0)
+                || (electricity != null && electricity.node().energyJoules() > 0.0D)
+                || (heat != null && Math.abs(
+                heat.node().temperatureKelvin() - HeatNode.AMBIENT_TEMPERATURE_KELVIN) > 1.0E-6D)
                 || progress > 0
                 || burnTicks > 0;
     }
@@ -474,17 +472,12 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     @Override
     public void onLoad() {
         super.onLoad();
-        validationDelay = 1;
         structureReady = false;
         rebindPhysicalModules();
-        rebindMemberCapabilities();
     }
 
     @Override
     public void setRemoved() {
-        if (level instanceof ServerLevel serverLevel) {
-            MultiblockMembershipService.unregister(serverLevel, worldPosition);
-        }
         super.setRemoved();
     }
 
@@ -506,13 +499,13 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         if (activeRecipe != null) {
             tag.putString(ACTIVE_RECIPE_TAG, activeRecipe.toString());
         }
+        logic.savePersistentState(tag);
     }
 
     @Override
     protected void loadMachineData(CompoundTag tag) {
         formed = tag.getBoolean(FORMED_TAG);
         structureReady = false;
-        validationDelay = 1;
         mirrored = tag.getBoolean(MIRRORED_TAG);
         owner = tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
         progress = Math.max(0, tag.getInt(PROGRESS_TAG));
@@ -526,6 +519,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         activeRecipe = tag.contains(ACTIVE_RECIPE_TAG)
                 ? ResourceLocation.tryParse(tag.getString(ACTIVE_RECIPE_TAG))
                 : null;
+        logic.loadPersistentState(tag);
         working = false;
     }
 
@@ -567,18 +561,19 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         if (!formed) {
             return;
         }
-        if (--validationDelay <= 0) {
-            validationDelay = VALIDATION_INTERVAL;
-            MultiblockValidationResult result = validate();
-            if (result.status() == MultiblockValidationResult.Status.MISMATCH) {
-                unform();
-                return;
-            }
-            if (result.status() == MultiblockValidationResult.Status.UNLOADED) {
-                setStructureReady(false);
-                return;
-            }
-            if (!MultiblockMembershipService.register(serverLevel, worldPosition, members())) {
+        MultiblockValidationResult result = validate();
+        if (result.status() == MultiblockValidationResult.Status.MISMATCH) {
+            unform();
+            return;
+        }
+        if (result.status() == MultiblockValidationResult.Status.UNLOADED) {
+            setStructureReady(false);
+            return;
+        }
+        if (!structureReady) {
+            if (!canClaimMemberCapabilities()
+                    || !MultiblockMembershipService.register(
+                    serverLevel, worldPosition, definition, members())) {
                 unform();
                 return;
             }
@@ -603,7 +598,6 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         }
         this.formed = formed;
         structureReady = formed;
-        validationDelay = VALIDATION_INTERVAL;
         refreshCapabilities();
         rebindPhysicalModules();
         rebindMemberCapabilities();
@@ -856,7 +850,8 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             case SOLAR_PANEL -> 100;
             case STEAM_ENGINE -> 240;
             case STEAM_TURBINE -> 1_200;
-            case GRINDER, SIEVE, PUMPJACK -> 40;
+            case GRINDER, SIEVE -> 40;
+            case PUMPJACK -> 80;
             case HYDRAULIC_PRESS -> 60;
             case BIG_ELECTRIC_FURNACE -> 200;
             default -> 0;
@@ -929,6 +924,26 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 }
             }
         }
+    }
+
+    private boolean canClaimMemberCapabilities() {
+        if (!(level instanceof ServerLevel)) {
+            return false;
+        }
+        for (MultiblockCell cell : definition.cells()) {
+            if (cell.rule() != MultiblockRule.SMALL_TANK) {
+                continue;
+            }
+            BlockPos member = MultiblockTransform.worldPosition(
+                    worldPosition, cell.offset(), definition.center(), facing(), mirrored
+            );
+            if (!level.hasChunk(member.getX() >> 4, member.getZ() >> 4)
+                    || !(level.getBlockEntity(member) instanceof SingleBlockMachineBlockEntity blockEntity)
+                    || !blockEntity.canClaimForMultiblock(worldPosition)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void unregisterPhysicalModules() {

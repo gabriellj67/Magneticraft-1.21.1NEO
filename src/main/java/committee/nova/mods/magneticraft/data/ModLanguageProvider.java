@@ -161,6 +161,8 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(), chinese ? "警示条纹机器外壳" : "Striped Machine Casing");
         add(ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(), chinese ? "电气机器外壳" : "Electrical Machine Casing");
         add(ModAdvancedBlocks.OIL_DEPOSIT.get(), chinese ? "地下油藏" : "Oil Deposit");
+        add("tooltip.magneticraft.oil_deposit.full", chinese ? "储量：100%" : "Reserve: 100%");
+        add("tooltip.magneticraft.oil_deposit.empty", chinese ? "储量：已耗尽" : "Reserve: depleted");
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             add(
                     ModAdvancedBlocks.controller(definition).get(),
@@ -360,6 +362,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("jei.magneticraft.conductivity", chinese ? "导热系数：%s" : "Conductivity: %s");
         add("jei.magneticraft.duration", chinese ? "耗时：%s 刻" : "Duration: %s ticks");
         add("jei.magneticraft.energy_per_tick", chinese ? "能耗：%s FE/t" : "Energy: %s FE/t");
+        add("jei.magneticraft.minimum_temperature", chinese ? "最低温度：%s K" : "Minimum: %s K");
         add("jei.magneticraft.machine", chinese ? "机器：%s" : "Machine: %s");
         add("jei.magneticraft.power", chinese ? "功率：%s FE/t" : "Power: %s FE/t");
         add("jei.magneticraft.press_mode", chinese ? "压力模式：%s" : "Press mode: %s");

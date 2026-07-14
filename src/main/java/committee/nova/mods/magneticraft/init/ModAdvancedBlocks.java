@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.init;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlock;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlock;
+import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -51,6 +52,15 @@ public final class ModAdvancedBlocks {
             "electrical_machine_casing",
             () -> new Block(partProperties())
     );
+    /** Pumpjack-owned drill column. It intentionally has no item, recipe, loot or creative entry. */
+    public static final RegistryObject<Block> PUMPJACK_DRILL = ModRegistries.BLOCKS.register(
+            "pumpjack_drill",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(2.0F, 10.0F)
+                    .sound(SoundType.METAL)
+                    .noLootTable())
+    );
     public static final RegistryObject<Block> OIL_DEPOSIT = ModRegistries.BLOCKS.register(
             "oil_deposit",
             () -> new OilDepositBlock(BlockBehaviour.Properties.of()
@@ -59,8 +69,13 @@ public final class ModAdvancedBlocks {
                     .sound(SoundType.STONE)
                     .noLootTable())
     );
+    public static final RegistryObject<Item> OIL_DEPOSIT_ITEM = ModRegistries.ITEMS.register(
+            "oil_deposit",
+            () -> new OilDepositBlockItem(OIL_DEPOSIT.get(), new Item.Properties())
+    );
 
     static {
+        BLOCK_ITEMS.add(OIL_DEPOSIT_ITEM);
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             RegistryObject<Block> controller = registerController(
                     definition.id(),

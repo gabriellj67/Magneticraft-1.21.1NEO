@@ -341,6 +341,7 @@ public final class SingleBlockMachineGameTests {
 
     @GameTest(template = TEMPLATE, timeoutTicks = 430)
     public static void feedingTroughUsesPositionPhaseAndLegacyOneItemBoundary(GameTestHelper helper) {
+        helper.killAllEntitiesOfClass(Animal.class);
         helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FEEDING_TROUGH, Direction.EAST));
         SingleBlockMachineBlockEntity trough = requireMachine(helper, CENTER);
         trough.inventory().setStackInSlot(0, new ItemStack(Items.WHEAT));
@@ -354,9 +355,11 @@ public final class SingleBlockMachineGameTests {
             delay = 400;
         }
         helper.runAfterDelay(delay + 2, () -> {
-            helper.assertTrue(cow.isInLove(), "Feeding trough did not select the first eligible animal");
-            helper.assertTrue(sheep.isInLove(), "Feeding trough incorrectly required matching animal types");
+            helper.assertTrue(cow.isInLove(), "Feeding trough did not feed the only eligible cow");
+            helper.assertTrue(sheep.isInLove(), "Feeding trough did not feed the only eligible sheep");
             helper.assertTrue(trough.inventory().getStackInSlot(0).isEmpty(), "Feeding trough did not consume its one food item");
+            cow.discard();
+            sheep.discard();
             helper.succeed();
         });
     }

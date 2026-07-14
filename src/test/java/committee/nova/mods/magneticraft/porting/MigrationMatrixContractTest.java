@@ -67,7 +67,7 @@ class MigrationMatrixContractTest {
     private static final String MAPPING_LEAF_SHA256 =
             "5068ab14ee3f8324e7dc947b58ce7b24e114e8a59882289df31a5df67fa7d6e8";
     private static final String MAPPING_PROJECTION_SHA256 =
-            "7717173ad41b6f9404125314504618fea5fc71c9c7d221924fcf2be93d3c874d";
+            "40b8ea11c0276feb76c9efa01aee5f629b892d097b1a4c3f39d8678145bbc3f4";
     private static final int MATERIAL_LEAF_COUNT = 77;
     private static final String MATERIAL_LEAF_SHA256 =
             "784b0c5ff88ddf7e6e28216ebe71ae5248c8f0d60c75b2f8dd099f9eb674409e";
@@ -77,16 +77,16 @@ class MigrationMatrixContractTest {
     private static final String STATE_LEAF_SHA256 =
             "ee263416076db2e98ecaacb709eb9c1e944588591f80c59713f2aad31da97928";
     private static final String STATE_PROJECTION_SHA256 =
-            "9bd6151e71cd5f9a3738780c7aa928860ea307a7bc900b4c4924da1aee4d31a2";
+            "230b94c106210b9481ab634af96321f626b7d147bd3466251f906d38655d2879";
     private static final int EXCLUSION_LEAF_COUNT = 16;
     private static final String EXCLUSION_LEAF_SHA256 =
             "f6beb52866ea02a788d7c1ba4a2e88ecbac78bcb54c7552183363b8505a19dac";
     private static final int DERIVED_RUNTIME_ID_COUNT = 80;
     private static final String DERIVED_RUNTIME_ID_SHA256 =
             "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451";
-    private static final int SUPPORTING_REGISTRY_ID_COUNT = 39;
+    private static final int SUPPORTING_REGISTRY_ID_COUNT = 40;
     private static final String SUPPORTING_REGISTRY_ID_SHA256 =
-            "4d866daa5ef2239e9d55f139efc9313b972c7aef6ce88bfa6815f5fdaa1eb38c";
+            "fa95e8fc79d6c129e558360938347eeaa3c8389d40a948b17ffaa55a270f1e38";
     private static final int FORBIDDEN_RUNTIME_ID_COUNT = 51;
     private static final String FORBIDDEN_RUNTIME_ID_SHA256 =
             "2dd45be9e2de079ee8c833139c481e9127269b554e4208bb57962f64aecddb11";
@@ -149,6 +149,7 @@ class MigrationMatrixContractTest {
             "runClient smoke"
     );
     private static final Map<String, Set<String>> SUPPORTING_RUNTIME_IDS = Map.of(
+            "block", Set.of("magneticraft:pumpjack_drill"),
             "block_entity_type", Set.of(
                     "magneticraft:crushing_table",
                     "magneticraft:battery_box",
@@ -1195,6 +1196,21 @@ class MigrationMatrixContractTest {
                 }
             }
         }
+        for (JsonElement element : idMap.getAsJsonArray("supporting_registry_mappings")) {
+            JsonObject mapping = element.getAsJsonObject();
+            String targetId = mapping.get("target_id").getAsString();
+            switch (mapping.get("registry").getAsString()) {
+                case "block" -> projectedBlocks.add(targetId);
+                case "item" -> projectedItems.add(targetId);
+                case "block_item" -> {
+                    projectedBlocks.add(targetId);
+                    projectedItems.add(targetId);
+                }
+                default -> {
+                    // Non-primary supporting registries are checked by their dedicated projection test.
+                }
+            }
+        }
 
         Set<String> currentBlocks = new HashSet<>();
         for (BaseBlockDefinition definition : BaseBlockDefinition.values()) {
@@ -1219,7 +1235,7 @@ class MigrationMatrixContractTest {
 
         Set<String> currentItems = new HashSet<>(currentBlocks);
         currentItems.remove(namespaced("air_bubble"));
-        currentItems.remove(namespaced("oil_deposit"));
+        currentItems.remove(namespaced("pumpjack_drill"));
         for (FluidDefinition definition : FluidDefinition.values()) {
             currentItems.remove(namespaced(definition.id()));
             currentItems.add(namespaced(definition.id() + "_bucket"));

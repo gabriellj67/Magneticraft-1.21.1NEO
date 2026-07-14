@@ -1,0 +1,16 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 2,
+  "fluid_input": {
+    "amount": 10,
+    "fluid": "magneticraft:steam"
+  },
+  "fluid_results": [
+    {
+      "amount": 1,
+      "fluid": "minecraft:water",
+      "tank": 0
+    }
+  ],
+  "machine": "refinery"
+}

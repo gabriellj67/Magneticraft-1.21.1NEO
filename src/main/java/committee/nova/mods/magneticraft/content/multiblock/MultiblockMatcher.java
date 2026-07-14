@@ -7,6 +7,8 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 /**
  * Read-only structure validation that never forces a chunk load.
@@ -23,6 +25,31 @@ public final class MultiblockMatcher {
             MultiblockDefinition definition,
             Block controllerBlock
     ) {
+        return validate(
+                controller,
+                facing,
+                mirrored,
+                definition,
+                position -> level.getChunkSource().hasChunk(
+                        position.getX() >> 4,
+                        position.getZ() >> 4
+                ),
+                (cell, position) -> cell.rule().matches(
+                        level.getBlockState(position),
+                        controllerBlock,
+                        facing
+                )
+        );
+    }
+
+    static MultiblockValidationResult validate(
+            BlockPos controller,
+            Direction facing,
+            boolean mirrored,
+            MultiblockDefinition definition,
+            Predicate<BlockPos> chunkLoaded,
+            BiPredicate<MultiblockCell, BlockPos> cellMatches
+    ) {
         for (MultiblockCell cell : definition.requiredCells()) {
             BlockPos worldPosition = MultiblockTransform.worldPosition(
                     controller,
@@ -31,10 +58,10 @@ public final class MultiblockMatcher {
                     facing,
                     mirrored
             );
-            if (!level.hasChunkAt(worldPosition)) {
+            if (!chunkLoaded.test(worldPosition)) {
                 return MultiblockValidationResult.unloaded(worldPosition, cell.rule());
             }
-            if (!cell.rule().matches(level.getBlockState(worldPosition), controllerBlock, facing)) {
+            if (!cellMatches.test(cell, worldPosition)) {
                 return MultiblockValidationResult.mismatch(worldPosition, cell.rule());
             }
         }

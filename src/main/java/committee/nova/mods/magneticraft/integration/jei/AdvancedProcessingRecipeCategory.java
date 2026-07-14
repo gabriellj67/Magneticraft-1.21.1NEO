@@ -11,6 +11,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,26 @@ final class AdvancedProcessingRecipeCategory extends AbstractMagneticraftRecipeC
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, AdvancedProcessingRecipe recipe, IFocusGroup focuses) {
+        if (recipe.isFluidProcessing()) {
+            var inputSlot = builder.addInputSlot(8, 8)
+                    .setStandardSlotBackground()
+                    .setFluidRenderer(Math.max(1, recipe.fluidInputAmount()), true, 16, 32);
+            if (recipe.fluidInput() != null) {
+                for (FluidStack input : recipe.fluidInput().examples(recipe.fluidInputAmount())) {
+                    inputSlot.addFluidStack(input.getFluid(), input.getAmount());
+                }
+            }
+            for (AdvancedProcessingRecipe.FluidOutput output : recipe.fluidOutputs()) {
+                FluidStack stack = output.stack();
+                builder.addOutputSlot(108 + output.tank() * 20, 8)
+                        .setOutputSlotBackground()
+                        .setFluidRenderer(Math.max(1, stack.getAmount()), true, 16, 32)
+                        .addFluidStack(stack.getFluid(), stack.getAmount());
+            }
+            builder.addInvisibleIngredients(RecipeIngredientRole.CATALYST)
+                    .addItemLike(ModAdvancedBlocks.controller(recipe.machine()).get());
+            return;
+        }
         List<ItemStack> inputs = Arrays.stream(recipe.input().getItems())
                 .map(ItemStack::copy)
                 .peek(stack -> stack.setCount(recipe.inputCount()))
@@ -71,12 +92,26 @@ final class AdvancedProcessingRecipeCategory extends AbstractMagneticraftRecipeC
                 46
         );
         drawLine(graphics, Component.translatable("jei.magneticraft.duration", recipe.duration()), 8, 60);
-        drawLine(
-                graphics,
-                Component.translatable("jei.magneticraft.energy_per_tick", recipe.energyPerTick()),
-                86,
-                60
-        );
+        if (recipe.isFluidProcessing()) {
+            if (recipe.minimumTemperatureKelvin() > 0.0D) {
+                drawLine(
+                        graphics,
+                        Component.translatable(
+                                "jei.magneticraft.minimum_temperature",
+                                Math.round(recipe.minimumTemperatureKelvin())
+                        ),
+                        86,
+                        60
+                );
+            }
+        } else {
+            drawLine(
+                    graphics,
+                    Component.translatable("jei.magneticraft.energy_per_tick", recipe.energyPerTick()),
+                    86,
+                    60
+            );
+        }
         if (recipe.pressMode() != null) {
             drawLine(
                     graphics,

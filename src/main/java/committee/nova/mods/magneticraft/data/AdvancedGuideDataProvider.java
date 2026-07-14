@@ -94,7 +94,7 @@ final class AdvancedGuideDataProvider implements DataProvider {
         root.addProperty("category", category(definition));
         root.addProperty("controller", Magneticraft.MOD_ID + ":" + definition.id());
         root.addProperty("translation_key", "block.magneticraft." + definition.id());
-        root.addProperty("supports_mirroring", true);
+        root.addProperty("supports_mirroring", false);
         root.add("size", offset(definition.size().x(), definition.size().y(), definition.size().z()));
         root.add("anchor", offset(definition.center().x(), definition.center().y(), definition.center().z()));
 

@@ -433,7 +433,7 @@ class GeneratedDataContractTest {
 
         assertFile(ASSETS.resolve("blockstates/oil_deposit.json"));
         assertFile(ASSETS.resolve("models/block/oil_deposit.json"));
-        assertFalse(Files.exists(ASSETS.resolve("models/item/oil_deposit.json")));
+        assertFile(ASSETS.resolve("models/item/oil_deposit.json"));
         assertFalse(Files.exists(DATA.resolve("loot_tables/blocks/oil_deposit.json")));
 
         for (String block : Set.of("computer", "mining_robot")) {

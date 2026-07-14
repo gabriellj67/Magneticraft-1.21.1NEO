@@ -96,6 +96,6 @@
     "y": 3,
     "z": 5
   },
-  "supports_mirroring": true,
+  "supports_mirroring": false,
   "translation_key": "block.magneticraft.steam_turbine"
 }

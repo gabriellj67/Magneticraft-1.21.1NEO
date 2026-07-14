@@ -65,7 +65,10 @@ final class ModBlockLootSubProvider extends BlockLootSubProvider {
                 TeslaTowerPart.BOTTOM,
                 ModNetworkBlocks.TESLA_TOWER.get()
         );
-        ModAdvancedBlocks.blockItems().forEach(item -> dropSelf(Block.byItem(item.get())));
+        ModAdvancedBlocks.blockItems().stream()
+                .map(item -> Block.byItem(item.get()))
+                .filter(block -> block != ModAdvancedBlocks.OIL_DEPOSIT.get())
+                .forEach(this::dropSelf);
         dropSelf(ModComputerContent.COMPUTER.get());
         dropSelf(ModComputerContent.MINING_ROBOT.get());
     }
@@ -76,7 +79,9 @@ final class ModBlockLootSubProvider extends BlockLootSubProvider {
                 ModBlocks.all().values().stream().map(RegistryObject::get),
                 ModMachineBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
                 ModNetworkBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
-                ModAdvancedBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
+                ModAdvancedBlocks.blockItems().stream()
+                        .map(item -> Block.byItem(item.get()))
+                        .filter(block -> block != ModAdvancedBlocks.OIL_DEPOSIT.get()),
                 Stream.of(ModComputerContent.COMPUTER.get(), ModComputerContent.MINING_ROBOT.get())
         ).flatMap(stream -> stream)::iterator;
     }

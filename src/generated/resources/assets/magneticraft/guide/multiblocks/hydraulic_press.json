@@ -96,6 +96,6 @@
     "y": 5,
     "z": 3
   },
-  "supports_mirroring": true,
+  "supports_mirroring": false,
   "translation_key": "block.magneticraft.hydraulic_press"
 }

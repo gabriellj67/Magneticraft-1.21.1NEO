@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.init;
 
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.PortableEnergyItem;
+import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -26,7 +27,8 @@ public final class ModCreativeTabs {
                         ModBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModMachineBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModNetworkBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
-                        ModAdvancedBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModAdvancedBlocks.blockItems().stream().map(RegistryObject::get)
+                                .forEach(item -> acceptAdvancedItem(output, item));
                         ModItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModMachineItems.creativeItems().stream()
                                 .map(RegistryObject::get)
@@ -53,6 +55,13 @@ public final class ModCreativeTabs {
         variant.putInt("schema_version", PORTABLE_VARIANT_SCHEMA);
         variant.putString("creative_variant", "full");
         output.accept(charged);
+    }
+
+    private static void acceptAdvancedItem(CreativeModeTab.Output output, Item item) {
+        output.accept(item);
+        if (item instanceof OilDepositBlockItem oilDeposit) {
+            output.accept(oilDeposit.emptyStack());
+        }
     }
 
     public static void bootstrap() {

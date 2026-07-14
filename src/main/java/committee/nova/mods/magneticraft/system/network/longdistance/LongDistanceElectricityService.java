@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -134,6 +135,10 @@ public final class LongDistanceElectricityService {
                 .filter(receiver -> Math.abs(receiver.position().getX() - center.getX()) <= radius
                         && Math.abs(receiver.position().getY() - center.getY()) <= radius
                         && Math.abs(receiver.position().getZ() - center.getZ()) <= radius)
+                .sorted(Comparator
+                        .comparingDouble((WirelessEnergyReceiverHost receiver) ->
+                                receiver.position().distSqr(center))
+                        .thenComparingLong(receiver -> receiver.position().asLong()))
                 .toList();
     }
 

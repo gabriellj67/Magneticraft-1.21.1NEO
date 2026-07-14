@@ -265,16 +265,24 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         return multiblockController != null;
     }
 
-    public void claimForMultiblock(BlockPos controller) {
+    public boolean canClaimForMultiblock(BlockPos controller) {
+        return multiblockController == null || multiblockController.equals(controller);
+    }
+
+    public boolean claimForMultiblock(BlockPos controller) {
         if (definition != SingleBlockMachineDefinition.SMALL_TANK) {
             throw new IllegalStateException("Only small tanks can be multiblock members");
         }
         BlockPos stable = controller.immutable();
+        if (!canClaimForMultiblock(stable)) {
+            return false;
+        }
         if (!stable.equals(multiblockController)) {
             multiblockController = stable;
             invalidateCaps();
             markChangedAndSync();
         }
+        return true;
     }
 
     public void releaseMultiblockClaim(BlockPos controller) {

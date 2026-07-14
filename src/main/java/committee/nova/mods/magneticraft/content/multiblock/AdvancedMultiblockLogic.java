@@ -2,7 +2,6 @@ package committee.nova.mods.magneticraft.content.multiblock;
 
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 
-import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.FluidFuelRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
@@ -10,6 +9,8 @@ import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
@@ -17,7 +18,9 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -30,27 +33,49 @@ import java.util.Optional;
  * Server-only behavior strategies for the sixteen advanced controllers.
  */
 final class AdvancedMultiblockLogic {
+    private enum DrillStatus {
+        INTACT,
+        MISSING,
+        UNLOADED
+    }
+
     private static final int STEAM_PER_OPERATION = 10;
     private static final double STEAM_ENERGY_PER_OPERATION = 20.0D;
-    private static final int PUMPJACK_RATE = 20;
-    private static final int PUMPJACK_COST = 40;
-    private static final int PUMPJACK_SEARCH_RADIUS = 3;
-    private static final int PUMPJACK_SEARCH_BUDGET = 256;
-    private static final int PUMPJACK_SEARCH_RETRY_TICKS = 100;
+    private static final String PUMPJACK_TAG = "pumpjack";
+    private static final int PUMPJACK_BATCH_MILLIBUCKETS =
+            OilDepositBlockEntity.EXTRACTION_STAGE_MILLIBUCKETS;
+    private static final int PUMPJACK_COST = 80;
+    private static final int PUMPJACK_INITIAL_SEARCH_BUDGET = 81;
+    private static final int PUMPJACK_FIELD_SEARCH_BUDGET = 640;
+    private static final int PUMPJACK_DRILL_SKIP_BUDGET = 5;
+    private static final int PUMPJACK_PIPE_CHECK_INTERVAL = 80;
     private static final int COMBUSTION_WORK_PER_TICK = 40;
     private static final double SOLID_FUEL_POWER = 10.0D;
     private static final double COMBUSTION_MAX_TEMPERATURE = 2_273.15D;
     private static final int REFINERY_STEAM_PER_TICK = 20;
 
     private final AdvancedMultiblockBlockEntity machine;
-    private BlockPos cachedOilDeposit;
-    private BlockPos oilSearchOrigin;
-    private int oilSearchColumn;
-    private int oilSearchY = Integer.MIN_VALUE;
-    private long oilSearchRetryAt;
+    private PumpjackState pumpjackState = new PumpjackState();
 
     AdvancedMultiblockLogic(AdvancedMultiblockBlockEntity machine) {
         this.machine = machine;
+    }
+
+    void savePersistentState(CompoundTag tag) {
+        if (machine.definition() == MultiblockDefinition.PUMPJACK) {
+            tag.put(PUMPJACK_TAG, pumpjackState.save());
+        }
+    }
+
+    void loadPersistentState(CompoundTag tag) {
+        pumpjackState = machine.definition() == MultiblockDefinition.PUMPJACK
+                && tag.contains(PUMPJACK_TAG, Tag.TAG_COMPOUND)
+                ? PumpjackState.load(tag.getCompound(PUMPJACK_TAG))
+                : new PumpjackState();
+    }
+
+    void stripPortableState(CompoundTag tag) {
+        tag.remove(PUMPJACK_TAG);
     }
 
     void onFormed(ServerLevel level) {
@@ -79,8 +104,8 @@ final class AdvancedMultiblockLogic {
             case BIG_ELECTRIC_FURNACE -> tickBigElectricFurnace(level);
             case BIG_COMBUSTION_CHAMBER -> tickBigCombustion(level);
             case BIG_STEAM_BOILER -> tickBigSteamBoiler();
-            case OIL_HEATER -> tickOilHeater();
-            case REFINERY -> tickRefinery();
+            case OIL_HEATER -> tickOilHeater(level);
+            case REFINERY -> tickRefinery(level);
             case PUMPJACK -> tickPumpjack(level);
             case SOLAR_MIRROR -> tickSolarMirror(level);
             default -> {
@@ -89,7 +114,7 @@ final class AdvancedMultiblockLogic {
     }
 
     private void tickSolarPanel(ServerLevel level) {
-        if (!level.isDay() || level.isThundering() || machine.electricity() == null) {
+        if (!level.isDay() || machine.electricity() == null) {
             return;
         }
         int visible = 0;
@@ -352,31 +377,33 @@ final class AdvancedMultiblockLogic {
         machine.setWorking(true);
     }
 
-    private void tickOilHeater() {
+    private void tickOilHeater(ServerLevel level) {
         if (machine.heat() == null || machine.tank(0) == null || machine.tank(1) == null) {
             return;
         }
         FluidStack input = machine.tank(0).tank().getFluid();
-        OilHeaterBatch batch = oilHeaterBatch(input);
-        if (batch == null
-                || input.getAmount() < batch.inputAmount()
-                || machine.heat().node().temperatureKelvin() < batch.minimumTemperature()
-                || machine.tank(1).tank().fill(batch.output(), IFluidHandler.FluidAction.SIMULATE)
-                < batch.output().getAmount()) {
+        AdvancedProcessingRecipe recipe = fluidRecipe(level, MultiblockDefinition.OIL_HEATER, input);
+        if (recipe == null) {
             machine.resetProgress();
             return;
         }
-        int totalWork = batch.duration() * 120;
-        if (!machine.recipeMatches(batch.id(), totalWork)) {
-            machine.startRecipe(batch.id(), totalWork);
+        FluidStack output = recipe.fluidOutputs().get(0).stack();
+        if (machine.heat().node().temperatureKelvin() < recipe.minimumTemperatureKelvin()
+                || machine.tank(1).tank().fill(output, IFluidHandler.FluidAction.SIMULATE) < output.getAmount()) {
+            machine.resetProgress();
+            return;
+        }
+        int totalWork = recipe.duration() * 120;
+        if (!machine.recipeMatches(recipe.getId(), totalWork)) {
+            machine.startRecipe(recipe.getId(), totalWork);
         }
         int work = (int) Math.floor(Math.min(
                 1.0D,
-                Math.max(0.0D, machine.heat().node().temperatureKelvin() - batch.minimumTemperature())
+                Math.max(0.0D, machine.heat().node().temperatureKelvin() - recipe.minimumTemperatureKelvin())
         ) * 120.0D);
         double excessHeat = Math.max(
                 0.0D,
-                (machine.heat().node().temperatureKelvin() - batch.minimumTemperature())
+                (machine.heat().node().temperatureKelvin() - recipe.minimumTemperatureKelvin())
                         * machine.heat().node().heatCapacityJoulesPerKelvin()
         );
         if (work <= 0 || excessHeat < work) {
@@ -386,237 +413,409 @@ final class AdvancedMultiblockLogic {
         machine.advanceProgress(work);
         machine.setWorking(true);
         if (machine.progress() >= totalWork) {
-            machine.tank(0).tank().drain(batch.inputAmount(), IFluidHandler.FluidAction.EXECUTE);
-            machine.tank(1).tank().fill(batch.output(), IFluidHandler.FluidAction.EXECUTE);
+            machine.tank(0).tank().drain(recipe.fluidInputAmount(), IFluidHandler.FluidAction.EXECUTE);
+            machine.tank(1).tank().fill(output, IFluidHandler.FluidAction.EXECUTE);
             machine.resetProgress();
         }
     }
 
-    private void tickRefinery() {
+    private void tickRefinery(ServerLevel level) {
         if (machine.tank(0) == null || machine.tank(1) == null) {
             return;
         }
         FluidStack input = machine.tank(0).tank().getFluid();
         FluidStack processSteam = machine.tank(1).tank().getFluid();
-        RefineryBatch batch = refineryBatch(input);
+        AdvancedProcessingRecipe recipe = fluidRecipe(level, MultiblockDefinition.REFINERY, input);
         int steamWork = Math.min(
                 REFINERY_STEAM_PER_TICK,
                 (int) Math.floor((double) REFINERY_STEAM_PER_TICK
                         * processSteam.getAmount()
                         / machine.tank(1).tank().getCapacity())
         );
-        if (batch == null
-                || input.getAmount() < batch.inputAmount()
+        if (recipe == null
                 || steamWork <= 0
                 || processSteam.getFluid() != ModFluids.get(FluidDefinition.STEAM).source().get()
-                || !refineryOutputsFit(batch.outputs())) {
+                || !refineryOutputsFit(recipe.fluidOutputs())) {
             machine.resetProgress();
             return;
         }
-        int totalWork = batch.duration() * REFINERY_STEAM_PER_TICK;
-        if (!machine.recipeMatches(batch.id(), totalWork)) {
-            machine.startRecipe(batch.id(), totalWork);
+        int totalWork = recipe.duration() * REFINERY_STEAM_PER_TICK;
+        if (!machine.recipeMatches(recipe.getId(), totalWork)) {
+            machine.startRecipe(recipe.getId(), totalWork);
         }
         machine.tank(1).tank().drain(steamWork, IFluidHandler.FluidAction.EXECUTE);
         machine.advanceProgress(steamWork);
         machine.setWorking(true);
         if (machine.progress() >= totalWork) {
-            machine.tank(0).tank().drain(batch.inputAmount(), IFluidHandler.FluidAction.EXECUTE);
-            for (int index = 0; index < batch.outputs().size(); index++) {
-                FluidStack output = batch.outputs().get(index);
-                if (!output.isEmpty()) {
-                    machine.tank(index + 2).tank().fill(output, IFluidHandler.FluidAction.EXECUTE);
-                }
+            machine.tank(0).tank().drain(recipe.fluidInputAmount(), IFluidHandler.FluidAction.EXECUTE);
+            for (AdvancedProcessingRecipe.FluidOutput output : recipe.fluidOutputs()) {
+                machine.tank(output.tank() + 2).tank().fill(output.stack(), IFluidHandler.FluidAction.EXECUTE);
             }
             machine.resetProgress();
         }
     }
 
-    private boolean refineryOutputsFit(List<FluidStack> outputs) {
-        for (int index = 0; index < outputs.size(); index++) {
-            FluidStack output = outputs.get(index);
-            if (!output.isEmpty()
-                    && machine.tank(index + 2).tank().fill(output, IFluidHandler.FluidAction.SIMULATE)
-                    < output.getAmount()) {
+    private boolean refineryOutputsFit(List<AdvancedProcessingRecipe.FluidOutput> outputs) {
+        for (AdvancedProcessingRecipe.FluidOutput output : outputs) {
+            FluidStack stack = output.stack();
+            if (machine.tank(output.tank() + 2).tank().fill(stack, IFluidHandler.FluidAction.SIMULATE)
+                    < stack.getAmount()) {
                 return false;
             }
         }
         return true;
     }
 
-    private OilHeaterBatch oilHeaterBatch(FluidStack input) {
-        if (input.getFluid().defaultFluidState().is(FluidTags.WATER)) {
-            return new OilHeaterBatch(
-                    Magneticraft.id("oil_heater/water_to_steam"),
-                    1,
-                    new FluidStack(ModFluids.get(FluidDefinition.STEAM).source().get(), 10),
-                    1,
-                    373.15D
-            );
-        }
-        if (input.getFluid() == ModFluids.get(FluidDefinition.OIL).source().get()) {
-            return new OilHeaterBatch(
-                    Magneticraft.id("oil_heater/crude_oil_to_heated_crude_oil"),
-                    10,
-                    new FluidStack(ModFluids.get(FluidDefinition.HOT_CRUDE).source().get(), 100),
-                    2,
-                    623.15D
-            );
-        }
-        return null;
-    }
-
-    private RefineryBatch refineryBatch(FluidStack input) {
-        if (input.getFluid() == ModFluids.get(FluidDefinition.STEAM).source().get()) {
-            return refineryBatch("steam_to_water", 10, 2,
-                    new FluidStack(Fluids.WATER, 1), FluidStack.EMPTY, FluidStack.EMPTY);
-        }
-        if (input.getFluid() == ModFluids.get(FluidDefinition.HOT_CRUDE).source().get()) {
-            return refineryBatch("heated_crude_oil_fractionation", 100, 1,
-                    fluid(FluidDefinition.HEAVY_OIL, 4),
-                    fluid(FluidDefinition.LIGHT_OIL, 3),
-                    fluid(FluidDefinition.LPG, 3));
-        }
-        if (input.getFluid() == ModFluids.get(FluidDefinition.HEAVY_OIL).source().get()) {
-            return refineryBatch("heavy_oil_fractionation", 10, 1,
-                    fluid(FluidDefinition.OIL_RESIDUE, 4),
-                    fluid(FluidDefinition.FUEL, 5),
-                    fluid(FluidDefinition.LUBRICANT, 1));
-        }
-        if (input.getFluid() == ModFluids.get(FluidDefinition.LIGHT_OIL).source().get()) {
-            return refineryBatch("light_oil_fractionation", 10, 1,
-                    fluid(FluidDefinition.DIESEL, 5),
-                    fluid(FluidDefinition.KEROSENE, 2),
-                    fluid(FluidDefinition.GASOLINE, 3));
-        }
-        if (input.getFluid() == ModFluids.get(FluidDefinition.LPG).source().get()) {
-            return refineryBatch("lpg_fractionation", 10, 1,
-                    fluid(FluidDefinition.PLASTIC, 5),
-                    fluid(FluidDefinition.NAPHTHA, 2),
-                    fluid(FluidDefinition.NATURAL_GAS, 3));
-        }
-        return null;
-    }
-
-    private RefineryBatch refineryBatch(
-            String id,
-            int inputAmount,
-            int duration,
-            FluidStack output0,
-            FluidStack output1,
-            FluidStack output2
+    private AdvancedProcessingRecipe fluidRecipe(
+            ServerLevel level,
+            MultiblockDefinition definition,
+            FluidStack input
     ) {
-        return new RefineryBatch(
-                Magneticraft.id("refinery/" + id),
-                inputAmount,
-                List.of(output0, output1, output2),
-                duration
-        );
-    }
-
-    private FluidStack fluid(FluidDefinition definition, int amount) {
-        return new FluidStack(ModFluids.get(definition).source().get(), amount);
+        return level.getRecipeManager().getAllRecipesFor(ModRecipeTypes.ADVANCED_PROCESSING_TYPE.get()).stream()
+                .filter(AdvancedProcessingRecipe::isFluidProcessing)
+                .filter(recipe -> recipe.machine() == definition)
+                .filter(recipe -> recipe.matchesFluid(input))
+                .findFirst()
+                .orElse(null);
     }
 
     private void tickPumpjack(ServerLevel level) {
-        if (machine.energy() == null || machine.tank(0) == null
-                || machine.energy().extractEnergy(PUMPJACK_COST, true) < PUMPJACK_COST) {
+        if (machine.energy() == null || machine.tank(0) == null) {
             return;
         }
-        FluidStack oil = new FluidStack(ModFluids.get(FluidDefinition.OIL).source().get(), PUMPJACK_RATE);
-        int accepted = machine.tank(0).tank().fill(oil, IFluidHandler.FluidAction.SIMULATE);
-        if (accepted <= 0) {
+        switch (pumpjackState.phase()) {
+            case SEARCHING_OIL -> tickPumpjackOilSearch(level);
+            case SEARCHING_DEPOSIT -> tickPumpjackDepositScan(level);
+            case DIGGING -> tickPumpjackDigging(level);
+            case SEARCHING_SOURCE -> tickPumpjackSourceSearch(level);
+            case EXTRACTING -> tickPumpjackExtraction(level);
+        }
+    }
+
+    private void tickPumpjackOilSearch(ServerLevel level) {
+        BlockPos origin = drillHead().below();
+        if (origin.getY() < level.getMinBuildHeight()) {
             return;
         }
-        OilDepositBlockEntity deposit = findOilDeposit(level);
-        if (deposit == null) {
+        PumpjackCursor cursor = PumpjackCursor.searchingOil(origin, level.getMinBuildHeight());
+        if (!validatePumpjackCursor(cursor)) {
             return;
         }
-        int drained = deposit.drain(accepted, true);
-        if (drained <= 0) {
+        int index = pumpjackState.cursorIndex();
+        int scanned = 0;
+        while (scanned < PUMPJACK_INITIAL_SEARCH_BUDGET && index < cursor.totalPositions()) {
+            BlockPos position = cursor.positionAt(index);
+            index++;
+            scanned++;
+            if (!loaded(level, position)) {
+                continue;
+            }
+            if (level.getBlockEntity(position) instanceof OilDepositBlockEntity) {
+                pumpjackState.setDepositOrigin(position);
+                pumpjackState.transitionTo(PumpjackState.Phase.SEARCHING_DEPOSIT);
+                machine.markChanged();
+                return;
+            }
+        }
+        if (index != pumpjackState.cursorIndex()) {
+            pumpjackState.setCursorIndex(index);
+            machine.markChanged();
+        }
+        if (index >= cursor.totalPositions()) {
+            pumpjackState.transitionTo(PumpjackState.Phase.SEARCHING_OIL);
+            machine.markChanged();
+        }
+    }
+
+    private void tickPumpjackDepositScan(ServerLevel level) {
+        BlockPos depositOrigin = pumpjackState.depositOrigin().orElse(null);
+        if (depositOrigin == null || machine.energy().extractEnergy(PUMPJACK_COST, true) < PUMPJACK_COST) {
+            return;
+        }
+        PumpjackCursor cursor = PumpjackCursor.depositScan(
+                depositOrigin,
+                level.getMinBuildHeight(),
+                level.getMaxBuildHeight()
+        );
+        if (!validatePumpjackCursor(cursor)) {
+            return;
+        }
+        int index = pumpjackState.cursorIndex();
+        int depositSize = pumpjackState.depositSize();
+        int remainingSources = pumpjackState.depositRemainingSources();
+        int scanned = 0;
+        while (scanned < PUMPJACK_FIELD_SEARCH_BUDGET && index < cursor.totalPositions()) {
+            BlockPos position = cursor.positionAt(index);
+            index++;
+            scanned++;
+            if (!loaded(level, position)) {
+                continue;
+            }
+            if (level.getBlockEntity(position) instanceof OilDepositBlockEntity deposit) {
+                depositSize++;
+                if (deposit.remaining() >= PUMPJACK_BATCH_MILLIBUCKETS) {
+                    remainingSources++;
+                }
+            }
+        }
+        if (scanned <= 0) {
             return;
         }
         machine.energy().extractEnergy(PUMPJACK_COST, false);
-        deposit.drain(drained, false);
-        machine.tank(0).tank().fill(new FluidStack(oil, drained), IFluidHandler.FluidAction.EXECUTE);
         machine.setWorking(true);
+        pumpjackState.setCursorIndex(index);
+        pumpjackState.setDepositCounts(depositSize, remainingSources);
+        if (index >= cursor.totalPositions()) {
+            pumpjackState.transitionTo(depositSize > 0
+                    ? PumpjackState.Phase.DIGGING
+                    : PumpjackState.Phase.SEARCHING_OIL);
+        }
+        machine.markChanged();
     }
 
-    private OilDepositBlockEntity findOilDeposit(ServerLevel level) {
-        if (cachedOilDeposit != null) {
-            if (!level.hasChunk(cachedOilDeposit.getX() >> 4, cachedOilDeposit.getZ() >> 4)) {
-                return null;
-            }
-            if (level.getBlockEntity(cachedOilDeposit) instanceof OilDepositBlockEntity deposit
-                    && deposit.remaining() > 0) {
-                return deposit;
-            }
-            cachedOilDeposit = null;
-            resetOilSearch();
+    private void tickPumpjackDigging(ServerLevel level) {
+        BlockPos depositOrigin = pumpjackState.depositOrigin().orElse(null);
+        if (depositOrigin == null || depositOrigin.getY() > drillHead().getY()) {
+            resetPumpjack();
+            return;
+        }
+        PumpjackCursor cursor = PumpjackCursor.digging(drillHead(), depositOrigin.getY());
+        if (!validatePumpjackCursor(cursor)) {
+            return;
+        }
+        int index = pumpjackState.cursorIndex();
+        if (index >= cursor.totalPositions()) {
+            pumpjackState.transitionTo(PumpjackState.Phase.SEARCHING_SOURCE);
+            machine.markChanged();
+            return;
+        }
+        BlockPos current = cursor.positionAt(index);
+        if (!loaded(level, current)
+                || machine.energy().extractEnergy(PUMPJACK_COST, true) < PUMPJACK_COST) {
+            return;
+        }
+        boolean operate = pumpjackState.advancePhaseTick();
+        machine.markChanged();
+        if (!operate) {
+            return;
         }
 
-        BlockPos origin = machine.getBlockPos().relative(machine.facing(), 5);
-        if (!origin.equals(oilSearchOrigin)) {
-            oilSearchOrigin = origin;
-            resetOilSearch();
-        }
-        int diameter = PUMPJACK_SEARCH_RADIUS * 2 + 1;
-        int columnCount = diameter * diameter;
-        if (oilSearchColumn >= columnCount) {
-            if (level.getGameTime() < oilSearchRetryAt) {
-                return null;
+        int inspected = 0;
+        while (inspected < PUMPJACK_DRILL_SKIP_BUDGET && index < cursor.totalPositions()) {
+            BlockPos position = cursor.positionAt(index);
+            if (!loaded(level, position)) {
+                return;
             }
-            resetOilSearch();
-        }
-
-        int budget = PUMPJACK_SEARCH_BUDGET;
-        while (budget-- > 0 && oilSearchColumn < columnCount) {
-            int offsetX = oilSearchColumn % diameter - PUMPJACK_SEARCH_RADIUS;
-            int offsetZ = oilSearchColumn / diameter - PUMPJACK_SEARCH_RADIUS;
-            int x = origin.getX() + offsetX;
-            int z = origin.getZ() + offsetZ;
-            if (!level.hasChunk(x >> 4, z >> 4)) {
-                advanceOilSearchColumn(origin.getY());
+            BlockState state = level.getBlockState(position);
+            if (state.is(committee.nova.mods.magneticraft.init.ModAdvancedBlocks.PUMPJACK_DRILL.get())) {
+                index++;
+                inspected++;
                 continue;
             }
-            if (oilSearchY == Integer.MIN_VALUE) {
-                oilSearchY = origin.getY();
+            if (state.getDestroySpeed(level, position) < 0.0F) {
+                pumpjackState.setCursorIndex(index);
+                machine.markChanged();
+                return;
             }
-            if (oilSearchY < level.getMinBuildHeight()) {
-                advanceOilSearchColumn(origin.getY());
+            BlockEntity blockEntity = state.hasBlockEntity() ? level.getBlockEntity(position) : null;
+            List<ItemStack> drops = state.isAir()
+                    ? List.of()
+                    : Block.getDrops(state, level, position, blockEntity);
+            if (!level.setBlock(
+                    position,
+                    committee.nova.mods.magneticraft.init.ModAdvancedBlocks.PUMPJACK_DRILL.get().defaultBlockState(),
+                    Block.UPDATE_ALL
+            )) {
+                return;
+            }
+            if (!state.isAir()) {
+                level.levelEvent(2001, position, Block.getId(state));
+                drops.forEach(stack -> Block.popResource(level, drillHead().above(), stack));
+            }
+            machine.energy().extractEnergy(PUMPJACK_COST, false);
+            machine.setWorking(true);
+            index++;
+            pumpjackState.setCursorIndex(index);
+            if (index >= cursor.totalPositions()) {
+                pumpjackState.transitionTo(PumpjackState.Phase.SEARCHING_SOURCE);
+            }
+            machine.markChanged();
+            return;
+        }
+        pumpjackState.setCursorIndex(index);
+        if (index >= cursor.totalPositions()) {
+            pumpjackState.transitionTo(PumpjackState.Phase.SEARCHING_SOURCE);
+        }
+        machine.markChanged();
+    }
+
+    private void tickPumpjackSourceSearch(ServerLevel level) {
+        BlockPos depositOrigin = pumpjackState.depositOrigin().orElse(null);
+        if (depositOrigin == null) {
+            resetPumpjack();
+            return;
+        }
+        if (pumpjackState.depositRemainingSources() <= 0) {
+            pumpjackState.transitionTo(PumpjackState.Phase.SEARCHING_DEPOSIT);
+            machine.markChanged();
+            return;
+        }
+        if (level.getGameTime() % PUMPJACK_PIPE_CHECK_INTERVAL == 0L) {
+            DrillStatus drillStatus = drillStatus(level, depositOrigin.getY());
+            if (drillStatus == DrillStatus.UNLOADED) {
+                return;
+            }
+            if (drillStatus == DrillStatus.MISSING) {
+                pumpjackState.transitionTo(PumpjackState.Phase.DIGGING);
+                machine.markChanged();
+                return;
+            }
+        }
+        PumpjackCursor cursor = PumpjackCursor.sourceScan(
+                drillHead().below(),
+                depositOrigin,
+                level.getMinBuildHeight(),
+                level.getMaxBuildHeight()
+        );
+        if (!validatePumpjackCursor(cursor)) {
+            return;
+        }
+        int index = pumpjackState.cursorIndex();
+        int scanned = 0;
+        while (scanned < PUMPJACK_FIELD_SEARCH_BUDGET && index < cursor.totalPositions()) {
+            BlockPos position = cursor.positionAt(index);
+            index++;
+            scanned++;
+            if (!loaded(level, position)) {
                 continue;
             }
-            BlockPos position = new BlockPos(x, oilSearchY--, z);
-            if (level.getBlockEntity(position) instanceof OilDepositBlockEntity deposit && deposit.remaining() > 0) {
-                cachedOilDeposit = position;
-                return deposit;
+            if (level.getBlockEntity(position) instanceof OilDepositBlockEntity deposit
+                    && deposit.remaining() >= PUMPJACK_BATCH_MILLIBUCKETS) {
+                pumpjackState.setTargetSource(position);
+                pumpjackState.transitionTo(PumpjackState.Phase.EXTRACTING);
+                machine.markChanged();
+                return;
             }
         }
-        if (oilSearchColumn >= columnCount) {
-            oilSearchRetryAt = level.getGameTime() + PUMPJACK_SEARCH_RETRY_TICKS;
+        if (index != pumpjackState.cursorIndex()) {
+            pumpjackState.setCursorIndex(index);
+            machine.markChanged();
         }
-        return null;
+        if (index >= cursor.totalPositions()) {
+            pumpjackState.transitionTo(PumpjackState.Phase.SEARCHING_DEPOSIT);
+            machine.markChanged();
+        }
     }
 
-    private void advanceOilSearchColumn(int startY) {
-        oilSearchColumn++;
-        oilSearchY = startY;
+    private void tickPumpjackExtraction(ServerLevel level) {
+        BlockPos target = pumpjackState.targetSource().orElse(null);
+        BlockPos depositOrigin = pumpjackState.depositOrigin().orElse(null);
+        if (target == null || depositOrigin == null) {
+            resetPumpjack();
+            return;
+        }
+        if (!loaded(level, target)) {
+            return;
+        }
+        if (level.getGameTime() % PUMPJACK_PIPE_CHECK_INTERVAL == 0L) {
+            DrillStatus drillStatus = drillStatus(level, depositOrigin.getY());
+            if (drillStatus == DrillStatus.UNLOADED) {
+                return;
+            }
+            if (drillStatus == DrillStatus.MISSING) {
+                pumpjackState.transitionTo(PumpjackState.Phase.DIGGING);
+                machine.markChanged();
+                return;
+            }
+        }
+        if (!(level.getBlockEntity(target) instanceof OilDepositBlockEntity deposit)
+                || deposit.remaining() < PUMPJACK_BATCH_MILLIBUCKETS) {
+            sourceUnavailable();
+            return;
+        }
+        if (machine.energy().extractEnergy(PUMPJACK_COST, true) < PUMPJACK_COST) {
+            return;
+        }
+        machine.energy().extractEnergy(PUMPJACK_COST, false);
+        machine.setWorking(true);
+        boolean produce = pumpjackState.advancePhaseTick();
+        machine.markChanged();
+        if (!produce) {
+            return;
+        }
+        FluidStack oil = new FluidStack(
+                ModFluids.get(FluidDefinition.OIL).source().get(),
+                PUMPJACK_BATCH_MILLIBUCKETS
+        );
+        if (machine.tank(0).tank().fill(oil, IFluidHandler.FluidAction.SIMULATE)
+                != PUMPJACK_BATCH_MILLIBUCKETS) {
+            return;
+        }
+        if (deposit.drain(PUMPJACK_BATCH_MILLIBUCKETS, true) != PUMPJACK_BATCH_MILLIBUCKETS) {
+            sourceUnavailable();
+            return;
+        }
+        deposit.drain(PUMPJACK_BATCH_MILLIBUCKETS, false);
+        machine.tank(0).tank().fill(oil, IFluidHandler.FluidAction.EXECUTE);
+        if (deposit.remaining() < PUMPJACK_BATCH_MILLIBUCKETS) {
+            sourceUnavailable();
+        }
     }
 
-    private void resetOilSearch() {
-        oilSearchColumn = 0;
-        oilSearchY = Integer.MIN_VALUE;
-        oilSearchRetryAt = 0L;
+    private void sourceUnavailable() {
+        pumpjackState.setDepositCounts(
+                pumpjackState.depositSize(),
+                Math.max(0, pumpjackState.depositRemainingSources() - 1)
+        );
+        pumpjackState.transitionTo(PumpjackState.Phase.SEARCHING_SOURCE);
+        machine.markChanged();
+    }
+
+    private boolean validatePumpjackCursor(PumpjackCursor cursor) {
+        if (pumpjackState.cursorIndex() <= cursor.totalPositions()) {
+            return true;
+        }
+        resetPumpjack();
+        return false;
+    }
+
+    private DrillStatus drillStatus(ServerLevel level, int targetY) {
+        BlockPos head = drillHead();
+        if (targetY > head.getY()) {
+            return DrillStatus.MISSING;
+        }
+        PumpjackCursor cursor = PumpjackCursor.digging(head, targetY);
+        for (int index = 0; index < cursor.totalPositions(); index++) {
+            BlockPos position = cursor.positionAt(index);
+            if (!loaded(level, position)) {
+                return DrillStatus.UNLOADED;
+            }
+            if (!level.getBlockState(position)
+                    .is(committee.nova.mods.magneticraft.init.ModAdvancedBlocks.PUMPJACK_DRILL.get())) {
+                return DrillStatus.MISSING;
+            }
+        }
+        return DrillStatus.INTACT;
+    }
+
+    private BlockPos drillHead() {
+        return machine.getBlockPos().relative(machine.facing(), 5);
+    }
+
+    private boolean loaded(ServerLevel level, BlockPos position) {
+        return level.getChunkSource().getChunkNow(position.getX() >> 4, position.getZ() >> 4) != null;
+    }
+
+    private void resetPumpjack() {
+        pumpjackState.reset();
+        machine.markChanged();
     }
 
     private void tickSolarMirror(ServerLevel level) {
-        if (!level.isDay() || level.isThundering() || level.getGameTime() % 20L != 0L) {
+        if (!level.isDay() || level.getGameTime() % 20L != 0L) {
             return;
         }
         BlockPos origin = machine.getBlockPos();
-        if (!level.canSeeSky(origin.above(3))) {
-            return;
-        }
         BlockPos target = machine.solarTowerPosition();
         if (target == null || !level.hasChunk(target.getX() >> 4, target.getZ() >> 4)) {
             return;
@@ -687,20 +886,4 @@ final class AdvancedMultiblockLogic {
                 && tower.definition() == MultiblockDefinition.SOLAR_TOWER;
     }
 
-    private record OilHeaterBatch(
-            ResourceLocation id,
-            int inputAmount,
-            FluidStack output,
-            int duration,
-            double minimumTemperature
-    ) {
-    }
-
-    private record RefineryBatch(
-            ResourceLocation id,
-            int inputAmount,
-            List<FluidStack> outputs,
-            int duration
-    ) {
-    }
 }

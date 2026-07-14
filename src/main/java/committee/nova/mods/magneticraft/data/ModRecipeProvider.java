@@ -37,6 +37,7 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -331,6 +332,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 HydraulicPressMode.LIGHT, 50);
         press(consumer, "ice", Ingredient.of(Blocks.ICE), 1, Blocks.PACKED_ICE,
                 HydraulicPressMode.LIGHT, 200);
+        addOilProcessingRecipes(consumer);
     }
 
     private void grinder(
@@ -401,6 +403,132 @@ final class ModRecipeProvider extends RecipeProvider {
                 duration,
                 energyPerTick
         ));
+    }
+
+    private void addOilProcessingRecipes(Consumer<FinishedRecipe> consumer) {
+        fluidProcessing(
+                consumer,
+                "oil_heater_water_to_steam",
+                MultiblockDefinition.OIL_HEATER,
+                new AdvancedProcessingRecipe.FluidInput(FluidTags.WATER.location(), true),
+                1,
+                List.of(fluidOutput(0, FluidDefinition.STEAM, 10)),
+                1,
+                373.15D
+        );
+        fluidProcessing(
+                consumer,
+                "oil_heater_crude_oil_to_heated_crude_oil",
+                MultiblockDefinition.OIL_HEATER,
+                fluidInput(FluidDefinition.OIL),
+                10,
+                List.of(fluidOutput(0, FluidDefinition.HOT_CRUDE, 100)),
+                2,
+                623.15D
+        );
+        fluidProcessing(
+                consumer,
+                "refinery_steam_to_water",
+                MultiblockDefinition.REFINERY,
+                fluidInput(FluidDefinition.STEAM),
+                10,
+                List.of(new AdvancedProcessingRecipe.FluidOutput(0, new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 1))),
+                2,
+                0.0D
+        );
+        fluidProcessing(
+                consumer,
+                "refinery_heated_crude_oil_fractionation",
+                MultiblockDefinition.REFINERY,
+                fluidInput(FluidDefinition.HOT_CRUDE),
+                100,
+                List.of(
+                        fluidOutput(0, FluidDefinition.HEAVY_OIL, 4),
+                        fluidOutput(1, FluidDefinition.LIGHT_OIL, 3),
+                        fluidOutput(2, FluidDefinition.LPG, 3)
+                ),
+                1,
+                0.0D
+        );
+        fluidProcessing(
+                consumer,
+                "refinery_heavy_oil_fractionation",
+                MultiblockDefinition.REFINERY,
+                fluidInput(FluidDefinition.HEAVY_OIL),
+                10,
+                List.of(
+                        fluidOutput(0, FluidDefinition.OIL_RESIDUE, 4),
+                        fluidOutput(1, FluidDefinition.FUEL, 5),
+                        fluidOutput(2, FluidDefinition.LUBRICANT, 1)
+                ),
+                1,
+                0.0D
+        );
+        fluidProcessing(
+                consumer,
+                "refinery_light_oil_fractionation",
+                MultiblockDefinition.REFINERY,
+                fluidInput(FluidDefinition.LIGHT_OIL),
+                10,
+                List.of(
+                        fluidOutput(0, FluidDefinition.DIESEL, 5),
+                        fluidOutput(1, FluidDefinition.KEROSENE, 2),
+                        fluidOutput(2, FluidDefinition.GASOLINE, 3)
+                ),
+                1,
+                0.0D
+        );
+        fluidProcessing(
+                consumer,
+                "refinery_lpg_fractionation",
+                MultiblockDefinition.REFINERY,
+                fluidInput(FluidDefinition.LPG),
+                10,
+                List.of(
+                        fluidOutput(0, FluidDefinition.PLASTIC, 5),
+                        fluidOutput(1, FluidDefinition.NAPHTHA, 2),
+                        fluidOutput(2, FluidDefinition.NATURAL_GAS, 3)
+                ),
+                1,
+                0.0D
+        );
+    }
+
+    private void fluidProcessing(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            MultiblockDefinition machine,
+            AdvancedProcessingRecipe.FluidInput input,
+            int inputAmount,
+            List<AdvancedProcessingRecipe.FluidOutput> outputs,
+            int duration,
+            double minimumTemperatureKelvin
+    ) {
+        consumer.accept(new AdvancedFluidProcessingResult(
+                id("advanced_processing/" + name),
+                machine,
+                input,
+                inputAmount,
+                outputs,
+                duration,
+                minimumTemperatureKelvin
+        ));
+    }
+
+    private static AdvancedProcessingRecipe.FluidInput fluidInput(FluidDefinition definition) {
+        ResourceLocation id = Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(ModFluids.get(definition).source().get()));
+        return new AdvancedProcessingRecipe.FluidInput(id, false);
+    }
+
+    private static AdvancedProcessingRecipe.FluidOutput fluidOutput(
+            int tank,
+            FluidDefinition definition,
+            int amount
+    ) {
+        return new AdvancedProcessingRecipe.FluidOutput(
+                tank,
+                new FluidStack(ModFluids.get(definition).source().get(), amount)
+        );
     }
 
     private static ItemLike controllerMarker(MultiblockDefinition definition) {
@@ -1466,6 +1594,79 @@ final class ModRecipeProvider extends RecipeProvider {
             json.add("results", results);
             json.addProperty("duration", duration);
             json.addProperty("energy_per_tick", energyPerTick);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public RecipeSerializer<?> getType() {
+            return ModRecipeTypes.ADVANCED_PROCESSING_SERIALIZER.get();
+        }
+
+        @Nullable
+        @Override
+        public JsonObject serializeAdvancement() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public ResourceLocation getAdvancementId() {
+            return null;
+        }
+    }
+
+    private record AdvancedFluidProcessingResult(
+            ResourceLocation id,
+            MultiblockDefinition machine,
+            AdvancedProcessingRecipe.FluidInput input,
+            int inputAmount,
+            List<AdvancedProcessingRecipe.FluidOutput> outputs,
+            int duration,
+            double minimumTemperatureKelvin
+    ) implements FinishedRecipe {
+        private AdvancedFluidProcessingResult {
+            new AdvancedProcessingRecipe(
+                    id,
+                    machine,
+                    input,
+                    inputAmount,
+                    outputs,
+                    duration,
+                    minimumTemperatureKelvin
+            );
+            outputs = outputs.stream()
+                    .map(output -> new AdvancedProcessingRecipe.FluidOutput(output.tank(), output.stack()))
+                    .toList();
+        }
+
+        @Override
+        public void serializeRecipeData(JsonObject json) {
+            json.addProperty("machine", machine.id());
+            JsonObject inputJson = new JsonObject();
+            inputJson.addProperty(input.tag() ? "tag" : "fluid", input.key().toString());
+            inputJson.addProperty("amount", inputAmount);
+            json.add("fluid_input", inputJson);
+
+            JsonArray outputArray = new JsonArray();
+            for (AdvancedProcessingRecipe.FluidOutput output : outputs) {
+                JsonObject outputJson = new JsonObject();
+                outputJson.addProperty("tank", output.tank());
+                outputJson.addProperty(
+                        "fluid",
+                        Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(output.stack().getFluid())).toString()
+                );
+                outputJson.addProperty("amount", output.stack().getAmount());
+                outputArray.add(outputJson);
+            }
+            json.add("fluid_results", outputArray);
+            json.addProperty("duration", duration);
+            if (minimumTemperatureKelvin > 0.0D) {
+                json.addProperty("minimum_temperature", minimumTemperatureKelvin);
+            }
         }
 
         @Override

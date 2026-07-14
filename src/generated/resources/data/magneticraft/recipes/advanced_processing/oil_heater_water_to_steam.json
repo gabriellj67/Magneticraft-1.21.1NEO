@@ -1,0 +1,17 @@
+{
+  "type": "magneticraft:advanced_processing",
+  "duration": 1,
+  "fluid_input": {
+    "amount": 1,
+    "tag": "minecraft:water"
+  },
+  "fluid_results": [
+    {
+      "amount": 10,
+      "fluid": "magneticraft:steam",
+      "tank": 0
+    }
+  ],
+  "machine": "oil_heater",
+  "minimum_temperature": 373.15
+}

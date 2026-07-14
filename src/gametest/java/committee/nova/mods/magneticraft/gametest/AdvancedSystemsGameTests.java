@@ -22,12 +22,16 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -118,38 +122,45 @@ public final class AdvancedSystemsGameTests {
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 200)
-    public static void rotationsMirrorsAndChunkBoundaryUseTheSameDefinition(GameTestHelper helper) {
+    public static void rotationsLegacyMirrorCompatibilityAndChunkBoundaryUseTheSameDefinition(GameTestHelper helper) {
         Player player = helper.makeMockSurvivalPlayer();
         MultiblockDefinition definition = MultiblockDefinition.OIL_HEATER;
         for (Direction facing : Direction.Plane.HORIZONTAL) {
-            for (boolean mirrored : List.of(false, true)) {
-                List<BlockPos> occupied = build(helper, definition, CONTROLLER, facing, mirrored);
-                AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
-                if (mirrored) {
-                    controller.toggleMirrored(player);
-                }
-                helper.assertTrue(controller.tryForm(player),
-                        "oil_heater did not form facing=" + facing + ", mirrored=" + mirrored);
-                controller.unform();
-                clear(helper, occupied);
-            }
+            List<BlockPos> occupied = build(helper, definition, CONTROLLER, facing, false);
+            AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+            helper.assertTrue(controller.tryForm(player),
+                    "oil_heater did not form facing=" + facing);
+            controller.unform();
+            clear(helper, occupied);
         }
 
         List<BlockPos> normalPumpjack = build(
                 helper, MultiblockDefinition.PUMPJACK, CONTROLLER, Direction.NORTH, false
         );
         AdvancedMultiblockBlockEntity normalController = requireController(helper, CONTROLLER);
-        normalController.toggleMirrored(player);
-        helper.assertFalse(normalController.tryForm(player),
-                "Non-mirrored pumpjack formed with mirrored validation");
+        helper.assertTrue(normalController.tryForm(player), "Normal pumpjack did not form");
+        normalController.unform();
         clear(helper, normalPumpjack);
 
         List<BlockPos> mirroredPumpjack = build(
                 helper, MultiblockDefinition.PUMPJACK, CONTROLLER, Direction.NORTH, true
         );
         AdvancedMultiblockBlockEntity mirroredController = requireController(helper, CONTROLLER);
-        mirroredController.toggleMirrored(player);
-        helper.assertTrue(mirroredController.tryForm(player), "Mirrored pumpjack did not form");
+        helper.assertFalse(mirroredController.tryForm(player),
+                "Newly formed pumpjack accepted the removed mirror extension");
+
+        CompoundTag legacyMirror = mirroredController.saveWithoutMetadata();
+        legacyMirror.putBoolean("formed", true);
+        legacyMirror.putBoolean("mirrored", true);
+        mirroredController.load(legacyMirror);
+        AdvancedMultiblockBlockEntity.serverTick(
+                helper.getLevel(),
+                helper.absolutePos(CONTROLLER),
+                mirroredController.getBlockState(),
+                mirroredController
+        );
+        helper.assertTrue(mirroredController.operational(),
+                "Already formed 0.2-0.5 mirrored pumpjack did not load compatibly");
         mirroredController.unform();
         clear(helper, mirroredPumpjack);
 
@@ -164,6 +175,131 @@ public final class AdvancedSystemsGameTests {
         boundary.unform();
         clear(helper, occupied);
         helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 500)
+    public static void unloadedCrossChunkMemberSuspendsWithoutForceLoadingAndRecovers(GameTestHelper helper) {
+        var level = helper.getLevel();
+        ServerChunkCache chunks = level.getChunkSource();
+        BlockPos absoluteOrigin = helper.absolutePos(BlockPos.ZERO);
+        int boundaryX = ((absoluteOrigin.getX() >> 4) + 32) << 4;
+        int remoteZ = (((absoluteOrigin.getZ() >> 4) + 32) << 4) + 8;
+        BlockPos controllerPosition = new BlockPos(
+                boundaryX - absoluteOrigin.getX(),
+                2,
+                remoteZ - absoluteOrigin.getZ()
+        );
+        BlockPos absoluteController = helper.absolutePos(controllerPosition);
+        ChunkPos controllerChunk = new ChunkPos(absoluteController);
+
+        chunks.addRegionTicket(TicketType.FORCED, controllerChunk, 0, controllerChunk);
+        chunks.getChunk(controllerChunk.x, controllerChunk.z, ChunkStatus.FULL, true);
+        List<BlockPos> occupied = build(
+                helper,
+                MultiblockDefinition.SOLAR_PANEL,
+                controllerPosition,
+                Direction.NORTH,
+                false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, controllerPosition);
+        Player player = helper.makeMockSurvivalPlayer();
+
+        BlockPos unloadedMember = occupied.stream()
+                .filter(position -> !new ChunkPos(helper.absolutePos(position)).equals(controllerChunk))
+                .findFirst()
+                .orElseThrow();
+        ChunkPos memberChunk = new ChunkPos(helper.absolutePos(unloadedMember));
+        boolean[] sawUnload = {false};
+        boolean[] memberTicketAdded = {false};
+        boolean[] finished = {false};
+        int[] stableUnloadedTicks = {0};
+        Runnable cleanup = () -> {
+            if (finished[0]) {
+                return;
+            }
+            finished[0] = true;
+            if (!memberTicketAdded[0]) {
+                chunks.addRegionTicket(TicketType.FORCED, memberChunk, 0, memberChunk);
+                memberTicketAdded[0] = true;
+            }
+            chunks.getChunk(memberChunk.x, memberChunk.z, ChunkStatus.FULL, true);
+            controller.unform();
+            clear(helper, occupied);
+            chunks.removeRegionTicket(TicketType.FORCED, memberChunk, 0, memberChunk);
+            chunks.removeRegionTicket(TicketType.FORCED, controllerChunk, 0, controllerChunk);
+        };
+
+        if (!controller.tryForm(player)) {
+            cleanup.run();
+            helper.fail("Cross-chunk solar panel did not form before unload testing");
+            return;
+        }
+
+        helper.onEachTick(() -> {
+            if (finished[0]) {
+                return;
+            }
+            if (helper.getTick() >= 460) {
+                cleanup.run();
+                helper.fail("Cross-chunk member did not complete the unload/reload lifecycle");
+                return;
+            }
+
+            if (!sawUnload[0]) {
+                if (chunks.hasChunk(memberChunk.x, memberChunk.z)) {
+                    return;
+                }
+                sawUnload[0] = true;
+                AdvancedMultiblockBlockEntity.serverTick(
+                        level,
+                        absoluteController,
+                        controller.getBlockState(),
+                        controller
+                );
+                if (!controller.formed()
+                        || controller.operational()
+                        || chunks.hasChunk(memberChunk.x, memberChunk.z)) {
+                    cleanup.run();
+                    helper.fail("Unloaded member forced a load, kept the machine operational, or unformed it");
+                }
+                return;
+            }
+
+            if (!memberTicketAdded[0]) {
+                AdvancedMultiblockBlockEntity.serverTick(
+                        level,
+                        absoluteController,
+                        controller.getBlockState(),
+                        controller
+                );
+                if (!controller.formed() || chunks.hasChunk(memberChunk.x, memberChunk.z)) {
+                    cleanup.run();
+                    helper.fail("Repeated suspended ticks loaded the member chunk or unformed the controller");
+                    return;
+                }
+                if (++stableUnloadedTicks[0] < 5) {
+                    return;
+                }
+                chunks.addRegionTicket(TicketType.FORCED, memberChunk, 0, memberChunk);
+                memberTicketAdded[0] = true;
+                chunks.getChunk(memberChunk.x, memberChunk.z, ChunkStatus.FULL, true);
+                return;
+            }
+
+            AdvancedMultiblockBlockEntity.serverTick(
+                    level,
+                    absoluteController,
+                    controller.getBlockState(),
+                    controller
+            );
+            if (!controller.operational()) {
+                return;
+            }
+            boolean remainedFormed = controller.formed();
+            cleanup.run();
+            helper.assertTrue(remainedFormed, "Cross-chunk reload lost the durable formed state");
+            helper.succeed();
+        });
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 80)
@@ -267,14 +403,38 @@ public final class AdvancedSystemsGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 40)
+    public static void frozenTankClaimCannotBeOverwritten(GameTestHelper helper) {
+        BlockPos tankPosition = new BlockPos(4, 2, 4);
+        helper.setBlock(
+                tankPosition,
+                ModMachineBlocks.machine(SingleBlockMachineDefinition.SMALL_TANK).get().defaultBlockState()
+        );
+        SingleBlockMachineBlockEntity tank = (SingleBlockMachineBlockEntity) helper.getBlockEntity(tankPosition);
+        BlockPos firstController = helper.absolutePos(new BlockPos(64, 2, 64));
+        BlockPos secondController = helper.absolutePos(new BlockPos(80, 2, 64));
+
+        helper.assertTrue(tank.claimForMultiblock(firstController), "Initial tank claim was rejected");
+        helper.assertFalse(tank.canClaimForMultiblock(secondController),
+                "A different controller was allowed to reserve a frozen tank claim");
+        helper.assertFalse(tank.claimForMultiblock(secondController),
+                "A different controller overwrote a frozen tank claim");
+        tank.releaseMultiblockClaim(secondController);
+        helper.assertTrue(tank.claimedByMultiblock(), "Wrong controller released the tank claim");
+        tank.releaseMultiblockClaim(firstController);
+        helper.assertFalse(tank.claimedByMultiblock(), "Recorded controller could not release the tank claim");
+        helper.setBlock(tankPosition, Blocks.AIR);
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE, timeoutTicks = 80)
     public static void completeAdvancedRecipeCatalogLoadsAtRuntime(GameTestHelper helper) {
         int processingRecipes = helper.getLevel().getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.ADVANCED_PROCESSING_TYPE.get()).size();
         int fluidFuels = helper.getLevel().getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get()).size();
-        helper.assertTrue(processingRecipes == 86,
-                "Expected 86 advanced processing recipes, loaded " + processingRecipes);
+        helper.assertTrue(processingRecipes == 93,
+                "Expected 93 advanced processing recipes, loaded " + processingRecipes);
         helper.assertTrue(fluidFuels == 10,
                 "Expected 10 fluid fuel recipes, loaded " + fluidFuels);
         helper.succeed();
@@ -391,33 +551,95 @@ public final class AdvancedSystemsGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 400)
+    @GameTest(template = TEMPLATE, timeoutTicks = 1_200)
     public static void pumpjackFindsNearbyFiniteDepositsForEveryFacing(GameTestHelper helper) {
         Player player = helper.makeMockSurvivalPlayer();
+        BlockPos pumpjackController = CONTROLLER.above(2);
         for (Direction facing : Direction.Plane.HORIZONTAL) {
             List<BlockPos> occupied = build(
-                    helper, MultiblockDefinition.PUMPJACK, CONTROLLER, facing, false
+                    helper, MultiblockDefinition.PUMPJACK, pumpjackController, facing, false
             );
-            BlockPos drill = CONTROLLER.relative(facing, 5);
+            BlockPos drill = pumpjackController.relative(facing, 5);
             BlockPos depositPosition = drill.offset(2, -1, -1);
             helper.setBlock(depositPosition, ModAdvancedBlocks.OIL_DEPOSIT.get());
             OilDepositBlockEntity deposit = (OilDepositBlockEntity) helper.getBlockEntity(depositPosition);
-            AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+            AdvancedMultiblockBlockEntity controller = requireController(helper, pumpjackController);
             helper.assertTrue(controller.tryForm(player), "Pumpjack did not form facing " + facing);
             controller.energy().setEnergyStored(10_000);
 
-            for (int tick = 0; tick < 100 && controller.tank(0).tank().getFluidAmount() == 0; tick++) {
+            for (int tick = 0; tick < 600 && controller.tank(0).tank().getFluidAmount() == 0; tick++) {
+                controller.electricity().node().setVoltage(60.0D);
                 AdvancedMultiblockBlockEntity.serverTick(
-                        helper.getLevel(), helper.absolutePos(CONTROLLER), controller.getBlockState(), controller
+                        helper.getLevel(), helper.absolutePos(pumpjackController), controller.getBlockState(), controller
                 );
+                if (tick == 0) {
+                    CompoundTag firstTickState = controller.saveWithoutMetadata().getCompound("pumpjack");
+                    helper.assertTrue("searching_deposit".equals(firstTickState.getString("phase")),
+                            "Pumpjack initial search did not find its radius-three source facing " + facing
+                                    + "; cursor=" + firstTickState.getInt("cursor_index")
+                                    + "; origin=" + controller.getBlockPos().relative(controller.facing(), 5).below()
+                                    + "; deposit=" + helper.absolutePos(depositPosition)
+                                    + "; block_entity=" + helper.getLevel().getBlockEntity(
+                                    helper.absolutePos(depositPosition)));
+                }
+                if (tick == 1) {
+                    CompoundTag secondTickState = controller.saveWithoutMetadata().getCompound("pumpjack");
+                    helper.assertTrue(secondTickState.getInt("cursor_index") == 640,
+                            "Pumpjack deposit scan did not advance on its first work tick facing " + facing
+                                    + "; state=" + secondTickState
+                                    + "; formed=" + controller.formed()
+                                    + "; operational=" + controller.operational()
+                                    + "; energy=" + controller.energy().getEnergyStored());
+                }
+                if (tick == 60) {
+                    CompoundTag persisted = controller.saveWithoutMetadata();
+                    helper.assertTrue(persisted.contains("pumpjack"),
+                            "Pumpjack search state was not persisted facing " + facing);
+                    CompoundTag persistedPumpjack = persisted.getCompound("pumpjack");
+                    BlockPos absoluteDeposit = helper.absolutePos(depositPosition);
+                    helper.assertTrue(persistedPumpjack.getInt("deposit_size") == 1,
+                            "Pumpjack deposit scan did not count its discovered source facing " + facing
+                                    + "; deposit=" + absoluteDeposit
+                                    + "; origin=" + BlockPos.of(persistedPumpjack.getLong("deposit_origin"))
+                                    + "; expected_drill=" + helper.absolutePos(drill)
+                                    + "; actual_drill=" + controller.getBlockPos().relative(controller.facing(), 5)
+                                    + "; cursor=" + persistedPumpjack.getInt("cursor_index")
+                                    + "; energy=" + controller.energy().getEnergyStored()
+                                    + "; phase=" + persistedPumpjack.getString("phase")
+                                    + "; block_entity=" + helper.getLevel().getBlockEntity(absoluteDeposit)
+                                    + "; chunk_loaded=" + (helper.getLevel().getChunkSource().getChunkNow(
+                                    absoluteDeposit.getX() >> 4, absoluteDeposit.getZ() >> 4) != null));
+                    ItemStack portable = new ItemStack(
+                            ModAdvancedBlocks.controller(MultiblockDefinition.PUMPJACK).get()
+                    );
+                    controller.saveToItem(portable);
+                    CompoundTag portableState = portable.getTagElement("BlockEntityTag");
+                    helper.assertTrue(portableState != null && !portableState.contains("pumpjack"),
+                            "Portable pumpjack retained world search coordinates facing " + facing);
+                    controller.load(persisted);
+                }
             }
 
-            helper.assertTrue(controller.tank(0).tank().getFluidAmount() == 20,
-                    "Pumpjack missed nearby deposit facing " + facing);
-            helper.assertTrue(deposit.remaining() == OilDepositBlockEntity.DEFAULT_RESERVE_MILLIBUCKETS - 20,
+            CompoundTag finalState = controller.saveWithoutMetadata();
+            helper.assertTrue(controller.tank(0).tank().getFluidAmount() == 1_000,
+                    "Pumpjack missed nearby deposit facing " + facing
+                            + "; formed=" + controller.formed()
+                            + "; energy=" + controller.energy().getEnergyStored()
+                            + "; reserve=" + deposit.remaining()
+                            + "; drill_head=" + helper.getBlockState(drill)
+                            + "; drill_below=" + helper.getBlockState(drill.below())
+                            + "; state=" + finalState.getCompound("pumpjack"));
+            helper.assertTrue(deposit.remaining() == OilDepositBlockEntity.DEFAULT_RESERVE_MILLIBUCKETS - 1_000,
                     "Pumpjack reserve accounting failed facing " + facing);
+            helper.assertTrue(controller.energy().getEnergyStored() == 1_840,
+                    "Pumpjack did not preserve the 8,160 J legacy work budget facing " + facing);
+            helper.assertTrue(helper.getBlockState(drill).is(ModAdvancedBlocks.PUMPJACK_DRILL.get())
+                            && helper.getBlockState(drill.below()).is(ModAdvancedBlocks.PUMPJACK_DRILL.get()),
+                    "Pumpjack did not leave a complete internal drill column facing " + facing);
             controller.unform();
             clear(helper, occupied);
+            helper.setBlock(drill, Blocks.AIR);
+            helper.setBlock(drill.below(), Blocks.AIR);
             helper.setBlock(depositPosition, Blocks.AIR);
         }
         helper.succeed();
@@ -438,24 +660,37 @@ public final class AdvancedSystemsGameTests {
             ).isEmpty(), "Container rejected content before reaching 65,536 items");
         }
 
-        LootParams.Builder loot = new LootParams.Builder(helper.getLevel())
-                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(CONTROLLER)))
-                .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
-                .withOptionalParameter(LootContextParams.BLOCK_ENTITY, controller)
-                .withOptionalParameter(LootContextParams.THIS_ENTITY, player);
-        ItemStack droppedController = controller.getBlockState().getDrops(loot).stream()
+        List<ItemStack> drops = controllerDrops(helper, CONTROLLER, controller, player);
+        List<ItemStack> controllerItems = drops.stream()
                 .filter(stack -> stack.is(ModAdvancedBlocks.controller(MultiblockDefinition.CONTAINER).get().asItem()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Content-bearing controller was lost with the wrong tool"));
+                .toList();
+        helper.assertTrue(controllerItems.size() == 1, "Container loot did not contain exactly one controller");
+        helper.assertTrue(drops.stream()
+                        .filter(stack -> stack.is(Items.COBBLESTONE))
+                        .mapToInt(ItemStack::getCount)
+                        .sum() == 0,
+                "Compressed container contents were duplicated as loose item drops");
+        ItemStack droppedController = controllerItems.get(0);
         helper.assertTrue(droppedController.getMaxStackSize() == 1,
                 "Portable controller contents were stackable");
         CompoundTag blockEntityTag = droppedController.getTagElement("BlockEntityTag");
         helper.assertTrue(blockEntityTag != null, "Controller drop has no BlockEntityTag");
         helper.assertFalse(blockEntityTag.getBoolean("formed"), "Dropped controller remained formed");
+        helper.assertFalse(blockEntityTag.getBoolean("mirrored"), "Dropped controller retained mirror state");
         helper.assertFalse(blockEntityTag.contains("owner"), "Dropped controller retained its world owner");
-        helper.assertTrue(blockEntityTag.getCompound(MachineBlockEntity.MODULES_TAG)
-                        .contains("magneticraft:advanced_bulk_inventory"),
+        helper.assertFalse(blockEntityTag.contains("id")
+                        || blockEntityTag.contains("x")
+                        || blockEntityTag.contains("y")
+                        || blockEntityTag.contains("z"),
+                "Dropped controller retained world block-entity identity");
+        CompoundTag bulk = blockEntityTag.getCompound(MachineBlockEntity.MODULES_TAG)
+                .getCompound(Magneticraft.id("advanced_bulk_inventory").toString());
+        helper.assertTrue(!bulk.isEmpty(),
                 "Bulk inventory module was not stored on the controller item");
+        helper.assertTrue(bulk.getInt("amount") == 65_536,
+                "Bulk inventory count was not compactly preserved");
+        helper.assertTrue(ItemStack.of(bulk.getCompound("type")).is(Items.COBBLESTONE),
+                "Bulk inventory type was not compactly preserved");
 
         BlockPos restoredPosition = CONTROLLER.offset(12, 0, 0);
         helper.setBlock(restoredPosition,
@@ -468,6 +703,56 @@ public final class AdvancedSystemsGameTests {
                 "Controller item lost bulk item type");
         helper.assertFalse(restored.formed(), "Restored controller became formed without validation");
         helper.assertTrue(restored.owner() == null, "Restored controller inherited the previous owner");
+        clear(helper, occupied);
+        helper.setBlock(restoredPosition, Blocks.AIR);
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 240)
+    public static void shelvingDropSeparatesStorageAndUpgradeChestsFromControllerNbt(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.SHELVING_UNIT, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Shelving unit did not form");
+        helper.assertTrue(controller.shelvingStorage().installChest(new ItemStack(Items.CHEST)),
+                "Shelving unit rejected its first chest upgrade");
+        helper.assertTrue(controller.shelvingStorage().installChest(new ItemStack(Items.CHEST)),
+                "Shelving unit rejected its second chest upgrade");
+        helper.assertTrue(controller.shelvingStorage().insertItem(
+                0, new ItemStack(Items.IRON_INGOT, 64), false
+        ).isEmpty(), "Shelving unit rejected first-layer contents");
+        helper.assertTrue(controller.shelvingStorage().insertItem(
+                27, new ItemStack(Items.GOLD_INGOT, 7), false
+        ).isEmpty(), "Shelving unit rejected second-layer contents");
+
+        List<ItemStack> drops = controllerDrops(helper, CONTROLLER, controller, player);
+        List<ItemStack> controllerItems = drops.stream()
+                .filter(stack -> stack.is(ModAdvancedBlocks.controller(MultiblockDefinition.SHELVING_UNIT).get().asItem()))
+                .toList();
+        helper.assertTrue(controllerItems.size() == 1, "Shelving loot did not contain exactly one controller");
+        CompoundTag blockEntityTag = controllerItems.get(0).getTagElement("BlockEntityTag");
+        helper.assertTrue(blockEntityTag != null, "Shelving controller drop has no BlockEntityTag");
+        helper.assertFalse(blockEntityTag.getCompound(MachineBlockEntity.MODULES_TAG)
+                        .contains(Magneticraft.id("advanced_shelving_inventory").toString()),
+                "Shelving contents were duplicated into the controller NBT");
+        helper.assertTrue(countItem(drops, Items.CHEST) == 2,
+                "Shelving chest upgrades were not returned exactly once");
+        helper.assertTrue(countItem(drops, Items.IRON_INGOT) == 64,
+                "Shelving first-layer contents were not returned exactly once");
+        helper.assertTrue(countItem(drops, Items.GOLD_INGOT) == 7,
+                "Shelving second-layer contents were not returned exactly once");
+
+        BlockPos restoredPosition = CONTROLLER.offset(12, 0, 0);
+        helper.setBlock(restoredPosition,
+                ModAdvancedBlocks.controller(MultiblockDefinition.SHELVING_UNIT).get().defaultBlockState());
+        AdvancedMultiblockBlockEntity restored = requireController(helper, restoredPosition);
+        restored.load(blockEntityTag.copy());
+        helper.assertTrue(restored.shelvingStorage().installedChests() == 0
+                        && restored.shelvingStorage().unlockedSlots() == 0
+                        && restored.shelvingStorage().dropContents().isEmpty(),
+                "Restored shelving controller retained separated contents");
         clear(helper, occupied);
         helper.setBlock(restoredPosition, Blocks.AIR);
         helper.succeed();
@@ -497,6 +782,24 @@ public final class AdvancedSystemsGameTests {
                 "Bottom service port could not recover fluid fuel");
         clear(helper, occupied);
         helper.succeed();
+    }
+
+    private static List<ItemStack> controllerDrops(
+            GameTestHelper helper,
+            BlockPos position,
+            AdvancedMultiblockBlockEntity controller,
+            Player player
+    ) {
+        LootParams.Builder loot = new LootParams.Builder(helper.getLevel())
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(helper.absolutePos(position)))
+                .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+                .withOptionalParameter(LootContextParams.BLOCK_ENTITY, controller)
+                .withOptionalParameter(LootContextParams.THIS_ENTITY, player);
+        return controller.getBlockState().getDrops(loot);
+    }
+
+    private static int countItem(List<ItemStack> drops, net.minecraft.world.item.Item item) {
+        return drops.stream().filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
     }
 
     private static List<BlockPos> build(

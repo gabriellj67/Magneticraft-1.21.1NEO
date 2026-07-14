@@ -93,7 +93,9 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
                 ADVANCED_PROCESSING,
                 ModAdvancedBlocks.controller(MultiblockDefinition.GRINDER).get(),
                 ModAdvancedBlocks.controller(MultiblockDefinition.SIEVE).get(),
-                ModAdvancedBlocks.controller(MultiblockDefinition.HYDRAULIC_PRESS).get()
+                ModAdvancedBlocks.controller(MultiblockDefinition.HYDRAULIC_PRESS).get(),
+                ModAdvancedBlocks.controller(MultiblockDefinition.OIL_HEATER).get(),
+                ModAdvancedBlocks.controller(MultiblockDefinition.REFINERY).get()
         );
     }
 

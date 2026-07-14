@@ -72,6 +72,6 @@
     "y": 2,
     "z": 5
   },
-  "supports_mirroring": true,
+  "supports_mirroring": false,
   "translation_key": "block.magneticraft.sieve"
 }

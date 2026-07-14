@@ -10,6 +10,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fluids.FluidType;
@@ -40,6 +41,8 @@ public final class ModRegistries {
             DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, Magneticraft.MOD_ID);
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS =
             DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, Magneticraft.MOD_ID);
+    public static final DeferredRegister<Feature<?>> FEATURES =
+            DeferredRegister.create(ForgeRegistries.FEATURES, Magneticraft.MOD_ID);
 
     private ModRegistries() {
     }
@@ -58,6 +61,7 @@ public final class ModRegistries {
         ModMenus.bootstrap();
         ModRecipeTypes.bootstrap();
         ModSounds.bootstrap();
+        ModFeatures.bootstrap();
         ModCreativeTabs.bootstrap();
 
         FLUID_TYPES.register(modBus);
@@ -69,6 +73,7 @@ public final class ModRegistries {
         RECIPE_TYPES.register(modBus);
         RECIPE_SERIALIZERS.register(modBus);
         SOUND_EVENTS.register(modBus);
+        FEATURES.register(modBus);
         CREATIVE_MODE_TABS.register(modBus);
     }
 }

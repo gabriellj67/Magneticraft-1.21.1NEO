@@ -40,6 +40,6 @@
     "y": 1,
     "z": 3
   },
-  "supports_mirroring": true,
+  "supports_mirroring": false,
   "translation_key": "block.magneticraft.solar_panel"
 }

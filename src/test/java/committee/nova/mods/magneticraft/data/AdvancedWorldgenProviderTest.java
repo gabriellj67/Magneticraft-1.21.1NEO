@@ -5,75 +5,174 @@ import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdvancedWorldgenProviderTest {
     private static final Set<String> EXPECTED_IDS = Set.of(
             "galena_ore",
-            "cobalt_ore",
             "tungsten_ore",
             "pyrite_ore",
             "limestone",
             "oil_deposit"
     );
 
+    private static final Map<String, CountedOreContract> COUNTED_ORES = Map.of(
+            "galena_ore", new CountedOreContract("magneticraft:galena_ore", 8, 10, 2, 80),
+            "tungsten_ore", new CountedOreContract("magneticraft:tungsten_ore", 8, 8, 20, 60),
+            "pyrite_ore", new CountedOreContract("magneticraft:pyrite_ore", 9, 9, 30, 100)
+    );
+
     @Test
-    void catalogueGeneratesOneConfiguredPlacedAndOverworldModifierPerDeposit() {
+    void catalogueContainsOnlyReleasedDepositsAndDoesNotRestoreCobalt() {
         Set<String> ids = new HashSet<>();
         for (AdvancedWorldgenProvider.DepositDefinition deposit : AdvancedWorldgenProvider.deposits()) {
             assertTrue(ids.add(deposit.id()), "Duplicate deposit ID " + deposit.id());
+        }
+
+        assertEquals(EXPECTED_IDS, ids);
+        assertFalse(ids.contains("cobalt_ore"));
+    }
+
+    @Test
+    void countedOresTranslateLegacyExclusiveUpperBoundsExactlyOnce() {
+        COUNTED_ORES.forEach((id, expected) -> {
+            AdvancedWorldgenProvider.DepositDefinition deposit = deposit(id);
+            assertEquals(expected.block(), deposit.block());
+            assertEquals(expected.veinSize(), deposit.veinSize());
+            assertEquals(AdvancedWorldgenProvider.FrequencyType.COUNT, deposit.frequencyType());
+            assertEquals(expected.count(), deposit.frequency());
+            assertEquals(expected.minYInclusive(), deposit.minY());
+            assertEquals(expected.maxYExclusive() - 1, deposit.maxY(),
+                    () -> id + " must convert the legacy exclusive upper bound to an inclusive bound");
 
             JsonObject configured = AdvancedWorldgenProvider.configuredFeature(deposit);
-            assertEquals("minecraft:ore", configured.get("type").getAsString());
-            JsonObject config = configured.getAsJsonObject("config");
-            assertEquals(deposit.veinSize(), config.get("size").getAsInt());
-            JsonArray targets = config.getAsJsonArray("targets");
-            assertEquals(2, targets.size());
-            assertEquals(
-                    Set.of("minecraft:stone_ore_replaceables", "minecraft:deepslate_ore_replaceables"),
-                    Set.of(targetTag(targets.get(0).getAsJsonObject()), targetTag(targets.get(1).getAsJsonObject()))
-            );
-            targets.forEach(target -> assertEquals(
-                    deposit.block(),
-                    target.getAsJsonObject().getAsJsonObject("state").get("Name").getAsString()
-            ));
+            assertOreConfiguration(configured, expected.block(), expected.veinSize());
 
-            JsonObject placed = AdvancedWorldgenProvider.placedFeature(deposit);
-            assertEquals("magneticraft:" + deposit.id(), placed.get("feature").getAsString());
-            JsonArray placement = placed.getAsJsonArray("placement");
+            JsonArray placement = AdvancedWorldgenProvider.placedFeature(deposit)
+                    .getAsJsonArray("placement");
             assertEquals(4, placement.size());
+            JsonObject frequency = placement.get(0).getAsJsonObject();
+            assertEquals("minecraft:count", frequency.get("type").getAsString());
+            assertEquals(expected.count(), frequency.get("count").getAsInt());
             assertEquals("minecraft:in_square", placement.get(1).getAsJsonObject().get("type").getAsString());
-            assertEquals("minecraft:height_range", placement.get(2).getAsJsonObject().get("type").getAsString());
+            assertUniformHeight(
+                    placement.get(2).getAsJsonObject(),
+                    expected.minYInclusive(),
+                    expected.maxYExclusive() - 1
+            );
             assertEquals("minecraft:biome", placement.get(3).getAsJsonObject().get("type").getAsString());
+        });
+    }
 
+    @Test
+    void limestoneUsesLegacyClampedNormalFrequency() {
+        AdvancedWorldgenProvider.DepositDefinition limestone = deposit("limestone");
+        assertEquals("magneticraft:limestone", limestone.block());
+        assertEquals(32, limestone.veinSize());
+        assertEquals(AdvancedWorldgenProvider.FrequencyType.CLAMPED_NORMAL, limestone.frequencyType());
+        assertEquals(3, limestone.frequency());
+        assertEquals(0.9D, limestone.deviation());
+        assertEquals(0, limestone.minCount());
+        assertEquals(5, limestone.maxCount());
+        assertEquals(16, limestone.minY());
+        assertEquals(63, limestone.maxY());
+        assertOreConfiguration(
+                AdvancedWorldgenProvider.configuredFeature(limestone),
+                "magneticraft:limestone",
+                32
+        );
+
+        JsonArray placement = AdvancedWorldgenProvider.placedFeature(limestone)
+                .getAsJsonArray("placement");
+        assertEquals(4, placement.size());
+        JsonObject frequency = placement.get(0).getAsJsonObject();
+        assertEquals("minecraft:count", frequency.get("type").getAsString());
+        JsonObject count = frequency.getAsJsonObject("count");
+        assertEquals("minecraft:clamped_normal", count.get("type").getAsString());
+        JsonObject value = count.getAsJsonObject("value");
+        assertEquals(3, value.get("mean").getAsInt());
+        assertEquals(0.9D, value.get("deviation").getAsDouble());
+        assertEquals(0, value.get("min_inclusive").getAsInt());
+        assertEquals(5, value.get("max_inclusive").getAsInt());
+        assertUniformHeight(placement.get(2).getAsJsonObject(), 16, 63);
+    }
+
+    @Test
+    void oilUsesCustomSectorFeatureWithoutGenericOrePlacement() {
+        AdvancedWorldgenProvider.DepositDefinition oil = deposit("oil_deposit");
+        assertEquals("magneticraft:oil_deposit", oil.block());
+        assertEquals(AdvancedWorldgenProvider.FrequencyType.SECTOR, oil.frequencyType());
+
+        JsonObject configured = AdvancedWorldgenProvider.configuredFeature(oil);
+        assertEquals("magneticraft:oil_field", configured.get("type").getAsString());
+        assertTrue(configured.getAsJsonObject("config").entrySet().isEmpty());
+
+        JsonObject placed = AdvancedWorldgenProvider.placedFeature(oil);
+        assertEquals("magneticraft:oil_deposit", placed.get("feature").getAsString());
+        JsonArray placement = placed.getAsJsonArray("placement");
+        assertEquals(1, placement.size());
+        assertEquals("minecraft:biome", placement.get(0).getAsJsonObject().get("type").getAsString());
+    }
+
+    @Test
+    void everyDepositHasAnOverworldUndergroundOreBiomeModifier() {
+        for (AdvancedWorldgenProvider.DepositDefinition deposit : AdvancedWorldgenProvider.deposits()) {
             JsonObject modifier = AdvancedWorldgenProvider.biomeModifier(deposit);
             assertEquals("forge:add_features", modifier.get("type").getAsString());
             assertEquals("#minecraft:is_overworld", modifier.get("biomes").getAsString());
             assertEquals("magneticraft:" + deposit.id(), modifier.get("features").getAsString());
             assertEquals("underground_ores", modifier.get("step").getAsString());
         }
-        assertEquals(EXPECTED_IDS, ids);
     }
 
-    @Test
-    void oilUsesBoundedLegacyRarityInsteadOfPerChunkCount() {
-        AdvancedWorldgenProvider.DepositDefinition oil = AdvancedWorldgenProvider.deposits().stream()
-                .filter(deposit -> deposit.id().equals("oil_deposit"))
+    private static AdvancedWorldgenProvider.DepositDefinition deposit(String id) {
+        return AdvancedWorldgenProvider.deposits().stream()
+                .filter(candidate -> candidate.id().equals(id))
                 .findFirst()
                 .orElseThrow();
+    }
 
-        JsonObject frequency = AdvancedWorldgenProvider.placedFeature(oil)
-                .getAsJsonArray("placement")
-                .get(0)
-                .getAsJsonObject();
-        assertEquals("minecraft:rarity_filter", frequency.get("type").getAsString());
-        assertEquals(50, frequency.get("chance").getAsInt());
+    private static void assertOreConfiguration(JsonObject configured, String block, int veinSize) {
+        assertEquals("minecraft:ore", configured.get("type").getAsString());
+        JsonObject config = configured.getAsJsonObject("config");
+        assertEquals(veinSize, config.get("size").getAsInt());
+        assertEquals(0.0D, config.get("discard_chance_on_air_exposure").getAsDouble());
+
+        JsonArray targets = config.getAsJsonArray("targets");
+        assertEquals(2, targets.size());
+        assertEquals(
+                Set.of("minecraft:stone_ore_replaceables", "minecraft:deepslate_ore_replaceables"),
+                Set.of(targetTag(targets.get(0).getAsJsonObject()), targetTag(targets.get(1).getAsJsonObject()))
+        );
+        targets.forEach(target -> assertEquals(
+                block,
+                target.getAsJsonObject().getAsJsonObject("state").get("Name").getAsString()
+        ));
+    }
+
+    private static void assertUniformHeight(JsonObject heightRange, int minInclusive, int maxInclusive) {
+        assertEquals("minecraft:height_range", heightRange.get("type").getAsString());
+        JsonObject height = heightRange.getAsJsonObject("height");
+        assertEquals("minecraft:uniform", height.get("type").getAsString());
+        assertEquals(minInclusive, height.getAsJsonObject("min_inclusive").get("absolute").getAsInt());
+        assertEquals(maxInclusive, height.getAsJsonObject("max_inclusive").get("absolute").getAsInt());
     }
 
     private static String targetTag(JsonObject target) {
         return target.getAsJsonObject("target").get("tag").getAsString();
+    }
+
+    private record CountedOreContract(
+            String block,
+            int veinSize,
+            int count,
+            int minYInclusive,
+            int maxYExclusive
+    ) {
     }
 }

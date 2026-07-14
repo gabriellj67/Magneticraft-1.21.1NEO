@@ -96,9 +96,7 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
         if (controller.handleShelvingChest(serverPlayer, player.getItemInHand(hand))) {
             return InteractionResult.CONSUME;
         }
-        if (!controller.formed() && player.isShiftKeyDown()) {
-            controller.toggleMirrored(serverPlayer);
-        } else if (!controller.formed()) {
+        if (!controller.formed()) {
             controller.tryForm(serverPlayer);
         } else if (player.isShiftKeyDown()) {
             controller.cycleHydraulicMode(serverPlayer);

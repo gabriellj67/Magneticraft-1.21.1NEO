@@ -13,19 +13,19 @@
     "ordering": "document_order_within_group_then_variant_order",
     "mapping_leaf_count": 147,
     "mapping_leaf_sha256": "5068ab14ee3f8324e7dc947b58ce7b24e114e8a59882289df31a5df67fa7d6e8",
-    "mapping_projection_sha256": "7717173ad41b6f9404125314504618fea5fc71c9c7d221924fcf2be93d3c874d",
+    "mapping_projection_sha256": "40b8ea11c0276feb76c9efa01aee5f629b892d097b1a4c3f39d8678145bbc3f4",
     "material_leaf_count": 77,
     "material_leaf_sha256": "784b0c5ff88ddf7e6e28216ebe71ae5248c8f0d60c75b2f8dd099f9eb674409e",
     "material_projection_sha256": "3188a163d2c96ec7fd7fabce09597e5a9d0f165703d209ecf4389d1d8dedfe36",
     "state_leaf_count": 95,
     "state_leaf_sha256": "ee263416076db2e98ecaacb709eb9c1e944588591f80c59713f2aad31da97928",
-    "state_projection_sha256": "9bd6151e71cd5f9a3738780c7aa928860ea307a7bc900b4c4924da1aee4d31a2",
+    "state_projection_sha256": "230b94c106210b9481ab634af96321f626b7d147bd3466251f906d38655d2879",
     "exclusion_leaf_count": 16,
     "exclusion_leaf_sha256": "f6beb52866ea02a788d7c1ba4a2e88ecbac78bcb54c7552183363b8505a19dac",
     "derived_runtime_id_count": 80,
     "derived_runtime_id_sha256": "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451",
-    "supporting_registry_id_count": 39,
-    "supporting_registry_id_sha256": "4d866daa5ef2239e9d55f139efc9313b972c7aef6ce88bfa6815f5fdaa1eb38c",
+    "supporting_registry_id_count": 40,
+    "supporting_registry_id_sha256": "fa95e8fc79d6c129e558360938347eeaa3c8389d40a948b17ffaa55a270f1e38",
     "forbidden_runtime_id_count": 51,
     "forbidden_runtime_id_sha256": "2dd45be9e2de079ee8c833139c481e9127269b554e4208bb57962f64aecddb11"
   },
@@ -242,12 +242,12 @@
       "legacy_variants": ["full_100", "full_90", "full_80", "full_70", "full_60", "full_50", "full_40", "full_30", "full_20", "full_10", "empty"],
       "target_registry": "block_entity_payload",
       "target_ids": ["magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit", "magneticraft:oil_deposit"],
-      "target_variants": ["remaining_millibuckets=4000000", "remaining_millibuckets=3600000", "remaining_millibuckets=3200000", "remaining_millibuckets=2800000", "remaining_millibuckets=2400000", "remaining_millibuckets=2000000", "remaining_millibuckets=1600000", "remaining_millibuckets=1200000", "remaining_millibuckets=800000", "remaining_millibuckets=400000", "remaining_millibuckets=0"],
+      "target_variants": ["remaining_millibuckets=10000", "remaining_millibuckets=9000", "remaining_millibuckets=8000", "remaining_millibuckets=7000", "remaining_millibuckets=6000", "remaining_millibuckets=5000", "remaining_millibuckets=4000", "remaining_millibuckets=3000", "remaining_millibuckets=2000", "remaining_millibuckets=1000", "remaining_millibuckets=0"],
       "disposition": "rebuild",
       "stage": "0.6.0",
       "source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/ores/Blocks.kt#OilAmount",
       "acceptance_tests": ["MIG-OIL-DEPOSIT-001", "MIG-OIL-CREATIVE-001"],
-      "notes": "FULL_100 and EMPTY were visible legacy variants. The target keeps a creative/admin placement surface while worldgen deposits remain non-dropping finite reserves."
+      "notes": "FULL_100 and EMPTY were visible legacy variants. Ten 1,000 mB extraction stages preserve the released default oilPerStage contract; schema v1's provisional 4,000,000 mB scale migrates proportionally to schema v2. The target keeps a creative/admin placement surface while worldgen deposits remain non-dropping finite reserves."
     },
     {
       "legacy_registry": "block_item",
@@ -772,12 +772,12 @@
       "target_ids": ["magneticraft:oil_deposit"],
       "target_storage": "block_entity_payload",
       "target_property": "remaining_millibuckets",
-      "target_states": ["remaining_millibuckets=4000000", "remaining_millibuckets=3600000", "remaining_millibuckets=3200000", "remaining_millibuckets=2800000", "remaining_millibuckets=2400000", "remaining_millibuckets=2000000", "remaining_millibuckets=1600000", "remaining_millibuckets=1200000", "remaining_millibuckets=800000", "remaining_millibuckets=400000", "remaining_millibuckets=0"],
+      "target_states": ["remaining_millibuckets=10000", "remaining_millibuckets=9000", "remaining_millibuckets=8000", "remaining_millibuckets=7000", "remaining_millibuckets=6000", "remaining_millibuckets=5000", "remaining_millibuckets=4000", "remaining_millibuckets=3000", "remaining_millibuckets=2000", "remaining_millibuckets=1000", "remaining_millibuckets=0"],
       "disposition": "rebuild",
       "stage": "0.6.0",
       "source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/ores/Blocks.kt#OilAmount",
       "acceptance_tests": ["MIG-OIL-DEPOSIT-001", "MIG-STATE-OIL-AMOUNT-001"],
-      "notes": "The target stores the finite reserve in the oil-deposit block entity payload (schema_version plus remaining_millibuckets), not in a blockstate, while retaining all eleven observable reserve steps."
+      "notes": "The target stores the finite reserve in the oil-deposit block entity payload (schema_version plus remaining_millibuckets), not in a blockstate, while retaining all eleven observable reserve steps. Schema v2 migrates the provisional schema v1 scale without changing the represented percentage."
     },
     {
       "legacy_enum": "OreType",
@@ -931,6 +931,7 @@
     }
   ],
   "supporting_registry_mappings": [
+    {"registry": "block", "internal": true, "target_id": "magneticraft:pumpjack_drill", "owner": "magneticraft:pumpjack"},
     {"registry": "block_entity_type", "legacy_id": "crushing_table", "target_id": "magneticraft:crushing_table", "owner": "magneticraft:crushing_table"},
     {"registry": "block_entity_type", "legacy_id": "battery", "target_id": "magneticraft:battery_box", "owner": "magneticraft:battery_box"},
     {"registry": "block_entity_type", "legacy_id": "electric_furnace", "target_id": "magneticraft:electric_furnace", "owner": "magneticraft:electric_furnace"},

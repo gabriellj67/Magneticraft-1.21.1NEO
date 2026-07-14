@@ -410,6 +410,7 @@
   "jei.magneticraft.duration": "Duration: %s ticks",
   "jei.magneticraft.energy_per_tick": "Energy: %s FE/t",
   "jei.magneticraft.machine": "Machine: %s",
+  "jei.magneticraft.minimum_temperature": "Minimum: %s K",
   "jei.magneticraft.power": "Power: %s FE/t",
   "jei.magneticraft.press_mode": "Press mode: %s",
   "jei.magneticraft.required_level": "Required level: %s",
@@ -474,5 +475,7 @@
   "text.magneticraft.wire_connect.updated_position": "Selected endpoint: %s, %s, %s",
   "tooltip.magneticraft.energy": "Energy: %s / %s FE",
   "tooltip.magneticraft.floppy_disk.instructions": "%s instructions stored",
+  "tooltip.magneticraft.oil_deposit.empty": "Reserve: depleted",
+  "tooltip.magneticraft.oil_deposit.full": "Reserve: 100%",
   "tooltip.magneticraft.small_tank.line_0": "Holding %s mB of %s"
 }

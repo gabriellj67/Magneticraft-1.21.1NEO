@@ -131,6 +131,6 @@
     "y": 5,
     "z": 6
   },
-  "supports_mirroring": true,
+  "supports_mirroring": false,
   "translation_key": "block.magneticraft.pumpjack"
 }

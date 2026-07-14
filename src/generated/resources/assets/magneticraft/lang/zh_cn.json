@@ -410,6 +410,7 @@
   "jei.magneticraft.duration": "耗时：%s 刻",
   "jei.magneticraft.energy_per_tick": "能耗：%s FE/t",
   "jei.magneticraft.machine": "机器：%s",
+  "jei.magneticraft.minimum_temperature": "最低温度：%s K",
   "jei.magneticraft.power": "功率：%s FE/t",
   "jei.magneticraft.press_mode": "压力模式：%s",
   "jei.magneticraft.required_level": "所需等级：%s",
@@ -474,5 +475,7 @@
   "text.magneticraft.wire_connect.updated_position": "已选择端点：%s, %s, %s",
   "tooltip.magneticraft.energy": "能量：%s / %s FE",
   "tooltip.magneticraft.floppy_disk.instructions": "已存储 %s 条指令",
+  "tooltip.magneticraft.oil_deposit.empty": "储量：已耗尽",
+  "tooltip.magneticraft.oil_deposit.full": "储量：100%",
   "tooltip.magneticraft.small_tank.line_0": "装有 %s mB %s"
 }

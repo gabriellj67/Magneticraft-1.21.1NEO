@@ -186,6 +186,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(),
                 models().cubeAll("electrical_machine_casing", mcLoc("block/redstone_block"))
         );
+        simpleBlock(
+                ModAdvancedBlocks.PUMPJACK_DRILL.get(),
+                models().cubeAll("pumpjack_drill", mcLoc("block/copper_block"))
+        );
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
@@ -198,7 +202,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             simpleBlockItem(controller, idle);
         }
 
-        simpleBlock(
+        simpleBlockWithItem(
                 ModAdvancedBlocks.OIL_DEPOSIT.get(),
                 models().cubeAll("oil_deposit", mcLoc("block/deepslate"))
         );

@@ -67,6 +67,6 @@
     "y": 3,
     "z": 7
   },
-  "supports_mirroring": true,
+  "supports_mirroring": false,
   "translation_key": "block.magneticraft.shipping_container"
 }

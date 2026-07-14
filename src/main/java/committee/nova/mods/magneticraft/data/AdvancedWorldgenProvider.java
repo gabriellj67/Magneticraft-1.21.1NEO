@@ -13,27 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-/**
- * Generates the first-release overworld deposits with vanilla ore features.
- *
- * <p>The legacy counts, vein sizes and vertical bands are retained where the
- * old generator had direct equivalents. Cobalt occupies the legacy copper
- * frequency slot because 1.20.1 already supplies vanilla copper. Oil keeps
- * its intended one-in-fifty rarity while using a bounded ore vein instead of
- * the cascading sector generator from 1.12.</p>
- */
+/** Generates the released overworld deposits without cross-chunk writes. */
 final class AdvancedWorldgenProvider implements DataProvider {
     private static final String OVERWORLD_BIOME_TAG = "#minecraft:is_overworld";
     private static final String STONE_REPLACEABLES = "minecraft:stone_ore_replaceables";
     private static final String DEEPSLATE_REPLACEABLES = "minecraft:deepslate_ore_replaceables";
 
     private static final List<DepositDefinition> DEPOSITS = List.of(
-            DepositDefinition.counted("galena_ore", "magneticraft:galena_ore", 8, 10, 2, 80),
-            DepositDefinition.counted("cobalt_ore", "magneticraft:cobalt_ore", 8, 11, 10, 70),
-            DepositDefinition.counted("tungsten_ore", "magneticraft:tungsten_ore", 8, 8, 20, 60),
-            DepositDefinition.counted("pyrite_ore", "magneticraft:pyrite_ore", 9, 9, 30, 100),
-            DepositDefinition.counted("limestone", "magneticraft:limestone", 32, 3, 16, 64),
-            DepositDefinition.rare("oil_deposit", "magneticraft:oil_deposit", 9, 50, 16, 24)
+            DepositDefinition.counted("galena_ore", "magneticraft:galena_ore", 8, 10, 2, 79),
+            DepositDefinition.counted("tungsten_ore", "magneticraft:tungsten_ore", 8, 8, 20, 59),
+            DepositDefinition.counted("pyrite_ore", "magneticraft:pyrite_ore", 9, 9, 30, 99),
+            DepositDefinition.gaussian("limestone", "magneticraft:limestone", 32, 3, 0.9D, 0, 5, 16, 63),
+            DepositDefinition.sector("oil_deposit", "magneticraft:oil_deposit")
     );
 
     private final PackOutput.PathProvider configuredFeatures;
@@ -78,6 +69,11 @@ final class AdvancedWorldgenProvider implements DataProvider {
 
     static JsonObject configuredFeature(DepositDefinition deposit) {
         JsonObject root = new JsonObject();
+        if (deposit.frequencyType() == FrequencyType.SECTOR) {
+            root.addProperty("type", "magneticraft:oil_field");
+            root.add("config", new JsonObject());
+            return root;
+        }
         root.addProperty("type", "minecraft:ore");
 
         JsonObject config = new JsonObject();
@@ -97,13 +93,26 @@ final class AdvancedWorldgenProvider implements DataProvider {
         root.addProperty("feature", Magneticraft.MOD_ID + ":" + deposit.id());
 
         JsonArray placement = new JsonArray();
+        if (deposit.frequencyType() == FrequencyType.SECTOR) {
+            placement.add(typeOnly("minecraft:biome"));
+            root.add("placement", placement);
+            return root;
+        }
+
         JsonObject frequency = new JsonObject();
-        if (deposit.frequencyType() == FrequencyType.COUNT) {
-            frequency.addProperty("type", "minecraft:count");
-            frequency.addProperty("count", deposit.frequency());
+        frequency.addProperty("type", "minecraft:count");
+        if (deposit.frequencyType() == FrequencyType.CLAMPED_NORMAL) {
+            JsonObject count = new JsonObject();
+            count.addProperty("type", "minecraft:clamped_normal");
+            JsonObject value = new JsonObject();
+            value.addProperty("mean", deposit.frequency());
+            value.addProperty("deviation", deposit.deviation());
+            value.addProperty("min_inclusive", deposit.minCount());
+            value.addProperty("max_inclusive", deposit.maxCount());
+            count.add("value", value);
+            frequency.add("count", count);
         } else {
-            frequency.addProperty("type", "minecraft:rarity_filter");
-            frequency.addProperty("chance", deposit.frequency());
+            frequency.addProperty("count", deposit.frequency());
         }
         placement.add(frequency);
         placement.add(typeOnly("minecraft:in_square"));
@@ -161,7 +170,8 @@ final class AdvancedWorldgenProvider implements DataProvider {
 
     enum FrequencyType {
         COUNT,
-        RARITY
+        CLAMPED_NORMAL,
+        SECTOR
     }
 
     record DepositDefinition(
@@ -170,6 +180,9 @@ final class AdvancedWorldgenProvider implements DataProvider {
             int veinSize,
             FrequencyType frequencyType,
             int frequency,
+            double deviation,
+            int minCount,
+            int maxCount,
             int minY,
             int maxY
     ) {
@@ -177,8 +190,13 @@ final class AdvancedWorldgenProvider implements DataProvider {
             if (id.isBlank() || block.isBlank()) {
                 throw new IllegalArgumentException("Deposit IDs must not be blank");
             }
-            if (veinSize <= 0 || frequency <= 0 || minY > maxY) {
+            if (frequencyType != FrequencyType.SECTOR
+                    && (veinSize <= 0 || frequency <= 0 || minY > maxY)) {
                 throw new IllegalArgumentException("Invalid deposit bounds for " + id);
+            }
+            if (frequencyType == FrequencyType.CLAMPED_NORMAL
+                    && (!(deviation > 0.0D) || minCount < 0 || minCount > maxCount)) {
+                throw new IllegalArgumentException("Invalid Gaussian deposit bounds for " + id);
             }
         }
 
@@ -190,18 +208,28 @@ final class AdvancedWorldgenProvider implements DataProvider {
                 int minY,
                 int maxY
         ) {
-            return new DepositDefinition(id, block, veinSize, FrequencyType.COUNT, count, minY, maxY);
+            return new DepositDefinition(
+                    id, block, veinSize, FrequencyType.COUNT, count, 0.0D, count, count, minY, maxY);
         }
 
-        static DepositDefinition rare(
+        static DepositDefinition gaussian(
                 String id,
                 String block,
                 int veinSize,
-                int chance,
+                int mean,
+                double deviation,
+                int minCount,
+                int maxCount,
                 int minY,
                 int maxY
         ) {
-            return new DepositDefinition(id, block, veinSize, FrequencyType.RARITY, chance, minY, maxY);
+            return new DepositDefinition(
+                    id, block, veinSize, FrequencyType.CLAMPED_NORMAL,
+                    mean, deviation, minCount, maxCount, minY, maxY);
+        }
+
+        static DepositDefinition sector(String id, String block) {
+            return new DepositDefinition(id, block, 0, FrequencyType.SECTOR, 0, 0.0D, 0, 0, 0, 0);
         }
     }
 }
