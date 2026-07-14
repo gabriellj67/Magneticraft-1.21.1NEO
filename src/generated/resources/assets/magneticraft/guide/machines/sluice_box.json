@@ -1,0 +1,17 @@
+{
+  "automation_profile": "none",
+  "category": "processing",
+  "description": "guide.magneticraft.machine.sluice_box.description",
+  "ghost_slots": 0,
+  "has_menu": false,
+  "id": "magneticraft:sluice_box",
+  "inventory_slots": 1,
+  "physical_ports": [],
+  "processing_kind": "sluice_box",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [
+    "input"
+  ],
+  "translation_key": "block.magneticraft.sluice_box"
+}

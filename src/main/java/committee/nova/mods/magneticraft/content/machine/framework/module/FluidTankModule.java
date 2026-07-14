@@ -19,6 +19,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Persisted and lifecycle-safe directional fluid capability module.
@@ -31,6 +32,8 @@ public final class FluidTankModule implements MachineModule {
     private final MachineModuleHost host;
     private final Function<Direction, TankAccess> accessBySide;
     private final FluidTank tank;
+    @Nullable
+    private final Supplier<FluidStack> infiniteSource;
     private final Map<Direction, LazyOptional<IFluidHandler>> sidedCapabilities = new EnumMap<>(Direction.class);
     private LazyOptional<IFluidHandler> unsidedCapability = LazyOptional.empty();
     private CompoundTag lastClientSnapshot;
@@ -50,7 +53,8 @@ public final class FluidTankModule implements MachineModule {
                 validator,
                 (Function<Direction, TankAccess>) side -> exposedSides.test(side)
                         ? TankAccess.BOTH
-                        : TankAccess.NONE
+                        : TankAccess.NONE,
+                null
         );
     }
 
@@ -59,18 +63,35 @@ public final class FluidTankModule implements MachineModule {
             MachineModuleHost host,
             int capacity,
             Predicate<FluidStack> validator,
-            Function<Direction, TankAccess> accessBySide
+            Function<Direction, TankAccess> accessBySide,
+            @Nullable Supplier<FluidStack> infiniteSource
     ) {
         this.id = Objects.requireNonNull(id);
         this.host = Objects.requireNonNull(host);
         this.accessBySide = Objects.requireNonNull(accessBySide);
+        this.infiniteSource = infiniteSource;
         this.tank = new FluidTank(capacity, Objects.requireNonNull(validator)) {
             @Override
             protected void onContentsChanged() {
                 clientSnapshotDirty = true;
                 host.markChanged();
             }
+
+            @Override
+            public FluidStack drain(FluidStack resource, FluidAction action) {
+                return FluidTankModule.this.infiniteSource == null
+                        ? super.drain(resource, action)
+                        : infiniteDrain(resource, resource.getAmount());
+            }
+
+            @Override
+            public FluidStack drain(int maxDrain, FluidAction action) {
+                return FluidTankModule.this.infiniteSource == null
+                        ? super.drain(maxDrain, action)
+                        : infiniteDrain(null, maxDrain);
+            }
         };
+        refillInfiniteSource();
         reviveCapabilities();
     }
 
@@ -81,7 +102,28 @@ public final class FluidTankModule implements MachineModule {
             Predicate<FluidStack> validator,
             Function<Direction, TankAccess> accessBySide
     ) {
-        return new FluidTankModule(id, host, capacity, validator, accessBySide);
+        return new FluidTankModule(id, host, capacity, validator, accessBySide, null);
+    }
+
+    public static FluidTankModule infiniteSource(
+            ResourceLocation id,
+            MachineModuleHost host,
+            int capacity,
+            Supplier<FluidStack> source,
+            Function<Direction, TankAccess> accessBySide
+    ) {
+        Objects.requireNonNull(source);
+        return new FluidTankModule(
+                id,
+                host,
+                capacity,
+                stack -> {
+                    FluidStack configured = source.get();
+                    return configured != null && !configured.isEmpty() && stack.isFluidEqual(configured);
+                },
+                accessBySide,
+                source
+        );
     }
 
     @Override
@@ -91,7 +133,11 @@ public final class FluidTankModule implements MachineModule {
 
     @Override
     public void load(CompoundTag tag) {
-        tank.readFromNBT(tag);
+        if (infiniteSource == null) {
+            tank.readFromNBT(tag);
+        } else {
+            refillInfiniteSource();
+        }
     }
 
     @Override
@@ -101,7 +147,11 @@ public final class FluidTankModule implements MachineModule {
 
     @Override
     public void loadClientData(CompoundTag tag) {
-        tank.readFromNBT(tag);
+        if (infiniteSource == null) {
+            tank.readFromNBT(tag);
+        } else {
+            refillInfiniteSource();
+        }
     }
 
     @Override
@@ -154,6 +204,30 @@ public final class FluidTankModule implements MachineModule {
 
     public FluidTank tank() {
         return tank;
+    }
+
+    private FluidStack infiniteDrain(@Nullable FluidStack requested, int maximum) {
+        FluidStack source = infiniteSource == null ? FluidStack.EMPTY : infiniteSource.get();
+        if (source == null || source.isEmpty() || maximum <= 0
+                || (requested != null && !requested.isFluidEqual(source))) {
+            return FluidStack.EMPTY;
+        }
+        FluidStack drained = source.copy();
+        drained.setAmount(Math.min(maximum, tank.getCapacity()));
+        return drained;
+    }
+
+    private void refillInfiniteSource() {
+        if (infiniteSource == null) {
+            return;
+        }
+        FluidStack configured = infiniteSource.get();
+        if (configured == null || configured.isEmpty()) {
+            throw new IllegalArgumentException("Infinite fluid source must not be empty");
+        }
+        FluidStack full = configured.copy();
+        full.setAmount(tank.getCapacity());
+        tank.setFluid(full);
     }
 
     private LazyOptional<IFluidHandler> viewFor(@Nullable Direction side) {

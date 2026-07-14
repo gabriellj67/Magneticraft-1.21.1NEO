@@ -42,6 +42,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 @PrefixGameTestTemplate(false)
 public final class LongDistanceElectricGameTests {
     private static final String TEMPLATE = "base_content";
+    private static final String ADVANCED_TEMPLATE = "advanced_systems";
 
     private LongDistanceElectricGameTests() {
     }
@@ -319,10 +320,10 @@ public final class LongDistanceElectricGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = TEMPLATE)
+    @GameTest(template = ADVANCED_TEMPLATE)
     public static void teslaTowerHonorsSixtyVoltThresholdAndFiveHundredRate(GameTestHelper helper) {
-        BlockPos towerPosition = new BlockPos(2, 5, 2);
-        BlockPos receiverPosition = new BlockPos(6, 5, 2);
+        BlockPos towerPosition = new BlockPos(20, 5, 20);
+        BlockPos receiverPosition = new BlockPos(24, 5, 20);
         helper.setBlock(towerPosition, ModNetworkBlocks.TESLA_TOWER.get());
         TeslaTowerBlockEntity tower = require(helper, towerPosition, TeslaTowerBlockEntity.class);
         WirelessEnergyReceiverBlockEntity receiver = placeReceiver(helper, receiverPosition);
@@ -342,56 +343,67 @@ public final class LongDistanceElectricGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 40)
+    @GameTest(template = ADVANCED_TEMPLATE, timeoutTicks = 40)
     public static void windTurbineStopsForBlockedRotorAndProducesBoundedPowerWhenOpen(GameTestHelper helper) {
-        int relativeY = 128 - helper.absolutePos(BlockPos.ZERO).getY();
-        BlockPos turbinePosition = new BlockPos(16, relativeY, 16);
+        BlockPos templateOrigin = helper.absolutePos(BlockPos.ZERO);
+        BlockPos turbinePosition = new BlockPos(20, 128 - templateOrigin.getY(), 20);
         Direction facing = Direction.EAST;
-        helper.setBlock(
-                turbinePosition,
-                ModNetworkBlocks.WIND_TURBINE.get().defaultBlockState().setValue(WindTurbineBlock.FACING, facing)
-        );
-        WindTurbineBlockEntity turbine = require(helper, turbinePosition, WindTurbineBlockEntity.class);
+        try {
+            clearWindTurbineTestArea(helper, turbinePosition, facing);
+            helper.setBlock(
+                    turbinePosition,
+                    ModNetworkBlocks.WIND_TURBINE.get().defaultBlockState().setValue(WindTurbineBlock.FACING, facing)
+            );
+            WindTurbineBlockEntity turbine = require(helper, turbinePosition, WindTurbineBlockEntity.class);
+            Direction horizontal = facing.getClockWise();
+            BlockPos planeCenter = turbinePosition.relative(facing);
+            BlockPos obstruction = planeCenter.relative(horizontal, -5).below(3);
+            helper.setBlock(obstruction, Blocks.STONE);
+
+            turbine.wind().load(new CompoundTag());
+            turbine.serverTick();
+            helper.assertFalse(turbine.wind().operational(), "Blocked wind-turbine rotor remained operational");
+            helper.assertTrue(turbine.wind().productionJoulesPerTick() == 0.0D,
+                    "Blocked wind turbine generated energy");
+
+            helper.setBlock(obstruction, Blocks.AIR);
+            CompoundTag wind = new CompoundTag();
+            wind.putDouble("current_wind", 1.0D);
+            wind.putDouble("target_wind", 1.0D);
+            turbine.wind().load(wind);
+            turbine.serverTick();
+
+            helper.assertTrue(turbine.wind().operational(), "Open wind-turbine rotor did not become operational");
+            helper.assertTrue(turbine.wind().openSpace() >= 0.0D && turbine.wind().openSpace() <= 1.0D,
+                    "Wind-turbine open-space factor escaped its bounded range");
+            helper.assertTrue(turbine.wind().productionJoulesPerTick() > 0.0D,
+                    "Open wind turbine did not generate energy");
+            helper.assertTrue(turbine.wind().productionJoulesPerTick() <= 200.0D,
+                    "Wind turbine exceeded its 200 J/t rating");
+        } finally {
+            clearWindTurbineTestArea(helper, turbinePosition, facing);
+        }
+        helper.succeed();
+    }
+
+    private static void clearWindTurbineTestArea(
+            GameTestHelper helper,
+            BlockPos turbinePosition,
+            Direction facing
+    ) {
+        helper.setBlock(turbinePosition, Blocks.AIR);
         Direction horizontal = facing.getClockWise();
         BlockPos planeCenter = turbinePosition.relative(facing);
-        BlockPos obstruction = planeCenter.relative(horizontal, -5).below(3);
-        helper.setBlock(obstruction, Blocks.STONE);
-
-        turbine.wind().load(new CompoundTag());
-        turbine.serverTick();
-        helper.assertFalse(turbine.wind().operational(), "Blocked wind-turbine rotor remained operational");
-        helper.assertTrue(turbine.wind().productionJoulesPerTick() == 0.0D,
-                "Blocked wind turbine generated energy");
-
         for (int horizontalOffset = -5; horizontalOffset <= 5; horizontalOffset++) {
             for (int verticalOffset = -5; verticalOffset <= 5; verticalOffset++) {
-                helper.setBlock(
-                        planeCenter.relative(horizontal, horizontalOffset).above(verticalOffset),
-                        Blocks.AIR
-                );
+                BlockPos bladePosition = planeCenter
+                        .relative(horizontal, horizontalOffset)
+                        .above(verticalOffset);
                 for (int depth = 0; depth <= 16; depth++) {
-                    BlockPos worldPosition = helper.absolutePos(planeCenter
-                            .relative(horizontal, horizontalOffset)
-                            .above(verticalOffset)
-                            .relative(facing, depth));
-                    helper.getLevel().getChunkAt(worldPosition);
+                    helper.setBlock(bladePosition.relative(facing, depth), Blocks.AIR);
                 }
             }
         }
-        CompoundTag wind = new CompoundTag();
-        wind.putDouble("current_wind", 1.0D);
-        wind.putDouble("target_wind", 1.0D);
-        turbine.wind().load(wind);
-        turbine.serverTick();
-
-        helper.assertTrue(turbine.wind().operational(), "Open wind-turbine rotor did not become operational");
-        helper.assertTrue(turbine.wind().openSpace() >= 0.0D && turbine.wind().openSpace() <= 1.0D,
-                "Wind-turbine open-space factor escaped its bounded range");
-        helper.assertTrue(turbine.wind().productionJoulesPerTick() > 0.0D,
-                "Open wind turbine did not generate energy");
-        helper.assertTrue(turbine.wind().productionJoulesPerTick() <= 200.0D,
-                "Wind turbine exceeded its 200 J/t rating");
-        helper.succeed();
     }
 
     private static UseOnContext useContext(GameTestHelper helper, Player player, BlockPos position) {

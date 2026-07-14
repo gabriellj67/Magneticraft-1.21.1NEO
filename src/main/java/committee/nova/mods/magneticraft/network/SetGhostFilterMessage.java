@@ -9,13 +9,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
+import java.util.Objects;
 
 /**
  * C2S intent for setting one non-consuming item-filter sample.
  */
 public record SetGhostFilterMessage(BlockPos position, int slot, ItemStack sample) {
     public SetGhostFilterMessage {
-        position = position.immutable();
+        position = Objects.requireNonNull(position, "position").immutable();
         sample = normalize(sample);
     }
 
@@ -37,7 +38,11 @@ public record SetGhostFilterMessage(BlockPos position, int slot, ItemStack sampl
     }
 
     public static boolean applyIfValid(Player sender, SetGhostFilterMessage message) {
-        if (sender == null || !(sender.containerMenu instanceof GhostFilterMenuAccess menu)) {
+        if (sender == null
+                || message == null
+                || sender.level().isClientSide
+                || !sender.level().getWorldBorder().isWithinBounds(message.position)
+                || !(sender.containerMenu instanceof GhostFilterMenuAccess menu)) {
             return false;
         }
         if (!menu.machinePosition().equals(message.position)

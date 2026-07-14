@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.item.ElectricPistonItem;
 import committee.nova.mods.magneticraft.content.item.ElectricToolItem;
 import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +20,45 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdvancedGuideDataProviderTest {
+    @Test
+    void singleBlockGuideCatalogueIsBilingualContractDataFromRuntimeDefinitions() {
+        List<AdvancedGuideDataProvider.MachineGuideContract> machines =
+                AdvancedGuideDataProvider.singleBlockMachineGuides();
+        assertEquals(SingleBlockMachineDefinition.values().length + 3, machines.size());
+        assertEquals(machines.size(), machines.stream().map(AdvancedGuideDataProvider.MachineGuideContract::id)
+                .distinct().count());
+
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            AdvancedGuideDataProvider.MachineGuideContract contract = machines.stream()
+                    .filter(machine -> machine.id().equals(definition.id()))
+                    .findFirst()
+                    .orElseThrow();
+            assertEquals(definition.inventorySlots(), contract.inventorySlots(), definition.id());
+            assertEquals(definition.ghostSlots(), contract.ghostSlots(), definition.id());
+            assertEquals(definition.slotRoles().size(), contract.slotRoles().size(), definition.id());
+            assertEquals("ignored", contract.redstoneControl(), definition.id());
+            assertEquals(
+                    definition.automationProfile().name().toLowerCase(java.util.Locale.ROOT),
+                    contract.automationProfile(),
+                    definition.id()
+            );
+            assertEquals(
+                    "guide.magneticraft.machine." + definition.id() + ".description",
+                    contract.descriptionKey()
+            );
+            JsonObject json = AdvancedGuideDataProvider.machineGuide(contract);
+            assertEquals("magneticraft:" + definition.id(), json.get("id").getAsString());
+            assertEquals(definition.physicalPorts().size(), json.getAsJsonArray("physical_ports").size());
+        }
+
+        AdvancedGuideDataProvider.MachineGuideContract water = machines.stream()
+                .filter(machine -> machine.id().equals("water_generator"))
+                .findFirst()
+                .orElseThrow();
+        assertFalse(water.hasMenu());
+        assertEquals("fluid_output_all_sides", water.automationProfile());
+    }
+
     @Test
     void everyMultiblockGuideIsAnExactSnapshotOfTheRuntimeCatalogue() {
         Set<String> ids = new HashSet<>();

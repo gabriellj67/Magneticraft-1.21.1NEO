@@ -92,6 +92,14 @@ class OptionalIntegrationContractTest {
     }
 
     @Test
+    void singleBlockRecipeFamiliesUseTheSameDataTypesExposedToJeiAndCraftTweaker() throws IOException {
+        assertGeneratedRecipeFamily("crushing_table");
+        assertGeneratedRecipeFamily("sluice_box");
+        assertGeneratedRecipeFamily("gasification_unit");
+        assertGeneratedRecipeFamily("thermopile");
+    }
+
+    @Test
     void tconstructDataAddsOnlyTungstenAndReusesLeadSteelTags() throws IOException {
         JsonObject materialRecipe = readJson(GENERATED.resolve(
                 "data/magneticraft/recipes/integration/tconstruct/tungsten_ingot_material.json"
@@ -121,6 +129,21 @@ class OptionalIntegrationContractTest {
         JsonObject tag = readJson(GENERATED.resolve("data/forge/tags/items/ingots/" + metal + ".json"));
         assertTrue(tag.getAsJsonArray("values").asList().stream()
                 .anyMatch(value -> value.getAsString().equals(item)), metal);
+    }
+
+    private static void assertGeneratedRecipeFamily(String type) throws IOException {
+        Path directory = GENERATED.resolve("data/magneticraft/recipes/" + type);
+        assertTrue(Files.isDirectory(directory), type);
+        try (Stream<Path> recipes = Files.list(directory)) {
+            List<Path> files = recipes
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .toList();
+            assertFalse(files.isEmpty(), type);
+            for (Path file : files) {
+                assertEquals("magneticraft:" + type, readJson(file).get("type").getAsString(), file.toString());
+            }
+        }
     }
 
     private static JsonObject readJson(Path path) throws IOException {

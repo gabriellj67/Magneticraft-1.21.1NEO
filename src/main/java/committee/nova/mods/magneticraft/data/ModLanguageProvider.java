@@ -40,6 +40,10 @@ final class ModLanguageProvider extends LanguageProvider {
                 MagneticraftConfig.CRUSHING_TABLE_CAUSES_FIRE_TRANSLATION_KEY,
                 chinese ? "压碎烈焰棒时点燃玩家" : "Crushing Table Causes Fire"
         );
+        add(
+                MagneticraftConfig.WATER_GENERATOR_PER_TICK_WATER_TRANSLATION_KEY,
+                chinese ? "供水器每侧每刻供水量" : "Water Generator Output Per Side"
+        );
         add(ModCreativeTabs.TRANSLATION_KEY, chinese ? "磁场工艺" : "Magneticraft");
         add(ModMachineBlocks.CRUSHING_TABLE.get(), chinese ? "压碎台" : "Crushing Table");
         add(ModMachineBlocks.BATTERY.get(), chinese ? "电池箱" : "Battery Box");
@@ -208,6 +212,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.state.stopped", chinese ? "已停止" : "Stopped");
         add("gui.magneticraft.energy.tooltip", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
         add("gui.magneticraft.progress.tooltip", chinese ? "进度：%s / %s" : "Progress: %s / %s");
+        add("gui.magneticraft.machine.rate.tooltip", chinese ? "消耗：%s/t；产出：%s/t" : "Consumption: %s/t; production: %s/t");
         add("gui.magneticraft.items.tooltip", chinese ? "物品：%s / %s" : "Items: %s / %s");
         add("gui.magneticraft.fluid.tooltip", chinese ? "流体：%s / %s mB" : "Fluid: %s / %s mB");
         add("gui.magneticraft.temperature_kelvin", chinese ? "%s K" : "%s K");
@@ -235,6 +240,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.search", chinese ? "搜索" : "Search");
         add("gui.magneticraft.guide.no_results", chinese ? "没有匹配内容" : "No matching entries");
         add("gui.magneticraft.guide.mode.structures", chinese ? "多方块结构" : "Multiblocks");
+        add("gui.magneticraft.guide.mode.machines", chinese ? "单方块机器" : "Single-Block Machines");
         add("gui.magneticraft.guide.mode.opcodes", chinese ? "计算机指令" : "Computer Opcodes");
         add("gui.magneticraft.guide.mode.items", chinese ? "电气设备" : "Electrical Equipment");
         add("gui.magneticraft.guide.capacity", chinese ? "容量：%s FE" : "Capacity: %s FE");
@@ -296,6 +302,59 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.category.processing", chinese ? "加工" : "Processing");
         add("gui.magneticraft.guide.category.oil", chinese ? "石油" : "Oil");
         add("gui.magneticraft.guide.category.energy", chinese ? "能源" : "Energy");
+        add("gui.magneticraft.guide.category.utility", chinese ? "实用设备" : "Utility");
+        add("gui.magneticraft.guide.machine.inventory", chinese ? "物品槽：%s；幽灵槽：%s" : "Item slots: %s; ghost slots: %s");
+        add("gui.magneticraft.guide.machine.menu", chinese ? "界面：%s" : "Menu: %s");
+        add("gui.magneticraft.guide.machine.redstone", chinese ? "红石控制：%s" : "Redstone control: %s");
+        add("gui.magneticraft.guide.machine.processing", chinese ? "处理类型：%s" : "Processing: %s");
+        add("gui.magneticraft.guide.machine.automation", chinese ? "自动化：%s" : "Automation: %s");
+        add("gui.magneticraft.guide.machine.slots", chinese ? "槽位职责：%s" : "Slot roles: %s");
+        add("gui.magneticraft.guide.machine.ports", chinese ? "物理端口：%s" : "Physical ports: %s");
+        add("gui.magneticraft.guide.redstone.ignored", chinese ? "忽略" : "Ignored");
+        addGuideValues("processing", new String[][]{
+                {"none", "无", "None"},
+                {"crushing_table", "压碎", "Crushing"},
+                {"crafting", "合成", "Crafting"},
+                {"sluice_box", "淘洗", "Sluicing"},
+                {"smelting", "冶炼", "Smelting"},
+                {"gasification", "气化", "Gasification"},
+                {"thermopile", "温差发电", "Thermopile"}
+        });
+        addGuideValues("automation", new String[][]{
+                {"none", "无外部自动化", "No external automation"},
+                {"all_sides", "所有侧面", "All sides"},
+                {"all_except_output_face", "除输出面外的所有侧面", "All sides except output face"},
+                {"item_input_output", "物品输入与输出", "Item input and output"},
+                {"fluid_output_all_sides", "所有侧面流体输出", "Fluid output on all sides"},
+                {"boiler_all_sides", "所有侧面锅炉端口", "Boiler ports on all sides"},
+                {"electric_top_bottom_back", "顶部、底部与背面电力端口", "Electrical ports on the top, bottom, and back"},
+                {"electricity_with_vertical_heat", "全侧电网与垂直热端口", "Electricity on all sides with vertical heat ports"},
+                {"all_sides_forge_energy_with_vertical_heat", "全侧 Forge Energy 与垂直热端口", "Forge Energy on all sides with vertical heat ports"},
+                {"all_sides_bidirectional_forge_energy_with_directional_output", "全侧双向 Forge Energy 与定向主动输出", "Bidirectional Forge Energy on all sides with directional active output"},
+                {"pneumatic_only", "仅气动网络", "Pneumatic network only"}
+        });
+        addGuideValues("slot", new String[][]{
+                {"storage", "存储", "Storage"},
+                {"input", "输入", "Input"},
+                {"output", "输出", "Output"},
+                {"fuel", "燃料", "Fuel"},
+                {"charge", "充电", "Charge"},
+                {"discharge", "放电", "Discharge"},
+                {"carried", "搬运中物品", "Carried item"},
+                {"upgrade", "升级", "Upgrade"},
+                {"internal_buffer", "内部缓冲", "Internal buffer"}
+        });
+        addGuideValues("port", new String[][]{
+                {"item", "物品", "Item"},
+                {"item_transfer", "物品搬运", "Item transfer"},
+                {"ghost_filter", "幽灵过滤", "Ghost filter"},
+                {"fluid_input", "流体输入", "Fluid input"},
+                {"fluid_output", "流体输出", "Fluid output"},
+                {"forge_energy", "Forge Energy", "Forge Energy"},
+                {"electricity", "电力", "Electricity"},
+                {"heat", "热力", "Heat"},
+                {"pneumatic", "气动物流", "Pneumatic logistics"}
+        });
         add("jei.magneticraft.advanced_processing", chinese ? "高级加工" : "Advanced Processing");
         add("jei.magneticraft.chance", chinese ? "概率：%s%%" : "Chance: %s%%");
         add("jei.magneticraft.conductivity", chinese ? "导热系数：%s" : "Conductivity: %s");
@@ -339,6 +398,86 @@ final class ModLanguageProvider extends LanguageProvider {
         addGuideRule("column_y", "Y 轴机器支撑柱", "Y-axis Machine Support Column");
         addGuideRule("column_z", "Z 轴机器支撑柱", "Z-axis Machine Support Column");
         addGuideRule("unknown", "未知部件", "Unknown Part");
+        addSingleBlockGuideTranslations();
+    }
+
+    private void addGuideValues(String group, String[][] values) {
+        for (String[] value : values) {
+            add(
+                    "gui.magneticraft.guide." + group + "." + value[0],
+                    chinese ? value[1] : value[2]
+            );
+        }
+    }
+
+    private void addSingleBlockGuideTranslations() {
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            add(
+                    "guide.magneticraft.machine." + definition.id() + ".description",
+                    chinese ? singleBlockGuideChinese(definition) : singleBlockGuideEnglish(definition)
+            );
+        }
+        add("guide.magneticraft.machine.crushing_table.description", chinese
+                ? "用对应等级的锤子反复击打台面上的物品，按旧版命中次数完成压碎；服务端决定产物和工具耐久。"
+                : "Strike the item on the table with a suitable hammer for the legacy hit count; the server owns results and tool damage.");
+        add("guide.magneticraft.machine.battery_box.description", chinese
+                ? "在两个内部槽位与磁场工艺电网之间充放便携电池；不向外暴露 Forge Energy 能力。"
+                : "Charges and discharges portable cells through two internal slots and the Magneticraft grid; it exposes no external Forge Energy capability.");
+        add("guide.magneticraft.machine.electric_furnace.description", chinese
+                ? "消耗磁场工艺电力执行原版熔炼配方；输入与输出槽分别接受自动化访问，进度随存档保存。"
+                : "Uses Magneticraft electricity for vanilla smelting recipes; automation sees separate input and output slots, and progress persists.");
+    }
+
+    private static String singleBlockGuideChinese(SingleBlockMachineDefinition definition) {
+        return switch (definition) {
+            case BOX -> "提供 27 格木制存储，所有侧面均可进行物品自动化。";
+            case SLUICE_BOX -> "成链放置并供水后处理淘洗配方；上游状态改变会重置已加载的下游链路。";
+            case FEEDING_TROUGH -> "每 400 刻尝试用小麦、胡萝卜或小麦种子喂养范围内两只可繁殖动物。";
+            case SMALL_TANK -> "保存单种流体并支持侧面输入输出；容器交互原子化，失败时不会吞掉容器。";
+            case FABRICATOR -> "用幽灵槽记录合成图样并读取相邻库存；右击结果清除图样，左击请求合成。";
+            case INSERTER -> "在相邻库存间搬运物品，可配置过滤、方向、速度升级和整组升级。";
+            case WATER_GENERATOR -> "内置无限水源，六个侧面各自最多输出 20 mB/t，且不会强加载区块。";
+            case RELAY -> "在气动物流网络与九格物品缓冲之间转接，输出面不接受普通物品自动化。";
+            case FILTER -> "用幽灵样本约束气动载荷，只在气动网络中工作。";
+            case TRANSPOSER -> "按幽灵样本在气动网络与相邻目标间转置物品。";
+            case COMBUSTION_CHAMBER -> "燃烧内部燃料并向热端口供热；门板用于直接装填或切换状态。";
+            case STEAM_BOILER -> "从任意侧面接收水和输出蒸汽，以热量驱动转换；主动输出遵循旧版目标侧规则。";
+            case ELECTRIC_HEATER -> "以每刻 80 J 的批量将磁场工艺电力转为热量；电力不足 80 J 时停止转换，机器热量会逐步散失。";
+            case RF_HEATER -> "使用 80 kFE 双向缓冲从任意侧面交换 FE，并通过垂直端口输出热量。";
+            case GASIFICATION_UNIT -> "在足够温度下按数据配方把物品转为气体，物品输入输出与流体输出可自动化。";
+            case BRICK_FURNACE -> "以外部热量执行熔炼配方；更换配方不会抹除已积累进度，工作显示会短暂延迟熄灭。";
+            case INFINITE_ENERGY -> "创意管理设备，持续维持 125 V 电源；没有生存配方。";
+            case RF_TRANSFORMER -> "在磁场工艺焦耳与 Forge Energy 间按 1 J = 1 FE 进行受限桥接。";
+            case ELECTRIC_ENGINE -> "从所有侧面接收或提供 FE 缓冲，并单向把磁场工艺电力转换为 FE 输出。";
+            case AIRLOCK -> "每 40 刻扫描半径 9 的已加载区域，以电力维持边界水泡并清除内部水体；欠压后逐步失效。";
+            case THERMOPILE -> "读取两侧温差并产生磁场工艺电力，使用 80 kJ 缓冲和 120 V 桥接。";
+        };
+    }
+
+    private static String singleBlockGuideEnglish(SingleBlockMachineDefinition definition) {
+        return switch (definition) {
+            case BOX -> "Provides 27 wooden storage slots with item automation on every side.";
+            case SLUICE_BOX -> "Processes sluice recipes when chained and watered; upstream changes reset the loaded downstream chain.";
+            case FEEDING_TROUGH -> "Every 400 ticks, attempts to feed two breedable animals with wheat, carrots, or wheat seeds.";
+            case SMALL_TANK -> "Stores one fluid with sided input and output; container interaction is atomic and never consumes a failed container.";
+            case FABRICATOR -> "Records a crafting pattern in ghost slots and reads adjacent inventories; right-click clears the result pattern and left-click requests crafting.";
+            case INSERTER -> "Moves items between adjacent inventories with filter, direction, speed, and stack upgrades.";
+            case WATER_GENERATOR -> "Its internal infinite water source outputs up to 20 mB/t independently on all six sides without loading chunks.";
+            case RELAY -> "Bridges a pneumatic network and a nine-slot item buffer; its output face rejects ordinary item automation.";
+            case FILTER -> "Constrains pneumatic payloads with ghost samples and operates only on the pneumatic network.";
+            case TRANSPOSER -> "Moves matching items between the pneumatic network and an adjacent target using ghost samples.";
+            case COMBUSTION_CHAMBER -> "Burns internal fuel into heat; use its door to insert fuel directly or change its state.";
+            case STEAM_BOILER -> "Accepts water and exposes steam on every side, converting with heat and retaining the legacy active-output target-side rule.";
+            case ELECTRIC_HEATER -> "Converts Magneticraft electricity into heat in 80 J/t steps; below 80 J, conversion stops while stored heat gradually dissipates.";
+            case RF_HEATER -> "Uses an 80 kFE bidirectional buffer on every side and emits heat through its vertical ports.";
+            case GASIFICATION_UNIT -> "Converts items into gas from data recipes at sufficient temperature, with automated item I/O and fluid output.";
+            case BRICK_FURNACE -> "Runs smelting recipes from external heat; recipe changes preserve accumulated progress and the working display lingers briefly.";
+            case INFINITE_ENERGY -> "A creative administration device that continuously holds a 125 V source; it has no survival recipe.";
+            case RF_TRANSFORMER -> "Bridges Magneticraft joules and Forge Energy at 1 J = 1 FE within its transfer limits.";
+            case ELECTRIC_ENGINE -> "Exchanges its FE buffer on every side and converts Magneticraft electricity one-way into FE output.";
+            case AIRLOCK -> "Every 40 ticks, spends electricity across the loaded radius-9 area to maintain boundary bubbles and clear interior water; it decays when undervolted.";
+            case THERMOPILE -> "Reads a temperature difference to produce Magneticraft electricity through an 80 kJ buffer and 120 V bridge.";
+        };
     }
 
     private void addGuideRule(String id, String chineseName, String englishName) {

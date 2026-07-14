@@ -138,7 +138,16 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
     @Override
     public void clicked(int slotId, int button, ClickType clickType, Player player) {
         if (slotId == fabricatorResultSlot && clickType == ClickType.PICKUP) {
-            if (machine != null && machine.craftFabricator()) {
+            if (!player.level().isClientSide && machine != null && stillValid(player)) {
+                if (button == 0 && player.getAbilities().mayBuild) {
+                    machine.craftFabricator();
+                } else if (button == 1
+                        && player.getAbilities().mayBuild
+                        && machine.filters() != null) {
+                    for (int slot = 0; slot < machine.filters().size(); slot++) {
+                        machine.filters().setFilter(slot, ItemStack.EMPTY);
+                    }
+                }
                 refreshFabricatorResult();
             }
             return;
@@ -148,7 +157,12 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
 
     @Override
     public boolean clickMenuButton(Player player, int id) {
-        if (definition == SingleBlockMachineDefinition.INSERTER && id >= 0 && id < 6 && machine != null) {
+        if (!player.level().isClientSide
+                && definition == SingleBlockMachineDefinition.INSERTER
+                && id >= 0 && id < 6
+                && machine != null
+                && player.getAbilities().mayBuild
+                && stillValid(player)) {
             machine.toggleInserterFlag(id);
             return true;
         }
@@ -219,6 +233,26 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
 
     public int thermopileFlux() {
         return Int32ContainerData.read(data, 11);
+    }
+
+    public int burnProgress() {
+        return Int32ContainerData.read(data, 12);
+    }
+
+    public int burnTotal() {
+        return Int32ContainerData.read(data, 13);
+    }
+
+    public int lastConsumption() {
+        return Int32ContainerData.read(data, 14);
+    }
+
+    public int lastProduction() {
+        return Int32ContainerData.read(data, 15);
+    }
+
+    public boolean working() {
+        return Int32ContainerData.read(data, 16) != 0;
     }
 
     @Override

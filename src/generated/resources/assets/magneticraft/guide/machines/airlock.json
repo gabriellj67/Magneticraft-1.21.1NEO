@@ -1,0 +1,17 @@
+{
+  "automation_profile": "all_sides",
+  "category": "utility",
+  "description": "guide.magneticraft.machine.airlock.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:airlock",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "electricity"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.airlock"
+}

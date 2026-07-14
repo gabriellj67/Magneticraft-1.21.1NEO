@@ -1,5 +1,7 @@
 package committee.nova.mods.magneticraft.content.machine.singleblock;
 
+import com.mojang.authlib.GameProfile;
+import committee.nova.mods.magneticraft.config.MagneticraftConfig;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.SluiceRecipe;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.system.network.logistics.ItemHandlerTransactions;
@@ -18,14 +20,23 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.common.util.FakePlayerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Item, fluid and animal automation behavior for the Task 5 utility machines.
  */
 final class SingleBlockAutomationLogic {
+    private static final int FEEDING_TROUGH_INTERVAL = 400;
+    private static final GameProfile FEEDING_TROUGH_PROFILE = new GameProfile(
+            UUID.fromString("d0f15bc8-6eb3-4a1b-8b5d-d3fdf5140321"),
+            "FeedingTrough"
+    );
+
     private final SingleBlockMachineBlockEntity machine;
     private final SingleBlockMachineState state;
 
@@ -52,7 +63,7 @@ final class SingleBlockAutomationLogic {
     void tickSluice(ServerLevel level) {
         if (state.chainDelay > 0 && --state.chainDelay == 0) {
             BlockPos next = machine.getBlockPos().relative(SingleBlockMachineSupport.facing(machine), 2).below();
-            if (level.getBlockEntity(next) instanceof SingleBlockMachineBlockEntity nextMachine
+            if (loadedBlockEntity(level, next) instanceof SingleBlockMachineBlockEntity nextMachine
                     && nextMachine.definition() == SingleBlockMachineDefinition.SLUICE_BOX) {
                 nextMachine.activateSluiceChain();
             }
@@ -68,37 +79,39 @@ final class SingleBlockAutomationLogic {
     }
 
     void tickFeedingTrough(ServerLevel level) {
-        if (level.getGameTime() % 400L != 0L || machine.inventory() == null) {
+        if (Math.floorMod(
+                level.getGameTime() + machine.getBlockPos().hashCode(),
+                FEEDING_TROUGH_INTERVAL
+        ) != 0 || machine.inventory() == null) {
             return;
         }
         ItemStack food = machine.inventory().getStackInSlot(0);
-        if (food.getCount() < 2) {
+        if (food.isEmpty()) {
             return;
         }
         List<Animal> animals = level.getEntitiesOfClass(
                 Animal.class,
-                new AABB(machine.getBlockPos()).inflate(4.0D, 1.5D, 4.0D),
+                feedingTroughArea(),
                 Animal::isAlive
         );
         if (animals.size() >= 30) {
             return;
         }
-        for (int firstIndex = 0; firstIndex < animals.size(); firstIndex++) {
-            Animal first = animals.get(firstIndex);
-            if (!first.canFallInLove() || !first.isFood(food)) {
-                continue;
-            }
-            for (int secondIndex = firstIndex + 1; secondIndex < animals.size(); secondIndex++) {
-                Animal second = animals.get(secondIndex);
-                if (second.getType() == first.getType() && second.canFallInLove() && second.isFood(food)) {
-                    machine.inventory().extractInternal(0, 2, false);
-                    first.setInLove(null);
-                    second.setInLove(null);
-                    machine.markChangedAndSync();
-                    return;
-                }
+        List<Animal> eligible = new ArrayList<>();
+        for (Animal animal : animals) {
+            if (animal.canFallInLove() && animal.isFood(food)) {
+                eligible.add(animal);
             }
         }
+        if (eligible.size() < 2) {
+            return;
+        }
+        for (int fed = 0; fed < 2; fed++) {
+            Animal animal = eligible.remove(level.random.nextInt(eligible.size()));
+            machine.inventory().extractInternal(0, 1, false);
+            animal.setInLove(FakePlayerFactory.get(level, FEEDING_TROUGH_PROFILE));
+        }
+        machine.markChangedAndSync();
     }
 
     void tickInserter(ServerLevel level) {
@@ -133,21 +146,9 @@ final class SingleBlockAutomationLogic {
         if (machine.primaryTank() == null) {
             return;
         }
-        int room = machine.primaryTank().tank().getCapacity() - machine.primaryTank().tank().getFluidAmount();
-        if (room > 0) {
-            machine.primaryTank().tank().fill(
-                    new FluidStack(net.minecraft.world.level.material.Fluids.WATER, room),
-                    IFluidHandler.FluidAction.EXECUTE
-            );
-        }
-        int remaining = 20;
-        Direction[] directions = Direction.values();
-        for (int offset = 0; offset < directions.length && remaining > 0; offset++) {
-            int index = (state.fluidOutputCursor + offset) % directions.length;
-            remaining -= SingleBlockMachineSupport.pushFluid(machine, directions[index], machine.primaryTank(), remaining);
-            if (remaining < 20) {
-                state.fluidOutputCursor = (index + 1) % directions.length;
-            }
+        int perSide = MagneticraftConfig.WATER_GENERATOR_PER_TICK_WATER.get();
+        for (Direction direction : Direction.values()) {
+            SingleBlockMachineSupport.pushFluid(machine, direction, machine.primaryTank(), perSide);
         }
     }
 
@@ -220,12 +221,29 @@ final class SingleBlockAutomationLogic {
     }
 
     void activateSluiceChain() {
-        if (state.progress == 0) {
-            state.progress = SingleBlockMachineBlockEntity.SLUICE_DURATION;
-            state.totalProgress = SingleBlockMachineBlockEntity.SLUICE_DURATION;
-            state.chainDelay = 20;
-            machine.markChangedAndSync();
+        state.progress = SingleBlockMachineBlockEntity.SLUICE_DURATION;
+        state.totalProgress = SingleBlockMachineBlockEntity.SLUICE_DURATION;
+        state.chainDelay = 20;
+        machine.markChangedAndSync();
+    }
+
+    private AABB feedingTroughArea() {
+        BlockPos position = machine.getBlockPos();
+        double minX = position.getX() - 3.5D;
+        double minY = position.getY() - 1.0D;
+        double minZ = position.getZ() - 3.5D;
+        double maxX = position.getX() + 4.5D;
+        double maxY = position.getY() + 2.0D;
+        double maxZ = position.getZ() + 4.5D;
+        switch (SingleBlockMachineSupport.facing(machine)) {
+            case DOWN -> minY -= 1.0D;
+            case UP -> maxY += 1.0D;
+            case NORTH -> minZ -= 1.0D;
+            case SOUTH -> maxZ += 1.0D;
+            case WEST -> minX -= 1.0D;
+            case EAST -> maxX += 1.0D;
         }
+        return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
     private boolean bufferFromInventory(IItemHandler source, PneumaticEndpointModule endpoint) {

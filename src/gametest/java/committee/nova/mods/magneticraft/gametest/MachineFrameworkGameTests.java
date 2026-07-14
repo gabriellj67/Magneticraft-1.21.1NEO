@@ -54,14 +54,21 @@ public final class MachineFrameworkGameTests {
     public static void capabilitiesAreDirectionalAndPersistByModuleId(GameTestHelper helper) {
         helper.setBlock(TEST_POS, ModMachineBlocks.BATTERY.get());
         BatteryBlockEntity battery = requireBlockEntity(helper, TEST_POS, BatteryBlockEntity.class);
-        helper.assertTrue(battery.getCapability(ForgeCapabilities.ENERGY, Direction.UP).isPresent(), "Battery top lost energy capability");
-        helper.assertTrue(battery.getCapability(ForgeCapabilities.ENERGY, Direction.SOUTH).isPresent(), "Battery back lost energy capability");
-        helper.assertFalse(battery.getCapability(ForgeCapabilities.ENERGY, Direction.NORTH).isPresent(), "Battery front exposed energy capability");
-        var oldEnergyCapability = battery.getCapability(ForgeCapabilities.ENERGY, Direction.UP);
+        for (Direction direction : Direction.values()) {
+            helper.assertFalse(
+                    battery.getCapability(ForgeCapabilities.ENERGY, direction).isPresent(),
+                    "Battery exposed external Forge Energy on " + direction
+            );
+        }
+        helper.assertFalse(battery.getCapability(ForgeCapabilities.ENERGY, null).isPresent(),
+                "Battery exposed an unsided Forge Energy capability");
+        var oldItemCapability = battery.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP);
+        helper.assertTrue(oldItemCapability.isPresent(), "Battery lost item automation capability");
         battery.invalidateCaps();
-        helper.assertFalse(oldEnergyCapability.isPresent(), "Invalidated energy capability remained live");
+        helper.assertFalse(oldItemCapability.isPresent(), "Invalidated battery item capability remained live");
         battery.reviveCaps();
-        helper.assertTrue(battery.getCapability(ForgeCapabilities.ENERGY, Direction.UP).isPresent(), "Energy capability did not revive");
+        helper.assertTrue(battery.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).isPresent(),
+                "Battery item capability did not revive");
         battery.energy().setEnergyStored(12_345);
         battery.inventory().setStackInSlot(0, new ItemStack(ModMachineItems.LOW_BATTERY.get()));
 
@@ -185,8 +192,8 @@ public final class MachineFrameworkGameTests {
         clickMenu.clicked(0, 0, ClickType.PICKUP, helper.makeMockSurvivalPlayer());
         helper.assertTrue(clickMenu.getCarried().getCount() == 32, "Ghost slot consumed the carried stack");
         helper.assertTrue(
-                filters.getFilter(0).is(Items.GOLD_INGOT) && filters.getFilter(0).getCount() == 1,
-                "Ghost slot did not copy the carried sample"
+                filters.getFilter(0).is(Items.IRON_INGOT) && filters.getFilter(0).getCount() == 1,
+                "Server-side generic slot click bypassed the validated filter message"
         );
         helper.succeed();
     }

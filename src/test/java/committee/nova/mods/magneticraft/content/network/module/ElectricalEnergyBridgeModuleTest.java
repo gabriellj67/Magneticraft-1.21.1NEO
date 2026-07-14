@@ -39,6 +39,23 @@ class ElectricalEnergyBridgeModuleTest {
     }
 
     @Test
+    void fullRateModeChargesAtTheExactThresholdAndReportsTheTransfer() {
+        Fixture fixture = fixture(
+                60.0D,
+                0,
+                1_000,
+                ElectricalEnergyBridgeModule.ChargeMode.FULL_RATE_AT_THRESHOLD
+        );
+        double before = fixture.node.energyJoules() + fixture.energy.getEnergyStored();
+
+        fixture.bridge.serverTick();
+
+        assertEquals(1_000, fixture.bridge.lastChargeTransfer());
+        assertEquals(1_000, fixture.energy.getEnergyStored());
+        assertEquals(before, fixture.node.energyJoules() + fixture.energy.getEnergyStored(), EPSILON);
+    }
+
+    @Test
     void lowVoltageBackfeedsWithoutRequiringAConnection() {
         Fixture fixture = fixture(55.0D, 500);
         double before = fixture.node.energyJoules() + fixture.energy.getEnergyStored();
@@ -66,18 +83,27 @@ class ElectricalEnergyBridgeModuleTest {
     }
 
     private static Fixture fixture(double voltage, int storedEnergy) {
+        return fixture(voltage, storedEnergy, 200, ElectricalEnergyBridgeModule.ChargeMode.LINEAR_RAMP);
+    }
+
+    private static Fixture fixture(
+            double voltage,
+            int storedEnergy,
+            int maxTransfer,
+            ElectricalEnergyBridgeModule.ChargeMode chargeMode
+    ) {
         TestHost host = new TestHost();
         ElectricalNode node = new ElectricalNode(1.0D, 125.0D, 0.001D);
         node.setVoltage(voltage);
         EnergyStorageModule energy = new EnergyStorageModule(
-                id("energy"), host, 10_000, 200, 200, side -> false, false, false
+                id("energy"), host, 10_000, maxTransfer, maxTransfer, side -> false, false, false
         );
         energy.setEnergyStored(storedEnergy);
         ElectricalNetworkModule electricity = new ElectricalNetworkModule(
                 id("electricity"), host, node, side -> true
         );
         ElectricalEnergyBridgeModule bridge = new ElectricalEnergyBridgeModule(
-                id("bridge"), electricity, energy, 60.0D, 60.0D, 200
+                id("bridge"), electricity, energy, 60.0D, 60.0D, maxTransfer, chargeMode
         );
         return new Fixture(node, energy, electricity, bridge);
     }

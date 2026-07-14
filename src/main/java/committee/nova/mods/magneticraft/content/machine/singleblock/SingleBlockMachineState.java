@@ -22,6 +22,7 @@ final class SingleBlockMachineState {
     private static final String INSERTER_FLAGS_TAG = "inserter_flags";
     private static final String ACTIVE_RECIPE_TAG = "active_recipe";
     private static final String THERMOPILE_FLUX_TAG = "thermopile_flux";
+    private static final String LAST_WORKING_TICK_TAG = "last_working_tick";
 
     int progress;
     int totalProgress;
@@ -41,6 +42,21 @@ final class SingleBlockMachineState {
     boolean inserterGrabItems;
     String activeRecipe = "";
     double thermopileFlux;
+    long lastWorkingTick = -1L;
+    int lastConsumption;
+    int lastProduction;
+
+    void recordWorking(long gameTime) {
+        lastWorkingTick = Math.max(0L, gameTime);
+        working = true;
+    }
+
+    boolean wasWorkingRecently(long gameTime, int graceTicks) {
+        return graceTicks > 0
+                && lastWorkingTick >= 0L
+                && gameTime >= lastWorkingTick
+                && gameTime - lastWorkingTick < graceTicks;
+    }
 
     int inserterFlags() {
         int flags = 0;
@@ -82,6 +98,7 @@ final class SingleBlockMachineState {
         tag.putInt(INSERTER_FLAGS_TAG, inserterFlags());
         tag.putString(ACTIVE_RECIPE_TAG, activeRecipe);
         tag.putDouble(THERMOPILE_FLUX_TAG, thermopileFlux);
+        tag.putLong(LAST_WORKING_TICK_TAG, lastWorkingTick);
     }
 
     void load(CompoundTag tag) {
@@ -101,6 +118,9 @@ final class SingleBlockMachineState {
         activeRecipe = tag.getString(ACTIVE_RECIPE_TAG);
         double loadedFlux = tag.getDouble(THERMOPILE_FLUX_TAG);
         thermopileFlux = Double.isFinite(loadedFlux) ? Math.max(0.0D, loadedFlux) : 0.0D;
+        lastWorkingTick = tag.contains(LAST_WORKING_TICK_TAG, Tag.TAG_LONG)
+                ? Math.max(-1L, tag.getLong(LAST_WORKING_TICK_TAG))
+                : -1L;
     }
 
     private void loadInserterFlags(int flags) {

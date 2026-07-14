@@ -57,8 +57,8 @@ public final class BatteryMenu extends AbstractMachineMenu {
                 ? ContainerLevelAccess.NULL
                 : ContainerLevelAccess.create(playerInventory.player.level(), position);
 
-        addSlot(new SlotItemHandler(handler, 0, 53, 35));
-        addSlot(new SlotItemHandler(handler, 1, 107, 35));
+        addSlot(filteredCellSlot(handler, 0, 53, 35));
+        addSlot(filteredCellSlot(handler, 1, 107, 35));
         addDataSlots(data);
         finishMachineSlots(playerInventory, 8, 84);
     }
@@ -78,6 +78,15 @@ public final class BatteryMenu extends AbstractMachineMenu {
 
     public int energyCapacity() {
         return Int32ContainerData.read(data, 1);
+    }
+
+    private static SlotItemHandler filteredCellSlot(IItemHandler handler, int slot, int x, int y) {
+        return new SlotItemHandler(handler, slot, x, y) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return BatteryBlockEntity.isValidCell(slot, stack);
+            }
+        };
     }
 
     @Override

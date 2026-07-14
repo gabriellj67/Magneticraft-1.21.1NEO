@@ -31,6 +31,8 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,6 +45,8 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     public static final BooleanProperty MASTER = BooleanProperty.create("master");
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
+    private static final VoxelShape SLUICE_SECONDARY_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 8.0D, 16.0D);
+    private static final VoxelShape FEEDING_TROUGH_SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D);
 
     private final SingleBlockMachineDefinition definition;
 
@@ -64,7 +68,9 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction facing = switch (definition.facingMode()) {
             case NONE -> Direction.NORTH;
-            case HORIZONTAL -> context.getHorizontalDirection().getOpposite();
+            case HORIZONTAL -> definition.doubleLength()
+                    ? context.getHorizontalDirection()
+                    : context.getHorizontalDirection().getOpposite();
             case ALL -> context.getClickedFace();
         };
         BlockState state = defaultBlockState().setValue(FACING, facing);
@@ -75,6 +81,22 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
             }
         }
         return state;
+    }
+
+    @Override
+    public VoxelShape getShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos position,
+            CollisionContext context
+    ) {
+        if (definition == SingleBlockMachineDefinition.FEEDING_TROUGH) {
+            return FEEDING_TROUGH_SHAPE;
+        }
+        if (definition == SingleBlockMachineDefinition.SLUICE_BOX && !state.getValue(MASTER)) {
+            return SLUICE_SECONDARY_SHAPE;
+        }
+        return super.getShape(state, level, position, context);
     }
 
     @Override

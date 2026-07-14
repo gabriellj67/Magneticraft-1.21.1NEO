@@ -36,6 +36,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
@@ -48,6 +49,7 @@ import net.minecraftforge.registries.RegistryObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -242,6 +244,42 @@ public final class BaseContentGameTests {
         assertNoForbiddenIds(helper, "recipe types", ForgeRegistries.RECIPE_TYPES.getKeys());
         assertNoForbiddenIds(helper, "recipe serializers", ForgeRegistries.RECIPE_SERIALIZERS.getKeys());
         assertNoForbiddenIds(helper, "sounds", ForgeRegistries.SOUND_EVENTS.getKeys());
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void internalAirBubbleNeverBecomesObtainableContent(GameTestHelper helper) {
+        ResourceLocation airBubble = Magneticraft.id("air_bubble");
+        ResourceLocation tubeLight = Magneticraft.id("tube_light");
+
+        helper.assertTrue(ForgeRegistries.BLOCKS.containsKey(airBubble), "air_bubble runtime block is missing");
+        helper.assertTrue(!ForgeRegistries.ITEMS.containsKey(airBubble), "air_bubble must not have a BlockItem");
+        helper.assertTrue(
+                Objects.equals(ModMachineBlocks.AIR_BUBBLE.get().getLootTable(), BuiltInLootTables.EMPTY),
+                "air_bubble must use the empty loot table"
+        );
+        helper.assertTrue(
+                ModMachineBlocks.blockItems().stream()
+                        .map(RegistryObject::get)
+                        .noneMatch(item -> Objects.equals(ForgeRegistries.ITEMS.getKey(item), airBubble)),
+                "air_bubble leaked into the creative item projection"
+        );
+        helper.assertTrue(
+                helper.getLevel().getRecipeManager().getRecipes().stream()
+                        .map(recipe -> recipe.getResultItem(helper.getLevel().registryAccess()))
+                        .filter(stack -> !stack.isEmpty())
+                        .noneMatch(stack -> Objects.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()), airBubble)),
+                "air_bubble leaked into a recipe result"
+        );
+
+        helper.assertTrue(ForgeRegistries.BLOCKS.containsKey(tubeLight), "tube_light public block is missing");
+        helper.assertTrue(ForgeRegistries.ITEMS.containsKey(tubeLight), "tube_light public BlockItem is missing");
+        helper.assertTrue(
+                ModMachineBlocks.blockItems().stream()
+                        .map(RegistryObject::get)
+                        .anyMatch(item -> Objects.equals(ForgeRegistries.ITEMS.getKey(item), tubeLight)),
+                "tube_light was incorrectly filtered as internal content"
+        );
         helper.succeed();
     }
 

@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.content.item.ElectricPistonItem;
 import committee.nova.mods.magneticraft.content.item.ElectricToolItem;
 import committee.nova.mods.magneticraft.content.item.LowBatteryItem;
 import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortProfile;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockRule;
@@ -37,6 +38,7 @@ final class AdvancedGuideDataProvider implements DataProvider {
     private final PackOutput.PathProvider multiblockGuides;
     private final PackOutput.PathProvider guideFiles;
     private final PackOutput.PathProvider itemGuides;
+    private final PackOutput.PathProvider machineGuides;
     private final List<GuideOpcodeEntry> opcodes;
 
     AdvancedGuideDataProvider(PackOutput output, Collection<GuideOpcodeEntry> opcodes) {
@@ -46,12 +48,16 @@ final class AdvancedGuideDataProvider implements DataProvider {
         );
         guideFiles = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "guide");
         itemGuides = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "guide/items");
+        machineGuides = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "guide/machines");
         this.opcodes = normalizeOpcodes(opcodes);
     }
 
     @Override
     public CompletableFuture<?> run(CachedOutput output) {
-        List<CompletableFuture<?>> writes = new ArrayList<>(MultiblockDefinition.values().length + 2);
+        List<MachineGuideContract> machines = singleBlockMachineGuides();
+        List<CompletableFuture<?>> writes = new ArrayList<>(
+                MultiblockDefinition.values().length + machines.size() + 2
+        );
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Path path = multiblockGuides.json(Magneticraft.id(definition.id()));
             writes.add(DataProvider.saveStable(output, multiblockGuide(definition), path));
@@ -66,6 +72,13 @@ final class AdvancedGuideDataProvider implements DataProvider {
                 portableItemGuide(),
                 itemGuides.json(Magneticraft.id("portable_electric"))
         ));
+        for (MachineGuideContract machine : machines) {
+            writes.add(DataProvider.saveStable(
+                    output,
+                    machineGuide(machine),
+                    machineGuides.json(Magneticraft.id(machine.id()))
+            ));
+        }
         return CompletableFuture.allOf(writes.toArray(CompletableFuture[]::new));
     }
 
@@ -150,6 +163,95 @@ final class AdvancedGuideDataProvider implements DataProvider {
         items.add(electricEquipmentItem("wireless_energy_receiver", true));
         items.add(electricEquipmentItem("wind_turbine", true));
         root.add("items", items);
+        return root;
+    }
+
+    static List<MachineGuideContract> singleBlockMachineGuides() {
+        List<MachineGuideContract> machines = new ArrayList<>(SingleBlockMachineDefinition.values().length + 3);
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            machines.add(new MachineGuideContract(
+                    definition.id(),
+                    "block.magneticraft." + definition.id(),
+                    "guide.magneticraft.machine." + definition.id() + ".description",
+                    definition.guideCategory(),
+                    definition.inventorySlots(),
+                    definition.ghostSlots(),
+                    definition.hasMenu(),
+                    definition.redstoneControl().name().toLowerCase(Locale.ROOT),
+                    definition.processingKind().name().toLowerCase(Locale.ROOT),
+                    definition.automationProfile().name().toLowerCase(Locale.ROOT),
+                    definition.slotRoles().stream().map(role -> role.name().toLowerCase(Locale.ROOT)).toList(),
+                    definition.physicalPorts().stream()
+                            .map(port -> port.name().toLowerCase(Locale.ROOT))
+                            .sorted()
+                            .toList()
+            ));
+        }
+        machines.add(new MachineGuideContract(
+                "crushing_table",
+                "block.magneticraft.crushing_table",
+                "guide.magneticraft.machine.crushing_table.description",
+                "processing",
+                1,
+                0,
+                false,
+                "ignored",
+                "crushing_table",
+                "none",
+                List.of("input"),
+                List.of()
+        ));
+        machines.add(new MachineGuideContract(
+                "battery_box",
+                "block.magneticraft.battery_box",
+                "guide.magneticraft.machine.battery_box.description",
+                "energy",
+                2,
+                0,
+                true,
+                "ignored",
+                "none",
+                "electric_top_bottom_back",
+                List.of("charge", "discharge"),
+                List.of("electricity", "item")
+        ));
+        machines.add(new MachineGuideContract(
+                "electric_furnace",
+                "block.magneticraft.electric_furnace",
+                "guide.magneticraft.machine.electric_furnace.description",
+                "processing",
+                2,
+                0,
+                true,
+                "ignored",
+                "smelting",
+                "item_input_output",
+                List.of("input", "output"),
+                List.of("electricity", "item")
+        ));
+        machines.sort(Comparator.comparing(MachineGuideContract::id));
+        return List.copyOf(machines);
+    }
+
+    static JsonObject machineGuide(MachineGuideContract machine) {
+        JsonObject root = new JsonObject();
+        root.addProperty("schema_version", SCHEMA_VERSION);
+        root.addProperty("id", Magneticraft.MOD_ID + ":" + machine.id());
+        root.addProperty("translation_key", machine.translationKey());
+        root.addProperty("description", machine.descriptionKey());
+        root.addProperty("category", machine.category());
+        root.addProperty("inventory_slots", machine.inventorySlots());
+        root.addProperty("ghost_slots", machine.ghostSlots());
+        root.addProperty("has_menu", machine.hasMenu());
+        root.addProperty("redstone_control", machine.redstoneControl());
+        root.addProperty("processing_kind", machine.processingKind());
+        root.addProperty("automation_profile", machine.automationProfile());
+        JsonArray slots = new JsonArray();
+        machine.slotRoles().forEach(slots::add);
+        root.add("slot_roles", slots);
+        JsonArray ports = new JsonArray();
+        machine.physicalPorts().forEach(ports::add);
+        root.add("physical_ports", ports);
         return root;
     }
 
@@ -318,5 +420,31 @@ final class AdvancedGuideDataProvider implements DataProvider {
             case OIL_HEATER, PUMPJACK, REFINERY -> "oil";
             default -> "energy";
         };
+    }
+
+    record MachineGuideContract(
+            String id,
+            String translationKey,
+            String descriptionKey,
+            String category,
+            int inventorySlots,
+            int ghostSlots,
+            boolean hasMenu,
+            String redstoneControl,
+            String processingKind,
+            String automationProfile,
+            List<String> slotRoles,
+            List<String> physicalPorts
+    ) {
+        MachineGuideContract {
+            if (id.isBlank() || translationKey.isBlank() || descriptionKey.isBlank() || category.isBlank()) {
+                throw new IllegalArgumentException("Machine guide identifiers must not be blank");
+            }
+            if (inventorySlots < 0 || ghostSlots < 0 || slotRoles.size() != inventorySlots) {
+                throw new IllegalArgumentException("Invalid slot contract for " + id);
+            }
+            slotRoles = List.copyOf(slotRoles);
+            physicalPorts = List.copyOf(physicalPorts);
+        }
     }
 }

@@ -1,0 +1,18 @@
+{
+  "automation_profile": "all_sides_forge_energy_with_vertical_heat",
+  "category": "energy",
+  "description": "guide.magneticraft.machine.forge_energy_heater.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:forge_energy_heater",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "forge_energy",
+    "heat"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.forge_energy_heater"
+}

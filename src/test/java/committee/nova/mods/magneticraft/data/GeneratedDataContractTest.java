@@ -321,6 +321,23 @@ class GeneratedDataContractTest {
                 assertFile(recipe("crafting/" + id));
             }
         }
+        for (var guide : AdvancedGuideDataProvider.singleBlockMachineGuides()) {
+            assertFile(ASSETS.resolve("guide/machines/" + guide.id() + ".json"));
+            for (JsonObject language : List.of(english, chinese)) {
+                assertTrue(language.has(guide.translationKey()), guide.translationKey());
+                assertTrue(language.has(guide.descriptionKey()), guide.descriptionKey());
+                assertTrue(language.has("gui.magneticraft.guide.category." + guide.category()), guide.id());
+                assertTrue(language.has("gui.magneticraft.guide.redstone." + guide.redstoneControl()), guide.id());
+                assertTrue(language.has("gui.magneticraft.guide.processing." + guide.processingKind()), guide.id());
+                assertTrue(language.has("gui.magneticraft.guide.automation." + guide.automationProfile()), guide.id());
+                for (String role : guide.slotRoles()) {
+                    assertTrue(language.has("gui.magneticraft.guide.slot." + role), guide.id() + ":" + role);
+                }
+                for (String port : guide.physicalPorts()) {
+                    assertTrue(language.has("gui.magneticraft.guide.port." + port), guide.id() + ":" + port);
+                }
+            }
+        }
         for (SingleBlockMachineDefinition endpoint : Set.of(
                 SingleBlockMachineDefinition.RELAY,
                 SingleBlockMachineDefinition.FILTER,
@@ -357,7 +374,7 @@ class GeneratedDataContractTest {
         assertFalse(Files.exists(DATA.resolve("loot_tables/blocks/air_bubble.json")));
 
         assertRecipeDirectory("sluice_box", 16, "magneticraft:sluice_box");
-        assertRecipeDirectory("gasification_unit", 19, "magneticraft:gasification_unit");
+        assertRecipeDirectory("gasification_unit", 28, "magneticraft:gasification_unit");
         assertRecipeDirectory("thermopile", 33, "magneticraft:thermopile");
         assertRecipeDirectory("fluid_fuel", 10, "magneticraft:fluid_fuel");
         JsonObject sand = readObject(recipe("sluice_box/sand"));

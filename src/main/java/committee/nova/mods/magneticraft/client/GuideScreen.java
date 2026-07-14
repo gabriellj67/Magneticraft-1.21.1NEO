@@ -74,6 +74,7 @@ public final class GuideScreen extends Screen {
         hoveredLegend = Component.empty();
         switch (mode) {
             case STRUCTURES -> renderStructures(graphics, mouseX, mouseY);
+            case MACHINES -> renderMachines(graphics);
             case ITEMS -> renderItems(graphics);
             case OPCODES -> renderOpcodes(graphics);
         }
@@ -241,6 +242,94 @@ public final class GuideScreen extends Screen {
         renderItemStat(graphics, "gui.magneticraft.guide.use_cost", selected.useCostFe(), contentLeft, cursorY);
     }
 
+    private void renderMachines(GuiGraphics graphics) {
+        List<GuideRepository.MachineGuide> machines = filteredMachines();
+        if (machines.isEmpty()) {
+            graphics.drawString(
+                    font,
+                    Component.translatable("gui.magneticraft.guide.no_results"),
+                    12,
+                    54,
+                    0xFF8B949E,
+                    false
+            );
+            return;
+        }
+        selectedIndex = Math.max(0, Math.min(selectedIndex, machines.size() - 1));
+        GuideRepository.MachineGuide selected = machines.get(selectedIndex);
+        renderEntryList(graphics, machines.stream()
+                .map(machine -> Component.translatable(machine.translationKey()))
+                .toList());
+
+        int contentLeft = SIDEBAR_WIDTH + 12;
+        int contentWidth = Math.max(80, width - contentLeft - 16);
+        graphics.drawString(
+                font,
+                Component.translatable(selected.translationKey()),
+                contentLeft,
+                42,
+                0xFFE6EDF3,
+                false
+        );
+        graphics.drawString(
+                font,
+                Component.translatable("gui.magneticraft.guide.category." + selected.category()),
+                contentLeft,
+                54,
+                0xFF8B949E,
+                false
+        );
+        Component description = Component.translatable(selected.descriptionKey());
+        graphics.drawWordWrap(font, description, contentLeft, 68, contentWidth, 0xFFB8C0C8);
+        int cursorY = 68 + Math.max(1, font.split(description, contentWidth).size()) * 9 + 6;
+        Component yes = Component.translatable("gui.magneticraft.guide.yes");
+        Component no = Component.translatable("gui.magneticraft.guide.no");
+        List<Component> details = List.of(
+                Component.translatable(
+                        "gui.magneticraft.guide.machine.inventory",
+                        selected.inventorySlots(),
+                        selected.ghostSlots()
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.machine.menu",
+                        selected.hasMenu() ? yes : no
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.machine.redstone",
+                        Component.translatable("gui.magneticraft.guide.redstone." + selected.redstoneControl())
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.machine.processing",
+                        Component.translatable("gui.magneticraft.guide.processing." + selected.processingKind())
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.machine.automation",
+                        Component.translatable("gui.magneticraft.guide.automation." + selected.automationProfile())
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.machine.slots",
+                        translatedList("gui.magneticraft.guide.slot.", selected.slotRoles())
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.machine.ports",
+                        translatedList("gui.magneticraft.guide.port.", selected.physicalPorts())
+                )
+        );
+        for (Component detail : details) {
+            graphics.drawWordWrap(font, detail, contentLeft, cursorY, contentWidth, 0xFF79C0FF);
+            cursorY += Math.max(1, font.split(detail, contentWidth).size()) * 9;
+        }
+    }
+
+    private static String translatedList(String prefix, List<String> values) {
+        if (values.isEmpty()) {
+            return Component.translatable("gui.magneticraft.guide.none").getString();
+        }
+        return values.stream()
+                .map(value -> Component.translatable(prefix + value).getString())
+                .collect(java.util.stream.Collectors.joining(", "));
+    }
+
     private int renderItemStat(GuiGraphics graphics, String translationKey, int value, int x, int y) {
         if (value <= 0) {
             return y;
@@ -304,6 +393,7 @@ public final class GuideScreen extends Screen {
     private void select(int amount) {
         int size = switch (mode) {
             case STRUCTURES -> filteredStructures().size();
+            case MACHINES -> filteredMachines().size();
             case ITEMS -> filteredItems().size();
             case OPCODES -> filteredOpcodes().size();
         };
@@ -334,6 +424,7 @@ public final class GuideScreen extends Screen {
         nextLayer.active = previousLayer.active;
         boolean hasEntries = switch (mode) {
             case STRUCTURES -> !filteredStructures().isEmpty();
+            case MACHINES -> !filteredMachines().isEmpty();
             case ITEMS -> !filteredItems().isEmpty();
             case OPCODES -> !filteredOpcodes().isEmpty();
         };
@@ -356,6 +447,16 @@ public final class GuideScreen extends Screen {
                 .filter(opcode -> query.isEmpty()
                         || opcode.id().toLowerCase(Locale.ROOT).contains(query)
                         || Component.translatable(opcode.descriptionKey()).getString().toLowerCase(Locale.ROOT).contains(query))
+                .toList();
+    }
+
+    private List<GuideRepository.MachineGuide> filteredMachines() {
+        String query = query();
+        return GuideRepository.INSTANCE.machines().stream()
+                .filter(machine -> query.isEmpty()
+                        || machine.id().toString().toLowerCase(Locale.ROOT).contains(query)
+                        || Component.translatable(machine.translationKey()).getString().toLowerCase(Locale.ROOT).contains(query)
+                        || Component.translatable(machine.descriptionKey()).getString().toLowerCase(Locale.ROOT).contains(query))
                 .toList();
     }
 
@@ -393,6 +494,7 @@ public final class GuideScreen extends Screen {
 
     private enum Mode {
         STRUCTURES("gui.magneticraft.guide.mode.structures"),
+        MACHINES("gui.magneticraft.guide.mode.machines"),
         ITEMS("gui.magneticraft.guide.mode.items"),
         OPCODES("gui.magneticraft.guide.mode.opcodes");
 

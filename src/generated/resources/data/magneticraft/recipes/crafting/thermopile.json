@@ -9,7 +9,7 @@
       "tag": "magneticraft:light_plates/copper"
     },
     "C": {
-      "item": "magneticraft:iron_grate"
+      "item": "magneticraft:machine_casing"
     }
   },
   "pattern": [

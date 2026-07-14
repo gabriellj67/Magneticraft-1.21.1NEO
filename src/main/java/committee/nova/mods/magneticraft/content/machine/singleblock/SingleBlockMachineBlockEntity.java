@@ -34,7 +34,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +45,7 @@ import org.jetbrains.annotations.Nullable;
  * Module, capability and persistence host for the Task 5 single-block behavior strategies.
  */
 public final class SingleBlockMachineBlockEntity extends MachineBlockEntity implements MenuProvider {
-    public static final int MENU_LOGICAL_DATA_COUNT = 12;
+    public static final int MENU_LOGICAL_DATA_COUNT = 17;
     public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     public static final int SLUICE_MAX_ITEMS = 10;
     public static final int SLUICE_DURATION = 80;
@@ -66,11 +68,14 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     private final ElectricalNetworkModule electricity;
     @Nullable
     private final HeatNetworkModule heat;
+    @Nullable
+    private final ElectricalEnergyBridgeModule electricalBridge;
     private final ContainerData menuData;
     private final SingleBlockMachineState state = new SingleBlockMachineState();
     private final SingleBlockMachineLogic logic;
     private final SingleBlockMachineInteractions interactions;
     private final SingleBlockFabricator fabricator;
+    private LazyOptional<IFluidHandler> boilerFluidCapability = LazyOptional.empty();
     @Nullable
     private BlockPos multiblockController;
 
@@ -106,13 +111,14 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         FluidTankModule[] tanks = createFluidTanks();
         primaryTank = tanks[0];
         secondaryTank = tanks[1];
+        reviveBoilerFluidCapability();
 
         EnergyStorageModule createdEnergy = createEnergyStorage();
         energy = createdEnergy;
         ElectricalNetworkModule createdElectricity = createElectricalNetwork();
         electricity = createdElectricity;
         heat = createHeatNetwork();
-        addElectricalBridge(createdEnergy, createdElectricity);
+        electricalBridge = createElectricalBridge(createdEnergy, createdElectricity);
         logic = new SingleBlockMachineLogic(this, this.state);
         interactions = new SingleBlockMachineInteractions(this, this.state);
         fabricator = new SingleBlockFabricator(this);
@@ -130,7 +136,14 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                         ? inserterFlags()
                         : this.state.doorOpen ? 1 : 0,
                 () -> electricity == null ? 0 : (int) Math.round(electricity.node().voltage() * 10.0D),
-                () -> (int) Math.round(this.state.thermopileFlux)
+                () -> (int) Math.round(this.state.thermopileFlux),
+                () -> this.state.burnProgress,
+                () -> this.state.burnTotal,
+                () -> this.state.lastConsumption,
+                () -> definition == SingleBlockMachineDefinition.THERMOPILE
+                        ? (int) Math.round(this.state.thermopileFlux / 10_000.0D * 20.0D)
+                        : this.state.lastProduction,
+                () -> this.state.working ? 1 : 0
         );
     }
 
@@ -152,6 +165,9 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                 return;
             }
             machine.releaseMultiblockClaim(controller);
+        }
+        if (machine.definition == SingleBlockMachineDefinition.INFINITE_ENERGY) {
+            machine.logic.clampInfiniteEnergyVoltage();
         }
         machine.tickModules();
         machine.logic.tick((ServerLevel) level);
@@ -207,6 +223,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         return heat;
     }
 
+    @Nullable
+    ElectricalEnergyBridgeModule electricalBridge() {
+        return electricalBridge;
+    }
+
     public ContainerData menuData() {
         return menuData;
     }
@@ -237,7 +258,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         if (multiblockController != null) {
             return InteractionResult.CONSUME;
         }
-        return interactions.interact(player, hand);
+        return interactions.interact(player, hand, hit);
     }
 
     public boolean claimedByMultiblock() {
@@ -265,10 +286,28 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     }
 
     @Override
+    public void invalidateCaps() {
+        boilerFluidCapability.invalidate();
+        boilerFluidCapability = LazyOptional.empty();
+        super.invalidateCaps();
+    }
+
+    @Override
+    public void reviveCaps() {
+        super.reviveCaps();
+        reviveBoilerFluidCapability();
+    }
+
+    @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction side) {
-        return multiblockController == null
-                ? super.getCapability(capability, side)
-                : LazyOptional.empty();
+        if (multiblockController != null) {
+            return LazyOptional.empty();
+        }
+        if (capability == ForgeCapabilities.FLUID_HANDLER
+                && definition == SingleBlockMachineDefinition.STEAM_BOILER) {
+            return boilerFluidCapability.cast();
+        }
+        return super.getCapability(capability, side);
     }
 
     public void onBroken() {
@@ -376,10 +415,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                     fluid -> true,
                     side -> FluidTankModule.TankAccess.BOTH
             ));
-            case WATER_GENERATOR -> primary = addModule(tank(
-                    "water",
+            case WATER_GENERATOR -> primary = addModule(FluidTankModule.infiniteSource(
+                    Magneticraft.id("water"),
+                    this,
                     32_000,
-                    fluid -> fluid.getFluid().defaultFluidState().is(FluidTags.WATER),
+                    () -> new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 32_000),
                     side -> FluidTankModule.TankAccess.OUTPUT
             ));
             case STEAM_BOILER -> {
@@ -387,17 +427,13 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                         "water",
                         1_000,
                         fluid -> fluid.getFluid().defaultFluidState().is(FluidTags.WATER),
-                        side -> side == Direction.UP
-                                ? FluidTankModule.TankAccess.NONE
-                                : FluidTankModule.TankAccess.INPUT
+                        side -> FluidTankModule.TankAccess.INPUT
                 ));
                 secondary = addModule(tank(
                         "steam",
                         16_000,
                         fluid -> fluid.getFluid() == ModFluids.get(FluidDefinition.STEAM).source().get(),
-                        side -> side == Direction.UP
-                                ? FluidTankModule.TankAccess.OUTPUT
-                                : FluidTankModule.TankAccess.NONE
+                        side -> FluidTankModule.TankAccess.OUTPUT
                 ));
             }
             case GASIFICATION_UNIT -> primary = addModule(tank(
@@ -425,10 +461,13 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     private EnergyStorageModule createEnergyStorage() {
         return switch (definition) {
             case ELECTRIC_HEATER -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"), this, 10_000, 640, 80, side -> false, false, false
+                    Magneticraft.id("energy_storage"), this, 10_000, 200, 80, side -> false, false, false
             ));
             case RF_HEATER -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"), this, 80_000, 80, 80, side -> true, true, false
+                    Magneticraft.id("energy_storage"), this, 80_000, 80_000, 80_000, side -> true, true, true
+            ));
+            case THERMOPILE -> addModule(new EnergyStorageModule(
+                    Magneticraft.id("energy_storage"), this, 80_000, 200, 200, side -> false, false, false
             ));
             case RF_TRANSFORMER -> addModule(new EnergyStorageModule(
                     Magneticraft.id("energy_storage"), this, 80_000, 100, 100, side -> true, true, false
@@ -437,10 +476,10 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                     Magneticraft.id("energy_storage"),
                     this,
                     80_000,
-                    1_000,
-                    1_000,
-                    side -> side == null || side == facing().getOpposite(),
-                    false,
+                    80_000,
+                    80_000,
+                    side -> true,
+                    true,
                     true
             ));
             default -> null;
@@ -479,17 +518,22 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         };
     }
 
-    private void addElectricalBridge(
+    @Nullable
+    private ElectricalEnergyBridgeModule createElectricalBridge(
             @Nullable EnergyStorageModule createdEnergy,
             @Nullable ElectricalNetworkModule createdElectricity
     ) {
         if (createdEnergy == null || createdElectricity == null) {
-            return;
+            return null;
         }
-        switch (definition) {
+        return switch (definition) {
             case ELECTRIC_HEATER -> addModule(new ElectricalEnergyBridgeModule(
                     Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
-                    60.0D, 60.0D, 640
+                    60.0D, 60.0D, 200
+            ));
+            case THERMOPILE -> addModule(new ElectricalEnergyBridgeModule(
+                    Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
+                    120.0D, 120.0D, 200
             ));
             case RF_TRANSFORMER -> addModule(new ElectricalEnergyBridgeModule(
                     Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
@@ -497,11 +541,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
             ));
             case ELECTRIC_ENGINE -> addModule(new ElectricalEnergyBridgeModule(
                     Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
-                    60.0D, 60.0D, 1_000
+                    60.0D, 0.0D, 1_000,
+                    ElectricalEnergyBridgeModule.ChargeMode.FULL_RATE_AT_THRESHOLD
             ));
-            default -> {
-            }
-        }
+            default -> null;
+        };
     }
 
     private boolean isInventoryItemValid(int slot, ItemStack stack) {
@@ -539,6 +583,63 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
             result[slot] = slot;
         }
         return result;
+    }
+
+    private void reviveBoilerFluidCapability() {
+        if (definition == SingleBlockMachineDefinition.STEAM_BOILER
+                && primaryTank != null
+                && secondaryTank != null
+                && !boilerFluidCapability.isPresent()) {
+            boilerFluidCapability = LazyOptional.of(() -> new BoilerFluidHandler(primaryTank, secondaryTank));
+        }
+    }
+
+    private record BoilerFluidHandler(
+            FluidTankModule water,
+            FluidTankModule steam
+    ) implements IFluidHandler {
+        @Override
+        public int getTanks() {
+            return 2;
+        }
+
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+            return switch (tank) {
+                case 0 -> water.tank().getFluidInTank(0);
+                case 1 -> steam.tank().getFluidInTank(0);
+                default -> FluidStack.EMPTY;
+            };
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+            return switch (tank) {
+                case 0 -> water.tank().getTankCapacity(0);
+                case 1 -> steam.tank().getTankCapacity(0);
+                default -> 0;
+            };
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, FluidStack stack) {
+            return tank == 0 && water.tank().isFluidValid(0, stack);
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+            return water.tank().fill(resource, action);
+        }
+
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+            return steam.tank().drain(resource, action);
+        }
+
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            return steam.tank().drain(maxDrain, action);
+        }
     }
 
     private Direction facing() {

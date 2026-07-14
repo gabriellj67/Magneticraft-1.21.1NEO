@@ -20,6 +20,10 @@ class GuideRepositoryTest {
             "magneticraft",
             "guide/items/portable_electric.json"
     );
+    private static final ResourceLocation MACHINE_FILE = ResourceLocation.fromNamespaceAndPath(
+            "magneticraft",
+            "guide/machines/electric_furnace.json"
+    );
 
     @Test
     void parsesMirroringAndPortSummary() {
@@ -85,6 +89,42 @@ class GuideRepositoryTest {
         assertEquals(1_000, drill.breakCostFe());
         assertEquals(2_000, drill.attackCostFe());
         assertEquals(0, drill.useCostFe());
+    }
+
+    @Test
+    void parsesSingleBlockMachineContracts() {
+        JsonObject root = JsonParser.parseString("""
+                {
+                  "schema_version": 1,
+                  "id": "magneticraft:electric_furnace",
+                  "translation_key": "block.magneticraft.electric_furnace",
+                  "description": "guide.magneticraft.machine.electric_furnace.description",
+                  "category": "processing",
+                  "inventory_slots": 2,
+                  "ghost_slots": 0,
+                  "has_menu": true,
+                  "redstone_control": "ignored",
+                  "processing_kind": "recipe",
+                  "automation_profile": "input_output",
+                  "slot_roles": ["input", "output"],
+                  "physical_ports": ["electric"]
+                }
+                """).getAsJsonObject();
+
+        GuideRepository.MachineGuide guide = GuideRepository.parseMachine(MACHINE_FILE, root);
+
+        assertEquals("magneticraft:electric_furnace", guide.id().toString());
+        assertEquals("block.magneticraft.electric_furnace", guide.translationKey());
+        assertEquals("guide.magneticraft.machine.electric_furnace.description", guide.descriptionKey());
+        assertEquals("processing", guide.category());
+        assertEquals(2, guide.inventorySlots());
+        assertEquals(0, guide.ghostSlots());
+        assertTrue(guide.hasMenu());
+        assertEquals("ignored", guide.redstoneControl());
+        assertEquals("recipe", guide.processingKind());
+        assertEquals("input_output", guide.automationProfile());
+        assertEquals(List.of("input", "output"), guide.slotRoles());
+        assertEquals(List.of("electric"), guide.physicalPorts());
     }
 
     private static JsonObject baseGuide() {

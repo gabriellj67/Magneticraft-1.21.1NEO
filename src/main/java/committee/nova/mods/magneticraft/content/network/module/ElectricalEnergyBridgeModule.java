@@ -18,6 +18,8 @@ public final class ElectricalEnergyBridgeModule implements MachineModule {
     private final double chargeThresholdVolts;
     private final double dischargeThresholdVolts;
     private final int maxTransfer;
+    private final ChargeMode chargeMode;
+    private int lastChargeTransfer;
 
     public ElectricalEnergyBridgeModule(
             ResourceLocation id,
@@ -26,6 +28,26 @@ public final class ElectricalEnergyBridgeModule implements MachineModule {
             double chargeThresholdVolts,
             double dischargeThresholdVolts,
             int maxTransfer
+    ) {
+        this(
+                id,
+                electricity,
+                energy,
+                chargeThresholdVolts,
+                dischargeThresholdVolts,
+                maxTransfer,
+                ChargeMode.LINEAR_RAMP
+        );
+    }
+
+    public ElectricalEnergyBridgeModule(
+            ResourceLocation id,
+            ElectricalNetworkModule electricity,
+            EnergyStorageModule energy,
+            double chargeThresholdVolts,
+            double dischargeThresholdVolts,
+            int maxTransfer,
+            ChargeMode chargeMode
     ) {
         if (!Double.isFinite(chargeThresholdVolts)
                 || !Double.isFinite(dischargeThresholdVolts)
@@ -40,6 +62,7 @@ public final class ElectricalEnergyBridgeModule implements MachineModule {
         this.chargeThresholdVolts = chargeThresholdVolts;
         this.dischargeThresholdVolts = dischargeThresholdVolts;
         this.maxTransfer = maxTransfer;
+        this.chargeMode = Objects.requireNonNull(chargeMode);
     }
 
     @Override
@@ -49,27 +72,39 @@ public final class ElectricalEnergyBridgeModule implements MachineModule {
 
     @Override
     public void serverTick() {
+        lastChargeTransfer = 0;
         double voltage = electricity.node().voltage();
-        if (voltage > chargeThresholdVolts) {
-            chargeFeBuffer();
+        boolean mayCharge = chargeMode == ChargeMode.FULL_RATE_AT_THRESHOLD
+                ? voltage >= chargeThresholdVolts
+                : voltage > chargeThresholdVolts;
+        if (mayCharge) {
+            lastChargeTransfer = chargeFeBuffer();
         } else if (voltage < dischargeThresholdVolts) {
             dischargeFeBuffer();
         }
     }
 
-    private void chargeFeBuffer() {
-        double ramp = Math.min(
-                1.0D,
-                (electricity.node().voltage() - chargeThresholdVolts) / CHARGE_RAMP_VOLTS
-        );
-        int rate = (int) Math.floor(ramp * maxTransfer);
+    public int lastChargeTransfer() {
+        return lastChargeTransfer;
+    }
+
+    private int chargeFeBuffer() {
+        int rate = maxTransfer;
+        if (chargeMode == ChargeMode.LINEAR_RAMP) {
+            double ramp = Math.min(
+                    1.0D,
+                    (electricity.node().voltage() - chargeThresholdVolts) / CHARGE_RAMP_VOLTS
+            );
+            rate = (int) Math.floor(ramp * maxTransfer);
+        }
         int room = energy.receiveEnergy(rate, true);
         int transferred = wholeJoules(electricity.node().removeEnergy(room, true));
         if (transferred <= 0) {
-            return;
+            return 0;
         }
         electricity.node().removeEnergy(transferred, false);
         energy.receiveEnergy(transferred, false);
+        return transferred;
     }
 
     private void dischargeFeBuffer() {
@@ -84,5 +119,10 @@ public final class ElectricalEnergyBridgeModule implements MachineModule {
 
     private static int wholeJoules(double joules) {
         return (int) Math.min(Integer.MAX_VALUE, Math.floor(Math.max(0.0D, joules)));
+    }
+
+    public enum ChargeMode {
+        LINEAR_RAMP,
+        FULL_RATE_AT_THRESHOLD
     }
 }

@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.gametest;
 
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.config.MagneticraftConfig;
 import committee.nova.mods.magneticraft.content.machine.singleblock.AirBubbleBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
@@ -16,6 +17,7 @@ import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.network.SetGhostFilterMessage;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import net.minecraft.core.BlockPos;
@@ -23,8 +25,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -33,6 +42,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -67,7 +78,7 @@ public final class SingleBlockMachineGameTests {
                 "Sluice recipe inventory is incomplete"
         );
         helper.assertTrue(
-                helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipeTypes.GASIFICATION_TYPE.get()).size() == 19,
+                helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipeTypes.GASIFICATION_TYPE.get()).size() == 28,
                 "Gasification recipe inventory is incomplete"
         );
         helper.assertTrue(
@@ -77,6 +88,31 @@ public final class SingleBlockMachineGameTests {
         helper.assertTrue(
                 helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get()).size() == 10,
                 "Fluid-fuel recipe inventory is incomplete"
+        );
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void boxExposesAndPersistsItsTwentySevenStorageSlots(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.BOX, Direction.NORTH));
+        SingleBlockMachineBlockEntity box = requireMachine(helper, CENTER);
+        helper.assertTrue(box.inventory().slots() == 27, "Wooden box does not have 27 slots");
+        for (Direction direction : Direction.values()) {
+            IItemHandler handler = box.getCapability(ForgeCapabilities.ITEM_HANDLER, direction)
+                    .orElseThrow(AssertionError::new);
+            helper.assertTrue(handler.getSlots() == 27, "Wooden box side lost storage access: " + direction);
+        }
+        box.inventory().setStackInSlot(26, new ItemStack(Items.DIAMOND, 3));
+        CompoundTag saved = box.saveWithoutMetadata();
+        SingleBlockMachineBlockEntity restored = new SingleBlockMachineBlockEntity(
+                box.getBlockPos(),
+                box.getBlockState()
+        );
+        restored.load(saved);
+        helper.assertTrue(
+                restored.inventory().getStackInSlot(26).is(Items.DIAMOND)
+                        && restored.inventory().getStackInSlot(26).getCount() == 3,
+                "Wooden box did not persist its last slot"
         );
         helper.succeed();
     }
@@ -147,18 +183,180 @@ public final class SingleBlockMachineGameTests {
         helper.assertFalse(secondary.getValue(SingleBlockMachineBlock.MASTER), "Sluice secondary half became authoritative");
         helper.assertTrue(helper.getBlockEntity(CENTER) instanceof SingleBlockMachineBlockEntity, "Primary half lost block entity");
         helper.assertTrue(helper.getBlockEntity(CENTER.east()) == null, "Secondary half created duplicate block entity");
+        helper.assertTrue(
+                Math.abs(primary.getShape(helper.getLevel(), helper.absolutePos(CENTER)).bounds().maxY - 1.0D) < 1.0E-6D,
+                "Sluice primary half lost its full-height shape"
+        );
+        helper.assertTrue(
+                Math.abs(secondary.getShape(helper.getLevel(), helper.absolutePos(CENTER.east())).bounds().maxY - 0.5D) < 1.0E-6D,
+                "Sluice secondary half is not half-height"
+        );
+
+        SingleBlockMachineBlock feedingTrough = (SingleBlockMachineBlock) ModMachineBlocks
+                .machine(SingleBlockMachineDefinition.FEEDING_TROUGH).get();
+        BlockState troughPrimary = feedingTrough.defaultBlockState()
+                .setValue(SingleBlockMachineBlock.FACING, Direction.EAST)
+                .setValue(SingleBlockMachineBlock.MASTER, true);
+        BlockState troughSecondary = troughPrimary
+                .setValue(SingleBlockMachineBlock.FACING, Direction.WEST)
+                .setValue(SingleBlockMachineBlock.MASTER, false);
+        helper.assertTrue(
+                Math.abs(troughPrimary.getShape(helper.getLevel(), helper.absolutePos(CENTER)).bounds().maxY - 0.75D) < 1.0E-6D,
+                "Feeding-trough primary half is not twelve pixels high"
+        );
+        helper.assertTrue(
+                Math.abs(troughSecondary.getShape(helper.getLevel(), helper.absolutePos(CENTER.east())).bounds().maxY - 0.75D) < 1.0E-6D,
+                "Feeding-trough secondary half is not twelve pixels high"
+        );
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 30)
-    public static void waterGeneratorExportsExactlyTwentyMilliBucketsPerTick(GameTestHelper helper) {
+    public static void waterGeneratorExportsTwentyMilliBucketsPerSidePerTick(GameTestHelper helper) {
         helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.WATER_GENERATOR, Direction.NORTH));
-        helper.setBlock(CENTER.east(), machineState(SingleBlockMachineDefinition.SMALL_TANK, Direction.NORTH));
-        SingleBlockMachineBlockEntity tank = requireMachine(helper, CENTER.east());
+        SingleBlockMachineBlockEntity generator = requireMachine(helper, CENTER);
+        SingleBlockMachineBlockEntity[] tanks = new SingleBlockMachineBlockEntity[Direction.values().length];
+        for (Direction direction : Direction.values()) {
+            BlockPos tankPosition = CENTER.relative(direction);
+            helper.setBlock(tankPosition, machineState(SingleBlockMachineDefinition.SMALL_TANK, Direction.NORTH));
+            tanks[direction.ordinal()] = requireMachine(helper, tankPosition);
+        }
         helper.runAfterDelay(5, () -> {
-            int amount = tank.primaryTank().tank().getFluidAmount();
-            helper.assertTrue(amount >= 80 && amount <= 120, "Water generator violated its 20 mB/t transfer rate: " + amount);
-            helper.assertTrue(tank.primaryTank().tank().getFluid().getFluid() == Fluids.WATER, "Water generator exported another fluid");
+            int rate = MagneticraftConfig.WATER_GENERATOR_PER_TICK_WATER.get();
+            helper.assertTrue(rate == 20, "Water-generator default rate changed from 20 mB/t: " + rate);
+            int total = 0;
+            for (SingleBlockMachineBlockEntity tank : tanks) {
+                int amount = tank.primaryTank().tank().getFluidAmount();
+                helper.assertTrue(
+                        amount >= rate * 4 && amount <= rate * 6,
+                        "Water generator did not export its rate independently to one side: " + amount
+                );
+                helper.assertTrue(
+                        tank.primaryTank().tank().getFluid().getFluid() == Fluids.WATER,
+                        "Water generator exported another fluid"
+                );
+                total += amount;
+            }
+            helper.assertTrue(
+                    total >= rate * 4 * Direction.values().length
+                            && total <= rate * 6 * Direction.values().length,
+                    "Six accepting sides did not receive 120 mB/t in total: " + total
+            );
+            FluidStack first = generator.primaryTank().tank().drain(32_000, IFluidHandler.FluidAction.EXECUTE);
+            FluidStack second = generator.primaryTank().tank().drain(32_000, IFluidHandler.FluidAction.EXECUTE);
+            helper.assertTrue(first.getAmount() == 32_000 && second.getAmount() == 32_000,
+                    "Water generator source did not refill in the same tick");
+            helper.assertTrue(generator.primaryTank().tank().getFluidAmount() == 32_000,
+                    "Water generator source tank was depleted");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void activeSluiceIsResetByUpstreamRunoff(GameTestHelper helper) {
+        BlockPos upstreamPosition = new BlockPos(0, 2, 1);
+        BlockPos downstreamPosition = new BlockPos(2, 1, 1);
+        helper.setBlock(upstreamPosition, machineState(SingleBlockMachineDefinition.SLUICE_BOX, Direction.EAST));
+        helper.setBlock(downstreamPosition, machineState(SingleBlockMachineDefinition.SLUICE_BOX, Direction.EAST));
+        SingleBlockMachineBlockEntity upstream = requireMachine(helper, upstreamPosition);
+        SingleBlockMachineBlockEntity downstream = requireMachine(helper, downstreamPosition);
+
+        CompoundTag downstreamState = downstream.saveWithoutMetadata();
+        downstreamState.putInt("progress", 20);
+        downstreamState.putInt("total_progress", 80);
+        downstream.load(downstreamState);
+        CompoundTag upstreamState = upstream.saveWithoutMetadata();
+        upstreamState.putInt("progress", 80);
+        upstreamState.putInt("total_progress", 80);
+        upstreamState.putInt("chain_delay", 1);
+        upstream.load(upstreamState);
+
+        helper.runAfterDelay(2, () -> {
+            helper.assertTrue(downstream.progress() > 20, "Active downstream sluice was not reset by runoff");
+            helper.assertTrue(
+                    downstream.saveWithoutMetadata().getInt("chain_delay") > 0,
+                    "Reset downstream sluice did not continue the runoff chain"
+            );
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void feedingTroughConsumesInvalidInteractionAndReturnsFoodToClickedHand(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FEEDING_TROUGH, Direction.EAST));
+        SingleBlockMachineBlockEntity trough = requireMachine(helper, CENTER);
+        Player player = helper.makeMockSurvivalPlayer();
+        BlockPos absolute = helper.absolutePos(CENTER);
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false);
+
+        trough.inventory().setStackInSlot(0, new ItemStack(Items.WHEAT, 3));
+        player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+        InteractionResult extraction = trough.interact(player, InteractionHand.OFF_HAND, hit);
+        helper.assertTrue(extraction.consumesAction(), "Empty-hand trough extraction did not consume the interaction");
+        helper.assertTrue(
+                player.getItemInHand(InteractionHand.OFF_HAND).is(Items.WHEAT)
+                        && player.getItemInHand(InteractionHand.OFF_HAND).getCount() == 3,
+                "Trough extraction did not return food to the clicked hand"
+        );
+
+        player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.POTATO));
+        InteractionResult invalid = trough.interact(player, InteractionHand.OFF_HAND, hit);
+        helper.assertTrue(invalid.consumesAction(), "Unsupported trough food did not consume the interaction");
+        helper.assertTrue(trough.inventory().getStackInSlot(0).isEmpty(), "Unsupported trough food was inserted");
+        helper.assertTrue(player.getItemInHand(InteractionHand.OFF_HAND).is(Items.POTATO), "Unsupported food was consumed");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void combustionChamberDoorAloneControlsDirectFuelInteraction(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.COMBUSTION_CHAMBER, Direction.SOUTH));
+        SingleBlockMachineBlockEntity chamber = requireMachine(helper, CENTER);
+        Player player = helper.makeMockSurvivalPlayer();
+        BlockPos absolute = helper.absolutePos(CENTER);
+
+        InteractionResult body = chamber.interact(
+                player,
+                InteractionHand.MAIN_HAND,
+                new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false)
+        );
+        helper.assertTrue(body == InteractionResult.PASS, "Combustion-chamber body did not defer to its menu");
+        helper.assertTrue(Int32ContainerData.read(chamber.menuData(), 9) == 0,
+                "Combustion-chamber body toggled the door");
+
+        Vec3 doorCenter = new Vec3(absolute.getX() + 0.5D, absolute.getY() + 0.375D, absolute.getZ() + 1.0D);
+        BlockHitResult door = new BlockHitResult(doorCenter, Direction.SOUTH, absolute, false);
+        InteractionResult opened = chamber.interact(player, InteractionHand.MAIN_HAND, door);
+        helper.assertTrue(opened.consumesAction(), "Combustion-chamber door did not consume the interaction");
+        helper.assertTrue(Int32ContainerData.read(chamber.menuData(), 9) == 1,
+                "Combustion-chamber door did not open");
+
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COAL, 2));
+        chamber.interact(player, InteractionHand.MAIN_HAND, door);
+        helper.assertTrue(chamber.inventory().getStackInSlot(0).is(Items.COAL),
+                "Open combustion-chamber door did not accept fuel");
+        helper.assertTrue(Int32ContainerData.read(chamber.menuData(), 9) == 1,
+                "Fuel insertion unexpectedly closed the combustion-chamber door");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 430)
+    public static void feedingTroughUsesPositionPhaseAndLegacyOneItemBoundary(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FEEDING_TROUGH, Direction.EAST));
+        SingleBlockMachineBlockEntity trough = requireMachine(helper, CENTER);
+        trough.inventory().setStackInSlot(0, new ItemStack(Items.WHEAT));
+        Cow cow = spawnAnimal(helper, EntityType.COW, CENTER.north());
+        Sheep sheep = spawnAnimal(helper, EntityType.SHEEP, CENTER.south());
+
+        BlockPos absolute = helper.absolutePos(CENTER);
+        long phase = Math.floorMod(helper.getLevel().getGameTime() + absolute.hashCode(), 400L);
+        int delay = (int) ((400L - phase) % 400L);
+        if (delay == 0) {
+            delay = 400;
+        }
+        helper.runAfterDelay(delay + 2, () -> {
+            helper.assertTrue(cow.isInLove(), "Feeding trough did not select the first eligible animal");
+            helper.assertTrue(sheep.isInLove(), "Feeding trough incorrectly required matching animal types");
+            helper.assertTrue(trough.inventory().getStackInSlot(0).isEmpty(), "Feeding trough did not consume its one food item");
             helper.succeed();
         });
     }
@@ -320,7 +518,37 @@ public final class SingleBlockMachineGameTests {
         );
         fabricator.inventory().setStackInSlot(0, new ItemStack(Items.OAK_PLANKS, 2));
         helper.assertTrue(fabricator.canCraftFabricator(), "Fabricator failed to reserve matching ingredients");
-        helper.assertTrue(fabricator.craftFabricator(), "Fabricator rejected a valid atomic craft");
+        Player player = helper.makeMockSurvivalPlayer();
+        player.setPos(
+                fabricator.getBlockPos().getX() + 0.5D,
+                fabricator.getBlockPos().getY() + 0.5D,
+                fabricator.getBlockPos().getZ() + 0.5D
+        );
+        SingleBlockMachineMenu menu = new SingleBlockMachineMenu(1, player.getInventory(), fabricator);
+        player.containerMenu = menu;
+        int resultSlot = menu.ghostFilterCount();
+        int energyBeforeRejectedCraft = menu.energyStored();
+        int progressBeforeRejectedCraft = menu.progress();
+        int consumptionBeforeRejectedCraft = menu.lastConsumption();
+        boolean workingBeforeRejectedCraft = menu.working();
+        player.getAbilities().mayBuild = false;
+        menu.clicked(resultSlot, 0, ClickType.PICKUP, player);
+        helper.assertTrue(
+                fabricator.inventory().getStackInSlot(0).is(Items.OAK_PLANKS)
+                        && fabricator.inventory().getStackInSlot(0).getCount() == 2,
+                "Player without build permission consumed fabricator ingredients"
+        );
+        helper.assertTrue(fabricator.canCraftFabricator(), "Permission-rejected fabricator craft changed its recipe inputs");
+        helper.assertTrue(
+                menu.energyStored() == energyBeforeRejectedCraft
+                        && menu.progress() == progressBeforeRejectedCraft
+                        && menu.lastConsumption() == consumptionBeforeRejectedCraft
+                        && menu.working() == workingBeforeRejectedCraft,
+                "Permission-rejected fabricator craft changed machine processing state"
+        );
+
+        player.getAbilities().mayBuild = true;
+        menu.clicked(resultSlot, 0, ClickType.PICKUP, player);
         int sticks = 0;
         int planks = 0;
         for (int slot = 0; slot < fabricator.inventory().slots(); slot++) {
@@ -333,9 +561,136 @@ public final class SingleBlockMachineGameTests {
         }
         helper.assertTrue(sticks == 4 && planks == 0, "Fabricator output or ingredient count is wrong");
 
-        Player player = helper.makeMockSurvivalPlayer();
-        SingleBlockMachineMenu menu = new SingleBlockMachineMenu(1, player.getInventory(), fabricator);
         helper.assertTrue(menu.ghostFilterCount() == 9, "Fabricator menu lost its ghost grid");
+        player.getAbilities().mayBuild = false;
+        menu.clicked(resultSlot, 1, ClickType.PICKUP, player);
+        helper.assertTrue(
+                fabricator.filters().getFilter(1).is(Items.OAK_PLANKS),
+                "Player without build permission cleared the fabricator recipe"
+        );
+        player.getAbilities().mayBuild = true;
+        menu.clicked(resultSlot, 1, ClickType.PICKUP, player);
+        for (int slot = 0; slot < fabricator.filters().size(); slot++) {
+            helper.assertTrue(fabricator.filters().getFilter(slot).isEmpty(), "Right-click did not clear fabricator ghost grid");
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void inserterConfigurationRequiresBuildPermission(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.INSERTER, Direction.NORTH));
+        SingleBlockMachineBlockEntity inserter = requireMachine(helper, CENTER);
+        Player player = helper.makeMockSurvivalPlayer();
+        player.setPos(
+                inserter.getBlockPos().getX() + 0.5D,
+                inserter.getBlockPos().getY() + 0.5D,
+                inserter.getBlockPos().getZ() + 0.5D
+        );
+        SingleBlockMachineMenu menu = new SingleBlockMachineMenu(2, player.getInventory(), inserter);
+        player.containerMenu = menu;
+        int initialFlags = inserter.inserterFlags();
+
+        player.getAbilities().mayBuild = false;
+        helper.assertFalse(menu.clickMenuButton(player, 0), "Permission-rejected inserter button reported success");
+        helper.assertTrue(inserter.inserterFlags() == initialFlags, "Permission-rejected inserter button changed state");
+
+        player.getAbilities().mayBuild = true;
+        helper.assertTrue(menu.clickMenuButton(player, 0), "Valid inserter button was rejected");
+        helper.assertTrue(inserter.inserterFlags() != initialFlags, "Valid inserter button did not change state");
+        helper.assertFalse(menu.clickMenuButton(player, 6), "Out-of-range inserter button was accepted");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void ghostFilterPacketRejectsStaleDistantAndUnloadedRealMenus(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FABRICATOR, Direction.NORTH));
+        SingleBlockMachineBlockEntity staleMachine = requireMachine(helper, CENTER);
+        staleMachine.filters().setFilter(0, new ItemStack(Items.IRON_INGOT));
+        Player player = helper.makeMockSurvivalPlayer();
+        player.setPos(
+                staleMachine.getBlockPos().getX() + 0.5D,
+                staleMachine.getBlockPos().getY() + 0.5D,
+                staleMachine.getBlockPos().getZ() + 0.5D
+        );
+        SingleBlockMachineMenu staleMenu = new SingleBlockMachineMenu(3, player.getInventory(), staleMachine);
+        player.containerMenu = staleMenu;
+        helper.setBlock(CENTER, Blocks.AIR);
+        helper.assertFalse(
+                SetGhostFilterMessage.applyIfValid(
+                        player,
+                        new SetGhostFilterMessage(staleMachine.getBlockPos(), 0, new ItemStack(Items.GOLD_INGOT))
+                ),
+                "Stale single-block menu accepted a ghost-filter packet"
+        );
+        helper.assertTrue(
+                staleMachine.filters().getFilter(0).is(Items.IRON_INGOT),
+                "Stale-menu rejection changed the ghost filter"
+        );
+
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FABRICATOR, Direction.NORTH));
+        SingleBlockMachineBlockEntity distantMachine = requireMachine(helper, CENTER);
+        distantMachine.filters().setFilter(0, new ItemStack(Items.IRON_INGOT));
+        SingleBlockMachineMenu distantMenu = new SingleBlockMachineMenu(4, player.getInventory(), distantMachine);
+        player.containerMenu = distantMenu;
+        player.setPos(
+                distantMachine.getBlockPos().getX() + 9.5D,
+                distantMachine.getBlockPos().getY() + 0.5D,
+                distantMachine.getBlockPos().getZ() + 0.5D
+        );
+        helper.assertFalse(
+                SetGhostFilterMessage.applyIfValid(
+                        player,
+                        new SetGhostFilterMessage(distantMachine.getBlockPos(), 0, new ItemStack(Items.GOLD_INGOT))
+                ),
+                "Distant player changed a real machine ghost filter"
+        );
+        helper.assertTrue(
+                distantMachine.filters().getFilter(0).is(Items.IRON_INGOT),
+                "Distance rejection changed the ghost filter"
+        );
+
+        BlockPos unloadedPosition = null;
+        BlockPos origin = helper.absolutePos(CENTER);
+        for (int offset = 32; offset <= 2_048; offset += 16) {
+            BlockPos candidate = origin.offset(offset, 0, 0);
+            if (helper.getLevel().getWorldBorder().isWithinBounds(candidate)
+                    && !helper.getLevel().hasChunk(candidate.getX() >> 4, candidate.getZ() >> 4)) {
+                unloadedPosition = candidate;
+                break;
+            }
+        }
+        helper.assertTrue(unloadedPosition != null, "Could not find an unloaded chunk for packet validation");
+        SingleBlockMachineBlockEntity unloadedMachine = new SingleBlockMachineBlockEntity(
+                unloadedPosition,
+                machineState(SingleBlockMachineDefinition.FABRICATOR, Direction.NORTH)
+        );
+        unloadedMachine.filters().setFilter(0, new ItemStack(Items.IRON_INGOT));
+        SingleBlockMachineMenu unloadedMenu = new SingleBlockMachineMenu(5, player.getInventory(), unloadedMachine);
+        player.containerMenu = unloadedMenu;
+        player.setPos(
+                unloadedPosition.getX() + 0.5D,
+                unloadedPosition.getY() + 0.5D,
+                unloadedPosition.getZ() + 0.5D
+        );
+        helper.assertFalse(
+                helper.getLevel().hasChunk(unloadedPosition.getX() >> 4, unloadedPosition.getZ() >> 4),
+                "Unloaded packet target became loaded during menu setup"
+        );
+        helper.assertFalse(
+                SetGhostFilterMessage.applyIfValid(
+                        player,
+                        new SetGhostFilterMessage(unloadedPosition, 0, new ItemStack(Items.GOLD_INGOT))
+                ),
+                "Unloaded machine position accepted a ghost-filter packet"
+        );
+        helper.assertTrue(
+                unloadedMachine.filters().getFilter(0).is(Items.IRON_INGOT),
+                "Unloaded-position rejection changed the ghost filter"
+        );
+        helper.assertFalse(
+                helper.getLevel().hasChunk(unloadedPosition.getX() >> 4, unloadedPosition.getZ() >> 4),
+                "Ghost-filter packet force-loaded its unloaded target"
+        );
         helper.succeed();
     }
 
@@ -426,31 +781,28 @@ public final class SingleBlockMachineGameTests {
 
             helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.ELECTRIC_ENGINE, Direction.NORTH));
             SingleBlockMachineBlockEntity engine = requireMachine(helper, CENTER);
-            helper.assertTrue(
-                    engine.getCapability(ForgeCapabilities.ENERGY, Direction.SOUTH).isPresent(),
-                    "Electric engine lost its output face"
-            );
-            helper.assertFalse(
-                    engine.getCapability(ForgeCapabilities.ENERGY, Direction.NORTH).isPresent(),
-                    "Electric engine exposed FE on its input face"
-            );
+            for (Direction direction : Direction.values()) {
+                var engineEnergy = engine.getCapability(ForgeCapabilities.ENERGY, direction)
+                        .orElseThrow(AssertionError::new);
+                helper.assertTrue(engineEnergy.canReceive(), "Electric engine cannot receive FE on " + direction);
+                helper.assertTrue(engineEnergy.canExtract(), "Electric engine cannot extract FE on " + direction);
+            }
             helper.succeed();
         });
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 125)
-    public static void airlockBubblesDecayAfterPowerLoss(GameTestHelper helper) {
+    @GameTest(template = TEMPLATE, timeoutTicks = 65)
+    public static void airlockClearsInteriorWaterWithoutCreatingBoundaryBubble(GameTestHelper helper) {
         helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.AIRLOCK, Direction.NORTH));
         helper.setBlock(CENTER.east(), Blocks.WATER);
         SingleBlockMachineBlockEntity airlock = requireMachine(helper, CENTER);
         airlock.electricity().node().setVoltage(125.0D);
 
         helper.runAfterDelay(45, () -> {
-            helper.assertTrue(helper.getBlockState(CENTER.east()).is(ModMachineBlocks.AIR_BUBBLE.get()), "Powered airlock did not replace water");
-            airlock.electricity().node().setVoltage(0.0D);
-        });
-        helper.runAfterDelay(100, () -> {
-            helper.assertFalse(helper.getBlockState(CENTER.east()).is(ModMachineBlocks.AIR_BUBBLE.get()), "Unpowered air bubble did not decay");
+            helper.assertTrue(
+                    helper.getBlockState(CENTER.east()).isAir(),
+                    "Airlock treated isolated interior water as a boundary bubble"
+            );
             helper.succeed();
         });
     }
@@ -480,6 +832,20 @@ public final class SingleBlockMachineGameTests {
 
     private static SingleBlockMachineBlockEntity requireMachine(GameTestHelper helper, BlockPos position) {
         return requireBlockEntity(helper, position, SingleBlockMachineBlockEntity.class);
+    }
+
+    private static <T extends Animal> T spawnAnimal(
+            GameTestHelper helper,
+            EntityType<T> type,
+            BlockPos relativePosition
+    ) {
+        T animal = type.create(helper.getLevel());
+        helper.assertTrue(animal != null, "Unable to create test animal " + type);
+        BlockPos absolute = helper.absolutePos(relativePosition);
+        animal.moveTo(absolute.getX() + 0.5D, absolute.getY(), absolute.getZ() + 0.5D, 0.0F, 0.0F);
+        animal.setNoAi(true);
+        helper.assertTrue(helper.getLevel().addFreshEntity(animal), "Unable to spawn test animal " + type);
+        return animal;
     }
 
     private static <T extends BlockEntity> T requireBlockEntity(

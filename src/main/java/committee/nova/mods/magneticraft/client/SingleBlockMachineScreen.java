@@ -138,9 +138,10 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
             int height = scaled(menu.secondaryFluid(), menu.secondaryCapacity(), 48);
             graphics.fill(barX + 2, barBottom - height, barX + 8, barBottom, 0xFFE8E8E8);
         }
-        if (menu.totalProgress() > 0) {
+        int totalProgress = displayedProgressTotal();
+        if (totalProgress > 0) {
             MachineScreenLayout.drawInset(graphics, leftPos + 72, topPos + 65, 34, 8);
-            int width = scaled(menu.progress(), menu.totalProgress(), 32);
+            int width = scaled(displayedProgress(), totalProgress, 32);
             graphics.fill(leftPos + 73, topPos + 66, leftPos + 73 + width, topPos + 72, 0xFFE88A2A);
         }
     }
@@ -158,7 +159,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                     String.format(Locale.ROOT, "%.1f", menu.voltage())
             );
         }
-        return null;
+        return menu.working() ? Component.translatable("gui.magneticraft.state.running") : null;
     }
 
     private Component inserterButtonLabel(int id, boolean enabled) {
@@ -179,16 +180,33 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
         if (menu.secondaryCapacity() > 0) {
             renderBarTooltip(graphics, mouseX, mouseY, barX, "gui.magneticraft.fluid.tooltip", menu.secondaryFluid(), menu.secondaryCapacity());
         }
-        if (menu.totalProgress() > 0
+        int totalProgress = displayedProgressTotal();
+        if (totalProgress > 0
                 && mouseX >= leftPos + 72 && mouseX < leftPos + 106
                 && mouseY >= topPos + 65 && mouseY < topPos + 73) {
-            graphics.renderTooltip(
-                    font,
-                    Component.translatable("gui.magneticraft.progress.tooltip", menu.progress(), menu.totalProgress()),
-                    mouseX,
-                    mouseY
-            );
+            List<Component> lines = new ArrayList<>();
+            lines.add(Component.translatable(
+                    "gui.magneticraft.progress.tooltip",
+                    displayedProgress(),
+                    totalProgress
+            ));
+            if (menu.lastConsumption() > 0 || menu.lastProduction() > 0) {
+                lines.add(Component.translatable(
+                        "gui.magneticraft.machine.rate.tooltip",
+                        menu.lastConsumption(),
+                        menu.lastProduction()
+                ));
+            }
+            graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
         }
+    }
+
+    private int displayedProgress() {
+        return menu.totalProgress() > 0 ? menu.progress() : menu.burnProgress();
+    }
+
+    private int displayedProgressTotal() {
+        return menu.totalProgress() > 0 ? menu.totalProgress() : menu.burnTotal();
     }
 
     private void renderBarTooltip(

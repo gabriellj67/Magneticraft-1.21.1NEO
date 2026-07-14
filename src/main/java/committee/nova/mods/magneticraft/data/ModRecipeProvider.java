@@ -743,7 +743,7 @@ final class ModRecipeProvider extends RecipeProvider {
         crush(consumer, "polished_granite", Ingredient.of(Blocks.POLISHED_GRANITE), Blocks.GRANITE, 1, 0);
         crush(consumer, "stone_bricks", Ingredient.of(Blocks.STONE_BRICKS), Blocks.CRACKED_STONE_BRICKS, 1, 0);
         crush(consumer, "mossy_stone_bricks", Ingredient.of(Blocks.MOSSY_STONE_BRICKS), Blocks.MOSSY_COBBLESTONE, 1, 0);
-        crush(consumer, "dark_prismarine", Ingredient.of(Blocks.DARK_PRISMARINE), Blocks.PRISMARINE, 1, 0);
+        crush(consumer, "prismarine_bricks", Ingredient.of(Blocks.PRISMARINE_BRICKS), Blocks.PRISMARINE, 1, 0);
         crush(consumer, "end_stone_bricks", Ingredient.of(Blocks.END_STONE_BRICKS), Blocks.END_STONE, 1, 0);
     }
 
@@ -834,7 +834,7 @@ final class ModRecipeProvider extends RecipeProvider {
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.THERMOPILE))
                 .pattern("ABA").pattern("BCB").pattern("ABA")
                 .define('A', Tags.Items.INGOTS_IRON).define('B', ModTags.Items.lightPlate(Metal.COPPER))
-                .define('C', ModMachineBlocks.GRATE.get())
+                .define('C', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
                 .unlockedBy("has_copper_plate", has(ModTags.Items.lightPlate(Metal.COPPER)))
                 .save(consumer, id("crafting/thermopile"));
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.RF_TRANSFORMER))
@@ -938,11 +938,26 @@ final class ModRecipeProvider extends RecipeProvider {
         gasify(consumer, "13_doors", Ingredient.of(ItemTags.WOODEN_DOORS), ItemStack.EMPTY, woodGas, 50, 20, 523.15D);
         gasify(consumer, "14_slabs", Ingredient.of(ItemTags.WOODEN_SLABS), ItemStack.EMPTY, woodGas, 50, 15, 473.15D);
         gasify(consumer, "15_trapdoors", Ingredient.of(ItemTags.WOODEN_TRAPDOORS), ItemStack.EMPTY, woodGas, 50, 15, 473.15D);
+        gasify(consumer, "16_pressure_plates", Ingredient.of(vanillaTag("wooden_pressure_plates")), ItemStack.EMPTY, woodGas, 50, 15, 473.15D);
         gasify(consumer, "20_saplings", Ingredient.of(ItemTags.SAPLINGS), ItemStack.EMPTY, woodGas, 30, 10, 453.15D);
         gasify(consumer, "21_leaves", Ingredient.of(ItemTags.LEAVES), ItemStack.EMPTY, woodGas, 30, 10, 453.15D);
+        gasify(consumer, "22_vines", Ingredient.of(Blocks.VINE), ItemStack.EMPTY, woodGas, 30, 10, 453.15D);
+        gasify(consumer, "23_lily_pad", Ingredient.of(Blocks.LILY_PAD), ItemStack.EMPTY, woodGas, 30, 10, 453.15D);
+        gasify(consumer, "24_flowers", Ingredient.of(vanillaTag("flowers")), ItemStack.EMPTY, woodGas, 10, 10, 423.15D);
+        gasify(consumer, "25_mushrooms", Ingredient.of(Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM), ItemStack.EMPTY, woodGas, 10, 10, 423.15D);
+        gasify(consumer, "26_tall_plants", Ingredient.of(
+                Blocks.SUNFLOWER,
+                Blocks.LILAC,
+                Blocks.TALL_GRASS,
+                Blocks.LARGE_FERN,
+                Blocks.ROSE_BUSH,
+                Blocks.PEONY
+        ), ItemStack.EMPTY, woodGas, 10, 10, 423.15D);
         gasify(consumer, "30_hay", Ingredient.of(Blocks.HAY_BLOCK), ItemStack.EMPTY, woodGas, 100, 15, 523.15D);
         gasify(consumer, "31_cactus", Ingredient.of(Blocks.CACTUS), ItemStack.EMPTY, woodGas, 10, 10, 453.15D);
         gasify(consumer, "32_chest", Ingredient.of(Tags.Items.CHESTS_WOODEN), ItemStack.EMPTY, woodGas, 50, 30, 473.15D);
+        gasify(consumer, "33_bowl", Ingredient.of(Items.BOWL), ItemStack.EMPTY, woodGas, 10, 15, 423.15D);
+        gasify(consumer, "34_signs", Ingredient.of(vanillaTag("signs")), ItemStack.EMPTY, woodGas, 10, 10, 423.15D);
         gasify(consumer, "40_stick", Ingredient.of(Tags.Items.RODS_WOODEN), ItemStack.EMPTY, woodGas, 10, 10, 423.15D);
         gasify(consumer, "41_wheat", Ingredient.of(Items.WHEAT), ItemStack.EMPTY, woodGas, 50, 20, 473.15D);
         gasify(consumer, "42_sugar_cane", Ingredient.of(Items.SUGAR_CANE), ItemStack.EMPTY, woodGas, 30, 10, 473.15D);
@@ -950,6 +965,12 @@ final class ModRecipeProvider extends RecipeProvider {
         gasify(consumer, "44_carrot", Ingredient.of(Items.CARROT), ItemStack.EMPTY, woodGas, 50, 10, 473.15D);
         gasify(consumer, "45_potato", Ingredient.of(Items.POTATO), ItemStack.EMPTY, woodGas, 50, 10, 473.15D);
         gasify(consumer, "46_beetroot", Ingredient.of(Items.BEETROOT), ItemStack.EMPTY, woodGas, 50, 10, 473.15D);
+        gasify(consumer, "47_seeds", Ingredient.of(
+                Items.WHEAT_SEEDS,
+                Items.BEETROOT_SEEDS,
+                Items.MELON_SEEDS,
+                Items.PUMPKIN_SEEDS
+        ), ItemStack.EMPTY, woodGas, 30, 10, 423.15D);
     }
 
     private void gasify(

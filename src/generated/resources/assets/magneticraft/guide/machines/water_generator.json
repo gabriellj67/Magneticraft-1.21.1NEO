@@ -1,0 +1,17 @@
+{
+  "automation_profile": "fluid_output_all_sides",
+  "category": "energy",
+  "description": "guide.magneticraft.machine.water_generator.description",
+  "ghost_slots": 0,
+  "has_menu": false,
+  "id": "magneticraft:water_generator",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "fluid_output"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.water_generator"
+}

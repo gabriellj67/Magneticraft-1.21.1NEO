@@ -1,5 +1,7 @@
 package committee.nova.mods.magneticraft.content.machine.framework.menu;
 
+import committee.nova.mods.magneticraft.network.ModNetwork;
+import committee.nova.mods.magneticraft.network.SetGhostFilterMessage;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -68,8 +70,18 @@ public abstract class AbstractMachineMenu extends AbstractContainerMenu {
     @Override
     public void clicked(int slotId, int button, ClickType clickType, Player player) {
         if (slotId >= 0 && slotId < slots.size() && slots.get(slotId) instanceof GhostSlot ghostSlot) {
-            if (clickType == ClickType.PICKUP) {
-                ghostSlot.set(getCarried());
+            if (clickType == ClickType.PICKUP
+                    && player.level().isClientSide
+                    && this instanceof GhostFilterMenuAccess access) {
+                ItemStack sample = getCarried().copy();
+                if (!sample.isEmpty()) {
+                    sample.setCount(1);
+                }
+                ModNetwork.setGhostFilter(new SetGhostFilterMessage(
+                        access.machinePosition(),
+                        ghostSlot.filterSlot(),
+                        sample
+                ));
             }
             return;
         }

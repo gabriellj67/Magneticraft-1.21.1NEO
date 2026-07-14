@@ -9,15 +9,19 @@ import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeB
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.network.SetGhostFilterMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -39,17 +43,29 @@ public final class PneumaticEndpointGameTests {
         helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FILTER, Direction.EAST));
         SingleBlockMachineBlockEntity filter = machine(helper, CENTER);
         Player player = helper.makeMockSurvivalPlayer();
+        player.setPos(
+                filter.getBlockPos().getX() + 0.5D,
+                filter.getBlockPos().getY() + 0.5D,
+                filter.getBlockPos().getZ() + 0.5D
+        );
         SingleBlockMachineMenu menu = new SingleBlockMachineMenu(1, player.getInventory(), filter);
+        player.containerMenu = menu;
 
         menu.setCarried(new ItemStack(Items.IRON_INGOT, 3));
-        menu.clicked(0, 0, ClickType.PICKUP, player);
+        helper.assertTrue(SetGhostFilterMessage.applyIfValid(
+                player,
+                new SetGhostFilterMessage(filter.getBlockPos(), 0, menu.getCarried())
+        ), "Validated filter message was rejected");
         helper.assertTrue(menu.getCarried().getCount() == 3, "Virtual filter sample consumed a held item");
         helper.assertTrue(filter.filters().getFilter(0).is(Items.IRON_INGOT)
                         && filter.filters().getFilter(0).getCount() == 1,
                 "Filter sample was not normalized to one virtual item");
 
         menu.setCarried(ItemStack.EMPTY);
-        menu.clicked(0, 0, ClickType.PICKUP, player);
+        helper.assertTrue(SetGhostFilterMessage.applyIfValid(
+                player,
+                new SetGhostFilterMessage(filter.getBlockPos(), 0, ItemStack.EMPTY)
+        ), "Validated filter clearing message was rejected");
         helper.assertTrue(menu.getCarried().isEmpty(), "Clearing a virtual filter returned a duplicated item");
         helper.assertTrue(filter.filters().getFilter(0).isEmpty(), "Virtual filter sample did not clear");
 
@@ -68,16 +84,28 @@ public final class PneumaticEndpointGameTests {
         helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.INSERTER, Direction.EAST));
         SingleBlockMachineBlockEntity inserter = machine(helper, CENTER);
         Player player = helper.makeMockSurvivalPlayer();
+        player.setPos(
+                inserter.getBlockPos().getX() + 0.5D,
+                inserter.getBlockPos().getY() + 0.5D,
+                inserter.getBlockPos().getZ() + 0.5D
+        );
         SingleBlockMachineMenu menu = new SingleBlockMachineMenu(2, player.getInventory(), inserter);
+        player.containerMenu = menu;
 
         helper.assertTrue(inserter.filters() != null, "Inserter did not create its virtual filter samples");
         menu.setCarried(new ItemStack(Items.GOLD_INGOT, 3));
-        menu.clicked(3, 0, ClickType.PICKUP, player);
+        helper.assertTrue(SetGhostFilterMessage.applyIfValid(
+                player,
+                new SetGhostFilterMessage(inserter.getBlockPos(), 0, menu.getCarried())
+        ), "Validated inserter filter message was rejected");
         helper.assertTrue(menu.getCarried().getCount() == 3, "Inserter virtual sample consumed the held item");
         helper.assertTrue(inserter.filters().getFilter(0).is(Items.GOLD_INGOT),
                 "Inserter did not retain the virtual sample");
         menu.setCarried(ItemStack.EMPTY);
-        menu.clicked(3, 0, ClickType.PICKUP, player);
+        helper.assertTrue(SetGhostFilterMessage.applyIfValid(
+                player,
+                new SetGhostFilterMessage(inserter.getBlockPos(), 0, ItemStack.EMPTY)
+        ), "Validated inserter clearing message was rejected");
         helper.assertTrue(menu.getCarried().isEmpty() && inserter.filters().getFilter(0).isEmpty(),
                 "Clearing an inserter sample returned a duplicated item");
 
@@ -128,18 +156,31 @@ public final class PneumaticEndpointGameTests {
         SingleBlockMachineBlockEntity filter = machine(helper, CENTER);
         var input = filter.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.WEST)
                 .orElseThrow(AssertionError::new);
-        input.insertItem(0, new ItemStack(Items.IRON_INGOT, 3), false);
-        input.insertItem(0, new ItemStack(Items.GOLD_INGOT, 2), false);
-        net.minecraft.nbt.CompoundTag saved = filter.saveWithoutMetadata();
-        filter.load(saved);
+        filter.filters().setFilter(0, new ItemStack(Items.IRON_INGOT));
+        filter.filters().setFilter(1, new ItemStack(Items.GOLD_INGOT));
+        helper.assertTrue(input.insertItem(0, new ItemStack(Items.IRON_INGOT, 3), false).isEmpty(),
+                "Filter rejected its first FIFO payload");
+        helper.assertTrue(input.insertItem(0, new ItemStack(Items.GOLD_INGOT, 2), false).isEmpty(),
+                "Filter rejected its second FIFO payload");
+        CompoundTag saved = filter.saveWithoutMetadata();
+        SingleBlockMachineBlockEntity restored = restoreMachine(helper, CENTER, filter, saved);
+        helper.assertTrue(restored != filter, "Persistence fixture reused the original filter block entity");
+        helper.assertTrue(
+                restored.filters().getFilter(0).is(Items.IRON_INGOT)
+                        && restored.filters().getFilter(1).is(Items.GOLD_INGOT),
+                "Reloaded filter lost its persistent filter samples"
+        );
 
         helper.runAfterDelay(8, () -> {
-            var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity)
-                    helper.getBlockEntity(CENTER.east());
+            ChestBlockEntity chest = (ChestBlockEntity) helper.getBlockEntity(CENTER.east());
             helper.assertTrue(chest.getItem(0).is(Items.IRON_INGOT) && chest.getItem(0).getCount() == 3,
                     "Reloaded endpoint changed the FIFO head");
             helper.assertTrue(chest.getItem(1).is(Items.GOLD_INGOT) && chest.getItem(1).getCount() == 2,
                     "Reloaded endpoint changed the FIFO tail");
+            helper.assertTrue(countItem(chest, Items.IRON_INGOT) == 3
+                            && countItem(chest, Items.GOLD_INGOT) == 2
+                            && countAllItems(chest) == 5,
+                    "Reloaded filter duplicated or lost a FIFO payload");
             helper.succeed();
         });
     }
@@ -167,7 +208,7 @@ public final class PneumaticEndpointGameTests {
         });
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 45)
+    @GameTest(template = TEMPLATE, timeoutTicks = 55)
     public static void blockedFilterRebuildsBackpressureAfterReload(GameTestHelper helper) {
         helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FILTER, Direction.EAST));
         helper.setBlock(CENTER.east(), net.minecraft.world.level.block.Blocks.CHEST);
@@ -178,19 +219,84 @@ public final class PneumaticEndpointGameTests {
         }
         var input = filter.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.WEST)
                 .orElseThrow(AssertionError::new);
-        input.insertItem(0, new ItemStack(Items.IRON_INGOT), false);
+        helper.assertTrue(input.insertItem(0, new ItemStack(Items.IRON_INGOT), false).isEmpty(),
+                "Filter rejected the payload used by the reload fixture");
+        SingleBlockMachineBlockEntity[] restored = new SingleBlockMachineBlockEntity[1];
 
         helper.runAfterDelay(8, () -> {
             helper.assertTrue(input.insertItem(0, new ItemStack(Items.IRON_INGOT), true).getCount() == 1,
                     "Full target did not backpressure filter input");
-            net.minecraft.nbt.CompoundTag saved = filter.saveWithoutMetadata();
-            filter.load(saved);
+            CompoundTag saved = filter.saveWithoutMetadata();
+            restored[0] = restoreMachine(helper, CENTER, filter, saved);
+            helper.assertTrue(restored[0] != filter,
+                    "Backpressure fixture reused the original filter block entity");
         });
         helper.runAfterDelay(16, () -> {
-            var restoredInput = filter.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.WEST)
+            var restoredInput = restored[0].getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.WEST)
                     .orElseThrow(AssertionError::new);
             helper.assertTrue(restoredInput.insertItem(0, new ItemStack(Items.IRON_INGOT), true).getCount() == 1,
                     "Reloaded filter did not re-derive backpressure from its still-full target");
+            chest.setItem(0, ItemStack.EMPTY);
+        });
+        helper.runAfterDelay(24, () -> {
+            var restoredInput = restored[0].getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.WEST)
+                    .orElseThrow(AssertionError::new);
+            helper.assertTrue(countItem(chest, Items.IRON_INGOT) == 1,
+                    "Reloaded blocked filter duplicated or lost its queued payload");
+            helper.assertTrue(restoredInput.insertItem(0, new ItemStack(Items.IRON_INGOT), true).isEmpty(),
+                    "Reloaded filter did not clear backpressure after delivering its only payload");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 65)
+    public static void relayAndTransposerQueuesSurviveNewBlockEntityRestoreExactlyOnce(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.RELAY, Direction.EAST));
+        helper.setBlock(CENTER.east(), Blocks.STONE);
+        SingleBlockMachineBlockEntity relay = machine(helper, CENTER);
+        relay.inventory().setStackInSlot(0, new ItemStack(Items.IRON_INGOT, 3));
+        relay.inventory().setStackInSlot(1, new ItemStack(Items.DIAMOND, 4));
+
+        helper.runAfterDelay(8, () -> {
+            helper.assertTrue(relay.inventory().getStackInSlot(0).isEmpty(),
+                    "Relay did not move its first stack into the persistent output queue");
+            CompoundTag saved = relay.saveWithoutMetadata();
+            SingleBlockMachineBlockEntity restoredRelay = restoreMachine(helper, CENTER, relay, saved);
+            helper.assertTrue(restoredRelay.inventory().getStackInSlot(1).is(Items.DIAMOND)
+                            && restoredRelay.inventory().getStackInSlot(1).getCount() == 4,
+                    "Reloaded relay lost its persistent inventory state");
+            helper.setBlock(CENTER.east(), Blocks.CHEST);
+        });
+        helper.runAfterDelay(22, () -> {
+            ChestBlockEntity target = (ChestBlockEntity) helper.getBlockEntity(CENTER.east());
+            helper.assertTrue(countItem(target, Items.IRON_INGOT) == 3
+                            && countItem(target, Items.DIAMOND) == 4
+                            && countAllItems(target) == 7,
+                    "Reloaded relay duplicated or lost inventory and queued payloads");
+            target.clearContent();
+            helper.setBlock(CENTER.east(), Blocks.STONE);
+            helper.setBlock(CENTER.west(), Blocks.CHEST);
+            ChestBlockEntity source = (ChestBlockEntity) helper.getBlockEntity(CENTER.west());
+            source.setItem(0, new ItemStack(Items.GOLD_INGOT, 2));
+            helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.TRANSPOSER, Direction.EAST));
+            SingleBlockMachineBlockEntity transposer = machine(helper, CENTER);
+            transposer.filters().setFilter(0, new ItemStack(Items.GOLD_INGOT));
+        });
+        helper.runAfterDelay(34, () -> {
+            ChestBlockEntity source = (ChestBlockEntity) helper.getBlockEntity(CENTER.west());
+            helper.assertTrue(source.getItem(0).isEmpty(),
+                    "Transposer did not move its source stack into the persistent output queue");
+            SingleBlockMachineBlockEntity transposer = machine(helper, CENTER);
+            CompoundTag saved = transposer.saveWithoutMetadata();
+            SingleBlockMachineBlockEntity restored = restoreMachine(helper, CENTER, transposer, saved);
+            helper.assertTrue(restored.filters().getFilter(0).is(Items.GOLD_INGOT),
+                    "Reloaded transposer lost its persistent filter state");
+            helper.setBlock(CENTER.east(), Blocks.CHEST);
+        });
+        helper.runAfterDelay(48, () -> {
+            ChestBlockEntity target = (ChestBlockEntity) helper.getBlockEntity(CENTER.east());
+            helper.assertTrue(countItem(target, Items.GOLD_INGOT) == 2 && countAllItems(target) == 2,
+                    "Reloaded transposer duplicated or lost its queued payload");
             helper.succeed();
         });
     }
@@ -248,24 +354,32 @@ public final class PneumaticEndpointGameTests {
         SingleBlockMachineBlockEntity inserter = machine(helper, CENTER);
         inserter.toggleInserterFlag(4);
 
-        helper.runAfterDelay(25, () -> {
-            BlockPos lowerDrop = helper.absolutePos(CENTER.west().below());
-            int dropped = helper.getLevel().getEntitiesOfClass(
-                    ItemEntity.class,
-                    new AABB(lowerDrop),
-                    entity -> entity.getItem().is(Items.COPPER_INGOT)
-            ).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
-            BlockPos sameLevelDrop = helper.absolutePos(CENTER.west());
-            int droppedAtSameLevel = helper.getLevel().getEntitiesOfClass(
-                    ItemEntity.class,
-                    new AABB(sameLevelDrop),
-                    entity -> entity.getItem().is(Items.COPPER_INGOT)
-            ).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
-            helper.assertTrue(source.getItem(0).isEmpty(), "Inserter did not extract for its lower drop position");
-            helper.assertTrue(dropped == 8 && droppedAtSameLevel == 0,
-                    "Inserter did not prefer and conserve its stack at the lower drop position");
-            helper.succeed();
-        });
+        // Keep item physics from moving the entity away before its selected spawn position is observed.
+        for (int tick = 0; tick < 25; tick++) {
+            SingleBlockMachineBlockEntity.serverTick(
+                    helper.getLevel(),
+                    inserter.getBlockPos(),
+                    inserter.getBlockState(),
+                    inserter
+            );
+        }
+
+        BlockPos lowerDrop = helper.absolutePos(CENTER.west().below());
+        int dropped = helper.getLevel().getEntitiesOfClass(
+                ItemEntity.class,
+                new AABB(lowerDrop),
+                entity -> entity.getItem().is(Items.COPPER_INGOT)
+        ).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+        BlockPos sameLevelDrop = helper.absolutePos(CENTER.west());
+        int droppedAtSameLevel = helper.getLevel().getEntitiesOfClass(
+                ItemEntity.class,
+                new AABB(sameLevelDrop),
+                entity -> entity.getItem().is(Items.COPPER_INGOT)
+        ).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+        helper.assertTrue(source.getItem(0).isEmpty(), "Inserter did not extract for its lower drop position");
+        helper.assertTrue(dropped == 8 && droppedAtSameLevel == 0,
+                "Inserter did not prefer and conserve its stack at the lower drop position");
+        helper.succeed();
     }
 
     private static BlockState machineState(SingleBlockMachineDefinition definition, Direction facing) {
@@ -278,6 +392,43 @@ public final class PneumaticEndpointGameTests {
         Object blockEntity = helper.getBlockEntity(position);
         helper.assertTrue(blockEntity instanceof SingleBlockMachineBlockEntity, "Missing single-block machine");
         return (SingleBlockMachineBlockEntity) blockEntity;
+    }
+
+    private static SingleBlockMachineBlockEntity restoreMachine(
+            GameTestHelper helper,
+            BlockPos position,
+            SingleBlockMachineBlockEntity original,
+            CompoundTag saved
+    ) {
+        BlockPos absolutePosition = helper.absolutePos(position);
+        BlockState state = helper.getLevel().getBlockState(absolutePosition);
+        helper.getLevel().removeBlockEntity(absolutePosition);
+        SingleBlockMachineBlockEntity restored = new SingleBlockMachineBlockEntity(absolutePosition, state);
+        restored.load(saved);
+        helper.getLevel().setBlockEntity(restored);
+        helper.assertTrue(original.isRemoved(), "Original block entity remained registered after replacement");
+        helper.assertTrue(helper.getBlockEntity(position) == restored,
+                "Restored block entity was not registered in the loaded level");
+        return restored;
+    }
+
+    private static int countItem(ChestBlockEntity chest, Item item) {
+        int count = 0;
+        for (int slot = 0; slot < chest.getContainerSize(); slot++) {
+            ItemStack stack = chest.getItem(slot);
+            if (stack.is(item)) {
+                count += stack.getCount();
+            }
+        }
+        return count;
+    }
+
+    private static int countAllItems(ChestBlockEntity chest) {
+        int count = 0;
+        for (int slot = 0; slot < chest.getContainerSize(); slot++) {
+            count += chest.getItem(slot).getCount();
+        }
+        return count;
     }
 
     private static PneumaticTubeBlockEntity tube(GameTestHelper helper, BlockPos position) {

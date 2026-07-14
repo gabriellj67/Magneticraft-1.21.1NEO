@@ -1,8 +1,10 @@
 package committee.nova.mods.magneticraft.content.machine.singleblock;
 
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.ThermopileRecipe;
+import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlockEntity;
+import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
@@ -10,19 +12,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Native-electricity generation, conversion and airlock behavior.
  */
 final class SingleBlockElectricalLogic {
+    private static final double AIRLOCK_MIN_VOLTAGE = 60.0D;
+
     private final SingleBlockMachineBlockEntity machine;
     private final SingleBlockMachineState state;
 
@@ -33,9 +40,15 @@ final class SingleBlockElectricalLogic {
 
     void tickInfiniteEnergy() {
         if (machine.electricity() != null) {
-            machine.electricity().node().setVoltage(125.0D);
+            clampInfiniteEnergyVoltage();
             state.working = true;
             machine.markChanged();
+        }
+    }
+
+    void clampInfiniteEnergyVoltage() {
+        if (machine.electricity() != null) {
+            machine.electricity().node().setVoltage(125.0D);
         }
     }
 
@@ -43,40 +56,72 @@ final class SingleBlockElectricalLogic {
         if (level.getGameTime() % 40L != 0L || machine.electricity() == null) {
             return;
         }
-        if (machine.electricity().node().voltage() < 60.0D) {
+        var node = machine.electricity().node();
+        if (node.voltage() < AIRLOCK_MIN_VOLTAGE) {
             startAirBubbleDecay(level);
             return;
         }
-        BlockState bubble = ModMachineBlocks.AIR_BUBBLE.get().defaultBlockState()
+        BlockPos origin = machine.getBlockPos();
+        if (!scanAreaLoaded(level, origin)) {
+            return;
+        }
+
+        AirlockPlan plan = AirlockPlan.build((x, y, z) -> cellAt(level, origin.offset(x, y, z)));
+        if (plan.operations().isEmpty()) {
+            return;
+        }
+        double simulated = node.removeEnergy(plan.totalCostJoules(), true);
+        if (!plan.canAfford(simulated)) {
+            startAirBubbleDecay(level);
+            return;
+        }
+        double removed = node.removeEnergy(plan.totalCostJoules(), false);
+        if (!plan.canAfford(removed)) {
+            node.addEnergy(removed, false);
+            startAirBubbleDecay(level);
+            return;
+        }
+
+        BlockState stableBubble = ModMachineBlocks.AIR_BUBBLE.get().defaultBlockState()
                 .setValue(AirBubbleBlock.DECAYING, false);
-        for (BlockPos target : BlockPos.betweenClosed(
-                machine.getBlockPos().offset(-3, -3, -3),
-                machine.getBlockPos().offset(3, 3, 3)
-        )) {
-            if (target.distSqr(machine.getBlockPos()) > 9.0D) {
-                continue;
+        AirBubbleOwnershipSavedData ownership = AirBubbleOwnershipSavedData.get(level);
+        for (AirlockPlan.Operation operation : plan.operations()) {
+            BlockPos target = origin.offset(
+                    operation.offset().x(),
+                    operation.offset().y(),
+                    operation.offset().z()
+            );
+            BlockState targetState = operation.target() == AirlockPlan.Target.STABLE_BUBBLE
+                    ? stableBubble
+                    : Blocks.AIR.defaultBlockState();
+            if (operation.target() == AirlockPlan.Target.STABLE_BUBBLE) {
+                ownership.bind(target, origin);
+            } else {
+                ownership.unbindBubble(target);
             }
-            BlockState targetState = level.getBlockState(target);
-            if (targetState.getFluidState().is(net.minecraft.tags.FluidTags.WATER)) {
-                if (machine.electricity().node().removeEnergy(2.0D, true) < 2.0D) {
-                    return;
-                }
-                machine.electricity().node().removeEnergy(2.0D, false);
-                level.setBlock(target, bubble, Block.UPDATE_ALL);
-                state.working = true;
-            } else if (targetState.is(ModMachineBlocks.AIR_BUBBLE.get())
-                    && targetState.getValue(AirBubbleBlock.DECAYING)) {
-                level.setBlock(target, bubble, Block.UPDATE_ALL);
+            if (!level.getBlockState(target).equals(targetState)) {
+                level.setBlock(target, targetState, Block.UPDATE_ALL);
+            }
+            if (operation.target() == AirlockPlan.Target.STABLE_BUBBLE) {
+                AirBubbleBlock.scheduleOwnerValidation(level, target);
             }
         }
+        state.working = !plan.operations().isEmpty();
         machine.markChanged();
     }
 
     void tickThermopile(ServerLevel level) {
+        if (!thermopileNeighborsLoaded(level)) {
+            return;
+        }
         if (level.getGameTime() % 20L == 0L) {
             List<ThermalSource> sources = new ArrayList<>(Direction.values().length);
             for (Direction direction : Direction.values()) {
-                sources.add(thermalSource(level, machine.getBlockPos().relative(direction)));
+                sources.add(thermalSource(
+                        level,
+                        machine.getBlockPos().relative(direction),
+                        direction.getOpposite()
+                ));
             }
             double flux = 0.0D;
             for (int first = 0; first < sources.size(); first++) {
@@ -103,44 +148,87 @@ final class SingleBlockElectricalLogic {
         if (machine.energy() == null) {
             return;
         }
+        int converted = machine.electricalBridge() == null
+                ? 0
+                : machine.electricalBridge().lastChargeTransfer();
+        state.lastProduction = converted;
+        if (converted > 0) {
+            state.working = true;
+            machine.markChanged();
+        }
         Direction output = SingleBlockMachineSupport.facing(machine).getOpposite();
-        BlockEntity target = level.getBlockEntity(machine.getBlockPos().relative(output));
+        BlockPos targetPosition = machine.getBlockPos().relative(output);
+        if (!level.hasChunk(targetPosition.getX() >> 4, targetPosition.getZ() >> 4)) {
+            return;
+        }
+        BlockEntity target = level.getBlockEntity(targetPosition);
         if (target == null) {
             return;
         }
         target.getCapability(ForgeCapabilities.ENERGY, output.getOpposite()).ifPresent(storage -> {
-            int offered = machine.energy().extractEnergy(1_000, true);
+            int offered = machine.energy().extractEnergy(machine.energy().getEnergyStored(), true);
             int accepted = storage.receiveEnergy(offered, true);
             if (accepted > 0) {
                 int extracted = machine.energy().extractEnergy(accepted, false);
-                storage.receiveEnergy(extracted, false);
-                state.working = true;
-                machine.markChanged();
+                int inserted = storage.receiveEnergy(extracted, false);
+                if (inserted < extracted) {
+                    machine.energy().receiveEnergy(extracted - inserted, false);
+                }
             }
         });
     }
 
     void startAirBubbleDecay(ServerLevel level) {
-        for (BlockPos target : BlockPos.betweenClosed(
-                machine.getBlockPos().offset(-3, -3, -3),
-                machine.getBlockPos().offset(3, 3, 3)
-        )) {
-            if (target.distSqr(machine.getBlockPos()) <= 9.0D) {
-                BlockState targetState = level.getBlockState(target);
-                if (targetState.is(ModMachineBlocks.AIR_BUBBLE.get())
-                        && !targetState.getValue(AirBubbleBlock.DECAYING)) {
-                    level.setBlock(
-                            target,
-                            targetState.setValue(AirBubbleBlock.DECAYING, true),
-                            Block.UPDATE_ALL
-                    );
-                    level.scheduleTick(target, ModMachineBlocks.AIR_BUBBLE.get(), 1 + level.random.nextInt(20));
-                }
+        BlockPos origin = machine.getBlockPos();
+        AirBubbleOwnershipSavedData ownership = AirBubbleOwnershipSavedData.get(level);
+        Set<BlockPos> targets = new LinkedHashSet<>(ownership.unbindAirlock(origin));
+        for (AirlockPlan.Offset offset : AirlockPlan.activeOffsets()) {
+            BlockPos target = origin.offset(offset.x(), offset.y(), offset.z());
+            if (ownership.ownerOf(target).isEmpty()) {
+                targets.add(target);
+            }
+        }
+        for (BlockPos target : targets) {
+            if (level.getChunkSource().getChunkNow(target.getX() >> 4, target.getZ() >> 4) == null) {
+                continue;
+            }
+            BlockState targetState = level.getBlockState(target);
+            if (targetState.is(ModMachineBlocks.AIR_BUBBLE.get())
+                    && !targetState.getValue(AirBubbleBlock.DECAYING)) {
+                AirBubbleBlock.beginDecay(level, target, targetState);
             }
         }
     }
 
-    private ThermalSource thermalSource(ServerLevel level, BlockPos position) {
+    private static boolean scanAreaLoaded(ServerLevel level, BlockPos origin) {
+        int minimumChunkX = (origin.getX() - AirlockPlan.SCAN_RANGE) >> 4;
+        int maximumChunkX = (origin.getX() + AirlockPlan.SCAN_RANGE) >> 4;
+        int minimumChunkZ = (origin.getZ() - AirlockPlan.SCAN_RANGE) >> 4;
+        int maximumChunkZ = (origin.getZ() + AirlockPlan.SCAN_RANGE) >> 4;
+        for (int chunkX = minimumChunkX; chunkX <= maximumChunkX; chunkX++) {
+            for (int chunkZ = minimumChunkZ; chunkZ <= maximumChunkZ; chunkZ++) {
+                if (!level.hasChunk(chunkX, chunkZ)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static AirlockPlan.Cell cellAt(ServerLevel level, BlockPos position) {
+        BlockState blockState = level.getBlockState(position);
+        if (blockState.is(Blocks.WATER)) {
+            return AirlockPlan.Cell.WATER;
+        }
+        if (blockState.is(ModMachineBlocks.AIR_BUBBLE.get())) {
+            return blockState.getValue(AirBubbleBlock.DECAYING)
+                    ? AirlockPlan.Cell.DECAYING_BUBBLE
+                    : AirlockPlan.Cell.STABLE_BUBBLE;
+        }
+        return blockState.isAir() ? AirlockPlan.Cell.AIR : AirlockPlan.Cell.OTHER;
+    }
+
+    private ThermalSource thermalSource(ServerLevel level, BlockPos position, Direction targetSide) {
         BlockState blockState = level.getBlockState(position);
         Optional<ThermopileRecipe> recipe = level.getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.THERMOPILE_TYPE.get())
@@ -151,8 +239,15 @@ final class SingleBlockElectricalLogic {
             return new ThermalSource(recipe.get().temperatureKelvin(), recipe.get().conductivity());
         }
         BlockEntity blockEntity = level.getBlockEntity(position);
+        if (!(blockEntity instanceof MachineBlockEntity thermalHost)
+                || thermalHost.thermalReading(targetSide).isEmpty()) {
+            return new ThermalSource(HeatNode.AMBIENT_TEMPERATURE_KELVIN, 1.0D);
+        }
         if (blockEntity instanceof SingleBlockMachineBlockEntity otherMachine && otherMachine.heat() != null) {
             return source(otherMachine.heat().node());
+        }
+        if (blockEntity instanceof AdvancedMultiblockBlockEntity multiblock && multiblock.heat() != null) {
+            return source(multiblock.heat().node());
         }
         if (blockEntity instanceof HeatPipeBlockEntity pipe) {
             return source(pipe.heat().node());
@@ -161,6 +256,16 @@ final class SingleBlockElectricalLogic {
             return source(sink.heat().node());
         }
         return new ThermalSource(HeatNode.AMBIENT_TEMPERATURE_KELVIN, 1.0D);
+    }
+
+    private boolean thermopileNeighborsLoaded(ServerLevel level) {
+        for (Direction direction : Direction.values()) {
+            BlockPos position = machine.getBlockPos().relative(direction);
+            if (level.getChunkSource().getChunkNow(position.getX() >> 4, position.getZ() >> 4) == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static ThermalSource source(HeatNode node) {

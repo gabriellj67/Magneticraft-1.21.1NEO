@@ -77,10 +77,15 @@ final class SingleBlockMachineSupport {
     }
 
     static IItemHandler adjacentItemHandler(SingleBlockMachineBlockEntity machine, Direction direction) {
-        if (machine.getLevel() == null) {
+        if (!(machine.getLevel() instanceof ServerLevel level)) {
             return null;
         }
-        BlockEntity blockEntity = machine.getLevel().getBlockEntity(machine.getBlockPos().relative(direction));
+        BlockPos targetPosition = machine.getBlockPos().relative(direction);
+        var targetChunk = level.getChunkSource().getChunkNow(
+                targetPosition.getX() >> 4,
+                targetPosition.getZ() >> 4
+        );
+        BlockEntity blockEntity = targetChunk == null ? null : targetChunk.getBlockEntity(targetPosition);
         return blockEntity == null
                 ? null
                 : blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);

@@ -1,0 +1,28 @@
+{
+  "automation_profile": "all_except_output_face",
+  "category": "utility",
+  "description": "guide.magneticraft.machine.pneumatic_relay.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:pneumatic_relay",
+  "inventory_slots": 9,
+  "physical_ports": [
+    "item",
+    "pneumatic"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [
+    "storage",
+    "storage",
+    "storage",
+    "storage",
+    "storage",
+    "storage",
+    "storage",
+    "storage",
+    "storage"
+  ],
+  "translation_key": "block.magneticraft.pneumatic_relay"
+}

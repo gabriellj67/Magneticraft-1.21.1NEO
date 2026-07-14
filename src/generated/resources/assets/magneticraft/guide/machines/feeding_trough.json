@@ -1,0 +1,17 @@
+{
+  "automation_profile": "none",
+  "category": "utility",
+  "description": "guide.magneticraft.machine.feeding_trough.description",
+  "ghost_slots": 0,
+  "has_menu": false,
+  "id": "magneticraft:feeding_trough",
+  "inventory_slots": 1,
+  "physical_ports": [],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [
+    "input"
+  ],
+  "translation_key": "block.magneticraft.feeding_trough"
+}

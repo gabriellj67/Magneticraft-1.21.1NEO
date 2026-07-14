@@ -45,6 +45,10 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         return data.items();
     }
 
+    public List<MachineGuide> machines() {
+        return data.machines();
+    }
+
     @Override
     protected PreparedGuideData prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
         List<MultiblockGuide> multiblocks = new ArrayList<>();
@@ -62,7 +66,15 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         List<ItemGuide> items = resourceManager.getResource(PORTABLE_ITEM_GUIDE)
                 .map(this::readItems)
                 .orElseGet(List::of);
-        return new PreparedGuideData(multiblocks, opcodes, items);
+        List<MachineGuide> machines = new ArrayList<>();
+        resourceManager.listResources(
+                "guide/machines",
+                location -> location.getNamespace().equals(Magneticraft.MOD_ID)
+                        && location.getPath().endsWith(".json")
+        ).entrySet().stream()
+                .sorted(Comparator.comparing(entry -> entry.getKey().toString()))
+                .forEach(entry -> readMachine(entry.getKey(), entry.getValue(), machines));
+        return new PreparedGuideData(multiblocks, opcodes, items, machines);
     }
 
     @Override
@@ -149,6 +161,50 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
             ));
         }
         return List.copyOf(items);
+    }
+
+    private void readMachine(ResourceLocation file, Resource resource, List<MachineGuide> destination) {
+        try (Reader reader = resource.openAsReader()) {
+            destination.add(parseMachine(file, GsonHelper.parse(reader)));
+        } catch (IOException | RuntimeException exception) {
+            Magneticraft.LOGGER.warn("Skipping invalid single-block machine guide {}", file, exception);
+        }
+    }
+
+    static MachineGuide parseMachine(ResourceLocation file, JsonObject root) {
+        requireSchema(file, root);
+        int inventorySlots = nonNegativeInt(root, "inventory_slots");
+        List<String> slotRoles = readStrings(root, "slot_roles");
+        if (slotRoles.size() != inventorySlots) {
+            throw new IllegalArgumentException("Machine guide slot count mismatch in " + file);
+        }
+        return new MachineGuide(
+                parseId(file, GsonHelper.getAsString(root, "id")),
+                GsonHelper.getAsString(root, "translation_key"),
+                GsonHelper.getAsString(root, "description"),
+                GsonHelper.getAsString(root, "category"),
+                inventorySlots,
+                nonNegativeInt(root, "ghost_slots"),
+                GsonHelper.getAsBoolean(root, "has_menu"),
+                GsonHelper.getAsString(root, "redstone_control"),
+                GsonHelper.getAsString(root, "processing_kind"),
+                GsonHelper.getAsString(root, "automation_profile"),
+                slotRoles,
+                readStrings(root, "physical_ports")
+        );
+    }
+
+    private static List<String> readStrings(JsonObject root, String key) {
+        JsonArray values = GsonHelper.getAsJsonArray(root, key);
+        List<String> result = new ArrayList<>(values.size());
+        for (JsonElement value : values) {
+            String text = value.getAsString();
+            if (text.isBlank()) {
+                throw new IllegalArgumentException("Blank " + key + " entry");
+            }
+            result.add(text);
+        }
+        return List.copyOf(result);
     }
 
     private static List<List<String>> readLayers(ResourceLocation file, JsonArray layerElements) {
@@ -280,17 +336,46 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         }
     }
 
+    public record MachineGuide(
+            ResourceLocation id,
+            String translationKey,
+            String descriptionKey,
+            String category,
+            int inventorySlots,
+            int ghostSlots,
+            boolean hasMenu,
+            String redstoneControl,
+            String processingKind,
+            String automationProfile,
+            List<String> slotRoles,
+            List<String> physicalPorts
+    ) {
+        public MachineGuide {
+            inventorySlots = Math.max(0, inventorySlots);
+            ghostSlots = Math.max(0, ghostSlots);
+            slotRoles = List.copyOf(slotRoles);
+            physicalPorts = List.copyOf(physicalPorts);
+        }
+    }
+
     protected record PreparedGuideData(
             List<MultiblockGuide> multiblocks,
             List<OpcodeGuide> opcodes,
-            List<ItemGuide> items
+            List<ItemGuide> items,
+            List<MachineGuide> machines
     ) {
-        private static final PreparedGuideData EMPTY = new PreparedGuideData(List.of(), List.of(), List.of());
+        private static final PreparedGuideData EMPTY = new PreparedGuideData(
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        );
 
         protected PreparedGuideData {
             multiblocks = List.copyOf(multiblocks);
             opcodes = List.copyOf(opcodes);
             items = List.copyOf(items);
+            machines = List.copyOf(machines);
         }
     }
 }

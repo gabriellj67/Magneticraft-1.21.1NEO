@@ -1,7 +1,7 @@
 {
   "type": "magneticraft:crushing_table",
   "ingredient": {
-    "item": "minecraft:dark_prismarine"
+    "item": "minecraft:prismarine_bricks"
   },
   "required_level": 0,
   "result": {

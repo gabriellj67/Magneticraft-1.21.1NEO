@@ -19,6 +19,10 @@ public final class GhostSlot extends Slot {
         this.filterSlot = filterSlot;
     }
 
+    public int filterSlot() {
+        return filterSlot;
+    }
+
     @Override
     public ItemStack getItem() {
         return filters.getFilter(filterSlot);

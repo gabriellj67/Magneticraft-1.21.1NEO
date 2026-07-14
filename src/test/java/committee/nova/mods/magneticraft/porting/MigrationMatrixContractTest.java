@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MigrationMatrixContractTest {
+    private static final String CURRENT_COMPLETED_STAGE = "0.5.0";
     private static final Path MATRIX_PATH = Path.of("docs/porting/migration-matrix.json");
     private static final Path ID_MAP_PATH = Path.of("docs/porting/registry-id-map.json");
     private static final Path LEGACY_RECIPE_ROOT = Path.of(
@@ -448,6 +449,149 @@ class MigrationMatrixContractTest {
         }
         assertEquals(tokenRoutes.keySet(), usedTokens, "Acceptance route token is orphaned");
         assertEquals(routeIds, usedRoutes, "Acceptance route is orphaned");
+    }
+
+    @Test
+    void singleBlockMachineCatalogResolvesTwentyFourRealContracts() throws IOException {
+        JsonObject catalog = readObject(MATRIX_PATH).getAsJsonObject("single_block_machine_catalog");
+        assertNotNull(catalog);
+        assertEquals(1, catalog.get("schema_version").getAsInt());
+        assertEquals("0.5.0", catalog.get("stage").getAsString());
+        assertEquals(24, catalog.get("expected_count").getAsInt());
+
+        Set<String> expectedIds = Set.of(
+                "magneticraft:airlock",
+                "magneticraft:battery_box",
+                "magneticraft:brick_furnace",
+                "magneticraft:combustion_chamber",
+                "magneticraft:crushing_table",
+                "magneticraft:electric_engine",
+                "magneticraft:electric_furnace",
+                "magneticraft:electric_heater",
+                "magneticraft:fabricator",
+                "magneticraft:feeding_trough",
+                "magneticraft:forge_energy_heater",
+                "magneticraft:forge_energy_transformer",
+                "magneticraft:gasification_unit",
+                "magneticraft:infinite_energy_source",
+                "magneticraft:inserter",
+                "magneticraft:pneumatic_filter",
+                "magneticraft:pneumatic_relay",
+                "magneticraft:pneumatic_transposer",
+                "magneticraft:sluice_box",
+                "magneticraft:small_tank",
+                "magneticraft:steam_boiler",
+                "magneticraft:thermopile",
+                "magneticraft:water_generator",
+                "magneticraft:wooden_crate"
+        );
+        Set<String> allowedObtainability = new HashSet<>(strings(
+                catalog.getAsJsonArray("obtainability_values")
+        ));
+        assertEquals(Set.of("survival", "creative_only"), allowedObtainability);
+
+        Path generatedRoot = Path.of(catalog.get("generated_root").getAsString());
+        assertTrue(Files.isDirectory(generatedRoot), "Missing generated resource root: " + generatedRoot);
+        JsonArray entries = catalog.getAsJsonArray("entries");
+        assertEquals(catalog.get("expected_count").getAsInt(), entries.size());
+
+        Set<String> targetIds = new HashSet<>();
+        Set<String> creativeOnly = new HashSet<>();
+        for (JsonElement element : entries) {
+            JsonObject entry = element.getAsJsonObject();
+            String targetId = entry.get("target_id").getAsString();
+            assertTrue(targetId.matches("[a-z0-9_.-]+:[a-z0-9_./-]+"), targetId);
+            assertTrue(targetIds.add(targetId), "Duplicate single-block target ID: " + targetId);
+            assertDecision(entry.get("disposition").getAsString(), targetId);
+
+            String obtainability = entry.get("obtainability").getAsString();
+            assertTrue(allowedObtainability.contains(obtainability), targetId + ": " + obtainability);
+            if (obtainability.equals("creative_only")) {
+                creativeOnly.add(targetId);
+            }
+
+            JsonArray legacySources = entry.getAsJsonArray("legacy_sources");
+            assertNonEmpty(legacySources, targetId);
+            for (JsonElement sourceElement : legacySources) {
+                JsonObject source = sourceElement.getAsJsonObject();
+                assertNonBlank(source, "path");
+                assertNonBlank(source, "symbol");
+                Path sourcePath = Path.of(source.get("path").getAsString());
+                assertTrue(Files.isRegularFile(sourcePath), "Missing legacy source for " + targetId + ": " + sourcePath);
+                String symbol = source.get("symbol").getAsString();
+                assertTrue(Files.readString(sourcePath).contains(symbol),
+                        "Missing legacy symbol for " + targetId + ": " + sourcePath + "#" + symbol);
+            }
+
+            String targetPath = targetId.substring(targetId.indexOf(':') + 1);
+            JsonObject resources = entry.getAsJsonObject("generated_resources");
+            assertNotNull(resources, targetId);
+            String guideResource = resources.get("guide").getAsString();
+            assertEquals("assets/magneticraft/guide/machines/" + targetPath + ".json", guideResource);
+            Path guidePath = generatedRoot.resolve(guideResource);
+            assertTrue(Files.isRegularFile(guidePath), "Missing generated guide for " + targetId + ": " + guidePath);
+            assertEquals(targetId, readObject(guidePath).get("id").getAsString());
+
+            JsonElement craftingRecipe = resources.get("crafting_recipe");
+            assertNotNull(craftingRecipe, targetId + " must declare its crafting-recipe decision");
+            Path expectedCraftingPath = generatedRoot.resolve(
+                    "data/magneticraft/recipes/crafting/" + targetPath + ".json"
+            );
+            if (obtainability.equals("creative_only")) {
+                assertTrue(craftingRecipe.isJsonNull(), targetId + " must not declare a survival recipe");
+                assertFalse(Files.exists(expectedCraftingPath), targetId + " leaked a survival recipe");
+            } else {
+                assertTrue(craftingRecipe.isJsonPrimitive(), targetId + " has no crafting resource");
+                assertEquals(
+                        "data/magneticraft/recipes/crafting/" + targetPath + ".json",
+                        craftingRecipe.getAsString()
+                );
+                assertTrue(Files.isRegularFile(expectedCraftingPath),
+                        "Missing survival recipe for " + targetId + ": " + expectedCraftingPath);
+            }
+
+            JsonArray processingTypes = resources.getAsJsonArray("processing_recipe_types");
+            JsonArray processingDirectories = resources.getAsJsonArray("processing_resource_directories");
+            assertNotNull(processingTypes, targetId);
+            assertNotNull(processingDirectories, targetId);
+            Set<String> recipeTypes = new HashSet<>(strings(processingTypes));
+            for (JsonElement directoryElement : processingDirectories) {
+                Path directory = generatedRoot.resolve(directoryElement.getAsString());
+                assertTrue(Files.isDirectory(directory),
+                        "Missing processing resource directory for " + targetId + ": " + directory);
+                try (Stream<Path> files = Files.list(directory)) {
+                    List<Path> recipes = files
+                            .filter(Files::isRegularFile)
+                            .filter(path -> path.getFileName().toString().endsWith(".json"))
+                            .toList();
+                    assertFalse(recipes.isEmpty(), "Empty processing resource directory for " + targetId);
+                    for (Path recipe : recipes) {
+                        String recipeType = readObject(recipe).get("type").getAsString();
+                        assertTrue(recipeTypes.contains(recipeType),
+                                targetId + " does not declare generated recipe type " + recipeType);
+                    }
+                }
+            }
+
+            JsonArray testLocators = entry.getAsJsonArray("test_locators");
+            assertNonEmpty(testLocators, targetId);
+            for (JsonElement locatorElement : testLocators) {
+                JsonObject locator = locatorElement.getAsJsonObject();
+                assertNonBlank(locator, "path");
+                assertNonBlank(locator, "method");
+                Path testPath = Path.of(locator.get("path").getAsString());
+                assertTrue(Files.isRegularFile(testPath), "Missing test source for " + targetId + ": " + testPath);
+                String method = locator.get("method").getAsString();
+                Pattern declaration = Pattern.compile(
+                        "\\b(?:public\\s+static\\s+)?void\\s+" + Pattern.quote(method) + "\\s*\\("
+                );
+                assertTrue(declaration.matcher(Files.readString(testPath)).find(),
+                        "Missing test method for " + targetId + ": " + testPath + "#" + method);
+            }
+        }
+
+        assertEquals(expectedIds, targetIds);
+        assertEquals(Set.of("magneticraft:infinite_energy_source"), creativeOnly);
     }
 
     @Test
@@ -1138,13 +1282,32 @@ class MigrationMatrixContractTest {
             assertNonBlank(group, "legacy_source");
             String disposition = group.get("disposition").getAsString();
             assertDecision(disposition, id);
-            assertStage(group.get("stage").getAsString(), id);
+            String stage = group.get("stage").getAsString();
+            assertStage(stage, id);
             assertNonEmpty(group.getAsJsonArray("acceptance_tests"), id);
             if (!disposition.equals("exclude")) {
                 assertNonBlank(group, "target_type");
                 assertNonBlank(group, "target_path_template");
                 assertTrue(group.has("variants"), "Missing explicit variants: " + id);
-                int count = group.getAsJsonArray("variants").size();
+                String targetTemplate = group.get("target_path_template").getAsString();
+                JsonArray variants = group.getAsJsonArray("variants");
+                if (stage.compareTo(CURRENT_COMPLETED_STAGE) <= 0) {
+                    for (JsonElement variantElement : variants) {
+                        String variant = variantElement.getAsString();
+                        String targetPath = targetTemplate
+                                .replace("{machine}_{variant}", variant)
+                                .replace("{variant}", variant);
+                        assertFalse(
+                                targetPath.contains("{"),
+                                "Unresolved target path template: " + id + ":" + targetPath
+                        );
+                        assertTrue(
+                                Files.isRegularFile(Path.of("src/generated/resources").resolve(targetPath)),
+                                "Missing generated recipe target: " + id + ":" + targetPath
+                        );
+                    }
+                }
+                int count = variants.size();
                 assertTrue(count > 0, id);
                 if (group.has("expected_recipe_count")) {
                     assertEquals(group.get("expected_recipe_count").getAsInt(), count, id);
@@ -1154,7 +1317,7 @@ class MigrationMatrixContractTest {
                 assertTrue(group.has("legacy_variants"), "Excluded group needs evidence inventory: " + id);
             }
         }
-        assertEquals(253, generatedRecipeCount);
+        assertEquals(262, generatedRecipeCount);
 
         JsonObject guides = matrix.getAsJsonObject("legacy_guides");
         List<String> inventory = strings(guides.getAsJsonArray("inventory"));
@@ -1244,7 +1407,7 @@ class MigrationMatrixContractTest {
             assertNonBlank(contract, "contract");
             assertNonEmpty(contract.getAsJsonArray("legacy_sources"), id);
             assertNonEmpty(contract.getAsJsonArray("acceptance_tests"), id);
-            if (stage.equals("0.3.0") || stage.equals("0.4.0")) {
+            if (stage.equals("0.3.0") || stage.equals("0.4.0") || stage.equals("0.5.0")) {
                 assertNonBlank(contract, "evidence");
                 String[] evidence = contract.get("evidence").getAsString().split("#", 2);
                 assertEquals(2, evidence.length, stage + " evidence must include a stable heading anchor: " + id);

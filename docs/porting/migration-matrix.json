@@ -67,8 +67,8 @@
       {
         "id": "machine-gametest",
         "tokens": ["MANUAL", "MISC", "OIL", "SINGLE", "WATER"],
-        "harness": "gametest",
-        "locator": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java"
+        "harness": "junit_and_gametest",
+        "locator": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java;src/gametest/java/committee/nova/mods/magneticraft/gametest/MachineFrameworkGameTests.java;src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java;src/gametest/java/committee/nova/mods/magneticraft/gametest/AirlockGameTests.java;src/gametest/java/committee/nova/mods/magneticraft/gametest/PneumaticEndpointGameTests.java;src/gametest/java/committee/nova/mods/magneticraft/gametest/BaseContentGameTests.java;src/test/java/committee/nova/mods/magneticraft/data/GeneratedDataContractTest.java;src/test/java/committee/nova/mods/magneticraft/content/machine/singleblock/SingleBlockMachineDefinitionContractTest.java;src/test/java/committee/nova/mods/magneticraft/integration/OptionalIntegrationContractTest.java"
       },
       {
         "id": "multiblock-worldgen-gametest",
@@ -111,6 +111,454 @@
       "explicit exclusions"
     ],
     "acceptance_tests": ["MIG-REGISTRY-PROJECTION-001", "MIG-REGISTRY-NAMING-001", "MIG-REGISTRY-UNIQUE-001"]
+  },
+  "single_block_machine_catalog": {
+    "schema_version": 1,
+    "stage": "0.5.0",
+    "expected_count": 24,
+    "generated_root": "src/generated/resources",
+    "obtainability_values": ["survival", "creative_only"],
+    "entries": [
+      {
+        "target_id": "magneticraft:airlock",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "airLock = builder.withName(\"airlock\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/TileEntitys.kt", "symbol": "class TileAirLock"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/airlock.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/airlock.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/AirlockGameTests.java", "method": "poweredAirlockSeparatesBoundaryAndMaintainsTheBubble"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:battery_box",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "battery = builder.withName(\"battery\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/TileEntitys.kt", "symbol": "class TileBattery"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/battery_box.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/battery_box.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "batteryKeepsFeInternalAndSeparatesAutomationFromMenuFiltering"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:brick_furnace",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/Blocks.kt", "symbol": "brickFurnace = builder.withName(\"brick_furnace\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/TileEntities.kt", "symbol": "class TileBrickFurnace"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/brick_furnace.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/brick_furnace.json",
+          "processing_recipe_types": ["minecraft:smelting"],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "brickFurnacePreservesProgressAcrossRecipeChangesAndUsesWorkingGrace"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:combustion_chamber",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/Blocks.kt", "symbol": "combustionChamber = builder.withName(\"combustion_chamber\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/TileEntities.kt", "symbol": "class TileCombustionChamber"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/combustion_chamber.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/combustion_chamber.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "combustionChamberDoorAloneControlsDirectFuelInteraction"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:crushing_table",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/Blocks.kt", "symbol": "crushingTable = builder.withName(\"crushing_table\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/TileEntities.kt", "symbol": "class TileCrushingTable"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt", "symbol": "addCrushingTableRecipe("}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/crushing_table.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/crushing_table.json",
+          "processing_recipe_types": ["magneticraft:crushing_table"],
+          "processing_resource_directories": ["data/magneticraft/recipes/crushing_table"]
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/MachineFrameworkGameTests.java", "method": "crushingTableAndShiftClickPreserveItems"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:electric_engine",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "electricEngine = builder.withName(\"electric_engine\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/TileEntitys.kt", "symbol": "class TileElectricEngine"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/electric_engine.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/electric_engine.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "engineConvertsAtFullRateAtExactlySixtyVoltsAndMarksWorking"},
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "engineActivelyOutputsOnlyThroughItsDirectionalFace"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:electric_furnace",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "electricFurnace = builder.withName(\"electric_furnace\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/TileEntitys.kt", "symbol": "class TileElectricFurnace"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/electric_furnace.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/electric_furnace.json",
+          "processing_recipe_types": ["minecraft:smelting"],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/MachineFrameworkGameTests.java", "method": "electricFurnaceConsumesEnergyAndSmelts"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:electric_heater",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "electricHeater = builder.withName(\"electric_heater\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/TileEntities.kt", "symbol": "class TileElectricHeater"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/electric_heater.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/electric_heater.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "heatersUseReleasedBridgeAndPartialEnergyContract"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:fabricator",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/Blocks.kt", "symbol": "fabricator = builder.withName(\"fabricator\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/TileEntities.kt", "symbol": "class TileFabricator"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/Containers.kt", "symbol": "class ContainerFabricator"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/fabricator.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/fabricator.json",
+          "processing_recipe_types": ["minecraft:crafting"],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "fabricatorConsumesReservedIngredientsAtomically"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:feeding_trough",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/Blocks.kt", "symbol": "feedingTrough = builder.withName(\"feeding_trough\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/TileEntities.kt", "symbol": "class TileFeedingTrough"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/feeding_trough.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/feeding_trough.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "feedingTroughUsesPositionPhaseAndLegacyOneItemBoundary"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:forge_energy_heater",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "rfHeater = builder.withName(\"rf_heater\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/TileEntities.kt", "symbol": "class TileRfHeater"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/forge_energy_heater.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/forge_energy_heater.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "heatersUseReleasedBridgeAndPartialEnergyContract"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:forge_energy_transformer",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "rfTransformer = builder.withName(\"rf_transformer\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/TileEntitys.kt", "symbol": "class TileRfTransformer"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/forge_energy_transformer.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/forge_energy_transformer.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "rfTransformerConvertsForgeEnergyToNativeJoulesOneToOne"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:gasification_unit",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/Blocks.kt", "symbol": "gasificationUnit = builder.withName(\"gasification_unit\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/TileEntities.kt", "symbol": "class TileGasificationUnit"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt", "symbol": "addGasifierRecipe("}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/gasification_unit.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/gasification_unit.json",
+          "processing_recipe_types": ["magneticraft:gasification_unit"],
+          "processing_resource_directories": ["data/magneticraft/recipes/gasification_unit"]
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "gasifierActivelyExportsItsWholeBufferWhileIdle"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:infinite_energy_source",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "infiniteEnergy = builder.withName(\"infinite_energy\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/TileEntitys.kt", "symbol": "class TileInfiniteEnergy"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "creative_only",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/infinite_energy_source.json",
+          "crafting_recipe": null,
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "infiniteSourceMaintainsItsNativeOneHundredTwentyFiveVoltContract"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:inserter",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/Blocks.kt", "symbol": "inserter = builder.withName(\"inserter\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/TileEntities.kt", "symbol": "class TileInserter"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/inserter.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/inserter.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "inserterConservesItemsAcrossTwoInventories"},
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/PneumaticEndpointGameTests.java", "method": "inserterBlankWhitelistRejectsAndBlankBlacklistAllows"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:pneumatic_filter",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/Blocks.kt", "symbol": "filter = builder.withName(\"filter\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/TileEntities.kt", "symbol": "class TileFilter"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/pneumatic_filter.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/pneumatic_filter.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/PneumaticEndpointGameTests.java", "method": "pneumaticFilterInputSimulationIsPureAndBounded"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:pneumatic_relay",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/Blocks.kt", "symbol": "relay = builder.withName(\"relay\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/TileEntities.kt", "symbol": "class TileRelay"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/pneumatic_relay.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/pneumatic_relay.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "relayAndFilterUseTransactionalPneumaticEndpoints"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:pneumatic_transposer",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/Blocks.kt", "symbol": "transposer = builder.withName(\"transposer\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/TileEntities.kt", "symbol": "class TileTransposer"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/pneumatic_transposer.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/pneumatic_transposer.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/PneumaticEndpointGameTests.java", "method": "transposerDoesNotFallBackToEntitiesBehindAnInventory"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:sluice_box",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/Blocks.kt", "symbol": "sluiceBox = builder.withName(\"sluice_box\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/TileEntities.kt", "symbol": "class TileSluiceBox"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt", "symbol": "addSluiceBoxRecipe("}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/sluice_box.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/sluice_box.json",
+          "processing_recipe_types": ["magneticraft:sluice_box"],
+          "processing_resource_directories": ["data/magneticraft/recipes/sluice_box"]
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "activeSluiceIsResetByUpstreamRunoff"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:small_tank",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/fluid_machines/Blocks.kt", "symbol": "smallTank = builder.withName(\"small_tank\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/fluid_machines/TileEntities.kt", "symbol": "class TileSmallTank"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/small_tank.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/small_tank.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "smallTankFluidSurvivesItemAndBlockEntityRoundTrip"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:steam_boiler",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/Blocks.kt", "symbol": "steamBoiler = builder.withName(\"steam_boiler\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines/TileEntities.kt", "symbol": "class TileSteamBoiler"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/steam_boiler.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/steam_boiler.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "boilerExposesBothTanksAndActivelyExportsWithoutRateCap"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:thermopile",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/Blocks.kt", "symbol": "thermopile = builder.withName(\"thermopile\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines/TileEntitys.kt", "symbol": "class TileThermopile"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt", "symbol": "addThermopileRecipe("}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/thermopile.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/thermopile.json",
+          "processing_recipe_types": ["magneticraft:thermopile"],
+          "processing_resource_directories": ["data/magneticraft/recipes/thermopile"]
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "thermopileUsesAnInternalEightyKilojouleBuffer"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:water_generator",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/Blocks.kt", "symbol": "waterGenerator = builder.withName(\"water_generator\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines/TileEntities.kt", "symbol": "class TileWaterGenerator"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/water_generator.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/water_generator.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "waterGeneratorExportsTwentyMilliBucketsPerSidePerTick"}
+        ]
+      },
+      {
+        "target_id": "magneticraft:wooden_crate",
+        "legacy_sources": [
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/Blocks.kt", "symbol": "box = builder.withName(\"box\")"},
+          {"path": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines/TileEntities.kt", "symbol": "class TileBox"}
+        ],
+        "disposition": "rebuild",
+        "obtainability": "survival",
+        "generated_resources": {
+          "guide": "assets/magneticraft/guide/machines/wooden_crate.json",
+          "crafting_recipe": "data/magneticraft/recipes/crafting/wooden_crate.json",
+          "processing_recipe_types": [],
+          "processing_resource_directories": []
+        },
+        "test_locators": [
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/SingleBlockMachineGameTests.java", "method": "boxExposesAndPersistsItsTwentySevenStorageSlots"}
+        ]
+      }
+    ]
   },
   "normalized_recipe_contracts": {
     "join_rule": "legacy_json_groups and programmatic_groups are keyed by their group id; every enumerated recipe member inherits exactly one joined data-path and behavior contract",
@@ -379,7 +827,7 @@
       "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerCrushingTableRecipes",
       "target_type": "magneticraft:crushing_table",
       "target_path_template": "data/magneticraft/recipes/crushing_table/{variant}.json",
-      "variants": ["aluminium_ore", "blaze_rod", "bone", "burnt_limestone", "cobalt_ore", "copper_block", "copper_ore", "creeper_head", "dark_prismarine", "end_stone_bricks", "galena_ore", "gold_block", "gold_ore", "iron_block", "iron_ore", "lead_block", "lead_ore", "limestone", "mithril_ore", "mossy_stone_bricks", "nickel_ore", "osmium_ore", "polished_andesite", "polished_diorite", "polished_granite", "pyrite_ore", "silver_ore", "skeleton_skull", "steel_ingot", "stone", "stone_bricks", "tin_ore", "tungsten_block", "tungsten_ore", "zinc_ore", "zombie_head"],
+      "variants": ["aluminium_ore", "blaze_rod", "bone", "burnt_limestone", "cobalt_ore", "copper_block", "copper_ore", "creeper_head", "prismarine_bricks", "end_stone_bricks", "galena_ore", "gold_block", "gold_ore", "iron_block", "iron_ore", "lead_block", "lead_ore", "limestone", "mithril_ore", "mossy_stone_bricks", "nickel_ore", "osmium_ore", "polished_andesite", "polished_diorite", "polished_granite", "pyrite_ore", "silver_ore", "skeleton_skull", "steel_ingot", "stone", "stone_bricks", "tin_ore", "tungsten_block", "tungsten_ore", "zinc_ore", "zombie_head"],
       "disposition": "rebuild",
       "stage": "0.5.0",
       "acceptance_tests": ["MIG-RECIPE-CRUSHING-001"]
@@ -399,7 +847,7 @@
       "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerGasifierRecipes",
       "target_type": "magneticraft:gasification_unit",
       "target_path_template": "data/magneticraft/recipes/gasification_unit/{variant}.json",
-      "variants": ["00_logs", "10_planks", "11_stairs", "12_fences", "13_doors", "14_slabs", "15_trapdoors", "20_saplings", "21_leaves", "30_hay", "31_cactus", "32_chest", "40_stick", "41_wheat", "42_sugar_cane", "43_nether_wart", "44_carrot", "45_potato", "46_beetroot"],
+      "variants": ["00_logs", "10_planks", "11_stairs", "12_fences", "13_doors", "14_slabs", "15_trapdoors", "16_pressure_plates", "20_saplings", "21_leaves", "22_vines", "23_lily_pad", "24_flowers", "25_mushrooms", "26_tall_plants", "30_hay", "31_cactus", "32_chest", "33_bowl", "34_signs", "40_stick", "41_wheat", "42_sugar_cane", "43_nether_wart", "44_carrot", "45_potato", "46_beetroot", "47_seeds"],
       "disposition": "rebuild",
       "stage": "0.5.0",
       "acceptance_tests": ["MIG-RECIPE-GASIFICATION-001"]
@@ -1119,10 +1567,11 @@
     },
     {
       "id": "machines.single_block_catalog",
-      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines"],
+      "legacy_sources": [".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/manual_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/fluid_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/electric_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/heat_machines", ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/automatic_machines"],
       "disposition": "rebuild",
       "stage": "0.5.0",
-      "contract": "Crushing table, wooden crate, sluice box, fabricator, feeding trough, water generator, battery box, electric furnace, airlock, thermopile, combustion chamber, steam boiler, electric/FE heaters, gasification unit, brick furnace, electric engine and automation each define recipes, slots/sides, redstone, persistence, menu sync, JEI/CT data, bilingual guide and GameTest contracts.",
+      "contract": "The 24-entry single_block_machine_catalog uniquely binds every released single-block machine to its target ID, exact legacy source symbols, obtainability, generated guide/crafting/processing resources and existing JUnit/GameTest methods. Every survival entry has a crafting recipe; infinite_energy_source is the sole creative-only entry and has none.",
+      "evidence": "docs/porting/single-block-0.5-evidence.md#single-block-catalog",
       "acceptance_tests": ["MIG-SINGLE-MACHINE-CATALOG-001"]
     },
     {
@@ -1131,6 +1580,7 @@
       "disposition": "rebuild",
       "stage": "0.5.0",
       "contract": "Intentional creative/admin devices, including infinite energy and oil-deposit placement, remain available while internal gaps and moving placeholders never enter normal obtainable content.",
+      "evidence": "docs/porting/single-block-0.5-evidence.md#creative-and-internal-boundary",
       "acceptance_tests": ["MIG-CREATIVE-ADMIN-001", "MIG-INTERNAL-NOT-OBTAINABLE-001"]
     },
     {

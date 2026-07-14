@@ -44,7 +44,7 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
                 Magneticraft.id("inventory"),
                 this,
                 2,
-                BatteryBlockEntity::isValidCell,
+                (slot, stack) -> true,
                 side -> new ItemInventoryModule.SlotAccess(new int[]{0, 1}, new int[]{0, 1})
         ));
         energy = addModule(new EnergyStorageModule(
@@ -53,7 +53,9 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
                 CAPACITY,
                 NETWORK_TRANSFER_RATE,
                 NETWORK_TRANSFER_RATE,
-                this::canAccessEnergy
+                side -> false,
+                false,
+                false
         ));
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
@@ -160,7 +162,7 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
                 && side == getBlockState().getValue(BatteryBlock.FACING).getOpposite();
     }
 
-    private static boolean isValidCell(int slot, ItemStack stack) {
+    static boolean isValidCell(int slot, ItemStack stack) {
         return stack.getCapability(ForgeCapabilities.ENERGY).map(storage -> switch (slot) {
             case 0 -> storage.canReceive();
             case 1 -> storage.canExtract();

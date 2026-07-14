@@ -50,6 +50,10 @@ final class SingleBlockMachineLogic {
         automation.activateSluiceChain();
     }
 
+    void clampInfiniteEnergyVoltage() {
+        electrical.clampInfiniteEnergyVoltage();
+    }
+
     void onBroken(ServerLevel level) {
         if (machine.definition() == SingleBlockMachineDefinition.AIRLOCK) {
             electrical.startAirBubbleDecay(level);

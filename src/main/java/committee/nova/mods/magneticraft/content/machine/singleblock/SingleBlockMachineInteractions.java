@@ -3,11 +3,14 @@ package committee.nova.mods.magneticraft.content.machine.singleblock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.SluiceRecipe;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModTags;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
@@ -27,7 +30,7 @@ final class SingleBlockMachineInteractions {
         this.state = state;
     }
 
-    InteractionResult interact(Player player, InteractionHand hand) {
+    InteractionResult interact(Player player, InteractionHand hand, BlockHitResult hit) {
         if (machine.getLevel() == null) {
             return InteractionResult.PASS;
         }
@@ -36,7 +39,7 @@ final class SingleBlockMachineInteractions {
             case FEEDING_TROUGH -> interactFeedingTrough(player, hand);
             case SMALL_TANK, WATER_GENERATOR, STEAM_BOILER, GASIFICATION_UNIT ->
                     interactFluidMachine(player, hand);
-            case COMBUSTION_CHAMBER -> interactCombustionChamber(player, hand);
+            case COMBUSTION_CHAMBER -> interactCombustionChamber(player, hand, hit);
             default -> InteractionResult.PASS;
         };
     }
@@ -94,13 +97,11 @@ final class SingleBlockMachineInteractions {
             return InteractionResult.PASS;
         }
         ItemStack held = player.getItemInHand(hand);
-        ItemStack stored = machine.inventory().getStackInSlot(0);
-        if (held.isEmpty() && !stored.isEmpty()) {
+        if (held.isEmpty()) {
             if (!machine.getLevel().isClientSide) {
+                ItemStack stored = machine.inventory().getStackInSlot(0);
                 ItemStack extracted = machine.inventory().extractInternal(0, stored.getCount(), false);
-                if (!player.addItem(extracted)) {
-                    player.drop(extracted, false);
-                }
+                player.setItemInHand(hand, extracted);
             }
             return InteractionResult.sidedSuccess(machine.getLevel().isClientSide);
         }
@@ -114,7 +115,7 @@ final class SingleBlockMachineInteractions {
             }
             return InteractionResult.sidedSuccess(machine.getLevel().isClientSide);
         }
-        return InteractionResult.PASS;
+        return InteractionResult.sidedSuccess(machine.getLevel().isClientSide);
     }
 
     private InteractionResult interactFluidMachine(Player player, InteractionHand hand) {
@@ -163,8 +164,13 @@ final class SingleBlockMachineInteractions {
         return InteractionResult.sidedSuccess(machine.getLevel().isClientSide);
     }
 
-    private InteractionResult interactCombustionChamber(Player player, InteractionHand hand) {
-        if (machine.inventory() == null || machine.getLevel() == null || player.isSecondaryUseActive()) {
+    private InteractionResult interactCombustionChamber(
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hit
+    ) {
+        if (machine.inventory() == null || machine.getLevel() == null || player.isSecondaryUseActive()
+                || !isCombustionDoorHit(hit)) {
             return InteractionResult.PASS;
         }
         ItemStack held = player.getItemInHand(hand);
@@ -181,5 +187,16 @@ final class SingleBlockMachineInteractions {
             }
         }
         return InteractionResult.sidedSuccess(machine.getLevel().isClientSide);
+    }
+
+    private boolean isCombustionDoorHit(BlockHitResult hit) {
+        Direction facing = SingleBlockMachineSupport.facing(machine);
+        if (hit.getDirection() != facing) {
+            return false;
+        }
+        Vec3 local = hit.getLocation().subtract(Vec3.atLowerCornerOf(machine.getBlockPos()));
+        double across = facing.getAxis() == Direction.Axis.X ? local.z : local.x;
+        return across >= 3.0D / 16.0D && across <= 13.0D / 16.0D
+                && local.y >= 2.0D / 16.0D && local.y <= 10.0D / 16.0D;
     }
 }
