@@ -36,7 +36,7 @@
 
 ## 共享基础设施例外
 
-`single_block_machine`、`advanced_multiblock`、`programmable` 与 `advanced_processing` 是不可获取的框架判别符，不是公开内容 ID；其载荷必须携带具体内容 ID。`heat_pipe` 与 `pneumatic_tube` 方块实体可以服务同域的多个具体方块，但保存和能力分派必须保留具体方块状态。除此之外，内容专属方块实体、菜单和配方类型沿用内容 ID。
+共享实现类不再拥有通用注册 ID。每个方块实体、菜单和自定义配方类型均使用其具体内容 ID；热管、气动管、单方块机器、多方块以及电脑仍复用实现，但 Forge 注册身份逐内容分离。`single_block_machine`、`advanced_multiblock`、`programmable`、`advanced_processing`、`fluid_fuel` 不得出现在运行时注册表中。
 
 ## 明确排除
 

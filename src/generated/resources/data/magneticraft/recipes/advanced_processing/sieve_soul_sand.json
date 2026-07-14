@@ -1,5 +1,5 @@
 {
-  "type": "magneticraft:advanced_processing",
+  "type": "magneticraft:sieve",
   "duration": 80,
   "energy_per_tick": 40,
   "ingredient": {

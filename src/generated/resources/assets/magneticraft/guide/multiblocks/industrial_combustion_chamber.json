@@ -53,7 +53,7 @@
     "fluid_tanks": [
       {
         "accepted_fluids": [
-          "@magneticraft:fluid_fuel"
+          "@magneticraft:industrial_combustion_chamber"
         ],
         "access": {
           "back": "input",
@@ -72,6 +72,7 @@
     "heat": true,
     "inventory_slots": 1
   },
+  "recipe_type": "magneticraft:industrial_combustion_chamber",
   "schema_version": 1,
   "size": {
     "x": 3,

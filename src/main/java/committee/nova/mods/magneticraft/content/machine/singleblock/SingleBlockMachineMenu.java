@@ -41,8 +41,13 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
     private final int fabricatorResultSlot;
     private final SingleBlockMachineBlockEntity machine;
 
-    public SingleBlockMachineMenu(int containerId, Inventory playerInventory, FriendlyByteBuf buffer) {
-        this(containerId, playerInventory, buffer.readBlockPos(), null);
+    public SingleBlockMachineMenu(
+            SingleBlockMachineDefinition definition,
+            int containerId,
+            Inventory playerInventory,
+            FriendlyByteBuf buffer
+    ) {
+        this(containerId, playerInventory, buffer.readBlockPos(), null, definition);
     }
 
     public SingleBlockMachineMenu(
@@ -50,16 +55,17 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
             Inventory playerInventory,
             SingleBlockMachineBlockEntity machine
     ) {
-        this(containerId, playerInventory, machine.getBlockPos(), machine);
+        this(containerId, playerInventory, machine.getBlockPos(), machine, machine.definition());
     }
 
     private SingleBlockMachineMenu(
             int containerId,
             Inventory playerInventory,
             BlockPos position,
-            SingleBlockMachineBlockEntity knownMachine
+            SingleBlockMachineBlockEntity knownMachine,
+            SingleBlockMachineDefinition definition
     ) {
-        super(ModMenus.SINGLE_BLOCK_MACHINE.get(), containerId);
+        super(ModMenus.singleBlockMachine(definition).get(), containerId);
         this.position = position.immutable();
 
         SingleBlockMachineBlockEntity resolved = knownMachine;
@@ -69,8 +75,12 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
                 resolved = loaded;
             }
         }
+        if (resolved != null && resolved.definition() != definition) {
+            throw new IllegalArgumentException("Menu type " + definition.id()
+                    + " does not match block entity " + resolved.definition().id());
+        }
         machine = resolved;
-        definition = resolved == null ? SingleBlockMachineDefinition.BOX : resolved.definition();
+        this.definition = definition;
         access = resolved == null
                 ? ContainerLevelAccess.NULL
                 : ContainerLevelAccess.create(playerInventory.player.level(), position);

@@ -92,16 +92,45 @@ class OptionalIntegrationContractTest {
                 "crushing_table",
                 "sluice_box",
                 "gasification_unit",
-                "thermopile",
-                "fluid_fuel",
-                "advanced_processing"
+                "thermopile"
         )) {
             assertTrue(jei.contains("\"" + type + "\""), type);
+            assertTrue(craftTweaker.contains("\"" + type + "\""), type);
+        }
+        assertTrue(jei.contains("advancedProcessingTypes()"));
+        for (String type : List.of(
+                "industrial_combustion_chamber",
+                "grinder",
+                "sieve",
+                "hydraulic_press",
+                "oil_heater",
+                "refinery"
+        )) {
             assertTrue(craftTweaker.contains("\"" + type + "\""), type);
         }
         assertTrue(Files.isRegularFile(Path.of(
                 "src/integrationTest/crafttweaker/scripts/magneticraft_recipes.zs"
         )));
+    }
+
+    @Test
+    void jeiDistinguishesAllCreativeNbtVariants() throws IOException {
+        String jei = Files.readString(JAVA.resolve(
+                "committee/nova/mods/magneticraft/integration/jei/MagneticraftJeiPlugin.java"
+        ));
+
+        assertTrue(jei.contains("registerItemSubtypes(ISubtypeRegistration registration)"));
+        for (String item : List.of(
+                "ModAdvancedBlocks.OIL_DEPOSIT_ITEM",
+                "ModMachineItems.LOW_BATTERY",
+                "ModMachineItems.MEDIUM_BATTERY",
+                "ModMachineItems.ELECTRIC_DRILL",
+                "ModMachineItems.ELECTRIC_CHAINSAW",
+                "ModMachineItems.ELECTRIC_PISTON",
+                "ModComputerContent.FLOPPY_DISK"
+        )) {
+            assertTrue(jei.contains(item + ".get()"), item);
+        }
     }
 
     @Test

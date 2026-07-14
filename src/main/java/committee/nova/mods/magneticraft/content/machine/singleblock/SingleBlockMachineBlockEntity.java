@@ -80,11 +80,16 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
     private BlockPos multiblockController;
 
     public SingleBlockMachineBlockEntity(BlockPos position, BlockState state) {
-        super(ModBlockEntities.SINGLE_BLOCK_MACHINE.get(), position, state);
-        if (!(state.getBlock() instanceof SingleBlockMachineBlock block)) {
-            throw new IllegalArgumentException("Single-block machine entity attached to " + state.getBlock());
-        }
-        definition = block.definition();
+        this(position, state, definition(state));
+    }
+
+    private SingleBlockMachineBlockEntity(
+            BlockPos position,
+            BlockState state,
+            SingleBlockMachineDefinition definition
+    ) {
+        super(ModBlockEntities.singleBlockMachine(definition).get(), position, state);
+        this.definition = definition;
         filters = definition.ghostSlots() == 0
                 ? null
                 : addModule(new GhostFilterModule(Magneticraft.id("filters"), this, definition.ghostSlots()));
@@ -145,6 +150,13 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                         : this.state.lastProduction,
                 () -> this.state.working ? 1 : 0
         );
+    }
+
+    private static SingleBlockMachineDefinition definition(BlockState state) {
+        if (!(state.getBlock() instanceof SingleBlockMachineBlock block)) {
+            throw new IllegalArgumentException("Single-block machine entity attached to " + state.getBlock());
+        }
+        return block.definition();
     }
 
     public static void serverTick(

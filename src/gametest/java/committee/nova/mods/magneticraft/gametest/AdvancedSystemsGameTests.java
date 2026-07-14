@@ -429,8 +429,9 @@ public final class AdvancedSystemsGameTests {
 
     @GameTest(template = TEMPLATE, timeoutTicks = 80)
     public static void completeAdvancedRecipeCatalogLoadsAtRuntime(GameTestHelper helper) {
-        int processingRecipes = helper.getLevel().getRecipeManager()
-                .getAllRecipesFor(ModRecipeTypes.ADVANCED_PROCESSING_TYPE.get()).size();
+        int processingRecipes = ModRecipeTypes.advancedProcessingTypes().values().stream()
+                .mapToInt(type -> helper.getLevel().getRecipeManager().getAllRecipesFor(type.get()).size())
+                .sum();
         int fluidFuels = helper.getLevel().getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get()).size();
         helper.assertTrue(processingRecipes == 93,

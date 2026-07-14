@@ -223,7 +223,7 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
                 ? null
                 : createTickerHelper(
                         type,
-                        ModBlockEntities.SINGLE_BLOCK_MACHINE.get(),
+                        ModBlockEntities.singleBlockMachine(definition).get(),
                         SingleBlockMachineBlockEntity::serverTick
                 );
     }

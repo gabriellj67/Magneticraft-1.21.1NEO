@@ -392,7 +392,8 @@ final class AdvancedGuideDataProvider implements DataProvider {
     private static String multiblockRecipeType(MultiblockDefinition definition) {
         return switch (definition) {
             case GRINDER, HYDRAULIC_PRESS, SIEVE, OIL_HEATER, REFINERY ->
-                    "magneticraft:advanced_processing";
+                    "magneticraft:" + definition.id();
+            case BIG_COMBUSTION_CHAMBER -> "magneticraft:industrial_combustion_chamber";
             case BIG_ELECTRIC_FURNACE -> "minecraft:smelting";
             default -> "";
         };

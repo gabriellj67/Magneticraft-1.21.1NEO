@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlockEntity;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,7 +18,11 @@ public final class HeatPipeBlockEntity extends NetworkComponentBlockEntity {
     private final HeatNetworkModule heat;
 
     public HeatPipeBlockEntity(BlockPos position, BlockState state) {
-        super(ModBlockEntities.HEAT_PIPE.get(), position, state);
+        super(state.is(ModNetworkBlocks.INSULATED_HEAT_PIPE.get())
+                        ? ModBlockEntities.INSULATED_HEAT_PIPE.get()
+                        : ModBlockEntities.HEAT_PIPE.get(),
+                position,
+                state);
         heat = addModule(new HeatNetworkModule(
                 Magneticraft.id("heat"),
                 this,

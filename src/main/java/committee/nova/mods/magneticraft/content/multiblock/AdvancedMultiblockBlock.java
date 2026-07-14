@@ -176,7 +176,7 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
         return level.isClientSide
                 ? null
                 : createTickerHelper(type,
-                committee.nova.mods.magneticraft.init.ModBlockEntities.ADVANCED_MULTIBLOCK.get(),
+                committee.nova.mods.magneticraft.init.ModBlockEntities.advancedMultiblock(definition).get(),
                 AdvancedMultiblockBlockEntity::serverTick);
     }
 }

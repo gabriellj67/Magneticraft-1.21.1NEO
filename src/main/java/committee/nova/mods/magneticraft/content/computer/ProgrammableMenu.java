@@ -39,8 +39,13 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
     private final int machineSlots;
     private int nextUploadSequence;
 
-    public ProgrammableMenu(int containerId, Inventory playerInventory, FriendlyByteBuf buffer) {
-        this(containerId, playerInventory, readOpeningData(buffer));
+    public ProgrammableMenu(
+            boolean miningRobot,
+            int containerId,
+            Inventory playerInventory,
+            FriendlyByteBuf buffer
+    ) {
+        this(containerId, playerInventory, validateOpeningData(miningRobot, readOpeningData(buffer)));
     }
 
     public ProgrammableMenu(
@@ -65,7 +70,7 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
     }
 
     private ProgrammableMenu(int containerId, Inventory playerInventory, OpeningData opening) {
-        super(ModMenus.PROGRAMMABLE.get(), containerId);
+        super(ModMenus.programmable(opening.miningRobot()).get(), containerId);
         position = opening.position().immutable();
         miningRobot = opening.miningRobot();
         revision = opening.revision();
@@ -105,6 +110,13 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
         }
         machineSlots = slots.size();
         finishMachineSlots(playerInventory, 43, 132);
+    }
+
+    private static OpeningData validateOpeningData(boolean miningRobot, OpeningData opening) {
+        if (miningRobot != opening.miningRobot()) {
+            throw new IllegalArgumentException("Programmable menu type does not match opening payload");
+        }
+        return opening;
     }
 
     @Override

@@ -196,9 +196,8 @@ final class AdvancedMultiblockLogic {
             return;
         }
         Optional<AdvancedProcessingRecipe> recipe = level.getRecipeManager()
-                .getAllRecipesFor(ModRecipeTypes.ADVANCED_PROCESSING_TYPE.get())
+                .getAllRecipesFor(ModRecipeTypes.advancedProcessingType(machine.definition()).get())
                 .stream()
-                .filter(candidate -> candidate.machine() == machine.definition())
                 .filter(candidate -> candidate.input().test(input)
                         && input.getCount() >= candidate.inputCount())
                 .filter(candidate -> candidate.pressMode() == null
@@ -471,9 +470,8 @@ final class AdvancedMultiblockLogic {
             MultiblockDefinition definition,
             FluidStack input
     ) {
-        return level.getRecipeManager().getAllRecipesFor(ModRecipeTypes.ADVANCED_PROCESSING_TYPE.get()).stream()
+        return level.getRecipeManager().getAllRecipesFor(ModRecipeTypes.advancedProcessingType(definition).get()).stream()
                 .filter(AdvancedProcessingRecipe::isFluidProcessing)
-                .filter(recipe -> recipe.machine() == definition)
                 .filter(recipe -> recipe.matchesFluid(input))
                 .findFirst()
                 .orElse(null);

@@ -16,11 +16,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneLampBlock;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -191,6 +195,128 @@ public final class ComputerRobotGameTests {
         helper.assertTrue(computer.programRevision() == 1L, "Stale upload changed the revision");
         helper.assertTrue(computer.scriptProgram().orElseThrow().equals(firstProgram), "Stale upload replaced the program");
         helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void uploadRejectsForgedContextWithoutChangingProgram(GameTestHelper helper) {
+        ComputerBlockEntity computer = placeComputer(helper);
+        Player sender = helper.makeMockSurvivalPlayer();
+        sender.setPos(
+                computer.getBlockPos().getX() + 0.5D,
+                computer.getBlockPos().getY() + 0.5D,
+                computer.getBlockPos().getZ() + 0.5D
+        );
+        computer.setOwner(sender.getUUID());
+
+        long sessionToken = 0x53_45_53_53_49_4F_4EL;
+        ProgrammableMenu menu = new ProgrammableMenu(1, sender.getInventory(), computer, sessionToken);
+        sender.containerMenu = menu;
+        ScriptProgram program = new ScriptProgram(ScriptLanguage.FORTH, "7 .");
+
+        helper.assertFalse(menu.applyUpload(
+                sender, computer.getBlockPos().above(), 0L, sessionToken, 0, program
+        ), "Upload with a forged block position was accepted");
+        helper.assertFalse(menu.applyUpload(
+                sender, computer.getBlockPos(), 0L, sessionToken + 1L, 0, program
+        ), "Upload with a forged session token was accepted");
+
+        sender.getAbilities().mayBuild = false;
+        helper.assertFalse(menu.applyUpload(
+                sender, computer.getBlockPos(), 0L, sessionToken, 0, program
+        ), "Upload without build permission was accepted");
+        sender.getAbilities().mayBuild = true;
+
+        sender.setPos(
+                computer.getBlockPos().getX() + 9.5D,
+                computer.getBlockPos().getY() + 0.5D,
+                computer.getBlockPos().getZ() + 0.5D
+        );
+        helper.assertFalse(menu.applyUpload(
+                sender, computer.getBlockPos(), 0L, sessionToken, 0, program
+        ), "Upload from outside the interaction radius was accepted");
+
+        helper.assertTrue(menu.nextUploadSequence() == 0, "Rejected uploads consumed the session sequence");
+        helper.assertTrue(computer.programRevision() == 0L, "Rejected uploads changed the program revision");
+        helper.assertTrue(computer.scriptProgram().isEmpty(), "Rejected uploads changed the stored program");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 500)
+    public static void uploadToUnloadedComputerIsRejectedWithoutForceLoading(GameTestHelper helper) {
+        var level = helper.getLevel();
+        ServerChunkCache chunks = level.getChunkSource();
+        BlockPos absoluteOrigin = helper.absolutePos(BlockPos.ZERO);
+        ChunkPos computerChunk = new ChunkPos(
+                (absoluteOrigin.getX() >> 4) + 32,
+                (absoluteOrigin.getZ() >> 4) + 32
+        );
+        BlockPos absoluteComputer = new BlockPos(
+                (computerChunk.x << 4) + 2,
+                absoluteOrigin.getY() + 2,
+                (computerChunk.z << 4) + 2
+        );
+        BlockPos relativeComputer = absoluteComputer.subtract(absoluteOrigin);
+
+        chunks.addRegionTicket(TicketType.FORCED, computerChunk, 0, computerChunk);
+        chunks.getChunk(computerChunk.x, computerChunk.z, ChunkStatus.FULL, true);
+        helper.setBlock(relativeComputer, ModComputerContent.COMPUTER.get().defaultBlockState());
+        var blockEntity = helper.getBlockEntity(relativeComputer);
+        helper.assertTrue(blockEntity instanceof ComputerBlockEntity, "Missing remote computer block entity");
+        ComputerBlockEntity computer = (ComputerBlockEntity) blockEntity;
+
+        Player sender = helper.makeMockSurvivalPlayer();
+        sender.setPos(
+                absoluteComputer.getX() + 0.5D,
+                absoluteComputer.getY() + 0.5D,
+                absoluteComputer.getZ() + 0.5D
+        );
+        computer.setOwner(sender.getUUID());
+        long sessionToken = 0x55_4E_4C_4F_41_44L;
+        ProgrammableMenu menu = new ProgrammableMenu(1, sender.getInventory(), computer, sessionToken);
+        sender.containerMenu = menu;
+        chunks.removeRegionTicket(TicketType.FORCED, computerChunk, 0, computerChunk);
+
+        boolean[] finished = {false};
+        Runnable cleanup = () -> {
+            if (finished[0]) {
+                return;
+            }
+            finished[0] = true;
+            chunks.addRegionTicket(TicketType.FORCED, computerChunk, 0, computerChunk);
+            chunks.getChunk(computerChunk.x, computerChunk.z, ChunkStatus.FULL, true);
+            helper.setBlock(relativeComputer, Blocks.AIR);
+            chunks.removeRegionTicket(TicketType.FORCED, computerChunk, 0, computerChunk);
+        };
+
+        helper.onEachTick(() -> {
+            if (finished[0]) {
+                return;
+            }
+            if (helper.getTick() >= 460) {
+                cleanup.run();
+                helper.fail("Remote computer chunk did not unload in time");
+                return;
+            }
+            if (chunks.hasChunk(computerChunk.x, computerChunk.z)) {
+                return;
+            }
+
+            boolean accepted = menu.applyUpload(
+                    sender,
+                    absoluteComputer,
+                    0L,
+                    sessionToken,
+                    0,
+                    new ScriptProgram(ScriptLanguage.FORTH, "9 .")
+            );
+            boolean stayedUnloaded = !chunks.hasChunk(computerChunk.x, computerChunk.z);
+            cleanup.run();
+            helper.assertFalse(accepted, "Upload to an unloaded computer was accepted");
+            helper.assertTrue(stayedUnloaded, "Upload validation force-loaded the computer chunk");
+            helper.assertTrue(computer.programRevision() == 0L, "Rejected unloaded upload changed the revision");
+            helper.assertTrue(computer.scriptProgram().isEmpty(), "Rejected unloaded upload changed the program");
+            helper.succeed();
+        });
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 30)

@@ -23,7 +23,7 @@ import java.util.Objects;
  */
 public final class MultiblockPortProfile {
     public static final String WATER_TAG = "#minecraft:water";
-    public static final String FLUID_FUEL_RECIPE = "@magneticraft:fluid_fuel";
+    public static final String COMBUSTION_FUEL_RECIPE = "@magneticraft:industrial_combustion_chamber";
 
     private MultiblockPortProfile() {
     }
@@ -39,7 +39,7 @@ public final class MultiblockPortProfile {
                     sides(FluidTankModule.TankAccess.OUTPUT, RelativeSide.values())
             ));
             case BIG_COMBUSTION_CHAMBER -> List.of(port(
-                    definition, 0, "fluid_fuel", List.of(FLUID_FUEL_RECIPE),
+                    definition, 0, "fluid_fuel", List.of(COMBUSTION_FUEL_RECIPE),
                     merge(
                             sides(FluidTankModule.TankAccess.INPUT,
                                     RelativeSide.FRONT, RelativeSide.BACK,
@@ -207,7 +207,7 @@ public final class MultiblockPortProfile {
                 if (WATER_TAG.equals(accepted) && stack.getFluid().defaultFluidState().is(FluidTags.WATER)) {
                     return true;
                 }
-                if (FLUID_FUEL_RECIPE.equals(accepted) && level != null && level.getRecipeManager()
+                if (COMBUSTION_FUEL_RECIPE.equals(accepted) && level != null && level.getRecipeManager()
                         .getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get())
                         .stream()
                         .anyMatch(recipe -> recipe.fluid() == stack.getFluid())) {

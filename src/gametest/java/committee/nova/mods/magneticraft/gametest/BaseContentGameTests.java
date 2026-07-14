@@ -10,14 +10,17 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.material.Metal;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
+import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
+import committee.nova.mods.magneticraft.init.ModMenus;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
+import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
@@ -108,6 +111,11 @@ public final class BaseContentGameTests {
             "crushing",
             "sluice",
             "gasification",
+            "fluid_fuel",
+            "single_block_machine",
+            "advanced_multiblock",
+            "programmable",
+            "advanced_processing",
             "broken_gear",
             "iron_gear",
             "steel_gear",
@@ -161,6 +169,86 @@ public final class BaseContentGameTests {
                 }
             }
         }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void ownedRegistriesUseTheirContentIds(GameTestHelper helper) {
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            ResourceLocation id = Magneticraft.id(definition.id());
+            assertRegistryEntry(
+                    helper,
+                    "single-block block entity type",
+                    ForgeRegistries.BLOCK_ENTITY_TYPES,
+                    ModBlockEntities.singleBlockMachine(definition),
+                    id
+            );
+            if (definition.hasMenu()) {
+                assertRegistryEntry(
+                        helper,
+                        "single-block menu",
+                        ForgeRegistries.MENU_TYPES,
+                        ModMenus.singleBlockMachine(definition),
+                        id
+                );
+            }
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            ResourceLocation id = Magneticraft.id(definition.id());
+            assertRegistryEntry(
+                    helper,
+                    "multiblock block entity type",
+                    ForgeRegistries.BLOCK_ENTITY_TYPES,
+                    ModBlockEntities.advancedMultiblock(definition),
+                    id
+            );
+            assertRegistryEntry(
+                    helper,
+                    "multiblock menu",
+                    ForgeRegistries.MENU_TYPES,
+                    ModMenus.advancedMultiblock(definition),
+                    id
+            );
+        }
+        ModRecipeTypes.advancedProcessingTypes().forEach((definition, type) -> {
+            ResourceLocation id = Magneticraft.id(definition.id());
+            assertRegistryEntry(helper, "processing recipe type", ForgeRegistries.RECIPE_TYPES, type, id);
+            assertRegistryEntry(
+                    helper,
+                    "processing recipe serializer",
+                    ForgeRegistries.RECIPE_SERIALIZERS,
+                    ModRecipeTypes.advancedProcessingSerializer(definition),
+                    id
+            );
+        });
+        assertRegistryEntry(
+                helper,
+                "insulated heat pipe block entity type",
+                ForgeRegistries.BLOCK_ENTITY_TYPES,
+                ModBlockEntities.INSULATED_HEAT_PIPE,
+                Magneticraft.id("insulated_heat_pipe")
+        );
+        assertRegistryEntry(
+                helper,
+                "pneumatic restriction tube block entity type",
+                ForgeRegistries.BLOCK_ENTITY_TYPES,
+                ModBlockEntities.PNEUMATIC_RESTRICTION_TUBE,
+                Magneticraft.id("pneumatic_restriction_tube")
+        );
+        assertRegistryEntry(
+                helper,
+                "computer menu",
+                ForgeRegistries.MENU_TYPES,
+                ModMenus.COMPUTER,
+                Magneticraft.id("computer")
+        );
+        assertRegistryEntry(
+                helper,
+                "mining robot menu",
+                ForgeRegistries.MENU_TYPES,
+                ModMenus.MINING_ROBOT,
+                Magneticraft.id("mining_robot")
+        );
         helper.succeed();
     }
 

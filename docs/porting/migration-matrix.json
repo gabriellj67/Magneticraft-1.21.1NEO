@@ -107,7 +107,6 @@
       "fluids and their Forge adapter families",
       "sound events",
       "owned block entity, menu and recipe identifiers",
-      "explicit shared-infrastructure exceptions",
       "explicit exclusions"
     ],
     "acceptance_tests": ["MIG-REGISTRY-PROJECTION-001", "MIG-REGISTRY-NAMING-001", "MIG-REGISTRY-UNIQUE-001"]
@@ -865,7 +864,7 @@
     {
       "id": "fluid_fuel",
       "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#registerFluidFuels",
-      "target_type": "magneticraft:fluid_fuel",
+      "target_type": "magneticraft:industrial_combustion_chamber",
       "target_path_template": "data/magneticraft/recipes/fluid_fuel/{variant}.json",
       "variants": ["diesel", "fuel_oil", "gasoline", "heavy_oil", "kerosene", "light_oil", "naphtha", "natural_gas", "crude_oil", "wood_gas"],
       "disposition": "rebuild",
@@ -886,7 +885,7 @@
     {
       "id": "advanced_processing",
       "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#grinder_sieve_hydraulic_press",
-      "target_type": "magneticraft:advanced_processing",
+      "target_types": ["magneticraft:grinder", "magneticraft:sieve", "magneticraft:hydraulic_press"],
       "target_path_template": "data/magneticraft/recipes/advanced_processing/{machine}_{variant}.json",
       "variants": ["grinder_aluminium_ingot", "grinder_aluminium_ore", "grinder_blaze_rod", "grinder_bone", "grinder_burnt_limestone", "grinder_coal_ore", "grinder_cobalt_ingot", "grinder_cobalt_ore", "grinder_cobblestone", "grinder_copper_ingot", "grinder_copper_ore", "grinder_diamond_ore", "grinder_emerald_ore", "grinder_galena_ore", "grinder_glowstone", "grinder_gold_ingot", "grinder_gold_ore", "grinder_iron_ingot", "grinder_iron_ore", "grinder_lapis_ore", "grinder_lead_ingot", "grinder_lead_ore", "grinder_limestone", "grinder_mithril_ingot", "grinder_mithril_ore", "grinder_nether_quartz_ore", "grinder_nickel_ingot", "grinder_nickel_ore", "grinder_osmium_ingot", "grinder_osmium_ore", "grinder_pyrite_ore", "grinder_quartz_block", "grinder_red_sandstone", "grinder_redstone_ore", "grinder_sandstone", "grinder_silver_ingot", "grinder_silver_ore", "grinder_steel_ingot", "grinder_sugar_cane", "grinder_tin_ingot", "grinder_tin_ore", "grinder_tungsten_ingot", "grinder_tungsten_ore", "grinder_wool", "grinder_zinc_ingot", "grinder_zinc_ore", "hydraulic_press_copper_heavy_plate", "hydraulic_press_copper_light_plate", "hydraulic_press_end_stone_bricks", "hydraulic_press_gold_heavy_plate", "hydraulic_press_gold_light_plate", "hydraulic_press_ice", "hydraulic_press_iron_heavy_plate", "hydraulic_press_iron_light_plate", "hydraulic_press_lead_heavy_plate", "hydraulic_press_lead_light_plate", "hydraulic_press_mossy_stone_bricks", "hydraulic_press_polished_andesite", "hydraulic_press_polished_diorite", "hydraulic_press_polished_granite", "hydraulic_press_prismarine_bricks", "hydraulic_press_smooth_red_sandstone", "hydraulic_press_smooth_sandstone", "hydraulic_press_steel_heavy_plate", "hydraulic_press_steel_light_plate", "hydraulic_press_stone", "hydraulic_press_stone_bricks", "hydraulic_press_tungsten_heavy_plate", "hydraulic_press_tungsten_light_plate", "sieve_aluminium_rocky_chunk", "sieve_cobalt_rocky_chunk", "sieve_copper_rocky_chunk", "sieve_galena_rocky_chunk", "sieve_gold_rocky_chunk", "sieve_gravel", "sieve_iron_rocky_chunk", "sieve_lead_rocky_chunk", "sieve_mithril_rocky_chunk", "sieve_nickel_rocky_chunk", "sieve_osmium_rocky_chunk", "sieve_sand", "sieve_silver_rocky_chunk", "sieve_soul_sand", "sieve_tin_rocky_chunk", "sieve_tungsten_rocky_chunk", "sieve_zinc_rocky_chunk"],
       "expected_recipe_count": 86,
@@ -897,7 +896,7 @@
     {
       "id": "oil_heater",
       "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#addOilHeaterRecipe",
-      "target_type": "magneticraft:advanced_processing",
+      "target_type": "magneticraft:oil_heater",
       "target_path_template": "data/magneticraft/recipes/advanced_processing/oil_heater_{variant}.json",
       "variants": ["water_to_steam", "crude_oil_to_heated_crude_oil"],
       "merged_legacy_inputs": {"crude_oil_to_heated_crude_oil": ["oil", "crude_oil"]},
@@ -908,7 +907,7 @@
     {
       "id": "refinery",
       "legacy_source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Recipes.kt#addRefineryRecipe",
-      "target_type": "magneticraft:advanced_processing",
+      "target_type": "magneticraft:refinery",
       "target_path_template": "data/magneticraft/recipes/advanced_processing/refinery_{variant}.json",
       "variants": ["steam_to_water", "heated_crude_oil_fractionation", "heavy_oil_fractionation", "light_oil_fractionation", "lpg_fractionation"],
       "disposition": "rebuild",

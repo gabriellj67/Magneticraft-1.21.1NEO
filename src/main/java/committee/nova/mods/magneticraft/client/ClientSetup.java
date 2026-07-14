@@ -27,17 +27,26 @@ public final class ClientSetup {
         event.enqueueWork(() -> {
             MenuScreens.register(ModMenus.BATTERY.get(), BatteryScreen::new);
             MenuScreens.register(ModMenus.ELECTRIC_FURNACE.get(), ElectricFurnaceScreen::new);
-            MenuScreens.register(ModMenus.SINGLE_BLOCK_MACHINE.get(), SingleBlockMachineScreen::new);
-            MenuScreens.register(ModMenus.ADVANCED_MULTIBLOCK.get(), AdvancedMultiblockScreen::new);
-            MenuScreens.register(ModMenus.PROGRAMMABLE.get(), ProgrammableScreen::new);
+            ModMenus.singleBlockMachines().values().forEach(type ->
+                    MenuScreens.register(type.get(), SingleBlockMachineScreen::new));
+            ModMenus.advancedMultiblocks().values().forEach(type ->
+                    MenuScreens.register(type.get(), AdvancedMultiblockScreen::new));
+            MenuScreens.register(ModMenus.COMPUTER.get(), ProgrammableScreen::new);
+            MenuScreens.register(ModMenus.MINING_ROBOT.get(), ProgrammableScreen::new);
             BlockEntityRenderers.register(ModBlockEntities.CRUSHING_TABLE.get(), CrushingTableRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.CONVEYOR_BELT.get(), ConveyorBeltRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.PNEUMATIC_TUBE.get(), PneumaticTubeRenderer::new);
+            BlockEntityRenderers.register(
+                    ModBlockEntities.PNEUMATIC_RESTRICTION_TUBE.get(),
+                    PneumaticTubeRenderer::new
+            );
             BlockEntityRenderers.register(ModBlockEntities.ELECTRIC_CONNECTOR.get(), LongDistanceWireRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.ELECTRIC_POLE.get(), LongDistanceWireRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.ELECTRIC_POLE_TRANSFORMER.get(), LongDistanceWireRenderer::new);
-            BlockEntityRenderers.register(ModBlockEntities.SINGLE_BLOCK_MACHINE.get(), SingleBlockMachineRenderer::new);
-            BlockEntityRenderers.register(ModBlockEntities.ADVANCED_MULTIBLOCK.get(), AdvancedMultiblockRenderer::new);
+            ModBlockEntities.singleBlockMachines().values().forEach(type ->
+                    BlockEntityRenderers.register(type.get(), SingleBlockMachineRenderer::new));
+            ModBlockEntities.advancedMultiblocks().values().forEach(type ->
+                    BlockEntityRenderers.register(type.get(), AdvancedMultiblockRenderer::new));
             BlockEntityRenderers.register(ModComputerContent.COMPUTER_BLOCK_ENTITY.get(), ComputerRenderer::new);
             BlockEntityRenderers.register(ModComputerContent.MINING_ROBOT_BLOCK_ENTITY.get(), MiningRobotRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.WIND_TURBINE.get(), WindTurbineRenderer::new);

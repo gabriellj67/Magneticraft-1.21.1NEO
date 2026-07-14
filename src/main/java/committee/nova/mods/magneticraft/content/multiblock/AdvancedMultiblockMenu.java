@@ -27,12 +27,17 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
     private final ContainerData data;
     private final int machineSlots;
 
-    public AdvancedMultiblockMenu(int containerId, Inventory playerInventory, FriendlyByteBuf buffer) {
+    public AdvancedMultiblockMenu(
+            MultiblockDefinition definition,
+            int containerId,
+            Inventory playerInventory,
+            FriendlyByteBuf buffer
+    ) {
         this(
                 containerId,
                 playerInventory,
                 buffer.readBlockPos(),
-                buffer.readEnum(MultiblockDefinition.class),
+                validateDefinition(definition, buffer.readEnum(MultiblockDefinition.class)),
                 null
         );
     }
@@ -52,7 +57,7 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
             MultiblockDefinition definition,
             AdvancedMultiblockBlockEntity controller
     ) {
-        super(ModMenus.ADVANCED_MULTIBLOCK.get(), containerId);
+        super(ModMenus.advancedMultiblock(definition).get(), containerId);
         this.position = position.immutable();
         this.definition = definition;
         access = ContainerLevelAccess.create(playerInventory.player.level(), position);
@@ -169,5 +174,16 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
 
     private static int slotX(int count, int index) {
         return 80 - (count - 1) * 9 + index * 18;
+    }
+
+    private static MultiblockDefinition validateDefinition(
+            MultiblockDefinition registered,
+            MultiblockDefinition transmitted
+    ) {
+        if (registered != transmitted) {
+            throw new IllegalArgumentException("Menu type " + registered.id()
+                    + " does not match transmitted definition " + transmitted.id());
+        }
+        return registered;
     }
 }

@@ -1620,7 +1620,7 @@ final class ModRecipeProvider extends RecipeProvider {
 
         @Override
         public RecipeSerializer<?> getType() {
-            return ModRecipeTypes.ADVANCED_PROCESSING_SERIALIZER.get();
+            return ModRecipeTypes.advancedProcessingSerializer(machine).get();
         }
 
         @Nullable
@@ -1693,7 +1693,7 @@ final class ModRecipeProvider extends RecipeProvider {
 
         @Override
         public RecipeSerializer<?> getType() {
-            return ModRecipeTypes.ADVANCED_PROCESSING_SERIALIZER.get();
+            return ModRecipeTypes.advancedProcessingSerializer(machine).get();
         }
 
         @Nullable

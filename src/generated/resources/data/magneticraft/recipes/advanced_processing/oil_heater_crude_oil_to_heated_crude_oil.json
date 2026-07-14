@@ -1,5 +1,5 @@
 {
-  "type": "magneticraft:advanced_processing",
+  "type": "magneticraft:oil_heater",
   "duration": 2,
   "fluid_input": {
     "amount": 10,

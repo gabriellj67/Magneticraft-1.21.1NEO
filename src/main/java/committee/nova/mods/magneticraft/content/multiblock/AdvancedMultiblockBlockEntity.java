@@ -94,11 +94,16 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private boolean working;
 
     public AdvancedMultiblockBlockEntity(BlockPos position, BlockState state) {
-        super(ModBlockEntities.ADVANCED_MULTIBLOCK.get(), position, state);
-        if (!(state.getBlock() instanceof AdvancedMultiblockBlock controller)) {
-            throw new IllegalArgumentException("Advanced multiblock entity attached to " + state.getBlock());
-        }
-        definition = controller.definition();
+        this(position, state, definition(state));
+    }
+
+    private AdvancedMultiblockBlockEntity(
+            BlockPos position,
+            BlockState state,
+            MultiblockDefinition definition
+    ) {
+        super(ModBlockEntities.advancedMultiblock(definition).get(), position, state);
+        this.definition = definition;
         formed = state.getValue(AdvancedMultiblockBlock.FORMED);
         bulkStorage = createBulkStorage();
         shelvingStorage = createShelvingStorage();
@@ -143,6 +148,13 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 () -> tankAmount(4),
                 () -> tankCapacity(4)
         );
+    }
+
+    private static MultiblockDefinition definition(BlockState state) {
+        if (!(state.getBlock() instanceof AdvancedMultiblockBlock controller)) {
+            throw new IllegalArgumentException("Advanced multiblock entity attached to " + state.getBlock());
+        }
+        return controller.definition();
     }
 
     public static void serverTick(
@@ -821,9 +833,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         }
         return switch (definition) {
             case GRINDER, SIEVE, HYDRAULIC_PRESS -> serverLevel.getRecipeManager()
-                    .getAllRecipesFor(ModRecipeTypes.ADVANCED_PROCESSING_TYPE.get())
+                    .getAllRecipesFor(ModRecipeTypes.advancedProcessingType(definition).get())
                     .stream()
-                    .anyMatch(recipe -> recipe.machine() == definition && recipe.input().test(stack));
+                    .anyMatch(recipe -> recipe.input().test(stack));
             case BIG_ELECTRIC_FURNACE -> serverLevel.getRecipeManager()
                     .getRecipeFor(RecipeType.SMELTING, new SimpleContainer(stack), serverLevel)
                     .isPresent();

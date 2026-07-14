@@ -374,7 +374,7 @@ class GeneratedDataContractTest {
         assertRecipeDirectory("sluice_box", 16, "magneticraft:sluice_box");
         assertRecipeDirectory("gasification_unit", 28, "magneticraft:gasification_unit");
         assertRecipeDirectory("thermopile", 33, "magneticraft:thermopile");
-        assertRecipeDirectory("fluid_fuel", 10, "magneticraft:fluid_fuel");
+        assertRecipeDirectory("fluid_fuel", 10, "magneticraft:industrial_combustion_chamber");
         JsonObject sand = readObject(recipe("sluice_box/sand"));
         assertEquals(9, sand.getAsJsonArray("results").size());
         JsonObject log = readObject(recipe("gasification_unit/00_logs"));
@@ -470,7 +470,7 @@ class GeneratedDataContractTest {
         );
         for (Map.Entry<String, String> entry : processingMachines.entrySet()) {
             JsonObject processing = readObject(recipe("advanced_processing/" + entry.getKey()));
-            assertEquals("magneticraft:advanced_processing", processing.get("type").getAsString());
+            assertEquals("magneticraft:" + entry.getValue(), processing.get("type").getAsString());
             assertEquals(entry.getValue(), processing.get("machine").getAsString());
             assertTrue(processing.get("duration").getAsInt() > 0);
             assertTrue(processing.get("energy_per_tick").getAsInt() >= 0);

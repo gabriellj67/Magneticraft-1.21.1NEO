@@ -1,5 +1,5 @@
 {
-  "type": "magneticraft:advanced_processing",
+  "type": "magneticraft:hydraulic_press",
   "duration": 120,
   "energy_per_tick": 60,
   "ingredient": {

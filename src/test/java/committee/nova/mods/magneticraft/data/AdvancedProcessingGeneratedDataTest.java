@@ -82,6 +82,7 @@ class AdvancedProcessingGeneratedDataTest {
             FluidRecipeContract expected = entry.getValue();
             JsonObject recipe = generated.get(name);
 
+            assertEquals("magneticraft:" + expected.machine(), recipe.get("type").getAsString(), name);
             assertEquals(expected.machine(), recipe.get("machine").getAsString(), name);
 
             JsonObject input = recipe.getAsJsonObject("fluid_input");

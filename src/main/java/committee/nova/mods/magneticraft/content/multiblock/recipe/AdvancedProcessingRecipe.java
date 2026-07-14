@@ -183,12 +183,12 @@ public final class AdvancedProcessingRecipe implements Recipe<SimpleContainer> {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return ModRecipeTypes.ADVANCED_PROCESSING_SERIALIZER.get();
+        return ModRecipeTypes.advancedProcessingSerializer(machine).get();
     }
 
     @Override
     public RecipeType<?> getType() {
-        return ModRecipeTypes.ADVANCED_PROCESSING_TYPE.get();
+        return ModRecipeTypes.advancedProcessingType(machine).get();
     }
 
     public MultiblockDefinition machine() {
@@ -250,9 +250,15 @@ public final class AdvancedProcessingRecipe implements Recipe<SimpleContainer> {
     }
 
     public static final class Serializer implements RecipeSerializer<AdvancedProcessingRecipe> {
+        private final MultiblockDefinition expectedMachine;
+
+        public Serializer(MultiblockDefinition expectedMachine) {
+            this.expectedMachine = Objects.requireNonNull(expectedMachine);
+        }
+
         @Override
         public AdvancedProcessingRecipe fromJson(ResourceLocation id, JsonObject json) {
-            MultiblockDefinition machine = parseMachine(GsonHelper.getAsString(json, "machine"));
+            MultiblockDefinition machine = validateMachine(GsonHelper.getAsString(json, "machine"));
             if (isFluidMachine(machine)) {
                 JsonObject input = GsonHelper.getAsJsonObject(json, "fluid_input");
                 JsonArray resultArray = GsonHelper.getAsJsonArray(json, "fluid_results");
@@ -305,7 +311,7 @@ public final class AdvancedProcessingRecipe implements Recipe<SimpleContainer> {
         @Nullable
         @Override
         public AdvancedProcessingRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
-            MultiblockDefinition machine = parseMachine(buffer.readUtf(64));
+            MultiblockDefinition machine = validateMachine(buffer.readUtf(64));
             if (buffer.readBoolean()) {
                 FluidInput input = FluidInput.fromNetwork(buffer);
                 int inputAmount = buffer.readVarInt();
@@ -351,6 +357,10 @@ public final class AdvancedProcessingRecipe implements Recipe<SimpleContainer> {
 
         @Override
         public void toNetwork(FriendlyByteBuf buffer, AdvancedProcessingRecipe recipe) {
+            if (recipe.machine != expectedMachine) {
+                throw new IllegalArgumentException("Serializer " + expectedMachine.id()
+                        + " cannot encode recipe for " + recipe.machine.id());
+            }
             buffer.writeUtf(recipe.machine.id());
             buffer.writeBoolean(recipe.isFluidProcessing());
             if (recipe.fluidInput != null) {
@@ -380,11 +390,16 @@ public final class AdvancedProcessingRecipe implements Recipe<SimpleContainer> {
             buffer.writeVarInt(recipe.energyPerTick);
         }
 
-        private static MultiblockDefinition parseMachine(String id) {
-            return java.util.Arrays.stream(MultiblockDefinition.values())
+        private MultiblockDefinition validateMachine(String id) {
+            MultiblockDefinition parsed = java.util.Arrays.stream(MultiblockDefinition.values())
                     .filter(definition -> definition.id().equals(id.toLowerCase(Locale.ROOT)))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Unknown advanced processing machine: " + id));
+            if (parsed != expectedMachine) {
+                throw new IllegalArgumentException("Recipe serializer " + expectedMachine.id()
+                        + " cannot decode machine " + parsed.id());
+            }
+            return parsed;
         }
 
         private static boolean isFluidMachine(MultiblockDefinition machine) {

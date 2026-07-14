@@ -347,6 +347,15 @@ public final class PneumaticEndpointGameTests {
 
     @GameTest(template = TEMPLATE, timeoutTicks = 40)
     public static void inserterPrefersLowerOpenDropPosition(GameTestHelper helper) {
+        BlockPos lowerDrop = helper.absolutePos(CENTER.west().below());
+        BlockPos sameLevelDrop = helper.absolutePos(CENTER.west());
+        AABB dropColumn = new AABB(lowerDrop).minmax(new AABB(sameLevelDrop));
+        helper.getLevel().getEntitiesOfClass(
+                ItemEntity.class,
+                dropColumn,
+                ItemEntity::isAlive
+        ).forEach(ItemEntity::discard);
+
         helper.setBlock(CENTER.east(), net.minecraft.world.level.block.Blocks.CHEST);
         var source = (net.minecraft.world.level.block.entity.ChestBlockEntity) helper.getBlockEntity(CENTER.east());
         source.setItem(0, new ItemStack(Items.COPPER_INGOT, 8));
@@ -364,21 +373,25 @@ public final class PneumaticEndpointGameTests {
             );
         }
 
-        BlockPos lowerDrop = helper.absolutePos(CENTER.west().below());
-        int dropped = helper.getLevel().getEntitiesOfClass(
+        var lowerEntities = helper.getLevel().getEntitiesOfClass(
                 ItemEntity.class,
                 new AABB(lowerDrop),
                 entity -> entity.getItem().is(Items.COPPER_INGOT)
-        ).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
-        BlockPos sameLevelDrop = helper.absolutePos(CENTER.west());
-        int droppedAtSameLevel = helper.getLevel().getEntitiesOfClass(
+        );
+        int dropped = lowerEntities.stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+        var sameLevelEntities = helper.getLevel().getEntitiesOfClass(
                 ItemEntity.class,
                 new AABB(sameLevelDrop),
                 entity -> entity.getItem().is(Items.COPPER_INGOT)
-        ).stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+        );
+        int droppedAtSameLevel = sameLevelEntities.stream()
+                .mapToInt(entity -> entity.getItem().getCount())
+                .sum();
+        lowerEntities.forEach(ItemEntity::discard);
+        sameLevelEntities.forEach(ItemEntity::discard);
         helper.assertTrue(source.getItem(0).isEmpty(), "Inserter did not extract for its lower drop position");
         helper.assertTrue(dropped == 8 && droppedAtSameLevel == 0,
-                "Inserter did not prefer and conserve its stack at the lower drop position");
+                "Inserter lower/same-level drop counts were " + dropped + "/" + droppedAtSameLevel);
         helper.succeed();
     }
 

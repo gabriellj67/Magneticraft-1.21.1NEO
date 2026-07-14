@@ -57,6 +57,7 @@ def craftTweakerRuntimeEnabled = optionalRuntimeEnabled("enable_crafttweaker_run
 def tconstructRuntimeEnabled = optionalRuntimeEnabled("enable_tconstruct_runtime")
 def jadeRuntimeEnabled = optionalRuntimeEnabled("enable_jade_runtime")
 def quickPlayWorld = providers.gradleProperty("quick_play_world").orNull
+def serverWorld = providers.gradleProperty("server_world").orNull
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime
@@ -158,6 +159,9 @@ legacyForge {
         server {
             server()
             programArgument "--nogui"
+            if (serverWorld) {
+                programArguments.addAll("--world", serverWorld)
+            }
             if (craftTweakerRuntimeEnabled) {
                 taskBefore prepareCraftTweakerIntegrationScripts
             }

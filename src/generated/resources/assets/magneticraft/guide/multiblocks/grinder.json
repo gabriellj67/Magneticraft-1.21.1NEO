@@ -70,7 +70,7 @@
     "heat": false,
     "inventory_slots": 3
   },
-  "recipe_type": "magneticraft:advanced_processing",
+  "recipe_type": "magneticraft:grinder",
   "schema_version": 1,
   "size": {
     "x": 3,

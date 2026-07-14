@@ -1,5 +1,5 @@
 {
-  "type": "magneticraft:advanced_processing",
+  "type": "magneticraft:refinery",
   "duration": 2,
   "fluid_input": {
     "amount": 10,

@@ -92,7 +92,7 @@
     "heat": true,
     "inventory_slots": 0
   },
-  "recipe_type": "magneticraft:advanced_processing",
+  "recipe_type": "magneticraft:oil_heater",
   "schema_version": 1,
   "size": {
     "x": 3,

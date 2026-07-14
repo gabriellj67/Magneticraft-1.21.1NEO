@@ -49,6 +49,15 @@ class MigrationMatrixContractTest {
     private static final Path LEGACY_GUIDE_ROOT = Path.of(
             ".references/nova-1.12/src/main/resources/assets/magneticraft/guide/en_us"
     );
+    private static final Path LEGACY_FEATURE_ROOT = Path.of(
+            ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features"
+    );
+    private static final Path LEGACY_FLUID_SOURCE = Path.of(
+            ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Fluids.kt"
+    );
+    private static final Path LEGACY_SOUND_SOURCE = Path.of(
+            ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/registry/Sounds.kt"
+    );
     private static final Path BASE_CONTENT_GAMETEST = Path.of(
             "src/gametest/java/committee/nova/mods/magneticraft/gametest/BaseContentGameTests.java"
     );
@@ -60,6 +69,12 @@ class MigrationMatrixContractTest {
             "22169dbd3f31e7e6d61d9bd1bab09ae048d1dcd762c9a8c58620c82b9f3c1813";
     private static final String LEGACY_GUIDE_CONTENT_MANIFEST_SHA256 =
             "628c16fb7164cfdcca98a4122b03f144dcd0db2517bd785be9b72c63eff2d9f8";
+    private static final int LEGACY_FEATURE_REGISTRY_GROUP_COUNT = 97;
+    private static final String LEGACY_FEATURE_REGISTRY_GROUP_SHA256 =
+            "077758678df4a3b18cb043d44d88ecd1a9982fad1888e6c692d943bd4b01da49";
+    private static final int LEGACY_BLOCK_ENTITY_COUNT = 60;
+    private static final String LEGACY_BLOCK_ENTITY_SHA256 =
+            "82389e2ca552e8d703c8b9fb466ed4bd6085b0215b5e1d5617aeaf31e6cc6fc6";
     private static final int ACCEPTANCE_CASE_COUNT = 137;
     private static final String ACCEPTANCE_CASE_SHA256 =
             "5fc8b5ab5d6417f877579554c192ba5b29239f1aa30fa2544419b49de182e70d";
@@ -84,12 +99,12 @@ class MigrationMatrixContractTest {
     private static final int DERIVED_RUNTIME_ID_COUNT = 80;
     private static final String DERIVED_RUNTIME_ID_SHA256 =
             "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451";
-    private static final int SUPPORTING_REGISTRY_ID_COUNT = 40;
+    private static final int SUPPORTING_REGISTRY_ID_COUNT = 117;
     private static final String SUPPORTING_REGISTRY_ID_SHA256 =
-            "fa95e8fc79d6c129e558360938347eeaa3c8389d40a948b17ffaa55a270f1e38";
-    private static final int FORBIDDEN_RUNTIME_ID_COUNT = 51;
+            "9fde46a5c715346c6a0cf6141c0da520ef720175975605fc24d1453ec810ffb5";
+    private static final int FORBIDDEN_RUNTIME_ID_COUNT = 56;
     private static final String FORBIDDEN_RUNTIME_ID_SHA256 =
-            "2dd45be9e2de079ee8c833139c481e9127269b554e4208bb57962f64aecddb11";
+            "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d";
     private static final Set<String> DECISIONS = Set.of("retain_rename", "rebuild", "exclude");
     private static final Set<String> STATE_ID_MODES = Set.of(
             "fixed_owner", "internal_owner", "owning_content", "flattened_variant", "flattened_variant_per_owner"
@@ -139,6 +154,24 @@ class MigrationMatrixContractTest {
             Pattern.DOTALL
     );
     private static final Pattern STRING_LITERAL = Pattern.compile("\"([a-z0-9_]+)\"");
+    private static final Pattern LEGACY_FEATURE_REGISTRATION = Pattern.compile(
+            "\\bwithName\\(\"([a-z0-9_]+)\"\\)"
+    );
+    private static final Pattern LEGACY_BLOCK_ENTITY_REGISTRATION = Pattern.compile(
+            "@RegisterTileEntity\\(\"([a-z0-9_]+)\"\\)"
+    );
+    private static final Pattern LEGACY_ENUM_VALUE = Pattern.compile(
+            "\\b[A-Z][A-Z0-9_]*\\s*\\(\\s*\"([a-z0-9_]+)\""
+    );
+    private static final Pattern LEGACY_ENUM_NAME = Pattern.compile(
+            "\\b([A-Z][A-Z0-9_]*)\\s*\\("
+    );
+    private static final Pattern LEGACY_FLUID_REGISTRATION = Pattern.compile(
+            "\\bisFluidRegistered\\(\"([a-z0-9_]+)\"\\)"
+    );
+    private static final Pattern LEGACY_SOUND_REGISTRATION = Pattern.compile(
+            "\\b[A-Z][A-Z0-9_]*\\(resource\\(\"([a-z0-9_]+)\"\\)\\)"
+    );
     private static final List<String> QUALITY_GATE = List.of(
             "compileJava",
             "runData twice with no second-run resource diff",
@@ -148,58 +181,7 @@ class MigrationMatrixContractTest {
             "runServer smoke",
             "runClient smoke"
     );
-    private static final Map<String, Set<String>> SUPPORTING_RUNTIME_IDS = Map.of(
-            "block", Set.of("magneticraft:pumpjack_drill"),
-            "block_entity_type", Set.of(
-                    "magneticraft:crushing_table",
-                    "magneticraft:battery_box",
-                    "magneticraft:electric_furnace",
-                    "magneticraft:electric_cable",
-                    "magneticraft:electric_connector",
-                    "magneticraft:electric_pole",
-                    "magneticraft:electric_pole_transformer",
-                    "magneticraft:tesla_tower",
-                    "magneticraft:wireless_energy_receiver",
-                    "magneticraft:wind_turbine",
-                    "magneticraft:heat_pipe",
-                    "magneticraft:heat_sink",
-                    "magneticraft:iron_fluid_pipe",
-                    "magneticraft:pneumatic_tube",
-                    "magneticraft:conveyor_belt",
-                    "magneticraft:single_block_machine",
-                    "magneticraft:advanced_multiblock",
-                    "magneticraft:oil_deposit",
-                    "magneticraft:computer",
-                    "magneticraft:mining_robot"
-            ),
-            "menu", Set.of(
-                    "magneticraft:battery_box",
-                    "magneticraft:electric_furnace",
-                    "magneticraft:single_block_machine",
-                    "magneticraft:programmable",
-                    "magneticraft:advanced_multiblock"
-            ),
-            "recipe_type", Set.of(
-                    "magneticraft:crushing_table",
-                    "magneticraft:sluice_box",
-                    "magneticraft:gasification_unit",
-                    "magneticraft:thermopile",
-                    "magneticraft:fluid_fuel",
-                    "magneticraft:advanced_processing"
-            ),
-            "recipe_serializer", Set.of(
-                    "magneticraft:crushing_table",
-                    "magneticraft:sluice_box",
-                    "magneticraft:gasification_unit",
-                    "magneticraft:thermopile",
-                    "magneticraft:fluid_fuel",
-                    "magneticraft:advanced_processing"
-            ),
-            "sound_event", Set.of(
-                    "magneticraft:crushing_table_hit",
-                    "magneticraft:crushing_table_complete"
-            )
-    );
+    private static final Map<String, Set<String>> SUPPORTING_RUNTIME_IDS = supportingRuntimeIds();
     private static final Map<String, List<String>> LEGACY_STATE_ENUM_VALUES = Map.ofEntries(
             Map.entry("Facing", List.of("down", "up", "north", "south", "east", "west")),
             Map.entry("Orientation", List.of("north", "south", "east", "west")),
@@ -852,11 +834,14 @@ class MigrationMatrixContractTest {
             String groupId = group.get("id").getAsString();
             assertTrue(programmaticIds.add(groupId), "Duplicate programmatic recipe group: " + groupId);
             if (!group.get("disposition").getAsString().equals("exclude")) {
-                String targetType = group.get("target_type").getAsString();
-                assertNormalizedTargetId(targetType);
-                if (targetType.startsWith("magneticraft:")) {
-                    assertTrue(projectedRecipeTypes.contains(targetType),
-                            "Programmatic target type is not projected: " + groupId + " -> " + targetType);
+                List<String> targetTypes = programmaticTargetTypes(group);
+                assertFalse(targetTypes.isEmpty(), "Missing programmatic target type: " + groupId);
+                for (String targetType : targetTypes) {
+                    assertNormalizedTargetId(targetType);
+                    if (targetType.startsWith("magneticraft:")) {
+                        assertTrue(projectedRecipeTypes.contains(targetType),
+                                "Programmatic target type is not projected: " + groupId + " -> " + targetType);
+                    }
                 }
             }
         }
@@ -1074,6 +1059,95 @@ class MigrationMatrixContractTest {
     }
 
     @Test
+    void legacyStateSchemasMatchTheirSourceEnumsWhenSnapshotPresent() throws IOException {
+        if (!Files.isDirectory(LEGACY_FEATURE_ROOT)) {
+            return;
+        }
+
+        JsonArray schemas = readObject(ID_MAP_PATH).getAsJsonArray("legacy_state_schemas");
+        for (JsonElement element : schemas) {
+            JsonObject schema = element.getAsJsonObject();
+            String legacyEnum = schema.get("legacy_enum").getAsString();
+            String sourceReference = schema.get("source").getAsString();
+            int anchor = sourceReference.lastIndexOf('#');
+            assertTrue(anchor > 0, "Legacy state source needs a symbol anchor: " + sourceReference);
+            assertEquals(legacyEnum, sourceReference.substring(anchor + 1), "Legacy state source anchor drift");
+
+            Path source = Path.of(sourceReference.substring(0, anchor));
+            assertTrue(Files.isRegularFile(source), "Missing legacy state source: " + source);
+            String sourceText = Files.readString(source, StandardCharsets.UTF_8);
+            int enumStart = sourceText.indexOf("enum class " + legacyEnum);
+            assertTrue(enumStart >= 0, "Missing legacy enum " + legacyEnum + " in " + source);
+            int constantsStart = sourceText.indexOf('{', enumStart);
+            int constantsEnd = sourceText.indexOf(';', constantsStart);
+            assertTrue(constantsStart >= 0 && constantsEnd > constantsStart,
+                    "Malformed legacy enum constants for " + legacyEnum);
+
+            List<String> sourceValues = new ArrayList<>();
+            Matcher matcher = LEGACY_ENUM_VALUE.matcher(sourceText.substring(constantsStart, constantsEnd));
+            while (matcher.find()) {
+                sourceValues.add(matcher.group(1));
+            }
+            if (sourceValues.isEmpty()) {
+                matcher = LEGACY_ENUM_NAME.matcher(sourceText.substring(constantsStart, constantsEnd));
+                while (matcher.find()) {
+                    sourceValues.add(matcher.group(1).toLowerCase(Locale.ROOT));
+                }
+            }
+            assertEquals(
+                    strings(schema.getAsJsonArray("legacy_values")),
+                    sourceValues,
+                    "Legacy state value drift for " + legacyEnum
+            );
+        }
+    }
+
+    @Test
+    void legacyFluidAndSoundRegistrationsMatchTheirSourceWhenSnapshotPresent() throws IOException {
+        if (!Files.isRegularFile(LEGACY_FLUID_SOURCE) || !Files.isRegularFile(LEGACY_SOUND_SOURCE)) {
+            return;
+        }
+
+        List<String> sourceFluids = new ArrayList<>();
+        Matcher matcher = LEGACY_FLUID_REGISTRATION.matcher(
+                Files.readString(LEGACY_FLUID_SOURCE, StandardCharsets.UTF_8)
+        );
+        while (matcher.find()) {
+            sourceFluids.add(matcher.group(1));
+        }
+        assertEquals(16, sourceFluids.size());
+        assertEquals(sourceFluids.size(), new HashSet<>(sourceFluids).size(), "Duplicate legacy fluid registration");
+
+        List<String> sourceSounds = new ArrayList<>();
+        matcher = LEGACY_SOUND_REGISTRATION.matcher(Files.readString(LEGACY_SOUND_SOURCE, StandardCharsets.UTF_8));
+        while (matcher.find()) {
+            sourceSounds.add(matcher.group(1));
+        }
+        assertEquals(4, sourceSounds.size());
+        assertEquals(sourceSounds.size(), new HashSet<>(sourceSounds).size(), "Duplicate legacy sound registration");
+
+        JsonObject idMap = readObject(ID_MAP_PATH);
+        List<String> projectedFluids = new ArrayList<>();
+        List<String> projectedSounds = new ArrayList<>();
+        for (JsonElement element : idMap.getAsJsonArray("mappings")) {
+            JsonObject mapping = element.getAsJsonObject();
+            switch (mapping.get("legacy_id").getAsString()) {
+                case "magneticraft_fluids" -> projectedFluids.addAll(
+                        strings(mapping.getAsJsonArray("legacy_variants"))
+                );
+                case "crushing_table_sounds", "sluice_box_sounds" -> projectedSounds.addAll(
+                        strings(mapping.getAsJsonArray("legacy_variants"))
+                );
+                default -> {
+                }
+            }
+        }
+
+        assertEquals(sourceFluids, projectedFluids, "Legacy fluid projection drift");
+        assertEquals(sourceSounds, projectedSounds, "Legacy sound projection drift");
+    }
+
+    @Test
     void forbiddenRuntimeIdsAreUniqueNormalizedAndAbsentFromTargets() throws IOException {
         JsonObject idMap = readObject(ID_MAP_PATH);
         List<String> forbiddenIds = strings(idMap.getAsJsonArray("forbidden_runtime_ids"));
@@ -1144,14 +1218,39 @@ class MigrationMatrixContractTest {
                 Path.of("src/main/java/committee/nova/mods/magneticraft/init/ModBlockEntities.java"),
                 Path.of("src/main/java/committee/nova/mods/magneticraft/init/ModComputerContent.java")
         );
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            blockEntityIds.add(namespaced(definition.id()));
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            blockEntityIds.add(namespaced(definition.id()));
+        }
         Set<String> menuIds = extractNamespacedIds(
                 MENU_REGISTRATION,
                 Path.of("src/main/java/committee/nova/mods/magneticraft/init/ModMenus.java")
         );
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            if (definition.hasMenu()) {
+                menuIds.add(namespaced(definition.id()));
+            }
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            menuIds.add(namespaced(definition.id()));
+        }
         Path recipeSource = Path.of("src/main/java/committee/nova/mods/magneticraft/init/ModRecipeTypes.java");
         Set<String> recipeTypeIds = extractNamespacedIds(RECIPE_TYPE_REGISTRATION, recipeSource);
         recipeTypeIds.addAll(extractNamespacedIds(RECIPE_TYPE_HELPER, recipeSource));
         Set<String> recipeSerializerIds = extractNamespacedIds(RECIPE_SERIALIZER_REGISTRATION, recipeSource);
+        for (String id : List.of(
+                "industrial_combustion_chamber",
+                "grinder",
+                "sieve",
+                "hydraulic_press",
+                "oil_heater",
+                "refinery"
+        )) {
+            recipeTypeIds.add(namespaced(id));
+            recipeSerializerIds.add(namespaced(id));
+        }
         Set<String> soundIds = extractNamespacedIds(
                 SOUND_REGISTRATION,
                 Path.of("src/main/java/committee/nova/mods/magneticraft/init/ModSounds.java")
@@ -1334,7 +1433,7 @@ class MigrationMatrixContractTest {
             assertStage(stage, id);
             assertNonEmpty(group.getAsJsonArray("acceptance_tests"), id);
             if (!disposition.equals("exclude")) {
-                assertNonBlank(group, "target_type");
+                assertFalse(programmaticTargetTypes(group).isEmpty(), "Missing target recipe type: " + id);
                 assertNonBlank(group, "target_path_template");
                 assertTrue(group.has("variants"), "Missing explicit variants: " + id);
                 String targetTemplate = group.get("target_path_template").getAsString();
@@ -1488,6 +1587,137 @@ class MigrationMatrixContractTest {
     }
 
     @Test
+    void legacyFeatureRegistrationsAreIndependentlyCoveredWhenSnapshotPresent() throws IOException {
+        if (!Files.isDirectory(LEGACY_FEATURE_ROOT)) {
+            return;
+        }
+
+        List<Path> sources;
+        try (Stream<Path> paths = Files.walk(LEGACY_FEATURE_ROOT)) {
+            sources = paths.filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".kt"))
+                    .toList();
+        }
+
+        List<String> declarations = new ArrayList<>();
+        for (Path source : sources) {
+            Matcher matcher = LEGACY_FEATURE_REGISTRATION.matcher(
+                    Files.readString(source, StandardCharsets.UTF_8)
+            );
+            while (matcher.find()) {
+                declarations.add(matcher.group(1));
+            }
+        }
+
+        TreeSet<String> legacyGroups = new TreeSet<>(declarations);
+        assertEquals(LEGACY_FEATURE_REGISTRY_GROUP_COUNT, declarations.size());
+        assertEquals(declarations.size(), legacyGroups.size(), "Duplicate legacy withName registry group");
+        assertEquals(
+                LEGACY_FEATURE_REGISTRY_GROUP_SHA256,
+                inventorySha256(new ArrayList<>(legacyGroups)),
+                "Legacy feature registry inventory changed"
+        );
+
+        JsonObject idMap = readObject(ID_MAP_PATH);
+        Set<String> projectedGroups = new HashSet<>();
+        for (JsonElement element : idMap.getAsJsonArray("mappings")) {
+            JsonObject mapping = element.getAsJsonObject();
+            String legacyId = mapping.get("legacy_id").getAsString();
+            if (legacyGroups.contains(legacyId)) {
+                assertTrue(projectedGroups.add(legacyId), "Duplicate registry projection: " + legacyId);
+                continue;
+            }
+            for (String variant : strings(mapping.getAsJsonArray("legacy_variants"))) {
+                if (legacyGroups.contains(variant)) {
+                    assertTrue(projectedGroups.add(variant), "Duplicate registry projection: " + variant);
+                }
+            }
+        }
+        for (JsonElement element : idMap.getAsJsonArray("material_families")) {
+            String legacyId = element.getAsJsonObject().get("legacy_id").getAsString();
+            if (legacyGroups.contains(legacyId)) {
+                assertTrue(projectedGroups.add(legacyId), "Duplicate material projection: " + legacyId);
+            }
+        }
+        for (JsonElement element : idMap.getAsJsonArray("exclusions")) {
+            for (String legacyId : strings(element.getAsJsonObject().getAsJsonArray("legacy_ids"))) {
+                if (legacyGroups.contains(legacyId)) {
+                    assertTrue(projectedGroups.add(legacyId), "Duplicate exclusion projection: " + legacyId);
+                }
+            }
+        }
+
+        assertEquals(legacyGroups, projectedGroups, "Legacy feature registration projection is incomplete");
+    }
+
+    @Test
+    void legacyBlockEntityRegistrationsHaveExactlyOneExplicitOutcomeWhenSnapshotPresent() throws IOException {
+        if (!Files.isDirectory(LEGACY_FEATURE_ROOT)) {
+            return;
+        }
+
+        List<Path> sources;
+        try (Stream<Path> paths = Files.walk(LEGACY_FEATURE_ROOT)) {
+            sources = paths.filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".kt"))
+                    .toList();
+        }
+
+        List<String> declarations = new ArrayList<>();
+        for (Path source : sources) {
+            Matcher matcher = LEGACY_BLOCK_ENTITY_REGISTRATION.matcher(
+                    Files.readString(source, StandardCharsets.UTF_8)
+            );
+            while (matcher.find()) {
+                declarations.add(matcher.group(1));
+            }
+        }
+
+        TreeSet<String> legacyIds = new TreeSet<>(declarations);
+        assertEquals(LEGACY_BLOCK_ENTITY_COUNT, declarations.size());
+        assertEquals(declarations.size(), legacyIds.size(), "Duplicate legacy block entity registration");
+        assertEquals(
+                LEGACY_BLOCK_ENTITY_SHA256,
+                inventorySha256(new ArrayList<>(legacyIds)),
+                "Legacy block entity inventory changed"
+        );
+
+        JsonObject idMap = readObject(ID_MAP_PATH);
+        JsonObject manifest = idMap.getAsJsonObject("legacy_leaf_manifest");
+        assertEquals(LEGACY_BLOCK_ENTITY_COUNT, manifest.get("legacy_block_entity_count").getAsInt());
+        assertEquals(LEGACY_BLOCK_ENTITY_SHA256, manifest.get("legacy_block_entity_sha256").getAsString());
+
+        Set<String> outcomes = new HashSet<>();
+        for (JsonElement element : idMap.getAsJsonArray("supporting_registry_mappings")) {
+            JsonObject mapping = element.getAsJsonObject();
+            if (!mapping.get("registry").getAsString().equals("block_entity_type")
+                    || !mapping.has("legacy_id")
+                    || !legacyIds.contains(mapping.get("legacy_id").getAsString())) {
+                continue;
+            }
+            String legacyId = mapping.get("legacy_id").getAsString();
+            assertTrue(outcomes.add(legacyId), "Duplicate legacy block entity outcome: " + legacyId);
+            assertNormalizedTargetId(mapping.get("target_id").getAsString());
+        }
+        for (JsonElement element : idMap.getAsJsonArray("legacy_block_entity_replacements")) {
+            JsonObject replacement = element.getAsJsonObject();
+            String legacyId = replacement.get("legacy_id").getAsString();
+            assertTrue(legacyIds.contains(legacyId), "Unknown legacy block entity replacement: " + legacyId);
+            assertTrue(outcomes.add(legacyId), "Duplicate legacy block entity outcome: " + legacyId);
+            assertDecision(replacement.get("disposition").getAsString(), legacyId);
+            assertNonBlank(replacement, "source");
+            assertNonBlank(replacement, "evidence");
+            if (replacement.get("target_registry").getAsString().equals("none")) {
+                assertEquals("exclude", replacement.get("disposition").getAsString(), legacyId);
+            } else {
+                assertFalse(replacement.get("disposition").getAsString().equals("exclude"), legacyId);
+                assertNormalizedTargetId(replacement.get("target_id").getAsString());
+            }
+        }
+        assertEquals(legacyIds, outcomes, "Unassigned legacy block entity registrations");
+    }
+
+    @Test
     void ignoredLegacySnapshotMatchesThePinnedManifestsWhenPresent() throws IOException {
         JsonObject matrix = readObject(MATRIX_PATH);
         if (Files.isDirectory(LEGACY_RECIPE_ROOT)) {
@@ -1637,6 +1867,76 @@ class MigrationMatrixContractTest {
         }
     }
 
+    private static Map<String, Set<String>> supportingRuntimeIds() {
+        Set<String> blockEntityTypes = new HashSet<>(Set.of(
+                namespaced("crushing_table"),
+                namespaced("battery_box"),
+                namespaced("electric_furnace"),
+                namespaced("electric_cable"),
+                namespaced("electric_connector"),
+                namespaced("electric_pole"),
+                namespaced("electric_pole_transformer"),
+                namespaced("tesla_tower"),
+                namespaced("wireless_energy_receiver"),
+                namespaced("wind_turbine"),
+                namespaced("heat_pipe"),
+                namespaced("insulated_heat_pipe"),
+                namespaced("heat_sink"),
+                namespaced("iron_fluid_pipe"),
+                namespaced("pneumatic_tube"),
+                namespaced("pneumatic_restriction_tube"),
+                namespaced("conveyor_belt"),
+                namespaced("oil_deposit"),
+                namespaced("computer"),
+                namespaced("mining_robot")
+        ));
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            blockEntityTypes.add(namespaced(definition.id()));
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            blockEntityTypes.add(namespaced(definition.id()));
+        }
+
+        Set<String> menus = new HashSet<>(Set.of(
+                namespaced("battery_box"),
+                namespaced("electric_furnace"),
+                namespaced("computer"),
+                namespaced("mining_robot")
+        ));
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            if (definition.hasMenu()) {
+                menus.add(namespaced(definition.id()));
+            }
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            menus.add(namespaced(definition.id()));
+        }
+
+        Set<String> recipeTypes = new HashSet<>(Set.of(
+                namespaced("crushing_table"),
+                namespaced("sluice_box"),
+                namespaced("gasification_unit"),
+                namespaced("thermopile"),
+                namespaced("industrial_combustion_chamber"),
+                namespaced("grinder"),
+                namespaced("sieve"),
+                namespaced("hydraulic_press"),
+                namespaced("oil_heater"),
+                namespaced("refinery")
+        ));
+        return Map.of(
+                "block", Set.of(namespaced("pumpjack_drill")),
+                "block_entity_type", Set.copyOf(blockEntityTypes),
+                "menu", Set.copyOf(menus),
+                "recipe_type", Set.copyOf(recipeTypes),
+                "recipe_serializer", Set.copyOf(recipeTypes),
+                "sound_event", Set.of(
+                        namespaced("crushing_table_hit"),
+                        namespaced("crushing_table_complete")
+                )
+        );
+    }
+
     private static Set<String> supportingIds(JsonObject idMap, String registry) {
         Set<String> ids = new HashSet<>();
         for (JsonElement element : idMap.getAsJsonArray("supporting_registry_mappings")) {
@@ -1646,6 +1946,17 @@ class MigrationMatrixContractTest {
             }
         }
         return ids;
+    }
+
+    private static List<String> programmaticTargetTypes(JsonObject group) {
+        if (group.has("target_types")) {
+            assertFalse(group.has("target_type"), "Recipe group declares both target_type and target_types: " + group);
+            return strings(group.getAsJsonArray("target_types"));
+        }
+        if (!group.has("target_type") || group.get("target_type").getAsString().isBlank()) {
+            return List.of();
+        }
+        return List.of(group.get("target_type").getAsString());
     }
 
     private static String namespaced(String path) {

@@ -65,7 +65,8 @@ class AdvancedProcessingRecipeTest {
         AdvancedProcessingRecipe original = pressRecipe();
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         try {
-            AdvancedProcessingRecipe.Serializer serializer = new AdvancedProcessingRecipe.Serializer();
+            AdvancedProcessingRecipe.Serializer serializer =
+                    new AdvancedProcessingRecipe.Serializer(MultiblockDefinition.HYDRAULIC_PRESS);
             serializer.toNetwork(buffer, original);
             AdvancedProcessingRecipe decoded = serializer.fromNetwork(original.getId(), buffer);
 
@@ -102,8 +103,8 @@ class AdvancedProcessingRecipeTest {
 
     @Test
     void oilHeaterAndRefineryFluidJsonPreserveEveryProcessingField() {
-        AdvancedProcessingRecipe.Serializer serializer = new AdvancedProcessingRecipe.Serializer();
-        AdvancedProcessingRecipe heater = serializer.fromJson(
+        AdvancedProcessingRecipe heater = new AdvancedProcessingRecipe.Serializer(MultiblockDefinition.OIL_HEATER)
+                .fromJson(
                 id("test_oil_heater"),
                 json("""
                         {
@@ -124,7 +125,8 @@ class AdvancedProcessingRecipeTest {
         assertFalse(heater.matchesFluid(new FluidStack(Fluids.WATER, 24)));
         assertFalse(heater.matchesFluid(new FluidStack(Fluids.LAVA, 25)));
 
-        AdvancedProcessingRecipe refinery = serializer.fromJson(
+        AdvancedProcessingRecipe refinery = new AdvancedProcessingRecipe.Serializer(MultiblockDefinition.REFINERY)
+                .fromJson(
                 id("test_refinery"),
                 json("""
                         {
@@ -154,7 +156,6 @@ class AdvancedProcessingRecipeTest {
 
     @Test
     void fluidNetworkRoundTripPreservesTagDirectInputsOutputsAndTemperature() {
-        AdvancedProcessingRecipe.Serializer serializer = new AdvancedProcessingRecipe.Serializer();
         for (AdvancedProcessingRecipe original : List.of(
                 fluidRecipe(
                         "heater_roundtrip",
@@ -179,6 +180,8 @@ class AdvancedProcessingRecipeTest {
                         623.15D
                 )
         )) {
+            AdvancedProcessingRecipe.Serializer serializer =
+                    new AdvancedProcessingRecipe.Serializer(original.machine());
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             try {
                 serializer.toNetwork(buffer, original);

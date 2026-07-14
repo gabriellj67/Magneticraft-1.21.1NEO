@@ -23,7 +23,11 @@ public final class PneumaticTubeBlockEntity extends NetworkComponentBlockEntity 
     private final LogisticsTubeModule logistics;
 
     public PneumaticTubeBlockEntity(BlockPos position, BlockState state) {
-        super(ModBlockEntities.PNEUMATIC_TUBE.get(), position, state);
+        super(state.is(ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get())
+                        ? ModBlockEntities.PNEUMATIC_RESTRICTION_TUBE.get()
+                        : ModBlockEntities.PNEUMATIC_TUBE.get(),
+                position,
+                state);
         boolean restriction = state.is(ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get());
         pressure = addModule(new PressureNetworkModule(
                 Magneticraft.id("pressure"),

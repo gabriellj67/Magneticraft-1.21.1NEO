@@ -1,5 +1,5 @@
 {
-  "type": "magneticraft:advanced_processing",
+  "type": "magneticraft:grinder",
   "duration": 40,
   "energy_per_tick": 40,
   "ingredient": {

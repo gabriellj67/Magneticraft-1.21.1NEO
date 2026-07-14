@@ -91,7 +91,7 @@
     "heat": false,
     "inventory_slots": 2
   },
-  "recipe_type": "magneticraft:advanced_processing",
+  "recipe_type": "magneticraft:hydraulic_press",
   "schema_version": 1,
   "size": {
     "x": 3,

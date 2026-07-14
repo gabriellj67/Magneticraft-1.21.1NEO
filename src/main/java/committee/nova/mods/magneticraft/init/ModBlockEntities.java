@@ -5,7 +5,9 @@ import committee.nova.mods.magneticraft.content.machine.crushingtable.CrushingTa
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlockEntity;
@@ -20,10 +22,19 @@ import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeB
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+
 /**
  * Machine block entity type registrations.
  */
 public final class ModBlockEntities {
+    private static final Map<SingleBlockMachineDefinition, RegistryObject<BlockEntityType<SingleBlockMachineBlockEntity>>>
+            SINGLE_BLOCK_MACHINES = new EnumMap<>(SingleBlockMachineDefinition.class);
+    private static final Map<MultiblockDefinition, RegistryObject<BlockEntityType<AdvancedMultiblockBlockEntity>>>
+            ADVANCED_MULTIBLOCKS = new EnumMap<>(MultiblockDefinition.class);
+
     public static final RegistryObject<BlockEntityType<CrushingTableBlockEntity>> CRUSHING_TABLE =
             ModRegistries.BLOCK_ENTITY_TYPES.register(
                     "crushing_table",
@@ -109,7 +120,14 @@ public final class ModBlockEntities {
                     "heat_pipe",
                     () -> BlockEntityType.Builder.of(
                             HeatPipeBlockEntity::new,
-                            ModNetworkBlocks.HEAT_PIPE.get(),
+                            ModNetworkBlocks.HEAT_PIPE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<HeatPipeBlockEntity>> INSULATED_HEAT_PIPE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "insulated_heat_pipe",
+                    () -> BlockEntityType.Builder.of(
+                            HeatPipeBlockEntity::new,
                             ModNetworkBlocks.INSULATED_HEAT_PIPE.get()
                     ).build(null)
             );
@@ -134,7 +152,14 @@ public final class ModBlockEntities {
                     "pneumatic_tube",
                     () -> BlockEntityType.Builder.of(
                             PneumaticTubeBlockEntity::new,
-                            ModNetworkBlocks.PNEUMATIC_TUBE.get(),
+                            ModNetworkBlocks.PNEUMATIC_TUBE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<PneumaticTubeBlockEntity>> PNEUMATIC_RESTRICTION_TUBE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "pneumatic_restriction_tube",
+                    () -> BlockEntityType.Builder.of(
+                            PneumaticTubeBlockEntity::new,
                             ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get()
                     ).build(null)
             );
@@ -146,26 +171,6 @@ public final class ModBlockEntities {
                             ModNetworkBlocks.CONVEYOR_BELT.get()
                     ).build(null)
             );
-    public static final RegistryObject<BlockEntityType<SingleBlockMachineBlockEntity>> SINGLE_BLOCK_MACHINE =
-            ModRegistries.BLOCK_ENTITY_TYPES.register(
-                    "single_block_machine",
-                    () -> BlockEntityType.Builder.of(
-                            SingleBlockMachineBlockEntity::new,
-                            ModMachineBlocks.machines().values().stream()
-                                    .map(RegistryObject::get)
-                                    .toArray(net.minecraft.world.level.block.Block[]::new)
-                    ).build(null)
-            );
-    public static final RegistryObject<BlockEntityType<AdvancedMultiblockBlockEntity>> ADVANCED_MULTIBLOCK =
-            ModRegistries.BLOCK_ENTITY_TYPES.register(
-                    "advanced_multiblock",
-                    () -> BlockEntityType.Builder.of(
-                            AdvancedMultiblockBlockEntity::new,
-                            ModAdvancedBlocks.controllers().values().stream()
-                                    .map(RegistryObject::get)
-                                    .toArray(net.minecraft.world.level.block.Block[]::new)
-                    ).build(null)
-            );
     public static final RegistryObject<BlockEntityType<OilDepositBlockEntity>> OIL_DEPOSIT =
             ModRegistries.BLOCK_ENTITY_TYPES.register(
                     "oil_deposit",
@@ -175,9 +180,60 @@ public final class ModBlockEntities {
                     ).build(null)
             );
 
+    static {
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            SINGLE_BLOCK_MACHINES.put(definition, ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    definition.id(),
+                    () -> BlockEntityType.Builder.of(
+                            SingleBlockMachineBlockEntity::new,
+                            ModMachineBlocks.machine(definition).get()
+                    ).build(null)
+            ));
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            ADVANCED_MULTIBLOCKS.put(definition, ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    definition.id(),
+                    () -> BlockEntityType.Builder.of(
+                            AdvancedMultiblockBlockEntity::new,
+                            ModAdvancedBlocks.controller(definition).get()
+                    ).build(null)
+            ));
+        }
+    }
+
     private ModBlockEntities() {
     }
 
     public static void bootstrap() {
+    }
+
+    public static RegistryObject<BlockEntityType<SingleBlockMachineBlockEntity>> singleBlockMachine(
+            SingleBlockMachineDefinition definition
+    ) {
+        RegistryObject<BlockEntityType<SingleBlockMachineBlockEntity>> type = SINGLE_BLOCK_MACHINES.get(definition);
+        if (type == null) {
+            throw new IllegalArgumentException("No block entity type registered for " + definition);
+        }
+        return type;
+    }
+
+    public static Map<SingleBlockMachineDefinition, RegistryObject<BlockEntityType<SingleBlockMachineBlockEntity>>>
+    singleBlockMachines() {
+        return Collections.unmodifiableMap(SINGLE_BLOCK_MACHINES);
+    }
+
+    public static RegistryObject<BlockEntityType<AdvancedMultiblockBlockEntity>> advancedMultiblock(
+            MultiblockDefinition definition
+    ) {
+        RegistryObject<BlockEntityType<AdvancedMultiblockBlockEntity>> type = ADVANCED_MULTIBLOCKS.get(definition);
+        if (type == null) {
+            throw new IllegalArgumentException("No block entity type registered for " + definition);
+        }
+        return type;
+    }
+
+    public static Map<MultiblockDefinition, RegistryObject<BlockEntityType<AdvancedMultiblockBlockEntity>>>
+    advancedMultiblocks() {
+        return Collections.unmodifiableMap(ADVANCED_MULTIBLOCKS);
     }
 }

@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MultiblockPortProfileTest {
     private static final Map<MultiblockDefinition, List<ExpectedPort>> EXPECTED_PORTS = Map.ofEntries(
             Map.entry(MultiblockDefinition.BIG_COMBUSTION_CHAMBER, List.of(port(
-                    0, 4_000, "fluid_fuel", List.of("@magneticraft:fluid_fuel"), BOTH,
+                    0, 4_000, "fluid_fuel", List.of("@magneticraft:industrial_combustion_chamber"), BOTH,
                     Map.of(FRONT, INPUT, BACK, INPUT, LEFT, INPUT, RIGHT, INPUT, UP, INPUT, DOWN, OUTPUT)
             ))),
             Map.entry(MultiblockDefinition.BIG_STEAM_BOILER, List.of(

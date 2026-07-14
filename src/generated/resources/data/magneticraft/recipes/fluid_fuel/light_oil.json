@@ -1,5 +1,5 @@
 {
-  "type": "magneticraft:fluid_fuel",
+  "type": "magneticraft:industrial_combustion_chamber",
   "duration": 25000,
   "fluid": "magneticraft:light_oil",
   "power": 80.0

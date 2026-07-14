@@ -116,9 +116,19 @@ class AdvancedGuideDataProviderTest {
                     MultiblockDefinition.SIEVE,
                     MultiblockDefinition.OIL_HEATER,
                     MultiblockDefinition.REFINERY,
+                    MultiblockDefinition.BIG_COMBUSTION_CHAMBER,
                     MultiblockDefinition.BIG_ELECTRIC_FURNACE
             ).contains(definition);
             assertEquals(hasRecipe, guide.has("recipe_type"), definition.id());
+            if (hasRecipe) {
+                assertEquals(
+                        definition == MultiblockDefinition.BIG_ELECTRIC_FURNACE
+                                ? "minecraft:smelting"
+                                : "magneticraft:" + definition.id(),
+                        guide.get("recipe_type").getAsString(),
+                        definition.id()
+                );
+            }
             assertFalse(guide.get("supports_mirroring").getAsBoolean());
             assertTrue(ids.add(guide.get("id").getAsString()));
 

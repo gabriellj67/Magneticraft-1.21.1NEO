@@ -10,11 +10,14 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Therm
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
+import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
@@ -37,6 +40,19 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
         return Magneticraft.id("jei_plugin");
+    }
+
+    @Override
+    public void registerItemSubtypes(ISubtypeRegistration registration) {
+        registration.useNbtForSubtypes(
+                ModAdvancedBlocks.OIL_DEPOSIT_ITEM.get(),
+                ModMachineItems.LOW_BATTERY.get(),
+                ModMachineItems.MEDIUM_BATTERY.get(),
+                ModMachineItems.ELECTRIC_DRILL.get(),
+                ModMachineItems.ELECTRIC_CHAINSAW.get(),
+                ModMachineItems.ELECTRIC_PISTON.get(),
+                ModComputerContent.FLOPPY_DISK.get()
+        );
     }
 
     @Override
@@ -66,7 +82,9 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
         registration.addRecipes(FLUID_FUEL, recipes.getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get()));
         registration.addRecipes(
                 ADVANCED_PROCESSING,
-                recipes.getAllRecipesFor(ModRecipeTypes.ADVANCED_PROCESSING_TYPE.get())
+                ModRecipeTypes.advancedProcessingTypes().values().stream()
+                        .flatMap(type -> recipes.getAllRecipesFor(type.get()).stream())
+                        .toList()
         );
     }
 
