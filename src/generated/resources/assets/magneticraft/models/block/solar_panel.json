@@ -1,4 +1,23 @@
 {
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.90909094,
+        0.90909094,
+        0.90909094
+      ],
+      "translation": [
+        3.2141225,
+        3.5753002,
+        -1.6471472
+      ]
+    }
+  },
   "flip_v": true,
   "loader": "forge:obj",
   "model": "magneticraft:models/block/solar_panel_base.obj",

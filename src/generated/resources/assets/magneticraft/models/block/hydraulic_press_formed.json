@@ -1,4 +1,23 @@
 {
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.71428573,
+        0.71428573,
+        0.71428573
+      ],
+      "translation": [
+        0,
+        0.61858964,
+        0.35714284
+      ]
+    }
+  },
   "flip_v": true,
   "loader": "forge:obj",
   "model": "magneticraft:models/block/hydraulic_press_base.obj",

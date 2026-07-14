@@ -1,5 +1,6 @@
 package committee.nova.mods.magneticraft.data;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -44,6 +45,84 @@ class GeneratedDataContractTest {
                 assertNotNull(readJson(path), path.toString());
             }
         }
+    }
+
+    @Test
+    void objBlockItemsHaveBoundedGuiTransforms() throws IOException {
+        int objBlockItems = 0;
+        Path itemModels = ASSETS.resolve("models/item");
+        try (Stream<Path> paths = Files.list(itemModels)) {
+            for (Path itemPath : paths.filter(Files::isRegularFile).toList()) {
+                JsonObject itemModel = readObject(itemPath);
+                if (!itemModel.has("parent")) {
+                    continue;
+                }
+                String parent = itemModel.get("parent").getAsString();
+                if (!parent.startsWith("magneticraft:block/")) {
+                    continue;
+                }
+
+                String blockModelName = parent.substring("magneticraft:block/".length());
+                JsonObject blockModel = readObject(ASSETS.resolve("models/block/" + blockModelName + ".json"));
+                if (!blockModel.has("loader") || !blockModel.get("loader").getAsString().equals("forge:obj")) {
+                    continue;
+                }
+
+                objBlockItems++;
+                assertFalse(blockModel.has("parent"), itemPath + " must not inherit transforms for non-GUI contexts");
+                assertTrue(blockModel.has("display"), itemPath + " must declare GUI display transforms");
+                JsonObject gui = blockModel.getAsJsonObject("display").getAsJsonObject("gui");
+                assertNotNull(gui, itemPath + " must declare a GUI display transform");
+                assertVectorEquals(gui.getAsJsonArray("rotation"), 30.0F, 225.0F, 0.0F, itemPath + " rotation");
+
+                if (gui.has("translation")) {
+                    JsonArray translation = gui.getAsJsonArray("translation");
+                    assertEquals(3, translation.size(), itemPath + " translation");
+                    translation.forEach(component -> assertTrue(
+                            Math.abs(component.getAsFloat()) <= 80.0F,
+                            itemPath + " translation must be valid"
+                    ));
+                }
+
+                JsonArray scale = gui.has("scale") ? gui.getAsJsonArray("scale") : null;
+                if (scale != null) {
+                    assertEquals(3, scale.size(), itemPath + " scale");
+                }
+                float uniformScale = scale == null ? 1.0F : scale.get(0).getAsFloat();
+                assertTrue(uniformScale > 0.0F && uniformScale <= 4.0F, itemPath + " scale must be valid");
+                if (scale != null) {
+                    assertEquals(uniformScale, scale.get(1).getAsFloat(), 0.000001F, itemPath + " Y scale");
+                    assertEquals(uniformScale, scale.get(2).getAsFloat(), 0.000001F, itemPath + " Z scale");
+                }
+            }
+        }
+        assertTrue(objBlockItems > 0, "Expected generated OBJ-backed block items");
+        assertTrue(guiScale("wind_turbine_inventory") < 0.1F, "Oversized turbine must fit its item slot");
+        assertTrue(guiScale("electric_connector") > 1.0F, "Small connector must remain recognizable");
+
+        JsonObject portableBattery = readObject(ASSETS.resolve("models/item/low_voltage_battery.json"));
+        assertEquals("minecraft:item/generated", portableBattery.get("parent").getAsString());
+        assertFalse(portableBattery.has("display"), "Non-block items must keep their flat item model contract");
+    }
+
+    private static void assertVectorEquals(
+            JsonArray actual,
+            float expectedX,
+            float expectedY,
+            float expectedZ,
+            String message
+    ) {
+        assertNotNull(actual, message);
+        assertEquals(3, actual.size(), message);
+        assertEquals(expectedX, actual.get(0).getAsFloat(), 0.000001F, message + " X");
+        assertEquals(expectedY, actual.get(1).getAsFloat(), 0.000001F, message + " Y");
+        assertEquals(expectedZ, actual.get(2).getAsFloat(), 0.000001F, message + " Z");
+    }
+
+    private static float guiScale(String blockModelName) throws IOException {
+        JsonObject model = readObject(ASSETS.resolve("models/block/" + blockModelName + ".json"));
+        JsonObject gui = model.getAsJsonObject("display").getAsJsonObject("gui");
+        return gui.has("scale") ? gui.getAsJsonArray("scale").get(0).getAsFloat() : 1.0F;
     }
 
     @Test

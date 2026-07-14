@@ -1,4 +1,18 @@
 {
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ]
+    }
+  },
   "flip_v": true,
   "loader": "forge:obj",
   "model": "magneticraft:models/block/legacy/insulated_heat_pipe.obj",

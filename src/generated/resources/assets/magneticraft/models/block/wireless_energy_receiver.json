@@ -1,4 +1,23 @@
 {
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        1.3333334,
+        1.3333334,
+        1.3333334
+      ],
+      "translation": [
+        0,
+        4.907478,
+        2.8333333
+      ]
+    }
+  },
   "flip_v": true,
   "loader": "forge:obj",
   "model": "magneticraft:models/block/legacy/wireless_energy_receiver.obj",

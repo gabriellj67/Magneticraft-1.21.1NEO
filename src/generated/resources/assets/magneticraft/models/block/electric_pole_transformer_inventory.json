@@ -1,4 +1,23 @@
 {
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.125,
+        0.125,
+        0.125
+      ],
+      "translation": [
+        0.3535534,
+        3.6408784,
+        1.6938137
+      ]
+    }
+  },
   "flip_v": true,
   "loader": "forge:obj",
   "model": "magneticraft:models/block/legacy/electric_pole_transformer.obj",

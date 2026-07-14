@@ -21,6 +21,7 @@ import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
@@ -33,8 +34,11 @@ import net.minecraftforge.common.data.ExistingFileHelper;
  * Generates solid-block models plus invisible fluid-block state models.
  */
 final class ModBlockStateProvider extends BlockStateProvider {
+    private final ExistingFileHelper existingFileHelper;
+
     ModBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
         super(output, Magneticraft.MOD_ID, existingFileHelper);
+        this.existingFileHelper = existingFileHelper;
     }
 
     @Override
@@ -308,13 +312,15 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private ModelFile objModel(String generatedName, String sourceName, ResourceLocation particleTexture) {
-        return models().getBuilder(generatedName)
+        ResourceLocation modelLocation = modLoc("models/block/" + sourceName + ".obj");
+        BlockModelBuilder model = models().getBuilder(generatedName)
                 .texture("particle", particleTexture)
                 .customLoader(ObjModelBuilder::begin)
-                .modelLocation(modLoc("models/block/" + sourceName + ".obj"))
+                .modelLocation(modelLocation)
                 .flipV(true)
                 .overrideMaterialLibrary(modLoc("models/block/" + sourceName + ".mtl"))
                 .end();
+        return withObjInventoryTransform(model, modelLocation);
     }
 
     private void conduitBlock(Block block, String name, ResourceLocation texture) {
@@ -432,12 +438,26 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private ModelFile legacyObjModel(String generatedName, String artifactName, ResourceLocation particleTexture) {
-        return models().getBuilder(generatedName)
+        ResourceLocation modelLocation = modLoc("models/block/legacy/" + artifactName + ".obj");
+        BlockModelBuilder model = models().getBuilder(generatedName)
                 .texture("particle", particleTexture)
                 .customLoader(ObjModelBuilder::begin)
-                .modelLocation(modLoc("models/block/legacy/" + artifactName + ".obj"))
+                .modelLocation(modelLocation)
                 .flipV(true)
                 .overrideMaterialLibrary(modLoc("models/block/legacy/" + artifactName + ".mtl"))
                 .end();
+        return withObjInventoryTransform(model, modelLocation);
+    }
+
+    private ModelFile withObjInventoryTransform(BlockModelBuilder model, ResourceLocation modelLocation) {
+        ObjInventoryTransform transform = ObjInventoryTransform.load(existingFileHelper, modelLocation);
+        model.transforms()
+                .transform(ItemDisplayContext.GUI)
+                .rotation(ObjInventoryTransform.GUI_ROTATION_X, ObjInventoryTransform.GUI_ROTATION_Y, 0.0F)
+                .translation(transform.translationX(), transform.translationY(), transform.translationZ())
+                .scale(transform.scale())
+                .end()
+                .end();
+        return model;
     }
 }

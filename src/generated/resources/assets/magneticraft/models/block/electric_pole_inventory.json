@@ -1,4 +1,23 @@
 {
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.125,
+        0.125,
+        0.125
+      ],
+      "translation": [
+        0.044194125,
+        3.486199,
+        1.9617267
+      ]
+    }
+  },
   "flip_v": true,
   "loader": "forge:obj",
   "model": "magneticraft:models/block/legacy/electric_pole.obj",

@@ -1,4 +1,23 @@
 {
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.5882353,
+        0.5882353,
+        0.5882353
+      ],
+      "translation": [
+        0,
+        0.7641401,
+        0.44117644
+      ]
+    }
+  },
   "flip_v": true,
   "loader": "forge:obj",
   "model": "magneticraft:models/block/legacy/conveyor_belt.obj",

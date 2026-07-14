@@ -1,4 +1,23 @@
 {
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        1.6666666,
+        1.6666666,
+        1.6666666
+      ],
+      "translation": [
+        0,
+        7.938566,
+        4.5833325
+      ]
+    }
+  },
   "flip_v": true,
   "loader": "forge:obj",
   "model": "magneticraft:models/block/legacy/electric_connector.obj",
