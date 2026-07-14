@@ -72,6 +72,17 @@ record ObjInventoryTransform(float translationX, float translationY, float trans
         if (vertexCount == 0) {
             throw new IllegalArgumentException("OBJ model contains no vertices");
         }
+        return fromBounds(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    static ObjInventoryTransform fromBounds(
+            double minX,
+            double minY,
+            double minZ,
+            double maxX,
+            double maxY,
+            double maxZ
+    ) {
         double largestSpan = Math.max(maxX - minX, Math.max(maxY - minY, maxZ - minZ));
         if (!Double.isFinite(largestSpan) || largestSpan <= 0.0D) {
             throw new IllegalArgumentException("OBJ model has no finite extent");

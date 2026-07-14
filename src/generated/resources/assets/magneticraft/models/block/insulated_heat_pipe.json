@@ -13,11 +13,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/insulated_heat_pipe.obj",
-  "mtl_override": "magneticraft:models/block/legacy/insulated_heat_pipe.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/insulated_heat_pipe.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/fluid_machines/insulated_heat_pipe"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

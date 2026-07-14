@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LegacyVisualAssetContractTest {
     private static final Path MANIFEST = Path.of("scripts/legacy_model_manifest.json");
-    private static final Path OUTPUT = Path.of("src/main/resources/assets/magneticraft");
+    private static final Path RUNTIME_ASSETS = Path.of("src/main/resources/assets/magneticraft");
     private static final Set<String> ROLES = Set.of(
             "static_block",
             "static_structure",
@@ -29,85 +30,79 @@ class LegacyVisualAssetContractTest {
     );
 
     @Test
-    void manifestPinsTheHistoricalSnapshotAndEveryBakedOutput() throws IOException {
+    void manifestPinsHistoricalSnapshotAndEverySourceIsPackagedInItsOriginalFormat() throws IOException {
         JsonObject manifest = readJson(MANIFEST);
         assertEquals(1, manifest.get("schema_version").getAsInt());
         assertEquals("4108ca9bb332d11965c30e0c592b310d0858f251", manifest.get("source_commit").getAsString());
-        assertEquals("bc3937d85016780665a0fad9f4657da90c5e8747a44d379b2510c0d21f99711b",
-                manifest.get("source_tree_sha256").getAsString());
-        assertEquals(".references/nova-1.12", manifest.get("source_repository").getAsString());
-        assertEquals("src/main/resources/assets/magneticraft", manifest.get("output_root").getAsString());
+        assertEquals(
+                "bc3937d85016780665a0fad9f4657da90c5e8747a44d379b2510c0d21f99711b",
+                manifest.get("source_tree_sha256").getAsString()
+        );
 
         Set<String> identifiers = new HashSet<>();
+        Set<String> sources = new HashSet<>();
         for (JsonElement element : manifest.getAsJsonArray("artifacts")) {
             JsonObject artifact = element.getAsJsonObject();
             String identifier = artifact.get("id").getAsString();
+            String source = artifact.get("source").getAsString();
             assertTrue(identifiers.add(identifier), identifier);
             assertTrue(ROLES.contains(artifact.get("role").getAsString()), identifier);
             assertTrue(Set.of("mcx", "gltf").contains(artifact.get("format").getAsString()), identifier);
-
-            int frames = artifact.has("animation_frames")
-                    ? artifact.get("animation_frames").getAsInt()
-                    : 0;
-            if (frames > 0) {
-                assertEquals(LegacyBakedModels.ANIMATION_FRAME_COUNT, frames, identifier);
-                for (int frame = 0; frame < frames; frame++) {
-                    assertBakedModel(identifier + "_frame_" + frame);
-                }
-            } else {
-                assertBakedModel(identifier);
+            assertTrue(Files.isRegularFile(RUNTIME_ASSETS.resolve(source)), source);
+            sources.add(source);
+            if (source.endsWith(".gltf")) {
+                assertTrue(Files.isRegularFile(RUNTIME_ASSETS.resolve(source.replace(".gltf", ".bin"))), source);
             }
         }
         assertEquals(59, identifiers.size(), "历史视觉清单不应被静默缩减");
+        assertEquals(45, sources.size(), "共享源模型应保持去重后的固定数量");
     }
 
     @Test
-    void explicitExclusionsCoverOnlySlopedConveyorsAndUnusedGears() throws IOException {
+    void fullOriginalBlockModelDirectoriesAreRetainedBeyondTheInitialConversionManifest() throws IOException {
         JsonArray exclusions = readJson(MANIFEST).getAsJsonArray("excluded_sources");
         assertEquals(8, exclusions.size());
-        long conveyors = exclusions.asList().stream()
-                .map(JsonElement::getAsJsonObject)
-                .filter(entry -> entry.get("source").getAsString().contains("conveyor_belt_"))
-                .count();
-        long gears = exclusions.asList().stream()
-                .map(JsonElement::getAsJsonObject)
-                .filter(entry -> entry.get("source").getAsString().endsWith("_gear.mcx"))
-                .count();
-        assertEquals(4, conveyors);
-        assertEquals(4, gears);
-        assertTrue(exclusions.asList().stream()
-                .map(JsonElement::getAsJsonObject)
-                .allMatch(entry -> !entry.get("reason").getAsString().isBlank()));
-    }
-
-    @Test
-    void runtimeResourcesContainNoLegacyRuntimeModelFormats() throws IOException {
-        try (Stream<Path> resources = Files.walk(OUTPUT)) {
-            Set<String> forbidden = Set.of(".mcx", ".gltf", ".glb", ".bin");
-            assertFalse(resources.filter(Files::isRegularFile).anyMatch(path -> {
-                String name = path.getFileName().toString().toLowerCase(java.util.Locale.ROOT);
-                return forbidden.stream().anyMatch(name::endsWith);
-            }));
+        for (JsonElement element : exclusions) {
+            String source = element.getAsJsonObject().get("source").getAsString();
+            if (source.startsWith("models/block/")) {
+                assertTrue(Files.isRegularFile(RUNTIME_ASSETS.resolve(source)), source);
+            }
         }
     }
 
-    private static void assertBakedModel(String identifier) throws IOException {
-        Path mesh = OUTPUT.resolve("models/block/legacy/" + identifier + ".obj");
-        Path material = OUTPUT.resolve("models/block/legacy/" + identifier + ".mtl");
-        Path model = OUTPUT.resolve("models/legacy/" + identifier + ".json");
-        assertTrue(Files.isRegularFile(mesh), mesh.toString());
-        assertTrue(Files.isRegularFile(material), material.toString());
-        assertTrue(Files.size(mesh) > 0, mesh.toString());
-        assertTrue(Files.readString(material).contains("Generated by scripts/convert_legacy_models.py"),
-                material.toString());
+    @Test
+    void runtimeResourcesContainMcxGltfAndBuffersButNoUnsupportedGlb() throws IOException {
+        int mcx = 0;
+        int gltf = 0;
+        int gltfBuffers = 0;
+        try (Stream<Path> resources = Files.walk(RUNTIME_ASSETS.resolve("models/block"))) {
+            for (Path path : resources.filter(Files::isRegularFile).toList()) {
+                String name = path.getFileName().toString().toLowerCase(Locale.ROOT);
+                assertFalse(name.endsWith(".glb"), path.toString());
+                mcx += name.endsWith(".mcx") ? 1 : 0;
+                gltf += name.endsWith(".gltf") ? 1 : 0;
+                gltfBuffers += name.endsWith(".bin") ? 1 : 0;
+            }
+        }
+        assertEquals(40, mcx);
+        assertEquals(21, gltf);
+        assertEquals(20, gltfBuffers);
+    }
 
-        JsonObject json = readJson(model);
-        assertEquals("forge:obj", json.get("loader").getAsString(), model.toString());
-        assertEquals("magneticraft:models/block/legacy/" + identifier + ".obj",
-                json.get("model").getAsString(), model.toString());
-        assertEquals("magneticraft:models/block/legacy/" + identifier + ".mtl",
-                json.get("mtl_override").getAsString(), model.toString());
-        assertTrue(json.get("flip_v").getAsBoolean(), model.toString());
+    @Test
+    void generatedStaticModelsUseTheRuntimeSceneLoader() throws IOException {
+        assertRuntimeModel("battery_box", "magneticraft:models/block/mcx/battery.mcx");
+        assertRuntimeModel("electric_engine", "magneticraft:models/block/gltf/electric_engine.gltf");
+        assertRuntimeModel("pneumatic_tube", "magneticraft:models/block/gltf/pneumatic_tube.gltf");
+        assertRuntimeModel("computer", "magneticraft:models/block/mcx/computer.mcx");
+    }
+
+    private static void assertRuntimeModel(String name, String source) throws IOException {
+        Path path = Path.of("src/generated/resources/assets/magneticraft/models/block/" + name + ".json");
+        JsonObject model = readJson(path);
+        assertEquals("magneticraft:legacy_scene", model.get("loader").getAsString(), path.toString());
+        assertEquals(source, model.get("model").getAsString(), path.toString());
+        assertTrue(model.has("display"), path.toString());
     }
 
     private static JsonObject readJson(Path path) throws IOException {

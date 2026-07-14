@@ -18,11 +18,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/wireless_energy_receiver.obj",
-  "mtl_override": "magneticraft:models/block/legacy/wireless_energy_receiver.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/energy_receiver.gltf",
   "textures": {
     "particle": "magneticraft:block/legacy/electric_connectors/energy_receiver"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

@@ -1,6 +1,11 @@
 {
   "sources": [
     {
+      "type": "minecraft:directory",
+      "prefix": "blocks/",
+      "source": "blocks"
+    },
+    {
       "type": "minecraft:single",
       "resource": "magneticraft:fluid/steam_still"
     },

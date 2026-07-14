@@ -13,11 +13,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/battery_box.obj",
-  "mtl_override": "magneticraft:models/block/legacy/battery_box.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/battery.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/electric_machines/battery"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

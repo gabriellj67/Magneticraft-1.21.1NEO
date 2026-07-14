@@ -13,11 +13,18 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/electric_engine_body.obj",
-  "mtl_override": "magneticraft:models/block/legacy/electric_engine_body.mtl",
+  "exclude_subtrees": [
+    "Group 18",
+    "piston"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/electric_engine.gltf",
   "textures": {
     "particle": "magneticraft:block/legacy/electric_machines/electric_engine"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

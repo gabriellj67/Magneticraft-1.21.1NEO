@@ -18,11 +18,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/wind_turbine_full.obj",
-  "mtl_override": "magneticraft:models/block/legacy/wind_turbine_full.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/wind_turbine.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/electric_machines/wind_turbine"
-  }
+  },
+  "translation": [
+    0.0,
+    -5.0,
+    0.0
+  ]
 }

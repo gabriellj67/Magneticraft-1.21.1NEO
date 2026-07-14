@@ -13,11 +13,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/electric_furnace.obj",
-  "mtl_override": "magneticraft:models/block/legacy/electric_furnace.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/electric_furnace.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/electric_machines/electric_furnace"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

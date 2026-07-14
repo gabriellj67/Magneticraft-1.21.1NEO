@@ -18,11 +18,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/tesla_tower.obj",
-  "mtl_override": "magneticraft:models/block/legacy/tesla_tower.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/tesla_tower.gltf",
   "textures": {
     "particle": "magneticraft:block/legacy/electric_connectors/tesla_tower"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

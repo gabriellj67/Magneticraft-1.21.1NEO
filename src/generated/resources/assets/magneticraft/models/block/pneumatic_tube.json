@@ -13,11 +13,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/pneumatic_tube.obj",
-  "mtl_override": "magneticraft:models/block/legacy/pneumatic_tube.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/pneumatic_tube.gltf",
   "textures": {
     "particle": "magneticraft:block/legacy/machines/pneumatic_tube"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

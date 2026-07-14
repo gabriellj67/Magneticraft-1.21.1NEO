@@ -18,11 +18,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/conveyor_belt.obj",
-  "mtl_override": "magneticraft:models/block/legacy/conveyor_belt.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/conveyor_belt.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/machines/conveyor_belt"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

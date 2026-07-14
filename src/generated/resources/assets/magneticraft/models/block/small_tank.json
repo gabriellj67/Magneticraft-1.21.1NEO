@@ -13,11 +13,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/small_tank.obj",
-  "mtl_override": "magneticraft:models/block/legacy/small_tank.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/small_tank.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/fluid_machines/small_tank"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

@@ -1,6 +1,8 @@
 package committee.nova.mods.magneticraft.data;
 
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.client.model.ModelSceneSelection;
+import committee.nova.mods.magneticraft.client.model.ModelTransform;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlock;
@@ -30,6 +32,8 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.client.model.generators.loaders.ObjModelBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
+import java.util.Set;
+
 /**
  * Generates solid-block models plus invisible fluid-block state models.
  */
@@ -49,18 +53,20 @@ final class ModBlockStateProvider extends BlockStateProvider {
         }
 
         Block crushingTable = ModMachineBlocks.CRUSHING_TABLE.get();
-        ModelFile crushingModel = legacyObjModel(
+        ModelFile crushingModel = mcxModel(
                 "crushing_table",
                 "crushing_table",
-                modLoc("block/legacy/machines/crushing_table_side")
+                modLoc("block/legacy/machines/crushing_table_side"),
+                ModelSceneSelection.ALL
         );
         simpleBlockWithItem(crushingTable, crushingModel);
 
         Block battery = ModMachineBlocks.BATTERY.get();
-        ModelFile batteryModel = legacyObjModel(
+        ModelFile batteryModel = mcxModel(
                 "battery_box",
-                "battery_box",
-                modLoc("block/legacy/electric_machines/battery")
+                "battery",
+                modLoc("block/legacy/electric_machines/battery"),
+                ModelSceneSelection.ALL
         );
         horizontalBlock(battery, batteryModel);
         simpleBlockItem(battery, batteryModel);
@@ -73,10 +79,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         Block electricFurnace = ModMachineBlocks.ELECTRIC_FURNACE.get();
-        ModelFile furnaceOff = legacyObjModel(
+        ModelFile furnaceOff = mcxModel(
                 "electric_furnace",
                 "electric_furnace",
-                modLoc("block/legacy/electric_machines/electric_furnace")
+                modLoc("block/legacy/electric_machines/electric_furnace"),
+                ModelSceneSelection.ALL
         );
         ModelFile furnaceOn = furnaceOff;
         horizontalBlock(
@@ -117,10 +124,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
         simpleBlockWithItem(
                 ModMachineBlocks.TUBE_LIGHT.get(),
-                legacyObjModel(
+                mcxModel(
                         "tube_light",
                         "tube_light",
-                        modLoc("block/legacy/decoration/tube_light")
+                        modLoc("block/legacy/decoration/tube_light"),
+                        ModelSceneSelection.ALL
                 )
         );
 
@@ -133,19 +141,21 @@ final class ModBlockStateProvider extends BlockStateProvider {
         legacyConduitBlock(ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(), "pneumatic_restriction_tube");
 
         Block heatSink = ModNetworkBlocks.HEAT_SINK.get();
-        ModelFile heatSinkModel = legacyObjModel(
+        ModelFile heatSinkModel = mcxModel(
                 "heat_sink",
                 "heat_sink",
-                modLoc("block/legacy/machines/heat_sink")
+                modLoc("block/legacy/machines/heat_sink"),
+                ModelSceneSelection.ALL
         );
         downFacingBlock(heatSink, heatSinkModel);
         simpleBlockItem(heatSink, heatSinkModel);
 
         Block conveyor = ModNetworkBlocks.CONVEYOR_BELT.get();
-        ModelFile conveyorModel = legacyObjModel(
+        ModelFile conveyorModel = mcxModel(
                 "conveyor_belt",
                 "conveyor_belt",
-                modLoc("block/legacy/machines/conveyor_belt")
+                modLoc("block/legacy/machines/conveyor_belt"),
+                ModelSceneSelection.ALL
         );
         horizontalBlock(conveyor, conveyorModel);
         simpleBlockItem(conveyor, conveyorModel);
@@ -196,19 +206,26 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         Block computer = ModComputerContent.COMPUTER.get();
-        ModelFile computerModel = legacyObjModel(
+        ModelFile computerModel = mcxModel(
                 "computer",
-                "computer_body",
-                modLoc("block/legacy/computers/computer1")
+                "computer",
+                modLoc("block/legacy/computers/computer1"),
+                new ModelSceneSelection(Set.of(), Set.of(), Set.of("screen"), Set.of())
         );
         horizontalBlock(computer, computerModel);
         simpleBlockItem(computer, computerModel);
 
         Block miningRobot = ModComputerContent.MINING_ROBOT.get();
-        ModelFile miningRobotModel = legacyObjModel(
+        ModelFile miningRobotModel = mcxModel(
                 "mining_robot",
-                "mining_robot_body",
-                modLoc("block/legacy/computers/mining_robot")
+                "mining_robot",
+                modLoc("block/legacy/computers/mining_robot"),
+                new ModelSceneSelection(
+                        Set.of(),
+                        Set.of(),
+                        Set.of("prop1", "prop2", "drill1", "drill2", "drill3", "drill4", "drill5"),
+                        Set.of()
+                )
         );
         horizontalBlock(miningRobot, miningRobotModel);
         simpleBlockItem(miningRobot, miningRobotModel);
@@ -222,23 +239,29 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private ModelFile historicalSingleBlockModel(SingleBlockMachineDefinition definition) {
         return switch (definition) {
-            case COMBUSTION_CHAMBER -> legacyObjModel(
-                    definition.id(), "combustion_chamber", modLoc("block/legacy/machines/combustion_gen_top")
+            case COMBUSTION_CHAMBER -> mcxModel(
+                    definition.id(), "combustion_chamber", modLoc("block/legacy/machines/combustion_gen_top"),
+                    ModelSceneSelection.ALL
             );
-            case STEAM_BOILER -> legacyObjModel(
-                    definition.id(), "steam_boiler", modLoc("block/legacy/machines/boiler")
+            case STEAM_BOILER -> mcxModel(
+                    definition.id(), "steam_boiler", modLoc("block/legacy/machines/boiler"),
+                    ModelSceneSelection.ALL
             );
-            case SMALL_TANK -> legacyObjModel(
-                    definition.id(), "small_tank", modLoc("block/legacy/fluid_machines/small_tank")
+            case SMALL_TANK -> mcxModel(
+                    definition.id(), "small_tank", modLoc("block/legacy/fluid_machines/small_tank"),
+                    ModelSceneSelection.ALL
             );
-            case GASIFICATION_UNIT -> legacyObjModel(
-                    definition.id(), "gasification_unit", modLoc("block/legacy/machines/gasification_unit")
+            case GASIFICATION_UNIT -> mcxModel(
+                    definition.id(), "gasification_unit", modLoc("block/legacy/machines/gasification_unit"),
+                    ModelSceneSelection.ALL
             );
-            case INSERTER -> legacyObjModel(
-                    definition.id(), "inserter_body", modLoc("block/legacy/machines/inserter")
+            case INSERTER -> gltfModel(
+                    definition.id(), "inserter", modLoc("block/legacy/machines/inserter"),
+                    new ModelSceneSelection(Set.of("Base1", "Base2"), Set.of(), Set.of(), Set.of())
             );
-            case ELECTRIC_ENGINE -> legacyObjModel(
-                    definition.id(), "electric_engine_body", modLoc("block/legacy/electric_machines/electric_engine")
+            case ELECTRIC_ENGINE -> gltfModel(
+                    definition.id(), "electric_engine", modLoc("block/legacy/electric_machines/electric_engine"),
+                    new ModelSceneSelection(Set.of(), Set.of(), Set.of(), Set.of("Group 18", "piston"))
             );
             default -> null;
         };
@@ -258,18 +281,20 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void legacyConduitBlock(Block block, String artifactName) {
-        ModelFile model = legacyObjModel(
-                artifactName,
-                artifactName,
-                switch (artifactName) {
+        ResourceLocation particle = switch (artifactName) {
                     case "electric_cable" -> modLoc("block/legacy/electric_connectors/electric_cable");
                     case "insulated_heat_pipe" -> modLoc("block/legacy/fluid_machines/insulated_heat_pipe");
                     case "iron_fluid_pipe" -> modLoc("block/legacy/fluid_machines/iron_pipe");
                     case "pneumatic_tube", "pneumatic_restriction_tube" ->
                             modLoc("block/legacy/machines/pneumatic_tube");
                     default -> throw new IllegalArgumentException("Unknown historical conduit: " + artifactName);
-                }
-        );
+                };
+        ModelFile model = switch (artifactName) {
+            case "pneumatic_tube", "pneumatic_restriction_tube" ->
+                    gltfModel(artifactName, artifactName, particle, ModelSceneSelection.ALL);
+            case "iron_fluid_pipe" -> mcxModel(artifactName, "iron_pipe", particle, ModelSceneSelection.ALL);
+            default -> mcxModel(artifactName, artifactName, particle, ModelSceneSelection.ALL);
+        };
         simpleBlockWithItem(block, model);
     }
 
@@ -345,23 +370,32 @@ final class ModBlockStateProvider extends BlockStateProvider {
     private void registerLongDistanceElectricModels() {
         historicalDirectionalBlock(
                 ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
-                "electric_connector",
-                modLoc("block/legacy/electric_connectors/connector")
+                mcxModel(
+                        "electric_connector",
+                        "connector",
+                        modLoc("block/legacy/electric_connectors/connector"),
+                        ModelSceneSelection.ALL
+                )
         );
         historicalDirectionalBlock(
                 ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(),
-                "wireless_energy_receiver",
-                modLoc("block/legacy/electric_connectors/energy_receiver")
+                gltfModel(
+                        "wireless_energy_receiver",
+                        "energy_receiver",
+                        modLoc("block/legacy/electric_connectors/energy_receiver"),
+                        ModelSceneSelection.ALL
+                )
         );
 
         poleModels(ModNetworkBlocks.ELECTRIC_POLE.get(), "electric_pole");
         poleModels(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), "electric_pole_transformer");
 
         Block teslaTower = ModNetworkBlocks.TESLA_TOWER.get();
-        ModelFile teslaBottom = legacyObjModel(
+        ModelFile teslaBottom = gltfModel(
                 "tesla_tower_bottom",
                 "tesla_tower",
-                modLoc("block/legacy/electric_connectors/tesla_tower")
+                modLoc("block/legacy/electric_connectors/tesla_tower"),
+                ModelSceneSelection.ALL
         );
         ModelFile teslaEmpty = emptyModel("tesla_tower_member", modLoc("block/legacy/electric_connectors/tesla_tower"));
         getVariantBuilder(teslaTower).forAllStates(state -> {
@@ -374,28 +408,32 @@ final class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockItem(teslaTower, teslaBottom);
 
         Block windTurbine = ModNetworkBlocks.WIND_TURBINE.get();
-        ModelFile turbineModel = legacyObjModel(
+        ModelFile turbineModel = legacySceneModel(
                 "wind_turbine",
-                "wind_turbine_hub",
-                modLoc("block/legacy/electric_machines/wind_turbine")
+                "mcx",
+                "wind_turbine",
+                modLoc("block/legacy/electric_machines/wind_turbine"),
+                new ModelSceneSelection(Set.of("Shape2"), Set.of(), Set.of(), Set.of()),
+                new ModelTransform(0.0F, -5.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F)
         );
         horizontalBlock(windTurbine, state -> turbineModel);
         simpleBlockItem(
                 windTurbine,
-                legacyObjModel(
+                legacySceneModel(
                         "wind_turbine_inventory",
-                        "wind_turbine_full",
-                        modLoc("block/legacy/electric_machines/wind_turbine")
+                        "mcx",
+                        "wind_turbine",
+                        modLoc("block/legacy/electric_machines/wind_turbine"),
+                        ModelSceneSelection.ALL,
+                        new ModelTransform(0.0F, -5.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F)
                 )
         );
     }
 
     private void historicalDirectionalBlock(
             Block block,
-            String name,
-            ResourceLocation particleTexture
+            ModelFile model
     ) {
-        ModelFile model = legacyObjModel(name, name, particleTexture);
         directionalBlock(block, model);
         simpleBlockItem(block, model);
     }
@@ -426,7 +464,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
     private void poleModels(Block block, String name) {
         ResourceLocation particle = modLoc("block/legacy/electric_connectors/" + name);
         ModelFile empty = emptyModel(name + "_world", particle);
-        ModelFile inventory = legacyObjModel(name + "_inventory", name, particle);
+        ModelFile inventory = mcxModel(name + "_inventory", name, particle, ModelSceneSelection.ALL);
         getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(empty)
                 .build());
@@ -449,8 +487,76 @@ final class ModBlockStateProvider extends BlockStateProvider {
         return withObjInventoryTransform(model, modelLocation);
     }
 
+    private ModelFile mcxModel(
+            String generatedName,
+            String sourceName,
+            ResourceLocation particleTexture,
+            ModelSceneSelection selection
+    ) {
+        return legacySceneModel(
+                generatedName,
+                "mcx",
+                sourceName,
+                particleTexture,
+                selection,
+                ModelTransform.IDENTITY
+        );
+    }
+
+    private ModelFile gltfModel(
+            String generatedName,
+            String sourceName,
+            ResourceLocation particleTexture,
+            ModelSceneSelection selection
+    ) {
+        return legacySceneModel(
+                generatedName,
+                "gltf",
+                sourceName,
+                particleTexture,
+                selection,
+                ModelTransform.IDENTITY
+        );
+    }
+
+    private ModelFile legacySceneModel(
+            String generatedName,
+            String format,
+            String sourceName,
+            ResourceLocation particleTexture,
+            ModelSceneSelection selection,
+            ModelTransform sourceTransform
+    ) {
+        ResourceLocation source = modLoc("models/block/" + format + "/" + sourceName + "." + format);
+        BlockModelBuilder model = models().getBuilder(generatedName)
+                .texture("particle", particleTexture)
+                .customLoader(LegacySceneModelBuilder::begin)
+                .model(source)
+                .includeNodes(selection.includeNodes().toArray(String[]::new))
+                .includeSubtrees(selection.includeSubtrees().toArray(String[]::new))
+                .excludeNodes(selection.excludeNodes().toArray(String[]::new))
+                .excludeSubtrees(selection.excludeSubtrees().toArray(String[]::new))
+                .translation(
+                        sourceTransform.translationX(),
+                        sourceTransform.translationY(),
+                        sourceTransform.translationZ()
+                )
+                .end();
+        ObjInventoryTransform transform = LegacyInventoryTransform.load(
+                existingFileHelper,
+                source,
+                selection,
+                sourceTransform
+        );
+        return withInventoryTransform(model, transform);
+    }
+
     private ModelFile withObjInventoryTransform(BlockModelBuilder model, ResourceLocation modelLocation) {
         ObjInventoryTransform transform = ObjInventoryTransform.load(existingFileHelper, modelLocation);
+        return withInventoryTransform(model, transform);
+    }
+
+    private ModelFile withInventoryTransform(BlockModelBuilder model, ObjInventoryTransform transform) {
         model.transforms()
                 .transform(ItemDisplayContext.GUI)
                 .rotation(ObjInventoryTransform.GUI_ROTATION_X, ObjInventoryTransform.GUI_ROTATION_Y, 0.0F)

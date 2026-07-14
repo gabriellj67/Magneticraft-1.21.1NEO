@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.data;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
+import net.minecraft.client.renderer.texture.atlas.sources.DirectoryLister;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -19,6 +20,7 @@ final class ModSpriteSourceProvider extends SpriteSourceProvider {
 
     @Override
     protected void addSources() {
+        atlas(BLOCKS_ATLAS).addSource(new DirectoryLister("blocks", "blocks/"));
         for (FluidDefinition definition : FluidDefinition.values()) {
             atlas(BLOCKS_ATLAS)
                     .addSource(single("fluid/" + definition.id() + "_still"))

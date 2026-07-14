@@ -18,11 +18,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/electric_connector.obj",
-  "mtl_override": "magneticraft:models/block/legacy/electric_connector.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/connector.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/electric_connectors/connector"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

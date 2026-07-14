@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.client;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.client.guide.GuideRepository;
+import committee.nova.mods.magneticraft.client.model.LegacyModelLoader;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
@@ -59,7 +60,13 @@ public final class ClientSetup {
     }
 
     @SubscribeEvent
+    public static void onRegisterGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
+        event.register("legacy_scene", LegacyModelLoader.INSTANCE);
+    }
+
+    @SubscribeEvent
     public static void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener(LegacyModelLoader.INSTANCE);
         event.registerReloadListener(GuideRepository.INSTANCE);
     }
 }

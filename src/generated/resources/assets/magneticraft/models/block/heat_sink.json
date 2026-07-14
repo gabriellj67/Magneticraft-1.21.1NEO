@@ -18,11 +18,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/heat_sink.obj",
-  "mtl_override": "magneticraft:models/block/legacy/heat_sink.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/heat_sink.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/machines/heat_sink"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

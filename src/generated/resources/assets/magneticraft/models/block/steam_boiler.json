@@ -13,11 +13,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/steam_boiler.obj",
-  "mtl_override": "magneticraft:models/block/legacy/steam_boiler.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/steam_boiler.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/machines/boiler"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

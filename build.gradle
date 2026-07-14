@@ -321,6 +321,9 @@ def verifyReleaseArtifact = tasks.register("verifyReleaseArtifact") {
                 "META-INF/mods.toml",
                 "assets/magneticraft/lang/en_us.json",
                 "assets/magneticraft/lang/zh_cn.json",
+                "assets/magneticraft/models/block/mcx/battery.mcx",
+                "assets/magneticraft/models/block/gltf/electric_engine.gltf",
+                "assets/magneticraft/models/block/gltf/electric_engine.bin",
                 "assets/magneticraft/models/legacy/wind_turbine_rotor.json",
                 "assets/magneticraft/models/legacy/grinder_moving_frame_0.json"
         ]
@@ -330,7 +333,7 @@ def verifyReleaseArtifact = tasks.register("verifyReleaseArtifact") {
         }
 
         def forbiddenPrefixes = [".references/", ".trellis/", "run/", "build/"]
-        def forbiddenExtensions = [".mcx", ".gltf", ".glb", ".bin"]
+        def forbiddenExtensions = [".glb"]
         def forbiddenEntry = { String entry ->
             forbiddenPrefixes.any(entry::startsWith)
                     || forbiddenExtensions.any { entry.toLowerCase(Locale.ROOT).endsWith(it) }

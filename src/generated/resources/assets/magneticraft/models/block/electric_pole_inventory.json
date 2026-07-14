@@ -18,11 +18,14 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/electric_pole.obj",
-  "mtl_override": "magneticraft:models/block/legacy/electric_pole.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/electric_pole.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/electric_connectors/electric_pole"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

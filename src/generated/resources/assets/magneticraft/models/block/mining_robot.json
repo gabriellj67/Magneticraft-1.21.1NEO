@@ -13,11 +13,23 @@
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/mining_robot_body.obj",
-  "mtl_override": "magneticraft:models/block/legacy/mining_robot_body.mtl",
+  "exclude_nodes": [
+    "drill5",
+    "drill4",
+    "drill3",
+    "prop2",
+    "prop1",
+    "drill2",
+    "drill1"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/mining_robot.mcx",
   "textures": {
     "particle": "magneticraft:block/legacy/computers/mining_robot"
-  }
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }
