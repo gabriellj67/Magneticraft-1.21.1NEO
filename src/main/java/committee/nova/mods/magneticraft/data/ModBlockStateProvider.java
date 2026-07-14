@@ -29,7 +29,6 @@ import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.client.model.generators.loaders.ObjModelBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.Set;
@@ -56,7 +55,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile crushingModel = mcxModel(
                 "crushing_table",
                 "crushing_table",
-                modLoc("block/legacy/machines/crushing_table_side"),
+                modLoc("blocks/machines/crushing_table_side"),
                 ModelSceneSelection.ALL
         );
         simpleBlockWithItem(crushingTable, crushingModel);
@@ -65,7 +64,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile batteryModel = mcxModel(
                 "battery_box",
                 "battery",
-                modLoc("block/legacy/electric_machines/battery"),
+                modLoc("blocks/electric_machines/battery"),
                 ModelSceneSelection.ALL
         );
         horizontalBlock(battery, batteryModel);
@@ -82,7 +81,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile furnaceOff = mcxModel(
                 "electric_furnace",
                 "electric_furnace",
-                modLoc("block/legacy/electric_machines/electric_furnace"),
+                modLoc("blocks/electric_machines/electric_furnace"),
                 ModelSceneSelection.ALL
         );
         ModelFile furnaceOn = furnaceOff;
@@ -127,7 +126,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 mcxModel(
                         "tube_light",
                         "tube_light",
-                        modLoc("block/legacy/decoration/tube_light"),
+                        modLoc("blocks/decoration/tube_light"),
                         ModelSceneSelection.ALL
                 )
         );
@@ -144,7 +143,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile heatSinkModel = mcxModel(
                 "heat_sink",
                 "heat_sink",
-                modLoc("block/legacy/machines/heat_sink"),
+                modLoc("blocks/machines/heat_sink"),
                 ModelSceneSelection.ALL
         );
         downFacingBlock(heatSink, heatSinkModel);
@@ -154,7 +153,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile conveyorModel = mcxModel(
                 "conveyor_belt",
                 "conveyor_belt",
-                modLoc("block/legacy/machines/conveyor_belt"),
+                modLoc("blocks/machines/conveyor_belt"),
                 ModelSceneSelection.ALL
         );
         horizontalBlock(conveyor, conveyorModel);
@@ -188,6 +187,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 ModAdvancedBlocks.PUMPJACK_DRILL.get(),
                 models().cubeAll("pumpjack_drill", mcLoc("block/copper_block"))
         );
+        simpleBlock(
+                ModAdvancedBlocks.MULTIBLOCK_GAP.get(),
+                emptyModel("multiblock_gap", mcLoc("block/iron_block"))
+        );
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
@@ -209,7 +212,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile computerModel = mcxModel(
                 "computer",
                 "computer",
-                modLoc("block/legacy/computers/computer1"),
+                modLoc("blocks/computers/computer1"),
                 new ModelSceneSelection(Set.of(), Set.of(), Set.of("screen"), Set.of())
         );
         horizontalBlock(computer, computerModel);
@@ -219,7 +222,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile miningRobotModel = mcxModel(
                 "mining_robot",
                 "mining_robot",
-                modLoc("block/legacy/computers/mining_robot"),
+                modLoc("blocks/computers/mining_robot"),
                 new ModelSceneSelection(
                         Set.of(),
                         Set.of(),
@@ -240,27 +243,27 @@ final class ModBlockStateProvider extends BlockStateProvider {
     private ModelFile historicalSingleBlockModel(SingleBlockMachineDefinition definition) {
         return switch (definition) {
             case COMBUSTION_CHAMBER -> mcxModel(
-                    definition.id(), "combustion_chamber", modLoc("block/legacy/machines/combustion_gen_top"),
+                    definition.id(), "combustion_chamber", modLoc("blocks/machines/combustion_gen_top"),
                     ModelSceneSelection.ALL
             );
             case STEAM_BOILER -> mcxModel(
-                    definition.id(), "steam_boiler", modLoc("block/legacy/machines/boiler"),
+                    definition.id(), "steam_boiler", modLoc("blocks/machines/boiler"),
                     ModelSceneSelection.ALL
             );
             case SMALL_TANK -> mcxModel(
-                    definition.id(), "small_tank", modLoc("block/legacy/fluid_machines/small_tank"),
+                    definition.id(), "small_tank", modLoc("blocks/fluid_machines/small_tank"),
                     ModelSceneSelection.ALL
             );
             case GASIFICATION_UNIT -> mcxModel(
-                    definition.id(), "gasification_unit", modLoc("block/legacy/machines/gasification_unit"),
+                    definition.id(), "gasification_unit", modLoc("blocks/machines/gasification_unit"),
                     ModelSceneSelection.ALL
             );
             case INSERTER -> gltfModel(
-                    definition.id(), "inserter", modLoc("block/legacy/machines/inserter"),
+                    definition.id(), "inserter", modLoc("blocks/machines/inserter"),
                     new ModelSceneSelection(Set.of("Base1", "Base2"), Set.of(), Set.of(), Set.of())
             );
             case ELECTRIC_ENGINE -> gltfModel(
-                    definition.id(), "electric_engine", modLoc("block/legacy/electric_machines/electric_engine"),
+                    definition.id(), "electric_engine", modLoc("blocks/electric_machines/electric_engine"),
                     new ModelSceneSelection(Set.of(), Set.of(), Set.of(), Set.of("Group 18", "piston"))
             );
             default -> null;
@@ -282,11 +285,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private void legacyConduitBlock(Block block, String artifactName) {
         ResourceLocation particle = switch (artifactName) {
-                    case "electric_cable" -> modLoc("block/legacy/electric_connectors/electric_cable");
-                    case "insulated_heat_pipe" -> modLoc("block/legacy/fluid_machines/insulated_heat_pipe");
-                    case "iron_fluid_pipe" -> modLoc("block/legacy/fluid_machines/iron_pipe");
+                    case "electric_cable" -> modLoc("blocks/electric_connectors/electric_cable");
+                    case "insulated_heat_pipe" -> modLoc("blocks/fluid_machines/insulated_heat_pipe");
+                    case "iron_fluid_pipe" -> modLoc("blocks/fluid_machines/iron_pipe");
                     case "pneumatic_tube", "pneumatic_restriction_tube" ->
-                            modLoc("block/legacy/machines/pneumatic_tube");
+                            modLoc("blocks/machines/pneumatic_tube");
                     default -> throw new IllegalArgumentException("Unknown historical conduit: " + artifactName);
                 };
         ModelFile model = switch (artifactName) {
@@ -319,33 +322,35 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private ModelFile advancedControllerModel(MultiblockDefinition definition, boolean formed) {
         String generatedName = definition.id() + (formed ? "_formed" : "");
+        if (formed) {
+            return emptyModel(generatedName, mcLoc("block/iron_block"));
+        }
         return switch (definition) {
-            case GRINDER -> objModel(generatedName, "grinder_block", modLoc("block/grinder"));
-            case HYDRAULIC_PRESS -> objModel(
-                    generatedName,
-                    "hydraulic_press_base",
-                    modLoc("block/hydraulic_press")
-            );
-            case SOLAR_PANEL -> objModel(generatedName, "solar_panel_base", modLoc("block/solar_panel"));
-            default -> models().orientable(
-                    generatedName,
-                    formed ? mcLoc("block/copper_block") : mcLoc("block/iron_block"),
-                    formed ? mcLoc("block/redstone_lamp") : mcLoc("block/polished_andesite"),
-                    mcLoc("block/iron_block")
-            );
+            case BIG_COMBUSTION_CHAMBER -> advancedGltfModel(generatedName, "big_combustion_chamber");
+            case BIG_ELECTRIC_FURNACE -> advancedGltfModel(generatedName, "big_electric_furnace");
+            case BIG_STEAM_BOILER -> advancedGltfModel(generatedName, "big_steam_boiler");
+            case CONTAINER -> advancedMcxModel(generatedName, "container");
+            case GRINDER -> advancedGltfModel(generatedName, "grinder");
+            case HYDRAULIC_PRESS -> advancedGltfModel(generatedName, "hydraulic_press");
+            case OIL_HEATER -> advancedMcxModel(generatedName, "oil_heater");
+            case PUMPJACK -> advancedMcxModel(generatedName, "pumpjack");
+            case REFINERY -> advancedMcxModel(generatedName, "refinery");
+            case SHELVING_UNIT -> advancedMcxModel(generatedName, "shelving_unit");
+            case SIEVE -> advancedGltfModel(generatedName, "sieve");
+            case SOLAR_MIRROR -> advancedMcxModel(generatedName, "solar_mirror");
+            case SOLAR_PANEL -> advancedMcxModel(generatedName, "solar_panel");
+            case SOLAR_TOWER -> advancedMcxModel(generatedName, "solar_tower");
+            case STEAM_ENGINE -> advancedGltfModel(generatedName, "steam_engine");
+            case STEAM_TURBINE -> advancedGltfModel(generatedName, "steam_turbine");
         };
     }
 
-    private ModelFile objModel(String generatedName, String sourceName, ResourceLocation particleTexture) {
-        ResourceLocation modelLocation = modLoc("models/block/" + sourceName + ".obj");
-        BlockModelBuilder model = models().getBuilder(generatedName)
-                .texture("particle", particleTexture)
-                .customLoader(ObjModelBuilder::begin)
-                .modelLocation(modelLocation)
-                .flipV(true)
-                .overrideMaterialLibrary(modLoc("models/block/" + sourceName + ".mtl"))
-                .end();
-        return withObjInventoryTransform(model, modelLocation);
+    private ModelFile advancedMcxModel(String generatedName, String sourceName) {
+        return mcxModel(generatedName, sourceName, mcLoc("block/iron_block"), ModelSceneSelection.ALL);
+    }
+
+    private ModelFile advancedGltfModel(String generatedName, String sourceName) {
+        return gltfModel(generatedName, sourceName, mcLoc("block/iron_block"), ModelSceneSelection.ALL);
     }
 
     private void conduitBlock(Block block, String name, ResourceLocation texture) {
@@ -373,7 +378,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 mcxModel(
                         "electric_connector",
                         "connector",
-                        modLoc("block/legacy/electric_connectors/connector"),
+                        modLoc("blocks/electric_connectors/connector"),
                         ModelSceneSelection.ALL
                 )
         );
@@ -382,7 +387,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 gltfModel(
                         "wireless_energy_receiver",
                         "energy_receiver",
-                        modLoc("block/legacy/electric_connectors/energy_receiver"),
+                        modLoc("blocks/electric_connectors/energy_receiver"),
                         ModelSceneSelection.ALL
                 )
         );
@@ -394,10 +399,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile teslaBottom = gltfModel(
                 "tesla_tower_bottom",
                 "tesla_tower",
-                modLoc("block/legacy/electric_connectors/tesla_tower"),
+                modLoc("blocks/electric_connectors/tesla_tower"),
                 ModelSceneSelection.ALL
         );
-        ModelFile teslaEmpty = emptyModel("tesla_tower_member", modLoc("block/legacy/electric_connectors/tesla_tower"));
+        ModelFile teslaEmpty = emptyModel("tesla_tower_member", modLoc("blocks/electric_connectors/tesla_tower"));
         getVariantBuilder(teslaTower).forAllStates(state -> {
             TeslaTowerPart part = state.getValue(TeslaTowerBlock.PART);
             return ConfiguredModel.builder().modelFile(switch (part) {
@@ -412,7 +417,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 "wind_turbine",
                 "mcx",
                 "wind_turbine",
-                modLoc("block/legacy/electric_machines/wind_turbine"),
+                modLoc("blocks/electric_machines/wind_turbine"),
                 new ModelSceneSelection(Set.of("Shape2"), Set.of(), Set.of(), Set.of()),
                 new ModelTransform(0.0F, -5.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F)
         );
@@ -423,7 +428,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                         "wind_turbine_inventory",
                         "mcx",
                         "wind_turbine",
-                        modLoc("block/legacy/electric_machines/wind_turbine"),
+                        modLoc("blocks/electric_machines/wind_turbine"),
                         ModelSceneSelection.ALL,
                         new ModelTransform(0.0F, -5.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F)
                 )
@@ -462,7 +467,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void poleModels(Block block, String name) {
-        ResourceLocation particle = modLoc("block/legacy/electric_connectors/" + name);
+        ResourceLocation particle = modLoc("blocks/electric_connectors/" + name);
         ModelFile empty = emptyModel(name + "_world", particle);
         ModelFile inventory = mcxModel(name + "_inventory", name, particle, ModelSceneSelection.ALL);
         getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
@@ -473,18 +478,6 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private ModelFile emptyModel(String name, ResourceLocation particleTexture) {
         return models().getBuilder(name).texture("particle", particleTexture);
-    }
-
-    private ModelFile legacyObjModel(String generatedName, String artifactName, ResourceLocation particleTexture) {
-        ResourceLocation modelLocation = modLoc("models/block/legacy/" + artifactName + ".obj");
-        BlockModelBuilder model = models().getBuilder(generatedName)
-                .texture("particle", particleTexture)
-                .customLoader(ObjModelBuilder::begin)
-                .modelLocation(modelLocation)
-                .flipV(true)
-                .overrideMaterialLibrary(modLoc("models/block/legacy/" + artifactName + ".mtl"))
-                .end();
-        return withObjInventoryTransform(model, modelLocation);
     }
 
     private ModelFile mcxModel(
@@ -542,7 +535,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                         sourceTransform.translationZ()
                 )
                 .end();
-        ObjInventoryTransform transform = LegacyInventoryTransform.load(
+        InventoryModelTransform transform = LegacyInventoryTransform.load(
                 existingFileHelper,
                 source,
                 selection,
@@ -551,15 +544,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
         return withInventoryTransform(model, transform);
     }
 
-    private ModelFile withObjInventoryTransform(BlockModelBuilder model, ResourceLocation modelLocation) {
-        ObjInventoryTransform transform = ObjInventoryTransform.load(existingFileHelper, modelLocation);
-        return withInventoryTransform(model, transform);
-    }
-
-    private ModelFile withInventoryTransform(BlockModelBuilder model, ObjInventoryTransform transform) {
+    private ModelFile withInventoryTransform(BlockModelBuilder model, InventoryModelTransform transform) {
         model.transforms()
                 .transform(ItemDisplayContext.GUI)
-                .rotation(ObjInventoryTransform.GUI_ROTATION_X, ObjInventoryTransform.GUI_ROTATION_Y, 0.0F)
+                .rotation(InventoryModelTransform.GUI_ROTATION_X, InventoryModelTransform.GUI_ROTATION_Y, 0.0F)
                 .translation(transform.translationX(), transform.translationY(), transform.translationZ())
                 .scale(transform.scale())
                 .end()

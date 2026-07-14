@@ -3,29 +3,25 @@ package committee.nova.mods.magneticraft.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.client.RenderTypeHelper;
-import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fluids.FluidStack;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 /**
- * Stateless primitives shared by machine block-entity renderers. Static machine
- * bodies remain baked models; this class only draws server-synchronized moving
- * parts and fluid surfaces.
+ * Stateless primitives shared by machine block-entity renderers.
  */
 final class MachineRenderHelper {
     private MachineRenderHelper() {
@@ -39,6 +35,26 @@ final class MachineRenderHelper {
             default -> poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F - facing.toYRot()));
         }
         poseStack.translate(-0.5D, -0.5D, -0.5D);
+    }
+
+    static void rotateAroundCenterY(PoseStack poseStack, float degrees) {
+        poseStack.translate(0.5D, 0.5D, 0.5D);
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(degrees));
+        poseStack.translate(-0.5D, -0.5D, -0.5D);
+    }
+
+    static int surroundingLight(Level level, BlockPos position, int fallback) {
+        if (level == null) {
+            return fallback;
+        }
+        int blockLight = LightTexture.block(fallback);
+        int skyLight = LightTexture.sky(fallback);
+        for (Direction direction : Direction.values()) {
+            int neighborLight = LevelRenderer.getLightColor(level, position.relative(direction));
+            blockLight = Math.max(blockLight, LightTexture.block(neighborLight));
+            skyLight = Math.max(skyLight, LightTexture.sky(neighborLight));
+        }
+        return LightTexture.pack(blockLight, skyLight);
     }
 
     static void renderItem(
@@ -59,37 +75,6 @@ final class MachineRenderHelper {
                 Minecraft.getInstance().level,
                 seed
         );
-    }
-
-    static void renderBakedModel(
-            ResourceLocation modelId,
-            PoseStack poseStack,
-            MultiBufferSource buffers,
-            int packedLight,
-            int packedOverlay
-    ) {
-        Minecraft minecraft = Minecraft.getInstance();
-        BakedModel model = minecraft.getModelManager().getModel(modelId);
-        if (model == minecraft.getModelManager().getMissingModel()) {
-            return;
-        }
-        var state = net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
-        for (RenderType renderType : model.getRenderTypes(state, RandomSource.create(42L), ModelData.EMPTY)) {
-            VertexConsumer consumer = buffers.getBuffer(RenderTypeHelper.getEntityRenderType(renderType, false));
-            minecraft.getBlockRenderer().getModelRenderer().renderModel(
-                    poseStack.last(),
-                    consumer,
-                    state,
-                    model,
-                    1.0F,
-                    1.0F,
-                    1.0F,
-                    packedLight,
-                    packedOverlay,
-                    ModelData.EMPTY,
-                    renderType
-            );
-        }
     }
 
     static void renderFluidSurface(

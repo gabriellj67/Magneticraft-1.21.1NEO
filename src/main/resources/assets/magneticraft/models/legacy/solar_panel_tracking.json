@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/solar_panel_tracking.obj",
-  "mtl_override": "magneticraft:models/block/legacy/solar_panel_tracking.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/multiblocks/solar_panel"
-  }
-}

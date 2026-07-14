@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/feeding_trough.obj",
-  "mtl_override": "magneticraft:models/block/legacy/feeding_trough.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/machines/feeding_trough"
-  }
-}

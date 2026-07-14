@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/tube_light.obj",
-  "mtl_override": "magneticraft:models/block/legacy/tube_light.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/decoration/tube_light"
-  }
-}

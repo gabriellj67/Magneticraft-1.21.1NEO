@@ -1,8 +1,31 @@
 {
-  "parent": "minecraft:block/orientable",
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.15625,
+        0.15625,
+        0.15625
+      ],
+      "translation": [
+        -0.8838833,
+        -0.64059,
+        -1.3904657
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/big_combustion_chamber.gltf",
   "textures": {
-    "front": "minecraft:block/polished_andesite",
-    "side": "minecraft:block/iron_block",
-    "top": "minecraft:block/iron_block"
-  }
+    "particle": "minecraft:block/iron_block"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

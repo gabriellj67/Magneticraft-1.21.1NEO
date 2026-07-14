@@ -35,8 +35,10 @@ public final class MiningRobotRenderer implements BlockEntityRenderer<MiningRobo
         poseStack.translate(0.5D, 0.34375D, 0.5D);
         poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
         poseStack.translate(-0.5D, -0.34375D, -0.5D);
-        MachineRenderHelper.renderBakedModel(
-                LegacyBakedModels.MINING_ROBOT_PROPELLERS,
+        LegacySceneModels.render(
+                LegacySceneModels.MINING_ROBOT_PROPELLERS,
+                null,
+                0.0D,
                 poseStack,
                 buffers,
                 packedLight,
@@ -48,8 +50,10 @@ public final class MiningRobotRenderer implements BlockEntityRenderer<MiningRobo
         poseStack.translate(0.5D, 0.5D, 0.8125D);
         poseStack.mulPose(Axis.ZP.rotationDegrees(moving ? rotation * 1.5F : 0.0F));
         poseStack.translate(-0.5D, -0.5D, -0.8125D);
-        MachineRenderHelper.renderBakedModel(
-                LegacyBakedModels.MINING_ROBOT_DRILL,
+        LegacySceneModels.render(
+                LegacySceneModels.MINING_ROBOT_DRILL,
+                null,
+                0.0D,
                 poseStack,
                 buffers,
                 packedLight,

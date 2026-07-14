@@ -21,7 +21,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/energy_receiver.gltf",
   "textures": {
-    "particle": "magneticraft:block/legacy/electric_connectors/energy_receiver"
+    "particle": "magneticraft:blocks/electric_connectors/energy_receiver"
   },
   "translation": [
     0.0,

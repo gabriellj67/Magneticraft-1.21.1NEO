@@ -8,9 +8,6 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.List;
 
 /**
  * Dynamic controller-local overlays for formed multiblocks. The renderer never
@@ -35,14 +32,19 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
         if (!machine.formed()) {
             return;
         }
+        int sceneLight = MachineRenderHelper.surroundingLight(
+                machine.getLevel(),
+                machine.getBlockPos(),
+                packedLight
+        );
         poseStack.pushPose();
         MachineRenderHelper.faceMachine(poseStack, machine.facing());
-        renderMovingPart(machine, partialTick, poseStack, buffers, packedLight, packedOverlay);
-        renderFluids(machine, poseStack, buffers, packedLight);
+        renderScene(machine, partialTick, poseStack, buffers, sceneLight, packedOverlay);
+        renderFluids(machine, poseStack, buffers, sceneLight);
         poseStack.popPose();
     }
 
-    private static void renderMovingPart(
+    private static void renderScene(
             AdvancedMultiblockBlockEntity machine,
             float partialTick,
             PoseStack poseStack,
@@ -52,111 +54,102 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
     ) {
         long gameTime = machine.getLevel() == null ? 0L : machine.getLevel().getGameTime();
         double animationTick = gameTime % 1_048_576L + partialTick;
+        double animationSeconds = machine.working() ? animationTick / 20.0D : 0.0D;
         MultiblockDefinition definition = machine.definition();
         switch (definition) {
-            case GRINDER -> renderFrame(
-                    LegacyBakedModels.GRINDER,
-                    gameTime,
-                    partialTick,
-                    1.0F,
-                    machine.working(),
-                    0.0D,
-                    0.0D,
-                    -1.0D,
-                    poseStack,
-                    buffers,
-                    packedLight,
-                    packedOverlay
-            );
-            case SIEVE -> {
-                poseStack.pushPose();
-                poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
-                renderFrame(
-                        LegacyBakedModels.SIEVE,
-                        gameTime,
-                        partialTick,
-                        0.75F,
-                        machine.working(),
+            case BIG_COMBUSTION_CHAMBER -> {
+                translateAndRender(LegacySceneModels.BIG_COMBUSTION_CHAMBER_BODY, null, 0.0D,
+                        0.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay);
+                translateAndRender(
+                        machine.working()
+                                ? LegacySceneModels.BIG_COMBUSTION_CHAMBER_FIRE_ON
+                                : LegacySceneModels.BIG_COMBUSTION_CHAMBER_FIRE_OFF,
+                        null,
                         0.0D,
                         0.0D,
-                        2.0D,
+                        0.0D,
+                        -1.0D,
                         poseStack,
                         buffers,
                         packedLight,
                         packedOverlay
                 );
+            }
+            case BIG_ELECTRIC_FURNACE -> translateAndRender(
+                    LegacySceneModels.BIG_ELECTRIC_FURNACE, null, 0.0D,
+                    0.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
+            );
+            case BIG_STEAM_BOILER -> renderPart(
+                    LegacySceneModels.BIG_STEAM_BOILER, null, 0.0D,
+                    poseStack, buffers, packedLight, packedOverlay
+            );
+            case CONTAINER -> translateAndRender(
+                    LegacySceneModels.SHIPPING_CONTAINER, null, 0.0D,
+                    0.0D, 0.0D, -3.0D, poseStack, buffers, packedLight, packedOverlay
+            );
+            case GRINDER -> translateAndRender(
+                    LegacySceneModels.GRINDER, machine.working() ? "animation" : null, animationSeconds,
+                    0.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
+            );
+            case SIEVE -> {
+                poseStack.pushPose();
+                MachineRenderHelper.rotateAroundCenterY(poseStack, 180.0F);
+                translateAndRender(
+                        LegacySceneModels.SIEVE, machine.working() ? "animation" : null, animationSeconds,
+                        0.0D, 0.0D, 2.0D, poseStack, buffers, packedLight, packedOverlay
+                );
                 poseStack.popPose();
             }
-            case HYDRAULIC_PRESS -> renderFrame(
-                    LegacyBakedModels.HYDRAULIC_PRESS,
-                    gameTime,
-                    partialTick,
-                    1.5F,
-                    machine.working(),
-                    0.0D,
-                    0.0D,
-                    -1.0D,
-                    poseStack,
-                    buffers,
-                    packedLight,
-                    packedOverlay
+            case HYDRAULIC_PRESS -> translateAndRender(
+                    LegacySceneModels.HYDRAULIC_PRESS, machine.working() ? "animation" : null, animationSeconds,
+                    0.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
             );
-            case STEAM_ENGINE -> renderFrame(
-                    LegacyBakedModels.STEAM_ENGINE,
-                    gameTime,
-                    partialTick,
-                    1.0F,
-                    machine.working(),
-                    -1.0D,
-                    0.0D,
-                    -1.0D,
-                    poseStack,
-                    buffers,
-                    packedLight,
-                    packedOverlay
+            case OIL_HEATER -> translateAndRender(
+                    LegacySceneModels.OIL_HEATER, null, 0.0D,
+                    -1.0D, 0.0D, 0.0D, poseStack, buffers, packedLight, packedOverlay
             );
-            case STEAM_TURBINE -> renderSteamTurbine(
-                    animationTick,
-                    machine.working(),
-                    poseStack,
-                    buffers,
-                    packedLight,
-                    packedOverlay
+            case PUMPJACK -> {
+                poseStack.pushPose();
+                MachineRenderHelper.rotateAroundCenterY(poseStack, 90.0F);
+                translateAndRender(
+                        LegacySceneModels.PUMPJACK, null, 0.0D,
+                        1.0D, 0.0D, 0.0D, poseStack, buffers, packedLight, packedOverlay
+                );
+                poseStack.popPose();
+            }
+            case REFINERY -> translateAndRender(
+                    LegacySceneModels.REFINERY, null, 0.0D,
+                    0.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
             );
+            case SHELVING_UNIT -> renderShelvingUnit(machine, poseStack, buffers, packedLight, packedOverlay);
+            case SOLAR_MIRROR -> renderSolarMirror(machine, gameTime, poseStack, buffers, packedLight, packedOverlay);
             case SOLAR_PANEL -> renderSolarPanel(
-                    machine,
-                    gameTime,
-                    poseStack,
-                    buffers,
-                    packedLight,
-                    packedOverlay
+                    machine, gameTime, poseStack, buffers, packedLight, packedOverlay
             );
-            case BIG_COMBUSTION_CHAMBER -> {
-                if (machine.working()) {
-                    poseStack.pushPose();
-                    poseStack.translate(0.0D, 0.0D, -1.0D);
-                    MachineRenderHelper.renderBakedModel(
-                            LegacyBakedModels.BIG_COMBUSTION_CHAMBER_FIRE,
-                            poseStack,
-                            buffers,
-                            packedLight,
-                            packedOverlay
-                    );
-                    poseStack.popPose();
-                }
+            case SOLAR_TOWER -> translateAndRender(
+                    LegacySceneModels.SOLAR_TOWER, null, 0.0D,
+                    0.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
+            );
+            case STEAM_ENGINE -> {
+                translateAndRender(
+                        LegacySceneModels.STEAM_ENGINE_BODY, machine.working() ? "animation" : null, animationSeconds,
+                        -1.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
+                );
+                translateAndRender(
+                        LegacySceneModels.STEAM_ENGINE_LID, null, 0.0D,
+                        -1.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
+                );
             }
-            default -> {
-                // The released pumpjack, refinery and remaining definitions used static historical models.
-            }
+            case STEAM_TURBINE -> renderSteamTurbine(
+                    animationTick, machine.working(), poseStack, buffers, packedLight, packedOverlay
+            );
         }
     }
 
-    private static void renderFrame(
-            List<ResourceLocation> frames,
-            long gameTime,
-            float partialTick,
-            float ticksPerFrame,
-            boolean working,
+    private static void translateAndRender(
+            LegacySceneModels.Part part,
+            String animation,
+            double animationSeconds,
             double x,
             double y,
             double z,
@@ -167,14 +160,28 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
     ) {
         poseStack.pushPose();
         poseStack.translate(x, y, z);
-        MachineRenderHelper.renderBakedModel(
-                LegacyBakedModels.frame(frames, gameTime, partialTick, ticksPerFrame, working),
+        renderPart(part, animation, animationSeconds, poseStack, buffers, packedLight, packedOverlay);
+        poseStack.popPose();
+    }
+
+    private static void renderPart(
+            LegacySceneModels.Part part,
+            String animation,
+            double animationSeconds,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        LegacySceneModels.render(
+                part,
+                animation,
+                animationSeconds,
                 poseStack,
                 buffers,
                 packedLight,
                 packedOverlay
         );
-        poseStack.popPose();
     }
 
     private static void renderSteamTurbine(
@@ -187,13 +194,25 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
     ) {
         float angle = working ? (float) (animationTick * 18.0D % 360.0D) : 0.0F;
         poseStack.pushPose();
-        poseStack.translate(0.5D, 1.5D, 0.0D);
+        poseStack.translate(-1.0D, 0.0D, 0.0D);
+        renderPart(
+                LegacySceneModels.STEAM_TURBINE_BODY,
+                null,
+                0.0D,
+                poseStack,
+                buffers,
+                packedLight,
+                packedOverlay
+        );
+        poseStack.translate(1.5D, 1.5D, 0.0D);
         for (int blade = 0; blade < STEAM_TURBINE_BLADE_COUNT; blade++) {
             poseStack.pushPose();
             poseStack.mulPose(Axis.ZP.rotationDegrees(angle + blade * 360.0F / STEAM_TURBINE_BLADE_COUNT));
             poseStack.translate(-1.5D, -1.5D, 0.0D);
-            MachineRenderHelper.renderBakedModel(
-                    LegacyBakedModels.STEAM_TURBINE_BLADE,
+            renderPart(
+                    LegacySceneModels.STEAM_TURBINE_BLADE,
+                    null,
+                    0.0D,
                     poseStack,
                     buffers,
                     packedLight,
@@ -218,17 +237,126 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
             angle = -angle;
         }
         poseStack.pushPose();
-        poseStack.translate(0.5D, 0.6875D, 0.5D);
-        poseStack.mulPose(Axis.XP.rotationDegrees(angle));
-        poseStack.translate(-0.5D, -0.6875D, -0.5D);
-        MachineRenderHelper.renderBakedModel(
-                LegacyBakedModels.SOLAR_PANEL_TRACKING,
-                poseStack,
-                buffers,
-                packedLight,
-                packedOverlay
-        );
+        MachineRenderHelper.rotateAroundCenterY(poseStack, -90.0F);
+        poseStack.translate(-1.0D, 0.0D, 0.0D);
+        renderPart(LegacySceneModels.SOLAR_PANEL_BODY, null, 0.0D,
+                poseStack, buffers, packedLight, packedOverlay);
+        if (machine.facing().getAxis() == net.minecraft.core.Direction.Axis.X) {
+            renderTiltedPanel(LegacySceneModels.SOLAR_PANEL_X_LEFT, angle,
+                    1.5D, 11.0D / 16.0D, 0.5D, Axis.ZP,
+                    poseStack, buffers, packedLight, packedOverlay);
+            renderTiltedPanel(LegacySceneModels.SOLAR_PANEL_X_MIDDLE, angle,
+                    0.5D, 11.0D / 16.0D, 0.5D, Axis.ZP,
+                    poseStack, buffers, packedLight, packedOverlay);
+            renderTiltedPanel(LegacySceneModels.SOLAR_PANEL_X_RIGHT, angle,
+                    -0.5D, 11.0D / 16.0D, 0.5D, Axis.ZP,
+                    poseStack, buffers, packedLight, packedOverlay);
+        } else {
+            renderTiltedPanel(LegacySceneModels.SOLAR_PANEL_Z_FRONT, angle,
+                    0.0D, 0.75D, 1.25D, Axis.XP,
+                    poseStack, buffers, packedLight, packedOverlay);
+            renderTiltedPanel(LegacySceneModels.SOLAR_PANEL_Z_BACK, angle,
+                    0.0D, 0.75D, -0.25D, Axis.XP,
+                    poseStack, buffers, packedLight, packedOverlay);
+        }
         poseStack.popPose();
+    }
+
+    private static void renderTiltedPanel(
+            LegacySceneModels.Part part,
+            float angle,
+            double pivotX,
+            double pivotY,
+            double pivotZ,
+            Axis axis,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        poseStack.pushPose();
+        poseStack.translate(pivotX, pivotY, pivotZ);
+        poseStack.mulPose(axis.rotationDegrees(angle));
+        poseStack.translate(-pivotX, -pivotY + 0.1D, -pivotZ);
+        renderPart(part, null, 0.0D, poseStack, buffers, packedLight, packedOverlay);
+        poseStack.popPose();
+    }
+
+    private static void renderShelvingUnit(
+            AdvancedMultiblockBlockEntity machine,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        renderPart(LegacySceneModels.SHELVING_UNIT_BODY, null, 0.0D,
+                poseStack, buffers, packedLight, packedOverlay);
+        int installed = machine.shelvingStorage() == null
+                ? 0
+                : Math.min(24, machine.shelvingStorage().installedChests());
+        for (int crate = 1; crate <= installed; crate++) {
+            renderPart(LegacySceneModels.shelvingCrate(crate), null, 0.0D,
+                    poseStack, buffers, packedLight, packedOverlay);
+        }
+    }
+
+    private static void renderSolarMirror(
+            AdvancedMultiblockBlockEntity machine,
+            long gameTime,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        poseStack.pushPose();
+        MachineRenderHelper.rotateAroundCenterY(poseStack, 180.0F);
+        poseStack.translate(0.0D, 0.0D, 1.0D);
+        renderPart(LegacySceneModels.SOLAR_MIRROR_BODY, null, 0.0D,
+                poseStack, buffers, packedLight, packedOverlay);
+        poseStack.popPose();
+
+        float[] angles = solarMirrorAngles(machine, gameTime);
+        poseStack.pushPose();
+        poseStack.translate(0.5D, 1.8125D, 0.5D);
+        poseStack.mulPose(Axis.YP.rotationDegrees(angles[0]));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(angles[1]));
+        poseStack.translate(-0.5D, -1.8125D, -0.5D);
+        renderPart(LegacySceneModels.SOLAR_MIRROR_MOVING, null, 0.0D,
+                poseStack, buffers, packedLight, packedOverlay);
+        poseStack.popPose();
+    }
+
+    private static float[] solarMirrorAngles(AdvancedMultiblockBlockEntity machine, long gameTime) {
+        if (machine.solarTowerPosition() == null) {
+            return new float[]{0.0F, 0.0F};
+        }
+        double dx = machine.solarTowerPosition().getX() - machine.getBlockPos().getX();
+        double dy = machine.solarTowerPosition().getY() - machine.getBlockPos().getY();
+        double dz = machine.solarTowerPosition().getZ() - machine.getBlockPos().getZ();
+        double targetLength = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (targetLength < 1.0E-6D) {
+            return new float[]{0.0F, 0.0F};
+        }
+        dx /= targetLength;
+        dy /= targetLength;
+        dz /= targetLength;
+        double sunAngle = ((gameTime % 24_000L) / 12_000.0D) * Math.PI - Math.PI / 2.0D;
+        double sunX = -Math.sin(sunAngle);
+        double sunY = Math.cos(sunAngle);
+        double normalX = sunX + dx;
+        double normalY = sunY + dy;
+        double normalZ = dz;
+        double normalLength = Math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ);
+        if (normalLength < 1.0E-6D) {
+            return new float[]{0.0F, 0.0F};
+        }
+        normalX /= normalLength;
+        normalY /= normalLength;
+        normalZ /= normalLength;
+        double planeLength = Math.sqrt(normalX * normalX + normalZ * normalZ);
+        float yaw = (float) Math.toDegrees(Math.atan2(normalX, normalZ) + Math.PI / 2.0D);
+        float pitch = (float) Math.toDegrees(Math.atan2(planeLength, normalY));
+        return new float[]{yaw, pitch > 90.0F ? 0.0F : pitch};
     }
 
     private static void renderFluids(

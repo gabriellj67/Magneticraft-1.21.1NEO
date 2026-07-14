@@ -29,6 +29,11 @@ public record ModelTransform(
         if (!Float.isFinite(lengthSquared) || lengthSquared == 0.0F) {
             throw new IllegalArgumentException("Rotation quaternion must be finite and non-zero");
         }
+        float inverseLength = 1.0F / (float) Math.sqrt(lengthSquared);
+        rotationX *= inverseLength;
+        rotationY *= inverseLength;
+        rotationZ *= inverseLength;
+        rotationW *= inverseLength;
         if (!allFinite(translationX, translationY, translationZ, scaleX, scaleY, scaleZ)) {
             throw new IllegalArgumentException("Transform components must be finite");
         }

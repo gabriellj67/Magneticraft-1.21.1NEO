@@ -324,8 +324,9 @@ def verifyReleaseArtifact = tasks.register("verifyReleaseArtifact") {
                 "assets/magneticraft/models/block/mcx/battery.mcx",
                 "assets/magneticraft/models/block/gltf/electric_engine.gltf",
                 "assets/magneticraft/models/block/gltf/electric_engine.bin",
-                "assets/magneticraft/models/legacy/wind_turbine_rotor.json",
-                "assets/magneticraft/models/legacy/grinder_moving_frame_0.json"
+                "assets/magneticraft/models/block/mcx/solar_panel.mcx",
+                "assets/magneticraft/models/block/gltf/grinder.gltf",
+                "assets/magneticraft/models/block/gltf/grinder.bin"
         ]
         def missingEntries = requiredBinaryEntries.findAll { !binaryEntries.contains(it) }
         if (!missingEntries.isEmpty()) {

@@ -21,7 +21,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/crushing_table.mcx",
   "textures": {
-    "particle": "magneticraft:block/legacy/machines/crushing_table_side"
+    "particle": "magneticraft:blocks/machines/crushing_table_side"
   },
   "translation": [
     0.0,

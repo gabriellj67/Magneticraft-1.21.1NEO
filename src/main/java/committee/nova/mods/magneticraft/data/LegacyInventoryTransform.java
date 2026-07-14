@@ -19,7 +19,7 @@ final class LegacyInventoryTransform {
     private LegacyInventoryTransform() {
     }
 
-    static ObjInventoryTransform load(
+    static InventoryModelTransform load(
             ExistingFileHelper existingFileHelper,
             ResourceLocation source,
             ModelSceneSelection selection,
@@ -43,7 +43,7 @@ final class LegacyInventoryTransform {
                 throw new IllegalArgumentException("Unsupported legacy model source " + source);
             }
             ModelSceneBounds bounds = ModelSceneBounds.calculate(scene, selection.select(scene), sourceTransform);
-            return ObjInventoryTransform.fromBounds(
+            return InventoryModelTransform.fromBounds(
                     bounds.minX(),
                     bounds.minY(),
                     bounds.minZ(),

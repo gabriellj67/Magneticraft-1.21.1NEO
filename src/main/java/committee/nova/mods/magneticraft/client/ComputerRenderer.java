@@ -27,8 +27,10 @@ public final class ComputerRenderer implements BlockEntityRenderer<ComputerBlock
                 poseStack,
                 computer.getBlockState().getValue(ProgrammableBlock.FACING)
         );
-        MachineRenderHelper.renderBakedModel(
-                LegacyBakedModels.COMPUTER_SCREEN,
+        LegacySceneModels.render(
+                LegacySceneModels.COMPUTER_SCREEN,
+                null,
+                0.0D,
                 poseStack,
                 buffers,
                 computer.visuallyRunning() ? LightTexture.FULL_BRIGHT : packedLight,

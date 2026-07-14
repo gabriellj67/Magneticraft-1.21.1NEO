@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/sluice_box.obj",
-  "mtl_override": "magneticraft:models/block/legacy/sluice_box.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/machines/table_sieve_side"
-  }
-}

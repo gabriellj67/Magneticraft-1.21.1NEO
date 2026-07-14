@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/solar_mirror.obj",
-  "mtl_override": "magneticraft:models/block/legacy/solar_mirror.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/multiblocks/solar_mirror"
-  }
-}

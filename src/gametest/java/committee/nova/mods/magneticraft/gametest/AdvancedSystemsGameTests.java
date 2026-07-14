@@ -378,7 +378,11 @@ public final class AdvancedSystemsGameTests {
 
         AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
         helper.assertTrue(controller.tryForm(player), "Steam turbine did not form");
-        helper.assertTrue(memberTank.claimedByMultiblock(), "Visible turbine tank was not claimed");
+        helper.assertTrue(memberTank.claimedByMultiblock(), "Turbine tank was not claimed before projection");
+        helper.assertTrue(
+                helper.getBlockState(tankPosition).is(ModAdvancedBlocks.MULTIBLOCK_GAP.get()),
+                "Formed turbine did not replace its tank with an invisible gap"
+        );
         helper.assertFalse(cachedMemberCapability.isPresent(), "Cached member-tank capability stayed live");
         helper.assertFalse(memberTank.getCapability(ForgeCapabilities.FLUID_HANDLER).isPresent(),
                 "Formed turbine exposed the independent member tank");
@@ -395,7 +399,15 @@ public final class AdvancedSystemsGameTests {
         helper.assertTrue(cachedControllerCapability.isPresent(), "Formed turbine controller lost steam input");
         controller.unform();
         helper.assertFalse(cachedControllerCapability.isPresent(), "Cached controller capability survived unform");
-        IFluidHandler restored = memberTank.getCapability(ForgeCapabilities.FLUID_HANDLER)
+        helper.assertTrue(
+                helper.getBlockState(tankPosition).is(
+                        ModMachineBlocks.machine(SingleBlockMachineDefinition.SMALL_TANK).get()
+                ),
+                "Unformed turbine did not restore its member tank"
+        );
+        SingleBlockMachineBlockEntity restoredTank =
+                (SingleBlockMachineBlockEntity) helper.getBlockEntity(tankPosition);
+        IFluidHandler restored = restoredTank.getCapability(ForgeCapabilities.FLUID_HANDLER)
                 .orElseThrow(AssertionError::new);
         helper.assertTrue(restored.getFluidInTank(0).getAmount() == 500,
                 "Member tank contents changed while claimed");

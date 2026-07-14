@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.machine.singleblock;
 
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -181,7 +182,9 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
 
     @Override
     public void onRemove(BlockState oldState, Level level, BlockPos position, BlockState newState, boolean moving) {
-        if (!oldState.is(newState.getBlock()) && oldState.getValue(MASTER)) {
+        if (!oldState.is(newState.getBlock())
+                && !newState.is(ModAdvancedBlocks.MULTIBLOCK_GAP.get())
+                && oldState.getValue(MASTER)) {
             BlockEntity blockEntity = level.getBlockEntity(position);
             if (blockEntity instanceof SingleBlockMachineBlockEntity machine) {
                 machine.dropContents(level);

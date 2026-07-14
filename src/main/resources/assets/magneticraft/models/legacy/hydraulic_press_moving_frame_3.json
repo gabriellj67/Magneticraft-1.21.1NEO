@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/hydraulic_press_moving_frame_3.obj",
-  "mtl_override": "magneticraft:models/block/legacy/hydraulic_press_moving_frame_3.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/multiblocks/hydraulic_press"
-  }
-}

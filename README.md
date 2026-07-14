@@ -16,8 +16,8 @@ from `0.2.0`; later releases may only add forward migrations.
 The repository is the `1.0.0` complete gameplay migration. Every published
 Nova 1.12 gameplay entry is assigned exactly once in the migration matrix, and
 every retained or rebuilt entry has executable evidence. Historical MCX/glTF
-assets are converted offline to baked OBJ models; bounded renderers restore
-moving parts without shipping the legacy runtime loader. The frozen registry
+assets are packaged unchanged and rendered through a reload-aware scene loader;
+bounded block-entity renderers sample named parts and continuous animations. The frozen registry
 and persistence contracts remain unchanged from `0.2.0`.
 
 JEI, CraftTweaker, Tinkers' Construct and Jade support is optional.
@@ -68,7 +68,6 @@ runtime dependency.
 ## Build and verification
 
 ```powershell
-py -3.14 scripts/convert_legacy_models.py --check
 ./gradlew.bat compileJava test --no-daemon
 ./gradlew.bat runData --no-daemon
 ./gradlew.bat runGameTestServer --no-daemon
@@ -77,11 +76,11 @@ py -3.14 scripts/convert_legacy_models.py --check
 ./gradlew.bat runClient --no-daemon
 ```
 
-Generated data resources are written to `src/generated/resources`; converted
-historical visual resources are owned by the manifest under
-`src/main/resources/assets/magneticraft`. Both are part of the main resource
-source set. The 1.0.0 report records JUnit, GameTest, deterministic conversion,
-datagen, client/server and optional-mod matrix results.
+Generated data resources are written to `src/generated/resources`. Historical
+MCX/glTF sources are packaged unchanged under
+`src/main/resources/assets/magneticraft/models/block` and loaded directly by
+the reload-aware runtime scene loader. The source manifest remains the pinned
+asset catalogue; no offline OBJ conversion step is required.
 
 Optional development runtimes are opt-in and may be combined:
 

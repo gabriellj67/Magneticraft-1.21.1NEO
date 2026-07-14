@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.init;
 
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlock;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlock;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlock;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockItem;
 import net.minecraft.world.item.BlockItem;
@@ -51,6 +52,16 @@ public final class ModAdvancedBlocks {
     public static final RegistryObject<Block> ELECTRIC_MULTIBLOCK_PART = register(
             "electrical_machine_casing",
             () -> new Block(partProperties())
+    );
+    /** Runtime-only invisible replacement for formed structure members. */
+    public static final RegistryObject<Block> MULTIBLOCK_GAP = ModRegistries.BLOCKS.register(
+            "multiblock_gap",
+            () -> new MultiblockGapBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.NONE)
+                    .strength(3.5F, 10.0F)
+                    .sound(SoundType.METAL)
+                    .noOcclusion()
+                    .noLootTable())
     );
     /** Pumpjack-owned drill column. It intentionally has no item, recipe, loot or creative entry. */
     public static final RegistryObject<Block> PUMPJACK_DRILL = ModRegistries.BLOCKS.register(
@@ -134,6 +145,7 @@ public final class ModAdvancedBlocks {
         return BlockBehaviour.Properties.of()
                 .mapColor(MapColor.METAL)
                 .strength(4.0F, 12.0F)
-                .sound(SoundType.METAL);
+                .sound(SoundType.METAL)
+                .noOcclusion();
     }
 }

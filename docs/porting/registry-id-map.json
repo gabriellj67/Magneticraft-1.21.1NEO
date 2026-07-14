@@ -26,8 +26,8 @@
     "exclusion_leaf_sha256": "f6beb52866ea02a788d7c1ba4a2e88ecbac78bcb54c7552183363b8505a19dac",
     "derived_runtime_id_count": 80,
     "derived_runtime_id_sha256": "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451",
-    "supporting_registry_id_count": 117,
-    "supporting_registry_id_sha256": "9fde46a5c715346c6a0cf6141c0da520ef720175975605fc24d1453ec810ffb5",
+    "supporting_registry_id_count": 118,
+    "supporting_registry_id_sha256": "673d29f098fa4cd4f1f86eea5d68496d24841f4279e5f9cb7fc6684beca57063",
     "forbidden_runtime_id_count": 56,
     "forbidden_runtime_id_sha256": "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d"
   },
@@ -939,6 +939,7 @@
   ],
   "supporting_registry_mappings": [
     {"registry": "block", "internal": true, "target_id": "magneticraft:pumpjack_drill", "owner": "magneticraft:pumpjack"},
+    {"registry": "block", "legacy_id": "multiblock_gap", "target_id": "magneticraft:multiblock_gap", "owner": "magneticraft:advanced_multiblocks"},
 
     {"registry": "block_entity_type", "legacy_id": "crushing_table", "target_id": "magneticraft:crushing_table", "owner": "magneticraft:crushing_table"},
     {"registry": "block_entity_type", "legacy_id": "battery", "target_id": "magneticraft:battery_box", "owner": "magneticraft:battery_box"},
@@ -1080,10 +1081,11 @@
     },
     {
       "legacy_id": "multiblock_gap",
-      "disposition": "exclude",
-      "target_registry": "none",
+      "disposition": "rebuild",
+      "target_registry": "block",
+      "target_id": "magneticraft:multiblock_gap",
       "source": ".references/nova-1.12/src/main/kotlin/com/cout970/magneticraft/features/multiblocks/tileentities/Multiblocks.kt#TileMultiblockGap",
-      "evidence": "The internal air placeholder is replaced by controller-owned structure validation and is not registered or obtainable."
+      "evidence": "The non-obtainable invisible block preserves the released formed-structure projection while the controller snapshots and restores member state."
     },
     {
       "legacy_id": "wind_turbine_gap",

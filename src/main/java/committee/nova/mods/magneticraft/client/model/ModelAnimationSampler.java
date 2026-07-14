@@ -45,8 +45,8 @@ public final class ModelAnimationSampler {
     }
 
     static float[] sample(ModelScene.Channel channel, float time) {
-        float[] times = channel.times();
-        float[] values = channel.values();
+        float[] times = channel.timesView();
+        float[] values = channel.valuesView();
         int width = channel.valueWidth();
         if (times.length == 1 || time <= times[0]) {
             return key(values, width, 0);

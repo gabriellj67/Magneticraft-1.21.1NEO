@@ -16,7 +16,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/gasification_unit.mcx",
   "textures": {
-    "particle": "magneticraft:block/legacy/machines/gasification_unit"
+    "particle": "magneticraft:blocks/machines/gasification_unit"
   },
   "translation": [
     0.0,

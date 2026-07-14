@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +36,19 @@ public final class MultiblockMatcher {
                         position.getX() >> 4,
                         position.getZ() >> 4
                 ),
-                (cell, position) -> cell.rule().matches(
-                        level.getBlockState(position),
-                        controllerBlock,
-                        facing
-                )
+                (cell, position) -> {
+                    if (level.getBlockState(position).is(ModAdvancedBlocks.MULTIBLOCK_GAP.get())
+                            && level instanceof ServerLevel serverLevel) {
+                        return controller.equals(
+                                MultiblockMembershipService.controllerAt(serverLevel, position)
+                        );
+                    }
+                    return cell.rule().matches(
+                            level.getBlockState(position),
+                            controllerBlock,
+                            facing
+                    );
+                }
         );
     }
 

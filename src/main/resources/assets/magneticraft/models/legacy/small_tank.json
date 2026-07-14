@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/small_tank.obj",
-  "mtl_override": "magneticraft:models/block/legacy/small_tank.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/fluid_machines/small_tank"
-  }
-}

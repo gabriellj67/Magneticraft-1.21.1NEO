@@ -16,7 +16,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/battery.mcx",
   "textures": {
-    "particle": "magneticraft:block/legacy/electric_machines/battery"
+    "particle": "magneticraft:blocks/electric_machines/battery"
   },
   "translation": [
     0.0,

@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/pumpjack.obj",
-  "mtl_override": "magneticraft:models/block/legacy/pumpjack.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/multiblocks/pumpjack"
-  }
-}

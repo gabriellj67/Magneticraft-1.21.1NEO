@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/combustion_chamber.obj",
-  "mtl_override": "magneticraft:models/block/legacy/combustion_chamber.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/machines/combustion_gen_metal2"
-  }
-}

@@ -19,13 +19,13 @@
     }
   },
   "include_nodes": [
-    "Base1",
-    "Base2"
+    "Base2",
+    "Base1"
   ],
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/inserter.gltf",
   "textures": {
-    "particle": "magneticraft:block/legacy/machines/inserter"
+    "particle": "magneticraft:blocks/machines/inserter"
   },
   "translation": [
     0.0,

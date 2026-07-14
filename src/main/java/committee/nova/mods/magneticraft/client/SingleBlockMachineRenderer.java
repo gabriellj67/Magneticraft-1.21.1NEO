@@ -42,27 +42,19 @@ public final class SingleBlockMachineRenderer implements BlockEntityRenderer<Sin
     ) {
         long gameTime = machine.getLevel() == null ? 0L : machine.getLevel().getGameTime();
         switch (machine.definition()) {
-            case INSERTER -> MachineRenderHelper.renderBakedModel(
-                    LegacyBakedModels.frame(
-                            LegacyBakedModels.INSERTER,
-                            gameTime,
-                            partialTick,
-                            1.5F,
-                            machine.working()
-                    ),
+            case INSERTER -> LegacySceneModels.render(
+                    LegacySceneModels.INSERTER_MOVING,
+                    machine.working() ? "animation0" : null,
+                    animationSeconds(gameTime, partialTick, machine.working()),
                     poseStack,
                     buffers,
                     packedLight,
                     packedOverlay
             );
-            case ELECTRIC_ENGINE -> MachineRenderHelper.renderBakedModel(
-                    LegacyBakedModels.frame(
-                            LegacyBakedModels.ELECTRIC_ENGINE,
-                            gameTime,
-                            partialTick,
-                            1.0F,
-                            machine.working()
-                    ),
+            case ELECTRIC_ENGINE -> LegacySceneModels.render(
+                    LegacySceneModels.ELECTRIC_ENGINE_MOVING,
+                    machine.working() ? "animation" : null,
+                    animationSeconds(gameTime, partialTick, machine.working()),
                     poseStack,
                     buffers,
                     packedLight,
@@ -72,6 +64,13 @@ public final class SingleBlockMachineRenderer implements BlockEntityRenderer<Sin
                 // Static-only definitions intentionally have no BER moving part.
             }
         }
+    }
+
+    private static double animationSeconds(long gameTime, float partialTick, boolean working) {
+        if (!working) {
+            return 0.0D;
+        }
+        return (gameTime + Math.max(0.0F, Math.min(1.0F, partialTick))) / 20.0D;
     }
 
     private static void renderTank(

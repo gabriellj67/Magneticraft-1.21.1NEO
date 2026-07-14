@@ -48,8 +48,8 @@ class GeneratedDataContractTest {
     }
 
     @Test
-    void objBlockItemsHaveBoundedGuiTransforms() throws IOException {
-        int objBlockItems = 0;
+    void customSceneBlockItemsHaveBoundedGuiTransforms() throws IOException {
+        int customSceneBlockItems = 0;
         Path itemModels = ASSETS.resolve("models/item");
         try (Stream<Path> paths = Files.list(itemModels)) {
             for (Path itemPath : paths.filter(Files::isRegularFile).toList()) {
@@ -64,11 +64,12 @@ class GeneratedDataContractTest {
 
                 String blockModelName = parent.substring("magneticraft:block/".length());
                 JsonObject blockModel = readObject(ASSETS.resolve("models/block/" + blockModelName + ".json"));
-                if (!blockModel.has("loader") || !blockModel.get("loader").getAsString().equals("forge:obj")) {
+                if (!blockModel.has("loader")
+                        || !"magneticraft:legacy_scene".equals(blockModel.get("loader").getAsString())) {
                     continue;
                 }
 
-                objBlockItems++;
+                customSceneBlockItems++;
                 assertFalse(blockModel.has("parent"), itemPath + " must not inherit transforms for non-GUI contexts");
                 assertTrue(blockModel.has("display"), itemPath + " must declare GUI display transforms");
                 JsonObject gui = blockModel.getAsJsonObject("display").getAsJsonObject("gui");
@@ -96,7 +97,7 @@ class GeneratedDataContractTest {
                 }
             }
         }
-        assertTrue(objBlockItems > 0, "Expected generated OBJ-backed block items");
+        assertTrue(customSceneBlockItems > 0, "Expected generated custom-scene block items");
         assertTrue(guiScale("wind_turbine_inventory") < 0.1F, "Oversized turbine must fit its item slot");
         assertTrue(guiScale("electric_connector") > 1.0F, "Small connector must remain recognizable");
 
@@ -131,9 +132,12 @@ class GeneratedDataContractTest {
         JsonObject chinese = readObject(ASSETS.resolve("lang/zh_cn.json"));
         JsonObject blockAtlas = readObject(GENERATED.resolve("assets/minecraft/atlases/blocks.json"));
         Set<String> atlasSprites = new HashSet<>();
-        blockAtlas.getAsJsonArray("sources").forEach(source ->
-                atlasSprites.add(source.getAsJsonObject().get("resource").getAsString())
-        );
+        blockAtlas.getAsJsonArray("sources").forEach(source -> {
+            JsonObject sourceObject = source.getAsJsonObject();
+            if (sourceObject.has("resource")) {
+                atlasSprites.add(sourceObject.get("resource").getAsString());
+            }
+        });
         assertEquals(english.keySet(), chinese.keySet(), "Language keys must remain symmetric");
 
         for (BaseBlockDefinition definition : BaseBlockDefinition.values()) {
@@ -257,7 +261,7 @@ class GeneratedDataContractTest {
         )) {
             assertPng(SOURCE_TEXTURES.resolve("block/" + texture + ".png"));
         }
-        assertLegacyObjModel("battery_box", "battery_box");
+        assertLegacySceneModel("battery_box", "mcx", "battery");
         assertItemAssetsAndTranslation("low_voltage_battery", readObject(ASSETS.resolve("lang/en_us.json")));
 
         for (String recipe : Set.of(
@@ -314,7 +318,7 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + block), block);
             assertTrue(chinese.has("block.magneticraft." + block), block);
         }
-        assertLegacyObjModel("heat_sink", "heat_sink");
+        assertLegacySceneModel("heat_sink", "mcx", "heat_sink");
         JsonObject heatSinkVariants = readObject(ASSETS.resolve("blockstates/heat_sink.json"))
                 .getAsJsonObject("variants");
         assertFalse(heatSinkVariants.getAsJsonObject("facing=down").has("x"));
@@ -501,12 +505,37 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + id), id);
             assertTrue(chinese.has("block.magneticraft." + id), id);
         }
-        assertObjModel("grinder", "grinder_block", "grinder");
-        assertObjModel("grinder_formed", "grinder_block", "grinder");
-        assertObjModel("hydraulic_press", "hydraulic_press_base", "hydraulic_press");
-        assertObjModel("hydraulic_press_formed", "hydraulic_press_base", "hydraulic_press");
-        assertObjModel("solar_panel", "solar_panel_base", "solar_panel");
-        assertObjModel("solar_panel_formed", "solar_panel_base", "solar_panel");
+        Map<String, String> advancedMcxModels = Map.of(
+                "shipping_container", "container",
+                "oil_heater", "oil_heater",
+                "pumpjack", "pumpjack",
+                "refinery", "refinery",
+                "shelving_unit", "shelving_unit",
+                "solar_mirror", "solar_mirror",
+                "solar_panel", "solar_panel",
+                "solar_tower", "solar_tower"
+        );
+        Map<String, String> advancedGltfModels = Map.of(
+                "industrial_combustion_chamber", "big_combustion_chamber",
+                "industrial_electric_furnace", "big_electric_furnace",
+                "industrial_steam_boiler", "big_steam_boiler",
+                "grinder", "grinder",
+                "hydraulic_press", "hydraulic_press",
+                "sieve", "sieve",
+                "steam_engine", "steam_engine",
+                "steam_turbine", "steam_turbine"
+        );
+        advancedMcxModels.forEach((generated, source) ->
+                assertLegacySceneModelUnchecked(generated, "mcx", source));
+        advancedGltfModels.forEach((generated, source) ->
+                assertLegacySceneModelUnchecked(generated, "gltf", source));
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            JsonObject formed = readObject(ASSETS.resolve(
+                    "models/block/" + definition.id() + "_formed.json"
+            ));
+            assertFalse(formed.has("loader"), definition.id() + " formed controller must be invisible");
+            assertFalse(formed.has("elements"), definition.id() + " formed controller must be invisible");
+        }
 
         assertFile(ASSETS.resolve("blockstates/oil_deposit.json"));
         assertFile(ASSETS.resolve("models/block/oil_deposit.json"));
@@ -529,7 +558,7 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + block), block);
             assertTrue(chinese.has("block.magneticraft." + block), block);
         }
-        assertLegacyObjModel("computer", "computer_body");
+        assertLegacySceneModel("computer", "mcx", "computer");
         assertFile(ASSETS.resolve("models/item/floppy_disk.json"));
         assertFile(recipe("crafting/floppy_disk"));
         assertTrue(english.has("item.magneticraft.floppy_disk"));
@@ -581,38 +610,26 @@ class GeneratedDataContractTest {
         assertTrue(language.has("item.magneticraft." + id), id);
     }
 
-    private static void assertObjModel(String generatedName, String sourceName, String textureName) throws IOException {
-        assertFile(SOURCE_MODELS.resolve("block/" + sourceName + ".obj"));
-        assertFile(SOURCE_MODELS.resolve("block/" + sourceName + ".mtl"));
-        assertPng(SOURCE_TEXTURES.resolve("block/" + textureName + ".png"));
-
+    private static void assertLegacySceneModel(
+            String generatedName,
+            String format,
+            String sourceName
+    ) throws IOException {
         JsonObject model = readObject(ASSETS.resolve("models/block/" + generatedName + ".json"));
-        assertEquals("forge:obj", model.get("loader").getAsString());
+        assertEquals("magneticraft:legacy_scene", model.get("loader").getAsString());
         assertEquals(
-                "magneticraft:models/block/" + sourceName + ".obj",
+                "magneticraft:models/block/" + format + "/" + sourceName + "." + format,
                 model.get("model").getAsString()
         );
-        assertEquals(
-                "magneticraft:models/block/" + sourceName + ".mtl",
-                model.get("mtl_override").getAsString()
-        );
+        assertFile(SOURCE_MODELS.resolve("block/" + format + "/" + sourceName + "." + format));
     }
 
-    private static void assertLegacyObjModel(String generatedName, String artifactName) throws IOException {
-        Path legacyModels = SOURCE_MODELS.resolve("block/legacy");
-        assertFile(legacyModels.resolve(artifactName + ".obj"));
-        assertFile(legacyModels.resolve(artifactName + ".mtl"));
-
-        JsonObject model = readObject(ASSETS.resolve("models/block/" + generatedName + ".json"));
-        assertEquals("forge:obj", model.get("loader").getAsString());
-        assertEquals(
-                "magneticraft:models/block/legacy/" + artifactName + ".obj",
-                model.get("model").getAsString()
-        );
-        assertEquals(
-                "magneticraft:models/block/legacy/" + artifactName + ".mtl",
-                model.get("mtl_override").getAsString()
-        );
+    private static void assertLegacySceneModelUnchecked(String generatedName, String format, String sourceName) {
+        try {
+            assertLegacySceneModel(generatedName, format, sourceName);
+        } catch (IOException exception) {
+            throw new java.io.UncheckedIOException(exception);
+        }
     }
 
     private static Path recipe(String path) {

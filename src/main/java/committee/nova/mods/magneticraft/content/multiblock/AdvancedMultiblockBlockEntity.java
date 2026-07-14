@@ -16,6 +16,8 @@ import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -60,6 +62,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private static final String BURN_POWER_TAG = "burn_power";
     private static final String SOLAR_TOWER_TAG = "solar_tower";
     private static final String HYDRAULIC_MODE_TAG = "hydraulic_mode";
+    private static final String STRUCTURE_SNAPSHOT_TAG = "structure_snapshot";
 
     private final MultiblockDefinition definition;
     @Nullable
@@ -77,6 +80,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private final HeatNetworkModule heat;
     private final AdvancedMultiblockLogic logic;
     private final ContainerData menuData;
+    private final MultiblockStructureSnapshot structureSnapshot = new MultiblockStructureSnapshot();
     private boolean formed;
     private boolean structureReady;
     private boolean mirrored;
@@ -311,6 +315,15 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             ), false);
             return false;
         }
+        setMemberCapabilities(false);
+        if (!structureSnapshot.captureAndHide(serverLevel, worldPosition, members)) {
+            MultiblockMembershipService.unregister(serverLevel, worldPosition);
+            setMemberCapabilities(true);
+            player.displayClientMessage(Component.translatable(
+                    "message.magneticraft.multiblock_invalid"
+            ), false);
+            return false;
+        }
         setFormed(true);
         player.displayClientMessage(Component.translatable(
                 "message.magneticraft.multiblock_formed",
@@ -320,7 +333,12 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     }
 
     public void unform() {
+        unform(null);
+    }
+
+    private void unform(@Nullable BlockPos brokenMember) {
         if (level instanceof ServerLevel serverLevel) {
+            structureSnapshot.restore(serverLevel, brokenMember);
             MultiblockMembershipService.unregister(serverLevel, worldPosition);
         }
         if (formed) {
@@ -330,7 +348,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
 
     public void onMemberBroken(BlockPos member) {
         if (!member.equals(worldPosition)) {
-            setStructureReady(false);
+            unform(member);
         }
     }
 
@@ -344,6 +362,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         blockEntityTag.putBoolean(MIRRORED_TAG, false);
         blockEntityTag.remove(OWNER_TAG);
         blockEntityTag.remove(SOLAR_TOWER_TAG);
+        blockEntityTag.remove(STRUCTURE_SNAPSHOT_TAG);
         if (definition == MultiblockDefinition.SHELVING_UNIT) {
             CompoundTag modules = blockEntityTag.getCompound(MachineBlockEntity.MODULES_TAG);
             modules.remove(Magneticraft.id("advanced_shelving_inventory").toString());
@@ -512,6 +531,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             tag.putString(ACTIVE_RECIPE_TAG, activeRecipe.toString());
         }
         logic.savePersistentState(tag);
+        if (!structureSnapshot.isEmpty()) {
+            tag.put(STRUCTURE_SNAPSHOT_TAG, structureSnapshot.save());
+        }
     }
 
     @Override
@@ -532,12 +554,17 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 ? ResourceLocation.tryParse(tag.getString(ACTIVE_RECIPE_TAG))
                 : null;
         logic.loadPersistentState(tag);
+        structureSnapshot.load(tag.contains(STRUCTURE_SNAPSHOT_TAG, Tag.TAG_LIST)
+                ? tag.getList(STRUCTURE_SNAPSHOT_TAG, Tag.TAG_COMPOUND)
+                : new ListTag());
         working = false;
     }
 
     @Override
     protected void resetMachineData() {
+        ListTag preservedStructure = structureSnapshot.save();
         super.resetMachineData();
+        structureSnapshot.load(preservedStructure);
         // Formation is world-derived state. Preserve only the controller block's
         // claim, then force a full structure validation before processing resumes.
         formed = getBlockState().getValue(AdvancedMultiblockBlock.FORMED);
@@ -575,7 +602,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         }
         MultiblockValidationResult result = validate();
         if (result.status() == MultiblockValidationResult.Status.MISMATCH) {
-            unform();
+            unform(result.position());
             return;
         }
         if (result.status() == MultiblockValidationResult.Status.UNLOADED) {
@@ -586,6 +613,11 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             if (!canClaimMemberCapabilities()
                     || !MultiblockMembershipService.register(
                     serverLevel, worldPosition, definition, members())) {
+                unform();
+                return;
+            }
+            if (structureSnapshot.isEmpty()
+                    && !structureSnapshot.captureAndHide(serverLevel, worldPosition, members())) {
                 unform();
                 return;
             }
@@ -950,8 +982,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                     worldPosition, cell.offset(), definition.center(), facing(), mirrored
             );
             if (!level.hasChunk(member.getX() >> 4, member.getZ() >> 4)
-                    || !(level.getBlockEntity(member) instanceof SingleBlockMachineBlockEntity blockEntity)
-                    || !blockEntity.canClaimForMultiblock(worldPosition)) {
+                    || (!structureSnapshot.contains(member)
+                    && (!(level.getBlockEntity(member) instanceof SingleBlockMachineBlockEntity blockEntity)
+                    || !blockEntity.canClaimForMultiblock(worldPosition)))) {
                 return false;
             }
         }

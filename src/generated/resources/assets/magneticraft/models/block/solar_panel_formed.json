@@ -1,28 +1,5 @@
 {
-  "display": {
-    "gui": {
-      "rotation": [
-        30,
-        225,
-        0
-      ],
-      "scale": [
-        0.90909094,
-        0.90909094,
-        0.90909094
-      ],
-      "translation": [
-        3.2141225,
-        3.5753002,
-        -1.6471472
-      ]
-    }
-  },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/solar_panel_base.obj",
-  "mtl_override": "magneticraft:models/block/solar_panel_base.mtl",
   "textures": {
-    "particle": "magneticraft:block/solar_panel"
+    "particle": "minecraft:block/iron_block"
   }
 }

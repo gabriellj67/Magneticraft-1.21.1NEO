@@ -21,7 +21,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/electric_pole_transformer.mcx",
   "textures": {
-    "particle": "magneticraft:block/legacy/electric_connectors/electric_pole_transformer"
+    "particle": "magneticraft:blocks/electric_connectors/electric_pole_transformer"
   },
   "translation": [
     0.0,

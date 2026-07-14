@@ -99,9 +99,9 @@ class MigrationMatrixContractTest {
     private static final int DERIVED_RUNTIME_ID_COUNT = 80;
     private static final String DERIVED_RUNTIME_ID_SHA256 =
             "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451";
-    private static final int SUPPORTING_REGISTRY_ID_COUNT = 117;
+    private static final int SUPPORTING_REGISTRY_ID_COUNT = 118;
     private static final String SUPPORTING_REGISTRY_ID_SHA256 =
-            "9fde46a5c715346c6a0cf6141c0da520ef720175975605fc24d1453ec810ffb5";
+            "673d29f098fa4cd4f1f86eea5d68496d24841f4279e5f9cb7fc6684beca57063";
     private static final int FORBIDDEN_RUNTIME_ID_COUNT = 56;
     private static final String FORBIDDEN_RUNTIME_ID_SHA256 =
             "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d";
@@ -920,7 +920,7 @@ class MigrationMatrixContractTest {
         assertTrue(locator.contains("PhysicalNetworkManagerLogisticsTest.java"));
         assertTrue(locator.contains("ReleaseCandidateBudgetContractTest.java"));
         assertTrue(locator.contains("LegacyVisualAssetContractTest.java"));
-        assertTrue(locator.contains("scripts/convert_legacy_models.py"));
+        assertTrue(locator.contains("LegacySourceModelParserContractTest.java"));
         assertTrue(locator.contains("SingleBlockMachineGameTests.java"));
         for (String path : locator.split(";")) {
             assertTrue(Files.isRegularFile(Path.of(path)), "Missing release-candidate evidence: " + path);
@@ -1367,6 +1367,7 @@ class MigrationMatrixContractTest {
         Set<String> currentItems = new HashSet<>(currentBlocks);
         currentItems.remove(namespaced("air_bubble"));
         currentItems.remove(namespaced("pumpjack_drill"));
+        currentItems.remove(namespaced("multiblock_gap"));
         for (FluidDefinition definition : FluidDefinition.values()) {
             currentItems.remove(namespaced(definition.id()));
             currentItems.add(namespaced(definition.id() + "_bucket"));
@@ -1925,7 +1926,7 @@ class MigrationMatrixContractTest {
                 namespaced("refinery")
         ));
         return Map.of(
-                "block", Set.of(namespaced("pumpjack_drill")),
+                "block", Set.of(namespaced("pumpjack_drill"), namespaced("multiblock_gap")),
                 "block_entity_type", Set.copyOf(blockEntityTypes),
                 "menu", Set.copyOf(menus),
                 "recipe_type", Set.copyOf(recipeTypes),

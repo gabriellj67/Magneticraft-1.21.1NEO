@@ -91,6 +91,18 @@ public record ModelScene(
             return Arrays.copyOf(normals, normals.length);
         }
 
+        float[] positionsView() {
+            return positions;
+        }
+
+        float[] textureCoordinatesView() {
+            return textureCoordinates;
+        }
+
+        float[] normalsView() {
+            return normals;
+        }
+
         public int faceCount() {
             return positions.length / 12;
         }
@@ -126,6 +138,14 @@ public record ModelScene(
         @Override
         public float[] values() {
             return Arrays.copyOf(values, values.length);
+        }
+
+        float[] timesView() {
+            return times;
+        }
+
+        float[] valuesView() {
+            return values;
         }
     }
 

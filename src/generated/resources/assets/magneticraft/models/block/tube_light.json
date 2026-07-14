@@ -21,7 +21,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/tube_light.mcx",
   "textures": {
-    "particle": "magneticraft:block/legacy/decoration/tube_light"
+    "particle": "magneticraft:blocks/decoration/tube_light"
   },
   "translation": [
     0.0,

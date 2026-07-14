@@ -7,22 +7,25 @@
         0
       ],
       "scale": [
-        0.625,
-        0.625,
-        0.625
+        0.15625,
+        0.15625,
+        0.15625
       ],
       "translation": [
-        -0.22097082,
-        0.11048545,
-        -0.19136643
+        0,
+        -3.2475953,
+        -1.8749999
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/grinder_block.obj",
-  "mtl_override": "magneticraft:models/block/grinder_block.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/grinder.gltf",
   "textures": {
-    "particle": "magneticraft:block/grinder"
-  }
+    "particle": "minecraft:block/iron_block"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

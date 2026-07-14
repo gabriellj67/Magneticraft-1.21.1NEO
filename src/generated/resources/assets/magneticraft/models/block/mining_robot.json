@@ -14,18 +14,18 @@
     }
   },
   "exclude_nodes": [
-    "drill5",
-    "drill4",
-    "drill3",
-    "prop2",
-    "prop1",
+    "drill1",
     "drill2",
-    "drill1"
+    "prop1",
+    "prop2",
+    "drill3",
+    "drill4",
+    "drill5"
   ],
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/mining_robot.mcx",
   "textures": {
-    "particle": "magneticraft:block/legacy/computers/mining_robot"
+    "particle": "magneticraft:blocks/computers/mining_robot"
   },
   "translation": [
     0.0,

@@ -55,11 +55,6 @@ public final class ClientSetup {
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        LegacyBakedModels.register(event);
-    }
-
-    @SubscribeEvent
     public static void onRegisterGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
         event.register("legacy_scene", LegacyModelLoader.INSTANCE);
     }

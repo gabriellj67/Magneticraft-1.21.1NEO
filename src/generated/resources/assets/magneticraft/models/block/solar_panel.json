@@ -7,22 +7,25 @@
         0
       ],
       "scale": [
-        0.90909094,
-        0.90909094,
-        0.90909094
+        0.21276596,
+        0.21276596,
+        0.21276596
       ],
       "translation": [
-        3.2141225,
-        3.5753002,
-        -1.6471472
+        0.075224146,
+        0.22187279,
+        0.04123698
       ]
     }
   },
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/solar_panel_base.obj",
-  "mtl_override": "magneticraft:models/block/solar_panel_base.mtl",
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/solar_panel.mcx",
   "textures": {
-    "particle": "magneticraft:block/solar_panel"
-  }
+    "particle": "minecraft:block/iron_block"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

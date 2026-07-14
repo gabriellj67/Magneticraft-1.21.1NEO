@@ -16,7 +16,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/small_tank.mcx",
   "textures": {
-    "particle": "magneticraft:block/legacy/fluid_machines/small_tank"
+    "particle": "magneticraft:blocks/fluid_machines/small_tank"
   },
   "translation": [
     0.0,

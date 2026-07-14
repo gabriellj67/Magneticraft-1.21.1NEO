@@ -16,7 +16,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/insulated_heat_pipe.mcx",
   "textures": {
-    "particle": "magneticraft:block/legacy/fluid_machines/insulated_heat_pipe"
+    "particle": "magneticraft:blocks/fluid_machines/insulated_heat_pipe"
   },
   "translation": [
     0.0,

@@ -67,6 +67,7 @@ public final class LegacyModelLoader implements IGeometryLoader<LegacySceneGeome
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
         state = new CacheState(resourceManager, new ConcurrentHashMap<>());
+        LegacySceneRenderer.clearCaches();
     }
 
     private static ModelScene parse(ResourceManager manager, ResourceLocation source) {

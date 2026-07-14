@@ -16,7 +16,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/pneumatic_tube.gltf",
   "textures": {
-    "particle": "magneticraft:block/legacy/machines/pneumatic_tube"
+    "particle": "magneticraft:blocks/machines/pneumatic_tube"
   },
   "translation": [
     0.0,

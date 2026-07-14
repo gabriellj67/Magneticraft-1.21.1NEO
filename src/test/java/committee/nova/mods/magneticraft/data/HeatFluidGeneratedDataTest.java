@@ -37,7 +37,7 @@ class HeatFluidGeneratedDataTest {
 
         assertEquals(4, centerInset("heat_pipe"));
         assertHistoricalModel("insulated_heat_pipe", "insulated_heat_pipe");
-        assertHistoricalModel("iron_fluid_pipe", "iron_fluid_pipe");
+        assertHistoricalModel("iron_fluid_pipe", "iron_pipe");
     }
 
     private static void assertRecipe(String name, int count, String... pattern) throws IOException {
@@ -64,14 +64,10 @@ class HeatFluidGeneratedDataTest {
 
     private static void assertHistoricalModel(String generatedName, String artifactName) throws IOException {
         JsonObject model = read(ASSETS.resolve("models/block/" + generatedName + ".json"));
-        assertEquals("forge:obj", model.get("loader").getAsString());
+        assertEquals("magneticraft:legacy_scene", model.get("loader").getAsString());
         assertEquals(
-                "magneticraft:models/block/legacy/" + artifactName + ".obj",
+                "magneticraft:models/block/mcx/" + artifactName + ".mcx",
                 model.get("model").getAsString()
-        );
-        assertEquals(
-                "magneticraft:models/block/legacy/" + artifactName + ".mtl",
-                model.get("mtl_override").getAsString()
         );
     }
 

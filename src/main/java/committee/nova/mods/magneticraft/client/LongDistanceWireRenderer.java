@@ -64,10 +64,12 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
         poseStack.translate(0.5D, 0.5D, 0.5D);
         poseStack.mulPose(Axis.YP.rotationDegrees(orientation * 45.0F));
         poseStack.translate(-0.5D, -0.5D, -0.5D);
-        MachineRenderHelper.renderBakedModel(
+        LegacySceneModels.render(
                 block.isTransformer()
-                        ? LegacyBakedModels.ELECTRIC_POLE_TRANSFORMER
-                        : LegacyBakedModels.ELECTRIC_POLE,
+                        ? LegacySceneModels.ELECTRIC_POLE_TRANSFORMER
+                        : LegacySceneModels.ELECTRIC_POLE,
+                null,
+                0.0D,
                 poseStack,
                 buffers,
                 packedLight,

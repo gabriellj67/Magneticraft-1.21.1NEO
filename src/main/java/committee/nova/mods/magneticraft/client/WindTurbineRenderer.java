@@ -34,8 +34,10 @@ public final class WindTurbineRenderer implements BlockEntityRenderer<WindTurbin
         poseStack.translate(ROTOR_X, ROTOR_Y, ROTOR_Z);
         poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
         poseStack.translate(-ROTOR_X, -ROTOR_Y, -ROTOR_Z);
-        MachineRenderHelper.renderBakedModel(
-                LegacyBakedModels.WIND_TURBINE_ROTOR,
+        LegacySceneModels.render(
+                LegacySceneModels.WIND_TURBINE_ROTOR,
+                null,
+                0.0D,
                 poseStack,
                 buffers,
                 packedLight,

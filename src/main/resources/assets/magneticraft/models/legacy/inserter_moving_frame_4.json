@@ -1,9 +1,0 @@
-{
-  "flip_v": true,
-  "loader": "forge:obj",
-  "model": "magneticraft:models/block/legacy/inserter_moving_frame_4.obj",
-  "mtl_override": "magneticraft:models/block/legacy/inserter_moving_frame_4.mtl",
-  "textures": {
-    "particle": "magneticraft:block/legacy/machines/inserter"
-  }
-}
