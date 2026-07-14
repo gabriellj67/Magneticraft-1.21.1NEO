@@ -6,6 +6,7 @@
   },
   "category": "energy",
   "controller": "magneticraft:solar_mirror",
+  "description": "guide.magneticraft.multiblock.solar_mirror.description",
   "id": "magneticraft:solar_mirror",
   "layers": [
     [

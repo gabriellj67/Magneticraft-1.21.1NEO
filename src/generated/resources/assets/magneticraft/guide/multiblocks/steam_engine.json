@@ -6,6 +6,7 @@
   },
   "category": "energy",
   "controller": "magneticraft:steam_engine",
+  "description": "guide.magneticraft.multiblock.steam_engine.description",
   "id": "magneticraft:steam_engine",
   "layers": [
     [

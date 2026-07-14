@@ -103,6 +103,11 @@ final class AdvancedGuideDataProvider implements DataProvider {
         root.addProperty("category", category(definition));
         root.addProperty("controller", Magneticraft.MOD_ID + ":" + definition.id());
         root.addProperty("translation_key", "block.magneticraft." + definition.id());
+        root.addProperty("description", "guide.magneticraft.multiblock." + definition.id() + ".description");
+        String recipeType = multiblockRecipeType(definition);
+        if (!recipeType.isEmpty()) {
+            root.addProperty("recipe_type", recipeType);
+        }
         root.addProperty("supports_mirroring", false);
         root.add("size", offset(definition.size().x(), definition.size().y(), definition.size().z()));
         root.add("anchor", offset(definition.center().x(), definition.center().y(), definition.center().z()));
@@ -234,6 +239,21 @@ final class AdvancedGuideDataProvider implements DataProvider {
         items.add(electricEquipmentItem("tesla_tower", true));
         items.add(electricEquipmentItem("wireless_energy_receiver", true));
         items.add(electricEquipmentItem("wind_turbine", true));
+        items.add(electricEquipmentItem("wrench", false));
+        items.add(electricEquipmentItem("electric_cable", true));
+        items.add(electricEquipmentItem("heat_pipe", true));
+        items.add(electricEquipmentItem("insulated_heat_pipe", true));
+        items.add(electricEquipmentItem("heat_sink", true));
+        items.add(electricEquipmentItem("iron_fluid_pipe", true));
+        items.add(electricEquipmentItem("pneumatic_tube", true));
+        items.add(electricEquipmentItem("pneumatic_restriction_tube", true));
+        items.add(electricEquipmentItem("conveyor_belt", true));
+        items.add(electricEquipmentItem("inserter_speed_upgrade", false));
+        items.add(electricEquipmentItem("inserter_stack_upgrade", false));
+        items.add(electricEquipmentItem("computer", true));
+        items.add(electricEquipmentItem("mining_robot", true));
+        items.add(electricEquipmentItem("floppy_disk", false));
+        items.add(electricEquipmentItem("oil_deposit", true));
         root.add("items", items);
         return root;
     }
@@ -317,6 +337,10 @@ final class AdvancedGuideDataProvider implements DataProvider {
         root.addProperty("has_menu", machine.hasMenu());
         root.addProperty("redstone_control", machine.redstoneControl());
         root.addProperty("processing_kind", machine.processingKind());
+        String recipeType = machineRecipeType(machine.processingKind());
+        if (!recipeType.isEmpty()) {
+            root.addProperty("recipe_type", recipeType);
+        }
         root.addProperty("automation_profile", machine.automationProfile());
         JsonArray slots = new JsonArray();
         machine.slotRoles().forEach(slots::add);
@@ -351,6 +375,27 @@ final class AdvancedGuideDataProvider implements DataProvider {
             item.addProperty("translation_key", "block.magneticraft." + id);
         }
         return item;
+    }
+
+    private static String machineRecipeType(String processingKind) {
+        return switch (processingKind) {
+            case "crushing_table" -> "magneticraft:crushing_table";
+            case "sluice_box" -> "magneticraft:sluice_box";
+            case "gasification" -> "magneticraft:gasification_unit";
+            case "thermopile" -> "magneticraft:thermopile";
+            case "smelting" -> "minecraft:smelting";
+            case "crafting" -> "minecraft:crafting";
+            default -> "";
+        };
+    }
+
+    private static String multiblockRecipeType(MultiblockDefinition definition) {
+        return switch (definition) {
+            case GRINDER, HYDRAULIC_PRESS, SIEVE, OIL_HEATER, REFINERY ->
+                    "magneticraft:advanced_processing";
+            case BIG_ELECTRIC_FURNACE -> "minecraft:smelting";
+            default -> "";
+        };
     }
 
     static List<GuideOpcodeEntry> computerOpcodes() {

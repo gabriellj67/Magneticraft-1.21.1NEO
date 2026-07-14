@@ -6,6 +6,7 @@
   },
   "category": "processing",
   "controller": "magneticraft:grinder",
+  "description": "guide.magneticraft.multiblock.grinder.description",
   "id": "magneticraft:grinder",
   "layers": [
     [
@@ -69,6 +70,7 @@
     "heat": false,
     "inventory_slots": 3
   },
+  "recipe_type": "magneticraft:advanced_processing",
   "schema_version": 1,
   "size": {
     "x": 3,

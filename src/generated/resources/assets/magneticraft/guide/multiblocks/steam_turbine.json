@@ -6,6 +6,7 @@
   },
   "category": "energy",
   "controller": "magneticraft:steam_turbine",
+  "description": "guide.magneticraft.multiblock.steam_turbine.description",
   "id": "magneticraft:steam_turbine",
   "layers": [
     [

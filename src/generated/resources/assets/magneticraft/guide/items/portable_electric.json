@@ -125,6 +125,141 @@
       "id": "magneticraft:wind_turbine",
       "translation_key": "block.magneticraft.wind_turbine",
       "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.wrench.description",
+      "id": "magneticraft:wrench",
+      "translation_key": "item.magneticraft.wrench",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_cable.description",
+      "id": "magneticraft:electric_cable",
+      "translation_key": "block.magneticraft.electric_cable",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.heat_pipe.description",
+      "id": "magneticraft:heat_pipe",
+      "translation_key": "block.magneticraft.heat_pipe",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.insulated_heat_pipe.description",
+      "id": "magneticraft:insulated_heat_pipe",
+      "translation_key": "block.magneticraft.insulated_heat_pipe",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.heat_sink.description",
+      "id": "magneticraft:heat_sink",
+      "translation_key": "block.magneticraft.heat_sink",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.iron_fluid_pipe.description",
+      "id": "magneticraft:iron_fluid_pipe",
+      "translation_key": "block.magneticraft.iron_fluid_pipe",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.pneumatic_tube.description",
+      "id": "magneticraft:pneumatic_tube",
+      "translation_key": "block.magneticraft.pneumatic_tube",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.pneumatic_restriction_tube.description",
+      "id": "magneticraft:pneumatic_restriction_tube",
+      "translation_key": "block.magneticraft.pneumatic_restriction_tube",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.conveyor_belt.description",
+      "id": "magneticraft:conveyor_belt",
+      "translation_key": "block.magneticraft.conveyor_belt",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.inserter_speed_upgrade.description",
+      "id": "magneticraft:inserter_speed_upgrade",
+      "translation_key": "item.magneticraft.inserter_speed_upgrade",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.inserter_stack_upgrade.description",
+      "id": "magneticraft:inserter_stack_upgrade",
+      "translation_key": "item.magneticraft.inserter_stack_upgrade",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.computer.description",
+      "id": "magneticraft:computer",
+      "translation_key": "block.magneticraft.computer",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.mining_robot.description",
+      "id": "magneticraft:mining_robot",
+      "translation_key": "block.magneticraft.mining_robot",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.floppy_disk.description",
+      "id": "magneticraft:floppy_disk",
+      "translation_key": "item.magneticraft.floppy_disk",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.oil_deposit.description",
+      "id": "magneticraft:oil_deposit",
+      "translation_key": "block.magneticraft.oil_deposit",
+      "use_cost_fe": 0
     }
   ],
   "schema_version": 1

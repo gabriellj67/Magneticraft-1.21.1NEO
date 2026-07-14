@@ -76,6 +76,7 @@ public final class GuideScreen extends Screen {
             case STRUCTURES -> renderStructures(graphics, mouseX, mouseY);
             case MACHINES -> renderMachines(graphics);
             case ITEMS -> renderItems(graphics);
+            case LANGUAGES -> renderLanguages(graphics);
             case OPCODES -> renderOpcodes(graphics);
         }
         updateButtons();
@@ -114,7 +115,11 @@ public final class GuideScreen extends Screen {
                 0xFF8B949E,
                 false
         );
-        int metadataY = renderStructureMetadata(graphics, selected, contentLeft, 66);
+        int contentWidth = Math.max(80, width - contentLeft - 16);
+        Component description = Component.translatable(selected.descriptionKey());
+        graphics.drawWordWrap(font, description, contentLeft, 66, contentWidth, 0xFFB8C0C8);
+        int descriptionBottom = 66 + Math.max(1, font.split(description, contentWidth).size()) * 9 + 3;
+        int metadataY = renderStructureMetadata(graphics, selected, contentLeft, descriptionBottom);
         layer = Math.max(0, Math.min(layer, selected.layers().size() - 1));
         Component layerText = Component.translatable(
                 "gui.magneticraft.guide.layer",
@@ -138,6 +143,12 @@ public final class GuideScreen extends Screen {
                 ? Component.translatable("gui.magneticraft.guide.none").getString()
                 : ports.fluidTankCapacitiesMb().stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(", "));
         List<Component> lines = List.of(
+                Component.translatable(
+                        "gui.magneticraft.guide.machine.recipe",
+                        guide.recipeType().isEmpty()
+                                ? Component.translatable("gui.magneticraft.guide.none")
+                                : Component.literal(guide.recipeType())
+                ),
                 Component.translatable(
                         "gui.magneticraft.guide.mirroring",
                         guide.supportsMirroring() ? yes : no
@@ -202,6 +213,91 @@ public final class GuideScreen extends Screen {
                 Math.max(80, width - contentLeft - 16),
                 0xFFB8C0C8
         );
+    }
+
+    private void renderLanguages(GuiGraphics graphics) {
+        List<GuideRepository.ComputerLanguageGuide> languages = filteredLanguages();
+        if (languages.isEmpty()) {
+            graphics.drawString(
+                    font,
+                    Component.translatable("gui.magneticraft.guide.no_results"),
+                    12,
+                    54,
+                    0xFF8B949E,
+                    false
+            );
+            return;
+        }
+        selectedIndex = Math.max(0, Math.min(selectedIndex, languages.size() - 1));
+        GuideRepository.ComputerLanguageGuide selected = languages.get(selectedIndex);
+        renderEntryList(graphics, languages.stream()
+                .map(language -> Component.translatable(
+                        "guide.magneticraft.computer.language." + language.id() + ".name"
+                ))
+                .toList());
+
+        int contentLeft = SIDEBAR_WIDTH + 12;
+        int contentWidth = Math.max(80, width - contentLeft - 16);
+        graphics.drawString(
+                font,
+                Component.translatable("guide.magneticraft.computer.language." + selected.id() + ".name"),
+                contentLeft,
+                44,
+                0xFFE6EDF3,
+                false
+        );
+        graphics.drawString(
+                font,
+                Component.translatable("gui.magneticraft.guide.computer.version", selected.historicalVersion()),
+                contentLeft,
+                58,
+                0xFF79C0FF,
+                false
+        );
+        Component description = Component.translatable(
+                "guide.magneticraft.computer.language." + selected.id() + ".description"
+        );
+        graphics.drawWordWrap(font, description, contentLeft, 72, contentWidth, 0xFFB8C0C8);
+        int cursorY = 72 + Math.max(1, font.split(description, contentWidth).size()) * 9 + 5;
+        GuideRepository.ComputerLimits limits = selected.limits();
+        List<Component> lines = List.of(
+                Component.translatable(
+                        "gui.magneticraft.guide.computer.source_limits",
+                        limits.sourceBytes(), limits.outputCharacters()
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.computer.tick_limits",
+                        limits.instructionsPerTick(), limits.deviceCallsPerTick()
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.computer.storage_limits",
+                        limits.floppyBytes(), limits.floppyEntries(), limits.quarryMaxSize()
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.computer.examples",
+                        String.join(" · ", selected.examples())
+                ),
+                Component.translatable(
+                        "gui.magneticraft.guide.computer.commands",
+                        String.join(", ", selected.commands())
+                )
+        );
+        for (Component line : lines) {
+            graphics.drawWordWrap(font, line, contentLeft, cursorY, contentWidth, 0xFF79C0FF);
+            cursorY += Math.max(1, font.split(line, contentWidth).size()) * 9;
+        }
+        GuideRepository.ComputerSecurity security = selected.security();
+        Component yes = Component.translatable("gui.magneticraft.guide.yes");
+        Component no = Component.translatable("gui.magneticraft.guide.no");
+        Component securityLine = Component.translatable(
+                "gui.magneticraft.guide.computer.security",
+                security.serverAuthoritative() ? yes : no,
+                security.menuSessionReplayProtection() ? yes : no,
+                security.hostFilesystemAccess() ? yes : no,
+                security.outboundNetworkAccess() ? yes : no,
+                security.forceLoadChunks() ? yes : no
+        );
+        graphics.drawWordWrap(font, securityLine, contentLeft, cursorY, contentWidth, 0xFFB8C0C8);
     }
 
     private void renderItems(GuiGraphics graphics) {
@@ -303,6 +399,12 @@ public final class GuideScreen extends Screen {
                         Component.translatable("gui.magneticraft.guide.processing." + selected.processingKind())
                 ),
                 Component.translatable(
+                        "gui.magneticraft.guide.machine.recipe",
+                        selected.recipeType().isEmpty()
+                                ? Component.translatable("gui.magneticraft.guide.none")
+                                : Component.literal(selected.recipeType())
+                ),
+                Component.translatable(
                         "gui.magneticraft.guide.machine.automation",
                         Component.translatable("gui.magneticraft.guide.automation." + selected.automationProfile())
                 ),
@@ -395,6 +497,7 @@ public final class GuideScreen extends Screen {
             case STRUCTURES -> filteredStructures().size();
             case MACHINES -> filteredMachines().size();
             case ITEMS -> filteredItems().size();
+            case LANGUAGES -> filteredLanguages().size();
             case OPCODES -> filteredOpcodes().size();
         };
         if (size == 0) {
@@ -426,6 +529,7 @@ public final class GuideScreen extends Screen {
             case STRUCTURES -> !filteredStructures().isEmpty();
             case MACHINES -> !filteredMachines().isEmpty();
             case ITEMS -> !filteredItems().isEmpty();
+            case LANGUAGES -> !filteredLanguages().isEmpty();
             case OPCODES -> !filteredOpcodes().isEmpty();
         };
         previousEntry.active = hasEntries;
@@ -437,7 +541,9 @@ public final class GuideScreen extends Screen {
         return GuideRepository.INSTANCE.multiblocks().stream()
                 .filter(guide -> query.isEmpty()
                         || guide.id().toString().toLowerCase(Locale.ROOT).contains(query)
-                        || Component.translatable(guide.translationKey()).getString().toLowerCase(Locale.ROOT).contains(query))
+                        || Component.translatable(guide.translationKey()).getString().toLowerCase(Locale.ROOT).contains(query)
+                        || Component.translatable(guide.descriptionKey()).getString().toLowerCase(Locale.ROOT).contains(query)
+                        || guide.recipeType().toLowerCase(Locale.ROOT).contains(query))
                 .toList();
     }
 
@@ -450,13 +556,27 @@ public final class GuideScreen extends Screen {
                 .toList();
     }
 
+    private List<GuideRepository.ComputerLanguageGuide> filteredLanguages() {
+        String query = query();
+        return GuideRepository.INSTANCE.languages().stream()
+                .filter(language -> query.isEmpty()
+                        || language.id().toLowerCase(Locale.ROOT).contains(query)
+                        || Component.translatable("guide.magneticraft.computer.language."
+                                + language.id() + ".name").getString().toLowerCase(Locale.ROOT).contains(query)
+                        || Component.translatable("guide.magneticraft.computer.language."
+                                + language.id() + ".description").getString().toLowerCase(Locale.ROOT).contains(query)
+                        || language.commands().stream().anyMatch(command -> command.toLowerCase(Locale.ROOT).contains(query)))
+                .toList();
+    }
+
     private List<GuideRepository.MachineGuide> filteredMachines() {
         String query = query();
         return GuideRepository.INSTANCE.machines().stream()
                 .filter(machine -> query.isEmpty()
                         || machine.id().toString().toLowerCase(Locale.ROOT).contains(query)
                         || Component.translatable(machine.translationKey()).getString().toLowerCase(Locale.ROOT).contains(query)
-                        || Component.translatable(machine.descriptionKey()).getString().toLowerCase(Locale.ROOT).contains(query))
+                        || Component.translatable(machine.descriptionKey()).getString().toLowerCase(Locale.ROOT).contains(query)
+                        || machine.recipeType().toLowerCase(Locale.ROOT).contains(query))
                 .toList();
     }
 
@@ -496,6 +616,7 @@ public final class GuideScreen extends Screen {
         STRUCTURES("gui.magneticraft.guide.mode.structures"),
         MACHINES("gui.magneticraft.guide.mode.machines"),
         ITEMS("gui.magneticraft.guide.mode.items"),
+        LANGUAGES("gui.magneticraft.guide.mode.languages"),
         OPCODES("gui.magneticraft.guide.mode.opcodes");
 
         private final String titleKey;

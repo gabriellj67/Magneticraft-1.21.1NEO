@@ -40,6 +40,13 @@ repositories {
             includeGroup "slimeknights.tconstruct"
         }
     }
+    maven {
+        name = "Modrinth"
+        url = uri("https://api.modrinth.com/maven")
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 def optionalRuntimeEnabled = { String propertyName ->
@@ -48,6 +55,7 @@ def optionalRuntimeEnabled = { String propertyName ->
 def jeiRuntimeEnabled = optionalRuntimeEnabled("enable_jei_runtime")
 def craftTweakerRuntimeEnabled = optionalRuntimeEnabled("enable_crafttweaker_runtime")
 def tconstructRuntimeEnabled = optionalRuntimeEnabled("enable_tconstruct_runtime")
+def jadeRuntimeEnabled = optionalRuntimeEnabled("enable_jade_runtime")
 def quickPlayWorld = providers.gradleProperty("quick_play_world").orNull
 
 configurations {
@@ -63,6 +71,7 @@ dependencies {
     modCompileOnly("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
     modCompileOnly("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
     modCompileOnly("com.blamejared.crafttweaker:CraftTweaker-forge-${mc_version}:${crafttweaker_version}")
+    modCompileOnly("maven.modrinth:jade:${jade_version}")
 
     if (jeiRuntimeEnabled) {
         ["core", "common", "common-api", "lib", "gui", "forge-api", "forge"].each { module ->
@@ -89,6 +98,9 @@ dependencies {
     if (tconstructRuntimeEnabled) {
         modLocalRuntime("slimeknights.mantle:Mantle:${mc_version}-${mantle_version}")
         modLocalRuntime("slimeknights.tconstruct:TConstruct:${mc_version}-${tconstruct_version}")
+    }
+    if (jadeRuntimeEnabled) {
+        modLocalRuntime("maven.modrinth:jade:${jade_version}")
     }
 
     testImplementation(platform("org.junit:junit-bom:${junit_version}"))
@@ -194,7 +206,8 @@ def expansionProperties = [
         display_url                : display_url,
         jei_version_range         : jei_version_range,
         crafttweaker_version_range: crafttweaker_version_range,
-        tconstruct_version_range  : tconstruct_version_range
+        tconstruct_version_range  : tconstruct_version_range,
+        jade_version_range        : jade_version_range
 ]
 
 processResources {
@@ -232,10 +245,6 @@ tasks.named("sourcesJar", Jar).configure {
     }
 }
 
-tasks.named("check").configure {
-    dependsOn tasks.named("compileGameTestJava")
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -246,4 +255,41 @@ publishing {
     repositories {
         mavenLocal()
     }
+}
+
+def verifyOptionalIntegrationIsolation = tasks.register("verifyOptionalIntegrationIsolation") {
+    dependsOn tasks.named("jar"), tasks.named("generatePomFileForMavenJavaPublication")
+    doLast {
+        def productionJar = tasks.named("jar", Jar).get().archiveFile.get().asFile
+        def forbiddenPrefixes = [
+                "mezz/jei/",
+                "com/blamejared/crafttweaker/",
+                "org/openzen/",
+                "slimeknights/",
+                "snownee/jade/"
+        ]
+        def bundledOptionalClasses = zipTree(productionJar).files.collect { entry ->
+            entry.absolutePath.replace('\\', '/')
+        }.findAll { entry -> forbiddenPrefixes.any { prefix -> entry.contains("/" + prefix) } }
+        if (!bundledOptionalClasses.isEmpty()) {
+            throw new GradleException("Production JAR bundled optional API classes: ${bundledOptionalClasses.take(10)}")
+        }
+
+        def pom = layout.buildDirectory.file("publications/mavenJava/pom-default.xml").get().asFile.text
+        def forbiddenCoordinates = [
+                "mezz.jei",
+                "com.blamejared.crafttweaker",
+                "org.openzen.zencode",
+                "slimeknights",
+                "maven.modrinth"
+        ]
+        def publishedOptionalDependencies = forbiddenCoordinates.findAll(pom::contains)
+        if (!publishedOptionalDependencies.isEmpty()) {
+            throw new GradleException("Publication POM leaked optional dependencies: ${publishedOptionalDependencies}")
+        }
+    }
+}
+
+tasks.named("check").configure {
+    dependsOn tasks.named("compileGameTestJava"), verifyOptionalIntegrationIsolation
 }

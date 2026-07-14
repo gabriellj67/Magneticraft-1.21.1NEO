@@ -1,11 +1,14 @@
 package committee.nova.mods.magneticraft.data;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import committee.nova.mods.magneticraft.content.computer.MiningRobotBlockEntity;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
 import committee.nova.mods.magneticraft.content.computer.runtime.VirtualDisk;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
+import committee.nova.mods.magneticraft.content.computer.vm.VmFault;
 import committee.nova.mods.magneticraft.content.item.ElectricPistonItem;
 import committee.nova.mods.magneticraft.content.item.ElectricToolItem;
 import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
@@ -13,8 +16,13 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,6 +84,10 @@ class AdvancedGuideDataProviderTest {
             JsonObject json = AdvancedGuideDataProvider.machineGuide(contract);
             assertEquals("magneticraft:" + definition.id(), json.get("id").getAsString());
             assertEquals(definition.physicalPorts().size(), json.getAsJsonArray("physical_ports").size());
+            if (Set.of("sluice_box", "gasification", "thermopile", "smelting", "crafting")
+                    .contains(contract.processingKind())) {
+                assertTrue(json.has("recipe_type"), definition.id());
+            }
         }
 
         AdvancedGuideDataProvider.MachineGuideContract water = machines.stream()
@@ -94,6 +106,19 @@ class AdvancedGuideDataProviderTest {
             assertEquals(AdvancedGuideDataProvider.SCHEMA_VERSION, guide.get("schema_version").getAsInt());
             assertEquals("magneticraft:" + definition.id(), guide.get("id").getAsString());
             assertEquals("magneticraft:" + definition.id(), guide.get("controller").getAsString());
+            assertEquals(
+                    "guide.magneticraft.multiblock." + definition.id() + ".description",
+                    guide.get("description").getAsString()
+            );
+            boolean hasRecipe = Set.of(
+                    MultiblockDefinition.GRINDER,
+                    MultiblockDefinition.HYDRAULIC_PRESS,
+                    MultiblockDefinition.SIEVE,
+                    MultiblockDefinition.OIL_HEATER,
+                    MultiblockDefinition.REFINERY,
+                    MultiblockDefinition.BIG_ELECTRIC_FURNACE
+            ).contains(definition);
+            assertEquals(hasRecipe, guide.has("recipe_type"), definition.id());
             assertFalse(guide.get("supports_mirroring").getAsBoolean());
             assertTrue(ids.add(guide.get("id").getAsString()));
 
@@ -201,8 +226,8 @@ class AdvancedGuideDataProviderTest {
     void portableItemGuideCapturesTheRestoredEnergyContracts() {
         JsonArray items = AdvancedGuideDataProvider.portableItemGuide().getAsJsonArray("items");
 
-        assertEquals(14, items.size());
-        assertEquals(14, items.asList().stream()
+        assertEquals(29, items.size());
+        assertEquals(29, items.asList().stream()
                 .map(element -> element.getAsJsonObject().get("id").getAsString())
                 .distinct()
                 .count());
@@ -223,12 +248,84 @@ class AdvancedGuideDataProviderTest {
                 "electric_pole_transformer",
                 "tesla_tower",
                 "wireless_energy_receiver",
-                "wind_turbine"
+                "wind_turbine",
+                "wrench",
+                "electric_cable",
+                "heat_pipe",
+                "insulated_heat_pipe",
+                "heat_sink",
+                "iron_fluid_pipe",
+                "pneumatic_tube",
+                "pneumatic_restriction_tube",
+                "conveyor_belt",
+                "inserter_speed_upgrade",
+                "inserter_stack_upgrade",
+                "computer",
+                "mining_robot",
+                "floppy_disk",
+                "oil_deposit"
         )) {
             JsonObject equipment = item(items, "magneticraft:" + id);
             assertEquals(0, equipment.get("capacity_fe").getAsInt());
             assertEquals("guide.magneticraft.item." + id + ".description",
                     equipment.get("description").getAsString());
+        }
+    }
+
+    @Test
+    void generatedGuideAndFaultKeysHaveCompleteEnglishAndChineseTranslations() throws IOException {
+        Path languageRoot = Path.of("src/generated/resources/assets/magneticraft/lang");
+        JsonObject english = JsonParser.parseString(Files.readString(
+                languageRoot.resolve("en_us.json"), StandardCharsets.UTF_8
+        )).getAsJsonObject();
+        JsonObject chinese = JsonParser.parseString(Files.readString(
+                languageRoot.resolve("zh_cn.json"), StandardCharsets.UTF_8
+        )).getAsJsonObject();
+        assertEquals(english.keySet(), chinese.keySet(), "en_us and zh_cn translation keys drifted");
+
+        Set<String> requiredKeys = new HashSet<>();
+        Path guideRoot = Path.of("src/generated/resources/assets/magneticraft/guide");
+        try (var paths = Files.walk(guideRoot)) {
+            for (Path path : paths.filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().endsWith(".json"))
+                    .toList()) {
+                collectTranslationKeys(JsonParser.parseString(Files.readString(path, StandardCharsets.UTF_8)), requiredKeys);
+            }
+        }
+        for (String language : List.of("forth", "lisp", "shell")) {
+            requiredKeys.add("guide.magneticraft.computer.language." + language + ".name");
+            requiredKeys.add("guide.magneticraft.computer.language." + language + ".description");
+        }
+        for (VmFault fault : VmFault.values()) {
+            if (fault != VmFault.NONE) {
+                requiredKeys.add("gui.magneticraft.programmable.fault."
+                        + fault.name().toLowerCase(Locale.ROOT));
+            }
+        }
+        for (String key : requiredKeys) {
+            assertTrue(english.has(key), "Missing en_us guide/fault translation: " + key);
+            assertTrue(chinese.has(key), "Missing zh_cn guide/fault translation: " + key);
+            assertFalse(english.get(key).getAsString().isBlank(), "Blank en_us translation: " + key);
+            assertFalse(chinese.get(key).getAsString().isBlank(), "Blank zh_cn translation: " + key);
+        }
+    }
+
+    private static void collectTranslationKeys(JsonElement element, Set<String> destination) {
+        if (element.isJsonArray()) {
+            element.getAsJsonArray().forEach(child -> collectTranslationKeys(child, destination));
+            return;
+        }
+        if (!element.isJsonObject()) {
+            return;
+        }
+        for (var entry : element.getAsJsonObject().entrySet()) {
+            if ((entry.getKey().equals("translation_key") || entry.getKey().equals("description"))
+                    && entry.getValue().isJsonPrimitive()
+                    && entry.getValue().getAsString().contains(".magneticraft.")) {
+                destination.add(entry.getValue().getAsString());
+            } else {
+                collectTranslationKeys(entry.getValue(), destination);
+            }
         }
     }
 

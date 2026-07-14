@@ -328,19 +328,23 @@ public final class LongDistanceElectricGameTests {
         TeslaTowerBlockEntity tower = require(helper, towerPosition, TeslaTowerBlockEntity.class);
         WirelessEnergyReceiverBlockEntity receiver = placeReceiver(helper, receiverPosition);
 
-        tower.electricity().node().setVoltage(59.0D);
-        tower.serverTick();
-        helper.assertTrue(receiver.electricity().node().energyJoules() == 0.0D,
-                "Tesla tower transferred below sixty volts");
+        helper.runAfterDelay(2, () -> {
+            tower.electricity().node().setVoltage(59.0D);
+            tower.serverTick();
+            helper.assertTrue(receiver.electricity().node().energyJoules() == 0.0D,
+                    "Tesla tower transferred below sixty volts");
 
-        tower.electricity().node().setVoltage(60.0D);
-        double sourceBefore = tower.electricity().node().energyJoules();
-        tower.serverTick();
-        helper.assertTrue(Math.abs(receiver.electricity().node().energyJoules() - 500.0D) < 1.0E-6D,
-                "Tesla receiver did not receive exactly 500 J in one tick");
-        helper.assertTrue(Math.abs(tower.electricity().node().energyJoules() - (sourceBefore - 500.0D)) < 1.0E-6D,
-                "Tesla transfer did not conserve its 1 J to 1 J boundary");
-        helper.succeed();
+            tower.electricity().node().setVoltage(60.0D);
+            double sourceBefore = tower.electricity().node().energyJoules();
+            tower.serverTick();
+            helper.assertTrue(Math.abs(receiver.electricity().node().energyJoules() - 500.0D) < 1.0E-6D,
+                    "Tesla receiver did not receive exactly 500 J in one tick");
+            helper.assertTrue(
+                    Math.abs(tower.electricity().node().energyJoules() - (sourceBefore - 500.0D)) < 1.0E-6D,
+                    "Tesla transfer did not conserve its 1 J to 1 J boundary"
+            );
+            helper.succeed();
+        });
     }
 
     @GameTest(template = ADVANCED_TEMPLATE, timeoutTicks = 40)

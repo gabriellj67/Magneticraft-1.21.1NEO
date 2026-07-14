@@ -6,6 +6,7 @@
   },
   "category": "oil",
   "controller": "magneticraft:pumpjack",
+  "description": "guide.magneticraft.multiblock.pumpjack.description",
   "id": "magneticraft:pumpjack",
   "layers": [
     [

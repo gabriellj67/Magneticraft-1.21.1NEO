@@ -6,6 +6,7 @@
   },
   "category": "oil",
   "controller": "magneticraft:refinery",
+  "description": "guide.magneticraft.multiblock.refinery.description",
   "id": "magneticraft:refinery",
   "layers": [
     [
@@ -171,6 +172,7 @@
     "heat": false,
     "inventory_slots": 0
   },
+  "recipe_type": "magneticraft:advanced_processing",
   "schema_version": 1,
   "size": {
     "x": 3,

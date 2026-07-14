@@ -6,6 +6,7 @@
   },
   "category": "oil",
   "controller": "magneticraft:oil_heater",
+  "description": "guide.magneticraft.multiblock.oil_heater.description",
   "id": "magneticraft:oil_heater",
   "layers": [
     [
@@ -91,6 +92,7 @@
     "heat": true,
     "inventory_slots": 0
   },
+  "recipe_type": "magneticraft:advanced_processing",
   "schema_version": 1,
   "size": {
     "x": 3,

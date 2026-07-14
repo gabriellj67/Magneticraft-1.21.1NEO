@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MigrationMatrixContractTest {
-    private static final String CURRENT_COMPLETED_STAGE = "0.5.0";
+    private static final String CURRENT_COMPLETED_STAGE = "0.8.0";
     private static final Path MATRIX_PATH = Path.of("docs/porting/migration-matrix.json");
     private static final Path ID_MAP_PATH = Path.of("docs/porting/registry-id-map.json");
     private static final Path LEGACY_RECIPE_ROOT = Path.of(
@@ -1392,10 +1392,27 @@ class MigrationMatrixContractTest {
             assertEquals("assets/magneticraft/guide/zh_cn/" + semanticPath + ".md", chineseResource);
             assertTrue(englishResources.add(englishResource), "Duplicate en_us guide resource: " + englishResource);
             assertTrue(chineseResources.add(chineseResource), "Duplicate zh_cn guide resource: " + chineseResource);
+            Path englishPath = Path.of("src/main/resources").resolve(englishResource);
+            Path chinesePath = Path.of("src/main/resources").resolve(chineseResource);
+            assertTrue(Files.isRegularFile(englishPath), "Missing en_us guide page: " + englishResource);
+            assertTrue(Files.isRegularFile(chinesePath), "Missing zh_cn guide page: " + chineseResource);
+            String english = Files.readString(englishPath, StandardCharsets.UTF_8);
+            String chinese = Files.readString(chinesePath, StandardCharsets.UTF_8);
+            assertTrue(english.startsWith("# ") && english.length() >= 80, "Incomplete en_us guide: " + englishResource);
+            assertTrue(chinese.startsWith("# ") && chinese.length() >= 80, "Incomplete zh_cn guide: " + chineseResource);
+            assertFalse(english.toUpperCase(Locale.ROOT).contains("TODO"), "TODO in en_us guide: " + englishResource);
+            assertFalse(chinese.toUpperCase(Locale.ROOT).contains("TODO"), "TODO in zh_cn guide: " + chineseResource);
+            assertFalse(english.equals(chinese), "Guide locales are not independently authored: " + semanticPath);
         }
         assertEquals(new HashSet<>(inventory), assignedLegacyPaths);
         assertEquals(51, rebuiltPageCount);
         assertEquals(Set.of("machines/utilities/6-copper-tank.md"), excludedLegacyPaths);
+        assertFalse(Files.exists(Path.of(
+                "src/main/resources/assets/magneticraft/guide/en_us/machines/utilities/copper_tank.md"
+        )));
+        assertFalse(Files.exists(Path.of(
+                "src/main/resources/assets/magneticraft/guide/zh_cn/machines/utilities/copper_tank.md"
+        )));
         assertEquals(51, targetPageIds.size());
         assertEquals(51, englishResources.size());
         assertEquals(51, chineseResources.size());

@@ -30,12 +30,24 @@ class OptionalIntegrationContractTest {
         assertEquals("14.0.60", properties.get("crafttweaker_version"));
         assertEquals("1.11.97", properties.get("mantle_version"));
         assertEquals("3.11.2.166", properties.get("tconstruct_version"));
+        assertEquals("11.13.1+forge", properties.get("jade_version"));
+        assertEquals("[11.13.1,12)", properties.get("jade_version_range"));
         assertEquals("false", properties.get("enable_jei_runtime"));
         assertEquals("false", properties.get("enable_crafttweaker_runtime"));
         assertEquals("false", properties.get("enable_tconstruct_runtime"));
+        assertEquals("false", properties.get("enable_jade_runtime"));
         assertFalse(properties.entrySet().stream()
                 .filter(entry -> entry.getKey().endsWith("_version"))
-                .anyMatch(entry -> entry.getValue().contains("+") || entry.getValue().equals("latest")));
+                .map(Map.Entry::getValue)
+                .anyMatch(version -> version.endsWith("+")
+                        || version.equalsIgnoreCase("latest")
+                        || version.equalsIgnoreCase("release")
+                        || version.toUpperCase(java.util.Locale.ROOT).contains("SNAPSHOT")));
+
+        String build = Files.readString(Path.of("build.gradle"));
+        assertTrue(build.contains("modCompileOnly(\"maven.modrinth:jade:${jade_version}\")"));
+        assertTrue(build.contains("if (jadeRuntimeEnabled)"));
+        assertFalse(build.contains("curse.maven:jade"));
     }
 
     @Test
@@ -47,6 +59,7 @@ class OptionalIntegrationContractTest {
                 assertFalse(source.contains("com.blamejared.crafttweaker."), path.toString());
                 assertFalse(source.contains("org.openzen.zencode."), path.toString());
                 assertFalse(source.contains("slimeknights.tconstruct."), path.toString());
+                assertFalse(source.contains("snownee.jade."), path.toString());
             }
         }
     }
@@ -55,7 +68,7 @@ class OptionalIntegrationContractTest {
     void metadataDeclaresAllIntegrationsAsOptional() throws IOException {
         String metadata = Files.readString(Path.of("src/main/resources/META-INF/mods.toml"));
 
-        for (String modId : List.of("jei", "crafttweaker", "tconstruct")) {
+        for (String modId : List.of("jei", "crafttweaker", "tconstruct", "jade")) {
             int declaration = metadata.indexOf("modId = \"" + modId + "\"");
             assertTrue(declaration >= 0, modId);
             int nextDeclaration = metadata.indexOf("[[dependencies.", declaration + 1);
@@ -122,7 +135,9 @@ class OptionalIntegrationContractTest {
         }
         String normalized = path.toString().replace('\\', '/');
         return !normalized.contains("/integration/jei/")
-                && !normalized.contains("/integration/crafttweaker/");
+                && !normalized.contains("/integration/crafttweaker/")
+                && !normalized.contains("/integration/tconstruct/")
+                && !normalized.contains("/integration/jade/");
     }
 
     private static void assertTagContains(String metal, String item) throws IOException {

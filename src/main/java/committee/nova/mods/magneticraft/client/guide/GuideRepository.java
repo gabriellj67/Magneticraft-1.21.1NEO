@@ -26,6 +26,7 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
     public static final GuideRepository INSTANCE = new GuideRepository();
     private static final int SUPPORTED_SCHEMA = 1;
     private static final ResourceLocation OPCODE_GUIDE = Magneticraft.id("guide/computer_opcodes.json");
+    private static final ResourceLocation COMPUTER_LANGUAGE_GUIDE = Magneticraft.id("guide/computer_languages.json");
     private static final ResourceLocation PORTABLE_ITEM_GUIDE = Magneticraft.id("guide/items/portable_electric.json");
 
     private volatile PreparedGuideData data = PreparedGuideData.EMPTY;
@@ -39,6 +40,10 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
 
     public List<OpcodeGuide> opcodes() {
         return data.opcodes();
+    }
+
+    public List<ComputerLanguageGuide> languages() {
+        return data.languages();
     }
 
     public List<ItemGuide> items() {
@@ -63,6 +68,9 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         List<OpcodeGuide> opcodes = resourceManager.getResource(OPCODE_GUIDE)
                 .map(this::readOpcodes)
                 .orElseGet(List::of);
+        List<ComputerLanguageGuide> languages = resourceManager.getResource(COMPUTER_LANGUAGE_GUIDE)
+                .map(this::readLanguages)
+                .orElseGet(List::of);
         List<ItemGuide> items = resourceManager.getResource(PORTABLE_ITEM_GUIDE)
                 .map(this::readItems)
                 .orElseGet(List::of);
@@ -74,7 +82,7 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         ).entrySet().stream()
                 .sorted(Comparator.comparing(entry -> entry.getKey().toString()))
                 .forEach(entry -> readMachine(entry.getKey(), entry.getValue(), machines));
-        return new PreparedGuideData(multiblocks, opcodes, items, machines);
+        return new PreparedGuideData(multiblocks, opcodes, languages, items, machines);
     }
 
     @Override
@@ -95,6 +103,10 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         requireSchema(file, root);
         ResourceLocation id = parseId(file, GsonHelper.getAsString(root, "id"));
         String translationKey = GsonHelper.getAsString(root, "translation_key");
+        String descriptionKey = root.has("description")
+                ? GsonHelper.getAsString(root, "description")
+                : "guide.magneticraft.multiblock." + id.getPath() + ".description";
+        String recipeType = root.has("recipe_type") ? GsonHelper.getAsString(root, "recipe_type") : "";
         String category = GsonHelper.getAsString(root, "category");
         List<List<String>> layers = readLayers(file, GsonHelper.getAsJsonArray(root, "layers"));
         Map<Character, LegendEntry> legend = readLegend(file, GsonHelper.getAsJsonArray(root, "legend"));
@@ -106,6 +118,8 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         return new MultiblockGuide(
                 id,
                 translationKey,
+                descriptionKey,
+                recipeType,
                 category,
                 layers,
                 legend,
@@ -143,6 +157,55 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
             Magneticraft.LOGGER.warn("Skipping invalid portable-item guide {}", PORTABLE_ITEM_GUIDE, exception);
             return List.of();
         }
+    }
+
+    private List<ComputerLanguageGuide> readLanguages(Resource resource) {
+        try (Reader reader = resource.openAsReader()) {
+            return parseLanguages(COMPUTER_LANGUAGE_GUIDE, GsonHelper.parse(reader));
+        } catch (IOException | RuntimeException exception) {
+            Magneticraft.LOGGER.warn("Skipping invalid computer-language guide {}", COMPUTER_LANGUAGE_GUIDE, exception);
+            return List.of();
+        }
+    }
+
+    static List<ComputerLanguageGuide> parseLanguages(ResourceLocation file, JsonObject root) {
+        requireSchema(file, root);
+        JsonObject limitData = GsonHelper.getAsJsonObject(root, "limits");
+        ComputerLimits limits = new ComputerLimits(
+                nonNegativeInt(limitData, "source_bytes"),
+                nonNegativeInt(limitData, "output_characters"),
+                nonNegativeInt(limitData, "instructions_per_tick"),
+                nonNegativeInt(limitData, "device_calls_per_tick"),
+                nonNegativeInt(limitData, "floppy_bytes"),
+                nonNegativeInt(limitData, "floppy_entries"),
+                nonNegativeInt(limitData, "quarry_max_size")
+        );
+        JsonObject securityData = GsonHelper.getAsJsonObject(root, "security");
+        ComputerSecurity security = new ComputerSecurity(
+                GsonHelper.getAsBoolean(securityData, "server_authoritative"),
+                GsonHelper.getAsBoolean(securityData, "menu_session_replay_protection"),
+                GsonHelper.getAsBoolean(securityData, "host_filesystem_access"),
+                GsonHelper.getAsBoolean(securityData, "outbound_network_access"),
+                GsonHelper.getAsBoolean(securityData, "force_load_chunks")
+        );
+        List<ComputerLanguageGuide> languages = new ArrayList<>();
+        for (JsonElement element : GsonHelper.getAsJsonArray(root, "languages")) {
+            JsonObject language = element.getAsJsonObject();
+            String id = GsonHelper.getAsString(language, "id");
+            if (id.isBlank()) {
+                throw new IllegalArgumentException("Blank computer language in " + file);
+            }
+            languages.add(new ComputerLanguageGuide(
+                    id,
+                    GsonHelper.getAsString(language, "historical_version"),
+                    readStrings(language, "examples"),
+                    readStrings(language, "commands"),
+                    limits,
+                    security
+            ));
+        }
+        languages.sort(Comparator.comparing(ComputerLanguageGuide::id));
+        return List.copyOf(languages);
     }
 
     static List<ItemGuide> parseItems(ResourceLocation file, JsonObject root) {
@@ -188,6 +251,7 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
                 GsonHelper.getAsBoolean(root, "has_menu"),
                 GsonHelper.getAsString(root, "redstone_control"),
                 GsonHelper.getAsString(root, "processing_kind"),
+                root.has("recipe_type") ? GsonHelper.getAsString(root, "recipe_type") : "",
                 GsonHelper.getAsString(root, "automation_profile"),
                 slotRoles,
                 readStrings(root, "physical_ports")
@@ -285,6 +349,8 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
     public record MultiblockGuide(
             ResourceLocation id,
             String translationKey,
+            String descriptionKey,
+            String recipeType,
             String category,
             List<List<String>> layers,
             Map<Character, LegendEntry> legend,
@@ -319,6 +385,40 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
     public record OpcodeGuide(String id, int code, int operandCount, String descriptionKey) {
     }
 
+    public record ComputerLanguageGuide(
+            String id,
+            String historicalVersion,
+            List<String> examples,
+            List<String> commands,
+            ComputerLimits limits,
+            ComputerSecurity security
+    ) {
+        public ComputerLanguageGuide {
+            examples = List.copyOf(examples);
+            commands = List.copyOf(commands);
+        }
+    }
+
+    public record ComputerLimits(
+            int sourceBytes,
+            int outputCharacters,
+            int instructionsPerTick,
+            int deviceCallsPerTick,
+            int floppyBytes,
+            int floppyEntries,
+            int quarryMaxSize
+    ) {
+    }
+
+    public record ComputerSecurity(
+            boolean serverAuthoritative,
+            boolean menuSessionReplayProtection,
+            boolean hostFilesystemAccess,
+            boolean outboundNetworkAccess,
+            boolean forceLoadChunks
+    ) {
+    }
+
     public record ItemGuide(
             ResourceLocation id,
             String translationKey,
@@ -346,6 +446,7 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
             boolean hasMenu,
             String redstoneControl,
             String processingKind,
+            String recipeType,
             String automationProfile,
             List<String> slotRoles,
             List<String> physicalPorts
@@ -361,10 +462,12 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
     protected record PreparedGuideData(
             List<MultiblockGuide> multiblocks,
             List<OpcodeGuide> opcodes,
+            List<ComputerLanguageGuide> languages,
             List<ItemGuide> items,
             List<MachineGuide> machines
     ) {
         private static final PreparedGuideData EMPTY = new PreparedGuideData(
+                List.of(),
                 List.of(),
                 List.of(),
                 List.of(),
@@ -374,6 +477,7 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         protected PreparedGuideData {
             multiblocks = List.copyOf(multiblocks);
             opcodes = List.copyOf(opcodes);
+            languages = List.copyOf(languages);
             items = List.copyOf(items);
             machines = List.copyOf(machines);
         }

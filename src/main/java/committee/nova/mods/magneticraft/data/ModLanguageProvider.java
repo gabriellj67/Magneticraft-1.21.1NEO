@@ -126,6 +126,18 @@ final class ModLanguageProvider extends LanguageProvider {
         add("text.magneticraft.wire_connect.already_connected", chinese ? "两个端点已经连接" : "The endpoints are already connected");
         add("text.magneticraft.wire_connect.no_other_connector", chinese ? "请先潜行右击选择第一个端点" : "Sneak-use a first endpoint before connecting");
         add("tooltip.magneticraft.energy", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
+        add("config.jade.plugin_magneticraft.machine_status", chinese ? "磁场工艺机器状态" : "Magneticraft Machine Status");
+        add("tooltip.magneticraft.jade.process", chinese ? "进度：%s / %s（%s）" : "Progress: %s / %s (%s)");
+        add("tooltip.magneticraft.jade.active", chinese ? "运行中" : "active");
+        add("tooltip.magneticraft.jade.idle", chinese ? "空闲" : "idle");
+        add("tooltip.magneticraft.jade.temperature", chinese ? "温度：%s K" : "Temperature: %s K");
+        add("tooltip.magneticraft.jade.tank", chinese ? "%s：%s / %s mB" : "%s: %s / %s mB");
+        add("tooltip.magneticraft.jade.empty", chinese ? "空" : "Empty");
+        add("tooltip.magneticraft.jade.structure", chinese ? "结构：%s，%s" : "Structure: %s, %s");
+        add("tooltip.magneticraft.jade.formed", chinese ? "已组装" : "formed");
+        add("tooltip.magneticraft.jade.unformed", chinese ? "未组装" : "unformed");
+        add("tooltip.magneticraft.jade.operational", chinese ? "可运行" : "operational");
+        add("tooltip.magneticraft.jade.paused", chinese ? "已暂停" : "paused");
         add("tooltip.magneticraft.small_tank.line_0", chinese
                 ? "装有 %s mB %s"
                 : "Holding %s mB of %s");
@@ -257,7 +269,35 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.mode.structures", chinese ? "多方块结构" : "Multiblocks");
         add("gui.magneticraft.guide.mode.machines", chinese ? "单方块机器" : "Single-Block Machines");
         add("gui.magneticraft.guide.mode.opcodes", chinese ? "计算机指令" : "Computer Opcodes");
-        add("gui.magneticraft.guide.mode.items", chinese ? "电气设备" : "Electrical Equipment");
+        add("gui.magneticraft.guide.mode.items", chinese ? "设备与工具" : "Equipment & Tools");
+        add("gui.magneticraft.guide.mode.languages", chinese ? "编程语言" : "Programming Languages");
+        add("gui.magneticraft.guide.computer.version", chinese ? "历史语义版本：%s" : "Historical semantics: %s");
+        add("gui.magneticraft.guide.computer.source_limits", chinese
+                ? "源码上限：%s 字节；输出上限：%s 字符"
+                : "Source limit: %s bytes; output limit: %s characters");
+        add("gui.magneticraft.guide.computer.tick_limits", chinese
+                ? "每 tick：%s 条指令，%s 次设备调用"
+                : "Per tick: %s instructions, %s device calls");
+        add("gui.magneticraft.guide.computer.storage_limits", chinese
+                ? "软盘：%s 字节/%s 条目；采石场最大边长：%s"
+                : "Floppy: %s bytes/%s entries; maximum quarry side: %s");
+        add("gui.magneticraft.guide.computer.examples", chinese ? "示例：%s" : "Examples: %s");
+        add("gui.magneticraft.guide.computer.commands", chinese ? "命令：%s" : "Commands: %s");
+        add("gui.magneticraft.guide.computer.security", chinese
+                ? "服务端权威：%s；防重放：%s；主机文件：%s；外部网络：%s；区块强加载：%s"
+                : "Server authority: %s; replay protection: %s; host files: %s; outbound network: %s; chunk loading: %s");
+        add("guide.magneticraft.computer.language.forth.name", chinese ? "Forth" : "Forth");
+        add("guide.magneticraft.computer.language.forth.description", chinese
+                ? "有界的栈式 Forth 核心，包含历史算术、控制流、词典和设备词；栈、词典及每 tick 执行量均受限制。"
+                : "A bounded stack-based Forth core with historical arithmetic, control flow, dictionary, and device words; stacks, dictionary, and per-tick execution are limited.");
+        add("guide.magneticraft.computer.language.lisp.name", chinese ? "Lisp" : "Lisp");
+        add("guide.magneticraft.computer.language.lisp.description", chinese
+                ? "运行在受限虚拟机上的 Lisp 层，支持定义、表达式、环境查询和设备调用；内存与求值预算会阻止无限增长。"
+                : "A Lisp layer on the bounded VM with definitions, expressions, environment inspection, and device calls; memory and evaluation budgets prevent unbounded growth.");
+        add("guide.magneticraft.computer.language.shell.name", chinese ? "Shell" : "Shell");
+        add("guide.magneticraft.computer.language.shell.description", chinese
+                ? "面向虚拟软盘与采石场命令的受限 Shell；它不能访问主机文件系统、外部网络或未加载区块。"
+                : "A constrained Shell for the virtual floppy and quarry commands; it cannot access the host filesystem, outbound network, or unloaded chunks.");
         add("gui.magneticraft.guide.capacity", chinese ? "容量：%s FE" : "Capacity: %s FE");
         add("gui.magneticraft.guide.break_cost", chinese ? "破坏耗能：%s FE" : "Block cost: %s FE");
         add("gui.magneticraft.guide.attack_cost", chinese ? "攻击耗能：%s FE" : "Attack cost: %s FE");
@@ -304,6 +344,37 @@ final class ModLanguageProvider extends LanguageProvider {
         add("guide.magneticraft.item.wind_turbine.description", chinese
                 ? "风力发电机最高产生 200 J/t。叶轮平面与前方 16 格需要保持开阔；扫描不会加载区块。"
                 : "Generates up to 200 J/t. Keep the rotor plane and 16 blocks ahead clear; its scan never loads chunks.");
+        addGuideItemDescription("wrench", "配置机器、管道与网络侧面；潜行交互用于次要配置。",
+                "Configures machine, pipe, and network sides; sneak-use selects secondary actions.");
+        addGuideItemDescription("electric_cable", "连接相邻兼容电力端口；断开后运行时图会由持久状态安全重建。",
+                "Connects adjacent compatible electrical ports; runtime graphs rebuild safely from persistent state.");
+        addGuideItemDescription("heat_pipe", "连接热力节点并向环境散热；区块卸载时暂停。",
+                "Connects thermal nodes with environmental heat loss and pauses during chunk unload.");
+        addGuideItemDescription("insulated_heat_pipe", "降低环境散热的热力传输管，不会强加载邻接区块。",
+                "A thermal pipe with reduced environmental loss that never force-loads neighboring chunks.");
+        addGuideItemDescription("heat_sink", "从热网主动耗散热量，用于限制机器与管网温度。",
+                "Deliberately dissipates thermal-network energy to limit machine and pipe temperatures.");
+        addGuideItemDescription("iron_fluid_pipe", "在兼容流体端点之间执行先模拟后提交的有界传输。",
+                "Performs bounded simulate-then-commit transfers between compatible fluid endpoints.");
+        addGuideItemDescription("pneumatic_tube", "构成有界气动物流图；载荷在目标阻塞或卸载时保留。",
+                "Forms a bounded pneumatic logistics graph whose payloads survive blocked or unloaded targets.");
+        addGuideItemDescription("pneumatic_restriction_tube", "提高该路径的物流代价，使搜索优先选择普通气动管。",
+                "Raises route cost so logistics searches prefer ordinary pneumatic tubes when possible.");
+        addGuideItemDescription("conveyor_belt", "以内部载荷模型水平搬运物品，支持右键存取、转角与阻塞回压。",
+                "Moves an internal item payload horizontally with right-click access, corners, and blockage backpressure.");
+        addGuideItemDescription("inserter_speed_upgrade", "缩短机械臂动作间隔；只对机械臂的真实升级槽生效。",
+                "Reduces inserter action delay and applies only through its real upgrade slot.");
+        addGuideItemDescription("inserter_stack_upgrade", "允许机械臂单次搬运更大物品组，不绕过目标容量检查。",
+                "Lets an inserter move larger stacks without bypassing destination-capacity checks.");
+        addGuideItemDescription("computer", "运行有界 Forth、Lisp 或 Shell 程序，并通过服务端验证的内部设备总线访问世界。",
+                "Runs bounded Forth, Lisp, or Shell programs and reaches the world only through a server-validated device bus.");
+        addGuideItemDescription("mining_robot", "按权限、能量、距离、区块和每 tick 预算执行移动、扫描、采掘与采石场任务。",
+                "Executes movement, scan, mining, and quarry tasks under permission, energy, range, chunk, and tick budgets.");
+        addGuideItemDescription("floppy_disk", "保存版本化程序与虚拟文件系统；损坏、未来版本及只读预置介质会安全拒绝写入。",
+                "Stores versioned programs and a virtual filesystem; corrupt, future-version, and read-only preset media fail safely.");
+        addGuideItemDescription("oil_deposit", "保存有限原油储量；抽油机只在油藏与结构均已加载且有效时抽取。",
+                "Stores a finite crude-oil reserve that a pumpjack extracts only while source and structure are loaded and valid.");
+        addMultiblockGuideTranslations();
         add("gui.magneticraft.guide.layer", chinese ? "层 %s/%s" : "Layer %s/%s");
         add("gui.magneticraft.guide.yes", chinese ? "是" : "yes");
         add("gui.magneticraft.guide.no", chinese ? "否" : "no");
@@ -322,6 +393,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.machine.menu", chinese ? "界面：%s" : "Menu: %s");
         add("gui.magneticraft.guide.machine.redstone", chinese ? "红石控制：%s" : "Redstone control: %s");
         add("gui.magneticraft.guide.machine.processing", chinese ? "处理类型：%s" : "Processing: %s");
+        add("gui.magneticraft.guide.machine.recipe", chinese ? "配方入口：%s" : "Recipe entry: %s");
         add("gui.magneticraft.guide.machine.automation", chinese ? "自动化：%s" : "Automation: %s");
         add("gui.magneticraft.guide.machine.slots", chinese ? "槽位职责：%s" : "Slot roles: %s");
         add("gui.magneticraft.guide.machine.ports", chinese ? "物理端口：%s" : "Physical ports: %s");
@@ -415,6 +487,61 @@ final class ModLanguageProvider extends LanguageProvider {
         addGuideRule("column_z", "Z 轴机器支撑柱", "Z-axis Machine Support Column");
         addGuideRule("unknown", "未知部件", "Unknown Part");
         addSingleBlockGuideTranslations();
+    }
+
+    private void addGuideItemDescription(String id, String chineseText, String englishText) {
+        add("guide.magneticraft.item." + id + ".description", chinese ? chineseText : englishText);
+    }
+
+    private void addMultiblockGuideTranslations() {
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            add(
+                    "guide.magneticraft.multiblock." + definition.id() + ".description",
+                    chinese ? multiblockGuideChinese(definition) : multiblockGuideEnglish(definition)
+            );
+        }
+    }
+
+    private static String multiblockGuideChinese(MultiblockDefinition definition) {
+        return switch (definition) {
+            case BIG_COMBUSTION_CHAMBER -> "燃烧固体燃料并向大型热力网络供热；结构或输出受阻时保留燃料。";
+            case BIG_ELECTRIC_FURNACE -> "使用原生电力执行高容量熔炼；完整输出可提交时才消耗输入。";
+            case BIG_STEAM_BOILER -> "把水与热量转换为蒸汽；输入、输出和热状态在回压下全部保留。";
+            case CONTAINER -> "以单一物品标识和有界计数提供大宗存储，模拟插取无副作用。";
+            case GRINDER -> "执行研磨高级加工配方，库存、能量、配方和进度均可持久化。";
+            case HYDRAULIC_PRESS -> "按轻压、中压或重压模式执行匹配配方，模式切换由服务端验证。";
+            case OIL_HEATER -> "消耗热量把原油转换为加热原油，输出罐不足时暂停。";
+            case PUMPJACK -> "从已加载的有限油藏抽取原油，不强加载区块且不会使储量为负。";
+            case REFINERY -> "把加热原油原子分离到五个带职责的储罐，任一输出受阻时暂停。";
+            case SHELVING_UNIT -> "通过受所有权保护的箱体升级解锁存储槽，自动化无法访问未解锁容量。";
+            case SIEVE -> "执行筛分高级加工配方，只有完整产物可接收时才提交输入。";
+            case SOLAR_MIRROR -> "在日照和加载条件允许时向有效太阳能塔贡献聚光热量。";
+            case SOLAR_PANEL -> "在天空无遮挡的日照条件下产生原生电力，夜晚或回压时暂停。";
+            case SOLAR_TOWER -> "汇集有效反射镜的聚光贡献，并从声明的热力端口输出热量。";
+            case STEAM_ENGINE -> "消耗蒸汽并产生原生电力，电网回压时保留输入流体。";
+            case STEAM_TURBINE -> "以有界速率把蒸汽转换为原生电力，卸载期间安全暂停。";
+        };
+    }
+
+    private static String multiblockGuideEnglish(MultiblockDefinition definition) {
+        return switch (definition) {
+            case BIG_COMBUSTION_CHAMBER -> "Burns solid fuel into a large thermal network and preserves fuel while structure or output is blocked.";
+            case BIG_ELECTRIC_FURNACE -> "Performs high-capacity smelting with native electricity and consumes input only when full output can commit.";
+            case BIG_STEAM_BOILER -> "Converts water and heat into steam while preserving all input, output, and thermal state under backpressure.";
+            case CONTAINER -> "Provides bulk storage as one item identity and bounded count with side-effect-free simulated insertion and extraction.";
+            case GRINDER -> "Runs grinder advanced-processing recipes with persistent inventory, energy, recipe identity, and progress.";
+            case HYDRAULIC_PRESS -> "Runs matching light, medium, or heavy press recipes with server-validated mode changes.";
+            case OIL_HEATER -> "Uses heat to convert crude oil into heated crude oil and pauses when its output tank lacks capacity.";
+            case PUMPJACK -> "Extracts a finite loaded oil deposit without force-loading chunks or allowing a negative reserve.";
+            case REFINERY -> "Atomically separates heated crude oil into five role-specific tanks and pauses when any output is blocked.";
+            case SHELVING_UNIT -> "Unlocks storage through owner-protected chest upgrades and hides locked capacity from automation.";
+            case SIEVE -> "Runs sieve advanced-processing recipes and commits input only when the complete result can be accepted.";
+            case SOLAR_MIRROR -> "Contributes concentrated heat to a valid solar tower while daylight and loaded-chunk conditions permit.";
+            case SOLAR_PANEL -> "Generates native electricity under unobstructed daylight and pauses at night or under backpressure.";
+            case SOLAR_TOWER -> "Collects valid mirror contributions and outputs their concentrated heat through the declared thermal port.";
+            case STEAM_ENGINE -> "Consumes steam to generate native electricity and retains input fluid under electrical backpressure.";
+            case STEAM_TURBINE -> "Converts steam into native electricity at a bounded rate and pauses safely while unloaded.";
+        };
     }
 
     private void addGuideValues(String group, String[][] values) {

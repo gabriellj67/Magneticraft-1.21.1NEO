@@ -6,6 +6,7 @@
   },
   "category": "energy",
   "controller": "magneticraft:solar_tower",
+  "description": "guide.magneticraft.multiblock.solar_tower.description",
   "id": "magneticraft:solar_tower",
   "layers": [
     [

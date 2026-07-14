@@ -10,6 +10,7 @@
     "item"
   ],
   "processing_kind": "crafting",
+  "recipe_type": "minecraft:crafting",
   "redstone_control": "ignored",
   "schema_version": 1,
   "slot_roles": [

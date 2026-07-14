@@ -6,6 +6,7 @@
   },
   "category": "energy",
   "controller": "magneticraft:industrial_steam_boiler",
+  "description": "guide.magneticraft.multiblock.industrial_steam_boiler.description",
   "id": "magneticraft:industrial_steam_boiler",
   "layers": [
     [

@@ -24,11 +24,17 @@ class GuideRepositoryTest {
             "magneticraft",
             "guide/machines/electric_furnace.json"
     );
+    private static final ResourceLocation LANGUAGE_FILE = ResourceLocation.fromNamespaceAndPath(
+            "magneticraft",
+            "guide/computer_languages.json"
+    );
 
     @Test
     void parsesMirroringAndPortSummary() {
         JsonObject root = baseGuide();
         root.addProperty("supports_mirroring", true);
+        root.addProperty("description", "guide.magneticraft.multiblock.test.description");
+        root.addProperty("recipe_type", "magneticraft:advanced_processing");
         root.add("ports", JsonParser.parseString("""
                 {
                   "inventory_slots": 3,
@@ -42,6 +48,8 @@ class GuideRepositoryTest {
         GuideRepository.MultiblockGuide guide = GuideRepository.parseMultiblock(FILE, root);
 
         assertTrue(guide.supportsMirroring());
+        assertEquals("guide.magneticraft.multiblock.test.description", guide.descriptionKey());
+        assertEquals("magneticraft:advanced_processing", guide.recipeType());
         assertEquals(3, guide.ports().inventorySlots());
         assertEquals(8192, guide.ports().bulkItemCapacity());
         assertTrue(guide.ports().electricity());
@@ -54,6 +62,8 @@ class GuideRepositoryTest {
         GuideRepository.MultiblockGuide guide = GuideRepository.parseMultiblock(FILE, baseGuide());
 
         assertFalse(guide.supportsMirroring());
+        assertEquals("guide.magneticraft.multiblock.test.description", guide.descriptionKey());
+        assertEquals("", guide.recipeType());
         assertEquals(0, guide.ports().inventorySlots());
         assertEquals(0, guide.ports().bulkItemCapacity());
         assertFalse(guide.ports().electricity());
@@ -105,6 +115,7 @@ class GuideRepositoryTest {
                   "has_menu": true,
                   "redstone_control": "ignored",
                   "processing_kind": "recipe",
+                  "recipe_type": "minecraft:smelting",
                   "automation_profile": "input_output",
                   "slot_roles": ["input", "output"],
                   "physical_ports": ["electric"]
@@ -122,9 +133,64 @@ class GuideRepositoryTest {
         assertTrue(guide.hasMenu());
         assertEquals("ignored", guide.redstoneControl());
         assertEquals("recipe", guide.processingKind());
+        assertEquals("minecraft:smelting", guide.recipeType());
         assertEquals("input_output", guide.automationProfile());
         assertEquals(List.of("input", "output"), guide.slotRoles());
         assertEquals(List.of("electric"), guide.physicalPorts());
+    }
+
+    @Test
+    void parsesBoundedComputerLanguageContracts() {
+        JsonObject root = JsonParser.parseString("""
+                {
+                  "schema_version": 1,
+                  "limits": {
+                    "source_bytes": 4096,
+                    "output_characters": 2048,
+                    "instructions_per_tick": 1000,
+                    "device_calls_per_tick": 8,
+                    "floppy_bytes": 32768,
+                    "floppy_entries": 64,
+                    "quarry_max_size": 32
+                  },
+                  "languages": [
+                    {
+                      "id": "shell",
+                      "historical_version": "1.1",
+                      "examples": ["help"],
+                      "commands": ["help", "quarry"]
+                    },
+                    {
+                      "id": "forth",
+                      "historical_version": "1.1",
+                      "examples": ["2 5 + ."],
+                      "commands": ["MINE"]
+                    }
+                  ],
+                  "security": {
+                    "server_authoritative": true,
+                    "menu_session_replay_protection": true,
+                    "host_filesystem_access": false,
+                    "outbound_network_access": false,
+                    "force_load_chunks": false
+                  }
+                }
+                """).getAsJsonObject();
+
+        List<GuideRepository.ComputerLanguageGuide> languages =
+                GuideRepository.parseLanguages(LANGUAGE_FILE, root);
+
+        assertEquals(List.of("forth", "shell"), languages.stream()
+                .map(GuideRepository.ComputerLanguageGuide::id)
+                .toList());
+        GuideRepository.ComputerLanguageGuide forth = languages.get(0);
+        assertEquals(4_096, forth.limits().sourceBytes());
+        assertEquals(8, forth.limits().deviceCallsPerTick());
+        assertTrue(forth.security().serverAuthoritative());
+        assertTrue(forth.security().menuSessionReplayProtection());
+        assertFalse(forth.security().hostFilesystemAccess());
+        assertFalse(forth.security().outboundNetworkAccess());
+        assertFalse(forth.security().forceLoadChunks());
     }
 
     private static JsonObject baseGuide() {

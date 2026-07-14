@@ -6,6 +6,7 @@
   },
   "category": "processing",
   "controller": "magneticraft:hydraulic_press",
+  "description": "guide.magneticraft.multiblock.hydraulic_press.description",
   "id": "magneticraft:hydraulic_press",
   "layers": [
     [
@@ -90,6 +91,7 @@
     "heat": false,
     "inventory_slots": 2
   },
+  "recipe_type": "magneticraft:advanced_processing",
   "schema_version": 1,
   "size": {
     "x": 3,

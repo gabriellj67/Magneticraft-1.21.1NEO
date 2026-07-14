@@ -14,6 +14,9 @@ import committee.nova.mods.magneticraft.content.machine.framework.menu.GhostSlot
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.GhostFilterModule;
+import committee.nova.mods.magneticraft.content.machine.observation.MachineObservation;
+import committee.nova.mods.magneticraft.content.machine.observation.MachineObservationCodec;
+import committee.nova.mods.magneticraft.content.machine.observation.MachineObservationService;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
@@ -94,6 +97,34 @@ public final class MachineFrameworkGameTests {
         helper.setBlock(TEST_POS, ModMachineBlocks.CRUSHING_TABLE.get());
         CrushingTableBlockEntity table = requireBlockEntity(helper, TEST_POS, CrushingTableBlockEntity.class);
         helper.assertFalse(table.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).isPresent(), "Crushing table exposed automation inventory");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void machineObservationExposesOnlyAuthoritativePublicState(GameTestHelper helper) {
+        helper.setBlock(TEST_POS, ModMachineBlocks.BATTERY.get());
+        BatteryBlockEntity battery = requireBlockEntity(helper, TEST_POS, BatteryBlockEntity.class);
+        battery.energy().setEnergyStored(12_345);
+        battery.electricity().node().setVoltage(60.0D);
+        battery.inventory().setStackInSlot(0, new ItemStack(ModMachineItems.LOW_BATTERY.get()));
+
+        MachineObservation observation = MachineObservationService.observe(battery, Direction.UP);
+        helper.assertTrue(
+                observation.energy().map(energy -> energy.stored() == 12_345
+                        && energy.capacity() == BatteryBlockEntity.CAPACITY).orElse(false),
+                "Machine observation lost the authoritative energy snapshot"
+        );
+        helper.assertTrue(observation.electrical().isPresent(), "Machine observation lost electrical diagnostics");
+        helper.assertTrue(observation.process().isEmpty(), "Battery exposed a fabricated process state");
+        helper.assertTrue(observation.tanks().isEmpty(), "Battery exposed a fabricated tank state");
+        helper.assertTrue(observation.structure().isEmpty(), "Battery exposed a fabricated structure state");
+
+        CompoundTag serverData = new CompoundTag();
+        MachineObservationCodec.write(serverData, observation);
+        String encoded = serverData.toString();
+        helper.assertFalse(encoded.contains("inventory"), "Observation leaked the battery inventory");
+        helper.assertFalse(encoded.contains("owner"), "Observation leaked ownership data");
+        helper.assertFalse(encoded.contains("program"), "Observation leaked program data");
         helper.succeed();
     }
 

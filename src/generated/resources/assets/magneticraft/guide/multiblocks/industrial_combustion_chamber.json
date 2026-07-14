@@ -6,6 +6,7 @@
   },
   "category": "energy",
   "controller": "magneticraft:industrial_combustion_chamber",
+  "description": "guide.magneticraft.multiblock.industrial_combustion_chamber.description",
   "id": "magneticraft:industrial_combustion_chamber",
   "layers": [
     [

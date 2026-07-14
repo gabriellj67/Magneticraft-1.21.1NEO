@@ -11,6 +11,7 @@
     "item"
   ],
   "processing_kind": "smelting",
+  "recipe_type": "minecraft:smelting",
   "redstone_control": "ignored",
   "schema_version": 1,
   "slot_roles": [
