@@ -13,17 +13,18 @@ from `0.2.0`; later releases may only add forward migrations.
 
 ## Current status
 
-The repository is the `0.2.0` governance and contract-freeze baseline for the
-complete gameplay rebuild. Existing 1.20.1 implementations are candidates:
-each later 0.x stage keeps code only after it passes the Nova 1.12 behavior
-contract, otherwise it is selectively rebuilt.
+The repository is the `0.9.0` gameplay-alignment release candidate. Every
+published Nova 1.12 gameplay entry is assigned exactly once in the migration
+matrix, and every retained or rebuilt entry has executable evidence. The
+remaining `1.0.0` work is the final historical model, animation and release
+presentation pass; it does not reopen frozen registry or persistence contracts.
 
-JEI, CraftTweaker and Tinkers' Construct support is currently optional.
+JEI, CraftTweaker, Tinkers' Construct and Jade support is optional.
 Magneticraft does not embed their classes or require them in a base
-installation. Jade support is not implemented in `0.2.0`; it is planned as an
-isolated optional integration for `0.8.0`. Strut Your Stuff was evaluated for
-future point-to-point electrical structures, but is not a runtime dependency
-because the current release has no matching long-span wire consumer.
+installation. Jade `11.13.1+forge` is isolated behind its plugin boundary and
+receives only server-authoritative observation snapshots. Long-distance
+electricity uses Magneticraft-owned endpoints and persisted connection graphs;
+Strut Your Stuff is not a runtime dependency.
 
 See the [authoritative migration matrix](docs/porting/migration-matrix.md),
 [machine-readable registry map](docs/porting/registry-id-map.json),
@@ -31,8 +32,10 @@ See the [authoritative migration matrix](docs/porting/migration-matrix.md),
 [machine framework notes](docs/porting/machine-framework.md) and
 [legacy model inventory](docs/MODEL_CONVERSION.md) for stable IDs and explicit
 conversion boundaries. The Chinese
-[release-readiness report](docs/porting/release-readiness.md) records the
-feasibility conclusion, test matrix, remaining risks and release advice.
+[0.9.0 release-candidate report](docs/porting/0.9.0-release-candidate.md)
+records the current automated and runtime evidence. The earlier
+[release-readiness report](docs/porting/release-readiness.md) is retained only
+as a historical feasibility snapshot.
 
 ## Runtime requirements
 
@@ -46,7 +49,8 @@ optional versions exercised by the release matrix are:
 - JEI `15.20.0.133` (client);
 - CraftTweaker `14.0.60` (client and dedicated server);
 - Tinkers' Construct `3.11.2.166` with Mantle `1.11.97` (client and dedicated
-  server).
+  server);
+- Jade `11.13.1+forge` (client and dedicated server).
 
 `mods.toml` declares version ranges for compatibility discovery; only the
 fixed versions above are release-tested. Mantle is intentionally not declared
@@ -71,7 +75,7 @@ runtime dependency.
 ```
 
 Generated resources are written to `src/generated/resources` and are part of
-the main resource source set. The release-readiness report contains the
+the main resource source set. The 0.9.0 release-candidate report contains the
 recorded JUnit, GameTest, datagen, client/server and optional-mod matrix
 results; the commands above remain the reproducible local quality gate.
 
@@ -81,7 +85,8 @@ Optional development runtimes are opt-in and may be combined:
 ./gradlew.bat runClient -Penable_jei_runtime=true --no-daemon
 ./gradlew.bat runServer -Penable_crafttweaker_runtime=true --no-daemon
 ./gradlew.bat runClient -Penable_tconstruct_runtime=true --no-daemon
-./gradlew.bat runClient -Penable_jei_runtime=true -Penable_crafttweaker_runtime=true -Penable_tconstruct_runtime=true --no-daemon
+./gradlew.bat runClient -Penable_jade_runtime=true --no-daemon
+./gradlew.bat runClient -Penable_jei_runtime=true -Penable_crafttweaker_runtime=true -Penable_tconstruct_runtime=true -Penable_jade_runtime=true --no-daemon
 ```
 
 The target is new worlds. The complete staged scope, future restoration targets

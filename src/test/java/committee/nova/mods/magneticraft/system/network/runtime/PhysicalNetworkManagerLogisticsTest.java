@@ -1,10 +1,12 @@
 package committee.nova.mods.magneticraft.system.network.runtime;
 
+import committee.nova.mods.magneticraft.MinecraftTestBootstrap;
 import committee.nova.mods.magneticraft.system.network.logistics.LogisticsNetworkNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumSet;
@@ -15,6 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PhysicalNetworkManagerLogisticsTest {
+    @BeforeAll
+    static void bootstrapMinecraft() {
+        MinecraftTestBootstrap.ensureBootstrapped();
+    }
+
     @Test
     void cacheHitStillRevalidatesDynamicDestinationCapacityAndVisitBudget() {
         PhysicalNetworkManager manager = new PhysicalNetworkManager(null);
@@ -41,6 +48,7 @@ class PhysicalNetworkManagerLogisticsTest {
 
     @Test
     void serviceClampsEveryCallerTo4096VisitedNodes() {
+        assertEquals(4_096, PhysicalNetworkManager.MAX_LOGISTICS_ROUTE_VISITS);
         PhysicalNetworkManager manager = new PhysicalNetworkManager(null);
         int destinationX = PhysicalNetworkManager.MAX_LOGISTICS_ROUTE_VISITS + 1;
         for (int x = 0; x <= destinationX; x++) {

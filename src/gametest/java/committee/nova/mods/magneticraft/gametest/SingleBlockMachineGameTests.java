@@ -118,6 +118,34 @@ public final class SingleBlockMachineGameTests {
     }
 
     @GameTest(template = TEMPLATE)
+    public static void twoPlayersShareBoxWithoutDuplicatingItemsInOneTick(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.BOX, Direction.NORTH));
+        SingleBlockMachineBlockEntity box = requireMachine(helper, CENTER);
+        Player first = helper.makeMockSurvivalPlayer();
+        Player second = helper.makeMockSurvivalPlayer();
+        first.getInventory().setItem(9, new ItemStack(Items.IRON_INGOT, 16));
+        second.getInventory().setItem(9, new ItemStack(Items.IRON_INGOT, 16));
+
+        SingleBlockMachineMenu firstMenu = new SingleBlockMachineMenu(1, first.getInventory(), box);
+        SingleBlockMachineMenu secondMenu = new SingleBlockMachineMenu(2, second.getInventory(), box);
+        helper.assertTrue(firstMenu.quickMoveStack(first, 27).getCount() == 16,
+                "First player could not insert its stack");
+        helper.assertTrue(secondMenu.quickMoveStack(second, 27).getCount() == 16,
+                "Second player could not insert its stack");
+        helper.assertTrue(countIron(box) == 32, "Concurrent inserts duplicated or lost box items");
+        helper.assertTrue(countIron(first) == 0 && countIron(second) == 0,
+                "Concurrent inserts left a duplicate in a player inventory");
+
+        ItemStack firstWithdrawal = firstMenu.quickMoveStack(first, 0);
+        ItemStack secondWithdrawal = secondMenu.quickMoveStack(second, 0);
+        helper.assertTrue(firstWithdrawal.getCount() == 32, "First withdrawal did not take the shared stack once");
+        helper.assertTrue(secondWithdrawal.isEmpty(), "Second withdrawal duplicated the already removed stack");
+        helper.assertTrue(countIron(box) + countIron(first) + countIron(second) == 32,
+                "Two-player same-tick interaction violated item conservation");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
     public static void customRecipeSerializersLoadRepresentativeRuntimeRecipes(GameTestHelper helper) {
         var recipeManager = helper.getLevel().getRecipeManager();
         var sluiceRecipe = recipeManager.byKey(Magneticraft.id("sluice_box/gravel")).orElse(null);
@@ -835,6 +863,28 @@ public final class SingleBlockMachineGameTests {
 
     private static SingleBlockMachineBlockEntity requireMachine(GameTestHelper helper, BlockPos position) {
         return requireBlockEntity(helper, position, SingleBlockMachineBlockEntity.class);
+    }
+
+    private static int countIron(SingleBlockMachineBlockEntity machine) {
+        int count = 0;
+        for (int slot = 0; slot < machine.inventory().slots(); slot++) {
+            ItemStack stack = machine.inventory().getStackInSlot(slot);
+            if (stack.is(Items.IRON_INGOT)) {
+                count += stack.getCount();
+            }
+        }
+        return count;
+    }
+
+    private static int countIron(Player player) {
+        int count = 0;
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack stack = player.getInventory().getItem(slot);
+            if (stack.is(Items.IRON_INGOT)) {
+                count += stack.getCount();
+            }
+        }
+        return count;
     }
 
     private static <T extends Animal> T spawnAnimal(

@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MigrationMatrixContractTest {
-    private static final String CURRENT_COMPLETED_STAGE = "0.8.0";
+    private static final String CURRENT_COMPLETED_STAGE = "0.9.0";
     private static final Path MATRIX_PATH = Path.of("docs/porting/migration-matrix.json");
     private static final Path ID_MAP_PATH = Path.of("docs/porting/registry-id-map.json");
     private static final Path LEGACY_RECIPE_ROOT = Path.of(
@@ -907,6 +907,36 @@ class MigrationMatrixContractTest {
         JsonObject matrix = readObject(MATRIX_PATH);
         if (matrix.has("quality_gate")) {
             assertEquals(QUALITY_GATE, strings(matrix.getAsJsonArray("quality_gate")));
+        }
+    }
+
+    @Test
+    void releaseCandidateRoutePointsToExecutableCurrentEvidence() throws IOException {
+        JsonArray routes = readObject(MATRIX_PATH)
+                .getAsJsonObject("acceptance_case_registry")
+                .getAsJsonArray("routes");
+        JsonObject releaseRoute = null;
+        for (JsonElement element : routes) {
+            JsonObject route = element.getAsJsonObject();
+            if (route.get("id").getAsString().equals("release-manual-and-performance")) {
+                releaseRoute = route;
+                break;
+            }
+        }
+
+        assertNotNull(releaseRoute, "Missing release-candidate acceptance route");
+        assertEquals("junit_gametest_runtime_matrix_and_visual_checklist",
+                releaseRoute.get("harness").getAsString());
+        String locator = releaseRoute.get("locator").getAsString();
+        assertFalse(locator.contains("docs/porting/release-readiness.md"),
+                "Release-candidate evidence still points only to the historical report");
+        assertTrue(locator.contains("docs/porting/0.9.0-release-candidate.md"));
+        assertTrue(locator.contains("IncrementalGraphTest.java"));
+        assertTrue(locator.contains("PhysicalNetworkManagerLogisticsTest.java"));
+        assertTrue(locator.contains("ReleaseCandidateBudgetContractTest.java"));
+        assertTrue(locator.contains("SingleBlockMachineGameTests.java"));
+        for (String path : locator.split(";")) {
+            assertTrue(Files.isRegularFile(Path.of(path)), "Missing release-candidate evidence: " + path);
         }
     }
 

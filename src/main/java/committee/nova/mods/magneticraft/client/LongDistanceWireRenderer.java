@@ -17,7 +17,7 @@ import org.joml.Matrix4f;
 /** Draws a bounded, server-synchronized wire snapshot without loading remote chunks. */
 public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistanceWireHost>
         implements BlockEntityRenderer<T> {
-    private static final int MAX_SEGMENTS = 32;
+    static final int MAX_SEGMENTS = 32;
     private static final float WIRE_SPACING = 0.12F;
 
     public LongDistanceWireRenderer(BlockEntityRendererProvider.Context context) {
@@ -73,7 +73,7 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
         float perpendicularX = horizontalLength > 1.0E-4F ? -deltaZ / horizontalLength : 1.0F;
         float perpendicularZ = horizontalLength > 1.0E-4F ? deltaX / horizontalLength : 0.0F;
         float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
-        int segmentCount = Math.min(MAX_SEGMENTS, Math.max(8, (int) Math.ceil(distance * 2.0F)));
+        int segmentCount = segmentCount(distance);
         float sag = Math.min(2.0F, distance * 0.08F);
 
         for (int wire = 0; wire < wireCount; wire++) {
@@ -87,6 +87,10 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
                 vertex(pose, consumer, point(deltaX, deltaY, deltaZ, secondT, sag, offsetX, offsetZ));
             }
         }
+    }
+
+    static int segmentCount(float distance) {
+        return Math.min(MAX_SEGMENTS, Math.max(8, (int) Math.ceil(distance * 2.0F)));
     }
 
     private static WirePoint point(
