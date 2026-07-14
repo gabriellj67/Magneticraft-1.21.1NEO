@@ -14,8 +14,8 @@
     }
   },
   "exclude_subtrees": [
-    "piston",
-    "Group 18"
+    "Group 18",
+    "piston"
   ],
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/electric_engine.gltf",

@@ -33,11 +33,20 @@ public final class MultiblockPortLayout {
             Direction side,
             Kind kind
     ) {
+        return findAll(controller, position, side, kind).stream().findFirst();
+    }
+
+    public static List<Port> findAll(
+            AdvancedMultiblockBlockEntity controller,
+            BlockPos position,
+            Direction side,
+            Kind kind
+    ) {
         return ports(controller.definition()).stream()
                 .filter(port -> port.kind() == kind)
                 .filter(port -> port.worldPosition(controller).equals(position))
                 .filter(port -> port.worldSide(controller.facing()) == side)
-                .findFirst();
+                .toList();
     }
 
     public static boolean supports(
@@ -69,7 +78,7 @@ public final class MultiblockPortLayout {
         layouts.put(MultiblockDefinition.HYDRAULIC_PRESS, hydraulicPress());
         layouts.put(MultiblockDefinition.PUMPJACK, List.of(
                 network(-1, 0, 0, Direction.UP, Kind.ELECTRICITY),
-                fluid(0, 0, 0, Direction.SOUTH, 0, FluidTankModule.TankAccess.OUTPUT)
+                fluid(0, 0, 0, Direction.SOUTH, 0, FluidTankModule.TankAccess.BOTH)
         ));
         layouts.put(MultiblockDefinition.OIL_HEATER, oilHeater());
         layouts.put(MultiblockDefinition.REFINERY, refinery());
@@ -87,7 +96,7 @@ public final class MultiblockPortLayout {
         ports.add(network(-2, 0, -2, Direction.UP, Kind.ELECTRICITY));
         ports.add(network(-2, 0, -2, Direction.SOUTH, Kind.ELECTRICITY));
         for (Direction side : Direction.values()) {
-            ports.add(fluid(0, 0, 0, side, 0, FluidTankModule.TankAccess.INPUT));
+            ports.add(fluid(0, 0, 0, side, 0, FluidTankModule.TankAccess.BOTH));
         }
         return List.copyOf(ports);
     }
@@ -99,7 +108,7 @@ public final class MultiblockPortLayout {
             Direction side = x < 0 ? Direction.WEST : Direction.EAST;
             for (int y = 0; y <= 1; y++) {
                 for (int z = -2; z <= -1; z++) {
-                    ports.add(fluid(x, y, z, side, 0, FluidTankModule.TankAccess.INPUT));
+                    ports.add(fluid(x, y, z, side, 0, FluidTankModule.TankAccess.BOTH));
                 }
             }
         }
@@ -142,17 +151,17 @@ public final class MultiblockPortLayout {
 
     private static List<Port> oilHeater() {
         List<Port> ports = new ArrayList<>();
-        ports.add(fluid(0, 1, -2, Direction.NORTH, 0, FluidTankModule.TankAccess.INPUT));
-        ports.add(fluid(0, 2, -1, Direction.UP, 1, FluidTankModule.TankAccess.OUTPUT));
+        ports.add(fluid(0, 1, -2, Direction.NORTH, 0, FluidTankModule.TankAccess.BOTH));
+        ports.add(fluid(0, 2, -1, Direction.UP, 1, FluidTankModule.TankAccess.BOTH));
         addArea(ports, -1, 1, 0, -2, 0, Direction.DOWN, Kind.HEAT);
         return List.copyOf(ports);
     }
 
     private static List<Port> refinery() {
         List<Port> ports = new ArrayList<>();
-        ports.add(fluid(0, 1, -2, Direction.NORTH, 0, FluidTankModule.TankAccess.INPUT));
-        ports.add(fluid(-1, 1, -1, Direction.WEST, 1, FluidTankModule.TankAccess.INPUT));
-        ports.add(fluid(1, 1, -1, Direction.EAST, 1, FluidTankModule.TankAccess.INPUT));
+        ports.add(fluid(0, 1, -2, Direction.NORTH, 0, FluidTankModule.TankAccess.BOTH));
+        ports.add(fluid(-1, 1, -1, Direction.WEST, 1, FluidTankModule.TankAccess.BOTH));
+        ports.add(fluid(1, 1, -1, Direction.EAST, 1, FluidTankModule.TankAccess.BOTH));
         addCross(ports, 3, 2);
         addCross(ports, 5, 3);
         addCross(ports, 7, 4);
@@ -163,8 +172,8 @@ public final class MultiblockPortLayout {
         List<Port> ports = new ArrayList<>();
         for (int x : new int[]{-1, 1}) {
             Direction side = x < 0 ? Direction.WEST : Direction.EAST;
-            ports.add(item(x, 0, -1, side, slots(0), slots()));
-            ports.add(fluid(x, 0, -1, side, 0, FluidTankModule.TankAccess.INPUT));
+            ports.add(item(x, 0, -1, side, slots(0), slots(0)));
+            ports.add(fluid(x, 0, -1, side, 0, FluidTankModule.TankAccess.BOTH));
         }
         addArea(ports, -1, 1, 1, -2, 0, Direction.UP, Kind.HEAT);
         return List.copyOf(ports);
@@ -175,16 +184,22 @@ public final class MultiblockPortLayout {
         for (int y = 0; y <= 3; y++) {
             for (int z = -2; z <= 0; z++) {
                 ports.add(fluid(-1, y, z, Direction.WEST, 0, FluidTankModule.TankAccess.INPUT));
+                ports.add(fluid(-1, y, z, Direction.WEST, 1, FluidTankModule.TankAccess.OUTPUT));
                 ports.add(fluid(1, y, z, Direction.EAST, 0, FluidTankModule.TankAccess.INPUT));
+                ports.add(fluid(1, y, z, Direction.EAST, 1, FluidTankModule.TankAccess.OUTPUT));
             }
             for (int x = -1; x <= 1; x++) {
                 ports.add(fluid(x, y, -2, Direction.NORTH, 0, FluidTankModule.TankAccess.INPUT));
+                ports.add(fluid(x, y, -2, Direction.NORTH, 1, FluidTankModule.TankAccess.OUTPUT));
                 ports.add(fluid(x, y, 0, Direction.SOUTH, 0, FluidTankModule.TankAccess.INPUT));
+                ports.add(fluid(x, y, 0, Direction.SOUTH, 1, FluidTankModule.TankAccess.OUTPUT));
             }
         }
         for (int x = -1; x <= 1; x++) {
             for (int z = -2; z <= 0; z++) {
                 ports.add(fluid(x, 0, z, Direction.DOWN, 0, FluidTankModule.TankAccess.INPUT));
+                ports.add(fluid(x, 0, z, Direction.DOWN, 1, FluidTankModule.TankAccess.OUTPUT));
+                ports.add(fluid(x, 3, z, Direction.UP, 0, FluidTankModule.TankAccess.INPUT));
                 ports.add(fluid(x, 3, z, Direction.UP, 1, FluidTankModule.TankAccess.OUTPUT));
             }
         }

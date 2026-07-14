@@ -14,6 +14,7 @@ import committee.nova.mods.magneticraft.content.item.LowBatteryItem;
 import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortProfile;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockRule;
 import committee.nova.mods.magneticraft.content.multiblock.ShelvingStorageModule;
@@ -515,20 +516,42 @@ final class AdvancedGuideDataProvider implements DataProvider {
             JsonArray accepted = new JsonArray();
             port.acceptedFluids().forEach(accepted::add);
             tank.add("accepted_fluids", accepted);
-
-            JsonObject access = new JsonObject();
-            access.addProperty("unsided", port.unsidedAccess().name().toLowerCase(Locale.ROOT));
-            for (MultiblockPortProfile.RelativeSide side : MultiblockPortProfile.RelativeSide.values()) {
-                var mode = port.sideAccess().get(side);
-                if (mode != null) {
-                    access.addProperty(side.serializedName(), mode.name().toLowerCase(Locale.ROOT));
-                }
-            }
-            tank.add("access", access);
             tankPorts.add(tank);
         }
         ports.add("fluid_tanks", tankPorts);
+
+        JsonArray connections = new JsonArray();
+        for (MultiblockPortLayout.Port port : MultiblockPortLayout.ports(definition)) {
+            JsonObject connection = new JsonObject();
+            connection.addProperty("kind", port.kind().name().toLowerCase(Locale.ROOT));
+            JsonObject offset = new JsonObject();
+            offset.addProperty("x", port.offset().x());
+            offset.addProperty("y", port.offset().y());
+            offset.addProperty("z", port.offset().z());
+            connection.add("offset", offset);
+            connection.addProperty("side", port.side().getName());
+            if (port.target() >= 0) {
+                connection.addProperty("target", port.target());
+            }
+            if (port.kind() == MultiblockPortLayout.Kind.FLUID) {
+                connection.addProperty("access", port.fluidAccess().name().toLowerCase(Locale.ROOT));
+                connection.addProperty("role", MultiblockPortProfile.tank(definition, port.target()).role());
+            } else if (port.kind() == MultiblockPortLayout.Kind.ITEM) {
+                connection.add("insert_slots", intArray(port.itemAccess().insertSlots()));
+                connection.add("extract_slots", intArray(port.itemAccess().extractSlots()));
+            }
+            connections.add(connection);
+        }
+        ports.add("connections", connections);
         return ports;
+    }
+
+    private static JsonArray intArray(int[] values) {
+        JsonArray result = new JsonArray();
+        for (int value : values) {
+            result.add(value);
+        }
+        return result;
     }
 
     private static String category(MultiblockDefinition definition) {

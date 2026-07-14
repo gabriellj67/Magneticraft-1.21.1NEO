@@ -14,6 +14,7 @@ import committee.nova.mods.magneticraft.content.item.ElectricToolItem;
 import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -103,7 +104,8 @@ class AdvancedGuideDataProviderTest {
         Set<String> ids = new HashSet<>();
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             JsonObject guide = AdvancedGuideDataProvider.multiblockGuide(definition);
-            assertEquals(AdvancedGuideDataProvider.SCHEMA_VERSION, guide.get("schema_version").getAsInt());
+            assertEquals(AdvancedGuideDataProvider.SCHEMA_VERSION,
+                    guide.get("schema_version").getAsInt());
             assertEquals("magneticraft:" + definition.id(), guide.get("id").getAsString());
             assertEquals("magneticraft:" + definition.id(), guide.get("controller").getAsString());
             assertEquals(
@@ -165,33 +167,53 @@ class AdvancedGuideDataProviderTest {
             assertEquals(definition.usesHeat(), ports.get("heat").getAsBoolean());
             assertEquals(definition.tankCount(), ports.getAsJsonArray("fluid_tank_capacities_mb").size());
             assertEquals(definition.tankCount(), ports.getAsJsonArray("fluid_tanks").size());
+            assertEquals(MultiblockPortLayout.ports(definition).size(),
+                    ports.getAsJsonArray("connections").size());
         }
         assertEquals(16, ids.size());
     }
 
     @Test
-    void refineryGuideExposesRuntimeTankRolesFluidsAndRelativeSides() {
-        JsonArray tanks = AdvancedGuideDataProvider.multiblockGuide(MultiblockDefinition.REFINERY)
-                .getAsJsonObject("ports")
-                .getAsJsonArray("fluid_tanks");
+    void refineryGuideExposesExactRuntimeConnectionCoordinatesAndTypedAccess() {
+        JsonObject ports = AdvancedGuideDataProvider.multiblockGuide(MultiblockDefinition.REFINERY)
+                .getAsJsonObject("ports");
+        JsonArray tanks = ports.getAsJsonArray("fluid_tanks");
 
         assertEquals(5, tanks.size());
         JsonObject feed = tanks.get(0).getAsJsonObject();
         assertEquals("feed_input", feed.get("role").getAsString());
         assertEquals(16_000, feed.get("capacity_mb").getAsInt());
-        assertEquals("input", feed.getAsJsonObject("access").get("front").getAsString());
+        assertFalse(feed.has("access"));
         assertTrue(feed.getAsJsonArray("accepted_fluids").toString().contains("magneticraft:heated_crude_oil"));
 
         JsonObject processSteam = tanks.get(1).getAsJsonObject();
         assertEquals("process_steam_input", processSteam.get("role").getAsString());
-        assertEquals("input", processSteam.getAsJsonObject("access").get("back").getAsString());
 
-        assertEquals("output", tanks.get(2).getAsJsonObject()
-                .getAsJsonObject("access").get("left").getAsString());
-        assertEquals("output", tanks.get(3).getAsJsonObject()
-                .getAsJsonObject("access").get("right").getAsString());
-        assertEquals("output", tanks.get(4).getAsJsonObject()
-                .getAsJsonObject("access").get("up").getAsString());
+        List<JsonObject> connections = ports.getAsJsonArray("connections").asList().stream()
+                .map(JsonElement::getAsJsonObject)
+                .toList();
+        assertEquals(15, connections.size());
+        JsonObject feedConnection = connections.stream()
+                .filter(connection -> connection.get("target").getAsInt() == 0)
+                .findFirst()
+                .orElseThrow();
+        assertEquals("fluid", feedConnection.get("kind").getAsString());
+        assertEquals("north", feedConnection.get("side").getAsString());
+        assertEquals("both", feedConnection.get("access").getAsString());
+        assertEquals("feed_input", feedConnection.get("role").getAsString());
+        assertOffset(feedConnection.getAsJsonObject("offset"), 0, 1, -2);
+
+        assertEquals(2, connections.stream()
+                .filter(connection -> connection.get("target").getAsInt() == 1)
+                .filter(connection -> "both".equals(connection.get("access").getAsString()))
+                .count());
+        for (int target = 2; target <= 4; target++) {
+            int expectedTarget = target;
+            assertEquals(4, connections.stream()
+                    .filter(connection -> connection.get("target").getAsInt() == expectedTarget)
+                    .filter(connection -> "output".equals(connection.get("access").getAsString()))
+                    .count());
+        }
     }
 
     @Test

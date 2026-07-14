@@ -64,6 +64,161 @@
   ],
   "ports": {
     "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "side": "east"
+      },
+      {
+        "extract_slots": [
+          1,
+          2
+        ],
+        "insert_slots": [],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "side": "north"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "side": "west"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": 0
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": 0
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": 0
+        },
+        "side": "up"
+      }
+    ],
     "electricity": true,
     "fluid_tank_capacities_mb": [],
     "fluid_tanks": [],

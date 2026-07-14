@@ -151,24 +151,7 @@ public enum SingleBlockMachineDefinition {
 
     /** Physical domains actually owned by this block entity. */
     public Set<PhysicalPort> physicalPorts() {
-        return switch (this) {
-            case BOX, FABRICATOR -> Set.of(PhysicalPort.ITEM);
-            case SLUICE_BOX, FEEDING_TROUGH -> Set.of();
-            case SMALL_TANK -> Set.of(PhysicalPort.FLUID_INPUT, PhysicalPort.FLUID_OUTPUT);
-            case INSERTER -> Set.of(PhysicalPort.ITEM_TRANSFER);
-            case WATER_GENERATOR -> Set.of(PhysicalPort.FLUID_OUTPUT);
-            case RELAY -> Set.of(PhysicalPort.ITEM, PhysicalPort.PNEUMATIC);
-            case FILTER, TRANSPOSER -> Set.of(PhysicalPort.GHOST_FILTER, PhysicalPort.PNEUMATIC);
-            case COMBUSTION_CHAMBER -> Set.of(PhysicalPort.ITEM, PhysicalPort.HEAT);
-            case STEAM_BOILER -> Set.of(PhysicalPort.FLUID_INPUT, PhysicalPort.FLUID_OUTPUT, PhysicalPort.HEAT);
-            case ELECTRIC_HEATER -> Set.of(PhysicalPort.ELECTRICITY, PhysicalPort.HEAT);
-            case RF_HEATER -> Set.of(PhysicalPort.FORGE_ENERGY, PhysicalPort.HEAT);
-            case GASIFICATION_UNIT -> Set.of(PhysicalPort.ITEM, PhysicalPort.FLUID_OUTPUT, PhysicalPort.HEAT);
-            case BRICK_FURNACE -> Set.of(PhysicalPort.ITEM, PhysicalPort.HEAT);
-            case INFINITE_ENERGY, AIRLOCK, THERMOPILE -> Set.of(PhysicalPort.ELECTRICITY);
-            case RF_TRANSFORMER -> Set.of(PhysicalPort.ELECTRICITY, PhysicalPort.FORGE_ENERGY);
-            case ELECTRIC_ENGINE -> Set.of(PhysicalPort.ELECTRICITY, PhysicalPort.FORGE_ENERGY);
-        };
+        return SingleBlockPortProfile.physicalPorts(this);
     }
 
     public String guideCategory() {

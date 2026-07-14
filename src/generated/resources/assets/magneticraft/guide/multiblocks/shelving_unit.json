@@ -37,6 +37,7 @@
   "ports": {
     "bulk_item_capacity": 0,
     "chest_upgrade_slots": 24,
+    "connections": [],
     "electricity": false,
     "fluid_tank_capacities_mb": [],
     "fluid_tanks": [],

@@ -48,6 +48,19 @@ public final class LongDistanceElectricGameTests {
     }
 
     @GameTest(template = TEMPLATE)
+    public static void windTurbinePreservesReleasedAllSideElectricalPorts(GameTestHelper helper) {
+        BlockPos position = new BlockPos(1, 1, 1);
+        helper.setBlock(position, ModNetworkBlocks.WIND_TURBINE.get().defaultBlockState()
+                .setValue(WindTurbineBlock.FACING, Direction.NORTH));
+        WindTurbineBlockEntity turbine = (WindTurbineBlockEntity) helper.getBlockEntity(position);
+        for (Direction side : Direction.values()) {
+            helper.assertTrue(turbine.electricity().connectionSides().contains(side),
+                    "Wind turbine lost its released electrical port on " + side.getName());
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
     public static void restoredBlocksAndBlockEntitiesAreRegistered(GameTestHelper helper) {
         assertBlockId(helper, "electric_connector", ModNetworkBlocks.ELECTRIC_CONNECTOR.get());
         assertBlockId(helper, "electric_pole", ModNetworkBlocks.ELECTRIC_POLE.get());

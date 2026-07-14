@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMenu;
+import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeBlockEntity;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
@@ -36,6 +37,29 @@ public final class PneumaticEndpointGameTests {
     private static final BlockPos CENTER = new BlockPos(1, 1, 1);
 
     private PneumaticEndpointGameTests() {
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void pneumaticTubeArmsMatchReleasedInputAndOutputFaces(GameTestHelper helper) {
+        BlockPos westTube = CENTER.west();
+        BlockPos eastTube = CENTER.east();
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.FILTER, Direction.EAST));
+        helper.setBlock(westTube, ModNetworkBlocks.PNEUMATIC_TUBE.get());
+        helper.setBlock(eastTube, ModNetworkBlocks.PNEUMATIC_TUBE.get());
+        ConduitBlock.refreshAround(helper.getLevel(), helper.absolutePos(CENTER));
+
+        helper.assertTrue(helper.getBlockState(westTube).getValue(ConduitBlock.EAST),
+                "Filter input tube did not align with the model's rear face");
+        helper.assertTrue(helper.getBlockState(eastTube).getValue(ConduitBlock.WEST),
+                "Filter output tube did not align with the model's front face");
+
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.RELAY, Direction.EAST));
+        ConduitBlock.refreshAround(helper.getLevel(), helper.absolutePos(CENTER));
+        helper.assertTrue(!helper.getBlockState(westTube).getValue(ConduitBlock.EAST),
+                "Relay exposed a pneumatic arm on its inventory-only rear face");
+        helper.assertTrue(helper.getBlockState(eastTube).getValue(ConduitBlock.WEST),
+                "Relay output tube did not align with the model's front face");
+        helper.succeed();
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 20)

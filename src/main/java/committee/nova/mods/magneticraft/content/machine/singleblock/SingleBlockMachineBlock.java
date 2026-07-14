@@ -67,13 +67,11 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Direction facing = switch (definition.facingMode()) {
-            case NONE -> Direction.NORTH;
-            case HORIZONTAL -> definition.doubleLength()
-                    ? context.getHorizontalDirection()
-                    : context.getHorizontalDirection().getOpposite();
-            case ALL -> context.getClickedFace();
-        };
+        Direction facing = placementFacing(
+                definition,
+                context.getClickedFace(),
+                context.getHorizontalDirection()
+        );
         BlockState state = defaultBlockState().setValue(FACING, facing);
         if (definition.doubleLength()) {
             BlockPos secondary = context.getClickedPos().relative(facing);
@@ -82,6 +80,20 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
             }
         }
         return state;
+    }
+
+    static Direction placementFacing(
+            SingleBlockMachineDefinition definition,
+            Direction clickedFace,
+            Direction horizontalDirection
+    ) {
+        return switch (definition.facingMode()) {
+            case NONE -> Direction.NORTH;
+            case HORIZONTAL -> definition.doubleLength()
+                    ? horizontalDirection
+                    : horizontalDirection.getOpposite();
+            case ALL -> clickedFace.getOpposite();
+        };
     }
 
     @Override

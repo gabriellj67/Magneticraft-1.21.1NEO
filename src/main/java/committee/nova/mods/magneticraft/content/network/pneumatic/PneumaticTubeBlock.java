@@ -37,6 +37,9 @@ public final class PneumaticTubeBlock extends ConduitBlock {
     @Override
     protected boolean connectsToMachine(LevelAccessor level, BlockPos position, Direction side) {
         BlockEntity blockEntity = level.getBlockEntity(position);
+        if (blockEntity instanceof PneumaticConnectionHost host) {
+            return host.supportsPneumaticConnection(side);
+        }
         return super.connectsToMachine(level, position, side)
                 || blockEntity instanceof NetworkConnectionHost host
                 && host.supportsNetworkConnection(NetworkDomain.PRESSURE, side)

@@ -94,7 +94,7 @@ public final class WindTurbineBlockEntity extends NetworkComponentBlockEntity {
     }
 
     private boolean canConnectElectricity(Direction side) {
-        return side == facing().getOpposite();
+        return true;
     }
 
     private static Component connectionMessage(Direction side, boolean enabled) {

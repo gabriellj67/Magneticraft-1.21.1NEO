@@ -19,8 +19,8 @@
     }
   },
   "include_nodes": [
-    "Base2",
-    "Base1"
+    "Base1",
+    "Base2"
   ],
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/inserter.gltf",

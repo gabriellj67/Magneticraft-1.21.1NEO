@@ -55,6 +55,113 @@
   ],
   "ports": {
     "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -2
+        },
+        "role": "feed_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 2,
+          "z": -1
+        },
+        "role": "product_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": 0
+        },
+        "side": "down"
+      }
+    ],
     "electricity": false,
     "fluid_tank_capacities_mb": [
       16000,
@@ -66,10 +173,6 @@
           "magneticraft:crude_oil",
           "#minecraft:water"
         ],
-        "access": {
-          "front": "input",
-          "unsided": "both"
-        },
         "capacity_mb": 16000,
         "index": 0,
         "role": "feed_input"
@@ -79,11 +182,6 @@
           "magneticraft:heated_crude_oil",
           "magneticraft:steam"
         ],
-        "access": {
-          "back": "output",
-          "unsided": "none",
-          "up": "output"
-        },
         "capacity_mb": 16000,
         "index": 1,
         "role": "product_output"

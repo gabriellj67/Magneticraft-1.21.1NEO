@@ -400,10 +400,15 @@ public final class AdvancedSystemsGameTests {
                         .contains("multiblock_controller"),
                 "Portable small tank retained a stale multiblock claim");
 
-        var cachedControllerCapability = controller.getCapability(ForgeCapabilities.FLUID_HANDLER);
-        helper.assertTrue(cachedControllerCapability.isPresent(), "Formed turbine controller lost steam input");
+        MultiblockPortLayout.Port steamPort = MultiblockPortLayout.ports(definition).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.FLUID)
+                .findFirst()
+                .orElseThrow();
+        var cachedPortCapability = helper.getLevel().getBlockEntity(steamPort.worldPosition(controller))
+                .getCapability(ForgeCapabilities.FLUID_HANDLER, steamPort.worldSide(controller.facing()));
+        helper.assertTrue(cachedPortCapability.isPresent(), "Formed turbine exact port lost steam input");
         controller.unform();
-        helper.assertFalse(cachedControllerCapability.isPresent(), "Cached controller capability survived unform");
+        helper.assertFalse(cachedPortCapability.isPresent(), "Cached exact-port capability survived unform");
         helper.assertTrue(
                 helper.getBlockState(tankPosition).is(
                         ModMachineBlocks.machine(SingleBlockMachineDefinition.SMALL_TANK).get()
@@ -447,6 +452,8 @@ public final class AdvancedSystemsGameTests {
         );
         helper.assertTrue(filled == 250 && controller.tank(0).tank().getFluidAmount() == 250,
                 "Oil input gap did not forward into controller tank 0");
+        helper.assertTrue(input.drain(50, IFluidHandler.FluidAction.EXECUTE).getAmount() == 50,
+                "Released oil-heater feed port did not preserve bidirectional tank access");
 
         MultiblockPortLayout.Port outputPort = MultiblockPortLayout.ports(controller.definition()).stream()
                 .filter(port -> port.kind() == MultiblockPortLayout.Kind.FLUID && port.target() == 1)
@@ -462,9 +469,56 @@ public final class AdvancedSystemsGameTests {
         helper.assertTrue(output.fill(
                 new FluidStack(ModFluids.get(FluidDefinition.HOT_CRUDE).source().get(), 10),
                 IFluidHandler.FluidAction.EXECUTE
-        ) == 0, "Oil heater output accepted input");
-        helper.assertTrue(output.drain(180, IFluidHandler.FluidAction.EXECUTE).getAmount() == 180,
+        ) == 10, "Released oil-heater product port did not preserve bidirectional tank access");
+        helper.assertTrue(output.drain(190, IFluidHandler.FluidAction.EXECUTE).getAmount() == 190,
                 "Oil heater output gap did not drain controller tank 1");
+        helper.assertFalse(controller.getCapability(ForgeCapabilities.FLUID_HANDLER).isPresent(),
+                "Oil heater exposed an unsided controller fluid shortcut");
+        clear(helper, occupied);
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 120)
+    public static void steamBoilerFacesExposeSeparatedWaterAndSteamTanks(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.BIG_STEAM_BOILER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Big steam boiler did not form");
+
+        MultiblockPortLayout.Port waterPort = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.FLUID && port.target() == 0)
+                .findFirst()
+                .orElseThrow();
+        List<MultiblockPortLayout.Port> endpoint = MultiblockPortLayout.findAll(
+                controller,
+                waterPort.worldPosition(controller),
+                waterPort.worldSide(controller.facing()),
+                MultiblockPortLayout.Kind.FLUID
+        );
+        helper.assertTrue(endpoint.size() == 2,
+                "Boiler face did not expose distinct water and steam routes");
+        IFluidHandler face = helper.getLevel().getBlockEntity(waterPort.worldPosition(controller))
+                .getCapability(ForgeCapabilities.FLUID_HANDLER, waterPort.worldSide(controller.facing()))
+                .orElseThrow(AssertionError::new);
+        helper.assertTrue(face.getTanks() == 2, "Boiler face merged the two fluids into one tank");
+        helper.assertTrue(face.fill(
+                new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 250),
+                IFluidHandler.FluidAction.EXECUTE
+        ) == 250, "Boiler face rejected water input");
+        helper.assertTrue(face.fill(
+                new FluidStack(ModFluids.get(FluidDefinition.STEAM).source().get(), 100),
+                IFluidHandler.FluidAction.EXECUTE
+        ) == 0, "Boiler steam output accepted input");
+        controller.tank(1).tank().fill(
+                new FluidStack(ModFluids.get(FluidDefinition.STEAM).source().get(), 180),
+                IFluidHandler.FluidAction.EXECUTE
+        );
+        helper.assertTrue(face.drain(180, IFluidHandler.FluidAction.EXECUTE).getAmount() == 180,
+                "Boiler face did not export steam");
+        helper.assertFalse(controller.getCapability(ForgeCapabilities.FLUID_HANDLER).isPresent(),
+                "Boiler exposed an unsided controller fluid shortcut");
         clear(helper, occupied);
         helper.succeed();
     }
@@ -507,6 +561,10 @@ public final class AdvancedSystemsGameTests {
                 "Grinder output gap accepted input");
         helper.assertTrue(output.extractItem(1, 2, false).getCount() == 2,
                 "Grinder output gap did not extract controller slot 1");
+        helper.assertFalse(controller.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent(),
+                "Grinder exposed an unsided controller item shortcut");
+        helper.assertFalse(controller.getCapability(ForgeCapabilities.ENERGY).isPresent(),
+                "Grinder exposed Forge Energy outside its native electrical ports");
         clear(helper, occupied);
         helper.succeed();
     }
@@ -929,7 +987,7 @@ public final class AdvancedSystemsGameTests {
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 160)
-    public static void combustionFluidPortRejectsInvalidFluidAndOutput(GameTestHelper helper) {
+    public static void combustionFluidPortPreservesReleasedBidirectionalTank(GameTestHelper helper) {
         Player player = helper.makeMockSurvivalPlayer();
         List<BlockPos> occupied = build(
                 helper, MultiblockDefinition.BIG_COMBUSTION_CHAMBER, CONTROLLER, Direction.NORTH, false
@@ -951,8 +1009,8 @@ public final class AdvancedSystemsGameTests {
                 new FluidStack(ModFluids.get(FluidDefinition.FUEL).source().get(), 100),
                 IFluidHandler.FluidAction.EXECUTE
         ) == 100, "Combustion chamber rejected a generated fluid fuel");
-        helper.assertTrue(input.drain(100, IFluidHandler.FluidAction.EXECUTE).isEmpty(),
-                "Combustion chamber input exposed output");
+        helper.assertTrue(input.drain(100, IFluidHandler.FluidAction.EXECUTE).getAmount() == 100,
+                "Combustion chamber did not preserve its released bidirectional fluid tank");
         clear(helper, occupied);
         helper.succeed();
     }

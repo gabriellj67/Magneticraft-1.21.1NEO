@@ -88,7 +88,7 @@ final class LegacySceneModelBuilder<T extends ModelBuilder<T>> extends CustomLoa
             return;
         }
         JsonArray array = new JsonArray();
-        values.forEach(array::add);
+        values.stream().sorted().forEach(array::add);
         json.add(key, array);
     }
 }

@@ -49,6 +49,1673 @@
   ],
   "ports": {
     "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 2,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 2,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 2,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 2,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 2,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 2,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "north",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "south",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -2
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "down",
+        "target": 1
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "water_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": 0
+        },
+        "role": "steam_output",
+        "side": "up",
+        "target": 1
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "side": "down"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": 0
+        },
+        "side": "down"
+      }
+    ],
     "electricity": false,
     "fluid_tank_capacities_mb": [
       16000,
@@ -59,14 +1726,6 @@
         "accepted_fluids": [
           "#minecraft:water"
         ],
-        "access": {
-          "back": "input",
-          "down": "input",
-          "front": "input",
-          "left": "input",
-          "right": "input",
-          "unsided": "both"
-        },
         "capacity_mb": 16000,
         "index": 0,
         "role": "water_input"
@@ -75,10 +1734,6 @@
         "accepted_fluids": [
           "magneticraft:steam"
         ],
-        "access": {
-          "unsided": "none",
-          "up": "output"
-        },
         "capacity_mb": 128000,
         "index": 1,
         "role": "steam_output"

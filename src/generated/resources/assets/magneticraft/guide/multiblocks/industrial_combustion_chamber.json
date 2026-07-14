@@ -46,6 +46,143 @@
   ],
   "ports": {
     "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "extract_slots": [
+          0
+        ],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "side": "west"
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "fluid_fuel",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "extract_slots": [
+          0
+        ],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "side": "east"
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "fluid_fuel",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": 0
+        },
+        "side": "up"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": 0
+        },
+        "side": "up"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        },
+        "side": "up"
+      }
+    ],
     "electricity": false,
     "fluid_tank_capacities_mb": [
       4000
@@ -55,15 +192,6 @@
         "accepted_fluids": [
           "@magneticraft:industrial_combustion_chamber"
         ],
-        "access": {
-          "back": "input",
-          "down": "output",
-          "front": "input",
-          "left": "input",
-          "right": "input",
-          "unsided": "both",
-          "up": "input"
-        },
         "capacity_mb": 4000,
         "index": 0,
         "role": "fluid_fuel"

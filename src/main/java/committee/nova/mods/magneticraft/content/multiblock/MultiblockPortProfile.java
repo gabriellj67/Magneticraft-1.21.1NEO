@@ -2,24 +2,18 @@ package committee.nova.mods.magneticraft.content.multiblock;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
-import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 
 /**
- * One immutable source of truth for advanced-machine tank roles, accepted
- * fluids and controller-relative side access.
+ * Immutable advanced-machine tank metadata. Exact capability positions,
+ * sides and access modes live exclusively in {@link MultiblockPortLayout}.
  */
 public final class MultiblockPortProfile {
     public static final String WATER_TAG = "#minecraft:water";
@@ -31,37 +25,23 @@ public final class MultiblockPortProfile {
     public static List<TankPort> tanks(MultiblockDefinition definition) {
         return switch (definition) {
             case STEAM_ENGINE, STEAM_TURBINE -> List.of(port(
-                    definition, 0, "steam_input", List.of(fluid(FluidDefinition.STEAM)),
-                    sides(FluidTankModule.TankAccess.INPUT, RelativeSide.values())
+                    definition, 0, "steam_input", List.of(fluid(FluidDefinition.STEAM))
             ));
             case PUMPJACK -> List.of(port(
-                    definition, 0, "oil_output", List.of(fluid(FluidDefinition.OIL)),
-                    sides(FluidTankModule.TankAccess.OUTPUT, RelativeSide.values())
+                    definition, 0, "oil_output", List.of(fluid(FluidDefinition.OIL))
             ));
             case BIG_COMBUSTION_CHAMBER -> List.of(port(
-                    definition, 0, "fluid_fuel", List.of(COMBUSTION_FUEL_RECIPE),
-                    merge(
-                            sides(FluidTankModule.TankAccess.INPUT,
-                                    RelativeSide.FRONT, RelativeSide.BACK,
-                                    RelativeSide.LEFT, RelativeSide.RIGHT, RelativeSide.UP),
-                            sides(FluidTankModule.TankAccess.OUTPUT, RelativeSide.DOWN)
-                    )
+                    definition, 0, "fluid_fuel", List.of(COMBUSTION_FUEL_RECIPE)
             ));
             case OIL_HEATER -> List.of(
                     port(definition, 0, "feed_input", List.of(
-                                    fluid(FluidDefinition.OIL), WATER_TAG),
-                            sides(FluidTankModule.TankAccess.INPUT, RelativeSide.FRONT)),
+                                    fluid(FluidDefinition.OIL), WATER_TAG)),
                     port(definition, 1, "product_output", List.of(
-                                    fluid(FluidDefinition.HOT_CRUDE), fluid(FluidDefinition.STEAM)),
-                            sides(FluidTankModule.TankAccess.OUTPUT, RelativeSide.BACK, RelativeSide.UP))
+                                    fluid(FluidDefinition.HOT_CRUDE), fluid(FluidDefinition.STEAM)))
             );
             case BIG_STEAM_BOILER -> List.of(
-                    port(definition, 0, "water_input", List.of(WATER_TAG),
-                            sides(FluidTankModule.TankAccess.INPUT,
-                                    RelativeSide.FRONT, RelativeSide.BACK,
-                                    RelativeSide.LEFT, RelativeSide.RIGHT, RelativeSide.DOWN)),
-                    port(definition, 1, "steam_output", List.of(fluid(FluidDefinition.STEAM)),
-                            sides(FluidTankModule.TankAccess.OUTPUT, RelativeSide.UP))
+                    port(definition, 0, "water_input", List.of(WATER_TAG)),
+                    port(definition, 1, "steam_output", List.of(fluid(FluidDefinition.STEAM)))
             );
             case REFINERY -> List.of(
                     port(definition, 0, "feed_input", List.of(
@@ -69,29 +49,24 @@ public final class MultiblockPortProfile {
                                     fluid(FluidDefinition.HOT_CRUDE),
                                     fluid(FluidDefinition.HEAVY_OIL),
                                     fluid(FluidDefinition.LIGHT_OIL),
-                                    fluid(FluidDefinition.LPG)),
-                            sides(FluidTankModule.TankAccess.INPUT, RelativeSide.FRONT)),
-                    port(definition, 1, "process_steam_input", List.of(fluid(FluidDefinition.STEAM)),
-                            sides(FluidTankModule.TankAccess.INPUT, RelativeSide.BACK)),
+                                    fluid(FluidDefinition.LPG))),
+                    port(definition, 1, "process_steam_input", List.of(fluid(FluidDefinition.STEAM))),
                     port(definition, 2, "heavy_product_output", List.of(
                                     WATER_TAG,
                                     fluid(FluidDefinition.HEAVY_OIL),
                                     fluid(FluidDefinition.OIL_RESIDUE),
                                     fluid(FluidDefinition.DIESEL),
-                                    fluid(FluidDefinition.PLASTIC)),
-                            sides(FluidTankModule.TankAccess.OUTPUT, RelativeSide.LEFT)),
+                                    fluid(FluidDefinition.PLASTIC))),
                     port(definition, 3, "light_product_output", List.of(
                                     fluid(FluidDefinition.LIGHT_OIL),
                                     fluid(FluidDefinition.FUEL),
                                     fluid(FluidDefinition.KEROSENE),
-                                    fluid(FluidDefinition.NAPHTHA)),
-                            sides(FluidTankModule.TankAccess.OUTPUT, RelativeSide.RIGHT)),
+                                    fluid(FluidDefinition.NAPHTHA))),
                     port(definition, 4, "gas_product_output", List.of(
                                     fluid(FluidDefinition.LPG),
                                     fluid(FluidDefinition.LUBRICANT),
                                     fluid(FluidDefinition.GASOLINE),
-                                    fluid(FluidDefinition.NATURAL_GAS)),
-                            sides(FluidTankModule.TankAccess.OUTPUT, RelativeSide.UP))
+                                    fluid(FluidDefinition.NATURAL_GAS)))
             );
             default -> List.of();
         };
@@ -108,16 +83,13 @@ public final class MultiblockPortProfile {
             MultiblockDefinition definition,
             int index,
             String role,
-            List<String> acceptedFluids,
-            Map<RelativeSide, FluidTankModule.TankAccess> sideAccess
+            List<String> acceptedFluids
     ) {
         return new TankPort(
                 index,
                 definition.tankCapacity(index),
                 role,
-                acceptedFluids,
-                index == 0 ? FluidTankModule.TankAccess.BOTH : FluidTankModule.TankAccess.NONE,
-                sideAccess
+                acceptedFluids
         );
     }
 
@@ -125,78 +97,17 @@ public final class MultiblockPortProfile {
         return Magneticraft.id(definition.id()).toString();
     }
 
-    private static Map<RelativeSide, FluidTankModule.TankAccess> sides(
-            FluidTankModule.TankAccess access,
-            RelativeSide... sides
-    ) {
-        EnumMap<RelativeSide, FluidTankModule.TankAccess> result = new EnumMap<>(RelativeSide.class);
-        for (RelativeSide side : sides) {
-            result.put(side, access);
-        }
-        return result;
-    }
-
-    @SafeVarargs
-    private static Map<RelativeSide, FluidTankModule.TankAccess> merge(
-            Map<RelativeSide, FluidTankModule.TankAccess>... maps
-    ) {
-        EnumMap<RelativeSide, FluidTankModule.TankAccess> result = new EnumMap<>(RelativeSide.class);
-        for (Map<RelativeSide, FluidTankModule.TankAccess> map : maps) {
-            result.putAll(map);
-        }
-        return result;
-    }
-
-    public enum RelativeSide {
-        FRONT,
-        BACK,
-        LEFT,
-        RIGHT,
-        UP,
-        DOWN;
-
-        public String serializedName() {
-            return name().toLowerCase(Locale.ROOT);
-        }
-
-        static RelativeSide fromWorld(Direction side, Direction front) {
-            if (side == Direction.UP) {
-                return UP;
-            }
-            if (side == Direction.DOWN) {
-                return DOWN;
-            }
-            if (side == front) {
-                return FRONT;
-            }
-            if (side == front.getOpposite()) {
-                return BACK;
-            }
-            return side == front.getCounterClockWise() ? LEFT : RIGHT;
-        }
-    }
-
     public record TankPort(
             int index,
             int capacity,
             String role,
-            List<String> acceptedFluids,
-            FluidTankModule.TankAccess unsidedAccess,
-            Map<RelativeSide, FluidTankModule.TankAccess> sideAccess
+            List<String> acceptedFluids
     ) {
         public TankPort {
             if (index < 0 || capacity <= 0 || role == null || role.isBlank()) {
                 throw new IllegalArgumentException("Invalid multiblock tank port");
             }
             acceptedFluids = List.copyOf(acceptedFluids);
-            unsidedAccess = Objects.requireNonNull(unsidedAccess);
-            sideAccess = Map.copyOf(sideAccess);
-        }
-
-        public FluidTankModule.TankAccess access(@Nullable Direction side, Direction front) {
-            return side == null
-                    ? unsidedAccess
-                    : sideAccess.getOrDefault(RelativeSide.fromWorld(side, front), FluidTankModule.TankAccess.NONE);
         }
 
         public boolean accepts(FluidStack stack, @Nullable ServerLevel level) {

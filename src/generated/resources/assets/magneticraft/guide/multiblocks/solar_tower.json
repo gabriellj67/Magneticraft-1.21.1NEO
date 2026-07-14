@@ -49,6 +49,17 @@
   ],
   "ports": {
     "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "side": "down"
+      }
+    ],
     "electricity": false,
     "fluid_tank_capacities_mb": [],
     "fluid_tanks": [],

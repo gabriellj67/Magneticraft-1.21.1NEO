@@ -65,6 +65,113 @@
   ],
   "ports": {
     "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 0,
+          "y": 2,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      }
+    ],
     "electricity": true,
     "fluid_tank_capacities_mb": [
       32000
@@ -74,15 +181,6 @@
         "accepted_fluids": [
           "magneticraft:steam"
         ],
-        "access": {
-          "back": "input",
-          "down": "input",
-          "front": "input",
-          "left": "input",
-          "right": "input",
-          "unsided": "both",
-          "up": "input"
-        },
         "capacity_mb": 32000,
         "index": 0,
         "role": "steam_input"

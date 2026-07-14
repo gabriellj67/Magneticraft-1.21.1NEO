@@ -5,12 +5,40 @@ import net.minecraft.core.Direction;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MultiblockPortLayoutTest {
+    private static final Map<MultiblockDefinition, Integer> RELEASED_PORT_COUNTS = Map.ofEntries(
+            Map.entry(MultiblockDefinition.SOLAR_PANEL, 2),
+            Map.entry(MultiblockDefinition.STEAM_ENGINE, 8),
+            Map.entry(MultiblockDefinition.STEAM_TURBINE, 9),
+            Map.entry(MultiblockDefinition.GRINDER, 12),
+            Map.entry(MultiblockDefinition.SIEVE, 7),
+            Map.entry(MultiblockDefinition.HYDRAULIC_PRESS, 4),
+            Map.entry(MultiblockDefinition.PUMPJACK, 2),
+            Map.entry(MultiblockDefinition.OIL_HEATER, 11),
+            Map.entry(MultiblockDefinition.REFINERY, 15),
+            Map.entry(MultiblockDefinition.SOLAR_TOWER, 1),
+            Map.entry(MultiblockDefinition.BIG_COMBUSTION_CHAMBER, 13),
+            Map.entry(MultiblockDefinition.BIG_STEAM_BOILER, 141),
+            Map.entry(MultiblockDefinition.BIG_ELECTRIC_FURNACE, 4)
+    );
+
+    @Test
+    void exactTypedConnectionCatalogueMatchesTheReleasedMachines() {
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            assertEquals(
+                    RELEASED_PORT_COUNTS.getOrDefault(definition, 0),
+                    MultiblockPortLayout.ports(definition).size(),
+                    definition.id()
+            );
+        }
+    }
+
     @Test
     void rotatesLegacyPortCoordinatesAndSidesWithControllerFacing() {
         MultiblockPortLayout.Port port = MultiblockPortLayout.ports(MultiblockDefinition.OIL_HEATER)

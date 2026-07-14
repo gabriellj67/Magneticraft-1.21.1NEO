@@ -37,6 +37,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
@@ -86,7 +88,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private final AdvancedMultiblockLogic logic;
     private final ContainerData menuData;
     private final MultiblockStructureSnapshot structureSnapshot = new MultiblockStructureSnapshot();
-    private final Map<MultiblockPortLayout.Port, LazyOptional<?>> portCapabilities = new HashMap<>();
+    private final Map<PortEndpoint, LazyOptional<?>> portCapabilities = new HashMap<>();
     private List<MultiblockExternalPortService.ExternalNode> externalPortNodes = List.of();
     private boolean formed;
     private boolean structureReady;
@@ -506,8 +508,10 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 || capability == ForgeCapabilities.ENERGY)) {
             return LazyOptional.empty();
         }
-        if (side != null && exposesExactPorts(capability)) {
-            return portCapability(worldPosition, side, capability);
+        if (exposesExactPorts(capability)) {
+            return side == null
+                    ? LazyOptional.empty()
+                    : portCapability(worldPosition, side, capability);
         }
         return super.getCapability(capability, side);
     }
@@ -528,11 +532,15 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         } else {
             return LazyOptional.empty();
         }
-        MultiblockPortLayout.Port port = MultiblockPortLayout.find(this, position, side, kind).orElse(null);
-        if (port == null) {
+        List<MultiblockPortLayout.Port> ports = MultiblockPortLayout.findAll(this, position, side, kind);
+        if (ports.isEmpty()) {
             return LazyOptional.empty();
         }
-        LazyOptional<?> result = portCapabilities.computeIfAbsent(port, this::createPortCapability);
+        PortEndpoint endpoint = new PortEndpoint(position, side, kind);
+        LazyOptional<?> result = portCapabilities.computeIfAbsent(
+                endpoint,
+                ignored -> createPortCapability(ports)
+        );
         return result.cast();
     }
 
@@ -546,16 +554,26 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 .anyMatch(port -> port.kind() == kind);
     }
 
-    private LazyOptional<?> createPortCapability(MultiblockPortLayout.Port port) {
-        return switch (port.kind()) {
+    private LazyOptional<?> createPortCapability(List<MultiblockPortLayout.Port> ports) {
+        MultiblockPortLayout.Port first = ports.get(0);
+        return switch (first.kind()) {
             case ITEM -> inventory == null
                     ? LazyOptional.empty()
-                    : LazyOptional.of(() -> inventory.portHandler(port.itemAccess()));
+                    : LazyOptional.of(() -> inventory.portHandler(first.itemAccess()));
             case FLUID -> {
-                FluidTankModule tank = tank(port.target());
-                yield tank == null
-                        ? LazyOptional.empty()
-                        : LazyOptional.of(() -> tank.portHandler(port.fluidAccess()));
+                List<IFluidHandler> handlers = ports.stream()
+                        .map(port -> {
+                            FluidTankModule tank = tank(port.target());
+                            return tank == null ? null : tank.portHandler(port.fluidAccess());
+                        })
+                        .filter(java.util.Objects::nonNull)
+                        .toList();
+                if (handlers.isEmpty()) {
+                    yield LazyOptional.empty();
+                }
+                yield LazyOptional.of(() -> handlers.size() == 1
+                        ? handlers.get(0)
+                        : new PortFluidHandler(handlers));
             }
             default -> LazyOptional.empty();
         };
@@ -873,7 +891,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                     this,
                     port.capacity(),
                     stack -> port.accepts(stack, level instanceof ServerLevel serverLevel ? serverLevel : null),
-                    side -> port.access(side, facing())
+                    side -> FluidTankModule.TankAccess.NONE
             )));
         }
         return List.copyOf(created);
@@ -891,7 +909,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 energyCapacity(),
                 energyTransferRate(),
                 energyTransferRate(),
-                side -> true,
+                side -> false,
                 !generator,
                 generator
         ));
@@ -1127,5 +1145,117 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             result[index] = startInclusive + index;
         }
         return result;
+    }
+
+    private record PortEndpoint(
+            BlockPos position,
+            Direction side,
+            MultiblockPortLayout.Kind kind
+    ) {
+        private PortEndpoint {
+            position = position.immutable();
+        }
+    }
+
+    /** Combines the released boiler's water-input and steam-output tanks on one physical face. */
+    private static final class PortFluidHandler implements IFluidHandler {
+        private final List<IFluidHandler> handlers;
+
+        private PortFluidHandler(List<IFluidHandler> handlers) {
+            this.handlers = List.copyOf(handlers);
+        }
+
+        @Override
+        public int getTanks() {
+            return handlers.stream().mapToInt(IFluidHandler::getTanks).sum();
+        }
+
+        @Override
+        public FluidStack getFluidInTank(int tank) {
+            TankView view = tankView(tank);
+            return view.handler().getFluidInTank(view.index());
+        }
+
+        @Override
+        public int getTankCapacity(int tank) {
+            TankView view = tankView(tank);
+            return view.handler().getTankCapacity(view.index());
+        }
+
+        @Override
+        public boolean isFluidValid(int tank, FluidStack stack) {
+            TankView view = tankView(tank);
+            return view.handler().isFluidValid(view.index(), stack);
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+            if (resource.isEmpty()) {
+                return 0;
+            }
+            int filled = 0;
+            for (IFluidHandler handler : handlers) {
+                FluidStack remaining = resource.copy();
+                remaining.setAmount(resource.getAmount() - filled);
+                filled += handler.fill(remaining, action);
+                if (filled >= resource.getAmount()) {
+                    break;
+                }
+            }
+            return filled;
+        }
+
+        @Override
+        public FluidStack drain(FluidStack resource, FluidAction action) {
+            if (resource.isEmpty()) {
+                return FluidStack.EMPTY;
+            }
+            FluidStack drained = FluidStack.EMPTY;
+            for (IFluidHandler handler : handlers) {
+                FluidStack request = resource.copy();
+                request.setAmount(resource.getAmount() - drained.getAmount());
+                FluidStack part = handler.drain(request, action);
+                if (!part.isEmpty()) {
+                    if (drained.isEmpty()) {
+                        drained = part.copy();
+                    } else {
+                        drained.grow(part.getAmount());
+                    }
+                }
+                if (drained.getAmount() >= resource.getAmount()) {
+                    break;
+                }
+            }
+            return drained;
+        }
+
+        @Override
+        public FluidStack drain(int maxDrain, FluidAction action) {
+            if (maxDrain <= 0) {
+                return FluidStack.EMPTY;
+            }
+            for (IFluidHandler handler : handlers) {
+                FluidStack candidate = handler.drain(maxDrain, FluidAction.SIMULATE);
+                if (!candidate.isEmpty()) {
+                    candidate.setAmount(maxDrain);
+                    return drain(candidate, action);
+                }
+            }
+            return FluidStack.EMPTY;
+        }
+
+        private TankView tankView(int tank) {
+            int localIndex = tank;
+            for (IFluidHandler handler : handlers) {
+                if (localIndex < handler.getTanks()) {
+                    return new TankView(handler, localIndex);
+                }
+                localIndex -= handler.getTanks();
+            }
+            throw new IndexOutOfBoundsException("Tank " + tank + " of " + getTanks());
+        }
+
+        private record TankView(IFluidHandler handler, int index) {
+        }
     }
 }

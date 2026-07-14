@@ -1,9 +1,12 @@
 package committee.nova.mods.magneticraft.content.machine.singleblock;
 
+import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
+import net.minecraft.core.Direction;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,5 +86,54 @@ class SingleBlockMachineDefinitionContractTest {
                 .filter(definition -> definition == SingleBlockMachineDefinition.SLUICE_BOX
                         || definition == SingleBlockMachineDefinition.FEEDING_TROUGH)
                 .allMatch(definition -> definition.physicalPorts().isEmpty()));
+    }
+
+    @Test
+    void releasedAllAxisPlacementPointsTheModelBackIntoTheClickedBlock() {
+        for (SingleBlockMachineDefinition definition : List.of(
+                SingleBlockMachineDefinition.RELAY,
+                SingleBlockMachineDefinition.FILTER,
+                SingleBlockMachineDefinition.TRANSPOSER,
+                SingleBlockMachineDefinition.ELECTRIC_ENGINE
+        )) {
+            assertEquals(Direction.DOWN,
+                    SingleBlockMachineBlock.placementFacing(definition, Direction.UP, Direction.EAST),
+                    definition.id());
+            assertEquals(Direction.WEST,
+                    SingleBlockMachineBlock.placementFacing(definition, Direction.EAST, Direction.NORTH),
+                    definition.id());
+        }
+    }
+
+    @Test
+    void typedRuntimePortsUseTheSameFacingAsTheReleasedModels() {
+        Direction facing = Direction.EAST;
+        assertTrue(SingleBlockPortProfile.pneumatic(
+                SingleBlockMachineDefinition.RELAY, Direction.EAST, facing));
+        assertFalse(SingleBlockPortProfile.pneumatic(
+                SingleBlockMachineDefinition.RELAY, Direction.WEST, facing));
+        assertTrue(SingleBlockPortProfile.pneumatic(
+                SingleBlockMachineDefinition.FILTER, Direction.EAST, facing));
+        assertTrue(SingleBlockPortProfile.pneumatic(
+                SingleBlockMachineDefinition.FILTER, Direction.WEST, facing));
+        assertFalse(SingleBlockPortProfile.pneumatic(
+                SingleBlockMachineDefinition.FILTER, Direction.UP, facing));
+
+        assertEquals(0, SingleBlockPortProfile.item(
+                SingleBlockMachineDefinition.RELAY, Direction.EAST, facing).insertSlots().length);
+        assertEquals(9, SingleBlockPortProfile.item(
+                SingleBlockMachineDefinition.RELAY, Direction.WEST, facing).insertSlots().length);
+        assertEquals(FluidTankModule.TankAccess.INPUT, SingleBlockPortProfile.fluid(
+                SingleBlockMachineDefinition.STEAM_BOILER, 0, Direction.NORTH));
+        assertEquals(FluidTankModule.TankAccess.OUTPUT, SingleBlockPortProfile.fluid(
+                SingleBlockMachineDefinition.STEAM_BOILER, 1, Direction.NORTH));
+        assertTrue(SingleBlockPortProfile.heat(
+                SingleBlockMachineDefinition.COMBUSTION_CHAMBER, Direction.UP, facing));
+        assertFalse(SingleBlockPortProfile.heat(
+                SingleBlockMachineDefinition.COMBUSTION_CHAMBER, Direction.NORTH, facing));
+        assertTrue(SingleBlockPortProfile.electricity(
+                SingleBlockMachineDefinition.ELECTRIC_ENGINE, Direction.NORTH, facing));
+        assertFalse(SingleBlockPortProfile.forgeEnergy(
+                SingleBlockMachineDefinition.ELECTRIC_HEATER, Direction.NORTH, facing));
     }
 }

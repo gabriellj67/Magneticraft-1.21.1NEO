@@ -16,11 +16,11 @@
   "exclude_nodes": [
     "drill1",
     "drill2",
-    "prop1",
-    "prop2",
     "drill3",
     "drill4",
-    "drill5"
+    "drill5",
+    "prop1",
+    "prop2"
   ],
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/mining_robot.mcx",

@@ -11,6 +11,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInv
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
+import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticConnectionHost;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModFluids;
@@ -44,7 +45,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Module, capability and persistence host for the Task 5 single-block behavior strategies.
  */
-public final class SingleBlockMachineBlockEntity extends MachineBlockEntity implements MenuProvider {
+public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
+        implements MenuProvider, PneumaticConnectionHost {
     public static final int MENU_LOGICAL_DATA_COUNT = 17;
     public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     public static final int SLUICE_MAX_ITEMS = 10;
@@ -433,34 +435,34 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                     "fluid",
                     32_000,
                     fluid -> true,
-                    side -> FluidTankModule.TankAccess.BOTH
+                    side -> SingleBlockPortProfile.fluid(definition, 0, side)
             ));
             case WATER_GENERATOR -> primary = addModule(FluidTankModule.infiniteSource(
                     Magneticraft.id("water"),
                     this,
                     32_000,
                     () -> new FluidStack(net.minecraft.world.level.material.Fluids.WATER, 32_000),
-                    side -> FluidTankModule.TankAccess.OUTPUT
+                    side -> SingleBlockPortProfile.fluid(definition, 0, side)
             ));
             case STEAM_BOILER -> {
                 primary = addModule(tank(
                         "water",
                         1_000,
                         fluid -> fluid.getFluid().defaultFluidState().is(FluidTags.WATER),
-                        side -> FluidTankModule.TankAccess.INPUT
+                        side -> SingleBlockPortProfile.fluid(definition, 0, side)
                 ));
                 secondary = addModule(tank(
                         "steam",
                         16_000,
                         fluid -> fluid.getFluid() == ModFluids.get(FluidDefinition.STEAM).source().get(),
-                        side -> FluidTankModule.TankAccess.OUTPUT
+                        side -> SingleBlockPortProfile.fluid(definition, 1, side)
                 ));
             }
             case GASIFICATION_UNIT -> primary = addModule(tank(
                     "wood_gas",
                     4_000,
                     fluid -> fluid.getFluid() == ModFluids.get(FluidDefinition.WOOD_GAS).source().get(),
-                    side -> FluidTankModule.TankAccess.OUTPUT
+                    side -> SingleBlockPortProfile.fluid(definition, 0, side)
             ));
             default -> {
             }
@@ -484,13 +486,15 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                     Magneticraft.id("energy_storage"), this, 10_000, 200, 80, side -> false, false, false
             ));
             case RF_HEATER -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"), this, 80_000, 80_000, 80_000, side -> true, true, true
+                    Magneticraft.id("energy_storage"), this, 80_000, 80_000, 80_000,
+                    side -> SingleBlockPortProfile.forgeEnergy(definition, side, facing()), true, true
             ));
             case THERMOPILE -> addModule(new EnergyStorageModule(
                     Magneticraft.id("energy_storage"), this, 80_000, 200, 200, side -> false, false, false
             ));
             case RF_TRANSFORMER -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"), this, 80_000, 100, 100, side -> true, true, false
+                    Magneticraft.id("energy_storage"), this, 80_000, 100, 100,
+                    side -> SingleBlockPortProfile.forgeEnergy(definition, side, facing()), true, false
             ));
             case ELECTRIC_ENGINE -> addModule(new EnergyStorageModule(
                     Magneticraft.id("energy_storage"),
@@ -498,7 +502,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                     80_000,
                     80_000,
                     80_000,
-                    side -> true,
+                    side -> SingleBlockPortProfile.forgeEnergy(definition, side, facing()),
                     true,
                     true
             ));
@@ -514,7 +518,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
                             Magneticraft.id("electricity"),
                             this,
                             new ElectricalNode(1.0D, 125.0D, 0.001D),
-                            side -> true
+                            side -> SingleBlockPortProfile.electricity(definition, side, facing())
                     ));
             default -> null;
         };
@@ -525,14 +529,15 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
         return switch (definition) {
             case COMBUSTION_CHAMBER -> addModule(new HeatNetworkModule(
                     Magneticraft.id("heat"), this, new HeatNode(1.0D, 73.0D), Double.MAX_VALUE,
-                    side -> side == Direction.UP
+                    side -> SingleBlockPortProfile.heat(definition, side, facing())
             ));
             case ELECTRIC_HEATER, RF_HEATER -> addModule(new HeatNetworkModule(
                     Magneticraft.id("heat"), this, new HeatNode(1.0D, 73.0D), Double.MAX_VALUE,
-                    side -> side != null && side.getAxis() == Direction.Axis.Y
+                    side -> SingleBlockPortProfile.heat(definition, side, facing())
             ));
             case STEAM_BOILER, GASIFICATION_UNIT, BRICK_FURNACE -> addModule(new HeatNetworkModule(
-                    Magneticraft.id("heat"), this, new HeatNode(1.0D, 73.0D), Double.MAX_VALUE, side -> true
+                    Magneticraft.id("heat"), this, new HeatNode(1.0D, 73.0D), Double.MAX_VALUE,
+                    side -> SingleBlockPortProfile.heat(definition, side, facing())
             ));
             default -> null;
         };
@@ -586,23 +591,12 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity impl
 
     @Nullable
     private ItemInventoryModule.SlotAccess inventoryAccess(@Nullable Direction side) {
-        int[] all = allSlots(definition.inventorySlots());
-        return switch (definition) {
-            case SLUICE_BOX, FEEDING_TROUGH, INSERTER, FILTER -> ItemInventoryModule.NONE;
-            case RELAY -> side == facing()
-                    ? new ItemInventoryModule.SlotAccess(new int[0], new int[0])
-                    : new ItemInventoryModule.SlotAccess(all, all);
-            case GASIFICATION_UNIT, BRICK_FURNACE -> new ItemInventoryModule.SlotAccess(new int[]{0}, new int[]{1});
-            default -> new ItemInventoryModule.SlotAccess(all, all);
-        };
+        return SingleBlockPortProfile.item(definition, side, facing());
     }
 
-    private static int[] allSlots(int slots) {
-        int[] result = new int[slots];
-        for (int slot = 0; slot < slots; slot++) {
-            result[slot] = slot;
-        }
-        return result;
+    @Override
+    public boolean supportsPneumaticConnection(Direction side) {
+        return SingleBlockPortProfile.pneumatic(definition, side, facing());
     }
 
     private void reviveBoilerFluidCapability() {

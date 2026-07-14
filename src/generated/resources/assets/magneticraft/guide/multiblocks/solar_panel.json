@@ -29,6 +29,26 @@
   ],
   "ports": {
     "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -5
+        },
+        "side": "north"
+      },
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "side": "south"
+      }
+    ],
     "electricity": true,
     "fluid_tank_capacities_mb": [],
     "fluid_tanks": [],
