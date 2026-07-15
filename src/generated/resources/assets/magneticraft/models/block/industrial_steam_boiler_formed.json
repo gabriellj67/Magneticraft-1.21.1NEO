@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "magneticraft:blocks/multiblocks/big_steam_boiler"
+    "particle": "magneticraft:blocks/multiblocks/unmounted_multiblock"
   }
 }

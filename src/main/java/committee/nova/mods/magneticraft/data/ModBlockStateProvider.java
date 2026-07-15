@@ -42,6 +42,8 @@ import java.util.Set;
 final class ModBlockStateProvider extends BlockStateProvider {
     private static final ResourceLocation CUTOUT_RENDER_TYPE =
             ResourceLocation.fromNamespaceAndPath("minecraft", "cutout");
+    private static final ResourceLocation UNMOUNTED_MULTIBLOCK_TEXTURE =
+            Magneticraft.id("blocks/multiblocks/unmounted_multiblock");
     private final ExistingFileHelper existingFileHelper;
 
     ModBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
@@ -218,11 +220,9 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
-            ResourceLocation controllerTexture = advancedControllerTexture(definition);
-            ModelFile idle = models().cubeAll(definition.id(), controllerTexture)
-                    .renderType(CUTOUT_RENDER_TYPE);
-            ModelFile formed = emptyModel(definition.id() + "_formed", controllerTexture);
-            ModelFile item = advancedControllerItemModel(definition, controllerTexture);
+            ModelFile idle = models().cubeAll(definition.id(), UNMOUNTED_MULTIBLOCK_TEXTURE);
+            ModelFile formed = emptyModel(definition.id() + "_formed", UNMOUNTED_MULTIBLOCK_TEXTURE);
+            ModelFile item = advancedControllerItemModel(definition, UNMOUNTED_MULTIBLOCK_TEXTURE);
             horizontalBlock(
                     controller,
                     state -> state.getValue(AdvancedMultiblockBlock.FORMED) ? formed : idle
@@ -703,17 +703,6 @@ final class ModBlockStateProvider extends BlockStateProvider {
             case STEAM_ENGINE -> advancedGltfModel(generatedName, "steam_engine", particle);
             case STEAM_TURBINE -> advancedGltfModel(generatedName, "steam_turbine", particle);
         };
-    }
-
-    private ResourceLocation advancedControllerTexture(MultiblockDefinition definition) {
-        String texture = switch (definition) {
-            case BIG_COMBUSTION_CHAMBER -> "big_combustion_chamber";
-            case BIG_ELECTRIC_FURNACE -> "big_electric_furnace_off";
-            case BIG_STEAM_BOILER -> "big_steam_boiler";
-            case CONTAINER -> "container";
-            default -> definition.id();
-        };
-        return modLoc("blocks/multiblocks/" + texture);
     }
 
     private ModelFile advancedMcxModel(String generatedName, String sourceName, ResourceLocation particle) {

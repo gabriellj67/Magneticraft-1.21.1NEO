@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/shelving_unit.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/multiblocks/shelving_unit"
+    "particle": "magneticraft:blocks/multiblocks/unmounted_multiblock"
   },
   "translation": [
     0.0,

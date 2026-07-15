@@ -1,7 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
-  "render_type": "minecraft:cutout",
   "textures": {
-    "all": "magneticraft:blocks/multiblocks/big_electric_furnace_off"
+    "all": "magneticraft:blocks/multiblocks/unmounted_multiblock"
   }
 }

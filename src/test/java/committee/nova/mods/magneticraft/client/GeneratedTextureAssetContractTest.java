@@ -10,7 +10,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,34 +66,6 @@ class GeneratedTextureAssetContractTest {
     }
 
     @Test
-    void everyAdvancedControllerAndInventorySceneUsesItsDedicatedNovaTexture() throws IOException {
-        Map<String, String> controllerTextures = new LinkedHashMap<>();
-        controllerTextures.put("industrial_combustion_chamber", "big_combustion_chamber");
-        controllerTextures.put("industrial_electric_furnace", "big_electric_furnace_off");
-        controllerTextures.put("industrial_steam_boiler", "big_steam_boiler");
-        controllerTextures.put("shipping_container", "container");
-        controllerTextures.put("grinder", "grinder");
-        controllerTextures.put("hydraulic_press", "hydraulic_press");
-        controllerTextures.put("oil_heater", "oil_heater");
-        controllerTextures.put("pumpjack", "pumpjack");
-        controllerTextures.put("refinery", "refinery");
-        controllerTextures.put("shelving_unit", "shelving_unit");
-        controllerTextures.put("sieve", "sieve");
-        controllerTextures.put("solar_mirror", "solar_mirror");
-        controllerTextures.put("solar_panel", "solar_panel");
-        controllerTextures.put("solar_tower", "solar_tower");
-        controllerTextures.put("steam_engine", "steam_engine");
-        controllerTextures.put("steam_turbine", "steam_turbine");
-
-        for (Map.Entry<String, String> entry : controllerTextures.entrySet()) {
-            Set<String> expected = Set.of("magneticraft:blocks/multiblocks/" + entry.getValue());
-            assertBlockTextures(entry.getKey(), expected);
-            assertBlockTextures(entry.getKey() + "_formed", expected);
-            assertBlockTextures(entry.getKey() + "_item", expected);
-        }
-    }
-
-    @Test
     void redesignedElectricalModelsAndItemsUseGeneratedDedicatedTextures() throws IOException {
         assertBlockTextures("box_transformer", Set.of("magneticraft:block/electrical_enclosure"));
         assertBlockTextures("fuse_box", Set.of("magneticraft:block/electrical_enclosure"));
@@ -106,6 +77,7 @@ class GeneratedTextureAssetContractTest {
 
     @Test
     void generatedPixelArtHasTheRequiredResolutionAndItemTransparency() throws IOException {
+        assertTexture("blocks/multiblocks/unmounted_multiblock", false);
         assertTexture("block/electrical_enclosure", false);
         assertTexture("block/electrical_breaker_housing", false);
         assertTexture("block/burnt_electric_cable", false);

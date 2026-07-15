@@ -54,9 +54,13 @@ static RenderType renderType(ModelScene scene, RenderStyle style,
   alpha below 255 requires at least `minecraft:cutout`. True blended content
   declares `minecraft:translucent` explicitly; PNG alpha values alone do not
   override the source model's material semantics.
-- Unformed multiblock controller cubes use retained Nova textures with alpha
-  and therefore declare `minecraft:cutout`, independently from the formed
-  runtime scene.
+- Every unformed advanced-multiblock controller reproduces Nova 1.12's shared
+  opaque `magneticraft:blocks/multiblocks/unmounted_multiblock` cube. A formed
+  controller uses an empty static model while the block-entity renderer owns
+  the assembled MCX/glTF scene.
+- Textures below `blocks/multiblocks/<machine>` are assembled-scene atlases.
+  They may be sampled by their MCX/glTF scene, but must never be assigned to an
+  unformed controller's `cube_all` faces or particle texture.
 
 ### 4. Validation and error matrix
 
@@ -71,6 +75,8 @@ static RenderType renderType(ModelScene scene, RenderStyle style,
 | Generated face uses a transparent local texture with no safe layer | Fail the all-block model contract |
 | A generated blockstate or Magneticraft model parent is missing | Fail with the owning model ID |
 | An `OPAQUE` glTF primitive samples a transparent local texture | Fail with the source and texture IDs |
+| An unformed controller uses a per-machine scene atlas | Fail with the multiblock definition ID |
+| A formed state resolves to the idle cube, or an unformed state resolves to the empty model | Fail the controller model contract |
 
 ### 5. Good, base and bad cases
 
@@ -78,12 +84,14 @@ static RenderType renderType(ModelScene scene, RenderStyle style,
   the wall retains all visible faces.
 - Base: an opaque electrical enclosure uses the solid layer and occludes like
   a normal opaque model.
-- Good: every unformed multiblock controller cube uses the shared cutout render
-  type while its formed state remains an empty static model plus runtime scene.
+- Good: every unformed multiblock controller is the shared opaque Nova
+  `unmounted_multiblock` cube, while its formed state is an empty static model
+  plus the runtime assembled scene.
 - Bad: a masked pneumatic tube is baked as solid, so transparent texels write
   depth and neighboring blocks appear to have missing faces.
-- Bad: only converted MCX/glTF wrappers are audited while an ordinary controller
-  cube still samples a transparent retained texture through the solid layer.
+- Bad: an unformed hydraulic-press cube repeats the complete hydraulic-press
+  scene atlas on all six faces, making one controller look like the whole
+  machine compressed into a block.
 
 ### 6. Tests required
 
@@ -95,6 +103,9 @@ static RenderType renderType(ModelScene scene, RenderStyle style,
 - The closure test rejects missing models/textures, unsafe explicit overrides,
   transparent standard models below cutout, and transparent glTF primitives
   declared as `OPAQUE`.
+- A controller resource contract iterates every `MultiblockDefinition` and
+  asserts the exact shared idle texture, opaque solid layer, eight horizontal
+  formed/unformed variants, empty formed model and shared particle texture.
 - Static layer tests assert `solid`, `cutout` and `translucent` inference.
 - Graphical acceptance uses a newly created Creative world, switches to the
   English input method only after entering it, and places an opaque wall
@@ -112,10 +123,9 @@ ResourceLocation layer = inferredRenderType(scene);
 RenderTypeGroup group = context.getRenderType(layer);
 return bakeWithRenderType(scene, group);
 
-// Wrong: a retained transparent controller texture silently uses solid.
-ModelFile idle = models().cubeAll(definition.id(), controllerTexture);
+// Wrong: this is the complete assembled-scene atlas, not a controller face.
+ModelFile idle = models().cubeAll(definition.id(), machineSceneTexture);
 
-// Correct: apply the shared safe layer at the data-generation boundary.
-ModelFile idle = models().cubeAll(definition.id(), controllerTexture)
-        .renderType(CUTOUT_RENDER_TYPE);
+// Correct: preserve Nova 1.12's one shared opaque unmounted-controller cube.
+ModelFile idle = models().cubeAll(definition.id(), UNMOUNTED_MULTIBLOCK_TEXTURE);
 ```

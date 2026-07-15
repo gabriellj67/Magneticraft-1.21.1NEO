@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "magneticraft:blocks/multiblocks/grinder"
+    "particle": "magneticraft:blocks/multiblocks/unmounted_multiblock"
   }
 }

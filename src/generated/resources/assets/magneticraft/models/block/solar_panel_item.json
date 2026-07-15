@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/solar_panel.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/multiblocks/solar_panel"
+    "particle": "magneticraft:blocks/multiblocks/unmounted_multiblock"
   },
   "translation": [
     0.0,

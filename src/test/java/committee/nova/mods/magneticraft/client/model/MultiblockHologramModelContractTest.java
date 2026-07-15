@@ -16,24 +16,46 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MultiblockHologramModelContractTest {
     private static final Path ASSET_ROOT = Path.of(
-            "src/generated/resources/assets/magneticraft/models"
+            "src/generated/resources/assets/magneticraft"
     );
+    private static final String UNMOUNTED_TEXTURE =
+            "magneticraft:blocks/multiblocks/unmounted_multiblock";
 
     @Test
     void worldControllerAndInventorySceneUseSeparateModels() throws Exception {
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             String id = definition.id();
-            JsonObject worldModel = read("block/" + id + ".json");
+            JsonObject worldModel = read("models/block/" + id + ".json");
             assertEquals("minecraft:block/cube_all", worldModel.get("parent").getAsString(), id);
             assertFalse(worldModel.has("loader"), id + " world model must not obscure the hologram");
+            assertEquals(UNMOUNTED_TEXTURE,
+                    worldModel.getAsJsonObject("textures").get("all").getAsString(),
+                    id + " unformed controller must use the original shared texture");
+            assertFalse(worldModel.has("render_type"), id + " opaque controller texture must stay solid");
 
-            JsonObject itemModel = read("item/" + id + ".json");
+            JsonObject formedModel = read("models/block/" + id + "_formed.json");
+            assertEquals(UNMOUNTED_TEXTURE,
+                    formedModel.getAsJsonObject("textures").get("particle").getAsString(), id);
+
+            JsonObject blockstate = read("blockstates/" + id + ".json");
+            JsonObject variants = blockstate.getAsJsonObject("variants");
+            assertEquals(8, variants.size(), id + " must cover four facings and two formed states");
+            variants.entrySet().forEach(entry -> {
+                boolean formed = entry.getKey().contains("formed=true");
+                String expected = "magneticraft:block/" + id + (formed ? "_formed" : "");
+                assertEquals(expected, entry.getValue().getAsJsonObject().get("model").getAsString(),
+                        id + " model mismatch for " + entry.getKey());
+            });
+
+            JsonObject itemModel = read("models/item/" + id + ".json");
             assertEquals("magneticraft:block/" + id + "_item",
                     itemModel.get("parent").getAsString(), id);
 
-            JsonObject sceneModel = read("block/" + id + "_item.json");
+            JsonObject sceneModel = read("models/block/" + id + "_item.json");
             assertTrue(sceneModel.has("loader"), id + " inventory model lost its legacy scene");
             assertTrue(sceneModel.has("model"), id + " inventory model lost its source model");
+            assertEquals(UNMOUNTED_TEXTURE,
+                    sceneModel.getAsJsonObject("textures").get("particle").getAsString(), id);
         }
     }
 
