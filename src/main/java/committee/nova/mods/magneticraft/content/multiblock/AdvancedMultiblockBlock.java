@@ -108,6 +108,7 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
             NetworkHooks.openScreen(serverPlayer, controller, buffer -> {
                 buffer.writeBlockPos(position);
                 buffer.writeEnum(definition);
+                buffer.writeBoolean(controller.mirrored());
             });
         } else {
             controller.describe(serverPlayer);

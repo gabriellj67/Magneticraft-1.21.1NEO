@@ -24,6 +24,7 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
 
     private final BlockPos position;
     private final MultiblockDefinition definition;
+    private final boolean mirrored;
     private final ContainerLevelAccess access;
     private final ContainerData data;
     private final int machineSlots;
@@ -39,6 +40,7 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
                 playerInventory,
                 buffer.readBlockPos(),
                 validateDefinition(definition, buffer.readEnum(MultiblockDefinition.class)),
+                buffer.readBoolean(),
                 null
         );
     }
@@ -48,7 +50,14 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
             Inventory playerInventory,
             AdvancedMultiblockBlockEntity controller
     ) {
-        this(containerId, playerInventory, controller.getBlockPos(), controller.definition(), controller);
+        this(
+                containerId,
+                playerInventory,
+                controller.getBlockPos(),
+                controller.definition(),
+                controller.mirrored(),
+                controller
+        );
     }
 
     private AdvancedMultiblockMenu(
@@ -56,11 +65,13 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
             Inventory playerInventory,
             BlockPos position,
             MultiblockDefinition definition,
+            boolean mirrored,
             AdvancedMultiblockBlockEntity controller
     ) {
         super(ModMenus.advancedMultiblock(definition).get(), containerId);
         this.position = position.immutable();
         this.definition = definition;
+        this.mirrored = mirrored;
         access = ContainerLevelAccess.create(playerInventory.player.level(), position);
         data = controller == null
                 ? new SimpleContainerData(AdvancedMultiblockBlockEntity.MENU_DATA_COUNT)
@@ -111,6 +122,10 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
 
     public MultiblockDefinition definition() {
         return definition;
+    }
+
+    public boolean mirrored() {
+        return mirrored;
     }
 
     public int imageWidth() {

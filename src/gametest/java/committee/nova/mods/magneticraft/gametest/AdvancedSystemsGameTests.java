@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlock;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
+import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockMenu;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockCell;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.LegacyMultiblockCollision;
@@ -18,6 +19,7 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockEvents;
 import committee.nova.mods.magneticraft.content.machine.observation.MachineObservationService;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
@@ -27,6 +29,7 @@ import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBl
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -158,7 +161,7 @@ public final class AdvancedSystemsGameTests {
                 player, InteractionHand.MAIN_HAND, clicked, hit
         );
         MultiblockEvents.onMemberInteract(statusEvent);
-        helper.assertTrue(statusEvent.isCanceled(), "Non-block member interaction lost the status response");
+        helper.assertTrue(statusEvent.isCanceled(), "Non-block member interaction was not safely consumed");
 
         helper.getLevel().removeBlock(placed, false);
         controller.unform();
@@ -206,6 +209,62 @@ public final class AdvancedSystemsGameTests {
                     .orElseThrow();
             helper.assertTrue(diagnostics.electricalReading(unsupported).isEmpty(),
                     "A non-port face leaked multiblock electrical telemetry");
+            clear(helper, occupied);
+            player.discard();
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 80)
+    public static void formedElectricalPortsAcceptMatchingTierConnectors(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.GRINDER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Grinder did not form for connector placement");
+        MultiblockPortLayout.Port port = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(candidate -> candidate.kind() == MultiblockPortLayout.Kind.ELECTRICITY)
+                .filter(candidate -> !candidate.worldPosition(controller).equals(controller.getBlockPos()))
+                .findFirst()
+                .orElseThrow();
+        BlockPos portPosition = port.worldPosition(controller);
+        Direction portSide = port.worldSide(controller.facing());
+        BlockPos connectorPosition = portPosition.relative(portSide);
+        helper.assertTrue(helper.getLevel().getBlockState(connectorPosition).isAir(),
+                "Grinder electrical port did not have room for a connector");
+
+        ItemStack connector = TieredElectricalBlockItem.stackForTier(
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                VoltageTierIds.MEDIUM
+        );
+        player.setItemInHand(InteractionHand.MAIN_HAND, connector);
+        BlockHitResult hit = new BlockHitResult(
+                Vec3.atCenterOf(portPosition).add(
+                        portSide.getStepX() * 0.5D,
+                        portSide.getStepY() * 0.5D,
+                        portSide.getStepZ() * 0.5D
+                ),
+                portSide,
+                portPosition,
+                false
+        );
+        InteractionResult placement = connector.useOn(new UseOnContext(
+                player, InteractionHand.MAIN_HAND, hit
+        ));
+        helper.assertTrue(placement.consumesAction(),
+                "Matching-tier connector could not be placed on the exact multiblock electrical port");
+        helper.assertTrue(helper.getLevel().getBlockState(connectorPosition)
+                        .is(ModNetworkBlocks.ELECTRIC_CONNECTOR.get()),
+                "Connector item consumed its action without placing a connector");
+
+        helper.runAfterDelay(2, () -> {
+            helper.assertTrue(PhysicalNetworkService.manager(helper.getLevel())
+                            .neighbors(NetworkDomain.ELECTRICITY, connectorPosition)
+                            .contains(portPosition.asLong()),
+                    "Placed connector did not join the exact multiblock electrical port");
+            helper.getLevel().removeBlock(connectorPosition, false);
+            controller.unform();
             clear(helper, occupied);
             player.discard();
             helper.succeed();
@@ -293,6 +352,11 @@ public final class AdvancedSystemsGameTests {
         );
         helper.assertTrue(mirroredController.operational(),
                 "Already formed 0.2-0.5 mirrored pumpjack did not load compatibly");
+        AdvancedMultiblockMenu mirroredMenu = new AdvancedMultiblockMenu(
+                1, player.getInventory(), mirroredController
+        );
+        helper.assertTrue(mirroredMenu.mirrored(),
+                "Advanced menu lost the mirrored structure state");
         mirroredController.unform();
         clear(helper, mirroredPumpjack);
 

@@ -95,6 +95,24 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
             );
         }
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
+        Component structureState = MachineScreenLayout.fitToWidth(
+                font,
+                Component.translatable(
+                        "gui.magneticraft.multiblock_structure_state",
+                        Component.translatable(menu.mirrored()
+                                ? "message.magneticraft.multiblock_mirrored_state"
+                                : "message.magneticraft.multiblock_normal_state")
+                ),
+                baseImageWidth - inventoryLabelX - font.width(playerInventoryTitle) - 12
+        );
+        graphics.drawString(
+                font,
+                structureState,
+                baseImageWidth - 8 - font.width(structureState),
+                inventoryLabelY,
+                0xFF5F6368,
+                false
+        );
     }
 
     @Override

@@ -4,7 +4,6 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -40,13 +39,11 @@ public final class MultiblockEvents {
                 || !(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        Player player = event.getEntity();
         BlockPos controllerPosition = MultiblockMembershipService.controllerAt(level, event.getPos());
         if (controllerPosition != null
                 && !controllerPosition.equals(event.getPos())
                 && level.getBlockEntity(controllerPosition) instanceof AdvancedMultiblockBlockEntity controller
                 && controller.formed()) {
-            controller.describe(player);
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.CONSUME);
         }

@@ -18,6 +18,7 @@ tasks must establish and preserve.
 | [Error Handling](./error-handling.md) | Setup invariants, reload failures and packet validation | Complete |
 | [Logging](./logging-guidelines.md) | SLF4J levels, context and rate control | Complete |
 | [Quality](./quality-guidelines.md) | Java/Forge rules, provenance and verification gates | Complete |
+| [Player Input and Block Interaction](./input-interaction-guidelines.md) | Right-click mapping, event propagation, placement and client acceptance | Complete |
 | [Electrical Data Contracts](./electrical-data-contracts.md) | Atomic voltage-tier, transformer and machine-profile reload/sync contracts | Complete |
 | [Physical Electrical Network Runtime](./electrical-network-runtime.md) | Multi-terminal topology, exact RC exchange, telemetry and electrical NBT | Complete |
 | [MCX and glTF Rendering](./model-rendering-guidelines.md) | Source alpha semantics, Forge layers and graphical regression checks | Complete |
@@ -28,24 +29,27 @@ Before modifying production code or resources:
 
 1. Read [Directory Structure](./directory-structure.md).
 2. Read [Quality](./quality-guidelines.md).
-3. Read [Persistence and Data](./database-guidelines.md) for block entities,
+3. Read [Player Input and Block Interaction](./input-interaction-guidelines.md)
+   before changing right-click handlers, block `use` behavior, item placement
+   or input-sensitive graphical tests.
+4. Read [Persistence and Data](./database-guidelines.md) for block entities,
    networks, recipes, config or generated resources.
-4. Read [Error Handling](./error-handling.md) and
+5. Read [Error Handling](./error-handling.md) and
    [Logging](./logging-guidelines.md) for packets, reload listeners, optional
    integrations or lifecycle code.
-5. Read [Electrical Data Contracts](./electrical-data-contracts.md) before
+6. Read [Electrical Data Contracts](./electrical-data-contracts.md) before
    changing native-electricity data, simulation, persistence, packets or UI.
-6. Read [Physical Electrical Network Runtime](./electrical-network-runtime.md)
+7. Read [Physical Electrical Network Runtime](./electrical-network-runtime.md)
    before changing terminal identity, RC exchange, topology, couplers or
    electrical telemetry.
-7. Read [MCX and glTF Rendering](./model-rendering-guidelines.md) before
+8. Read [MCX and glTF Rendering](./model-rendering-guidelines.md) before
    changing legacy model parsing, baking or runtime named-part rendering.
-8. Read `../guides/code-reuse-thinking-guide.md` before adding a shared helper,
+9. Read `../guides/code-reuse-thinking-guide.md` before adding a shared helper,
    base class, constant or configuration value.
-9. Read `../guides/cross-layer-thinking-guide.md` when a change crosses three or
+10. Read `../guides/cross-layer-thinking-guide.md` when a change crosses three or
    more of registry, data, simulation, persistence, networking, menu and client
    rendering.
-10. Inspect the Nova 1.12 behavior before selecting a Forge 1.20.1 API shape.
+11. Inspect the Nova 1.12 behavior before selecting a Forge 1.20.1 API shape.
 
 ## Quality check
 
