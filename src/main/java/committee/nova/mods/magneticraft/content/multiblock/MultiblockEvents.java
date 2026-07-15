@@ -3,8 +3,10 @@ package committee.nova.mods.magneticraft.content.multiblock;
 import committee.nova.mods.magneticraft.Magneticraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -34,10 +36,11 @@ public final class MultiblockEvents {
 
     @SubscribeEvent
     public static void onMemberInteract(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getLevel() instanceof ServerLevel level)
-                || !(event.getEntity() instanceof ServerPlayer player)) {
+        if (isBlockPlacement(event.getItemStack().getItem())
+                || !(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
+        Player player = event.getEntity();
         BlockPos controllerPosition = MultiblockMembershipService.controllerAt(level, event.getPos());
         if (controllerPosition != null
                 && !controllerPosition.equals(event.getPos())
@@ -47,5 +50,9 @@ public final class MultiblockEvents {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.CONSUME);
         }
+    }
+
+    static boolean isBlockPlacement(Item item) {
+        return item instanceof BlockItem;
     }
 }

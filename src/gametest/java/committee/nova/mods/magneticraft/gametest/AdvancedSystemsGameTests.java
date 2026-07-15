@@ -14,6 +14,7 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockTransform;
 import committee.nova.mods.magneticraft.content.multiblock.StructureOffset;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlockEntity;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockEvents;
 import committee.nova.mods.magneticraft.content.machine.observation.MachineObservationService;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
@@ -34,8 +35,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
@@ -43,6 +47,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -50,12 +55,15 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @GameTestHolder(Magneticraft.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -99,6 +107,63 @@ public final class AdvancedSystemsGameTests {
             controller.unform();
             clear(helper, occupied);
         }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60)
+    public static void formedMembersAllowBlockItemsToPlaceAgainstThem(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.GRINDER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Grinder did not form for member interaction test");
+
+        Set<BlockPos> members = new HashSet<>(controller.members());
+        BlockPos clicked = null;
+        Direction face = null;
+        search:
+        for (BlockPos member : members) {
+            if (member.equals(controller.getBlockPos())) {
+                continue;
+            }
+            for (Direction candidate : Direction.values()) {
+                BlockPos target = member.relative(candidate);
+                if (!members.contains(target) && helper.getLevel().getBlockState(target).isAir()) {
+                    clicked = member;
+                    face = candidate;
+                    break search;
+                }
+            }
+        }
+        helper.assertTrue(clicked != null && face != null, "Formed grinder had no exposed member face");
+
+        ItemStack stone = new ItemStack(Blocks.STONE);
+        player.setItemInHand(InteractionHand.MAIN_HAND, stone);
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(clicked), face, clicked, false);
+        PlayerInteractEvent.RightClickBlock placementEvent = new PlayerInteractEvent.RightClickBlock(
+                player, InteractionHand.MAIN_HAND, clicked, hit
+        );
+        MultiblockEvents.onMemberInteract(placementEvent);
+        helper.assertFalse(placementEvent.isCanceled(), "Member interaction consumed a block placement");
+
+        InteractionResult placement = stone.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit));
+        BlockPos placed = clicked.relative(face);
+        helper.assertTrue(placement.consumesAction(), "Stone placement did not consume its normal item action");
+        helper.assertTrue(helper.getLevel().getBlockState(placed).is(Blocks.STONE),
+                "Block item did not place against the formed member");
+
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STICK));
+        PlayerInteractEvent.RightClickBlock statusEvent = new PlayerInteractEvent.RightClickBlock(
+                player, InteractionHand.MAIN_HAND, clicked, hit
+        );
+        MultiblockEvents.onMemberInteract(statusEvent);
+        helper.assertTrue(statusEvent.isCanceled(), "Non-block member interaction lost the status response");
+
+        helper.getLevel().removeBlock(placed, false);
+        controller.unform();
+        clear(helper, occupied);
+        player.discard();
         helper.succeed();
     }
 

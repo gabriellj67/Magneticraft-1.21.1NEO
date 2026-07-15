@@ -85,6 +85,18 @@ class ElectricalRuntimeModelContractTest {
         assertTrue(bounds.maxX() < 0.9F && bounds.maxY() < 0.9F && bounds.maxZ() < 0.9F);
     }
 
+    @Test
+    void electricalGltfCubeNormalsPointOutward() throws Exception {
+        for (String name : Set.of("box_transformer", "fuse_box", "circuit_breaker", "burnt_electric_cable")) {
+            ModelScene scene = readScene(name);
+            for (ModelScene.Node node : scene.nodes()) {
+                for (ModelScene.Primitive primitive : node.primitives()) {
+                    assertOutwardNormals(name, node.name(), primitive);
+                }
+            }
+        }
+    }
+
     private static void assertModel(String name, Set<String> requiredNodes, boolean hasManifest) throws Exception {
         Path source = ROOT.resolve(name + ".gltf");
         JsonObject json;
@@ -153,6 +165,51 @@ class ElectricalRuntimeModelContractTest {
             assertNotNull(imageFile, texture.toString());
             assertEquals(16, imageFile.getWidth(), texture.toString());
             assertEquals(16, imageFile.getHeight(), texture.toString());
+        }
+    }
+
+    private static void assertOutwardNormals(
+            String modelName,
+            String nodeName,
+            ModelScene.Primitive primitive
+    ) {
+        float[] positions = primitive.positions();
+        float minX = Float.POSITIVE_INFINITY;
+        float minY = Float.POSITIVE_INFINITY;
+        float minZ = Float.POSITIVE_INFINITY;
+        float maxX = Float.NEGATIVE_INFINITY;
+        float maxY = Float.NEGATIVE_INFINITY;
+        float maxZ = Float.NEGATIVE_INFINITY;
+        for (int offset = 0; offset < positions.length; offset += 3) {
+            minX = Math.min(minX, positions[offset]);
+            minY = Math.min(minY, positions[offset + 1]);
+            minZ = Math.min(minZ, positions[offset + 2]);
+            maxX = Math.max(maxX, positions[offset]);
+            maxY = Math.max(maxY, positions[offset + 1]);
+            maxZ = Math.max(maxZ, positions[offset + 2]);
+        }
+        float centerX = (minX + maxX) * 0.5F;
+        float centerY = (minY + maxY) * 0.5F;
+        float centerZ = (minZ + maxZ) * 0.5F;
+        float[] normals = primitive.normals();
+        for (int face = 0; face < primitive.faceCount(); face++) {
+            int offset = face * 12;
+            float ax = positions[offset];
+            float ay = positions[offset + 1];
+            float az = positions[offset + 2];
+            float normalX = (normals[offset] + normals[offset + 3] + normals[offset + 6]) / 3.0F;
+            float normalY = (normals[offset + 1] + normals[offset + 4] + normals[offset + 7]) / 3.0F;
+            float normalZ = (normals[offset + 2] + normals[offset + 5] + normals[offset + 8]) / 3.0F;
+            float faceX = (ax + positions[offset + 3] + positions[offset + 6]) / 3.0F;
+            float faceY = (ay + positions[offset + 4] + positions[offset + 7]) / 3.0F;
+            float faceZ = (az + positions[offset + 5] + positions[offset + 8]) / 3.0F;
+            float outwardDot = normalX * (faceX - centerX)
+                    + normalY * (faceY - centerY)
+                    + normalZ * (faceZ - centerZ);
+            assertTrue(
+                    outwardDot > 0.0F,
+                    modelName + "/" + nodeName + " face " + face + " has an inward normal"
+            );
         }
     }
 
