@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ElectricalDataParserTest {
     private static final ResourceLocation LOW = id("low_voltage");
     private static final ResourceLocation MEDIUM = id("medium_voltage");
+    private static final ResourceLocation HIGH = id("high_voltage");
 
     @Test
     void builtInSnapshotAndDataPackFourthTierParseAsOneCompleteRegistry() throws IOException {
@@ -31,7 +32,9 @@ class ElectricalDataParserTest {
         Map<ResourceLocation, JsonElement> machines = resources("machine_electrical_profiles");
 
         ResourceLocation ultra = ResourceLocation.fromNamespaceAndPath("test_pack", "ultra_voltage");
-        tiers.put(ultra, tierJson(3_840.0, 7_680.0, 8_000.0, "#A05CFF"));
+        JsonObject ultraTier = tierJson(3_840.0, 7_680.0, 8_000.0, "#A05CFF").getAsJsonObject();
+        ultraTier.addProperty("connector_conversion_joules_per_tick", 12_345.0D);
+        tiers.put(ultra, ultraTier);
         transformers.put(
                 ResourceLocation.fromNamespaceAndPath("test_pack", "hv_to_uv"),
                 transformerJson(id("high_voltage"), ultra, 12_800.0, 0.95)
@@ -50,7 +53,30 @@ class ElectricalDataParserTest {
         assertEquals(21, snapshot.machineProfiles().size());
         assertEquals(120.0, snapshot.voltageTier(LOW).orElseThrow().nominalVoltage());
         assertEquals(0xD98245, snapshot.voltageTier(LOW).orElseThrow().colorRgb());
-        assertEquals(16_000_000L, snapshot.voltageTier(id("high_voltage")).orElseThrow().batteryCapacityJoules());
+        assertEquals(16_000_000L, snapshot.voltageTier(HIGH).orElseThrow().batteryCapacityJoules());
+        assertEquals(400.0D, snapshot.voltageTier(LOW).orElseThrow().connectorConversionJoulesPerTick());
+        assertEquals(1_600.0D, snapshot.voltageTier(MEDIUM).orElseThrow().connectorConversionJoulesPerTick());
+        assertEquals(6_400.0D, snapshot.voltageTier(HIGH).orElseThrow().connectorConversionJoulesPerTick());
+        assertEquals(12_345.0D, snapshot.voltageTier(ultra).orElseThrow().connectorConversionJoulesPerTick());
+    }
+
+    @Test
+    void schemaOneVoltageTierWithoutConnectorRateUsesCompatibilityDefault() {
+        ElectricalDataLoadResult result = ElectricalDataParser.parse(
+                Map.of(
+                        LOW, tierJson(60.0, 120.0, 125.0, "#D98245"),
+                        MEDIUM, tierJson(240.0, 480.0, 500.0, "#E5C84B")
+                ),
+                Map.of(id("lv_to_mv"), transformerJson(LOW, MEDIUM, 800.0, 0.96)),
+                Map.of(id("load"), machineJson(LOW, "consumer", 1_000.0, 40.0))
+        );
+
+        assertTrue(result.valid(), () -> result.errors().toString());
+        ElectricalDataSnapshot snapshot = result.snapshot().orElseThrow();
+        assertEquals(
+                VoltageTier.DEFAULT_CONNECTOR_CONVERSION_JOULES_PER_TICK,
+                snapshot.voltageTier(LOW).orElseThrow().connectorConversionJoulesPerTick()
+        );
     }
 
     @Test
@@ -128,6 +154,7 @@ class ElectricalDataParserTest {
         tier.addProperty("schema_version", 2);
         tier.addProperty("nominal_voltage", 60.0);
         tier.addProperty("battery_transfer_joules_per_tick", Double.POSITIVE_INFINITY);
+        tier.addProperty("connector_conversion_joules_per_tick", Double.POSITIVE_INFINITY);
         JsonObject transformer = transformerJson(LOW, LOW, 1.0, 1.1).getAsJsonObject();
         JsonObject machine = machineJson(LOW, "consumer", 1.0, 1.0).getAsJsonObject();
         machine.addProperty("terminal_rated_charge_per_tick", -1.0);
@@ -143,6 +170,7 @@ class ElectricalDataParserTest {
         assertTrue(messages.contains("schema_version"));
         assertTrue(messages.contains("minimum_operating_voltage"));
         assertTrue(messages.contains("battery_transfer_joules_per_tick"));
+        assertTrue(messages.contains("connector_conversion_joules_per_tick"));
         assertTrue(messages.contains("must differ"));
         assertTrue(messages.contains("efficiency"));
         assertTrue(messages.contains("terminal_rated_charge_per_tick"));

@@ -23,6 +23,7 @@ import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
 import committee.nova.mods.magneticraft.system.network.electric.item.ElectricalRatingIds;
 import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
+import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.TransformerProfileIds;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
@@ -52,6 +53,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /** Runtime contracts for long-distance electricity, Tesla transfer and wind generation. */
@@ -713,7 +715,7 @@ public final class LongDistanceElectricGameTests {
     }
 
     @GameTest(template = ADVANCED_TEMPLATE)
-    public static void onlyLowVoltageConnectorExportsForgeEnergyOutward(GameTestHelper helper) {
+    public static void everyVoltageTierConnectorExportsForgeEnergyByDataRate(GameTestHelper helper) {
         BlockPos connectorPosition = new BlockPos(20, 5, 20);
         BlockPos receiverPosition = connectorPosition.north();
         helper.setBlock(
@@ -732,22 +734,36 @@ public final class LongDistanceElectricGameTests {
                 helper, receiverPosition, SingleBlockMachineBlockEntity.class
         );
 
-        connector.electricity().node().setVoltage(120.0D);
-        double sourceBefore = connector.electricity().node().energyJoules();
-        connector.serverTick();
-        helper.assertTrue(receiver.forgeEnergy().getEnergyStored() == 400,
-                "Low-voltage connector did not export 400 FE through its outward face");
-        helper.assertTrue(Math.abs(sourceBefore - connector.electricity().node().energyJoules() - 400.0D) < 1.0E-6D,
-                "Low-voltage connector violated the 1 J = 1 FE boundary");
+        Map<ResourceLocation, Integer> expectedRates = Map.of(
+                VoltageTierIds.LOW, 400,
+                VoltageTierIds.MEDIUM, 1_600,
+                VoltageTierIds.HIGH, 6_400
+        );
+        var snapshot = ElectricalDataRegistry.INSTANCE.currentOrThrow();
+        for (Map.Entry<ResourceLocation, Integer> entry : expectedRates.entrySet()) {
+            ResourceLocation tierId = entry.getKey();
+            int expectedRate = entry.getValue();
+            var tier = snapshot.voltageTier(tierId).orElseThrow();
+            helper.assertTrue(
+                    (int) Math.floor(tier.connectorConversionJoulesPerTick()) == expectedRate,
+                    "Connector conversion rate did not match the built-in voltage-tier data for " + tierId
+            );
 
-        receiver.forgeEnergy().setEnergyStored(0);
-        connector.electricity().applyTierFromPlacementData(VoltageTierIds.MEDIUM);
-        helper.assertTrue(connector.electricity().tierId().equals(VoltageTierIds.MEDIUM),
-                "Connector rejected its medium-voltage test tier");
-        connector.electricity().node().setVoltage(480.0D);
-        connector.serverTick();
-        helper.assertTrue(receiver.forgeEnergy().getEnergyStored() == 0,
-                "Medium-voltage connector exposed a direct Forge Energy output");
+            receiver.forgeEnergy().setEnergyStored(0);
+            connector.electricity().applyTierFromPlacementData(tierId);
+            helper.assertTrue(connector.electricity().tierId().equals(tierId),
+                    "Connector rejected its test tier " + tierId);
+            connector.electricity().node().setVoltage(tier.nominalVoltage());
+            double sourceBefore = connector.electricity().node().energyJoules();
+            connector.serverTick();
+
+            helper.assertTrue(receiver.forgeEnergy().getEnergyStored() == expectedRate,
+                    "Connector did not export its data-defined FE rate for " + tierId);
+            helper.assertTrue(
+                    Math.abs(sourceBefore - connector.electricity().node().energyJoules() - expectedRate) < 1.0E-6D,
+                    "Connector violated the 1 J = 1 FE boundary for " + tierId
+            );
+        }
         helper.succeed();
     }
 

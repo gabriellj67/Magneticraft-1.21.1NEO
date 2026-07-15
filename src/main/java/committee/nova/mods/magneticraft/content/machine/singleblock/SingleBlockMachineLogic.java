@@ -40,9 +40,8 @@ final class SingleBlockMachineLogic {
             case INFINITE_ENERGY -> electrical.tickInfiniteEnergy();
             case AIRLOCK -> electrical.tickAirlock(level);
             case THERMOPILE -> electrical.tickThermopile(level);
-            case RF_TRANSFORMER -> {
+            case RF_TRANSFORMER, ELECTRIC_ENGINE -> {
             }
-            case ELECTRIC_ENGINE -> electrical.tickElectricEngine(level);
         }
     }
 

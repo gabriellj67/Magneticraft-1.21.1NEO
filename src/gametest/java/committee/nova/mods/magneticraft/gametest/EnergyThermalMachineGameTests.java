@@ -13,6 +13,7 @@ import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -332,59 +333,35 @@ public final class EnergyThermalMachineGameTests {
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 10)
-    public static void engineOutputsForgeEnergyWithoutAcceptingOrBackfeeding(GameTestHelper helper) {
+    public static void engineExposesOnlyNativeElectricity(GameTestHelper helper) {
         SingleBlockMachineBlockEntity engine = placeMachine(helper, SingleBlockMachineDefinition.ELECTRIC_ENGINE);
         ElectricalPowerModule energy = requirePower(helper, engine);
-        for (Direction direction : Direction.values()) {
-            var capability = engine.getCapability(ForgeCapabilities.ENERGY, direction)
-                    .orElseThrow(AssertionError::new);
-            helper.assertFalse(capability.canReceive(), "Electric engine accepted FE on " + direction);
-            helper.assertTrue(capability.canExtract(), "Electric engine cannot extract FE on " + direction);
-        }
-        helper.assertTrue(
-                engine.getCapability(ForgeCapabilities.ENERGY, Direction.UP)
-                        .orElseThrow(AssertionError::new)
-                        .receiveEnergy(Integer.MAX_VALUE, true) == 0,
-                "Electric engine accepted simulated FE input"
+        helper.assertTrue(energy.electricalControllerBound(), "Electric engine did not bind its native J controller");
+        helper.assertFalse(
+                engine.getCapability(ForgeCapabilities.ENERGY, null).isPresent(),
+                "Electric engine exposed an unsided Forge Energy capability"
         );
+        for (Direction direction : Direction.values()) {
+            helper.assertFalse(
+                    engine.getCapability(ForgeCapabilities.ENERGY, direction).isPresent(),
+                    "Electric engine exposed Forge Energy on " + direction
+            );
+            helper.assertTrue(
+                    engine.supportsNetworkConnection(NetworkDomain.ELECTRICITY, direction),
+                    "Electric engine did not expose native electricity on " + direction
+            );
+        }
         energy.setStoredJoules(1_000);
 
         helper.runAfterDelay(2, () -> {
             helper.assertTrue(energy.storedWholeJoules() == 1_000,
-                    "Electric engine backfed FE into the electrical network");
+                    "Electric engine changed its native J buffer without a native load");
             helper.succeed();
         });
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 10)
-    public static void engineConvertsAtFullRateAtMediumNominalVoltageAndMarksWorking(GameTestHelper helper) {
-        helper.setBlock(CENTER.relative(Direction.SOUTH), Blocks.AIR);
-        SingleBlockMachineBlockEntity engine = placeMachine(helper, SingleBlockMachineDefinition.ELECTRIC_ENGINE);
-        ElectricalPowerModule energy = requirePower(helper, engine);
-        engine.electricity().node().setVoltage(480.0D);
-        double before = engine.electricity().node().energyJoules();
-        var forgeEnergy = engine.getCapability(ForgeCapabilities.ENERGY, Direction.UP)
-                .orElseThrow(AssertionError::new);
-        helper.assertTrue(forgeEnergy.extractEnergy(2_000, true) == 1_000,
-                "Electric engine simulation ignored its 1,000 J/t profile rate");
-        helper.assertTrue(Math.abs(engine.electricity().node().energyJoules() - before) < 1.0E-6D,
-                "Electric engine simulation mutated node energy");
-        helper.assertTrue(forgeEnergy.extractEnergy(2_000, false) == 1_000,
-                "Electric engine did not convert J to FE at full rate");
-        helper.assertTrue(Math.abs(before - engine.electricity().node().energyJoules() - 1_000.0D) < 1.0E-6D,
-                "Electric engine violated the 1 J = 1 FE conservation contract");
-        helper.assertTrue(forgeEnergy.extractEnergy(2_000, false) == 0,
-                "Electric engine exceeded its cumulative J/t budget in one game tick");
-        helper.runAfterDelay(1, () -> {
-            engine.electricity().node().setVoltage(480.0D);
-            helper.assertTrue(forgeEnergy.extractEnergy(2_000, false) == 1_000,
-                    "Electric engine did not reset its conversion budget on the next game tick");
-            helper.succeed();
-        });
-    }
-
-    @GameTest(template = TEMPLATE, timeoutTicks = 10)
-    public static void engineActivelyOutputsOnlyThroughItsDirectionalFace(GameTestHelper helper) {
+    public static void engineDoesNotConvertOrActivelyOutputForgeEnergy(GameTestHelper helper) {
         helper.setBlock(
                 CENTER,
                 ModMachineBlocks.machine(SingleBlockMachineDefinition.ELECTRIC_ENGINE).get().defaultBlockState()
@@ -400,18 +377,21 @@ public final class EnergyThermalMachineGameTests {
         SingleBlockMachineBlockEntity sideReceiver = placeMachineAt(
                 helper, CENTER.east(), SingleBlockMachineDefinition.RF_HEATER
         );
-        requirePower(helper, engine).setStoredJoules(32_000);
+        ElectricalPowerModule energy = requirePower(helper, engine);
+        energy.setStoredJoules(32_000);
 
         helper.runAfterDelay(2, () -> {
             helper.assertTrue(
-                    requireForgeEnergy(helper, outputReceiver).getEnergyStored() > 0,
-                    "Electric engine did not actively output through its configured face"
+                    requireForgeEnergy(helper, outputReceiver).getEnergyStored() == 0,
+                    "Electric engine directly output FE through its configured face"
             );
             helper.assertTrue(
                     requireForgeEnergy(helper, sideReceiver).getEnergyStored() == 0,
-                    "Electric engine actively output through a non-output face"
+                    "Electric engine directly output FE through a side face"
             );
-            helper.assertTrue(engine.working(), "Electric engine active conversion did not set its working state");
+            helper.assertTrue(energy.storedWholeJoules() == 32_000,
+                    "Electric engine consumed J for a removed FE conversion path");
+            helper.assertFalse(engine.working(), "Electric engine reported a removed FE conversion as working");
             helper.succeed();
         });
     }

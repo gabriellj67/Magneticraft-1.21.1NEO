@@ -27,6 +27,7 @@ public record VoltageTier(
         double cableCoolingPerTick,
         double overheadThermalCapacity,
         double overheadCoolingPerTick,
+        double connectorConversionJoulesPerTick,
         int connectorRange,
         int poleRange,
         long batteryCapacityJoules,
@@ -36,6 +37,7 @@ public record VoltageTier(
     public static final int SCHEMA_VERSION = 1;
     public static final int MAX_SYNCED_TIERS = 256;
     public static final int MAX_TEXT_LENGTH = 128;
+    public static final double DEFAULT_CONNECTOR_CONVERSION_JOULES_PER_TICK = 400.0D;
     private static final double VOLTAGE_COMPARISON_EPSILON = 1.0E-9D;
 
     public VoltageTier {
@@ -58,6 +60,7 @@ public record VoltageTier(
                 cableCoolingPerTick,
                 overheadThermalCapacity,
                 overheadCoolingPerTick,
+                connectorConversionJoulesPerTick,
                 connectorRange,
                 poleRange,
                 batteryCapacityJoules,
@@ -86,6 +89,7 @@ public record VoltageTier(
             double cableCoolingPerTick,
             double overheadThermalCapacity,
             double overheadCoolingPerTick,
+            double connectorConversionJoulesPerTick,
             int connectorRange,
             int poleRange,
             long batteryCapacityJoules,
@@ -111,6 +115,7 @@ public record VoltageTier(
         positiveFinite(errors, "cable_cooling_per_tick", cableCoolingPerTick);
         positiveFinite(errors, "overhead_thermal_capacity", overheadThermalCapacity);
         positiveFinite(errors, "overhead_cooling_per_tick", overheadCoolingPerTick);
+        positiveFinite(errors, "connector_conversion_joules_per_tick", connectorConversionJoulesPerTick);
         positiveFinite(errors, "battery_transfer_joules_per_tick", batteryTransferJoulesPerTick);
         if (Double.isFinite(minimumOperatingVoltage)
                 && Double.isFinite(nominalVoltage)

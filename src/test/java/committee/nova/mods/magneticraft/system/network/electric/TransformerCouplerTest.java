@@ -142,6 +142,7 @@ class TransformerCouplerTest {
                 0.0025D,
                 800.0D,
                 0.00125D,
+                400.0D,
                 8,
                 16,
                 1_000_000L,

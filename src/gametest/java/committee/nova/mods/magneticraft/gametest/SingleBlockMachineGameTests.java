@@ -816,11 +816,15 @@ public final class SingleBlockMachineGameTests {
 
             helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.ELECTRIC_ENGINE, Direction.NORTH));
             SingleBlockMachineBlockEntity engine = requireMachine(helper, CENTER);
+            helper.assertFalse(
+                    engine.getCapability(ForgeCapabilities.ENERGY, null).isPresent(),
+                    "Electric engine exposed an unsided FE capability"
+            );
             for (Direction direction : Direction.values()) {
-                var engineEnergy = engine.getCapability(ForgeCapabilities.ENERGY, direction)
-                        .orElseThrow(AssertionError::new);
-                helper.assertFalse(engineEnergy.canReceive(), "Electric engine accepted FE on " + direction);
-                helper.assertTrue(engineEnergy.canExtract(), "Electric engine cannot extract FE on " + direction);
+                helper.assertFalse(
+                        engine.getCapability(ForgeCapabilities.ENERGY, direction).isPresent(),
+                        "Electric engine exposed FE on " + direction
+                );
             }
             helper.succeed();
         });

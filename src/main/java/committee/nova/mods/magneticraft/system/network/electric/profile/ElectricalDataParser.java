@@ -159,6 +159,14 @@ public final class ElectricalDataParser {
         double cableCooling = decimal(VOLTAGE_TIER, id, object, "cable_cooling_per_tick", errors);
         double overheadThermal = decimal(VOLTAGE_TIER, id, object, "overhead_thermal_capacity", errors);
         double overheadCooling = decimal(VOLTAGE_TIER, id, object, "overhead_cooling_per_tick", errors);
+        double connectorConversion = optionalDecimal(
+                VOLTAGE_TIER,
+                id,
+                object,
+                "connector_conversion_joules_per_tick",
+                VoltageTier.DEFAULT_CONNECTOR_CONVERSION_JOULES_PER_TICK,
+                errors
+        );
         int connectorRange = integer(VOLTAGE_TIER, id, object, "connector_range", errors);
         int poleRange = integer(VOLTAGE_TIER, id, object, "pole_range", errors);
         long batteryCapacity = longInteger(VOLTAGE_TIER, id, object, "battery_capacity_joules", errors);
@@ -185,6 +193,7 @@ public final class ElectricalDataParser {
                 cableCooling,
                 overheadThermal,
                 overheadCooling,
+                connectorConversion,
                 connectorRange,
                 poleRange,
                 batteryCapacity,
@@ -214,6 +223,7 @@ public final class ElectricalDataParser {
                 cableCooling,
                 overheadThermal,
                 overheadCooling,
+                connectorConversion,
                 connectorRange,
                 poleRange,
                 batteryCapacity,
@@ -383,6 +393,17 @@ public final class ElectricalDataParser {
             errors.add(error(kind, id, field + " must be a number"));
             return Double.NaN;
         }
+    }
+
+    private static double optionalDecimal(
+            ElectricalDataValidationError.RegistryKind kind,
+            ResourceLocation id,
+            JsonObject object,
+            String field,
+            double fallback,
+            List<ElectricalDataValidationError> errors
+    ) {
+        return object.has(field) ? decimal(kind, id, object, field, errors) : fallback;
     }
 
     private static JsonPrimitive number(

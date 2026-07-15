@@ -8,7 +8,6 @@ import committee.nova.mods.magneticraft.content.network.module.LongDistanceWireH
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
-import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceEndpointHost;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistancePort;
 import net.minecraft.core.BlockPos;
@@ -84,16 +83,15 @@ public final class ElectricConnectorBlockEntity extends NetworkComponentBlockEnt
     protected void tickComponent() {
         if (level instanceof ServerLevel serverLevel
                 && electricity.electricalProfileBound()
-                && electricity.tierId().equals(VoltageTierIds.LOW)
                 && ElectricalDataRegistry.INSTANCE.current()
-                .flatMap(snapshot -> snapshot.voltageTier(VoltageTierIds.LOW))
+                .flatMap(snapshot -> snapshot.voltageTier(electricity.tierId()))
                 .map(tier -> ElectricEnergyExporter.export(
                         serverLevel,
                         worldPosition,
                         outwardFacing(),
                         electricity.node(),
                         tier,
-                        400
+                        (int) Math.floor(tier.connectorConversionJoulesPerTick())
                 ))
                 .orElse(0) > 0) {
             markChanged();

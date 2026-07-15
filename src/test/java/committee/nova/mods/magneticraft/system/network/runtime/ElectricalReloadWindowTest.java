@@ -84,6 +84,7 @@ class ElectricalReloadWindowTest {
                 0.0025,
                 800.0,
                 0.00125,
+                400.0,
                 8,
                 16,
                 1_000_000L,

@@ -592,7 +592,6 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
         }
         ElectricalPowerModule.ForgeEnergyAccess forgeAccess = switch (definition) {
             case RF_TRANSFORMER -> ElectricalPowerModule.ForgeEnergyAccess.INPUT;
-            case ELECTRIC_ENGINE -> ElectricalPowerModule.ForgeEnergyAccess.OUTPUT;
             default -> ElectricalPowerModule.ForgeEnergyAccess.NONE;
         };
         return addModule(new ElectricalPowerModule(

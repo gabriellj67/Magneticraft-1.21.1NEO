@@ -2,19 +2,16 @@ package committee.nova.mods.magneticraft.content.network.module;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
-import committee.nova.mods.magneticraft.content.network.electric.ElectricEnergyExporter;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalProfileController;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataSnapshot;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalRole;
 import committee.nova.mods.magneticraft.system.network.electric.profile.MachineElectricalProfile;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTier;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -217,43 +214,6 @@ public final class ElectricalPowerModule implements MachineModule, ElectricalPro
         return inserted;
     }
 
-    /** Loader-independent J -> FE conversion entry point used by the capability view and tests. */
-    public int extractForgeEnergy(int maxExtract, boolean simulate) {
-        if (forgeEnergyAccess != ForgeEnergyAccess.OUTPUT || !profileBound) {
-            return 0;
-        }
-        int requested = Math.min(
-                Math.max(0, maxExtract),
-                remainingForgeEnergyTransfer(voltageLimitedOutputRate())
-        );
-        int available = wholeJoules(electricity.node().removeEnergy(requested, true));
-        int extracted = wholeJoules(withdrawJoules(available, simulate));
-        if (!simulate) {
-            recordForgeEnergyTransfer(extracted);
-        }
-        return extracted;
-    }
-
-    /** Active J -> FE output sharing the same per-tick budget as capability extraction. */
-    public int exportForgeEnergy(ServerLevel level, BlockPos position, Direction outwardFacing) {
-        Objects.requireNonNull(level, "level");
-        Objects.requireNonNull(position, "position");
-        Objects.requireNonNull(outwardFacing, "outwardFacing");
-        if (forgeEnergyAccess != ForgeEnergyAccess.OUTPUT || !profileBound) {
-            return 0;
-        }
-        int remaining = remainingForgeEnergyTransfer(voltageLimitedOutputRate());
-        int exported = ElectricEnergyExporter.exportAtMost(
-                level,
-                position,
-                outwardFacing,
-                electricity.node(),
-                remaining
-        );
-        recordForgeEnergyTransfer(exported);
-        return exported;
-    }
-
     public void setStoredJoules(double joules) {
         double bounded = Math.min(nonNegativeFinite(joules), ratedCapacityJoules);
         if (electricity.node().energyJoules() != bounded) {
@@ -340,14 +300,6 @@ public final class ElectricalPowerModule implements MachineModule, ElectricalPro
                 : candidate.bufferCapacityJoules();
     }
 
-    private int voltageLimitedOutputRate() {
-        if (!profileBound) {
-            return 0;
-        }
-        double fraction = tier.operatingRateFraction(electricity.node().voltage());
-        return wholeJoules(fraction * maximumTransferJoulesPerTick);
-    }
-
     private int remainingForgeEnergyTransfer(int limit) {
         int used = currentGameTick() == forgeEnergyTransferTick
                 ? forgeEnergyTransferredThisTick
@@ -388,16 +340,11 @@ public final class ElectricalPowerModule implements MachineModule, ElectricalPro
             boolean accepts(ElectricalRole role) {
                 return role == ElectricalRole.CONSUMER
                         || role == ElectricalRole.GENERATOR
-                        || role == ElectricalRole.STORAGE;
+                        || role == ElectricalRole.STORAGE
+                        || role == ElectricalRole.PASSIVE;
             }
         },
         INPUT {
-            @Override
-            boolean accepts(ElectricalRole role) {
-                return role == ElectricalRole.CONVERTER;
-            }
-        },
-        OUTPUT {
             @Override
             boolean accepts(ElectricalRole role) {
                 return role == ElectricalRole.CONVERTER;
@@ -415,7 +362,7 @@ public final class ElectricalPowerModule implements MachineModule, ElectricalPro
 
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
-            return extractForgeEnergy(maxExtract, simulate);
+            return 0;
         }
 
         @Override
@@ -430,7 +377,7 @@ public final class ElectricalPowerModule implements MachineModule, ElectricalPro
 
         @Override
         public boolean canExtract() {
-            return forgeEnergyAccess == ForgeEnergyAccess.OUTPUT;
+            return false;
         }
 
         @Override

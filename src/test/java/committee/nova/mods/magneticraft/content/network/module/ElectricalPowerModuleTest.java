@@ -93,7 +93,7 @@ class ElectricalPowerModuleTest {
     }
 
     @Test
-    void forgeEnergyAdaptersConvertDirectlyAndKeepSimulationPure() {
+    void forgeEnergyInputConvertsDirectlyAndKeepsSimulationPure() {
         Fixture input = fixture(ElectricalRole.CONVERTER, ElectricalPowerModule.ForgeEnergyAccess.INPUT);
         assertEquals(200, input.power.receiveForgeEnergy(1_000, true));
         assertEquals(0.0D, input.node.energyJoules(), EPSILON);
@@ -101,18 +101,16 @@ class ElectricalPowerModuleTest {
         assertEquals(200.0D, input.node.energyJoules(), EPSILON);
         assertEquals(0, input.power.receiveForgeEnergy(1_000, false));
         assertEquals(200.0D, input.node.energyJoules(), EPSILON);
-        assertEquals(0, input.power.extractForgeEnergy(1_000, false));
+    }
 
-        Fixture output = fixture(ElectricalRole.CONVERTER, ElectricalPowerModule.ForgeEnergyAccess.OUTPUT);
-        output.node.setVoltage(120.0D);
-        double before = output.node.energyJoules();
-        assertEquals(200, output.power.extractForgeEnergy(1_000, true));
-        assertEquals(before, output.node.energyJoules(), EPSILON);
-        assertEquals(200, output.power.extractForgeEnergy(1_000, false));
-        assertEquals(before - 200.0D, output.node.energyJoules(), EPSILON);
-        assertEquals(0, output.power.extractForgeEnergy(1_000, false));
-        assertEquals(before - 200.0D, output.node.energyJoules(), EPSILON);
-        assertEquals(0, output.power.receiveForgeEnergy(1_000, false));
+    @Test
+    void passiveNativeProfileBindsWithoutAForgeEnergyAdapter() {
+        Fixture fixture = fixture(ElectricalRole.PASSIVE, ElectricalPowerModule.ForgeEnergyAccess.NONE);
+
+        assertTrue(fixture.power.electricalControllerBound());
+        fixture.power.setStoredJoules(1_000.0D);
+        assertEquals(1_000.0D, fixture.node.energyJoules(), EPSILON);
+        assertEquals(0, fixture.power.receiveForgeEnergy(1_000, false));
     }
 
     @Test
@@ -191,6 +189,7 @@ class ElectricalPowerModuleTest {
                 0.0025D,
                 800.0D,
                 0.00125D,
+                400.0D,
                 8,
                 16,
                 1_000_000L,

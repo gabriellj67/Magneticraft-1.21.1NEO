@@ -5,9 +5,9 @@ Magneticraft fixes the adapter rate at `1 joule = 1 Forge Energy`. No hidden mul
 FE can cross the boundary only at explicit devices:
 
 - The FE transformer accepts FE and feeds the low-voltage native network, normally up to 100 FE/t.
-- Every connector can carry native J through its outward face to a same-tier Magneticraft electrical port. A low-voltage connector automatically outputs up to 400 FE/t only when that target is FE-only; medium- and high-voltage connectors stay native-only.
+- Every connector can carry native J through its outward face to a same-tier Magneticraft electrical port. When the target is FE-only, every connector tier converts at its voltage-tier data-pack rate; the built-in limits are 400 FE/t at low voltage, 1,600 FE/t at medium voltage, and 6,400 FE/t at high voltage.
 - A wireless receiver carries Tesla-delivered J to a Magneticraft electrical port, or automatically outputs up to 400 FE/t when the outward target is FE-only.
-- The electric motor consumes medium-voltage native power and can output up to 1000 FE/t.
+- The electric engine is a medium-voltage native J endpoint and does not expose or output FE. Attach a matching-tier connector when an FE device must be powered from its network.
 - Portable battery slots are limited to 500 FE/t and do not turn the battery block into a universal sided FE provider.
 
 Every transaction simulates the receiver first. Only the accepted integer amount is committed, and any rounding remainder stays at the source. A one-to-one ratio therefore never means unlimited transfer or free energy.

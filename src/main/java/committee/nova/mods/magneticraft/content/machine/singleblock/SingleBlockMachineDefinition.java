@@ -141,8 +141,6 @@ public enum SingleBlockMachineDefinition {
             case STEAM_BOILER -> AutomationProfile.BOILER_ALL_SIDES;
             case ELECTRIC_HEATER -> AutomationProfile.ELECTRICITY_WITH_VERTICAL_HEAT;
             case RF_HEATER -> AutomationProfile.ALL_SIDES_FORGE_ENERGY_WITH_VERTICAL_HEAT;
-            case ELECTRIC_ENGINE ->
-                    AutomationProfile.ALL_SIDES_BIDIRECTIONAL_FORGE_ENERGY_WITH_DIRECTIONAL_OUTPUT;
             case GASIFICATION_UNIT, BRICK_FURNACE -> AutomationProfile.ITEM_INPUT_OUTPUT;
             case WATER_GENERATOR -> AutomationProfile.FLUID_OUTPUT_ALL_SIDES;
             default -> AutomationProfile.ALL_SIDES;
@@ -209,7 +207,6 @@ public enum SingleBlockMachineDefinition {
         BOILER_ALL_SIDES,
         ELECTRICITY_WITH_VERTICAL_HEAT,
         ALL_SIDES_FORGE_ENERGY_WITH_VERTICAL_HEAT,
-        ALL_SIDES_BIDIRECTIONAL_FORGE_ENERGY_WITH_DIRECTIONAL_OUTPUT,
         PNEUMATIC_ONLY
     }
 

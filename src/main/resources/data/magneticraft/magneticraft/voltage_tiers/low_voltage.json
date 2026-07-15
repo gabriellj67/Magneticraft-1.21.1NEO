@@ -16,6 +16,7 @@
   "cable_cooling_per_tick": 0.0025,
   "overhead_thermal_capacity": 800.0,
   "overhead_cooling_per_tick": 0.00125,
+  "connector_conversion_joules_per_tick": 400.0,
   "connector_range": 8,
   "pole_range": 16,
   "battery_capacity_joules": 1000000,

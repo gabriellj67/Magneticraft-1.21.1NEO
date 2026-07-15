@@ -298,6 +298,8 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModAdvancedBlocks.MULTIBLOCK_COLUMN.get(), chinese ? "机器支撑柱" : "Machine Support Column");
         add(ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(), chinese ? "警示条纹机器外壳" : "Striped Machine Casing");
         add(ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(), chinese ? "电气机器外壳" : "Electrical Machine Casing");
+        add(ModAdvancedBlocks.MULTIBLOCK_GAP.get(), chinese ? "已成型多方块结构" : "Formed Multiblock Structure");
+        add(ModAdvancedBlocks.PUMPJACK_DRILL.get(), chinese ? "抽油机钻杆" : "Pumpjack Drill");
         add(ModAdvancedBlocks.OIL_DEPOSIT.get(), chinese ? "地下油藏" : "Oil Deposit");
         add("tooltip.magneticraft.oil_deposit.full", chinese ? "储量：100%" : "Reserve: 100%");
         add("tooltip.magneticraft.oil_deposit.empty", chinese ? "储量：已耗尽" : "Reserve: depleted");
@@ -461,8 +463,8 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "潜行右击选择第一个端点，再右击同层级、同端口且同维度的端点建立连接；无效连接不消耗线卷。"
                 : "Sneak-use a first endpoint, then use an endpoint with the same tier, port type, and dimension; invalid links do not consume the coil.");
         add("guide.magneticraft.item.electric_connector.description", chinese
-                ? "壁挂式分级长距端点：低/中/高压范围为 8/16/32 格。朝外连接本模组电气端口时直接传输 J；低压变体面对仅 FE 设备时自动按 1 J = 1 FE 输出，最多 400 FE/t。"
-                : "A tiered wall endpoint with 8/16/32-block LV/MV/HV ranges. Its outward face carries native J to Magneticraft electrical ports; the LV variant automatically exports up to 400 FE/t at 1 J = 1 FE only to FE-only targets.");
+                ? "壁挂式分级长距端点：低/中/高压范围为 8/16/32 格。朝外连接本模组电气端口时直接传输 J；面对仅 FE 设备时，各层级按电压数据包参数以 1 J = 1 FE 自动输出，内置满速上限为 400/1600/6400 FE/t。"
+                : "A tiered wall endpoint with 8/16/32-block LV/MV/HV ranges. Its outward face carries native J to Magneticraft electrical ports; every tier automatically exports to FE-only targets at 1 J = 1 FE using its voltage-tier data rate, with built-in full-rate limits of 400/1600/6400 FE/t.");
         add("guide.magneticraft.item.electric_pole.description", chinese
                 ? "五格高的分级架空线路端点：低/中/高压范围为 16/32/64 格。只连接同层级电线杆且不会强加载区块。"
                 : "A five-block tiered overhead endpoint with 16/32/64-block LV/MV/HV ranges. It only links the same tier and never force-loads chunks.");
@@ -561,7 +563,6 @@ final class ModLanguageProvider extends LanguageProvider {
                 {"electric_top_bottom_back", "顶部、底部与背面电力端口", "Electrical ports on the top, bottom, and back"},
                 {"electricity_with_vertical_heat", "全侧电网与垂直热端口", "Electricity on all sides with vertical heat ports"},
                 {"all_sides_forge_energy_with_vertical_heat", "全侧 Forge Energy 与垂直热端口", "Forge Energy on all sides with vertical heat ports"},
-                {"all_sides_bidirectional_forge_energy_with_directional_output", "全侧双向 Forge Energy 与定向主动输出", "Bidirectional Forge Energy on all sides with directional active output"},
                 {"pneumatic_only", "仅气动网络", "Pneumatic network only"}
         });
         addGuideValues("slot", new String[][]{
@@ -735,7 +736,7 @@ final class ModLanguageProvider extends LanguageProvider {
             case BRICK_FURNACE -> "以外部热量执行熔炼配方；更换配方不会抹除已积累进度，工作显示会短暂延迟熄灭。";
             case INFINITE_ENERGY -> "创意管理设备，持续维持 125 V 电源；没有生存配方。";
             case RF_TRANSFORMER -> "从侧面接收 Forge Energy，并按 1 FE = 1 J 写入低压原生电气节点；不维护第二份 FE 缓冲。";
-            case ELECTRIC_ENGINE -> "从中压原生电气节点消耗 J，并向朝向侧的相邻设备按 1 J = 1 FE 输出；不维护第二份 FE 缓冲。";
+            case ELECTRIC_ENGINE -> "仅连接中压原生电气节点，不再暴露或转换 Forge Energy；需要向 FE 设备供能时，请通过匹配电压层级的电力连接器输出。";
             case AIRLOCK -> "每 40 刻扫描半径 9 的已加载区域，以电力维持边界水泡并清除内部水体；欠压后逐步失效。";
             case THERMOPILE -> "读取两侧温差并直接向额定原生电气节点产生焦耳，受节点容量、输出电压和发电速率限制。";
         };
@@ -761,7 +762,7 @@ final class ModLanguageProvider extends LanguageProvider {
             case BRICK_FURNACE -> "Runs smelting recipes from external heat; recipe changes preserve accumulated progress and the working display lingers briefly.";
             case INFINITE_ENERGY -> "A creative administration device that continuously holds a 125 V source; it has no survival recipe.";
             case RF_TRANSFORMER -> "Accepts Forge Energy on its sides and writes it into the low-voltage native node at 1 FE = 1 J, without a second FE buffer.";
-            case ELECTRIC_ENGINE -> "Consumes J from its medium-voltage native node and exports FE to the adjacent facing target at 1 J = 1 FE, without a second FE buffer.";
+            case ELECTRIC_ENGINE -> "Connects only to its medium-voltage native electrical node and no longer exposes or converts Forge Energy; route J through a matching-tier connector to power FE devices.";
             case AIRLOCK -> "Every 40 ticks, spends electricity across the loaded radius-9 area to maintain boundary bubbles and clear interior water; it decays when undervolted.";
             case THERMOPILE -> "Reads a temperature difference and generates joules directly into its rated native node, bounded by node capacity, output voltage, and generation rate.";
         };

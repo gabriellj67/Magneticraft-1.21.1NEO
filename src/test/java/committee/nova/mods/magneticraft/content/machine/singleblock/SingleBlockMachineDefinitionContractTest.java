@@ -52,8 +52,7 @@ class SingleBlockMachineDefinitionContractTest {
                 SingleBlockMachineDefinition.RF_HEATER.automationProfile()
         );
         assertEquals(
-                SingleBlockMachineDefinition.AutomationProfile
-                        .ALL_SIDES_BIDIRECTIONAL_FORGE_ENERGY_WITH_DIRECTIONAL_OUTPUT,
+                SingleBlockMachineDefinition.AutomationProfile.ALL_SIDES,
                 SingleBlockMachineDefinition.ELECTRIC_ENGINE.automationProfile()
         );
         assertFalse(SingleBlockMachineDefinition.WATER_GENERATOR.hasMenu());
@@ -74,6 +73,10 @@ class SingleBlockMachineDefinitionContractTest {
                         SingleBlockMachineDefinition.PhysicalPort.HEAT
                 ),
                 SingleBlockMachineDefinition.RF_HEATER.physicalPorts()
+        );
+        assertEquals(
+                Set.of(SingleBlockMachineDefinition.PhysicalPort.ELECTRICITY),
+                SingleBlockMachineDefinition.ELECTRIC_ENGINE.physicalPorts()
         );
         assertEquals(
                 Set.of(
@@ -132,6 +135,8 @@ class SingleBlockMachineDefinitionContractTest {
         assertFalse(SingleBlockPortProfile.heat(
                 SingleBlockMachineDefinition.COMBUSTION_CHAMBER, Direction.NORTH, facing));
         assertTrue(SingleBlockPortProfile.electricity(
+                SingleBlockMachineDefinition.ELECTRIC_ENGINE, Direction.NORTH, facing));
+        assertFalse(SingleBlockPortProfile.forgeEnergy(
                 SingleBlockMachineDefinition.ELECTRIC_ENGINE, Direction.NORTH, facing));
         assertFalse(SingleBlockPortProfile.forgeEnergy(
                 SingleBlockMachineDefinition.ELECTRIC_HEATER, Direction.NORTH, facing));

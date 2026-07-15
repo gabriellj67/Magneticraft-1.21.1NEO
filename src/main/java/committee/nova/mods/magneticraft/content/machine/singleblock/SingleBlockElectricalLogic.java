@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Native-electricity generation, conversion and airlock behavior.
+ * Native-electricity generation and airlock behavior.
  */
 final class SingleBlockElectricalLogic {
     private static final double AIRLOCK_MIN_VOLTAGE = 60.0D;
@@ -130,19 +130,6 @@ final class SingleBlockElectricalLogic {
                 state.working = true;
                 machine.markChanged();
             }
-        }
-    }
-
-    void tickElectricEngine(ServerLevel level) {
-        if (machine.energy() == null || machine.electricity() == null) {
-            return;
-        }
-        Direction output = SingleBlockMachineSupport.facing(machine).getOpposite();
-        int converted = machine.energy().exportForgeEnergy(level, machine.getBlockPos(), output);
-        state.lastProduction = converted;
-        if (converted > 0) {
-            state.working = true;
-            machine.markChanged();
         }
     }
 

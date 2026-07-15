@@ -63,9 +63,9 @@ public final class SingleBlockPortProfile {
                     SingleBlockMachineDefinition.PhysicalPort.ITEM,
                     SingleBlockMachineDefinition.PhysicalPort.HEAT
             );
-            case INFINITE_ENERGY, AIRLOCK, THERMOPILE ->
+            case INFINITE_ENERGY, AIRLOCK, THERMOPILE, ELECTRIC_ENGINE ->
                     Set.of(SingleBlockMachineDefinition.PhysicalPort.ELECTRICITY);
-            case RF_TRANSFORMER, ELECTRIC_ENGINE -> Set.of(
+            case RF_TRANSFORMER -> Set.of(
                     SingleBlockMachineDefinition.PhysicalPort.ELECTRICITY,
                     SingleBlockMachineDefinition.PhysicalPort.FORGE_ENERGY
             );
@@ -120,7 +120,7 @@ public final class SingleBlockPortProfile {
             Direction facing
     ) {
         return switch (definition) {
-            case RF_HEATER, RF_TRANSFORMER, ELECTRIC_ENGINE -> true;
+            case RF_HEATER, RF_TRANSFORMER -> true;
             default -> false;
         };
     }

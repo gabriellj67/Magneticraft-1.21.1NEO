@@ -649,6 +649,13 @@ class GeneratedDataContractTest {
             assertTrue(english.has("block.magneticraft." + id), id);
             assertTrue(chinese.has("block.magneticraft." + id), id);
         }
+        for (String runtimeBlock : List.of("multiblock_gap", "pumpjack_drill")) {
+            String translationKey = "block.magneticraft." + runtimeBlock;
+            assertTrue(english.has(translationKey), translationKey);
+            assertTrue(chinese.has(translationKey), translationKey);
+            assertFalse(english.get(translationKey).getAsString().isBlank(), translationKey);
+            assertFalse(chinese.get(translationKey).getAsString().isBlank(), translationKey);
+        }
         Map<String, String> advancedMcxModels = Map.of(
                 "shipping_container", "container",
                 "oil_heater", "oil_heater",
