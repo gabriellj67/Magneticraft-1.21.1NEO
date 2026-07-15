@@ -5,6 +5,8 @@ import committee.nova.mods.magneticraft.system.network.core.IncrementalGraph;
 import committee.nova.mods.magneticraft.system.network.core.WeightedPathfinder;
 import committee.nova.mods.magneticraft.system.network.logistics.LogisticsNetworkNode;
 import committee.nova.mods.magneticraft.system.network.logistics.LogisticsRouteDecision;
+import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataSnapshot;
+import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalProfileBinding;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -31,6 +33,8 @@ public final class PhysicalNetworkManager {
             new EnumMap<>(NetworkDomain.class);
     private long lastTick = Long.MIN_VALUE;
     private long edgeTicks;
+    private int electricalPauseTicks;
+    private int electricalDamageGraceTicks;
     private long logisticsCacheTopologyVersion = Long.MIN_VALUE;
     private final Map<LogisticsCacheKey, CachedLogisticsRoute> logisticsRouteCache =
             new LinkedHashMap<>(64, 0.75F, true) {
@@ -85,7 +89,12 @@ public final class PhysicalNetworkManager {
         }
         lastTick = gameTime;
 
+        boolean pauseElectrical = electricalPauseTicks > 0;
+
         for (NetworkDomain domain : NetworkDomain.values()) {
+            if (domain == NetworkDomain.ELECTRICITY && pauseElectrical) {
+                continue;
+            }
             IncrementalGraph<Long, PhysicalNetworkNode> graph = graph(domain);
             graph.values().forEach(node -> node.beforeNetworkTick(this));
             for (long firstKey : graph.keys()) {
@@ -102,6 +111,34 @@ public final class PhysicalNetworkManager {
             }
             graph.values().forEach(node -> node.afterNetworkTick(this));
         }
+        if (electricalPauseTicks > 0) {
+            electricalPauseTicks--;
+        }
+        if (electricalDamageGraceTicks > 0) {
+            electricalDamageGraceTicks--;
+        }
+    }
+
+    public void onElectricalProfilesReloaded(ElectricalDataSnapshot snapshot, int graceTicks) {
+        graph(NetworkDomain.ELECTRICITY).values().forEach(node -> {
+            if (node instanceof ElectricalProfileBinding binding) {
+                binding.rebindElectricalProfile(snapshot);
+            }
+        });
+        electricalPauseTicks = 1;
+        electricalDamageGraceTicks = Math.max(0, graceTicks);
+    }
+
+    public boolean electricalSimulationPaused() {
+        return electricalPauseTicks > 0;
+    }
+
+    public boolean electricalDamageSuppressed() {
+        return electricalDamageGraceTicks > 0;
+    }
+
+    public int electricalDamageGraceTicks() {
+        return electricalDamageGraceTicks;
     }
 
     public Optional<PhysicalNetworkNode> node(NetworkDomain domain, BlockPos position) {

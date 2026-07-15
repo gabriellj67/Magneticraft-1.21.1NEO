@@ -82,6 +82,8 @@
   "block.magneticraft.wooden_crate": "Wooden Crate",
   "config.jade.plugin_magneticraft.machine_status": "Magneticraft Machine Status",
   "config.magneticraft.crushing_table_causes_fire": "Crushing Table Causes Fire",
+  "config.magneticraft.electrical_reload_grace_ticks": "Electrical Reload Grace Ticks",
+  "config.magneticraft.enable_electrical_damage": "Enable Electrical Damage",
   "config.magneticraft.water_generator_per_tick_water": "Water Generator Output Per Side",
   "container.magneticraft.airlock": "Airlock",
   "container.magneticraft.battery_box": "Battery Box",
@@ -550,5 +552,8 @@
   "tooltip.magneticraft.jade.unformed": "unformed",
   "tooltip.magneticraft.oil_deposit.empty": "Reserve: depleted",
   "tooltip.magneticraft.oil_deposit.full": "Reserve: 100%",
-  "tooltip.magneticraft.small_tank.line_0": "Holding %s mB of %s"
+  "tooltip.magneticraft.small_tank.line_0": "Holding %s mB of %s",
+  "voltage_tier.magneticraft.high_voltage": "High Voltage",
+  "voltage_tier.magneticraft.low_voltage": "Low Voltage",
+  "voltage_tier.magneticraft.medium_voltage": "Medium Voltage"
 }

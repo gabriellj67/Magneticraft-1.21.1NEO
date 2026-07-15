@@ -3,7 +3,9 @@ package committee.nova.mods.magneticraft.network;
 import committee.nova.mods.magneticraft.Magneticraft;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Optional;
 
@@ -11,7 +13,7 @@ import java.util.Optional;
  * Narrow protocol for server-authoritative machine-menu actions.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "2";
+    private static final String PROTOCOL = "3";
     private static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(Magneticraft.id("machine"))
             .networkProtocolVersion(() -> PROTOCOL)
@@ -44,6 +46,14 @@ public final class ModNetwork {
                 UploadComputerProgramMessage::handle,
                 Optional.of(NetworkDirection.PLAY_TO_SERVER)
         );
+        CHANNEL.registerMessage(
+                2,
+                SyncVoltageTiersMessage.class,
+                SyncVoltageTiersMessage::encode,
+                SyncVoltageTiersMessage::decode,
+                SyncVoltageTiersMessage::handle,
+                Optional.of(NetworkDirection.PLAY_TO_CLIENT)
+        );
         registered = true;
     }
 
@@ -53,5 +63,9 @@ public final class ModNetwork {
 
     public static void uploadComputerProgram(UploadComputerProgramMessage message) {
         CHANNEL.sendToServer(message);
+    }
+
+    public static void syncVoltageTiers(ServerPlayer player, SyncVoltageTiersMessage message) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), message);
     }
 }

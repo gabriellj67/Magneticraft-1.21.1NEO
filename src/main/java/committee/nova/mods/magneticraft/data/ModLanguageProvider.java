@@ -44,6 +44,17 @@ final class ModLanguageProvider extends LanguageProvider {
                 MagneticraftConfig.WATER_GENERATOR_PER_TICK_WATER_TRANSLATION_KEY,
                 chinese ? "供水器每侧每刻供水量" : "Water Generator Output Per Side"
         );
+        add(
+                MagneticraftConfig.ENABLE_ELECTRICAL_DAMAGE_TRANSLATION_KEY,
+                chinese ? "启用电气损坏" : "Enable Electrical Damage"
+        );
+        add(
+                MagneticraftConfig.ELECTRICAL_RELOAD_GRACE_TICKS_TRANSLATION_KEY,
+                chinese ? "电气数据重载保护刻数" : "Electrical Reload Grace Ticks"
+        );
+        add("voltage_tier.magneticraft.low_voltage", chinese ? "低压" : "Low Voltage");
+        add("voltage_tier.magneticraft.medium_voltage", chinese ? "中压" : "Medium Voltage");
+        add("voltage_tier.magneticraft.high_voltage", chinese ? "高压" : "High Voltage");
         add(ModCreativeTabs.TRANSLATION_KEY, chinese ? "磁场工艺" : "Magneticraft");
         add(ModMachineBlocks.CRUSHING_TABLE.get(), chinese ? "压碎台" : "Crushing Table");
         add(ModMachineBlocks.BATTERY.get(), chinese ? "电池箱" : "Battery Box");

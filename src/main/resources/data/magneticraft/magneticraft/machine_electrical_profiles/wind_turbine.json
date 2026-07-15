@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "tier": "magneticraft:low_voltage",
+  "role": "generator",
+  "buffer_capacity_joules": 80000.0,
+  "maximum_transfer_joules_per_tick": 200.0,
+  "terminal_rated_charge_per_tick": 8.0
+}
