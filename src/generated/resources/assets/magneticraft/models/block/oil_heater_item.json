@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/oil_heater.mcx",
   "textures": {
-    "particle": "minecraft:block/iron_block"
+    "particle": "magneticraft:blocks/multiblocks/oil_heater"
   },
   "translation": [
     0.0,

@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/refinery.mcx",
   "textures": {
-    "particle": "minecraft:block/iron_block"
+    "particle": "magneticraft:blocks/multiblocks/refinery"
   },
   "translation": [
     0.0,

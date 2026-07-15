@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "minecraft:block/deepslate"
+    "all": "magneticraft:blocks/ore_block/oil_source_1"
   }
 }

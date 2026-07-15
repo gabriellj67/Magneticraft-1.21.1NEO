@@ -7,9 +7,9 @@
         0
       ],
       "scale": [
-        0.4,
-        0.4,
-        0.4
+        0.5882353,
+        0.5882353,
+        0.5882353
       ]
     },
     "firstperson_righthand": {
@@ -19,23 +19,23 @@
         0
       ],
       "scale": [
-        0.4,
-        0.4,
-        0.4
+        0.5882353,
+        0.5882353,
+        0.5882353
       ]
     },
     "fixed": {
       "scale": [
-        0.5,
-        0.5,
-        0.5
+        0.73529416,
+        0.73529416,
+        0.73529416
       ]
     },
     "ground": {
       "scale": [
-        0.25,
-        0.25,
-        0.25
+        0.36764708,
+        0.36764708,
+        0.36764708
       ],
       "translation": [
         0,
@@ -50,9 +50,16 @@
         0
       ],
       "scale": [
-        0.625,
-        0.625,
-        0.625
+        0.9191177,
+        0.9191177,
+        0.9191177
+      ]
+    },
+    "head": {
+      "scale": [
+        1.4705883,
+        1.4705883,
+        1.4705883
       ]
     },
     "thirdperson_lefthand": {
@@ -62,9 +69,9 @@
         0
       ],
       "scale": [
-        0.375,
-        0.375,
-        0.375
+        0.55147064,
+        0.55147064,
+        0.55147064
       ],
       "translation": [
         0,
@@ -79,9 +86,9 @@
         0
       ],
       "scale": [
-        0.375,
-        0.375,
-        0.375
+        0.55147064,
+        0.55147064,
+        0.55147064
       ],
       "translation": [
         0,
@@ -93,7 +100,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/burnt_electric_cable.gltf",
   "textures": {
-    "particle": "minecraft:block/black_concrete"
+    "particle": "magneticraft:block/burnt_electric_cable"
   },
   "translation": [
     0.0,

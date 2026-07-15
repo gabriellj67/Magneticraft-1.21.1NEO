@@ -1,13 +1,15 @@
 {
   "asset": {"version": "2.0", "generator": "Magneticraft electrical redesign"},
   "scene": 0,
-  "scenes": [{"nodes": [0, 1, 2, 3, 4]}],
+  "scenes": [{"nodes": [0, 1, 2, 3, 4, 5, 6]}],
   "nodes": [
     {"name": "housing", "mesh": 0, "translation": [0.2, 0.15, 0.3], "scale": [0.6, 0.7, 0.4]},
     {"name": "cover", "mesh": 0, "translation": [0.25, 0.2, 0.275], "scale": [0.5, 0.6, 0.05]},
     {"name": "tier_band", "mesh": 1, "translation": [0.25, 0.35, 0.245], "scale": [0.5, 0.1, 0.035]},
     {"name": "switch_closed", "mesh": 2, "translation": [0.46, 0.45, 0.225], "scale": [0.08, 0.28, 0.04]},
-    {"name": "switch_open", "mesh": 2, "translation": [0.35, 0.55, 0.225], "scale": [0.3, 0.08, 0.04]}
+    {"name": "switch_open", "mesh": 2, "translation": [0.35, 0.55, 0.225], "scale": [0.3, 0.08, 0.04]},
+    {"name": "input_terminal", "mesh": 0, "translation": [0.4, 0.42, 0.7], "scale": [0.2, 0.16, 0.3]},
+    {"name": "output_terminal", "mesh": 0, "translation": [0.4, 0.42, 0.0], "scale": [0.2, 0.16, 0.3]}
   ],
   "meshes": [
     {"name": "housing_mesh", "primitives": [{"attributes": {"POSITION": 0, "TEXCOORD_0": 1}, "indices": 2, "material": 0}]},
@@ -20,7 +22,7 @@
     {"name": "state_indicator", "pbrMetallicRoughness": {"baseColorTexture": {"index": 1}}}
   ],
   "textures": [{"source": 0}, {"source": 1}],
-  "images": [{"uri": "minecraft:block/polished_blackstone"}, {"uri": "minecraft:block/white_concrete"}],
+  "images": [{"uri": "magneticraft:block/electrical_breaker_housing"}, {"uri": "magneticraft:block/electrical_indicator"}],
   "accessors": [
     {"bufferView": 0, "componentType": 5126, "count": 24, "type": "VEC3", "min": [0, 0, 0], "max": [1, 1, 1]},
     {"bufferView": 1, "componentType": 5126, "count": 24, "type": "VEC2", "min": [0, 0], "max": [1, 1]},

@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/hydraulic_press.gltf",
   "textures": {
-    "particle": "minecraft:block/iron_block"
+    "particle": "magneticraft:blocks/multiblocks/hydraulic_press"
   },
   "translation": [
     0.0,

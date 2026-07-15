@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/pumpjack.mcx",
   "textures": {
-    "particle": "minecraft:block/iron_block"
+    "particle": "magneticraft:blocks/multiblocks/pumpjack"
   },
   "translation": [
     0.0,

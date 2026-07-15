@@ -1,6 +1,8 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube_bottom_top",
   "textures": {
-    "all": "minecraft:block/iron_block"
+    "bottom": "magneticraft:blocks/multiblock_parts/base_bottom",
+    "side": "magneticraft:blocks/multiblock_parts/base_side",
+    "top": "magneticraft:blocks/multiblock_parts/base_top"
   }
 }

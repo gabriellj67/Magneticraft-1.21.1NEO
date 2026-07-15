@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube_column",
   "textures": {
-    "all": "minecraft:block/copper_block"
+    "end": "magneticraft:blocks/multiblock_parts/pumpjack_drill",
+    "side": "magneticraft:blocks/multiblock_parts/pumpjack_drill_side"
   }
 }

@@ -2,6 +2,6 @@
   "parent": "minecraft:block/cube_all",
   "render_type": "minecraft:translucent",
   "textures": {
-    "all": "minecraft:block/white_stained_glass"
+    "all": "magneticraft:blocks/machines/air_bubble"
   }
 }

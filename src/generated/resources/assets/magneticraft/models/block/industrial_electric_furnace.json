@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "minecraft:block/iron_block"
+    "all": "magneticraft:blocks/multiblocks/big_electric_furnace_off"
   }
 }

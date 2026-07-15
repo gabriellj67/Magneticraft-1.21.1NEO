@@ -7,14 +7,9 @@
         0
       ],
       "scale": [
-        0.42666668,
-        0.42666668,
-        0.42666668
-      ],
-      "translation": [
-        -0.07844177,
-        0.21333334,
-        -0.0784418
+        0.4,
+        0.4,
+        0.4
       ]
     },
     "firstperson_righthand": {
@@ -24,38 +19,28 @@
         0
       ],
       "scale": [
-        0.42666668,
-        0.42666668,
-        0.42666668
-      ],
-      "translation": [
-        0.078441784,
-        0.21333334,
-        0.07844178
+        0.4,
+        0.4,
+        0.4
       ]
     },
     "fixed": {
       "scale": [
-        0.53333336,
-        0.53333336,
-        0.53333336
-      ],
-      "translation": [
-        0,
-        0.26666668,
-        0.1386668
+        0.5,
+        0.5,
+        0.5
       ]
     },
     "ground": {
       "scale": [
-        0.26666668,
-        0.26666668,
-        0.26666668
+        0.25,
+        0.25,
+        0.25
       ],
       "translation": [
         0,
-        3.1333334,
-        0.0693334
+        3,
+        0
       ]
     },
     "gui": {
@@ -65,26 +50,9 @@
         0
       ],
       "scale": [
-        0.6666667,
-        0.6666667,
-        0.6666667
-      ],
-      "translation": [
-        -0.12256528,
-        0.34995782,
-        0.060521975
-      ]
-    },
-    "head": {
-      "scale": [
-        1.0666667,
-        1.0666667,
-        1.0666667
-      ],
-      "translation": [
-        0,
-        0.53333336,
-        0.2773336
+        0.625,
+        0.625,
+        0.625
       ]
     },
     "thirdperson_lefthand": {
@@ -94,14 +62,14 @@
         0
       ],
       "scale": [
-        0.4,
-        0.4,
-        0.4
+        0.375,
+        0.375,
+        0.375
       ],
       "translation": [
-        -0.07353916,
-        2.6227973,
-        0.17415181
+        0,
+        2.5,
+        0
       ]
     },
     "thirdperson_righthand": {
@@ -111,25 +79,25 @@
         0
       ],
       "scale": [
-        0.4,
-        0.4,
-        0.4
+        0.375,
+        0.375,
+        0.375
       ],
       "translation": [
-        0.073539175,
-        2.4807305,
-        0.2122185
+        0,
+        2.5,
+        0
       ]
     }
   },
-  "exclude_nodes": [
+  "exclude_subtrees": [
     "arrow_forward",
     "arrow_reverse"
   ],
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/box_transformer.gltf",
   "textures": {
-    "particle": "minecraft:block/iron_block"
+    "particle": "magneticraft:block/electrical_enclosure"
   },
   "translation": [
     0.0,

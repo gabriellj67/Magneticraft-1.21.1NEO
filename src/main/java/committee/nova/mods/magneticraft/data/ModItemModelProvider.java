@@ -38,9 +38,9 @@ final class ModItemModelProvider extends ItemModelProvider {
                         && item != ModNetworkItems.ELECTRICAL_REPAIR_TOOL.get())
                 .forEach(this::basicItem);
         withExistingParent("electrical_fuse", mcLoc("item/generated"))
-                .texture("layer0", mcLoc("item/redstone"));
+                .texture("layer0", modLoc("item/electrical_fuse"));
         withExistingParent("electrical_repair_tool", mcLoc("item/handheld"))
-                .texture("layer0", mcLoc("item/iron_pickaxe"));
+                .texture("layer0", modLoc("item/electrical_repair_tool"));
         registerFloppyDiskModels();
 
         for (FluidDefinition definition : FluidDefinition.values()) {

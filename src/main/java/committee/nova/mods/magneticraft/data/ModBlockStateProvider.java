@@ -104,7 +104,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 registerSingleBlockMachineModel(holder.get(), definition));
         simpleBlock(
                 ModMachineBlocks.AIR_BUBBLE.get(),
-                models().cubeAll("air_bubble", mcLoc("block/white_stained_glass"))
+                models().cubeAll("air_bubble", modLoc("blocks/machines/air_bubble"))
                         .renderType(ResourceLocation.fromNamespaceAndPath("minecraft", "translucent"))
         );
         simpleBlockWithItem(
@@ -123,7 +123,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 gltfModel(
                         "burnt_electric_cable",
                         "burnt_electric_cable",
-                        mcLoc("block/black_concrete"),
+                        modLoc("block/burnt_electric_cable"),
                         ModelSceneSelection.ALL
                 )
         );
@@ -156,42 +156,70 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         simpleBlockWithItem(
                 ModAdvancedBlocks.MULTIBLOCK_BASE.get(),
-                models().cubeAll("machine_casing", mcLoc("block/iron_block"))
+                models().cubeBottomTop(
+                        "machine_casing",
+                        modLoc("blocks/multiblock_parts/base_side"),
+                        modLoc("blocks/multiblock_parts/base_bottom"),
+                        modLoc("blocks/multiblock_parts/base_top")
+                )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.CORRUGATED_IRON.get(),
-                models().cubeAll("corrugated_iron", mcLoc("block/polished_andesite"))
+                models().cubeColumn(
+                        "corrugated_iron",
+                        modLoc("blocks/multiblock_parts/corrugated_iron_side"),
+                        modLoc("blocks/multiblock_parts/corrugated_iron")
+                )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.COPPER_COIL.get(),
-                models().cubeAll("copper_coil", mcLoc("block/copper_block"))
+                models().cubeColumn(
+                        "copper_coil",
+                        modLoc("blocks/multiblock_parts/copper_coil_side"),
+                        modLoc("blocks/multiblock_parts/copper_coil")
+                )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.MULTIBLOCK_COLUMN.get(),
-                models().cubeAll("machine_support_column", mcLoc("block/iron_block"))
+                models().cubeColumn(
+                        "machine_support_column",
+                        modLoc("blocks/multiblock_parts/column_side"),
+                        modLoc("blocks/multiblock_parts/column_end")
+                )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(),
-                models().cubeAll("striped_machine_casing", mcLoc("block/yellow_concrete"))
+                models().cubeAll(
+                        "striped_machine_casing",
+                        modLoc("blocks/multiblock_parts/striped")
+                )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(),
-                models().cubeAll("electrical_machine_casing", mcLoc("block/redstone_block"))
+                models().cubeAll(
+                        "electrical_machine_casing",
+                        modLoc("blocks/multiblock_parts/electric")
+                )
         );
         simpleBlock(
                 ModAdvancedBlocks.PUMPJACK_DRILL.get(),
-                models().cubeAll("pumpjack_drill", mcLoc("block/copper_block"))
+                models().cubeColumn(
+                        "pumpjack_drill",
+                        modLoc("blocks/multiblock_parts/pumpjack_drill_side"),
+                        modLoc("blocks/multiblock_parts/pumpjack_drill")
+                )
         );
         simpleBlock(
                 ModAdvancedBlocks.MULTIBLOCK_GAP.get(),
-                emptyModel("multiblock_gap", mcLoc("block/iron_block"))
+                emptyModel("multiblock_gap", modLoc("blocks/multiblocks/multiblock_gap"))
         );
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
-            ModelFile idle = models().cubeAll(definition.id(), mcLoc("block/iron_block"));
-            ModelFile formed = emptyModel(definition.id() + "_formed", mcLoc("block/iron_block"));
-            ModelFile item = advancedControllerItemModel(definition);
+            ResourceLocation controllerTexture = advancedControllerTexture(definition);
+            ModelFile idle = models().cubeAll(definition.id(), controllerTexture);
+            ModelFile formed = emptyModel(definition.id() + "_formed", controllerTexture);
+            ModelFile item = advancedControllerItemModel(definition, controllerTexture);
             horizontalBlock(
                     controller,
                     state -> state.getValue(AdvancedMultiblockBlock.FORMED) ? formed : idle
@@ -201,7 +229,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         simpleBlockWithItem(
                 ModAdvancedBlocks.OIL_DEPOSIT.get(),
-                models().cubeAll("oil_deposit", mcLoc("block/deepslate"))
+                models().cubeAll("oil_deposit", modLoc("blocks/ore_block/oil_source_1"))
         );
 
         Block computer = ModComputerContent.COMPUTER.get();
@@ -594,6 +622,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
         return new ModelSceneSelection(Set.of(), Set.of(), Set.of(names), Set.of());
     }
 
+    private static ModelSceneSelection excludeSubtrees(String... names) {
+        return new ModelSceneSelection(Set.of(), Set.of(), Set.of(), Set.of(names));
+    }
+
     private void registerPneumaticEndpoint(Block block, SingleBlockMachineDefinition definition) {
         String texture = switch (definition) {
             case RELAY -> "relay";
@@ -645,34 +677,48 @@ final class ModBlockStateProvider extends BlockStateProvider {
         });
     }
 
-    private ModelFile advancedControllerItemModel(MultiblockDefinition definition) {
+    private ModelFile advancedControllerItemModel(
+            MultiblockDefinition definition,
+            ResourceLocation particle
+    ) {
         String generatedName = definition.id() + "_item";
         return switch (definition) {
-            case BIG_COMBUSTION_CHAMBER -> advancedGltfModel(generatedName, "big_combustion_chamber");
-            case BIG_ELECTRIC_FURNACE -> advancedGltfModel(generatedName, "big_electric_furnace");
-            case BIG_STEAM_BOILER -> advancedGltfModel(generatedName, "big_steam_boiler");
-            case CONTAINER -> advancedMcxModel(generatedName, "container");
-            case GRINDER -> advancedGltfModel(generatedName, "grinder");
-            case HYDRAULIC_PRESS -> advancedGltfModel(generatedName, "hydraulic_press");
-            case OIL_HEATER -> advancedMcxModel(generatedName, "oil_heater");
-            case PUMPJACK -> advancedMcxModel(generatedName, "pumpjack");
-            case REFINERY -> advancedMcxModel(generatedName, "refinery");
-            case SHELVING_UNIT -> advancedMcxModel(generatedName, "shelving_unit");
-            case SIEVE -> advancedGltfModel(generatedName, "sieve");
-            case SOLAR_MIRROR -> advancedMcxModel(generatedName, "solar_mirror");
-            case SOLAR_PANEL -> advancedMcxModel(generatedName, "solar_panel");
-            case SOLAR_TOWER -> advancedMcxModel(generatedName, "solar_tower");
-            case STEAM_ENGINE -> advancedGltfModel(generatedName, "steam_engine");
-            case STEAM_TURBINE -> advancedGltfModel(generatedName, "steam_turbine");
+            case BIG_COMBUSTION_CHAMBER -> advancedGltfModel(generatedName, "big_combustion_chamber", particle);
+            case BIG_ELECTRIC_FURNACE -> advancedGltfModel(generatedName, "big_electric_furnace", particle);
+            case BIG_STEAM_BOILER -> advancedGltfModel(generatedName, "big_steam_boiler", particle);
+            case CONTAINER -> advancedMcxModel(generatedName, "container", particle);
+            case GRINDER -> advancedGltfModel(generatedName, "grinder", particle);
+            case HYDRAULIC_PRESS -> advancedGltfModel(generatedName, "hydraulic_press", particle);
+            case OIL_HEATER -> advancedMcxModel(generatedName, "oil_heater", particle);
+            case PUMPJACK -> advancedMcxModel(generatedName, "pumpjack", particle);
+            case REFINERY -> advancedMcxModel(generatedName, "refinery", particle);
+            case SHELVING_UNIT -> advancedMcxModel(generatedName, "shelving_unit", particle);
+            case SIEVE -> advancedGltfModel(generatedName, "sieve", particle);
+            case SOLAR_MIRROR -> advancedMcxModel(generatedName, "solar_mirror", particle);
+            case SOLAR_PANEL -> advancedMcxModel(generatedName, "solar_panel", particle);
+            case SOLAR_TOWER -> advancedMcxModel(generatedName, "solar_tower", particle);
+            case STEAM_ENGINE -> advancedGltfModel(generatedName, "steam_engine", particle);
+            case STEAM_TURBINE -> advancedGltfModel(generatedName, "steam_turbine", particle);
         };
     }
 
-    private ModelFile advancedMcxModel(String generatedName, String sourceName) {
-        return mcxModel(generatedName, sourceName, mcLoc("block/iron_block"), ModelSceneSelection.ALL);
+    private ResourceLocation advancedControllerTexture(MultiblockDefinition definition) {
+        String texture = switch (definition) {
+            case BIG_COMBUSTION_CHAMBER -> "big_combustion_chamber";
+            case BIG_ELECTRIC_FURNACE -> "big_electric_furnace_off";
+            case BIG_STEAM_BOILER -> "big_steam_boiler";
+            case CONTAINER -> "container";
+            default -> definition.id();
+        };
+        return modLoc("blocks/multiblocks/" + texture);
     }
 
-    private ModelFile advancedGltfModel(String generatedName, String sourceName) {
-        return gltfModel(generatedName, sourceName, mcLoc("block/iron_block"), ModelSceneSelection.ALL);
+    private ModelFile advancedMcxModel(String generatedName, String sourceName, ResourceLocation particle) {
+        return mcxModel(generatedName, sourceName, particle, ModelSceneSelection.ALL);
+    }
+
+    private ModelFile advancedGltfModel(String generatedName, String sourceName, ResourceLocation particle) {
+        return gltfModel(generatedName, sourceName, particle, ModelSceneSelection.ALL);
     }
 
     private void registerLongDistanceElectricModels() {
@@ -702,8 +748,8 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile boxTransformerModel = gltfModel(
                 "box_transformer",
                 "box_transformer",
-                mcLoc("block/iron_block"),
-                excludeNodes("arrow_forward", "arrow_reverse")
+                modLoc("block/electrical_enclosure"),
+                excludeSubtrees("arrow_forward", "arrow_reverse")
         );
         horizontalBlock(boxTransformer, boxTransformerModel);
         simpleBlockItem(boxTransformer, boxTransformerModel);
@@ -711,7 +757,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile fuseBoxModel = gltfModel(
                 "fuse_box",
                 "fuse_box",
-                mcLoc("block/iron_block"),
+                modLoc("block/electrical_enclosure"),
                 excludeNodes("fuse_intact", "fuse_blown")
         );
         horizontalBlock(ModNetworkBlocks.FUSE_BOX.get(), fuseBoxModel);
@@ -720,7 +766,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile circuitBreakerModel = gltfModel(
                 "circuit_breaker",
                 "circuit_breaker",
-                mcLoc("block/polished_blackstone"),
+                modLoc("block/electrical_breaker_housing"),
                 excludeNodes("switch_closed", "switch_open")
         );
         horizontalBlock(ModNetworkBlocks.CIRCUIT_BREAKER.get(), circuitBreakerModel);
