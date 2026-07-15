@@ -835,13 +835,19 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private ModelFile withInventoryTransform(BlockModelBuilder model, InventoryModelTransform transform) {
-        model.transforms()
-                .transform(ItemDisplayContext.GUI)
-                .rotation(InventoryModelTransform.GUI_ROTATION_X, InventoryModelTransform.GUI_ROTATION_Y, 0.0F)
-                .translation(transform.translationX(), transform.translationY(), transform.translationZ())
-                .scale(transform.scale())
-                .end()
-                .end();
+        var transforms = model.transforms();
+        for (ItemDisplayContext context : ItemDisplayContext.values()) {
+            if (context == ItemDisplayContext.NONE) {
+                continue;
+            }
+            InventoryModelTransform.DisplayTransform display = transform.forContext(context);
+            transforms.transform(context)
+                    .rotation(display.rotationX(), display.rotationY(), display.rotationZ())
+                    .translation(display.translationX(), display.translationY(), display.translationZ())
+                    .scale(display.scale())
+                    .end();
+        }
+        transforms.end();
         return model;
     }
 }

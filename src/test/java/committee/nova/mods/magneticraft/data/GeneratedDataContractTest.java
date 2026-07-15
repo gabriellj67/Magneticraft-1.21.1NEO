@@ -37,6 +37,25 @@ class GeneratedDataContractTest {
     private static final Path DATA = GENERATED.resolve("data/magneticraft");
     private static final Path SOURCE_TEXTURES = Path.of("src/main/resources/assets/magneticraft/textures");
     private static final Path SOURCE_MODELS = Path.of("src/main/resources/assets/magneticraft/models");
+    private static final Set<String> BLOCK_DISPLAY_CONTEXTS = Set.of(
+            "thirdperson_lefthand",
+            "thirdperson_righthand",
+            "firstperson_lefthand",
+            "firstperson_righthand",
+            "head",
+            "gui",
+            "ground",
+            "fixed"
+    );
+    private static final Set<String> REQUIRED_BLOCK_DISPLAY_CONTEXTS = Set.of(
+            "thirdperson_lefthand",
+            "thirdperson_righthand",
+            "firstperson_lefthand",
+            "firstperson_righthand",
+            "gui",
+            "ground",
+            "fixed"
+    );
 
     @Test
     void everyGeneratedJsonFileIsValid() throws IOException {
@@ -48,7 +67,7 @@ class GeneratedDataContractTest {
     }
 
     @Test
-    void customSceneBlockItemsHaveBoundedGuiTransforms() throws IOException {
+    void customSceneBlockItemsHaveBoundedModelLoaderTransforms() throws IOException {
         int customSceneBlockItems = 0;
         Path itemModels = ASSETS.resolve("models/item");
         try (Stream<Path> paths = Files.list(itemModels)) {
@@ -70,30 +89,40 @@ class GeneratedDataContractTest {
                 }
 
                 customSceneBlockItems++;
-                assertFalse(blockModel.has("parent"), itemPath + " must not inherit transforms for non-GUI contexts");
-                assertTrue(blockModel.has("display"), itemPath + " must declare GUI display transforms");
-                JsonObject gui = blockModel.getAsJsonObject("display").getAsJsonObject("gui");
-                assertNotNull(gui, itemPath + " must declare a GUI display transform");
+                assertFalse(blockModel.has("parent"), itemPath + " must own its legacy scene transforms");
+                assertTrue(blockModel.has("display"), itemPath + " must declare block display transforms");
+                JsonObject display = blockModel.getAsJsonObject("display");
+                assertTrue(display.keySet().containsAll(REQUIRED_BLOCK_DISPLAY_CONTEXTS),
+                        itemPath + " must preserve every non-identity ModelLoader block display context");
+                assertTrue(BLOCK_DISPLAY_CONTEXTS.containsAll(display.keySet()),
+                        itemPath + " declares an unknown block display context");
+                JsonObject gui = display.getAsJsonObject("gui");
                 assertVectorEquals(gui.getAsJsonArray("rotation"), 30.0F, 225.0F, 0.0F, itemPath + " rotation");
 
-                if (gui.has("translation")) {
-                    JsonArray translation = gui.getAsJsonArray("translation");
-                    assertEquals(3, translation.size(), itemPath + " translation");
-                    translation.forEach(component -> assertTrue(
-                            Math.abs(component.getAsFloat()) <= 80.0F,
-                            itemPath + " translation must be valid"
-                    ));
-                }
+                for (String context : display.keySet()) {
+                    JsonObject itemDisplay = display.getAsJsonObject(context);
+                    if (itemDisplay.has("translation")) {
+                        JsonArray translation = itemDisplay.getAsJsonArray("translation");
+                        assertEquals(3, translation.size(), itemPath + " " + context + " translation");
+                        translation.forEach(component -> assertTrue(
+                                Math.abs(component.getAsFloat()) <= 80.0F,
+                                itemPath + " " + context + " translation must be valid"
+                        ));
+                    }
 
-                JsonArray scale = gui.has("scale") ? gui.getAsJsonArray("scale") : null;
-                if (scale != null) {
-                    assertEquals(3, scale.size(), itemPath + " scale");
-                }
-                float uniformScale = scale == null ? 1.0F : scale.get(0).getAsFloat();
-                assertTrue(uniformScale > 0.0F && uniformScale <= 4.0F, itemPath + " scale must be valid");
-                if (scale != null) {
-                    assertEquals(uniformScale, scale.get(1).getAsFloat(), 0.000001F, itemPath + " Y scale");
-                    assertEquals(uniformScale, scale.get(2).getAsFloat(), 0.000001F, itemPath + " Z scale");
+                    JsonArray scale = itemDisplay.has("scale") ? itemDisplay.getAsJsonArray("scale") : null;
+                    if (scale != null) {
+                        assertEquals(3, scale.size(), itemPath + " " + context + " scale");
+                    }
+                    float uniformScale = scale == null ? 1.0F : scale.get(0).getAsFloat();
+                    assertTrue(uniformScale > 0.0F && uniformScale <= 4.0F,
+                            itemPath + " " + context + " scale must be valid");
+                    if (scale != null) {
+                        assertEquals(uniformScale, scale.get(1).getAsFloat(), 0.000001F,
+                                itemPath + " " + context + " Y scale");
+                        assertEquals(uniformScale, scale.get(2).getAsFloat(), 0.000001F,
+                                itemPath + " " + context + " Z scale");
+                    }
                 }
             }
         }
