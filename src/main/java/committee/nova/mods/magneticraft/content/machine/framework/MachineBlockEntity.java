@@ -86,7 +86,7 @@ public abstract class MachineBlockEntity extends BlockEntity
 
     /** Returns whether one physical-network module exposes the requested face. */
     @Override
-    public final boolean supportsNetworkConnection(NetworkDomain domain, Direction side) {
+    public boolean supportsNetworkConnection(NetworkDomain domain, Direction side) {
         for (MachineModule module : modules.values()) {
             if (module instanceof PhysicalNetworkNode node
                     && node.domain() == domain

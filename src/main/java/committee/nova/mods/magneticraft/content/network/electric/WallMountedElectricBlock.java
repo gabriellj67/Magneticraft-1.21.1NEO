@@ -1,7 +1,9 @@
 package committee.nova.mods.magneticraft.content.network.electric;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
+import committee.nova.mods.magneticraft.content.machine.framework.NetworkConnectionHost;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -39,7 +41,9 @@ abstract class WallMountedElectricBlock extends NetworkComponentBlock {
         BlockPos support = position.relative(facing.getOpposite());
         BlockState supportState = level.getBlockState(support);
         return supportState.is(ModNetworkBlocks.ELECTRIC_CABLE.get())
-                || supportState.isFaceSturdy(level, support, facing);
+                || supportState.isFaceSturdy(level, support, facing)
+                || level.getBlockEntity(support) instanceof NetworkConnectionHost host
+                && host.supportsNetworkConnection(NetworkDomain.ELECTRICITY, facing);
     }
 
     @Override

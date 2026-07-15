@@ -187,8 +187,7 @@ public final class MultiblockGapBlockEntity extends BlockEntity
     public boolean supportsNetworkConnection(NetworkDomain domain, Direction side) {
         AdvancedMultiblockBlockEntity controller = controller();
         return controller != null
-                && controller.operational()
-                && MultiblockPortLayout.supports(controller, worldPosition, domain, side);
+                && controller.supportsNetworkConnection(worldPosition, domain, side);
     }
 
     @Override

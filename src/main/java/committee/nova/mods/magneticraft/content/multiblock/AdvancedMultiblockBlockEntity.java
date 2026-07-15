@@ -206,6 +206,16 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         return formed && structureReady && validate().valid();
     }
 
+    @Override
+    public boolean supportsNetworkConnection(NetworkDomain domain, Direction side) {
+        return supportsNetworkConnection(worldPosition, domain, side);
+    }
+
+    boolean supportsNetworkConnection(BlockPos position, NetworkDomain domain, Direction side) {
+        boolean portsAvailable = level != null && level.isClientSide ? formed : operational();
+        return portsAvailable && MultiblockPortLayout.supports(this, position, domain, side);
+    }
+
     public boolean mirrored() {
         return mirrored;
     }
