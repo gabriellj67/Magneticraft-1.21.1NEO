@@ -7,7 +7,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyS
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -60,7 +60,7 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
-                new ElectricalNode(1.0D, 125.0D, 0.001D),
+                ElectricalNodeKind.MACHINE,
                 this::canAccessEnergy
         ));
         addModule(new ElectricalEnergyBridgeModule(

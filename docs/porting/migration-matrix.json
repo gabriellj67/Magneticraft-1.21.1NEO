@@ -224,7 +224,7 @@
           "processing_resource_directories": []
         },
         "test_locators": [
-          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "engineConvertsAtFullRateAtExactlySixtyVoltsAndMarksWorking"},
+          {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "engineConvertsAtFullRateAtMediumNominalVoltageAndMarksWorking"},
           {"path": "src/gametest/java/committee/nova/mods/magneticraft/gametest/EnergyThermalMachineGameTests.java", "method": "engineActivelyOutputsOnlyThroughItsDirectionalFace"}
         ]
       },

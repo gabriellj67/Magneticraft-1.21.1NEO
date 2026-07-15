@@ -380,8 +380,8 @@ public final class PortableElectricGameTests {
             helper.assertTrue(Math.abs(sourceReading.currentAmps() - targetReading.currentAmps()) < 1.0E-9D,
                     "Electrical diagnostic throughput was not conserved");
             helper.assertTrue(Math.abs(sourceReading.powerWatts()
-                    - sourceReading.voltageVolts() * sourceReading.currentAmps()) < 1.0E-9D,
-                    "Electrical diagnostic power did not match V*A");
+                    - source.electricity().node().lastCompletedTickJoules() * 20.0D) < 1.0E-9D,
+                    "Electrical diagnostic power did not match J/t x 20");
             source.electricity().node().setVoltage(50.0D);
             target.electricity().node().setVoltage(50.0D);
             manager.tick(helper.getLevel().getGameTime() + 2L);

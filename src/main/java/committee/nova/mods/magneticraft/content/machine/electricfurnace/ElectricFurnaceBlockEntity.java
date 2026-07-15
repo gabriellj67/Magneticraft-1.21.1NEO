@@ -7,7 +7,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInv
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
@@ -55,7 +55,7 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
-                new ElectricalNode(1.0D, 125.0D, 0.001D),
+                ElectricalNodeKind.MACHINE,
                 side -> true
         ));
         addModule(new ElectricalEnergyBridgeModule(

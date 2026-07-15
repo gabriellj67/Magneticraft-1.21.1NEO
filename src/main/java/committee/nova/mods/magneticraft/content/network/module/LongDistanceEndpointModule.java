@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.system.network.longdistance.LongDistance
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceEndpointHost;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistancePort;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -58,8 +59,8 @@ public final class LongDistanceEndpointModule implements MachineModule {
 
     @Override
     public void serverTick() {
-        if (service != null && host.level() != null) {
-            service.tick(host.level().getGameTime());
+        if (service != null && host.level() instanceof ServerLevel level) {
+            PhysicalNetworkService.manager(level).tick(level.getGameTime());
         }
     }
 

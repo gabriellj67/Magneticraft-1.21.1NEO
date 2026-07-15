@@ -2,6 +2,9 @@ package committee.nova.mods.magneticraft.system.network.longdistance;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalEdgeTelemetry;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkManager;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +39,14 @@ public final class LongDistanceElectricityService {
 
     public static synchronized void discard(ServerLevel level) {
         SERVICES.remove(level);
+    }
+
+    /** Runs only an already-created loaded-endpoint cache; never creates or loads world state. */
+    public static synchronized void tickIfPresent(ServerLevel level, long gameTime) {
+        LongDistanceElectricityService service = SERVICES.get(level);
+        if (service != null) {
+            service.tick(gameTime);
+        }
     }
 
     public void register(LongDistanceEndpointHost endpoint) {
@@ -147,6 +158,7 @@ public final class LongDistanceElectricityService {
             return;
         }
         lastTick = gameTime;
+        PhysicalNetworkManager manager = PhysicalNetworkService.manager(level);
         for (LongDistanceConnection connection : LongDistanceElectricitySavedData.get(level).connections()) {
             LongDistanceEndpointHost first = endpoints.get(connection.first().position());
             LongDistanceEndpointHost second = endpoints.get(connection.second().position());
@@ -155,7 +167,12 @@ public final class LongDistanceElectricityService {
                     || !second.longDistancePorts().contains(connection.second().port())) {
                 continue;
             }
-            first.electricity().exchangeLongDistance(second.electricity(), connection.distance());
+            manager.transferElectrical(
+                    first.electricity().nodeKey(),
+                    second.electricity().nodeKey(),
+                    connection.distance(),
+                    ElectricalEdgeTelemetry.EdgeType.LONG_DISTANCE
+            );
         }
     }
 

@@ -13,6 +13,10 @@ public interface PhysicalNetworkNode {
 
     BlockPos position();
 
+    default PhysicalNodeKey nodeKey() {
+        return PhysicalNodeKey.main(position());
+    }
+
     Set<Direction> connectionSides();
 
     /** Resolves a position-only proxy to the authoritative state-owning node. */

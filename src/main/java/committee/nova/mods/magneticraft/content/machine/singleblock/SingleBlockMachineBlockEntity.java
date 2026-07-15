@@ -15,7 +15,7 @@ import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticConne
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModFluids;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -559,7 +559,10 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
                     addModule(new ElectricalNetworkModule(
                             Magneticraft.id("electricity"),
                             this,
-                            new ElectricalNode(1.0D, 125.0D, 0.001D),
+                            definition == SingleBlockMachineDefinition.ELECTRIC_ENGINE
+                                    ? Magneticraft.id("medium_voltage")
+                                    : ElectricalNetworkModule.LOW_VOLTAGE,
+                            ElectricalNodeKind.MACHINE,
                             side -> SingleBlockPortProfile.electricity(definition, side, facing())
                     ));
             default -> null;

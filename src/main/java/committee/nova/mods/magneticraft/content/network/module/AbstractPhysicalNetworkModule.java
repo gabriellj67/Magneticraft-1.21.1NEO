@@ -184,6 +184,10 @@ public abstract class AbstractPhysicalNetworkModule implements MachineModule, Ph
                 : null;
     }
 
+    protected final boolean networkRegistered() {
+        return registered;
+    }
+
     protected final void topologyChanged() {
         host.markChangedAndSync();
         PhysicalNetworkManager manager = manager();

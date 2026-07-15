@@ -336,10 +336,16 @@ public final class ComputerRobotGameTests {
         });
         helper.runAfterDelay(9, () -> {
             BlockPos target = DEVICE_POSITION.relative(Direction.NORTH);
-            helper.assertTrue(helper.getBlockEntity(target) instanceof MiningRobotBlockEntity,
-                    "Robot did not move after its cooldown");
+            Object sourceEntity = helper.getBlockEntity(DEVICE_POSITION);
+            Object targetEntity = helper.getBlockEntity(target);
+            helper.assertTrue(targetEntity instanceof MiningRobotBlockEntity,
+                    "Robot did not move after its cooldown; source=" + sourceEntity
+                            + ", target=" + targetEntity
+                            + ", source_state=" + helper.getBlockState(DEVICE_POSITION)
+                            + ", target_state=" + helper.getBlockState(target));
             MiningRobotBlockEntity moved = (MiningRobotBlockEntity) helper.getBlockEntity(target);
-            helper.assertTrue(moved.energy().getEnergyStored() == 1_500, "Robot movement charged the wrong energy cost");
+            helper.assertTrue(moved.energy().getEnergyStored() == 1_500,
+                    "Robot movement charged the wrong energy cost: " + moved.energy().getEnergyStored());
             helper.assertFalse(moved.activeRunning(), "Completed FORTH movement remained running");
             helper.succeed();
         });

@@ -341,11 +341,11 @@ public final class EnergyThermalMachineGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void engineConvertsAtFullRateAtExactlySixtyVoltsAndMarksWorking(GameTestHelper helper) {
+    public static void engineConvertsAtFullRateAtMediumNominalVoltageAndMarksWorking(GameTestHelper helper) {
         helper.setBlock(CENTER.relative(Direction.SOUTH), Blocks.AIR);
         SingleBlockMachineBlockEntity engine = placeMachine(helper, SingleBlockMachineDefinition.ELECTRIC_ENGINE);
         EnergyStorageModule energy = requireEnergy(helper, engine);
-        engine.electricity().node().setVoltage(60.0D);
+        engine.electricity().node().setVoltage(480.0D);
         double before = engine.electricity().node().energyJoules();
 
         SingleBlockMachineBlockEntity.serverTick(
@@ -355,7 +355,8 @@ public final class EnergyThermalMachineGameTests {
                 engine
         );
 
-        helper.assertTrue(energy.getEnergyStored() == 1_000, "Electric engine was not full-speed at exactly 60 V");
+        helper.assertTrue(energy.getEnergyStored() == 1_000,
+                "Electric engine was not full-speed at medium nominal voltage");
         helper.assertTrue(engine.working(), "Electric engine conversion did not set its working state");
         helper.assertTrue(
                 Math.abs(before - engine.electricity().node().energyJoules() - energy.getEnergyStored()) < 0.000001D,

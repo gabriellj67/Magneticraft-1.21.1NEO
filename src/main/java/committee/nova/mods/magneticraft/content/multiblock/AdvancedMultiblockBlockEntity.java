@@ -39,7 +39,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import org.jetbrains.annotations.Nullable;
@@ -941,7 +941,8 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         return addModule(new ElectricalNetworkModule(
                 Magneticraft.id("advanced_electricity"),
                 this,
-                new ElectricalNode(1.0D, 125.0D, 0.001D),
+                electricalTier(),
+                ElectricalNodeKind.MACHINE,
                 side -> operational() && MultiblockPortLayout.supports(
                         this, worldPosition, NetworkDomain.ELECTRICITY, side
                 )
@@ -1015,6 +1016,14 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         return definition == MultiblockDefinition.SOLAR_PANEL
                 || definition == MultiblockDefinition.STEAM_ENGINE
                 || definition == MultiblockDefinition.STEAM_TURBINE;
+    }
+
+    private ResourceLocation electricalTier() {
+        return switch (definition) {
+            case SOLAR_PANEL -> ElectricalNetworkModule.LOW_VOLTAGE;
+            case STEAM_TURBINE -> Magneticraft.id("high_voltage");
+            default -> Magneticraft.id("medium_voltage");
+        };
     }
 
     private int energyCapacity() {

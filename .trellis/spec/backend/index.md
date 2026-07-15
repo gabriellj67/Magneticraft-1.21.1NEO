@@ -19,6 +19,7 @@ tasks must establish and preserve.
 | [Logging](./logging-guidelines.md) | SLF4J levels, context and rate control | Complete |
 | [Quality](./quality-guidelines.md) | Java/Forge rules, provenance and verification gates | Complete |
 | [Electrical Data Contracts](./electrical-data-contracts.md) | Atomic voltage-tier, transformer and machine-profile reload/sync contracts | Complete |
+| [Physical Electrical Network Runtime](./electrical-network-runtime.md) | Multi-terminal topology, exact RC exchange, telemetry and electrical NBT | Complete |
 
 ## Pre-development checklist
 
@@ -33,12 +34,15 @@ Before modifying production code or resources:
    integrations or lifecycle code.
 5. Read [Electrical Data Contracts](./electrical-data-contracts.md) before
    changing native-electricity data, simulation, persistence, packets or UI.
-6. Read `../guides/code-reuse-thinking-guide.md` before adding a shared helper,
+6. Read [Physical Electrical Network Runtime](./electrical-network-runtime.md)
+   before changing terminal identity, RC exchange, topology, couplers or
+   electrical telemetry.
+7. Read `../guides/code-reuse-thinking-guide.md` before adding a shared helper,
    base class, constant or configuration value.
-7. Read `../guides/cross-layer-thinking-guide.md` when a change crosses three or
+8. Read `../guides/cross-layer-thinking-guide.md` when a change crosses three or
    more of registry, data, simulation, persistence, networking, menu and client
    rendering.
-8. Inspect the Nova 1.12 behavior before selecting a Forge 1.20.1 API shape.
+9. Inspect the Nova 1.12 behavior before selecting a Forge 1.20.1 API shape.
 
 ## Quality check
 

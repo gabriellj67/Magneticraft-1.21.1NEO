@@ -5,7 +5,7 @@ import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBl
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.WirelessReceiverModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.longdistance.WirelessEnergyReceiverHost;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,7 +22,7 @@ public final class WirelessEnergyReceiverBlockEntity extends NetworkComponentBlo
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
-                new ElectricalNode(1.0D, 120.0D, 0.001D),
+                ElectricalNodeKind.MACHINE,
                 side -> side == backSide()
         ));
         addModule(new WirelessReceiverModule(Magneticraft.id("wireless_receiver"), this));

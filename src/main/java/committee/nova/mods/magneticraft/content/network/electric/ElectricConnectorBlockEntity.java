@@ -6,7 +6,7 @@ import committee.nova.mods.magneticraft.content.network.module.ElectricalNetwork
 import committee.nova.mods.magneticraft.content.network.module.LongDistanceEndpointModule;
 import committee.nova.mods.magneticraft.content.network.module.LongDistanceWireHost;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceEndpointHost;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistancePort;
 import net.minecraft.core.BlockPos;
@@ -27,7 +27,7 @@ public final class ElectricConnectorBlockEntity extends NetworkComponentBlockEnt
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
-                new ElectricalNode(0.25D, 125.0D, 0.001D),
+                ElectricalNodeKind.CONDUCTOR,
                 side -> side == backSide()
         ));
         longDistance = addModule(new LongDistanceEndpointModule(

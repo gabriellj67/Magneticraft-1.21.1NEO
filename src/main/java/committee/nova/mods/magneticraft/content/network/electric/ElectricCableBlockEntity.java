@@ -4,7 +4,7 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlockEntity;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -21,7 +21,7 @@ public final class ElectricCableBlockEntity extends NetworkComponentBlockEntity 
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
-                new ElectricalNode(0.25D, 125.0D, 0.001D),
+                ElectricalNodeKind.CONDUCTOR,
                 side -> true
         ));
     }

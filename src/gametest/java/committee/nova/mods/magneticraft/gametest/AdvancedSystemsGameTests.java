@@ -600,6 +600,7 @@ public final class AdvancedSystemsGameTests {
         helper.getLevel().setBlock(cablePosition, ModNetworkBlocks.ELECTRIC_CABLE.get().defaultBlockState(),
                 net.minecraft.world.level.block.Block.UPDATE_ALL);
         ElectricCableBlockEntity cable = (ElectricCableBlockEntity) helper.getLevel().getBlockEntity(cablePosition);
+        cable.electricity().applyTierFromPlacementData(Magneticraft.id("medium_voltage"));
         cable.electricity().node().setEnergyJoules(2_000.0D);
 
         helper.runAfterDelay(20, () -> {

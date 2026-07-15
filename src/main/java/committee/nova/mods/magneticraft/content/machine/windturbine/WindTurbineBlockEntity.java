@@ -6,7 +6,7 @@ import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBl
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -19,9 +19,6 @@ public final class WindTurbineBlockEntity extends NetworkComponentBlockEntity {
     public static final int ENERGY_CAPACITY_JOULES = 80_000;
     public static final int MAX_TRANSFER_JOULES_PER_TICK = 200;
 
-    private static final double NODE_CAPACITANCE = 1.0D;
-    private static final double NODE_MAX_VOLTAGE = 125.0D;
-    private static final double NODE_RESISTANCE = 0.001D;
     private static final double BRIDGE_CHARGE_THRESHOLD_VOLTS = 120.0D;
     private static final double BRIDGE_DISCHARGE_THRESHOLD_VOLTS = 115.0D;
 
@@ -44,7 +41,7 @@ public final class WindTurbineBlockEntity extends NetworkComponentBlockEntity {
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
-                new ElectricalNode(NODE_CAPACITANCE, NODE_MAX_VOLTAGE, NODE_RESISTANCE),
+                ElectricalNodeKind.MACHINE,
                 this::canConnectElectricity
         ));
         addModule(new ElectricalEnergyBridgeModule(

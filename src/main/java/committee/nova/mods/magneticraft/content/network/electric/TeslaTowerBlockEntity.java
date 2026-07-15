@@ -5,7 +5,7 @@ import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBl
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.TeslaTowerModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -19,7 +19,8 @@ public final class TeslaTowerBlockEntity extends NetworkComponentBlockEntity {
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
-                new ElectricalNode(1.0D, 125.0D, 0.001D),
+                Magneticraft.id("medium_voltage"),
+                ElectricalNodeKind.MACHINE,
                 side -> side.getAxis() == Direction.Axis.Y
         ));
         addModule(new TeslaTowerModule(Magneticraft.id("tesla_tower"), this, electricity.node()));
