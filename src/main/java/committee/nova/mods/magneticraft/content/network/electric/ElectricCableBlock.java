@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.content.item.TieredElectricalDrops;
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
+import committee.nova.mods.magneticraft.content.network.module.TieredElectricalSideHost;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import net.minecraft.core.BlockPos;
@@ -55,6 +56,12 @@ public final class ElectricCableBlock extends ConduitBlock {
     protected boolean connectsToMachine(LevelAccessor level, BlockPos position, Direction side) {
         BlockEntity self = level.getBlockEntity(position.relative(side));
         BlockEntity target = level.getBlockEntity(position);
+        if (target instanceof TieredElectricalSideHost sideHost) {
+            return sideHost.electricalTerminal(side)
+                    .filter(module -> tierCompatible(self, module))
+                    .isPresent()
+                    && super.connectsToMachine(level, position, side);
+        }
         return (!(target instanceof TieredElectricalHost) || tierCompatible(self, target))
                 && super.connectsToMachine(level, position, side);
     }
@@ -68,6 +75,17 @@ public final class ElectricCableBlock extends ConduitBlock {
         ElectricalNetworkModule secondModule = secondHost.tieredElectricalModule();
         return firstModule != null
                 && secondModule != null
+                && firstModule.electricalProfileBound()
+                && secondModule.electricalProfileBound()
+                && firstModule.tierId().equals(secondModule.tierId());
+    }
+
+    private static boolean tierCompatible(BlockEntity first, ElectricalNetworkModule secondModule) {
+        if (!(first instanceof TieredElectricalHost firstHost)) {
+            return false;
+        }
+        ElectricalNetworkModule firstModule = firstHost.tieredElectricalModule();
+        return firstModule != null
                 && firstModule.electricalProfileBound()
                 && secondModule.electricalProfileBound()
                 && firstModule.tierId().equals(secondModule.tierId());

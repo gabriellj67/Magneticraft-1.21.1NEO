@@ -26,8 +26,8 @@
     "exclusion_leaf_sha256": "f6beb52866ea02a788d7c1ba4a2e88ecbac78bcb54c7552183363b8505a19dac",
     "derived_runtime_id_count": 80,
     "derived_runtime_id_sha256": "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451",
-    "supporting_registry_id_count": 120,
-    "supporting_registry_id_sha256": "6db128ea15b02a6c6bbb5170fd8506694d72dbc42964c7e4fa972ccf0d0f7ca0",
+    "supporting_registry_id_count": 122,
+    "supporting_registry_id_sha256": "0948c3f7309519d52781dc715bdd20311abfeacacaba4b2c29bec8c664a202a7",
     "forbidden_runtime_id_count": 56,
     "forbidden_runtime_id_sha256": "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d"
   },
@@ -938,6 +938,7 @@
     }
   ],
   "supporting_registry_mappings": [
+    {"registry": "block_item", "internal": true, "target_id": "magneticraft:box_transformer", "owner": "magneticraft:box_transformer"},
     {"registry": "block", "internal": true, "target_id": "magneticraft:pumpjack_drill", "owner": "magneticraft:pumpjack"},
     {"registry": "block", "legacy_id": "multiblock_gap", "target_id": "magneticraft:multiblock_gap", "owner": "magneticraft:advanced_multiblocks"},
 
@@ -949,6 +950,7 @@
     {"registry": "block_entity_type", "legacy_id": "connector", "target_id": "magneticraft:electric_connector", "owner": "magneticraft:electric_connector"},
     {"registry": "block_entity_type", "legacy_id": "electric_pole", "target_id": "magneticraft:electric_pole", "owner": "magneticraft:electric_pole"},
     {"registry": "block_entity_type", "legacy_id": "electric_pole_transformer", "target_id": "magneticraft:electric_pole_transformer", "owner": "magneticraft:electric_pole_transformer"},
+    {"registry": "block_entity_type", "internal": true, "target_id": "magneticraft:box_transformer", "owner": "magneticraft:box_transformer"},
     {"registry": "block_entity_type", "legacy_id": "tesla_tower", "target_id": "magneticraft:tesla_tower", "owner": "magneticraft:tesla_tower"},
     {"registry": "block_entity_type", "legacy_id": "energy_receiver", "target_id": "magneticraft:wireless_energy_receiver", "owner": "magneticraft:wireless_energy_receiver"},
     {"registry": "block_entity_type", "legacy_id": "wind_turbine", "target_id": "magneticraft:wind_turbine", "owner": "magneticraft:wind_turbine"},

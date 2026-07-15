@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/box_transformer",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/box_transformer"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/box_transformer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/box_transformer",
+      "y": 270
+    }
+  }
+}

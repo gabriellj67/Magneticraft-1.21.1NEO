@@ -33,6 +33,7 @@ import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModTags;
 import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
+import committee.nova.mods.magneticraft.system.network.electric.profile.TransformerProfileIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.PackOutput;
@@ -63,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -778,16 +780,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .save(consumer, id("crafting/copper_wire_coil"));
 
         addTieredPoleRecipes(consumer);
-
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), 2)
-                .pattern(" A ")
-                .pattern("BCB")
-                .pattern("BCB")
-                .define('A', ModNetworkBlocks.ELECTRIC_CONNECTOR.get())
-                .define('B', ModTags.Items.ingot(Metal.LEAD))
-                .define('C', ModTags.Items.lightPlate(Metal.COPPER))
-                .unlockedBy("has_electric_connector", has(ModNetworkBlocks.ELECTRIC_CONNECTOR.get()))
-                .save(consumer, id("crafting/electric_pole_transformer"));
+        addTransformerRecipes(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.TESLA_TOWER.get())
                 .pattern("ABA")
@@ -960,6 +953,78 @@ final class ModRecipeProvider extends RecipeProvider {
                 Ingredient.of(ModTags.Items.ingot(Metal.TUNGSTEN)),
                 "has_tungsten_ingot",
                 has(ModTags.Items.ingot(Metal.TUNGSTEN))
+        );
+    }
+
+    private void addTransformerRecipes(Consumer<FinishedRecipe> consumer) {
+        transformerRecipe(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(),
+                2,
+                id("crafting/electric_pole_transformer"),
+                TransformerProfileIds.LV_TO_MV,
+                VoltageTierIds.LOW,
+                Ingredient.of(ModTags.Items.ingot(Metal.LEAD)),
+                Ingredient.of(ModNetworkBlocks.ELECTRIC_CONNECTOR.get())
+        );
+        transformerRecipe(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(),
+                2,
+                id("crafting/electric_pole_transformer_high_voltage"),
+                TransformerProfileIds.MV_TO_HV,
+                VoltageTierIds.MEDIUM,
+                Ingredient.of(ModTags.Items.ingot(Metal.TUNGSTEN)),
+                Ingredient.of(ModNetworkBlocks.ELECTRIC_CONNECTOR.get())
+        );
+        transformerRecipe(
+                consumer,
+                ModNetworkBlocks.BOX_TRANSFORMER.get(),
+                1,
+                id("crafting/box_transformer"),
+                TransformerProfileIds.LV_TO_MV,
+                VoltageTierIds.LOW,
+                Ingredient.of(ModTags.Items.ingot(Metal.LEAD)),
+                Ingredient.of(ModAdvancedBlocks.MULTIBLOCK_BASE.get())
+        );
+        transformerRecipe(
+                consumer,
+                ModNetworkBlocks.BOX_TRANSFORMER.get(),
+                1,
+                id("crafting/box_transformer_high_voltage"),
+                TransformerProfileIds.MV_TO_HV,
+                VoltageTierIds.MEDIUM,
+                Ingredient.of(ModTags.Items.ingot(Metal.TUNGSTEN)),
+                Ingredient.of(ModAdvancedBlocks.MULTIBLOCK_BASE.get())
+        );
+    }
+
+    private void transformerRecipe(
+            Consumer<FinishedRecipe> consumer,
+            ItemLike result,
+            int count,
+            ResourceLocation recipeId,
+            ResourceLocation profileId,
+            ResourceLocation inputTierId,
+            Ingredient tierMaterial,
+            Ingredient body
+    ) {
+        ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, result, count)
+                .pattern("AMA")
+                .pattern("CRC")
+                .pattern("SBS")
+                .define('A', tierMaterial)
+                .define('M', component(CraftingComponent.MAGNET))
+                .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('S', ModTags.Items.ingot(Metal.STEEL))
+                .define('B', body)
+                .unlockedBy("has_magnet", has(component(CraftingComponent.MAGNET)));
+        TieredShapedFinishedRecipe.save(
+                builder,
+                consumer,
+                recipeId,
+                new TieredElectricalItemData(inputTierId, Optional.empty(), Optional.of(profileId))
         );
     }
 

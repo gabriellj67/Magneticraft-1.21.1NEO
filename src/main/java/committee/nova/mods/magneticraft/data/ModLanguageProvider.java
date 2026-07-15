@@ -98,7 +98,8 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModNetworkBlocks.ELECTRIC_CABLE.get(), chinese ? "电缆" : "Electric Cable");
         add(ModNetworkBlocks.ELECTRIC_CONNECTOR.get(), chinese ? "电力连接器" : "Electric Connector");
         add(ModNetworkBlocks.ELECTRIC_POLE.get(), chinese ? "电线杆" : "Electric Pole");
-        add(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), chinese ? "变压器电线杆" : "Transformer Electric Pole");
+        add(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), chinese ? "变压电线杆升级件" : "Transformer Pole Upgrade");
+        add(ModNetworkBlocks.BOX_TRANSFORMER.get(), chinese ? "箱式变压器" : "Box Transformer");
         add(ModNetworkBlocks.TESLA_TOWER.get(), chinese ? "特斯拉塔" : "Tesla Tower");
         add(ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(), chinese ? "无线能量接收器" : "Wireless Energy Receiver");
         add(ModNetworkBlocks.WIND_TURBINE.get(), chinese ? "风力涡轮机" : "Wind Turbine");
@@ -115,6 +116,12 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.invalid_voltage_tier", chinese
                 ? "无法放置：电压层级 %s 不存在或物品数据已损坏"
                 : "Cannot place: voltage tier %s is missing or the item data is invalid");
+        add("message.magneticraft.invalid_transformer_profile", chinese
+                ? "无法使用：变压配置 %s 不存在或物品数据已损坏"
+                : "Cannot use: transformer profile %s is missing or the item data is invalid");
+        add("message.magneticraft.transformer_status", chinese
+                ? "变压配置：%s，反向：%s，红石模式：%s"
+                : "Transformer profile: %s, reversed: %s, redstone mode: %s");
         add("message.magneticraft.redstone_mode", chinese ? "红石控制：%s" : "Redstone control: %s");
         add("message.magneticraft.redstone_mode.ignored", chinese ? "忽略" : "Ignored");
         add("message.magneticraft.redstone_mode.requires_signal", chinese ? "需要信号" : "Requires signal");

@@ -5,7 +5,10 @@ import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.PortableEnergyItem;
 import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleTransformerBlockItem;
+import committee.nova.mods.magneticraft.content.network.electric.TransformerBlockItem;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockItem;
+import committee.nova.mods.magneticraft.system.network.electric.profile.TransformerProfileIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -66,6 +69,16 @@ public final class ModCreativeTabs {
     }
 
     private static void acceptBlockItem(CreativeModeTab.Output output, Item item) {
+        if (item instanceof TransformerBlockItem transformerItem) {
+            output.accept(transformerItem.stackForProfile(TransformerProfileIds.LV_TO_MV, VoltageTierIds.LOW));
+            output.accept(transformerItem.stackForProfile(TransformerProfileIds.MV_TO_HV, VoltageTierIds.MEDIUM));
+            return;
+        }
+        if (item instanceof ElectricPoleTransformerBlockItem transformerPoleItem) {
+            output.accept(transformerPoleItem.stackForProfile(TransformerProfileIds.LV_TO_MV, VoltageTierIds.LOW));
+            output.accept(transformerPoleItem.stackForProfile(TransformerProfileIds.MV_TO_HV, VoltageTierIds.MEDIUM));
+            return;
+        }
         if (!(item instanceof TieredElectricalBlockItem tieredItem)) {
             output.accept(item);
             return;

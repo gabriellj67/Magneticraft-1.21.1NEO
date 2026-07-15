@@ -5,8 +5,10 @@ import committee.nova.mods.magneticraft.content.item.CopperWireCoilItem;
 import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlock;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlockEntity;
@@ -21,6 +23,7 @@ import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
 import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
+import committee.nova.mods.magneticraft.system.network.electric.profile.TransformerProfileIds;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 import net.minecraft.core.BlockPos;
@@ -73,6 +76,7 @@ public final class LongDistanceElectricGameTests {
         assertBlockId(helper, "electric_connector", ModNetworkBlocks.ELECTRIC_CONNECTOR.get());
         assertBlockId(helper, "electric_pole", ModNetworkBlocks.ELECTRIC_POLE.get());
         assertBlockId(helper, "electric_pole_transformer", ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get());
+        assertBlockId(helper, "box_transformer", ModNetworkBlocks.BOX_TRANSFORMER.get());
         assertBlockId(helper, "tesla_tower", ModNetworkBlocks.TESLA_TOWER.get());
         assertBlockId(helper, "wireless_energy_receiver", ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get());
         assertBlockId(helper, "wind_turbine", ModNetworkBlocks.WIND_TURBINE.get());
@@ -91,6 +95,11 @@ public final class LongDistanceElectricGameTests {
                 "electric_pole_transformer".equals(ForgeRegistries.BLOCK_ENTITY_TYPES
                         .getKey(ModBlockEntities.ELECTRIC_POLE_TRANSFORMER.get()).getPath()),
                 "Transformer pole block entity has the wrong registry id"
+        );
+        helper.assertTrue(
+                "box_transformer".equals(ForgeRegistries.BLOCK_ENTITY_TYPES
+                        .getKey(ModBlockEntities.BOX_TRANSFORMER.get()).getPath()),
+                "Box transformer block entity has the wrong registry id"
         );
         helper.assertTrue(
                 "tesla_tower".equals(ForgeRegistries.BLOCK_ENTITY_TYPES
@@ -112,6 +121,8 @@ public final class LongDistanceElectricGameTests {
                 () -> placeConnector(helper, new BlockPos(1, 4, 1)));
         placePole(helper, new BlockPos(20, 8, 1), false);
         placePole(helper, new BlockPos(40, 8, 1), true);
+        require(helper, new BlockPos(45, 8, 1), BoxTransformerBlockEntity.class,
+                () -> helper.setBlock(new BlockPos(45, 8, 1), ModNetworkBlocks.BOX_TRANSFORMER.get()));
         require(helper, new BlockPos(1, 4, 5), TeslaTowerBlockEntity.class,
                 () -> helper.setBlock(new BlockPos(1, 4, 5), ModNetworkBlocks.TESLA_TOWER.get()));
         require(helper, new BlockPos(5, 4, 5), WirelessEnergyReceiverBlockEntity.class,
@@ -147,6 +158,85 @@ public final class LongDistanceElectricGameTests {
                 ModNetworkBlocks.ELECTRIC_POLE.get().asItem(), VoltageTierIds.MEDIUM);
         assertTieredRecipe(helper, "crafting/electric_pole_high_voltage",
                 ModNetworkBlocks.ELECTRIC_POLE.get().asItem(), VoltageTierIds.HIGH);
+        assertTransformerRecipe(
+                helper,
+                "crafting/electric_pole_transformer",
+                ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get().asItem(),
+                VoltageTierIds.LOW,
+                TransformerProfileIds.LV_TO_MV
+        );
+        assertTransformerRecipe(
+                helper,
+                "crafting/electric_pole_transformer_high_voltage",
+                ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get().asItem(),
+                VoltageTierIds.MEDIUM,
+                TransformerProfileIds.MV_TO_HV
+        );
+        assertTransformerRecipe(
+                helper,
+                "crafting/box_transformer",
+                ModNetworkBlocks.BOX_TRANSFORMER.get().asItem(),
+                VoltageTierIds.LOW,
+                TransformerProfileIds.LV_TO_MV
+        );
+        assertTransformerRecipe(
+                helper,
+                "crafting/box_transformer_high_voltage",
+                ModNetworkBlocks.BOX_TRANSFORMER.get().asItem(),
+                VoltageTierIds.MEDIUM,
+                TransformerProfileIds.MV_TO_HV
+        );
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void boxTransformerKeepsTerminalsIsolatedAndTransfersByProfile(GameTestHelper helper) {
+        BlockPos position = new BlockPos(5, 4, 5);
+        helper.setBlock(position, ModNetworkBlocks.BOX_TRANSFORMER.get());
+        BoxTransformerBlockEntity transformer = require(helper, position, BoxTransformerBlockEntity.class);
+        helper.assertFalse(
+                transformer.input().nodeKey().equals(transformer.output().nodeKey()),
+                "Box transformer terminals collapsed to one physical node key"
+        );
+        helper.assertTrue(transformer.input().tierId().equals(VoltageTierIds.LOW),
+                "Box transformer input did not bind to low voltage");
+        helper.assertTrue(transformer.output().tierId().equals(VoltageTierIds.MEDIUM),
+                "Box transformer output did not bind to medium voltage");
+
+        var manager = PhysicalNetworkService.manager(helper.getLevel());
+        transformer.input().node().setVoltage(120.0D);
+        transformer.output().node().setVoltage(0.0D);
+        double before = transformer.input().node().energyJoules() + transformer.output().node().energyJoules();
+        transformer.transformerCoupler().coupler().setEnabled(false);
+        manager.tick(helper.getLevel().getGameTime() + 2_000L);
+        helper.assertTrue(transformer.output().node().energyJoules() == 0.0D,
+                "Isolated transformer terminals exchanged energy without their coupler");
+
+        transformer.transformerCoupler().coupler().setEnabled(true);
+        manager.tick(helper.getLevel().getGameTime() + 2_001L);
+        double delivered = transformer.output().node().energyJoules();
+        double after = transformer.input().node().energyJoules() + delivered;
+        helper.assertTrue(Math.abs(delivered - 768.0D) < 1.0E-6D,
+                "LV-to-MV transformer did not apply its 800 J/t and 96% profile");
+        helper.assertTrue(Math.abs((before - after) - 32.0D) < 1.0E-6D,
+                "Transformer efficiency loss did not remain energy-conserving telemetry loss");
+
+        ItemStack drop = Block.getDrops(
+                        transformer.getBlockState(),
+                        helper.getLevel(),
+                        transformer.getBlockPos(),
+                        transformer
+                ).stream()
+                .filter(stack -> stack.is(ModNetworkBlocks.BOX_TRANSFORMER.get().asItem()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Box transformer did not produce its block drop"));
+        helper.assertTrue(
+                TieredElectricalItemData.read(drop)
+                        .flatMap(TieredElectricalItemData::transformerProfileId)
+                        .filter(TransformerProfileIds.LV_TO_MV::equals)
+                        .isPresent(),
+                "Box transformer drop lost its transformer profile"
+        );
         helper.succeed();
     }
 
@@ -448,7 +538,10 @@ public final class LongDistanceElectricGameTests {
         service.removeConnectionsAt(helper.absolutePos(transformer));
         service.removeConnectionsAt(helper.absolutePos(pole));
         placeConnector(helper, connector);
-        placePole(helper, pole, false);
+        ElectricPoleBlockEntity mediumPole = placePole(helper, pole, false);
+        mediumPole.electricity().applyTierFromPlacementData(VoltageTierIds.MEDIUM);
+        helper.assertTrue(mediumPole.electricity().tierId().equals(VoltageTierIds.MEDIUM),
+                "Transformer test pole could not bind its medium-voltage tier");
         placePole(helper, transformer, true);
         helper.assertTrue(service.connect(helper.absolutePos(connector), helper.absolutePos(pole)).result()
                         == LongDistanceElectricityService.ConnectionResult.INCOMPATIBLE_PORT,
@@ -546,31 +639,71 @@ public final class LongDistanceElectricGameTests {
     }
 
     @GameTest(template = ADVANCED_TEMPLATE)
-    public static void teslaTowerHonorsSixtyVoltThresholdAndFiveHundredRate(GameTestHelper helper) {
+    public static void teslaTowerUsesMediumVoltageAndIsolatedOneToOneTransfer(GameTestHelper helper) {
         BlockPos towerPosition = new BlockPos(20, 5, 20);
         BlockPos receiverPosition = new BlockPos(24, 5, 20);
         helper.setBlock(towerPosition, ModNetworkBlocks.TESLA_TOWER.get());
         TeslaTowerBlockEntity tower = require(helper, towerPosition, TeslaTowerBlockEntity.class);
         WirelessEnergyReceiverBlockEntity receiver = placeReceiver(helper, receiverPosition);
 
+        double[] sourceBefore = new double[1];
+        tower.electricity().node().setVoltage(239.0D);
         helper.runAfterDelay(2, () -> {
-            tower.electricity().node().setVoltage(59.0D);
-            tower.serverTick();
             helper.assertTrue(receiver.electricity().node().energyJoules() == 0.0D,
-                    "Tesla tower transferred below sixty volts");
+                    "Tesla tower transferred below its medium-voltage minimum");
 
-            tower.electricity().node().setVoltage(60.0D);
-            double sourceBefore = tower.electricity().node().energyJoules();
-            tower.serverTick();
+            tower.electricity().node().setVoltage(240.0D);
+            sourceBefore[0] = tower.electricity().node().energyJoules();
+        });
+        helper.runAfterDelay(3, () -> {
             double received = receiver.electricity().node().energyJoules();
-            helper.assertTrue(Math.abs(received - 500.0D) < 1.0E-6D,
-                    "Tesla receiver did not receive exactly 500 J in one tick; received " + received + " J");
+            helper.assertTrue(Math.abs(received - 400.0D) < 1.0E-6D,
+                    "Tesla receiver did not receive exactly 400 J in one tick; received " + received + " J");
             helper.assertTrue(
-                    Math.abs(tower.electricity().node().energyJoules() - (sourceBefore - 500.0D)) < 1.0E-6D,
+                    Math.abs(tower.electricity().node().energyJoules() - (sourceBefore[0] - 400.0D)) < 1.0E-6D,
                     "Tesla transfer did not conserve its 1 J to 1 J boundary"
             );
             helper.succeed();
         });
+    }
+
+    @GameTest(template = ADVANCED_TEMPLATE)
+    public static void onlyLowVoltageConnectorExportsForgeEnergyOutward(GameTestHelper helper) {
+        BlockPos connectorPosition = new BlockPos(20, 5, 20);
+        BlockPos receiverPosition = connectorPosition.north();
+        helper.setBlock(
+                receiverPosition,
+                ModMachineBlocks.machine(SingleBlockMachineDefinition.RF_HEATER).get().defaultBlockState()
+        );
+        helper.setBlock(
+                connectorPosition,
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get().defaultBlockState()
+                        .setValue(BlockStateProperties.FACING, Direction.NORTH)
+        );
+        ElectricConnectorBlockEntity connector = require(
+                helper, connectorPosition, ElectricConnectorBlockEntity.class
+        );
+        SingleBlockMachineBlockEntity receiver = require(
+                helper, receiverPosition, SingleBlockMachineBlockEntity.class
+        );
+
+        connector.electricity().node().setVoltage(120.0D);
+        double sourceBefore = connector.electricity().node().energyJoules();
+        connector.serverTick();
+        helper.assertTrue(receiver.energy().getEnergyStored() == 400,
+                "Low-voltage connector did not export 400 FE through its outward face");
+        helper.assertTrue(Math.abs(sourceBefore - connector.electricity().node().energyJoules() - 400.0D) < 1.0E-6D,
+                "Low-voltage connector violated the 1 J = 1 FE boundary");
+
+        receiver.energy().setEnergyStored(0);
+        connector.electricity().applyTierFromPlacementData(VoltageTierIds.MEDIUM);
+        helper.assertTrue(connector.electricity().tierId().equals(VoltageTierIds.MEDIUM),
+                "Connector rejected its medium-voltage test tier");
+        connector.electricity().node().setVoltage(480.0D);
+        connector.serverTick();
+        helper.assertTrue(receiver.energy().getEnergyStored() == 0,
+                "Medium-voltage connector exposed a direct Forge Energy output");
+        helper.succeed();
     }
 
     @GameTest(template = ADVANCED_TEMPLATE, timeoutTicks = 40)
@@ -721,6 +854,28 @@ public final class LongDistanceElectricGameTests {
                         .filter(expectedTier::equals)
                         .isPresent(),
                 "Tiered recipe result lost its electrical identity: " + recipePath
+        );
+    }
+
+    private static void assertTransformerRecipe(
+            GameTestHelper helper,
+            String recipePath,
+            net.minecraft.world.item.Item expectedItem,
+            ResourceLocation expectedTier,
+            ResourceLocation expectedProfile
+    ) {
+        ItemStack result = helper.getLevel().getRecipeManager()
+                .byKey(Magneticraft.id(recipePath))
+                .orElseThrow(() -> new AssertionError("Missing transformer recipe " + recipePath))
+                .getResultItem(helper.getLevel().registryAccess());
+        helper.assertTrue(result.is(expectedItem), "Transformer recipe returned the wrong item: " + recipePath);
+        helper.assertTrue(
+                TieredElectricalItemData.read(result)
+                        .filter(data -> data.tierId().equals(expectedTier))
+                        .flatMap(TieredElectricalItemData::transformerProfileId)
+                        .filter(expectedProfile::equals)
+                        .isPresent(),
+                "Transformer recipe result lost its complete electrical identity: " + recipePath
         );
     }
 

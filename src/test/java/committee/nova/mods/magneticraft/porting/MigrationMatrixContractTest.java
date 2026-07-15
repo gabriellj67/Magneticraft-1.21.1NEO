@@ -99,9 +99,9 @@ class MigrationMatrixContractTest {
     private static final int DERIVED_RUNTIME_ID_COUNT = 80;
     private static final String DERIVED_RUNTIME_ID_SHA256 =
             "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451";
-    private static final int SUPPORTING_REGISTRY_ID_COUNT = 120;
+    private static final int SUPPORTING_REGISTRY_ID_COUNT = 122;
     private static final String SUPPORTING_REGISTRY_ID_SHA256 =
-            "6db128ea15b02a6c6bbb5170fd8506694d72dbc42964c7e4fa972ccf0d0f7ca0";
+            "0948c3f7309519d52781dc715bdd20311abfeacacaba4b2c29bec8c664a202a7";
     private static final int FORBIDDEN_RUNTIME_ID_COUNT = 56;
     private static final String FORBIDDEN_RUNTIME_ID_SHA256 =
             "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d";
@@ -1877,6 +1877,7 @@ class MigrationMatrixContractTest {
                 namespaced("electric_connector"),
                 namespaced("electric_pole"),
                 namespaced("electric_pole_transformer"),
+                namespaced("box_transformer"),
                 namespaced("tesla_tower"),
                 namespaced("wireless_energy_receiver"),
                 namespaced("wind_turbine"),
@@ -1929,6 +1930,7 @@ class MigrationMatrixContractTest {
         Set<String> recipeSerializers = new HashSet<>(recipeTypes);
         recipeSerializers.add(namespaced("tiered_shaped"));
         return Map.of(
+                "block_item", Set.of(namespaced("box_transformer")),
                 "block", Set.of(namespaced("pumpjack_drill"), namespaced("multiblock_gap")),
                 "block_entity_type", Set.copyOf(blockEntityTypes),
                 "menu", Set.copyOf(menus),

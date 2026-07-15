@@ -114,7 +114,7 @@ final class AdvancedMultiblockLogic {
     }
 
     private void tickSolarPanel(ServerLevel level) {
-        if (!level.isDay() || machine.electricity() == null) {
+        if (!level.isDay() || machine.energy() == null) {
             return;
         }
         int visible = 0;
@@ -137,7 +137,7 @@ final class AdvancedMultiblockLogic {
         }
         if (visible > 0 && panels > 0) {
             double generated = 100.0D * visible / panels;
-            if (machine.electricity().node().addEnergy(generated, false) > 0.0D) {
+            if (machine.energy().receiveEnergy((int) Math.floor(generated), false) > 0) {
                 machine.setWorking(true);
             }
         }
@@ -154,7 +154,7 @@ final class AdvancedMultiblockLogic {
     }
 
     private void tickSteamGenerator(int steamRate, double power) {
-        if (machine.electricity() == null || machine.tank(0) == null) {
+        if (machine.energy() == null || machine.tank(0) == null) {
             return;
         }
         FluidStack steam = machine.tank(0).tank().getFluid();
@@ -167,7 +167,7 @@ final class AdvancedMultiblockLogic {
                 steamRate / STEAM_PER_OPERATION
         );
         double requestedEnergy = Math.min(power, availableOperations * STEAM_ENERGY_PER_OPERATION);
-        double acceptedEnergy = machine.electricity().node().addEnergy(requestedEnergy, true);
+        double acceptedEnergy = machine.energy().receiveEnergy((int) Math.floor(requestedEnergy), true);
         int operations = Math.min(
                 availableOperations,
                 (int) Math.floor(acceptedEnergy / STEAM_ENERGY_PER_OPERATION)
@@ -179,10 +179,7 @@ final class AdvancedMultiblockLogic {
                 operations * STEAM_PER_OPERATION,
                 IFluidHandler.FluidAction.EXECUTE
         );
-        machine.electricity().node().addEnergy(
-                operations * STEAM_ENERGY_PER_OPERATION,
-                false
-        );
+        machine.energy().receiveEnergy((int) Math.floor(operations * STEAM_ENERGY_PER_OPERATION), false);
         machine.setWorking(true);
     }
 

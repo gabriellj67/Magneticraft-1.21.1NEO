@@ -23,7 +23,12 @@ public final class TeslaTowerBlockEntity extends NetworkComponentBlockEntity {
                 ElectricalNodeKind.MACHINE,
                 side -> side.getAxis() == Direction.Axis.Y
         ));
-        addModule(new TeslaTowerModule(Magneticraft.id("tesla_tower"), this, electricity.node()));
+        addModule(new TeslaTowerModule(
+                Magneticraft.id("tesla_tower"),
+                Magneticraft.id("tesla_tower"),
+                this,
+                electricity
+        ));
     }
 
     public ElectricalNetworkModule electricity() {

@@ -11,7 +11,7 @@
       "tag": "forge:ingots/lead"
     },
     "B": {
-      "item": "magneticraft:electric_connector"
+      "item": "magneticraft:machine_casing"
     },
     "C": {
       "item": "magneticraft:fine_copper_wire"
@@ -32,8 +32,7 @@
     "SBS"
   ],
   "result": {
-    "count": 2,
-    "item": "magneticraft:electric_pole_transformer"
+    "item": "magneticraft:box_transformer"
   },
   "show_notification": true
 }

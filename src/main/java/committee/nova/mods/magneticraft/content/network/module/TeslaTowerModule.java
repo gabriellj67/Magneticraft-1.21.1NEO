@@ -2,29 +2,50 @@ package committee.nova.mods.magneticraft.content.network.module;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
-import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalProfileController;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalTickParticipant;
+import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
+import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataSnapshot;
+import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalRole;
+import committee.nova.mods.magneticraft.system.network.electric.profile.MachineElectricalProfile;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTier;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 import java.util.Objects;
+import java.util.Optional;
 
-/** Server-authoritative item charging and receiver transfer for a Tesla tower. */
-public final class TeslaTowerModule implements MachineModule {
+/** One-way, 1:1 joule-isolated MV-to-LV wireless transfer. */
+public final class TeslaTowerModule
+        implements MachineModule, ElectricalProfileController, ElectricalTickParticipant {
     public static final double RANGE_BLOCKS = 32.0D;
-    public static final int TRANSFER_RATE = 500;
-    public static final double MINIMUM_VOLTAGE = 60.0D;
 
     private final ResourceLocation id;
+    private final ResourceLocation profileId;
     private final MachineModuleHost host;
-    private final ElectricalNode node;
+    private final ElectricalNetworkModule electricity;
+    private MachineElectricalProfile profile;
+    private VoltageTier inputTier;
+    private VoltageTier outputTier;
+    private boolean profileBound;
+    private double lastTransferJoules;
 
-    public TeslaTowerModule(ResourceLocation id, MachineModuleHost host, ElectricalNode node) {
-        this.id = Objects.requireNonNull(id);
-        this.host = Objects.requireNonNull(host);
-        this.node = Objects.requireNonNull(node);
+    public TeslaTowerModule(
+            ResourceLocation id,
+            ResourceLocation profileId,
+            MachineModuleHost host,
+            ElectricalNetworkModule electricity
+    ) {
+        this.id = Objects.requireNonNull(id, "id");
+        this.profileId = Objects.requireNonNull(profileId, "profileId");
+        this.host = Objects.requireNonNull(host, "host");
+        this.electricity = Objects.requireNonNull(electricity, "electricity");
+        electricity.attachProfileController(this);
+        electricity.attachTickParticipant(this);
+        ElectricalDataRegistry.INSTANCE.current().ifPresent(this::rebindElectricalProfile);
     }
 
     @Override
@@ -33,79 +54,76 @@ public final class TeslaTowerModule implements MachineModule {
     }
 
     @Override
-    public void serverTick() {
-        if (!(host.level() instanceof ServerLevel level) || node.voltage() < MINIMUM_VOLTAGE) {
+    public void rebindElectricalProfile(ElectricalDataSnapshot snapshot) {
+        Optional<MachineElectricalProfile> nextProfile = snapshot.machineProfile(profileId);
+        boolean inputBound = nextProfile.isPresent()
+                && electricity.bindTierFromMachineProfile(snapshot, nextProfile.get().tierId());
+        Optional<VoltageTier> nextInput = inputBound
+                ? snapshot.voltageTier(electricity.tierId())
+                : Optional.empty();
+        Optional<VoltageTier> nextOutput = snapshot.voltageTier(VoltageTierIds.LOW);
+        profileBound = nextProfile.isPresent()
+                && nextInput.isPresent()
+                && nextOutput.isPresent()
+                && nextProfile.get().role() == ElectricalRole.CONVERTER
+                && inputBound;
+        profile = profileBound ? nextProfile.orElseThrow() : null;
+        inputTier = profileBound ? nextInput.orElseThrow() : null;
+        outputTier = profileBound ? nextOutput.orElseThrow() : null;
+    }
+
+    @Override
+    public boolean electricalControllerBound() {
+        return profileBound;
+    }
+
+    @Override
+    public void extractElectricalEnergy(PhysicalNetworkManager manager) {
+        lastTransferJoules = 0.0D;
+        if (!profileBound
+                || electricity.node().voltage() < inputTier.minimumOperatingVoltage()
+                || !(host.level() instanceof ServerLevel level)) {
             return;
         }
-        boolean moved = chargePlayerItems(level);
-        if (node.voltage() >= MINIMUM_VOLTAGE) {
-            moved |= chargeReceivers(level);
+
+        double remaining = profile.maximumTransferJoulesPerTick();
+        for (var receiver : LongDistanceElectricityService.get(level).receiversWithin(host.position(), RANGE_BLOCKS)) {
+            if (remaining <= 0.0D
+                    || electricity.node().voltage() < inputTier.minimumOperatingVoltage()
+                    || !receiver.electricity().electricalProfileBound()
+                    || !receiver.electricity().tierId().equals(VoltageTierIds.LOW)) {
+                continue;
+            }
+            double targetEnergy = 0.5D * receiver.electricity().node().capacitance()
+                    * outputTier.generatorVoltage() * outputTier.generatorVoltage();
+            double destinationRoom = Math.max(
+                    0.0D,
+                    targetEnergy - receiver.electricity().node().energyJoules()
+            );
+            double offered = Math.min(remaining, destinationRoom);
+            double removable = electricity.node().removeEnergy(offered, true);
+            double acceptable = receiver.electricity().node().addEnergy(removable, true);
+            double transfer = Math.min(removable, acceptable);
+            if (transfer <= 0.0D) {
+                continue;
+            }
+            double removed = electricity.node().removeEnergy(transfer, false);
+            double inserted = receiver.electricity().node().addEnergy(removed, false);
+            if (inserted < removed) {
+                electricity.node().addEnergy(removed - inserted, false);
+            }
+            if (inserted > 0.0D) {
+                remaining -= inserted;
+                lastTransferJoules += inserted;
+                receiver.markChanged();
+            }
         }
-        if (moved) {
+        if (lastTransferJoules > 0.0D) {
             host.markChanged();
         }
     }
 
-    private boolean chargePlayerItems(ServerLevel level) {
-        boolean moved = false;
-        for (Player player : level.players()) {
-            if (!insideRange(player.getX(), player.getY(), player.getZ()) || player.isSpectator()) {
-                continue;
-            }
-            for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
-                if (node.voltage() < MINIMUM_VOLTAGE) {
-                    return moved;
-                }
-                var stack = player.getInventory().getItem(slot);
-                if (stack.isEmpty()) {
-                    continue;
-                }
-                int available = (int) Math.floor(node.removeEnergy(TRANSFER_RATE, true));
-                if (available <= 0) {
-                    return moved;
-                }
-                int inserted = stack.getCapability(ForgeCapabilities.ENERGY)
-                        .map(storage -> {
-                            int accepted = storage.receiveEnergy(available, true);
-                            return accepted <= 0 ? 0 : storage.receiveEnergy(accepted, false);
-                        })
-                        .orElse(0);
-                if (inserted > 0) {
-                    node.removeEnergy(inserted, false);
-                    moved = true;
-                }
-            }
-        }
-        return moved;
-    }
-
-    private boolean chargeReceivers(ServerLevel level) {
-        boolean moved = false;
-        for (var receiver : LongDistanceElectricityService.get(level).receiversWithin(host.position(), RANGE_BLOCKS)) {
-            if (node.voltage() < MINIMUM_VOLTAGE) {
-                break;
-            }
-            double available = node.removeEnergy(TRANSFER_RATE, true);
-            double accepted = receiver.electricity().node().addEnergy(available, true);
-            if (accepted <= 0.0D) {
-                continue;
-            }
-            double removed = node.removeEnergy(accepted, false);
-            double inserted = receiver.electricity().node().addEnergy(removed, false);
-            if (inserted < removed) {
-                node.addEnergy(removed - inserted, false);
-            }
-            if (inserted > 0.0D) {
-                receiver.markChanged();
-                moved = true;
-            }
-        }
-        return moved;
-    }
-
-    private boolean insideRange(double x, double y, double z) {
-        return Math.abs(x - (host.position().getX() + 0.5D)) <= RANGE_BLOCKS
-                && Math.abs(y - (host.position().getY() + 0.5D)) <= RANGE_BLOCKS
-                && Math.abs(z - (host.position().getZ() + 0.5D)) <= RANGE_BLOCKS;
+    public double lastTransferJoules() {
+        return lastTransferJoules;
     }
 }

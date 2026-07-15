@@ -24,6 +24,8 @@ public final class EnergyStorageModule implements MachineModule, IEnergyStorage 
     private final ResourceLocation id;
     private final MachineModuleHost host;
     private final EnergyBuffer buffer;
+    private final int internalMaxReceive;
+    private final int internalMaxExtract;
     private final Predicate<Direction> exposedSides;
     private final boolean externalReceive;
     private final boolean externalExtract;
@@ -53,6 +55,8 @@ public final class EnergyStorageModule implements MachineModule, IEnergyStorage 
         this.id = Objects.requireNonNull(id);
         this.host = Objects.requireNonNull(host);
         this.buffer = new EnergyBuffer(capacity, maxReceive, maxExtract);
+        this.internalMaxReceive = maxReceive;
+        this.internalMaxExtract = maxExtract;
         this.exposedSides = Objects.requireNonNull(exposedSides);
         this.externalReceive = externalReceive;
         this.externalExtract = externalExtract;
@@ -137,6 +141,26 @@ public final class EnergyStorageModule implements MachineModule, IEnergyStorage 
         if (oldEnergy != buffer.energy()) {
             host.markChanged();
         }
+    }
+
+    /** Applies a validated data-pack profile while preserving the authoritative stored balance. */
+    public void reconfigure(int capacity, int maxReceive, int maxExtract) {
+        buffer.reconfigure(capacity, maxReceive, maxExtract);
+        host.markChanged();
+    }
+
+    /**
+     * Applies electrical cache/rate data without turning the network transfer limit into a
+     * recipe or discrete-action withdrawal limit. The bridge enforces the electrical rate;
+     * this buffer only needs to admit both its original internal operation and that bridge.
+     */
+    public void reconfigureForElectricalProfile(int capacity, int networkTransferRate) {
+        buffer.reconfigure(
+                capacity,
+                Math.max(internalMaxReceive, networkTransferRate),
+                Math.max(internalMaxExtract, networkTransferRate)
+        );
+        host.markChanged();
     }
 
     private final class ExternalEnergyView implements IEnergyStorage {

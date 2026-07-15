@@ -60,11 +60,9 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
         ));
         addModule(new ElectricalEnergyBridgeModule(
                 Magneticraft.id("electricity_bridge"),
+                Magneticraft.id("electric_furnace"),
                 electricity,
-                energy,
-                60.0D,
-                60.0D,
-                NETWORK_TRANSFER_RATE
+                energy
         ));
         process = addModule(new ElectricFurnaceProcessModule(
                 Magneticraft.id("processing"),

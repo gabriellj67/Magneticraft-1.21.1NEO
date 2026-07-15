@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlo
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlockEntity;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlockEntity;
@@ -98,6 +99,14 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             ElectricPoleBlockEntity::new,
                             ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<BoxTransformerBlockEntity>> BOX_TRANSFORMER =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "box_transformer",
+                    () -> BlockEntityType.Builder.of(
+                            BoxTransformerBlockEntity::new,
+                            ModNetworkBlocks.BOX_TRANSFORMER.get()
                     ).build(null)
             );
     public static final RegistryObject<BlockEntityType<TeslaTowerBlockEntity>> TESLA_TOWER =

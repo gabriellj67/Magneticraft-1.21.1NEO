@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.GhostFi
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalVoltageSourceModule;
 import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticConnectionHost;
@@ -74,6 +75,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     private final HeatNetworkModule heat;
     @Nullable
     private final ElectricalEnergyBridgeModule electricalBridge;
+    @Nullable
+    private final ElectricalVoltageSourceModule voltageSource;
     private final ContainerData menuData;
     private final SingleBlockMachineState state = new SingleBlockMachineState();
     private final SingleBlockMachineLogic logic;
@@ -128,6 +131,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
         electricity = createdElectricity;
         heat = createHeatNetwork();
         electricalBridge = createElectricalBridge(createdEnergy, createdElectricity);
+        voltageSource = createVoltageSource(createdElectricity);
         logic = new SingleBlockMachineLogic(this, this.state);
         interactions = new SingleBlockMachineInteractions(this, this.state);
         fabricator = new SingleBlockFabricator(this);
@@ -181,9 +185,6 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
                 return;
             }
             machine.releaseMultiblockClaim(controller);
-        }
-        if (machine.definition == SingleBlockMachineDefinition.INFINITE_ENERGY) {
-            machine.logic.clampInfiniteEnergyVoltage();
         }
         machine.tickModules();
         machine.logic.tick((ServerLevel) level);
@@ -248,6 +249,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Nullable
     ElectricalEnergyBridgeModule electricalBridge() {
         return electricalBridge;
+    }
+
+    @Nullable
+    ElectricalVoltageSourceModule voltageSource() {
+        return voltageSource;
     }
 
     public ContainerData menuData() {
@@ -531,8 +537,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Nullable
     private EnergyStorageModule createEnergyStorage() {
         return switch (definition) {
-            case ELECTRIC_HEATER -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"), this, 10_000, 200, 80, side -> false, false, false
+            case ELECTRIC_HEATER, AIRLOCK -> addModule(new EnergyStorageModule(
+                    Magneticraft.id("energy_storage"), this, 10_000, 200, 200, side -> false, false, false
             ));
             case RF_HEATER -> addModule(new EnergyStorageModule(
                     Magneticraft.id("energy_storage"), this, 80_000, 80_000, 80_000,
@@ -552,7 +558,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
                     80_000,
                     80_000,
                     side -> SingleBlockPortProfile.forgeEnergy(definition, side, facing()),
-                    true,
+                    false,
                     true
             ));
             default -> null;
@@ -604,25 +610,36 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
             return null;
         }
         return switch (definition) {
-            case ELECTRIC_HEATER -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
-                    60.0D, 60.0D, 200
-            ));
-            case THERMOPILE -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
-                    120.0D, 120.0D, 200
+            case ELECTRIC_HEATER, AIRLOCK, THERMOPILE -> addModule(new ElectricalEnergyBridgeModule(
+                    Magneticraft.id("electricity_bridge"), Magneticraft.id(definition.id()),
+                    createdElectricity, createdEnergy
             ));
             case RF_TRANSFORMER -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
-                    126.0D, 120.0D, 100
+                    Magneticraft.id("electricity_bridge"), Magneticraft.id(definition.id()),
+                    createdElectricity, createdEnergy,
+                    ElectricalEnergyBridgeModule.ExchangePolicy.FE_TO_NATIVE, false
             ));
             case ELECTRIC_ENGINE -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), createdElectricity, createdEnergy,
-                    60.0D, 0.0D, 1_000,
-                    ElectricalEnergyBridgeModule.ChargeMode.FULL_RATE_AT_THRESHOLD
+                    Magneticraft.id("electricity_bridge"), Magneticraft.id(definition.id()),
+                    createdElectricity, createdEnergy,
+                    ElectricalEnergyBridgeModule.ExchangePolicy.NATIVE_TO_FE, false
             ));
             default -> null;
         };
+    }
+
+    @Nullable
+    private ElectricalVoltageSourceModule createVoltageSource(@Nullable ElectricalNetworkModule createdElectricity) {
+        if (definition != SingleBlockMachineDefinition.INFINITE_ENERGY || createdElectricity == null) {
+            return null;
+        }
+        return addModule(new ElectricalVoltageSourceModule(
+                Magneticraft.id("voltage_source"),
+                Magneticraft.id(definition.id()),
+                this,
+                createdElectricity,
+                true
+        ));
     }
 
     private boolean isInventoryItemValid(int slot, ItemStack stack) {

@@ -3,9 +3,11 @@ package committee.nova.mods.magneticraft.content.network.electric;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlockEntity;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalProfileGateModule;
 import committee.nova.mods.magneticraft.content.network.module.WirelessReceiverModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
+import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalRole;
 import committee.nova.mods.magneticraft.system.network.longdistance.WirelessEnergyReceiverHost;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,20 +27,18 @@ public final class WirelessEnergyReceiverBlockEntity extends NetworkComponentBlo
                 ElectricalNodeKind.MACHINE,
                 side -> side == backSide()
         ));
+        addModule(new ElectricalProfileGateModule(
+                Magneticraft.id("electrical_profile"),
+                Magneticraft.id("wireless_energy_receiver"),
+                electricity,
+                ElectricalRole.CONVERTER
+        ));
         addModule(new WirelessReceiverModule(Magneticraft.id("wireless_receiver"), this));
     }
 
     @Override
     public ElectricalNetworkModule electricity() {
         return electricity;
-    }
-
-    @Override
-    protected void tickComponent() {
-        if (level instanceof ServerLevel serverLevel
-                && ElectricEnergyExporter.export(serverLevel, worldPosition, outwardFacing(), electricity.node()) > 0) {
-            markChanged();
-        }
     }
 
     @Override

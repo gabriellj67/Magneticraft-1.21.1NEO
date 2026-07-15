@@ -693,10 +693,14 @@ public final class AdvancedSystemsGameTests {
 
         helper.assertTrue(controller.tank(0).tank().getFluidAmount() == 0,
                 "Steam engine did not consume exactly 10 mB");
-        helper.assertTrue(Math.abs(controller.electricity().node().energyJoules() - 20.0D) < 0.0001D,
-                "Steam engine did not produce exactly 20 J");
-        clear(helper, occupied);
-        helper.succeed();
+        helper.assertTrue(controller.energy().getEnergyStored() == 20,
+                "Steam engine did not stage exactly 20 J in its generator cache");
+        helper.runAfterDelay(2, () -> {
+            helper.assertTrue(Math.abs(controller.electricity().node().energyJoules() - 20.0D) < 0.0001D,
+                    "Steam engine did not export exactly 20 J to its electrical terminal");
+            clear(helper, occupied);
+            helper.succeed();
+        });
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 300)

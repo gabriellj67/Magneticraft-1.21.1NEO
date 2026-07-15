@@ -127,14 +127,11 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         electricity = createElectricity();
         heat = createHeat();
         if (energy != null && electricity != null) {
-            boolean generator = isElectricalGenerator();
             addModule(new ElectricalEnergyBridgeModule(
                     Magneticraft.id("advanced_electricity_bridge"),
+                    Magneticraft.id(definition.id()),
                     electricity,
-                    energy,
-                    generator ? 120.0D : 60.0D,
-                    60.0D,
-                    energyTransferRate()
+                    energy
             ));
         }
         logic = new AdvancedMultiblockLogic(this);

@@ -819,7 +819,7 @@ public final class SingleBlockMachineGameTests {
             for (Direction direction : Direction.values()) {
                 var engineEnergy = engine.getCapability(ForgeCapabilities.ENERGY, direction)
                         .orElseThrow(AssertionError::new);
-                helper.assertTrue(engineEnergy.canReceive(), "Electric engine cannot receive FE on " + direction);
+                helper.assertFalse(engineEnergy.canReceive(), "Electric engine accepted FE on " + direction);
                 helper.assertTrue(engineEnergy.canExtract(), "Electric engine cannot extract FE on " + direction);
             }
             helper.succeed();

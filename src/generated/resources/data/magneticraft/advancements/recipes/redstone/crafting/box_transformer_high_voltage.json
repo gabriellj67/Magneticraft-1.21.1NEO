@@ -15,7 +15,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "magneticraft:crafting/electric_pole_transformer"
+        "recipe": "magneticraft:crafting/box_transformer_high_voltage"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +28,7 @@
   ],
   "rewards": {
     "recipes": [
-      "magneticraft:crafting/electric_pole_transformer"
+      "magneticraft:crafting/box_transformer_high_voltage"
     ]
   },
   "sends_telemetry_event": false

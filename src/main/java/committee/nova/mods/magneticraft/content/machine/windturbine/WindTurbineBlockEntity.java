@@ -19,9 +19,6 @@ public final class WindTurbineBlockEntity extends NetworkComponentBlockEntity {
     public static final int ENERGY_CAPACITY_JOULES = 80_000;
     public static final int MAX_TRANSFER_JOULES_PER_TICK = 200;
 
-    private static final double BRIDGE_CHARGE_THRESHOLD_VOLTS = 120.0D;
-    private static final double BRIDGE_DISCHARGE_THRESHOLD_VOLTS = 115.0D;
-
     private final EnergyStorageModule energy;
     private final ElectricalNetworkModule electricity;
     private final WindTurbineModule wind;
@@ -46,16 +43,14 @@ public final class WindTurbineBlockEntity extends NetworkComponentBlockEntity {
         ));
         addModule(new ElectricalEnergyBridgeModule(
                 Magneticraft.id("electricity_bridge"),
+                Magneticraft.id("wind_turbine"),
                 electricity,
-                energy,
-                BRIDGE_CHARGE_THRESHOLD_VOLTS,
-                BRIDGE_DISCHARGE_THRESHOLD_VOLTS,
-                MAX_TRANSFER_JOULES_PER_TICK
+                energy
         ));
         wind = addModule(new WindTurbineModule(
                 Magneticraft.id("wind_turbine"),
                 this,
-                electricity,
+                energy,
                 this::facing
         ));
     }

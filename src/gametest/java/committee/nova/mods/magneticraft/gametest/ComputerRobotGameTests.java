@@ -323,7 +323,6 @@ public final class ComputerRobotGameTests {
     public static void forthRobotMovementWaitsForHistoricalCooldownAndChargesEnergy(GameTestHelper helper) {
         MiningRobotBlockEntity robot = placeRobot(helper);
         robot.setOwner(UUID.randomUUID());
-        robot.electricity().node().setVoltage(90.0D);
         robot.energy().setEnergyStored(2_000);
         helper.assertTrue(
                 robot.tryReplaceScript(0L, new ScriptProgram(ScriptLanguage.FORTH, "front")),
@@ -357,7 +356,6 @@ public final class ComputerRobotGameTests {
         BlockPos target = DEVICE_POSITION.below();
         helper.setBlock(target, Blocks.COBBLESTONE);
         robot.setOwner(UUID.randomUUID());
-        robot.electricity().node().setVoltage(90.0D);
         robot.energy().setEnergyStored(2_000);
         helper.assertTrue(
                 robot.tryReplaceScript(0L, new ScriptProgram(ScriptLanguage.SHELL, "quarry 1")),

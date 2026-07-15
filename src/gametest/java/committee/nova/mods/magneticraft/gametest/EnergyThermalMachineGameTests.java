@@ -11,6 +11,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -74,11 +75,36 @@ public final class EnergyThermalMachineGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE)
+    public static void tieredBatteriesBindCapacityAndNativeTransferRate(GameTestHelper helper) {
+        BlockPos lowPosition = CENTER;
+        BlockPos mediumPosition = CENTER.east(2);
+        BlockPos highPosition = CENTER.west(1);
+        helper.setBlock(lowPosition, ModMachineBlocks.BATTERY.get());
+        helper.setBlock(mediumPosition, ModMachineBlocks.BATTERY.get());
+        helper.setBlock(highPosition, ModMachineBlocks.BATTERY.get());
+        BatteryBlockEntity low = requireBlockEntity(helper, lowPosition, BatteryBlockEntity.class);
+        BatteryBlockEntity medium = requireBlockEntity(helper, mediumPosition, BatteryBlockEntity.class);
+        BatteryBlockEntity high = requireBlockEntity(helper, highPosition, BatteryBlockEntity.class);
+
+        medium.electricity().applyTierFromPlacementData(VoltageTierIds.MEDIUM);
+        high.electricity().applyTierFromPlacementData(VoltageTierIds.HIGH);
+        helper.assertTrue(medium.electricity().tierId().equals(VoltageTierIds.MEDIUM),
+                "Medium-voltage battery rejected its tier payload");
+        helper.assertTrue(high.electricity().tierId().equals(VoltageTierIds.HIGH),
+                "High-voltage battery rejected its tier payload");
+
+        assertBatteryProfile(helper, low, 1_000_000, 640);
+        assertBatteryProfile(helper, medium, 4_000_000, 2_560);
+        assertBatteryProfile(helper, high, 16_000_000, 10_240);
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE, timeoutTicks = 10)
-    public static void thermopileUsesAnInternalEightyKilojouleBuffer(GameTestHelper helper) {
+    public static void thermopileUsesItsDataDrivenGeneratorBuffer(GameTestHelper helper) {
         SingleBlockMachineBlockEntity thermopile = placeMachine(helper, SingleBlockMachineDefinition.THERMOPILE);
         EnergyStorageModule energy = requireEnergy(helper, thermopile);
-        helper.assertTrue(energy.getMaxEnergyStored() == 80_000, "Thermopile buffer capacity is not 80 kJ");
+        helper.assertTrue(energy.getMaxEnergyStored() == 4_000, "Thermopile buffer did not bind its data profile");
         helper.assertFalse(
                 thermopile.getCapability(ForgeCapabilities.ENERGY, Direction.UP).isPresent(),
                 "Thermopile leaked its internal buffer as Forge Energy"
@@ -86,7 +112,7 @@ public final class EnergyThermalMachineGameTests {
         thermopile.electricity().node().setVoltage(125.0D);
 
         helper.runAfterDelay(2, () -> {
-            helper.assertTrue(energy.getEnergyStored() > 0, "120 V bridge did not charge the thermopile buffer");
+            helper.assertTrue(energy.getEnergyStored() == 0, "Generator role accepted energy back from the grid");
             helper.succeed();
         });
     }
@@ -243,8 +269,8 @@ public final class EnergyThermalMachineGameTests {
             );
         }
 
-        electric.electricity().node().setVoltage(125.0D);
-        double suppliedJoules = electric.electricity().node().energyJoules();
+        electric.electricity().node().setVoltage(60.0D);
+        electricEnergy.setEnergyStored(80);
         double heatedJoules = electric.heat().node().internalEnergyJoules();
         SingleBlockMachineBlockEntity.serverTick(
                 helper.getLevel(),
@@ -253,12 +279,8 @@ public final class EnergyThermalMachineGameTests {
                 electric
         );
         helper.assertTrue(
-                electricEnergy.getEnergyStored() == 120,
-                "Electric-heater ticker did not bridge 200 J and consume exactly 80 J"
-        );
-        helper.assertTrue(
-                Math.abs(suppliedJoules - electric.electricity().node().energyJoules() - 200.0D) < 0.000001D,
-                "Electric-heater ticker bypassed or mis-accounted its electrical bridge"
+                electricEnergy.getEnergyStored() == 0,
+                "Electric-heater recipe did not consume its fixed 80 J from cache"
         );
         helper.assertTrue(
                 Math.abs(electric.heat().node().internalEnergyJoules() - heatedJoules - 80.0D) < 0.000001D,
@@ -269,9 +291,8 @@ public final class EnergyThermalMachineGameTests {
         helper.setBlock(CENTER, Blocks.AIR);
         SingleBlockMachineBlockEntity partial = placeMachine(helper, SingleBlockMachineDefinition.ELECTRIC_HEATER);
         EnergyStorageModule partialEnergy = requireEnergy(helper, partial);
-        partial.electricity().node().setVoltage(63.5D);
-        partial.heat().node().setTemperature(400.0D);
-        double partialSupply = partial.electricity().node().energyJoules();
+        partial.electricity().node().setVoltage(60.0D);
+        partialEnergy.setEnergyStored(79);
         double partialHeat = partial.heat().node().internalEnergyJoules();
         SingleBlockMachineBlockEntity.serverTick(
                 helper.getLevel(),
@@ -279,18 +300,13 @@ public final class EnergyThermalMachineGameTests {
                 partial.getBlockState(),
                 partial
         );
-        int bridgedPartial = partialEnergy.getEnergyStored();
         helper.assertTrue(
-                bridgedPartial > 0 && bridgedPartial < 80,
-                "Electric-heater bridge did not produce a 1..79 J boundary fixture"
+                partialEnergy.getEnergyStored() == 79,
+                "Electric heater consumed an incomplete 79 J cache"
         );
         helper.assertTrue(
-                Math.abs(partialSupply - partial.electricity().node().energyJoules() - bridgedPartial) < 0.000001D,
-                "Electric heater consumed part of its bridged 1..79 J buffer"
-        );
-        helper.assertTrue(
-                partial.heat().node().internalEnergyJoules() <= partialHeat - 10.0D,
-                "Electric heater did not dissipate heat with a partial 1..79 J buffer"
+                Math.abs(partial.heat().node().internalEnergyJoules() - partialHeat) < 0.000001D,
+                "Electric heater produced heat from an incomplete cache"
         );
         helper.assertFalse(partial.working(), "Electric heater reported working with less than 80 J");
 
@@ -316,20 +332,20 @@ public final class EnergyThermalMachineGameTests {
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 10)
-    public static void engineBufferIsBidirectionalButCannotBackfeedElectricalNetwork(GameTestHelper helper) {
+    public static void engineOutputsForgeEnergyWithoutAcceptingOrBackfeeding(GameTestHelper helper) {
         SingleBlockMachineBlockEntity engine = placeMachine(helper, SingleBlockMachineDefinition.ELECTRIC_ENGINE);
         EnergyStorageModule energy = requireEnergy(helper, engine);
         for (Direction direction : Direction.values()) {
             var capability = engine.getCapability(ForgeCapabilities.ENERGY, direction)
                     .orElseThrow(AssertionError::new);
-            helper.assertTrue(capability.canReceive(), "Electric engine cannot receive FE on " + direction);
+            helper.assertFalse(capability.canReceive(), "Electric engine accepted FE on " + direction);
             helper.assertTrue(capability.canExtract(), "Electric engine cannot extract FE on " + direction);
         }
         helper.assertTrue(
                 engine.getCapability(ForgeCapabilities.ENERGY, Direction.UP)
                         .orElseThrow(AssertionError::new)
-                        .receiveEnergy(Integer.MAX_VALUE, true) == 80_000,
-                "Electric engine buffer retained a 1,000 FE external rate cap"
+                        .receiveEnergy(Integer.MAX_VALUE, true) == 0,
+                "Electric engine accepted simulated FE input"
         );
         energy.setEnergyStored(1_000);
         engine.electricity().node().setVoltage(0.0D);
@@ -340,7 +356,7 @@ public final class EnergyThermalMachineGameTests {
         });
     }
 
-    @GameTest(template = TEMPLATE)
+    @GameTest(template = TEMPLATE, timeoutTicks = 10)
     public static void engineConvertsAtFullRateAtMediumNominalVoltageAndMarksWorking(GameTestHelper helper) {
         helper.setBlock(CENTER.relative(Direction.SOUTH), Blocks.AIR);
         SingleBlockMachineBlockEntity engine = placeMachine(helper, SingleBlockMachineDefinition.ELECTRIC_ENGINE);
@@ -348,21 +364,18 @@ public final class EnergyThermalMachineGameTests {
         engine.electricity().node().setVoltage(480.0D);
         double before = engine.electricity().node().energyJoules();
 
-        SingleBlockMachineBlockEntity.serverTick(
-                helper.getLevel(),
-                engine.getBlockPos(),
-                engine.getBlockState(),
-                engine
-        );
-
-        helper.assertTrue(energy.getEnergyStored() == 1_000,
-                "Electric engine was not full-speed at medium nominal voltage");
-        helper.assertTrue(engine.working(), "Electric engine conversion did not set its working state");
-        helper.assertTrue(
-                Math.abs(before - engine.electricity().node().energyJoules() - energy.getEnergyStored()) < 0.000001D,
-                "Electric engine violated the 1 J = 1 FE conservation contract"
-        );
-        helper.succeed();
+        helper.runAfterDelay(2, () -> {
+            helper.assertTrue(energy.getEnergyStored() >= 1_000,
+                    "Electric engine did not charge its FE output cache");
+            helper.assertTrue(energy.getEnergyStored() <= 2_000,
+                    "Electric engine exceeded 1,000 FE/t across the two-tick observation window");
+            helper.assertTrue(engine.working(), "Electric engine conversion did not set its working state");
+            helper.assertTrue(
+                    Math.abs(before - engine.electricity().node().energyJoules() - energy.getEnergyStored()) < 0.000001D,
+                    "Electric engine violated the 1 J = 1 FE conservation contract"
+            );
+            helper.succeed();
+        });
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 10)
@@ -500,6 +513,18 @@ public final class EnergyThermalMachineGameTests {
         BlockEntity blockEntity = helper.getBlockEntity(position);
         helper.assertTrue(type.isInstance(blockEntity), "Missing block entity " + type.getSimpleName());
         return type.cast(blockEntity);
+    }
+
+    private static void assertBatteryProfile(
+            GameTestHelper helper,
+            BatteryBlockEntity battery,
+            int expectedCapacity,
+            int expectedTransfer
+    ) {
+        helper.assertTrue(battery.energy().getMaxEnergyStored() == expectedCapacity,
+                "Battery capacity did not match its voltage tier");
+        helper.assertTrue(battery.energy().receiveEnergy(Integer.MAX_VALUE, true) == expectedTransfer,
+                "Battery native transfer rate did not match its voltage tier");
     }
 
     private static final class SideLimitedFluidReceiverBlockEntity extends BarrelBlockEntity {

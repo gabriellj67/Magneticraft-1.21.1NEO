@@ -2,7 +2,7 @@ package committee.nova.mods.magneticraft.content.machine.windturbine;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
-import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -25,7 +25,7 @@ public final class WindTurbineModule implements MachineModule {
 
     private final ResourceLocation id;
     private final MachineModuleHost host;
-    private final ElectricalNetworkModule electricity;
+    private final EnergyStorageModule energy;
     private final Supplier<Direction> facingSupplier;
 
     private double currentWind;
@@ -40,12 +40,12 @@ public final class WindTurbineModule implements MachineModule {
     public WindTurbineModule(
             ResourceLocation id,
             MachineModuleHost host,
-            ElectricalNetworkModule electricity,
+            EnergyStorageModule energy,
             Supplier<Direction> facingSupplier
     ) {
         this.id = Objects.requireNonNull(id);
         this.host = Objects.requireNonNull(host);
-        this.electricity = Objects.requireNonNull(electricity);
+        this.energy = Objects.requireNonNull(energy);
         this.facingSupplier = Objects.requireNonNull(facingSupplier);
     }
 
@@ -108,13 +108,14 @@ public final class WindTurbineModule implements MachineModule {
 
         currentWind = WindTurbineMath.smoothWind(currentWind, targetWind);
         lastProductionJoulesPerTick = 0.0D;
-        if (operational && electricity.node().voltage() < electricity.node().maxVoltage()) {
+        if (operational && energy.getEnergyStored() < energy.getMaxEnergyStored()) {
             double requested = WindTurbineMath.productionJoulesPerTick(
                     openSpace,
                     currentWind,
                     host.position().getY()
             );
-            lastProductionJoulesPerTick = electricity.node().addEnergy(requested, false);
+            int accepted = energy.receiveEnergy((int) Math.floor(requested), false);
+            lastProductionJoulesPerTick = accepted;
             if (lastProductionJoulesPerTick > 0.0D) {
                 host.markChanged();
             }

@@ -3,12 +3,12 @@
   "category": "redstone",
   "electrical": {
     "schema_version": 1,
-    "tier_id": "magneticraft:low_voltage",
-    "transformer_profile_id": "magneticraft:lv_to_mv"
+    "tier_id": "magneticraft:medium_voltage",
+    "transformer_profile_id": "magneticraft:mv_to_hv"
   },
   "key": {
     "A": {
-      "tag": "forge:ingots/lead"
+      "tag": "forge:ingots/tungsten"
     },
     "B": {
       "item": "magneticraft:electric_connector"

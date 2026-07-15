@@ -39,26 +39,15 @@ final class SingleBlockElectricalLogic {
     }
 
     void tickInfiniteEnergy() {
-        if (machine.electricity() != null) {
-            clampInfiniteEnergyVoltage();
-            state.working = true;
+        if (machine.voltageSource() != null) {
+            state.lastProduction = (int) Math.floor(machine.voltageSource().lastProductionJoules());
+            state.working = state.lastProduction > 0;
             machine.markChanged();
         }
     }
 
-    void clampInfiniteEnergyVoltage() {
-        if (machine.electricity() != null) {
-            machine.electricity().node().setVoltage(125.0D);
-        }
-    }
-
     void tickAirlock(ServerLevel level) {
-        if (level.getGameTime() % 40L != 0L || machine.electricity() == null) {
-            return;
-        }
-        var node = machine.electricity().node();
-        if (node.voltage() < AIRLOCK_MIN_VOLTAGE) {
-            startAirBubbleDecay(level);
+        if (level.getGameTime() % 40L != 0L || machine.energy() == null) {
             return;
         }
         BlockPos origin = machine.getBlockPos();
@@ -70,14 +59,15 @@ final class SingleBlockElectricalLogic {
         if (plan.operations().isEmpty()) {
             return;
         }
-        double simulated = node.removeEnergy(plan.totalCostJoules(), true);
+        int requested = (int) Math.ceil(plan.totalCostJoules());
+        int simulated = machine.energy().extractEnergy(requested, true);
         if (!plan.canAfford(simulated)) {
             startAirBubbleDecay(level);
             return;
         }
-        double removed = node.removeEnergy(plan.totalCostJoules(), false);
+        int removed = machine.energy().extractEnergy(requested, false);
         if (!plan.canAfford(removed)) {
-            node.addEnergy(removed, false);
+            machine.energy().receiveEnergy(removed, false);
             startAirBubbleDecay(level);
             return;
         }
@@ -135,9 +125,9 @@ final class SingleBlockElectricalLogic {
             state.thermopileFlux = flux;
             machine.markChanged();
         }
-        if (machine.electricity() != null) {
+        if (machine.energy() != null) {
             double generated = state.thermopileFlux / 10_000.0D * 20.0D;
-            if (machine.electricity().node().addEnergy(generated, false) > 0.0D) {
+            if (machine.energy().receiveEnergy((int) Math.floor(generated), false) > 0) {
                 state.working = true;
                 machine.markChanged();
             }
@@ -166,7 +156,10 @@ final class SingleBlockElectricalLogic {
             return;
         }
         target.getCapability(ForgeCapabilities.ENERGY, output.getOpposite()).ifPresent(storage -> {
-            int offered = machine.energy().extractEnergy(machine.energy().getEnergyStored(), true);
+            int transferLimit = machine.electricalBridge() == null
+                    ? 0
+                    : machine.electricalBridge().maximumTransferJoulesPerTick();
+            int offered = machine.energy().extractEnergy(transferLimit, true);
             int accepted = storage.receiveEnergy(offered, true);
             if (accepted > 0) {
                 int extracted = machine.energy().extractEnergy(accepted, false);

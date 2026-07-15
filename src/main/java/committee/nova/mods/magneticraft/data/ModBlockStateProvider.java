@@ -685,6 +685,15 @@ final class ModBlockStateProvider extends BlockStateProvider {
         poleModels(ModNetworkBlocks.ELECTRIC_POLE.get(), "electric_pole");
         poleModels(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), "electric_pole_transformer");
 
+        Block boxTransformer = ModNetworkBlocks.BOX_TRANSFORMER.get();
+        ModelFile boxTransformerModel = models().cubeColumn(
+                "box_transformer",
+                modLoc("blocks/electric_machines/rf_transformer"),
+                modLoc("blocks/electric_machines/rf_transformer_top")
+        );
+        horizontalBlock(boxTransformer, boxTransformerModel);
+        simpleBlockItem(boxTransformer, boxTransformerModel);
+
         Block teslaTower = ModNetworkBlocks.TESLA_TOWER.get();
         ModelFile teslaBottom = gltfModel(
                 "tesla_tower_bottom",

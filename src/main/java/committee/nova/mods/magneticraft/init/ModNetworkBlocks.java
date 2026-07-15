@@ -1,10 +1,12 @@
 package committee.nova.mods.magneticraft.init;
 
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlock;
+import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleTransformerBlockItem;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock;
+import committee.nova.mods.magneticraft.content.network.electric.TransformerBlockItem;
 import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyReceiverBlock;
 import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlock;
@@ -44,6 +46,7 @@ public final class ModNetworkBlocks {
             () -> new ElectricPoleBlock(poleProperties(), false)
     );
     public static final RegistryObject<Block> ELECTRIC_POLE_TRANSFORMER = registerTransformerPole();
+    public static final RegistryObject<Block> BOX_TRANSFORMER = registerBoxTransformer();
     public static final RegistryObject<Block> TESLA_TOWER = register(
             "tesla_tower",
             () -> new TeslaTowerBlock(machineProperties().noOcclusion())
@@ -123,6 +126,18 @@ public final class ModNetworkBlocks {
         BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
                 "electric_pole_transformer",
                 () -> new ElectricPoleTransformerBlockItem((ElectricPoleBlock) block.get(), new Item.Properties())
+        ));
+        return block;
+    }
+
+    private static RegistryObject<Block> registerBoxTransformer() {
+        RegistryObject<Block> block = ModRegistries.BLOCKS.register(
+                "box_transformer",
+                () -> new BoxTransformerBlock(machineProperties().noOcclusion())
+        );
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                "box_transformer",
+                () -> new TransformerBlockItem(block.get(), new Item.Properties())
         ));
         return block;
     }

@@ -8,6 +8,9 @@ import committee.nova.mods.magneticraft.system.network.electric.ElectricalLink;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeAccess;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalProfileController;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalTickParticipant;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalCoupler;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataSnapshot;
@@ -28,7 +31,7 @@ import java.util.function.Predicate;
 
 /** Persisted, tier-bound Magneticraft electrical terminal; Forge Energy is intentionally absent. */
 public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
-        implements ElectricalDiagnosticSource, ElectricalNodeAccess, ElectricalProfileBinding {
+        implements ElectricalDiagnosticSource, ElectricalNodeAccess, ElectricalProfileBinding, ElectricalTickParticipant {
     public static final int MODULE_SCHEMA_VERSION = 2;
     public static final ResourceLocation LOW_VOLTAGE = VoltageTierIds.LOW;
 
@@ -42,7 +45,9 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
     private final ResourceLocation terminalId;
     private final Predicate<Direction> sideFilter;
     private ResourceLocation tierId;
-    private boolean profileBound;
+    private boolean tierProfileBound;
+    private ElectricalProfileController profileController;
+    private ElectricalTickParticipant tickParticipant;
 
     /**
      * Compatibility constructor for isolated tests and old call sites. Production nodes should
@@ -55,7 +60,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
             Predicate<Direction> sideFilter
     ) {
         this(id, host, node, LOW_VOLTAGE, PhysicalNodeKey.MAIN_TERMINAL, ElectricalNodeKind.MACHINE, sideFilter);
-        profileBound = true;
+        tierProfileBound = true;
     }
 
     public ElectricalNetworkModule(
@@ -134,6 +139,38 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         return nodeKind;
     }
 
+    /** Attaches one device-level profile gate. Transformer controllers may attach to two terminals. */
+    public void attachProfileController(ElectricalProfileController controller) {
+        Objects.requireNonNull(controller, "controller");
+        if (profileController != null && profileController != controller) {
+            throw new IllegalStateException("Electrical terminal already owns a profile controller");
+        }
+        profileController = controller;
+    }
+
+    /** Attaches the deterministic source/sink participant executed by the physical manager. */
+    public void attachTickParticipant(ElectricalTickParticipant participant) {
+        Objects.requireNonNull(participant, "participant");
+        if (tickParticipant != null && tickParticipant != participant) {
+            throw new IllegalStateException("Electrical terminal already owns a tick participant");
+        }
+        tickParticipant = participant;
+    }
+
+    public void registerElectricalCoupler(ElectricalCoupler coupler) {
+        PhysicalNetworkManager manager = manager();
+        if (manager != null) {
+            manager.registerElectricalCoupler(coupler);
+        }
+    }
+
+    public void unregisterElectricalCoupler(ElectricalCoupler coupler) {
+        PhysicalNetworkManager manager = manager();
+        if (manager != null) {
+            manager.unregisterElectricalCoupler(coupler);
+        }
+    }
+
     /** Applies already-validated placement/item data; no player interaction calls this method directly. */
     public void applyTierFromPlacementData(ResourceLocation nextTierId) {
         Objects.requireNonNull(nextTierId, "nextTierId");
@@ -143,11 +180,38 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         }
         ElectricalDataRegistry.INSTANCE.current().ifPresentOrElse(
                 this::rebindElectricalProfile,
-                () -> profileBound = false
+                () -> tierProfileBound = false
         );
         if (changed || networkRegistered()) {
             topologyChanged();
         }
+    }
+
+    /**
+     * Binds a fixed machine terminal to the tier selected by its data-pack profile.
+     * Tiered placeable devices bypass this path so their validated item identity remains authoritative.
+     */
+    boolean bindTierFromMachineProfile(ElectricalDataSnapshot snapshot, ResourceLocation profileTierId) {
+        Objects.requireNonNull(snapshot, "snapshot");
+        Objects.requireNonNull(profileTierId, "profileTierId");
+        Optional<VoltageTier> tier = snapshot.voltageTier(profileTierId);
+        if (tier.isEmpty()) {
+            tierProfileBound = false;
+            return false;
+        }
+        boolean changed = !tierId.equals(profileTierId);
+        tierId = profileTierId;
+        tierProfileBound = true;
+        VoltageTier value = tier.orElseThrow();
+        node.reconfigure(
+                nodeKind.capacitance(value),
+                value.maximumVoltage(),
+                value.nodeResistanceOhms()
+        );
+        if (changed && networkRegistered()) {
+            topologyChanged();
+        }
+        return true;
     }
 
     @Override
@@ -175,14 +239,14 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
     public void onLoad() {
         ElectricalDataRegistry.INSTANCE.current().ifPresentOrElse(
                 this::rebindElectricalProfile,
-                () -> profileBound = false
+                () -> tierProfileBound = false
         );
         super.onLoad();
     }
 
     @Override
     public Optional<ElectricalReading> electricalReading(Direction side) {
-        if (!profileBound || !isSideEnabled(side)) {
+        if (!electricalProfileBound() || !isSideEnabled(side)) {
             return Optional.empty();
         }
         return Optional.of(new ElectricalReading(
@@ -199,7 +263,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
 
     @Override
     public boolean canConnect(Direction side, PhysicalNetworkNode other) {
-        if (!profileBound || !super.canConnect(side, other)) {
+        if (!electricalProfileBound() || !super.canConnect(side, other)) {
             return false;
         }
         PhysicalNetworkNode transferNode = other.transferNode();
@@ -235,7 +299,8 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
 
     @Override
     public boolean electricalProfileBound() {
-        return profileBound;
+        return tierProfileBound
+                && (profileController == null || profileController.electricalControllerBound());
     }
 
     @Override
@@ -246,17 +311,41 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
     @Override
     public void rebindElectricalProfile(ElectricalDataSnapshot snapshot) {
         Optional<VoltageTier> tier = snapshot.voltageTier(tierId);
-        profileBound = tier.isPresent();
+        tierProfileBound = tier.isPresent();
         tier.ifPresent(value -> node.reconfigure(
                 nodeKind.capacitance(value),
                 value.maximumVoltage(),
                 value.nodeResistanceOhms()
         ));
+        if (profileController != null) {
+            profileController.rebindElectricalProfile(snapshot);
+        }
+    }
+
+    @Override
+    public void injectElectricalEnergy(PhysicalNetworkManager manager) {
+        if (electricalProfileBound() && tickParticipant != null) {
+            tickParticipant.injectElectricalEnergy(manager);
+        }
+    }
+
+    @Override
+    public void extractElectricalEnergy(PhysicalNetworkManager manager) {
+        if (electricalProfileBound() && tickParticipant != null) {
+            tickParticipant.extractElectricalEnergy(manager);
+        }
+    }
+
+    @Override
+    public void commitElectricalState(PhysicalNetworkManager manager) {
+        if (tickParticipant != null) {
+            tickParticipant.commitElectricalState(manager);
+        }
     }
 
     @Override
     protected void loadNetworkData(CompoundTag tag) {
-        profileBound = false;
+        tierProfileBound = false;
         if (tag.getInt(SCHEMA_VERSION_TAG) != MODULE_SCHEMA_VERSION) {
             node.setEnergyJoules(0.0D);
             finishLoadedBinding();
@@ -290,7 +379,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
     private void finishLoadedBinding() {
         ElectricalDataRegistry.INSTANCE.current().ifPresentOrElse(
                 this::rebindElectricalProfile,
-                () -> profileBound = false
+                () -> tierProfileBound = false
         );
         PhysicalNetworkManager manager = manager();
         if (networkRegistered() && manager != null) {
