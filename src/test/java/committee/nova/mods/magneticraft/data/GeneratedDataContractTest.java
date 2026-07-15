@@ -362,8 +362,8 @@ class GeneratedDataContractTest {
                 pneumaticFilter.getAsJsonObject("key").getAsJsonObject("C").get("item").getAsString()
         );
         JsonObject wrench = readObject(ASSETS.resolve("models/item/wrench.json"));
-        assertEquals("minecraft:item/handheld", wrench.get("parent").getAsString());
-        assertEquals("minecraft:item/iron_hoe", wrench.getAsJsonObject("textures").get("layer0").getAsString());
+        assertEquals("minecraft:item/generated", wrench.get("parent").getAsString());
+        assertEquals("magneticraft:item/wrench", wrench.getAsJsonObject("textures").get("layer0").getAsString());
         assertTrue(english.has("item.magneticraft.wrench"));
         assertTrue(chinese.has("item.magneticraft.wrench"));
         assertFile(recipe("crafting/wrench"));

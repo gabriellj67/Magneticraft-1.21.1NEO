@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "source_repository": "Magneticraft-Team/Magneticraft",
+  "source_commit": "4108ca9bb332d11965c30e0c592b310d0858f251",
+  "artifacts": [
+    {
+      "source": "textures/items/crafting/guide_book.png",
+      "runtime": "textures/item/guide_book.png",
+      "sha256": "45b0d05a04c8be4e94d3aaf7a17005500787a7ade479bfec9c3dde0d3f2c9b0a"
+    },
+    {
+      "source": "textures/items/upgrades/inserter_upgrade_speed.png",
+      "runtime": "textures/item/inserter_speed_upgrade.png",
+      "sha256": "6e5ca6dae5315b1db0f814d46b0b5c48b699e92ecbaeecd0d97786c00dc721f6"
+    },
+    {
+      "source": "textures/items/upgrades/inserter_upgrade_stack.png",
+      "runtime": "textures/item/inserter_stack_upgrade.png",
+      "sha256": "f3ed9fb1817541285d9b3f48721ff2b7a7bd247e25d768da8b5e8008fab2481f"
+    },
+    {
+      "source": "textures/items/tools/wrench.png",
+      "runtime": "textures/item/wrench.png",
+      "sha256": "53cdccd59ea3504b3ec547dd7b4d50549a79d7f8623ba0fc39a45789c5a282a7"
+    },
+    {
+      "source": "textures/items/tools/copper_coil.png",
+      "runtime": "textures/item/copper_wire_coil.png",
+      "sha256": "f98e50b49633eb9cbc78c16a02d408d50e4396a292c2522ab6e53d9b5d35fbe8"
+    },
+    {
+      "source": "textures/items/computer/floppy_disk_0.png",
+      "runtime": "textures/item/floppy_disk_0.png",
+      "sha256": "77b30bc3b8b5c5338cc6cd6ae9746554f98be5a2ab30a4bb434fb0b5e29f5c2e"
+    },
+    {
+      "source": "textures/items/computer/floppy_disk_1.png",
+      "runtime": "textures/item/floppy_disk_1.png",
+      "sha256": "c0a4f88bb436be0a80a7dd40e1921bf81959a5039c2d7a147af1beebfa0cf69c"
+    },
+    {
+      "source": "textures/items/computer/floppy_disk_2.png",
+      "runtime": "textures/item/floppy_disk_2.png",
+      "sha256": "09ccddb8fc2151a833e36bf16b9bcc48a3cdd07a2f67afe094ba4d0dd8ffedb5"
+    },
+    {
+      "source": "textures/items/computer/floppy_disk_3.png",
+      "runtime": "textures/item/floppy_disk_3.png",
+      "sha256": "8ef5856bffaf68745d3b7d0fb059d557eaaed34f99dc8a9188c3c5d0f05475e5"
+    },
+    {
+      "source": "textures/items/computer/floppy_disk_4.png",
+      "runtime": "textures/item/floppy_disk_4.png",
+      "sha256": "1c98483dd064c1c250bf9b5b3dd81ba47cc5b0a3a034e6ed103033eb6988bd60"
+    },
+    {
+      "source": "textures/items/computer/floppy_disk_5.png",
+      "runtime": "textures/item/floppy_disk_5.png",
+      "sha256": "a433ccbaea1dce681f9c1e621650d6e5c0eb43747ff99cb093745a6db8467b1e"
+    },
+    {
+      "source": "textures/items/computer/floppy_disk_6.png",
+      "runtime": "textures/item/floppy_disk_6.png",
+      "sha256": "9dca97de25eda095f64bc54ab6e141190d3c47990d37a621c84697db7c6ae85f"
+    }
+  ]
+}

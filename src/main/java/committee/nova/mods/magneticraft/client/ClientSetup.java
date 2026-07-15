@@ -3,11 +3,13 @@ package committee.nova.mods.magneticraft.client;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.client.guide.GuideRepository;
 import committee.nova.mods.magneticraft.client.model.LegacyModelLoader;
+import committee.nova.mods.magneticraft.content.computer.FloppyDiskItem;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.ModelEvent;
@@ -34,6 +36,11 @@ public final class ClientSetup {
                     MenuScreens.register(type.get(), AdvancedMultiblockScreen::new));
             MenuScreens.register(ModMenus.COMPUTER.get(), ProgrammableScreen::new);
             MenuScreens.register(ModMenus.MINING_ROBOT.get(), ProgrammableScreen::new);
+            ItemProperties.register(
+                    ModComputerContent.FLOPPY_DISK.get(),
+                    Magneticraft.id("floppy_variant"),
+                    (stack, level, entity, seed) -> FloppyDiskItem.visualVariant(stack).textureIndex()
+            );
             BlockEntityRenderers.register(ModBlockEntities.CRUSHING_TABLE.get(), CrushingTableRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.CONVEYOR_BELT.get(), ConveyorBeltRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.PNEUMATIC_TUBE.get(), PneumaticTubeRenderer::new);

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:block/oak_planks"
+    "layer0": "magneticraft:item/inserter_stack_upgrade"
   }
 }

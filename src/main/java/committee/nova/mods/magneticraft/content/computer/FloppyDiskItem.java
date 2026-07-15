@@ -55,6 +55,13 @@ public final class FloppyDiskItem extends Item {
         return tag == null ? Optional.of(FloppyDiskPersistence.State.empty()) : FloppyDiskPersistence.read(tag);
     }
 
+    public static FloppyDiskVisualVariant visualVariant(ItemStack stack) {
+        return readState(stack)
+                .map(FloppyDiskPersistence.State::preset)
+                .map(FloppyDiskVisualVariant::fromPreset)
+                .orElse(FloppyDiskVisualVariant.USER);
+    }
+
     public static void configurePreset(ItemStack stack, String preset, @Nullable ScriptLanguage language) {
         FloppyDiskPersistence.writePreset(stack.getOrCreateTag(), preset, language);
     }
