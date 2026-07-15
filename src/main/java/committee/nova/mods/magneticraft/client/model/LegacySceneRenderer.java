@@ -96,11 +96,7 @@ public final class LegacySceneRenderer {
                 animationSeconds
         );
         Set<Integer> selectedNodes = selectedNodes(source, selection, scene);
-        VertexConsumer consumer = buffers.getBuffer(
-                style.translucent()
-                        ? RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS)
-                        : RenderType.entityCutoutNoCull(InventoryMenu.BLOCK_ATLAS)
-        );
+        VertexConsumer consumer = buffers.getBuffer(renderType(scene.alphaMode(), style.translucent()));
 
         poseStack.pushPose();
         poseStack.mulPoseMatrix(sourceTransform.matrix());
@@ -119,6 +115,15 @@ public final class LegacySceneRenderer {
             );
         }
         poseStack.popPose();
+    }
+
+    private static RenderType renderType(ModelScene.AlphaMode alphaMode, boolean forceTranslucent) {
+        if (forceTranslucent || alphaMode == ModelScene.AlphaMode.BLEND) {
+            return RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS);
+        }
+        return alphaMode == ModelScene.AlphaMode.MASK
+                ? RenderType.entityCutoutNoCull(InventoryMenu.BLOCK_ATLAS)
+                : RenderType.entitySolid(InventoryMenu.BLOCK_ATLAS);
     }
 
     @Nullable

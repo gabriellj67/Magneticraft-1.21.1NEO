@@ -2,13 +2,16 @@ package committee.nova.mods.magneticraft.client.model;
 
 import com.mojang.math.Transformation;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraftforge.client.RenderTypeGroup;
 import net.minecraftforge.client.model.IModelBuilder;
 import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
 import net.minecraftforge.client.model.geometry.SimpleUnbakedGeometry;
@@ -38,6 +41,47 @@ public final class LegacySceneGeometry extends SimpleUnbakedGeometry<LegacyScene
         selectedNodes = selection.select(scene);
         this.sourceTransform = sourceTransform;
         this.manifest = manifest;
+    }
+
+    @Override
+    public BakedModel bake(
+            IGeometryBakingContext context,
+            ModelBaker baker,
+            Function<Material, TextureAtlasSprite> spriteGetter,
+            ModelState modelState,
+            ItemOverrides overrides,
+            ResourceLocation modelLocation
+    ) {
+        TextureAtlasSprite particle = spriteGetter.apply(context.getMaterial("particle"));
+        ResourceLocation renderTypeHint = context.getRenderTypeHint();
+        if (renderTypeHint == null) {
+            renderTypeHint = inferredRenderType(scene.alphaMode());
+        }
+        RenderTypeGroup renderTypes = context.getRenderType(renderTypeHint);
+        ResourceLocation fastHint = context.getRenderTypeFastHint();
+        RenderTypeGroup fastRenderTypes = fastHint == null
+                ? RenderTypeGroup.EMPTY
+                : context.getRenderType(fastHint);
+        IModelBuilder<?> builder = IModelBuilder.of(
+                context.useAmbientOcclusion(),
+                context.useBlockLight(),
+                context.isGui3d(),
+                context.getTransforms(),
+                overrides,
+                particle,
+                renderTypes,
+                fastRenderTypes
+        );
+        addQuads(context, builder, baker, spriteGetter, modelState, modelLocation);
+        return builder.build();
+    }
+
+    static ResourceLocation inferredRenderType(ModelScene.AlphaMode alphaMode) {
+        return ResourceLocation.withDefaultNamespace(switch (alphaMode) {
+            case OPAQUE -> "solid";
+            case MASK -> "cutout";
+            case BLEND -> "translucent";
+        });
     }
 
     @Override

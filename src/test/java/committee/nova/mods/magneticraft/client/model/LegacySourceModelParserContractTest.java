@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class LegacySourceModelParserContractTest {
     private static final Path MANIFEST = Path.of("scripts/legacy_model_manifest.json");
+    private static final Path GLTF_ROOT = Path.of("src/main/resources/assets/magneticraft/models/block/gltf");
 
     @Test
     void parsesEveryUniqueHistoricalMcxAndGltfSource() throws Exception {
@@ -65,6 +66,24 @@ class LegacySourceModelParserContractTest {
         assertEquals(354, gltfReferencedPrimitives.size());
         assertEquals(473, gltfPrimitiveInstances);
         assertEquals(15, gltfAnimations);
+    }
+
+    @Test
+    void preservesReleasedGltfMaterialAlphaModes() throws Exception {
+        assertEquals(ModelScene.AlphaMode.MASK, parseGltf("grinder").alphaMode());
+        assertEquals(ModelScene.AlphaMode.MASK, parseGltf("pneumatic_tube").alphaMode());
+        assertEquals(ModelScene.AlphaMode.OPAQUE, parseGltf("box_transformer").alphaMode());
+    }
+
+    private static ModelScene parseGltf(String name) throws Exception {
+        Path source = GLTF_ROOT.resolve(name + ".gltf");
+        try (Reader reader = Files.newBufferedReader(source, StandardCharsets.UTF_8)) {
+            return GltfModelParser.parse(
+                    source.toString(),
+                    reader,
+                    uri -> Files.newInputStream(source.getParent().resolve(uri))
+            );
+        }
     }
 
     private static Map<String, String> uniqueSources(JsonArray artifacts) {

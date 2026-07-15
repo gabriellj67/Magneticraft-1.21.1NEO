@@ -21,6 +21,8 @@ class McxModelParserTest {
         assertEquals(1, scene.nodes().size());
         assertEquals("rotor", scene.node(0).name());
         assertEquals(1, scene.node(0).primitives().get(0).faceCount());
+        assertEquals(ModelScene.AlphaMode.MASK, scene.alphaMode());
+        assertEquals("minecraft:cutout", LegacySceneGeometry.inferredRenderType(scene.alphaMode()).toString());
         assertEquals(Set.of(0), ModelSelection.nodes(scene, ModelSelection.exact("rotor")));
     }
 

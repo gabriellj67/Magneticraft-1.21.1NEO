@@ -114,7 +114,15 @@ public final class McxModelParser {
                 copy(normal, outputNormals, targetFace * 12 + vertex * 3);
             }
         }
-        return new ModelScene.Primitive(texture, side, outputPositions, outputTextureCoordinates, outputNormals);
+        return new ModelScene.Primitive(
+                texture,
+                side,
+                null,
+                ModelScene.AlphaMode.MASK,
+                outputPositions,
+                outputTextureCoordinates,
+                outputNormals
+        );
     }
 
     private static float[] quadNormal(float[] a, float[] b, float[] c, float[] d) {

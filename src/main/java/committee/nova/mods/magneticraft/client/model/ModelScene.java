@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.client.model;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /** Immutable render-neutral representation shared by MCX and glTF. */
@@ -31,9 +32,31 @@ public record ModelScene(
         return animations.stream().filter(animation -> animation.name().equals(name)).findFirst();
     }
 
+    /** Returns the most permissive material alpha mode required by this scene. */
+    public AlphaMode alphaMode() {
+        AlphaMode result = AlphaMode.OPAQUE;
+        for (Node node : nodes) {
+            for (Primitive primitive : node.primitives()) {
+                result = AlphaMode.combine(result, primitive.alphaMode());
+            }
+        }
+        return result;
+    }
+
     public enum Format {
         MCX,
         GLTF
+    }
+
+    /** glTF 2.0 material alpha modes ordered from opaque to blended. */
+    public enum AlphaMode {
+        OPAQUE,
+        MASK,
+        BLEND;
+
+        static AlphaMode combine(AlphaMode left, AlphaMode right) {
+            return left.ordinal() >= right.ordinal() ? left : right;
+        }
     }
 
     public record Node(
@@ -60,6 +83,7 @@ public record ModelScene(
             String texture,
             String cullFace,
             String materialName,
+            AlphaMode alphaMode,
             float[] positions,
             float[] textureCoordinates,
             float[] normals
@@ -71,10 +95,22 @@ public record ModelScene(
                 float[] textureCoordinates,
                 float[] normals
         ) {
-            this(texture, cullFace, null, positions, textureCoordinates, normals);
+            this(texture, cullFace, null, AlphaMode.OPAQUE, positions, textureCoordinates, normals);
+        }
+
+        public Primitive(
+                String texture,
+                String cullFace,
+                String materialName,
+                float[] positions,
+                float[] textureCoordinates,
+                float[] normals
+        ) {
+            this(texture, cullFace, materialName, AlphaMode.OPAQUE, positions, textureCoordinates, normals);
         }
 
         public Primitive {
+            alphaMode = Objects.requireNonNull(alphaMode);
             positions = Arrays.copyOf(positions, positions.length);
             textureCoordinates = Arrays.copyOf(textureCoordinates, textureCoordinates.length);
             normals = Arrays.copyOf(normals, normals.length);

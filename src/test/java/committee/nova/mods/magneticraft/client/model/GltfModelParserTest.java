@@ -31,9 +31,32 @@ class GltfModelParserTest {
         ModelScene.Primitive primitive = scene.node(0).primitives().get(0);
         assertEquals(1, primitive.faceCount());
         assertEquals("tier_band", primitive.materialName());
+        assertEquals(ModelScene.AlphaMode.OPAQUE, primitive.alphaMode());
+        assertEquals(ModelScene.AlphaMode.OPAQUE, scene.alphaMode());
+        assertEquals("minecraft:solid", LegacySceneGeometry.inferredRenderType(scene.alphaMode()).toString());
         assertArrayEquals(new float[]{0.0F, 0.0F, 0.0F}, first(primitive.positions(), 3));
         assertArrayEquals(new float[]{0.0F, 1.0F, 0.0F}, last(primitive.positions(), 3));
         assertArrayEquals(new float[]{0.0F, 0.0F, 1.0F}, first(primitive.normals(), 3));
+    }
+
+    @Test
+    void mapsStandardMaterialAlphaModesToForgeRenderLayers() throws Exception {
+        byte[] buffer = triangleBuffer();
+        String encoded = Base64.getEncoder().encodeToString(buffer);
+
+        ModelScene masked = parseWithAlphaMode(encoded, buffer.length, "MASK");
+        assertEquals(ModelScene.AlphaMode.MASK, masked.alphaMode());
+        assertEquals("minecraft:cutout", LegacySceneGeometry.inferredRenderType(masked.alphaMode()).toString());
+
+        ModelScene blended = parseWithAlphaMode(encoded, buffer.length, "BLEND");
+        assertEquals(ModelScene.AlphaMode.BLEND, blended.alphaMode());
+        assertEquals("minecraft:translucent", LegacySceneGeometry.inferredRenderType(blended.alphaMode()).toString());
+
+        ModelParseException exception = assertThrows(
+                ModelParseException.class,
+                () -> parseWithAlphaMode(encoded, buffer.length, "CUTOUT")
+        );
+        assertTrue(exception.getMessage().contains("$.materials[0].alphaMode"));
     }
 
     @Test
@@ -98,6 +121,21 @@ class GltfModelParserTest {
                   }]}]
                 }
                 """.formatted(encodedBuffer, byteLength, stride);
+    }
+
+    private static ModelScene parseWithAlphaMode(String encodedBuffer, int byteLength, String alphaMode)
+            throws Exception {
+        String source = gltf(encodedBuffer, byteLength, 20).replace(
+                "\"pbrMetallicRoughness\"",
+                "\"alphaMode\": \"" + alphaMode + "\", \"pbrMetallicRoughness\""
+        );
+        return GltfModelParser.parse(
+                "magneticraft:models/block/gltf/alpha_" + alphaMode.toLowerCase() + ".gltf",
+                new StringReader(source),
+                uri -> {
+                    throw new AssertionError("data URI must not use the external resolver");
+                }
+        );
     }
 
     private static float[] first(float[] values, int width) {

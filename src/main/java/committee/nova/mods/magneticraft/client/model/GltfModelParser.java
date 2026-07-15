@@ -234,6 +234,17 @@ public final class GltfModelParser {
             String path = "$.materials[" + index + "]";
             JsonObject material = McxModelParser.object(resource, materials.get(index), path);
             String name = McxModelParser.optionalString(resource, material, "name", path);
+            String alphaModeName = McxModelParser.optionalString(resource, material, "alphaMode", path);
+            ModelScene.AlphaMode alphaMode = switch (alphaModeName == null ? "OPAQUE" : alphaModeName) {
+                case "OPAQUE" -> ModelScene.AlphaMode.OPAQUE;
+                case "MASK" -> ModelScene.AlphaMode.MASK;
+                case "BLEND" -> ModelScene.AlphaMode.BLEND;
+                default -> throw new ModelParseException(
+                        resource,
+                        path + ".alphaMode",
+                        "unsupported glTF alpha mode " + alphaModeName
+                );
+            };
             String texture = MISSING_TEXTURE;
             if (material.has("pbrMetallicRoughness")) {
                 JsonObject pbr = McxModelParser.object(
@@ -257,7 +268,7 @@ public final class GltfModelParser {
                     texture = textures.get(textureIndex);
                 }
             }
-            result.add(new MaterialDefinition(name, texture));
+            result.add(new MaterialDefinition(name, texture, alphaMode));
         }
         return result;
     }
@@ -318,12 +329,14 @@ public final class GltfModelParser {
                 validateAttributeCounts(resource, path, positions, textureCoordinates, normals);
                 String texture = MISSING_TEXTURE;
                 String materialName = null;
+                ModelScene.AlphaMode alphaMode = ModelScene.AlphaMode.OPAQUE;
                 if (primitive.has("material")) {
                     int material = McxModelParser.requiredInt(resource, primitive, "material", path);
                     checkIndex(resource, path + ".material", material, materials.size());
                     MaterialDefinition definition = materials.get(material);
                     texture = definition.texture();
                     materialName = definition.name();
+                    alphaMode = definition.alphaMode();
                 }
                 parsed.add(expandTriangles(
                         resource,
@@ -333,7 +346,8 @@ public final class GltfModelParser {
                         normals,
                         indices,
                         texture,
-                        materialName
+                        materialName,
+                        alphaMode
                 ));
             }
             result.add(List.copyOf(parsed));
@@ -364,7 +378,8 @@ public final class GltfModelParser {
             Accessor normals,
             int[] indices,
             String texture,
-            String materialName
+            String materialName,
+            ModelScene.AlphaMode alphaMode
     ) throws ModelParseException {
         int faceCount = indices.length / 3;
         float[] outputPositions = new float[faceCount * 12];
@@ -404,6 +419,7 @@ public final class GltfModelParser {
                 texture,
                 null,
                 materialName,
+                alphaMode,
                 outputPositions,
                 outputTextureCoordinates,
                 outputNormals
@@ -730,7 +746,7 @@ public final class GltfModelParser {
     private record BufferView(int buffer, int offset, int length, int stride) {
     }
 
-    private record MaterialDefinition(String name, String texture) {
+    private record MaterialDefinition(String name, String texture, ModelScene.AlphaMode alphaMode) {
     }
 
     private static final class Accessor {
