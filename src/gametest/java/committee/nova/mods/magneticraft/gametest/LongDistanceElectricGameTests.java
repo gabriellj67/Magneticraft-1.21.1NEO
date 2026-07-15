@@ -21,6 +21,7 @@ import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
+import committee.nova.mods.magneticraft.system.network.electric.item.ElectricalRatingIds;
 import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.TransformerProfileIds;
@@ -31,6 +32,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -48,6 +50,9 @@ import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.List;
+import java.util.Optional;
+
 /** Runtime contracts for long-distance electricity, Tesla transfer and wind generation. */
 @GameTestHolder(Magneticraft.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -56,6 +61,39 @@ public final class LongDistanceElectricGameTests {
     private static final String ADVANCED_TEMPLATE = "advanced_systems";
 
     private LongDistanceElectricGameTests() {
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void everyTierPayloadItemDisplaysItsVoltageTier(GameTestHelper helper) {
+        ItemStack cable = TieredElectricalBlockItem.stackForTier(
+                ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                VoltageTierIds.LOW
+        );
+        ItemStack fuse = ModNetworkItems.FUSE.get().stackFor(
+                VoltageTierIds.LOW,
+                ElectricalRatingIds.STANDARD
+        );
+        ItemStack transformer = new ItemStack(ModNetworkBlocks.BOX_TRANSFORMER.get());
+        new TieredElectricalItemData(
+                VoltageTierIds.LOW,
+                Optional.empty(),
+                Optional.of(TransformerProfileIds.LV_TO_MV)
+        ).write(transformer);
+        ItemStack transformerPole = new ItemStack(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get());
+        new TieredElectricalItemData(
+                VoltageTierIds.MEDIUM,
+                Optional.empty(),
+                Optional.of(TransformerProfileIds.MV_TO_HV)
+        ).write(transformerPole);
+
+        for (ItemStack stack : List.of(cable, fuse, transformer, transformerPole)) {
+            String serializedName = Component.Serializer.toJson(stack.getItem().getName(stack));
+            helper.assertTrue(serializedName.contains("item.magneticraft.tiered_name"),
+                    "Tiered item did not expose its voltage tier in the display name: " + stack.getItem());
+            helper.assertTrue(serializedName.contains("voltage_tier.magneticraft."),
+                    "Tiered item display name did not resolve a voltage-tier translation: " + stack.getItem());
+        }
+        helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
@@ -400,6 +438,7 @@ public final class LongDistanceElectricGameTests {
 
         BlockPos poleBottom = new BlockPos(14, 2, 3);
         BlockPos poleSupport = poleBottom.below();
+        clearPoleVolume(helper, poleBottom);
         helper.setBlock(poleSupport, Blocks.STONE);
         ItemStack mediumPole = TieredElectricalBlockItem.stackForTier(
                 ModNetworkBlocks.ELECTRIC_POLE.get(),
@@ -411,10 +450,15 @@ public final class LongDistanceElectricGameTests {
                 InteractionHand.MAIN_HAND,
                 polePlacementHit(helper, poleSupport)
         ));
-        helper.assertTrue(polePlaced.consumesAction(), "Valid medium-voltage pole was not placed");
+        helper.assertTrue(polePlaced.consumesAction(),
+                "Valid medium-voltage pole was not placed: result=" + polePlaced
+                        + ", support=" + helper.getBlockState(poleSupport)
+                        + ", bottom=" + helper.getBlockState(poleBottom)
+                        + ", remaining=" + mediumPole.getCount());
         ElectricPoleBlockEntity pole = require(helper, poleBottom.above(4), ElectricPoleBlockEntity.class);
         helper.assertTrue(pole.electricity().tierId().equals(VoltageTierIds.MEDIUM),
                 "Five-block pole did not apply its item tier to the top endpoint");
+        clearPoleVolume(helper, poleBottom);
         player.discard();
         helper.succeed();
     }
@@ -813,6 +857,12 @@ public final class LongDistanceElectricGameTests {
                 block.defaultBlockState().setValue(ElectricPoleBlock.SEGMENT, PoleSegment.BASE)
         );
         return require(helper, position, ElectricPoleBlockEntity.class);
+    }
+
+    private static void clearPoleVolume(GameTestHelper helper, BlockPos bottom) {
+        for (int height = 0; height < 5; height++) {
+            helper.setBlock(bottom.above(height), Blocks.AIR);
+        }
     }
 
     private static WirelessEnergyReceiverBlockEntity placeReceiver(GameTestHelper helper, BlockPos position) {

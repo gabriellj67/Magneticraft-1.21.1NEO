@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.network.electric;
 
 import committee.nova.mods.magneticraft.content.network.module.TransformerElectricalHost;
+import committee.nova.mods.magneticraft.content.item.TieredElectricalItemName;
 import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
 import net.minecraft.network.chat.Component;
@@ -18,6 +19,11 @@ import java.util.Optional;
 public final class TransformerBlockItem extends BlockItem {
     public TransformerBlockItem(Block block, Properties properties) {
         super(block, properties);
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        return TieredElectricalItemName.decorate(stack, super.getName(stack));
     }
 
     @Override

@@ -30,6 +30,11 @@ public class TieredElectricalBlockItem extends BlockItem {
     }
 
     @Override
+    public Component getName(ItemStack stack) {
+        return TieredElectricalItemName.decorate(stack, super.getName(stack));
+    }
+
+    @Override
     public InteractionResult place(BlockPlaceContext context) {
         ItemStack stack = context.getItemInHand();
         Optional<TieredElectricalItemData> itemData = TieredElectricalItemData.read(stack);

@@ -60,6 +60,13 @@ S2C data contains at most 256 tier display entries. IDs and translation keys are
 at most 128 characters. The client atomically accepts only non-stale generations
 and must never feed its display cache into simulation.
 
+Every item carrying `TieredElectricalItemData` decorates its normal display
+name as `[%tier%] %base-name%`. On the client, the tier component comes from the
+synced immutable display snapshot so data-pack tiers retain their declared
+translation key. Server-side name generation may use the authoritative
+snapshot; an unavailable display definition falls back to the tier ID. Item
+name rendering never changes placement validation or simulation identity.
+
 ## 4. Validation & Error Matrix
 
 | Condition | Required result |
@@ -74,6 +81,9 @@ and must never feed its display cache into simulation.
 | Invalid first load | Fail resource loading; never publish an empty fallback |
 | Missing profile after a valid reload | Bound device enters safe disconnected `MISSING_PROFILE` state |
 | Malformed/stale client packet | Reject it and retain the prior client display snapshot |
+| Tiered item with a synced custom tier | Render the synced tier translation in its display name |
+| Item without valid tier payload | Preserve its ordinary base display name |
+| Tier payload unavailable in both display snapshots | Render the stable tier ID; never crash |
 
 All errors discovered in the same candidate are reported together. Do not log
 per tick; one reload summary with resource-specific details is sufficient.
@@ -86,6 +96,9 @@ per tick; one reload summary with resource-specific details is sufficient.
   generation before gameplay begins.
 - Bad: one machine references a removed tier while another tier contains NaN;
   both errors are reported and no map from the candidate becomes visible.
+- Good display: a data pack adds a fourth tier and its cable, connector,
+  protection, fuse and transformer items all show that tier in the name without
+  adding item-specific translation keys.
 
 ## 6. Tests Required
 
@@ -93,6 +106,8 @@ per tick; one reload summary with resource-specific details is sufficient.
   references, fourth-tier success, atomic failure and generation ordering.
 - Packet tests: count, text, numeric and duplicate-ID bounds; round trip and
   stale-generation rejection.
+- Item-name tests: built-in and custom synced tiers, all tier-payload item
+  subclasses, missing payload and unknown-tier fallback.
 - GameTest: built-in full snapshot exists on a dedicated server; successful
   rebind pauses only electricity for one tick and counts down grace.
 - Cross-layer gates: `compileJava`, `compileGameTestJava`, `test`,
@@ -116,3 +131,7 @@ ElectricalDataLoadResult candidate = ElectricalDataParser.parse(tiers, transform
 ElectricalDataSnapshot snapshot = ElectricalDataRegistry.INSTANCE.apply(candidate).current();
 double voltage = snapshot.voltageTier(id).orElseThrow().nominalVoltage();
 ```
+
+Wrong: hard-code LV/MV/HV names in every item subclass. Correct: every payload
+item delegates its name decoration to one display-only resolver backed by the
+synced tier snapshot.
