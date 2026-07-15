@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractM
 import committee.nova.mods.magneticraft.content.machine.framework.menu.GhostFilterMenuAccess;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.GhostSlot;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.content.machine.framework.module.GhostFilterModule;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMenus;
@@ -94,13 +95,15 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
                 : resolved.inventory().menuHandler();
         GhostFilterModule filters = resolved == null ? null : resolved.filters();
 
+        List<LegacyMachineGuiLayout.Point> layout = LegacyMachineGuiLayout.singleBlockSlots(definition);
         int resultSlot = -1;
         switch (definition) {
-            case BOX -> addGrid(inventory, 0, 3, 9, 8, 18, true);
+            case BOX -> addMachineSlots(inventory, 0, layout, true);
             case FABRICATOR -> {
-                addGhostGrid(filters, 3, 3, 30, 18);
+                addGhostSlots(filters, layout.subList(0, 9));
                 resultSlot = slots.size();
-                addSlot(new Slot(fabricatorResult, 0, 124, 36) {
+                LegacyMachineGuiLayout.Point result = layout.get(9);
+                addSlot(new Slot(fabricatorResult, 0, result.x(), result.y()) {
                     @Override
                     public boolean mayPlace(ItemStack stack) {
                         return false;
@@ -111,20 +114,21 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
                         return false;
                     }
                 });
-                addGrid(inventory, 0, 3, 3, 62, 84, true);
+                addMachineSlots(inventory, 0, layout.subList(10, 19), true);
             }
             case INSERTER -> {
-                addMachineSlot(inventory, 0, 26, 35, false);
-                addMachineSlot(inventory, 1, 26, 57, true);
-                addMachineSlot(inventory, 2, 44, 57, true);
-                addGhostGrid(filters, 3, 3, 92, 18);
+                addMachineSlot(inventory, 0, layout.get(0), false);
+                addMachineSlot(inventory, 1, layout.get(1), true);
+                addMachineSlot(inventory, 2, layout.get(2), true);
+                addGhostSlots(filters, layout.subList(3, 12));
             }
-            case RELAY -> addGrid(inventory, 0, 3, 3, 62, 18, true);
-            case FILTER, TRANSPOSER -> addGhostGrid(filters, 3, 3, 62, 18);
-            case COMBUSTION_CHAMBER -> addMachineSlot(inventory, 0, 80, 35, true);
+            case RELAY -> addMachineSlots(inventory, 0, layout, true);
+            case FILTER, TRANSPOSER -> addGhostSlots(filters, layout);
+            case COMBUSTION_CHAMBER -> addMachineSlot(inventory, 0, layout.get(0), true);
             case GASIFICATION_UNIT, BRICK_FURNACE -> {
-                addMachineSlot(inventory, 0, 56, 35, true);
-                addSlot(new SlotItemHandler(inventory, 1, 116, 35) {
+                addMachineSlot(inventory, 0, layout.get(0), true);
+                LegacyMachineGuiLayout.Point output = layout.get(1);
+                addSlot(new SlotItemHandler(inventory, 1, output.x(), output.y()) {
                     @Override
                     public boolean mayPlace(ItemStack stack) {
                         return false;
@@ -135,8 +139,8 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
             }
         }
         fabricatorResultSlot = resultSlot;
-        playerInventoryTop = definition == SingleBlockMachineDefinition.FABRICATOR ? 156 : 84;
-        finishMachineSlots(playerInventory, 8, playerInventoryTop);
+        playerInventoryTop = LegacyMachineGuiLayout.singleBlockPlayerTop(definition);
+        finishMachineSlots(playerInventory, LegacyMachineGuiLayout.STANDARD_PLAYER_LEFT, playerInventoryTop);
         refreshFabricatorResult();
     }
 
@@ -194,7 +198,7 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
     }
 
     public int imageHeight() {
-        return definition == SingleBlockMachineDefinition.FABRICATOR ? 238 : 166;
+        return LegacyMachineGuiLayout.singleBlockSize(definition).height();
     }
 
     public int energyStored() {
@@ -294,26 +298,24 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
         return false;
     }
 
-    private void addGrid(
+    private void addMachineSlots(
             IItemHandler handler,
             int startSlot,
-            int rows,
-            int columns,
-            int x,
-            int y,
+            List<LegacyMachineGuiLayout.Point> positions,
             boolean playerTarget
     ) {
-        for (int row = 0; row < rows; row++) {
-            for (int column = 0; column < columns; column++) {
-                addMachineSlot(
-                        handler,
-                        startSlot + row * columns + column,
-                        x + column * 18,
-                        y + row * 18,
-                        playerTarget
-                );
-            }
+        for (int index = 0; index < positions.size(); index++) {
+            addMachineSlot(handler, startSlot + index, positions.get(index), playerTarget);
         }
+    }
+
+    private void addMachineSlot(
+            IItemHandler handler,
+            int slot,
+            LegacyMachineGuiLayout.Point position,
+            boolean playerTarget
+    ) {
+        addMachineSlot(handler, slot, position.x(), position.y(), playerTarget);
     }
 
     private void addMachineSlot(IItemHandler handler, int slot, int x, int y, boolean playerTarget) {
@@ -324,15 +326,16 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
         }
     }
 
-    private void addGhostGrid(@javax.annotation.Nullable GhostFilterModule filters, int rows, int columns, int x, int y) {
+    private void addGhostSlots(
+            @javax.annotation.Nullable GhostFilterModule filters,
+            List<LegacyMachineGuiLayout.Point> positions
+    ) {
         if (filters == null) {
             return;
         }
-        for (int row = 0; row < rows; row++) {
-            for (int column = 0; column < columns; column++) {
-                int slot = row * columns + column;
-                addSlot(new GhostSlot(filters, slot, x + column * 18, y + row * 18));
-            }
+        for (int slot = 0; slot < positions.size(); slot++) {
+            LegacyMachineGuiLayout.Point position = positions.get(slot);
+            addSlot(new GhostSlot(filters, slot, position.x(), position.y()));
         }
     }
 

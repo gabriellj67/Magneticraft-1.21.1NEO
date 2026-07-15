@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.multiblock;
 
 import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractMachineMenu;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -66,17 +67,30 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
                 : controller.menuData();
         addDataSlots(data);
 
-        int displayedSlots = definition == MultiblockDefinition.SHELVING_UNIT
-                ? 0
-                : Math.min(definition.inventorySlots(), 4);
+        java.util.List<LegacyMachineGuiLayout.Point> slotLayout = LegacyMachineGuiLayout.multiblockSlots(definition);
+        int displayedSlots = slotLayout.size();
         IItemHandler inventory = controller != null && controller.inventory() != null
                 ? controller.inventory().menuHandler()
                 : new ItemStackHandler(displayedSlots);
         for (int slot = 0; slot < displayedSlots; slot++) {
-            addSlot(new SlotItemHandler(inventory, slot, slotX(displayedSlots, slot), 35));
+            LegacyMachineGuiLayout.Point slotPosition = slotLayout.get(slot);
+            if (isOutputSlot(definition, slot)) {
+                addSlot(new SlotItemHandler(inventory, slot, slotPosition.x(), slotPosition.y()) {
+                    @Override
+                    public boolean mayPlace(ItemStack stack) {
+                        return false;
+                    }
+                });
+            } else {
+                addSlot(new SlotItemHandler(inventory, slot, slotPosition.x(), slotPosition.y()));
+            }
         }
         machineSlots = slots.size();
-        finishMachineSlots(playerInventory, 8, 126);
+        finishMachineSlots(
+                playerInventory,
+                LegacyMachineGuiLayout.STANDARD_PLAYER_LEFT,
+                LegacyMachineGuiLayout.multiblockPlayerTop(definition)
+        );
     }
 
     @Override
@@ -97,6 +111,18 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
 
     public MultiblockDefinition definition() {
         return definition;
+    }
+
+    public int imageWidth() {
+        return LegacyMachineGuiLayout.multiblockSize(definition).width();
+    }
+
+    public int imageHeight() {
+        return LegacyMachineGuiLayout.multiblockSize(definition).height();
+    }
+
+    public int playerInventoryTop() {
+        return LegacyMachineGuiLayout.multiblockPlayerTop(definition);
     }
 
     public int energyStored() {
@@ -172,8 +198,11 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
         }
     }
 
-    private static int slotX(int count, int index) {
-        return 80 - (count - 1) * 9 + index * 18;
+    private static boolean isOutputSlot(MultiblockDefinition definition, int slot) {
+        return slot > 0 && switch (definition) {
+            case GRINDER, SIEVE, HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE -> true;
+            default -> false;
+        };
     }
 
     private static MultiblockDefinition validateDefinition(

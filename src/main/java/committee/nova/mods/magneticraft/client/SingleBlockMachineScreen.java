@@ -2,6 +2,8 @@ package committee.nova.mods.magneticraft.client;
 
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMenu;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.StatusBar;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -29,7 +31,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
 
     public SingleBlockMachineScreen(SingleBlockMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = 176;
+        imageWidth = LegacyMachineGuiLayout.singleBlockSize(menu.definition()).width();
         imageHeight = menu.imageHeight();
     }
 
@@ -40,6 +42,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
         if (menu.definition() == SingleBlockMachineDefinition.INSERTER) {
             for (int id = 0; id < INSERTER_BUTTON_KEYS.length; id++) {
                 int buttonId = id;
+                LegacyMachineGuiLayout.Rect bounds = LegacyMachineGuiLayout.inserterButtons().get(id);
                 Button button = Button.builder(
                                 inserterButtonLabel(id, false),
                                 ignored -> {
@@ -48,7 +51,12 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                                     }
                                 }
                         )
-                        .bounds(leftPos + 7 + id * 27, topPos + 67, 24, 16)
+                        .bounds(
+                                leftPos + bounds.x(),
+                                topPos + bounds.y(),
+                                bounds.width(),
+                                bounds.height()
+                        )
                         .build();
                 inserterButtons.add(addRenderableWidget(button));
             }
@@ -70,6 +78,17 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
         super.render(graphics, mouseX, mouseY, partialTick);
         renderStatusTooltips(graphics, mouseX, mouseY);
         renderTooltip(graphics, mouseX, mouseY);
+        for (int id = 0; id < inserterButtons.size(); id++) {
+            if (inserterButtons.get(id).isHoveredOrFocused()) {
+                graphics.renderTooltip(
+                        font,
+                        Component.translatable(INSERTER_BUTTON_KEYS[id]),
+                        mouseX,
+                        mouseY
+                );
+                break;
+            }
+        }
     }
 
     @Override
@@ -83,13 +102,16 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (menu.definition() == SingleBlockMachineDefinition.BOX) {
+            return;
+        }
         Component status = statusLabel();
         if (status == null) {
             graphics.drawString(
                     font,
                     MachineScreenLayout.fitToWidth(font, title, imageWidth - titleLabelX - 8),
                     titleLabelX,
-                    titleLabelY,
+                    LegacyMachineGuiLayout.CONTENT_TITLE_TOP,
                     0x404040,
                     false
             );
@@ -102,47 +124,39 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                     font,
                     MachineScreenLayout.fitToWidth(font, title, titleWidth),
                     titleLabelX,
-                    titleLabelY,
+                    LegacyMachineGuiLayout.CONTENT_TITLE_TOP,
                     0x404040,
                     false
             );
-            graphics.drawString(font, fittedStatus, statusX, titleLabelY, 0x404040, false);
+            graphics.drawString(
+                    font,
+                    fittedStatus,
+                    statusX,
+                    LegacyMachineGuiLayout.CONTENT_TITLE_TOP,
+                    0x404040,
+                    false
+            );
         }
-        graphics.drawString(
-                font,
-                playerInventoryTitle,
-                inventoryLabelX,
-                menu.playerInventoryTop() - 12,
-                0x404040,
-                false
-        );
     }
 
     private void drawStatusBars(GuiGraphics graphics) {
-        int barX = leftPos + 151;
-        int barBottom = topPos + 68;
-        if (menu.energyCapacity() > 0) {
-            MachineScreenLayout.drawInset(graphics, barX, topPos + 18, 10, 52);
-            int height = scaled(menu.energyStored(), menu.energyCapacity(), 48);
-            graphics.fill(barX + 2, barBottom - height, barX + 8, barBottom, 0xFF43D96B);
-            barX -= 13;
-        }
-        if (menu.primaryCapacity() > 0) {
-            MachineScreenLayout.drawInset(graphics, barX, topPos + 18, 10, 52);
-            int height = scaled(menu.primaryFluid(), menu.primaryCapacity(), 48);
-            graphics.fill(barX + 2, barBottom - height, barX + 8, barBottom, 0xFF2F78D0);
-            barX -= 13;
-        }
-        if (menu.secondaryCapacity() > 0) {
-            MachineScreenLayout.drawInset(graphics, barX, topPos + 18, 10, 52);
-            int height = scaled(menu.secondaryFluid(), menu.secondaryCapacity(), 48);
-            graphics.fill(barX + 2, barBottom - height, barX + 8, barBottom, 0xFFE8E8E8);
-        }
-        int totalProgress = displayedProgressTotal();
-        if (totalProgress > 0) {
-            MachineScreenLayout.drawInset(graphics, leftPos + 72, topPos + 65, 34, 8);
-            int width = scaled(displayedProgress(), totalProgress, 32);
-            graphics.fill(leftPos + 73, topPos + 66, leftPos + 73 + width, topPos + 72, 0xFFE88A2A);
+        for (StatusBar bar : statusBars()) {
+            LegacyMachineGuiLayout.Rect bounds = bar.bounds();
+            MachineScreenLayout.drawInset(
+                    graphics,
+                    leftPos + bounds.x(),
+                    topPos + bounds.y(),
+                    bounds.width(),
+                    bounds.height()
+            );
+            int height = scaled(value(bar), capacity(bar), bounds.height() - 4);
+            graphics.fill(
+                    leftPos + bounds.x() + 2,
+                    topPos + bounds.bottom() - 2 - height,
+                    leftPos + bounds.right() - 2,
+                    topPos + bounds.bottom() - 2,
+                    color(bar)
+            );
         }
     }
 
@@ -163,34 +177,30 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
     }
 
     private Component inserterButtonLabel(int id, boolean enabled) {
-        return Component.literal(enabled ? "✓ " : "· ")
-                .append(Component.translatable(INSERTER_BUTTON_KEYS[id]));
+        return Component.literal((enabled ? "✓" : "·") + (id + 1));
     }
 
     private void renderStatusTooltips(GuiGraphics graphics, int mouseX, int mouseY) {
-        int barX = 151;
-        if (menu.energyCapacity() > 0) {
-            renderBarTooltip(graphics, mouseX, mouseY, barX, "gui.magneticraft.energy.tooltip", menu.energyStored(), menu.energyCapacity());
-            barX -= 13;
-        }
-        if (menu.primaryCapacity() > 0) {
-            renderBarTooltip(graphics, mouseX, mouseY, barX, "gui.magneticraft.fluid.tooltip", menu.primaryFluid(), menu.primaryCapacity());
-            barX -= 13;
-        }
-        if (menu.secondaryCapacity() > 0) {
-            renderBarTooltip(graphics, mouseX, mouseY, barX, "gui.magneticraft.fluid.tooltip", menu.secondaryFluid(), menu.secondaryCapacity());
-        }
-        int totalProgress = displayedProgressTotal();
-        if (totalProgress > 0
-                && mouseX >= leftPos + 72 && mouseX < leftPos + 106
-                && mouseY >= topPos + 65 && mouseY < topPos + 73) {
+        for (StatusBar bar : statusBars()) {
+            LegacyMachineGuiLayout.Rect bounds = bar.bounds();
+            if (mouseX < leftPos + bounds.x() || mouseX >= leftPos + bounds.right()
+                    || mouseY < topPos + bounds.y() || mouseY >= topPos + bounds.bottom()) {
+                continue;
+            }
+            String key = switch (bar.kind()) {
+                case ENERGY -> "gui.magneticraft.energy.tooltip";
+                case PROGRESS -> "gui.magneticraft.progress.tooltip";
+                case PRIMARY_FLUID, SECONDARY_FLUID, TANK -> "gui.magneticraft.fluid.tooltip";
+                case BULK -> "gui.magneticraft.items.tooltip";
+            };
             List<Component> lines = new ArrayList<>();
             lines.add(Component.translatable(
-                    "gui.magneticraft.progress.tooltip",
-                    displayedProgress(),
-                    totalProgress
+                    key,
+                    value(bar),
+                    capacity(bar)
             ));
-            if (menu.lastConsumption() > 0 || menu.lastProduction() > 0) {
+            if (bar.kind() == LegacyMachineGuiLayout.StatusKind.PROGRESS
+                    && (menu.lastConsumption() > 0 || menu.lastProduction() > 0)) {
                 lines.add(Component.translatable(
                         "gui.magneticraft.machine.rate.tooltip",
                         menu.lastConsumption(),
@@ -198,7 +208,47 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                 ));
             }
             graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+            return;
         }
+    }
+
+    private List<StatusBar> statusBars() {
+        return LegacyMachineGuiLayout.singleBlockStatusBars(
+                menu.energyCapacity() > 0,
+                menu.primaryCapacity() > 0,
+                menu.secondaryCapacity() > 0,
+                displayedProgressTotal() > 0
+        );
+    }
+
+    private int value(StatusBar bar) {
+        return switch (bar.kind()) {
+            case ENERGY -> menu.energyStored();
+            case PRIMARY_FLUID -> menu.primaryFluid();
+            case SECONDARY_FLUID -> menu.secondaryFluid();
+            case PROGRESS -> displayedProgress();
+            case BULK, TANK -> 0;
+        };
+    }
+
+    private int capacity(StatusBar bar) {
+        return switch (bar.kind()) {
+            case ENERGY -> menu.energyCapacity();
+            case PRIMARY_FLUID -> menu.primaryCapacity();
+            case SECONDARY_FLUID -> menu.secondaryCapacity();
+            case PROGRESS -> displayedProgressTotal();
+            case BULK, TANK -> 0;
+        };
+    }
+
+    private int color(StatusBar bar) {
+        return switch (bar.kind()) {
+            case ENERGY -> 0xFF43D96B;
+            case PRIMARY_FLUID -> 0xFF2F78D0;
+            case SECONDARY_FLUID -> 0xFFE8E8E8;
+            case PROGRESS -> 0xFFE88A2A;
+            case BULK, TANK -> 0xFF4FC3C8;
+        };
     }
 
     private int displayedProgress() {
@@ -207,21 +257,6 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
 
     private int displayedProgressTotal() {
         return menu.totalProgress() > 0 ? menu.totalProgress() : menu.burnTotal();
-    }
-
-    private void renderBarTooltip(
-            GuiGraphics graphics,
-            int mouseX,
-            int mouseY,
-            int x,
-            String key,
-            int value,
-            int capacity
-    ) {
-        if (mouseX >= leftPos + x && mouseX < leftPos + x + 10
-                && mouseY >= topPos + 18 && mouseY < topPos + 70) {
-            graphics.renderTooltip(font, Component.translatable(key, value, capacity), mouseX, mouseY);
-        }
     }
 
     private static int scaled(int value, int capacity, int size) {

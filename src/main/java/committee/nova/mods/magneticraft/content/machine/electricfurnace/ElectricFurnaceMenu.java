@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.machine.electricfurnace;
 
 import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractMachineMenu;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import net.minecraft.core.BlockPos;
@@ -56,15 +57,29 @@ public final class ElectricFurnaceMenu extends AbstractMachineMenu {
                 ? ContainerLevelAccess.NULL
                 : ContainerLevelAccess.create(playerInventory.player.level(), position);
 
-        addSlot(new SlotItemHandler(handler, 0, 56, 35));
-        addSlot(new SlotItemHandler(handler, 1, 116, 35) {
+        addSlot(new SlotItemHandler(
+                handler,
+                0,
+                LegacyMachineGuiLayout.ELECTRIC_FURNACE_INPUT.x(),
+                LegacyMachineGuiLayout.ELECTRIC_FURNACE_INPUT.y()
+        ));
+        addSlot(new SlotItemHandler(
+                handler,
+                1,
+                LegacyMachineGuiLayout.ELECTRIC_FURNACE_OUTPUT.x(),
+                LegacyMachineGuiLayout.ELECTRIC_FURNACE_OUTPUT.y()
+        ) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
             }
         });
         addDataSlots(data);
-        finishMachineSlots(playerInventory, 8, 84);
+        finishMachineSlots(
+                playerInventory,
+                LegacyMachineGuiLayout.STANDARD_PLAYER_LEFT,
+                LegacyMachineGuiLayout.STANDARD_PLAYER_TOP
+        );
     }
 
     @Override

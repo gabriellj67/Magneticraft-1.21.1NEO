@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.client;
 
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceMenu;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -12,8 +13,8 @@ import net.minecraft.world.entity.player.Inventory;
 public final class ElectricFurnaceScreen extends AbstractContainerScreen<ElectricFurnaceMenu> {
     public ElectricFurnaceScreen(ElectricFurnaceMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = 176;
-        imageHeight = 166;
+        imageWidth = LegacyMachineGuiLayout.STANDARD_WIDTH;
+        imageHeight = LegacyMachineGuiLayout.STANDARD_HEIGHT;
     }
 
     @Override
@@ -54,8 +55,20 @@ public final class ElectricFurnaceScreen extends AbstractContainerScreen<Electri
         int top = topPos;
         MachineScreenLayout.drawPanel(graphics, left, top, imageWidth, imageHeight);
         MachineScreenLayout.drawPlayerInventory(graphics, left, top);
-        MachineScreenLayout.drawSlot(graphics, left, top, 56, 35);
-        MachineScreenLayout.drawSlot(graphics, left, top, 116, 35);
+        MachineScreenLayout.drawSlot(
+                graphics,
+                left,
+                top,
+                LegacyMachineGuiLayout.ELECTRIC_FURNACE_INPUT.x(),
+                LegacyMachineGuiLayout.ELECTRIC_FURNACE_INPUT.y()
+        );
+        MachineScreenLayout.drawSlot(
+                graphics,
+                left,
+                top,
+                LegacyMachineGuiLayout.ELECTRIC_FURNACE_OUTPUT.x(),
+                LegacyMachineGuiLayout.ELECTRIC_FURNACE_OUTPUT.y()
+        );
         MachineScreenLayout.drawInset(graphics, left + 77, top + 37, 34, 12);
         MachineScreenLayout.drawInset(graphics, left + 14, top + 18, 10, 52);
 

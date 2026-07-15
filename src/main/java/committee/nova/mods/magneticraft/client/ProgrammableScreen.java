@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptProgram;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
 import committee.nova.mods.magneticraft.content.computer.vm.VmFault;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.network.ModNetwork;
 import committee.nova.mods.magneticraft.network.UploadComputerProgramMessage;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,6 +14,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,13 +27,13 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
     private static final int LINES_PER_PAGE = 8;
     private static final int MAX_LINES = ScriptRuntime.MAX_SOURCE_BYTES + 1;
     private static final int PAGE_COUNT = (MAX_LINES + LINES_PER_PAGE - 1) / LINES_PER_PAGE;
-    static final int ROBOT_ENERGY_TOP = 96;
+    static final int ROBOT_ENERGY_TOP = 48;
     static final int ROBOT_ENERGY_HEIGHT = 12;
-    static final int STATE_TOP = 110;
+    static final int STATE_TOP = 20;
     static final int STATE_LINE_HEIGHT = 9;
-    static final int INVENTORY_PANEL_TOP = 128;
-    private static final int STATE_LEFT = 166;
-    private static final int STATE_WIDTH = 78;
+    static final int EDITOR_PANEL_BOTTOM = 114;
+    private static final int STATE_LEFT = 246;
+    private static final int STATE_WIDTH = 96;
 
     private final List<String> lines = new ArrayList<>(MAX_LINES);
     private final List<EditBox> editors = new ArrayList<>(LINES_PER_PAGE);
@@ -42,10 +44,11 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
 
     public ProgrammableScreen(ProgrammableMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = 248;
-        imageHeight = 214;
-        inventoryLabelX = 43;
-        inventoryLabelY = 121;
+        LegacyMachineGuiLayout.Size size = LegacyMachineGuiLayout.programmableSize(menu.miningRobot());
+        imageWidth = size.width();
+        imageHeight = size.height();
+        inventoryLabelX = LegacyMachineGuiLayout.PROGRAMMABLE_PLAYER_LEFT;
+        inventoryLabelY = LegacyMachineGuiLayout.programmablePlayerTop(menu.miningRobot()) - 12;
         language = menu.initialLanguage();
         String normalizedSource = menu.initialSource().replace("\r\n", "\n").replace('\r', '\n');
         lines.addAll(List.of(normalizedSource.split("\n", -1)));
@@ -61,29 +64,44 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
         for (int row = 0; row < LINES_PER_PAGE; row++) {
             EditBox editor = new EditBox(
                     font,
-                    leftPos + 26,
-                    topPos + 18 + row * 12,
-                    132,
-                    11,
+                    leftPos + LegacyMachineGuiLayout.PROGRAMMABLE_EDITOR_LEFT,
+                    topPos + LegacyMachineGuiLayout.PROGRAMMABLE_EDITOR_TOP + row * 12,
+                    LegacyMachineGuiLayout.PROGRAMMABLE_EDITOR_WIDTH,
+                    LegacyMachineGuiLayout.PROGRAMMABLE_EDITOR_HEIGHT,
                     Component.translatable("gui.magneticraft.programmable.instruction", row + 1)
             );
             editor.setMaxLength(ScriptRuntime.MAX_SOURCE_BYTES);
             editors.add(addRenderableWidget(editor));
         }
+        List<LegacyMachineGuiLayout.Rect> buttons = LegacyMachineGuiLayout.programmableButtons();
+        LegacyMachineGuiLayout.Rect previous = buttons.get(0);
         addRenderableWidget(Button.builder(Component.literal("<"), ignored -> setPage(page - 1))
-                .bounds(leftPos + 8, topPos + 110, 20, 18)
+                .bounds(leftPos + previous.x(), topPos + previous.y(), previous.width(), previous.height())
                 .build());
+        LegacyMachineGuiLayout.Rect next = buttons.get(1);
         addRenderableWidget(Button.builder(Component.literal(">"), ignored -> setPage(page + 1))
-                .bounds(leftPos + 32, topPos + 110, 20, 18)
+                .bounds(leftPos + next.x(), topPos + next.y(), next.width(), next.height())
                 .build());
+        LegacyMachineGuiLayout.Rect languageBounds = buttons.get(2);
         languageButton = addRenderableWidget(Button.builder(languageLabel(), ignored -> cycleLanguage())
-                .bounds(leftPos + 55, topPos + 110, 50, 18)
+                .bounds(
+                        leftPos + languageBounds.x(),
+                        topPos + languageBounds.y(),
+                        languageBounds.width(),
+                        languageBounds.height()
+                )
                 .build());
+        LegacyMachineGuiLayout.Rect uploadBounds = buttons.get(3);
         addRenderableWidget(Button.builder(
                         Component.translatable("gui.magneticraft.programmable.upload"),
                         ignored -> uploadProgram()
                 )
-                .bounds(leftPos + 108, topPos + 110, 50, 18)
+                .bounds(
+                        leftPos + uploadBounds.x(),
+                        topPos + uploadBounds.y(),
+                        uploadBounds.width(),
+                        uploadBounds.height()
+                )
                 .build());
         loadVisibleLines();
     }
@@ -91,16 +109,12 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         graphics.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xFF20242A);
-        graphics.fill(leftPos + 5, topPos + 14, leftPos + 162, topPos + 108, 0xFF101316);
+        graphics.fill(leftPos + 5, topPos + 14, leftPos + 238, topPos + EDITOR_PANEL_BOTTOM, 0xFF101316);
+        graphics.fill(leftPos + 242, topPos + 14, leftPos + 346, topPos + EDITOR_PANEL_BOTTOM, 0xFF171B20);
+        int playerTop = LegacyMachineGuiLayout.programmablePlayerTop(menu.miningRobot());
+        graphics.fill(leftPos + 91, topPos + playerTop - 4, leftPos + 258, topPos + playerTop + 78, 0xFF171B20);
         if (menu.miningRobot()) {
-            graphics.fill(leftPos + 166, topPos + 14, leftPos + 244, topPos + 94, 0xFF171B20);
-            for (int row = 0; row < 4; row++) {
-                for (int column = 0; column < 4; column++) {
-                    int x = leftPos + 169 + column * 18;
-                    int y = topPos + 17 + row * 18;
-                    graphics.fill(x, y, x + 18, y + 18, 0xFF353B43);
-                }
-            }
+            graphics.fill(leftPos + 264, topPos + playerTop - 4, leftPos + 346, topPos + playerTop + 78, 0xFF171B20);
             graphics.fill(
                     leftPos + STATE_LEFT,
                     topPos + ROBOT_ENERGY_TOP,
@@ -109,7 +123,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     0xFF303740
             );
             int capacity = menu.energyCapacity();
-            int width = capacity <= 0 ? 0 : (int) Math.min(76L, (long) menu.energyStored() * 76L / capacity);
+            int width = capacity <= 0 ? 0 : (int) Math.min(94L, (long) menu.energyStored() * 94L / capacity);
             graphics.fill(
                     leftPos + STATE_LEFT + 1,
                     topPos + ROBOT_ENERGY_TOP + 1,
@@ -118,12 +132,21 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     0xFF4DA3FF
             );
         }
-        graphics.fill(leftPos + 39, topPos + INVENTORY_PANEL_TOP, leftPos + 209, topPos + 210, 0xFF171B20);
+        for (Slot slot : menu.slots) {
+            MachineScreenLayout.drawSlot(graphics, leftPos, topPos, slot.x, slot.y);
+        }
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, titleLabelX, titleLabelY, 0xFFE6EDF3, false);
+        graphics.drawString(
+                font,
+                MachineScreenLayout.fitToWidth(font, title, 230),
+                titleLabelX,
+                titleLabelY,
+                0xFFE6EDF3,
+                false
+        );
         for (int row = 0; row < LINES_PER_PAGE; row++) {
             graphics.drawString(
                     font,
@@ -163,12 +186,19 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     font,
                     Component.translatable("gui.magneticraft.programmable.page", page + 1, PAGE_COUNT),
                     8,
-                    101,
+                    LegacyMachineGuiLayout.PROGRAMMABLE_PAGE_TOP,
                     0xFFB8C0C8,
                     false
             );
         } else {
-            graphics.drawString(font, validationMessage, 8, 101, 0xFFFF7B72, false);
+            graphics.drawString(
+                    font,
+                    MachineScreenLayout.fitToWidth(font, validationMessage, 230),
+                    8,
+                    LegacyMachineGuiLayout.PROGRAMMABLE_PAGE_TOP,
+                    0xFFFF7B72,
+                    false
+            );
         }
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFFB8C0C8, false);
     }

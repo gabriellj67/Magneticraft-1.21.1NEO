@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.machine.battery;
 
 import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractMachineMenu;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import net.minecraft.core.BlockPos;
@@ -57,10 +58,24 @@ public final class BatteryMenu extends AbstractMachineMenu {
                 ? ContainerLevelAccess.NULL
                 : ContainerLevelAccess.create(playerInventory.player.level(), position);
 
-        addSlot(filteredCellSlot(handler, 0, 53, 35));
-        addSlot(filteredCellSlot(handler, 1, 107, 35));
+        addSlot(filteredCellSlot(
+                handler,
+                0,
+                LegacyMachineGuiLayout.BATTERY_INPUT.x(),
+                LegacyMachineGuiLayout.BATTERY_INPUT.y()
+        ));
+        addSlot(filteredCellSlot(
+                handler,
+                1,
+                LegacyMachineGuiLayout.BATTERY_OUTPUT.x(),
+                LegacyMachineGuiLayout.BATTERY_OUTPUT.y()
+        ));
         addDataSlots(data);
-        finishMachineSlots(playerInventory, 8, 84);
+        finishMachineSlots(
+                playerInventory,
+                LegacyMachineGuiLayout.STANDARD_PLAYER_LEFT,
+                LegacyMachineGuiLayout.STANDARD_PLAYER_TOP
+        );
     }
 
     @Override

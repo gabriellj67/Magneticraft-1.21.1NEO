@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.client;
 
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryMenu;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -12,8 +13,8 @@ import net.minecraft.world.entity.player.Inventory;
 public final class BatteryScreen extends AbstractContainerScreen<BatteryMenu> {
     public BatteryScreen(BatteryMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = 176;
-        imageHeight = 166;
+        imageWidth = LegacyMachineGuiLayout.STANDARD_WIDTH;
+        imageHeight = LegacyMachineGuiLayout.STANDARD_HEIGHT;
     }
 
     @Override
@@ -42,8 +43,20 @@ public final class BatteryScreen extends AbstractContainerScreen<BatteryMenu> {
         int top = topPos;
         MachineScreenLayout.drawPanel(graphics, left, top, imageWidth, imageHeight);
         MachineScreenLayout.drawPlayerInventory(graphics, left, top);
-        MachineScreenLayout.drawSlot(graphics, left, top, 53, 35);
-        MachineScreenLayout.drawSlot(graphics, left, top, 107, 35);
+        MachineScreenLayout.drawSlot(
+                graphics,
+                left,
+                top,
+                LegacyMachineGuiLayout.BATTERY_INPUT.x(),
+                LegacyMachineGuiLayout.BATTERY_INPUT.y()
+        );
+        MachineScreenLayout.drawSlot(
+                graphics,
+                left,
+                top,
+                LegacyMachineGuiLayout.BATTERY_OUTPUT.x(),
+                LegacyMachineGuiLayout.BATTERY_OUTPUT.y()
+        );
         MachineScreenLayout.drawInset(graphics, left + 82, top + 20, 12, 47);
 
         int capacity = menu.energyCapacity();

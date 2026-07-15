@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
 import committee.nova.mods.magneticraft.content.computer.vm.VmFault;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractMachineMenu;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.core.BlockPos;
@@ -102,14 +103,18 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
             IItemHandler inventory = programmable instanceof MiningRobotBlockEntity robot
                     ? robot.inventory().menuHandler()
                     : new ItemStackHandler(16);
-            for (int row = 0; row < 4; row++) {
-                for (int column = 0; column < 4; column++) {
-                    addSlot(new SlotItemHandler(inventory, row * 4 + column, 170 + column * 18, 18 + row * 18));
-                }
+            java.util.List<LegacyMachineGuiLayout.Point> slotLayout = LegacyMachineGuiLayout.miningRobotSlots();
+            for (int slot = 0; slot < slotLayout.size(); slot++) {
+                LegacyMachineGuiLayout.Point position = slotLayout.get(slot);
+                addSlot(new SlotItemHandler(inventory, slot, position.x(), position.y()));
             }
         }
         machineSlots = slots.size();
-        finishMachineSlots(playerInventory, 43, 132);
+        finishMachineSlots(
+                playerInventory,
+                LegacyMachineGuiLayout.PROGRAMMABLE_PLAYER_LEFT,
+                LegacyMachineGuiLayout.programmablePlayerTop(miningRobot)
+        );
     }
 
     private static OpeningData validateOpeningData(boolean miningRobot, OpeningData opening) {
