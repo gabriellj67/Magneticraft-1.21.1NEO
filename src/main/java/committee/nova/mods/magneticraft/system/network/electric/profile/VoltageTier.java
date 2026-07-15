@@ -36,6 +36,7 @@ public record VoltageTier(
     public static final int SCHEMA_VERSION = 1;
     public static final int MAX_SYNCED_TIERS = 256;
     public static final int MAX_TEXT_LENGTH = 128;
+    private static final double VOLTAGE_COMPARISON_EPSILON = 1.0E-9D;
 
     public VoltageTier {
         Objects.requireNonNull(id, "id");
@@ -140,6 +141,31 @@ public record VoltageTier(
             errors.add("color must be a 24-bit RGB value");
         }
         return List.copyOf(errors);
+    }
+
+    /** Tolerant threshold check for voltages reconstructed from capacitor energy. */
+    public boolean meetsMinimumOperatingVoltage(double voltage) {
+        return Double.isFinite(voltage)
+                && voltage + voltageTolerance() >= minimumOperatingVoltage;
+    }
+
+    /** Linear minimum-to-nominal rate fraction with exact nominal saturation. */
+    public double operatingRateFraction(double voltage) {
+        if (!meetsMinimumOperatingVoltage(voltage)) {
+            return 0.0D;
+        }
+        if (voltage + voltageTolerance() >= nominalVoltage) {
+            return 1.0D;
+        }
+        return Math.min(
+                1.0D,
+                Math.max(0.0D, (voltage - minimumOperatingVoltage)
+                        / (nominalVoltage - minimumOperatingVoltage))
+        );
+    }
+
+    private double voltageTolerance() {
+        return VOLTAGE_COMPARISON_EPSILON * Math.max(1.0D, nominalVoltage);
     }
 
     private static void positiveFinite(List<String> errors, String field, double value) {

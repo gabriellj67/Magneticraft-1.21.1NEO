@@ -137,7 +137,7 @@ final class AdvancedMultiblockLogic {
         }
         if (visible > 0 && panels > 0) {
             double generated = 100.0D * visible / panels;
-            if (machine.energy().receiveEnergy((int) Math.floor(generated), false) > 0) {
+            if (machine.energy().generateJoules(generated, false) > 0.0D) {
                 machine.setWorking(true);
             }
         }
@@ -167,7 +167,7 @@ final class AdvancedMultiblockLogic {
                 steamRate / STEAM_PER_OPERATION
         );
         double requestedEnergy = Math.min(power, availableOperations * STEAM_ENERGY_PER_OPERATION);
-        double acceptedEnergy = machine.energy().receiveEnergy((int) Math.floor(requestedEnergy), true);
+        double acceptedEnergy = machine.energy().generateJoules(requestedEnergy, true);
         int operations = Math.min(
                 availableOperations,
                 (int) Math.floor(acceptedEnergy / STEAM_ENERGY_PER_OPERATION)
@@ -179,7 +179,7 @@ final class AdvancedMultiblockLogic {
                 operations * STEAM_PER_OPERATION,
                 IFluidHandler.FluidAction.EXECUTE
         );
-        machine.energy().receiveEnergy((int) Math.floor(operations * STEAM_ENERGY_PER_OPERATION), false);
+        machine.energy().generateJoules(operations * STEAM_ENERGY_PER_OPERATION, false);
         machine.setWorking(true);
     }
 
@@ -256,10 +256,10 @@ final class AdvancedMultiblockLogic {
         if (!machine.recipeMatches(recipeId, duration)) {
             machine.startRecipe(recipeId, duration);
         }
-        if (machine.energy().extractEnergy(cost, true) < cost) {
+        if (machine.energy().consumeJoules(cost, true) < cost) {
             return;
         }
-        machine.energy().extractEnergy(cost, false);
+        machine.energy().consumeJoules(cost, false);
         machine.advanceProgress();
         machine.setWorking(true);
         if (machine.progress() < duration) {
@@ -524,7 +524,7 @@ final class AdvancedMultiblockLogic {
 
     private void tickPumpjackDepositScan(ServerLevel level) {
         BlockPos depositOrigin = pumpjackState.depositOrigin().orElse(null);
-        if (depositOrigin == null || machine.energy().extractEnergy(PUMPJACK_COST, true) < PUMPJACK_COST) {
+        if (depositOrigin == null || machine.energy().consumeJoules(PUMPJACK_COST, true) < PUMPJACK_COST) {
             return;
         }
         PumpjackCursor cursor = PumpjackCursor.depositScan(
@@ -556,7 +556,7 @@ final class AdvancedMultiblockLogic {
         if (scanned <= 0) {
             return;
         }
-        machine.energy().extractEnergy(PUMPJACK_COST, false);
+        machine.energy().consumeJoules(PUMPJACK_COST, false);
         machine.setWorking(true);
         pumpjackState.setCursorIndex(index);
         pumpjackState.setDepositCounts(depositSize, remainingSources);
@@ -586,7 +586,7 @@ final class AdvancedMultiblockLogic {
         }
         BlockPos current = cursor.positionAt(index);
         if (!loaded(level, current)
-                || machine.energy().extractEnergy(PUMPJACK_COST, true) < PUMPJACK_COST) {
+                || machine.energy().consumeJoules(PUMPJACK_COST, true) < PUMPJACK_COST) {
             return;
         }
         boolean operate = pumpjackState.advancePhaseTick();
@@ -627,7 +627,7 @@ final class AdvancedMultiblockLogic {
                 level.levelEvent(2001, position, Block.getId(state));
                 drops.forEach(stack -> Block.popResource(level, drillHead().above(), stack));
             }
-            machine.energy().extractEnergy(PUMPJACK_COST, false);
+            machine.energy().consumeJoules(PUMPJACK_COST, false);
             machine.setWorking(true);
             index++;
             pumpjackState.setCursorIndex(index);
@@ -728,10 +728,10 @@ final class AdvancedMultiblockLogic {
             sourceUnavailable();
             return;
         }
-        if (machine.energy().extractEnergy(PUMPJACK_COST, true) < PUMPJACK_COST) {
+        if (machine.energy().consumeJoules(PUMPJACK_COST, true) < PUMPJACK_COST) {
             return;
         }
-        machine.energy().extractEnergy(PUMPJACK_COST, false);
+        machine.energy().consumeJoules(PUMPJACK_COST, false);
         machine.setWorking(true);
         boolean produce = pumpjackState.advancePhaseTick();
         machine.markChanged();

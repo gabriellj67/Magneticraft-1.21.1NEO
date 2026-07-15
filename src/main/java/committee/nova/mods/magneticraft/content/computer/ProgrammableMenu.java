@@ -91,10 +91,10 @@ public final class ProgrammableMenu extends AbstractMachineMenu {
                         programmable::redstoneOutput,
                         programmable::activeLastResult,
                         () -> programmable instanceof MiningRobotBlockEntity robot
-                                ? robot.energy().getEnergyStored()
+                                ? robot.energy().storedWholeJoules()
                                 : 0,
                         () -> programmable instanceof MiningRobotBlockEntity robot
-                                ? robot.energy().getMaxEnergyStored()
+                                ? robot.energy().ratedCapacityWholeJoules()
                                 : 0
                 );
         addDataSlots(data);

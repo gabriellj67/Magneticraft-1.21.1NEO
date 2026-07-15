@@ -56,6 +56,18 @@ I(A) = abs(Q(C/t))*20
 W = abs(J/t)*20
 ```
 
+Profile-bound machines derive node capacitance from the profile's rated joules
+at the tier maximum voltage. Reloading a profile may change capacitance and
+therefore derived voltage, but it never copies energy into a second buffer or
+rewrites the stored joules. `ElectricalPowerModule` is a controller/view over
+that node, not an additional storage element.
+
+Minimum-voltage checks and operating-rate ramps must use the `VoltageTier`
+comparison helpers. Because voltage is reconstructed from energy and
+capacitance, direct `>=` comparisons at a configured boundary are not stable
+under ordinary floating-point round trips. The helper tolerance affects only
+boundary classification and never changes physical state.
+
 Ordinary edges move equal signed charge and stop no later than the shared
 voltage equilibrium. Source joules removed equal destination joules added plus
 non-negative resistive loss. `maximumVoltage` is a rating/damage threshold;
@@ -94,6 +106,9 @@ leaving a stale topology entry.
 | Two terminals share a position | Keep isolated unless an explicit closed internal edge exists |
 | Coupler endpoints are unloaded | Skip exchange without merging components or loading chunks |
 | Electrical NBT schema/terminal is invalid | Reset energy and rebind only the block's stable defaults |
+| Profile-bound machine capacity changes | Recompute capacitance and preserve the single node joule balance |
+| Native consumer is below minimum operating voltage | Do not withdraw J or advance its operation |
+| Voltage reconstructed from exact minimum/nominal energy | Accept the boundary; minimum yields zero ramp and nominal yields full rate |
 
 ## 5. Good / Base / Bad Cases
 
@@ -114,6 +129,9 @@ leaving a stale topology entry.
   graph with no per-tick topology rebuild.
 - Persistence tests: module-container round trip for schema/tier/terminal/joule
   data and safe reset for legacy, missing and mismatched payloads.
+- Machine tests: profile-rated capacitance, node-direct consumption/generation,
+  no duplicate energy field, exact reconstructed minimum/nominal thresholds and
+  repeat-safe legacy integer migration.
 - GameTest: same-block terminal isolation, explicit internal edge, different
   tier rejection, existing non-electrical regression suite and chunk-unload
   lifecycle.
@@ -137,3 +155,7 @@ and register the stable terminal identity.
 double voltage = Math.sqrt(2.0D * energyJoules / capacitanceFarads);
 graph.addNode(new PhysicalNodeKey(position, terminalId), node);
 ```
+
+Wrong: interpret `buffer_capacity_joules` as permission to persist another
+machine balance. Correct: treat it as the rated energy used to configure the
+node's capacitance, then read and mutate only `ElectricalNode.energyJoules()`.

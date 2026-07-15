@@ -4,6 +4,6 @@
 
 低压、中压和高压是彼此分离的层级。普通边只连接同层级端子；变压器的两侧端子始终电气隔离，通过有方向、有效率和功率上限的耦合器传输。
 
-Forge Energy 不会替代原生电力，只能由明确的转换设备按 `1 J = 1 FE` 跨域交换。机器配方仍从内部缓存按固定 J/t 消耗；欠压会降低缓存充电能力，缓存耗尽后配方暂停。
+Forge Energy 不会替代原生电力。原生机器只在电气节点中以 J 保存能量，电压也由同一状态推导；明确的适配器按 `1 J = 1 FE` 跨域转换。节点欠压或无法提供配方所需 J/t 时，机器暂停工作。
 
 继续阅读[基础概念](electricity/fundamentals.md)、[换算率](electricity/conversion_rates.md)和[输电](electricity/transportation.md)。

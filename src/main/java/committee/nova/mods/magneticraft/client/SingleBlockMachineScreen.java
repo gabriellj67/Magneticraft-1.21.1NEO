@@ -210,7 +210,9 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                 continue;
             }
             String key = switch (bar.kind()) {
-                case ENERGY -> "gui.magneticraft.energy.tooltip";
+                case ENERGY -> menu.definition() == SingleBlockMachineDefinition.RF_HEATER
+                        ? "gui.magneticraft.forge_energy.tooltip"
+                        : "gui.magneticraft.energy.tooltip";
                 case PROGRESS -> "gui.magneticraft.progress.tooltip";
                 case PRIMARY_FLUID, SECONDARY_FLUID, TANK -> "gui.magneticraft.fluid.tooltip";
                 case BULK -> "gui.magneticraft.items.tooltip";

@@ -160,37 +160,37 @@ public final class PortableElectricGameTests {
         battery.electricity().node().setVoltage(90.0D);
 
         ItemStack medium = new ItemStack(ModMachineItems.MEDIUM_BATTERY.get());
-        battery.energy().setEnergyStored(1_000);
+        battery.energy().setStoredJoules(1_000);
         battery.inventory().setStackInSlot(0, medium);
         tickBattery(helper, SECOND, battery);
         helper.assertTrue(energy(medium).getEnergyStored() == BatteryBlockEntity.ITEM_TRANSFER_RATE,
                 "Medium battery did not charge in slot 0");
-        helper.assertTrue(battery.energy().getEnergyStored() == 500,
+        helper.assertTrue(battery.energy().storedWholeJoules() == 500,
                 "Machine battery removed the wrong amount while charging a medium battery");
 
         battery.inventory().setStackInSlot(0, ItemStack.EMPTY);
         battery.inventory().setStackInSlot(1, medium);
-        battery.energy().setEnergyStored(0);
+        battery.energy().setStoredJoules(0);
         tickBattery(helper, SECOND, battery);
         helper.assertTrue(energy(medium).getEnergyStored() == 0,
                 "Medium battery did not discharge in slot 1");
-        helper.assertTrue(battery.energy().getEnergyStored() == BatteryBlockEntity.ITEM_TRANSFER_RATE,
+        helper.assertTrue(battery.energy().storedWholeJoules() == BatteryBlockEntity.ITEM_TRANSFER_RATE,
                 "Machine battery received the wrong amount from a medium battery");
 
         ItemStack low = new ItemStack(ModMachineItems.LOW_BATTERY.get());
         battery.inventory().setStackInSlot(1, ItemStack.EMPTY);
         battery.inventory().setStackInSlot(0, low);
-        battery.energy().setEnergyStored(1_000);
+        battery.energy().setStoredJoules(1_000);
         tickBattery(helper, SECOND, battery);
         helper.assertTrue(energy(low).getEnergyStored() == BatteryBlockEntity.ITEM_TRANSFER_RATE,
                 "Low battery did not charge in slot 0");
 
         battery.inventory().setStackInSlot(0, ItemStack.EMPTY);
         battery.inventory().setStackInSlot(1, low);
-        battery.energy().setEnergyStored(0);
+        battery.energy().setStoredJoules(0);
         tickBattery(helper, SECOND, battery);
         helper.assertTrue(energy(low).getEnergyStored() == 0, "Low battery did not discharge in slot 1");
-        helper.assertTrue(battery.energy().getEnergyStored() == BatteryBlockEntity.ITEM_TRANSFER_RATE,
+        helper.assertTrue(battery.energy().storedWholeJoules() == BatteryBlockEntity.ITEM_TRANSFER_RATE,
                 "Machine battery received the wrong amount from a low battery");
         helper.succeed();
     }

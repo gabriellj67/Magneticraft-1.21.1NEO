@@ -57,7 +57,7 @@ public final class TeslaTowerModule
     public void rebindElectricalProfile(ElectricalDataSnapshot snapshot) {
         Optional<MachineElectricalProfile> nextProfile = snapshot.machineProfile(profileId);
         boolean inputBound = nextProfile.isPresent()
-                && electricity.bindTierFromMachineProfile(snapshot, nextProfile.get().tierId());
+                && electricity.bindMachineProfile(snapshot, nextProfile.orElseThrow());
         Optional<VoltageTier> nextInput = inputBound
                 ? snapshot.voltageTier(electricity.tierId())
                 : Optional.empty();
@@ -81,7 +81,7 @@ public final class TeslaTowerModule
     public void extractElectricalEnergy(PhysicalNetworkManager manager) {
         lastTransferJoules = 0.0D;
         if (!profileBound
-                || electricity.node().voltage() < inputTier.minimumOperatingVoltage()
+                || !inputTier.meetsMinimumOperatingVoltage(electricity.node().voltage())
                 || !(host.level() instanceof ServerLevel level)) {
             return;
         }
@@ -89,7 +89,7 @@ public final class TeslaTowerModule
         double remaining = profile.maximumTransferJoulesPerTick();
         for (var receiver : LongDistanceElectricityService.get(level).receiversWithin(host.position(), RANGE_BLOCKS)) {
             if (remaining <= 0.0D
-                    || electricity.node().voltage() < inputTier.minimumOperatingVoltage()
+                    || !inputTier.meetsMinimumOperatingVoltage(electricity.node().voltage())
                     || !receiver.electricity().electricalProfileBound()
                     || !receiver.electricity().tierId().equals(VoltageTierIds.LOW)) {
                 continue;

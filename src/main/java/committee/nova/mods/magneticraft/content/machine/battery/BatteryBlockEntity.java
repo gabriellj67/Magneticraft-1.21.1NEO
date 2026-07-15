@@ -3,10 +3,9 @@ package committee.nova.mods.magneticraft.content.machine.battery;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
-import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
-import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
@@ -22,20 +21,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * One-million-FE battery with two portable-cell transfer slots.
+ * Tiered native-joule battery with two explicit portable-FE conversion slots.
  */
 public final class BatteryBlockEntity extends MachineBlockEntity implements MenuProvider, TieredElectricalHost {
     public static final int CAPACITY = 1_000_000;
     public static final int ITEM_TRANSFER_RATE = 500;
     public static final int MENU_DATA_COUNT = 4;
-    private static final int NETWORK_TRANSFER_RATE = 640;
 
     private final ItemInventoryModule inventory;
-    private final EnergyStorageModule energy;
+    private final ElectricalPowerModule energy;
     private final ElectricalNetworkModule electricity;
     private final ContainerData data;
 
@@ -48,31 +45,22 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
                 (slot, stack) -> true,
                 side -> new ItemInventoryModule.SlotAccess(new int[]{0, 1}, new int[]{0, 1})
         ));
-        energy = addModule(new EnergyStorageModule(
-                Magneticraft.id("energy_storage"),
-                this,
-                CAPACITY,
-                NETWORK_TRANSFER_RATE,
-                NETWORK_TRANSFER_RATE,
-                side -> false,
-                false,
-                false
-        ));
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
                 ElectricalNodeKind.MACHINE,
                 this::canAccessEnergy
         ));
-        addModule(new ElectricalEnergyBridgeModule(
-                Magneticraft.id("electricity_bridge"),
+        energy = addModule(new ElectricalPowerModule(
+                Magneticraft.id("energy_storage"),
                 Magneticraft.id("battery_box"),
+                this,
                 electricity,
-                energy,
-                ElectricalEnergyBridgeModule.ExchangePolicy.PROFILE_ROLE,
+                ElectricalPowerModule.ForgeEnergyAccess.NONE,
+                side -> false,
                 true
         ));
-        data = Int32ContainerData.readOnly(energy::getEnergyStored, energy::getMaxEnergyStored);
+        data = Int32ContainerData.readOnly(energy::storedWholeJoules, energy::ratedCapacityWholeJoules);
     }
 
     public static void serverTick(Level level, BlockPos position, BlockState state, BatteryBlockEntity battery) {
@@ -89,7 +77,7 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
         return inventory;
     }
 
-    public EnergyStorageModule energy() {
+    public ElectricalPowerModule energy() {
         return energy;
     }
 
@@ -133,30 +121,38 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
     }
 
     private int chargeItem(ItemStack stack) {
-        if (stack.isEmpty() || energy.getEnergyStored() <= 0) {
+        if (stack.isEmpty() || energy.storedWholeJoules() <= 0) {
             return 0;
         }
         return stack.getCapability(ForgeCapabilities.ENERGY).map(itemEnergy -> {
-            int offered = energy.extractEnergy(ITEM_TRANSFER_RATE, true);
-            int accepted = itemEnergy.receiveEnergy(offered, false);
-            if (accepted > 0) {
-                energy.extractEnergy(accepted, false);
+            int offered = (int) Math.floor(energy.withdrawJoules(ITEM_TRANSFER_RATE, true));
+            int accepted = itemEnergy.receiveEnergy(offered, true);
+            int inserted = itemEnergy.receiveEnergy(accepted, false);
+            if (inserted > 0) {
+                energy.withdrawJoules(inserted, false);
             }
-            return accepted;
+            return inserted;
         }).orElse(0);
     }
 
     private int dischargeItem(ItemStack stack) {
-        if (stack.isEmpty() || energy.getEnergyStored() >= energy.getMaxEnergyStored()) {
+        if (stack.isEmpty() || energy.storedJoules() >= energy.ratedCapacityJoules()) {
             return 0;
         }
         return stack.getCapability(ForgeCapabilities.ENERGY).map(itemEnergy -> {
-            int requested = energy.receiveEnergy(ITEM_TRANSFER_RATE, true);
-            int extracted = itemEnergy.extractEnergy(requested, false);
+            int requested = (int) Math.floor(energy.storeJoules(ITEM_TRANSFER_RATE, true));
+            int available = itemEnergy.extractEnergy(requested, true);
+            int extracted = itemEnergy.extractEnergy(available, false);
+            int insertedWhole = 0;
             if (extracted > 0) {
-                energy.receiveEnergy(extracted, false);
+                double inserted = energy.storeJoules(extracted, false);
+                insertedWhole = (int) Math.floor(inserted);
+                int remainder = extracted - insertedWhole;
+                if (remainder > 0) {
+                    itemEnergy.receiveEnergy(remainder, false);
+                }
             }
-            return extracted;
+            return insertedWhole;
         }).orElse(0);
     }
 

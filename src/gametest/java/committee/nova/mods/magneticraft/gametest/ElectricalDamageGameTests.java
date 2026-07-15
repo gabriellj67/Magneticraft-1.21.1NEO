@@ -58,7 +58,7 @@ public final class ElectricalDamageGameTests {
                     ElectricFurnaceBlockEntity.class
             );
             furnace.inventory().setStackInSlot(0, new ItemStack(Items.DIAMOND, 3));
-            furnace.energy().setEnergyStored(1_000);
+            furnace.energy().setStoredJoules(3_000);
             CompoundTag process = new CompoundTag();
             process.putInt("progress_units", 123);
             furnace.process().load(process);
@@ -73,7 +73,7 @@ public final class ElectricalDamageGameTests {
             helper.assertTrue(furnace.electricalFaulted(), "Overvolted machine did not enter permanent fault state");
             helper.assertTrue(furnace.inventory().getStackInSlot(0).getCount() == 3,
                     "Machine fault discarded inventory");
-            helper.assertTrue(furnace.energy().getEnergyStored() >= 1_000,
+            helper.assertTrue(furnace.energy().storedWholeJoules() >= 3_000,
                     "Machine fault discarded the energy cache");
             helper.assertTrue(furnace.process().progressUnits() == 123,
                     "Machine fault changed recipe progress");

@@ -105,18 +105,26 @@ final class SingleBlockThermalLogic {
 
     void tickHeater() {
         resetRates();
-        if (machine.energy() == null || machine.heat() == null) {
+        if ((machine.energy() == null && machine.forgeEnergy() == null) || machine.heat() == null) {
             return;
         }
-        if (machine.heat().node().temperatureKelvin() < MACHINE_MAX_TEMPERATURE
-                && machine.energy().extractEnergy(80, true) == 80) {
-            machine.energy().extractEnergy(80, false);
+        int available = machine.energy() != null
+                ? machine.energy().consumeJoules(80, true)
+                : machine.forgeEnergy().extractEnergy(80, true);
+        if (machine.heat().node().temperatureKelvin() < MACHINE_MAX_TEMPERATURE && available == 80) {
+            if (machine.energy() != null) {
+                machine.energy().consumeJoules(80, false);
+            } else {
+                machine.forgeEnergy().extractEnergy(80, false);
+            }
             machine.heat().node().addHeat(80.0D, false);
             state.working = true;
             state.lastConsumption = 80;
             state.lastProduction = 80;
             machine.markChanged();
-        } else if (machine.energy().getEnergyStored() < 80) {
+        } else if ((machine.energy() != null
+                ? machine.energy().storedWholeJoules()
+                : machine.forgeEnergy().getEnergyStored()) < 80) {
             SingleBlockMachineSupport.dissipateHeat(machine, 10.0D);
         }
     }

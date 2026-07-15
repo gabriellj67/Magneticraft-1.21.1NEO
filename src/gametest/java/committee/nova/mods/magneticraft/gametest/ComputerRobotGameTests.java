@@ -323,15 +323,21 @@ public final class ComputerRobotGameTests {
     public static void forthRobotMovementWaitsForHistoricalCooldownAndChargesEnergy(GameTestHelper helper) {
         MiningRobotBlockEntity robot = placeRobot(helper);
         robot.setOwner(UUID.randomUUID());
-        robot.energy().setEnergyStored(2_000);
+        robot.energy().setStoredJoules(3_000);
         helper.assertTrue(
                 robot.tryReplaceScript(0L, new ScriptProgram(ScriptLanguage.FORTH, "front")),
                 "Robot rejected its FORTH movement program"
         );
+        int[] energyBeforeMove = new int[1];
 
         helper.runAfterDelay(4, () -> {
-            helper.assertTrue(helper.getBlockEntity(DEVICE_POSITION) instanceof MiningRobotBlockEntity,
+            Object stationaryEntity = helper.getBlockEntity(DEVICE_POSITION);
+            helper.assertTrue(stationaryEntity instanceof MiningRobotBlockEntity,
                     "Robot moved before the five-tick historical cooldown");
+            MiningRobotBlockEntity stationary = (MiningRobotBlockEntity) stationaryEntity;
+            energyBeforeMove[0] = stationary.energy().storedWholeJoules();
+            helper.assertTrue(energyBeforeMove[0] >= MiningRobotBlockEntity.MOVE_ENERGY_COST,
+                    "Robot native node could not afford the pending move after its network exchange");
         });
         helper.runAfterDelay(9, () -> {
             BlockPos target = DEVICE_POSITION.relative(Direction.NORTH);
@@ -343,8 +349,10 @@ public final class ComputerRobotGameTests {
                             + ", source_state=" + helper.getBlockState(DEVICE_POSITION)
                             + ", target_state=" + helper.getBlockState(target));
             MiningRobotBlockEntity moved = (MiningRobotBlockEntity) helper.getBlockEntity(target);
-            helper.assertTrue(moved.energy().getEnergyStored() == 1_500,
-                    "Robot movement charged the wrong energy cost: " + moved.energy().getEnergyStored());
+            helper.assertTrue(
+                    moved.energy().storedWholeJoules()
+                            == energyBeforeMove[0] - MiningRobotBlockEntity.MOVE_ENERGY_COST,
+                    "Robot movement charged the wrong energy cost: " + moved.energy().storedWholeJoules());
             helper.assertFalse(moved.activeRunning(), "Completed FORTH movement remained running");
             helper.succeed();
         });
@@ -356,7 +364,7 @@ public final class ComputerRobotGameTests {
         BlockPos target = DEVICE_POSITION.below();
         helper.setBlock(target, Blocks.COBBLESTONE);
         robot.setOwner(UUID.randomUUID());
-        robot.energy().setEnergyStored(2_000);
+        robot.energy().setStoredJoules(3_000);
         helper.assertTrue(
                 robot.tryReplaceScript(0L, new ScriptProgram(ScriptLanguage.SHELL, "quarry 1")),
                 "Robot rejected its Shell quarry program"
@@ -371,7 +379,7 @@ public final class ComputerRobotGameTests {
                 }
             }
             helper.assertTrue(drops == 1, "One-cell quarry duplicated or lost its cobblestone drop: " + drops);
-            helper.assertTrue(robot.energy().getEnergyStored() == 1_800, "Quarry mining charged the wrong energy cost");
+            helper.assertTrue(robot.energy().storedWholeJoules() == 2_800, "Quarry mining charged the wrong energy cost");
             helper.assertFalse(robot.activeRunning(), "Completed Shell quarry remained running");
             helper.succeed();
         });
@@ -383,7 +391,7 @@ public final class ComputerRobotGameTests {
         BlockPos target = DEVICE_POSITION.relative(Direction.NORTH);
         helper.setBlock(target, Blocks.COBBLESTONE);
         robot.setOwner(UUID.randomUUID());
-        robot.energy().setEnergyStored(2_000);
+        robot.energy().setStoredJoules(3_000);
         for (int slot = 0; slot < robot.inventory().slots(); slot++) {
             robot.inventory().setStackInSlot(slot, new ItemStack(Items.DIRT, 64));
         }
@@ -393,11 +401,11 @@ public final class ComputerRobotGameTests {
         );
         helper.assertTrue(robot.tryReplaceProgram(0L, program), "Robot rejected its mining program");
 
-        int energyBefore = robot.energy().getEnergyStored();
+        int energyBefore = robot.energy().storedWholeJoules();
         robot.vm().executeTick(robot);
 
         helper.assertTrue(helper.getBlockState(target).is(Blocks.COBBLESTONE), "Full robot destroyed the target");
-        helper.assertTrue(robot.energy().getEnergyStored() == energyBefore, "Failed mining consumed energy");
+        helper.assertTrue(robot.energy().storedWholeJoules() == energyBefore, "Failed mining consumed energy");
         helper.assertTrue(robot.vm().lastResult() == 0, "Failed mining reported success");
         for (int slot = 0; slot < robot.inventory().slots(); slot++) {
             ItemStack stack = robot.inventory().getStackInSlot(slot);
@@ -421,7 +429,7 @@ public final class ComputerRobotGameTests {
         helper.setBlock(target, Blocks.AIR);
         robot.setOwner(owner);
         robot.electricity().node().setVoltage(90.0D);
-        robot.energy().setEnergyStored(5_000);
+        robot.energy().setStoredJoules(5_000);
         robot.inventory().setStackInSlot(0, new ItemStack(Items.IRON_INGOT, 7));
         helper.assertTrue(robot.tryReplaceProgram(0L, program), "Robot rejected its movement program");
         helper.assertTrue(robot.vm().executeTick(robot) == 3, "Robot did not stop on the pending move");
@@ -442,7 +450,7 @@ public final class ComputerRobotGameTests {
         helper.assertTrue(moved.vm().programCounter() == 2, "Robot VM position changed during move");
         helper.assertTrue(moved.vm().register(3) == 99, "Robot register state changed during move");
         helper.assertTrue(moved.vm().memory(5) == 99, "Robot RAM state changed during move");
-        helper.assertTrue(moved.energy().getEnergyStored() == 5_000 - MiningRobotBlockEntity.MOVE_ENERGY_COST,
+        helper.assertTrue(moved.energy().storedWholeJoules() == 5_000 - MiningRobotBlockEntity.MOVE_ENERGY_COST,
                 "Robot movement energy was not conserved");
         ItemStack movedStack = moved.inventory().getStackInSlot(0);
         helper.assertTrue(movedStack.is(Items.IRON_INGOT) && movedStack.getCount() == 7,
@@ -463,14 +471,14 @@ public final class ComputerRobotGameTests {
         UUID owner = UUID.randomUUID();
         helper.setBlock(target, Blocks.COBBLESTONE);
         robot.setOwner(owner);
-        robot.energy().setEnergyStored(2_000);
+        robot.energy().setStoredJoules(3_000);
         helper.assertTrue(robot.tryReplaceProgram(0L, List.of(
                 instruction(ComputerOpcode.MINE, 0, 0),
                 instruction(ComputerOpcode.HALT, 0, 0)
         )), "Robot rejected its mining program");
 
         BreakCancellation listener = new BreakCancellation(robot.getBlockPos().relative(Direction.NORTH), owner);
-        int energyBefore = robot.energy().getEnergyStored();
+        int energyBefore = robot.energy().storedWholeJoules();
         MinecraftForge.EVENT_BUS.register(listener);
         try {
             robot.vm().executeTick(robot);
@@ -480,7 +488,7 @@ public final class ComputerRobotGameTests {
 
         helper.assertTrue(listener.called, "Robot mining did not reach the Forge break event");
         helper.assertTrue(helper.getBlockState(target).is(Blocks.COBBLESTONE), "Canceled mining destroyed the target");
-        helper.assertTrue(robot.energy().getEnergyStored() == energyBefore, "Canceled mining consumed energy");
+        helper.assertTrue(robot.energy().storedWholeJoules() == energyBefore, "Canceled mining consumed energy");
         helper.assertTrue(robot.inventory().getStackInSlot(0).isEmpty(), "Canceled mining inserted a drop");
         helper.assertTrue(robot.vm().lastResult() == 0, "Canceled mining reported success");
         helper.succeed();

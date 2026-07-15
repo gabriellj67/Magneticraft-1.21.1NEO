@@ -32,7 +32,7 @@ public final class ElectricConnectorBlockEntity extends NetworkComponentBlockEnt
                 Magneticraft.id("electricity"),
                 this,
                 ElectricalNodeKind.CONDUCTOR,
-                side -> side == backSide()
+                side -> side == backSide() || side == outwardFacing()
         ));
         electricity.useOverheadDamageProfile();
         longDistance = addModule(new LongDistanceEndpointModule(

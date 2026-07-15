@@ -75,12 +75,10 @@ public final class AirlockGameTests {
                             AirBubbleOwnershipSavedData.get(level).ownerOf(boundary).filter(origin::equals).isPresent(),
                             "Powered airlock did not persist ownership of its boundary bubble"
                     );
-                    energyAfterBuild[0] = airlock.electricity().node().energyJoules()
-                            + airlock.energy().getEnergyStored();
+                    energyAfterBuild[0] = airlock.electricity().node().energyJoules();
                 })
                 .thenWaitUntil(() -> helper.assertTrue(
-                        Math.abs(airlock.electricity().node().energyJoules()
-                                + airlock.energy().getEnergyStored() - energyAfterBuild[0]) > 0.000001D,
+                        Math.abs(airlock.electricity().node().energyJoules() - energyAfterBuild[0]) > 0.000001D,
                         "Airlock has not completed its next maintenance cycle"
                 ))
                 .thenExecute(() -> {
@@ -90,8 +88,7 @@ public final class AirlockGameTests {
                                     && !boundaryState.getValue(AirBubbleBlock.DECAYING),
                             "Powered airlock did not maintain its boundary bubble"
                     );
-                    double actualEnergy = airlock.electricity().node().energyJoules()
-                            + airlock.energy().getEnergyStored();
+                    double actualEnergy = airlock.electricity().node().energyJoules();
                     double consumedEnergy = energyAfterBuild[0] - actualEnergy;
                     helper.assertTrue(
                             Math.abs(consumedEnergy - 1.0D) < 0.000001D,

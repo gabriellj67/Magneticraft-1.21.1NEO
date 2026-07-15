@@ -38,7 +38,7 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
                         : "tooltip.magneticraft.jade.idle")
         )));
         observation.energy().ifPresent(energy -> tooltip.add(Component.translatable(
-                "tooltip.magneticraft.energy", energy.stored(), energy.capacity()
+                energy.unit().tooltipTranslationKey(), energy.stored(), energy.capacity()
         )));
         observation.electrical().ifPresent(electrical -> tooltip.add(Component.translatable(
                 "tooltip.magneticraft.jade.electrical_terminal",

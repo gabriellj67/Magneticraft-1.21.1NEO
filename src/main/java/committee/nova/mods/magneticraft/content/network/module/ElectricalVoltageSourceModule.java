@@ -53,9 +53,18 @@ public final class ElectricalVoltageSourceModule
     @Override
     public void rebindElectricalProfile(ElectricalDataSnapshot snapshot) {
         Optional<MachineElectricalProfile> nextProfile = snapshot.machineProfile(profileId);
-        boolean tierBound = nextProfile.isPresent() && (tierOverrideAllowed
-                ? snapshot.voltageTier(electricity.tierId()).isPresent()
-                : electricity.bindTierFromMachineProfile(snapshot, nextProfile.get().tierId()));
+        Optional<VoltageTier> selectedTier = nextProfile.isEmpty()
+                ? Optional.empty()
+                : snapshot.voltageTier(tierOverrideAllowed
+                ? electricity.tierId()
+                : nextProfile.orElseThrow().tierId());
+        boolean tierBound = nextProfile.isPresent()
+                && selectedTier.isPresent()
+                && electricity.bindTierFromMachineProfile(
+                snapshot,
+                selectedTier.orElseThrow().id(),
+                nextProfile.orElseThrow().nodeCapacitanceFarads(selectedTier.orElseThrow())
+        );
         Optional<VoltageTier> nextTier = tierBound
                 ? snapshot.voltageTier(electricity.tierId())
                 : Optional.empty();

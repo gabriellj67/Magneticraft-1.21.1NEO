@@ -30,6 +30,20 @@ void PhysicalNetworkManager.onElectricalProfilesReloaded(
     ElectricalDataSnapshot snapshot,
     int graceTicks
 );
+
+int ElectricalPowerModule.consumeJoules(int requested, boolean simulate);
+double ElectricalPowerModule.generateJoules(double requested, boolean simulate);
+int ElectricalPowerModule.receiveForgeEnergy(int maximum, boolean simulate);
+int ElectricalPowerModule.extractForgeEnergy(int maximum, boolean simulate);
+
+int ElectricEnergyExporter.export(
+    ServerLevel level,
+    BlockPos position,
+    Direction outwardFacing,
+    ElectricalNode node,
+    VoltageTier tier,
+    int maximumTransfer
+);
 ```
 
 Resource directories are fixed:
@@ -48,7 +62,40 @@ owns voltage, capacitance, resistance, conductor/protection ratings, thermal
 parameters, long-distance ranges, battery parameters, translation key and RGB
 color. Transformer profiles reference two distinct tier IDs and define maximum
 J/t plus efficiency. Machine profiles reference a tier and define one
-`ElectricalRole`, buffer J, maximum J/t and terminal C/t.
+`ElectricalRole`, rated node energy, maximum J/t and terminal C/t. The legacy
+JSON key remains `buffer_capacity_joules` for data-pack compatibility, but it
+does not authorize a second machine buffer. Profile-bound machine capacitance
+is derived as `C = 2 * ratedEnergy / maximumVoltage^2`.
+
+For every native machine, `ElectricalNode.energyJoules()` is the only
+authoritative balance. `ElectricalPowerModule` binds the profile and performs
+J operations without owning an energy field. Consumers atomically withdraw J
+only at or above minimum operating voltage; generators write J directly up to
+the profile rate and generator-voltage target. Normal native machines expose no
+Forge Energy capability. The FE transformer is FE -> J, and the electric
+engine is J -> FE, both at `1 J = 1 FE` with side and rate limits.
+FE conversion operates on whole integer units and shares one cumulative
+machine-profile budget per game tick across active push and capability calls;
+simulation neither consumes that budget nor mutates either endpoint.
+
+Operating thresholds use `VoltageTier.meetsMinimumOperatingVoltage` and
+`VoltageTier.operatingRateFraction`. These helpers apply only a scale-relative
+floating-point comparison tolerance; they do not round or mutate node energy.
+This keeps voltages reconstructed from `E = 0.5CV^2` stable at the exact tier
+minimum and nominal boundaries.
+
+Connectors and wireless receivers expose their outward face to the native
+physical network. `ElectricEnergyExporter` first checks the target's opposing
+face for `NetworkDomain.ELECTRICITY`; if present, it performs no FE operation
+and lets the physical network carry J. Only an FE-only target enters the
+transactional J -> FE path. The low-voltage connector retains its 400 FE/t
+compatibility limit; wireless output uses its machine-profile rate.
+
+Machine-observation schema 3 includes `energy.unit` with the enum values
+`JOULE` and `FORGE_ENERGY`. GUI and Jade translations must use this explicit
+unit; native node storage is displayed in J and the pure FE heater in FE.
+Observation preserves stored energy above the current rated capacity so a
+profile shrink remains visible instead of silently clamping telemetry.
 
 `ElectricalDataSnapshot` contains three non-empty immutable maps. Reload builds
 and validates all maps before `ElectricalDataRegistry.apply`; only a valid full
@@ -84,6 +131,14 @@ name rendering never changes placement validation or simulation identity.
 | Tiered item with a synced custom tier | Render the synced tier translation in its display name |
 | Item without valid tier payload | Preserve its ordinary base display name |
 | Tier payload unavailable in both display snapshots | Render the stable tier ID; never crash |
+| Native machine is queried for a generic FE capability | Return no capability unless it is a named conversion boundary |
+| Adapter target supports both native electricity and FE | Skip FE conversion; allow only the native J path |
+| Simulated J or FE operation | Return the exact prospective integer/double amount and mutate nothing |
+| Repeated FE conversion calls in one game tick | Share one cumulative profile J/t budget across every call |
+| FE conversion has less than one whole unit available or free | Transfer zero; never create or delete fractional J |
+| Legacy schema-1 module contains integer `energy` | Merge it with the loaded node balance; current saves omit that field |
+| A machine action fails after withdrawing J | Restore the exact captured node balance, including energy above a reloaded rating |
+| Missing/unknown machine-observation energy unit | Reject an unknown schema; within schema 3, use the bounded safe fallback |
 
 All errors discovered in the same candidate are reported together. Do not log
 per tick; one reload summary with resource-specific details is sufficient.
@@ -99,6 +154,14 @@ per tick; one reload summary with resource-specific details is sufficient.
 - Good display: a data pack adds a fourth tier and its cable, connector,
   protection, fuse and transformer items all show that tier in the name without
   adding item-specific translation keys.
+- Good conversion: a wireless receiver adjacent to a hybrid native/FE target
+  skips the FE capability, then transfers J through the ordinary electrical
+  edge; an FE-only target receives only its simulated-and-accepted integer FE.
+- Base machine: recipe consumption and GUI storage both read the same node J;
+  no synchronization bridge runs between two balances.
+- Bad machine: keep `EnergyStorageModule` beside an electrical node and copy
+  between them every tick, or choose FE merely because a hybrid target exposes
+  that capability.
 
 ## 6. Tests Required
 
@@ -110,6 +173,14 @@ per tick; one reload summary with resource-specific details is sufficient.
   subclasses, missing payload and unknown-tier fallback.
 - GameTest: built-in full snapshot exists on a dedicated server; successful
   rebind pauses only electricity for one tick and counts down grace.
+- Power-module tests: profile energy-to-capacitance binding, undervoltage,
+  generation/rate limits, pure simulation, whole-unit FE boundaries, cumulative
+  per-tick conversion limits and repeat-safe legacy `energy` migration.
+- Boundary GameTests: connector and wireless receiver each cover an FE-only
+  target plus a hybrid target where native J wins and total J is conserved.
+- Observation tests: schema-3 round trip includes `energy.unit`; unknown enum
+  values use the documented safe fallback, over-rated stored J remains visible,
+  and no value escapes the whitelist.
 - Cross-layer gates: `compileJava`, `compileGameTestJava`, `test`,
   `runGameTestServer`, `runData`, `build`, then inspect the JAR paths.
 
@@ -135,3 +206,23 @@ double voltage = snapshot.voltageTier(id).orElseThrow().nominalVoltage();
 Wrong: hard-code LV/MV/HV names in every item subclass. Correct: every payload
 item delegates its name decoration to one display-only resolver backed by the
 synced tier snapshot.
+
+Wrong: maintain a node plus an integer FE buffer and select the FE capability
+before checking whether the destination is a native electrical endpoint.
+
+```java
+bridge.tick(node, energyStorage);
+target.getCapability(ForgeCapabilities.ENERGY, side).ifPresent(this::export);
+```
+
+Correct: operate on the node directly and make native endpoint detection the
+first branch at an explicit conversion boundary.
+
+```java
+power.consumeJoules(recipeCost, false);
+if (target instanceof NetworkConnectionHost host
+        && host.supportsNetworkConnection(NetworkDomain.ELECTRICITY, side)) {
+    return 0;
+}
+return ElectricEnergyExporter.export(level, position, facing, node, tier, rate);
+```

@@ -2,7 +2,7 @@ package committee.nova.mods.magneticraft.content.machine.windturbine;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
-import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -25,7 +25,7 @@ public final class WindTurbineModule implements MachineModule {
 
     private final ResourceLocation id;
     private final MachineModuleHost host;
-    private final EnergyStorageModule energy;
+    private final ElectricalPowerModule energy;
     private final Supplier<Direction> facingSupplier;
 
     private double currentWind;
@@ -40,7 +40,7 @@ public final class WindTurbineModule implements MachineModule {
     public WindTurbineModule(
             ResourceLocation id,
             MachineModuleHost host,
-            EnergyStorageModule energy,
+            ElectricalPowerModule energy,
             Supplier<Direction> facingSupplier
     ) {
         this.id = Objects.requireNonNull(id);
@@ -108,13 +108,13 @@ public final class WindTurbineModule implements MachineModule {
 
         currentWind = WindTurbineMath.smoothWind(currentWind, targetWind);
         lastProductionJoulesPerTick = 0.0D;
-        if (operational && energy.getEnergyStored() < energy.getMaxEnergyStored()) {
+        if (operational && energy.storedJoules() < energy.ratedCapacityJoules()) {
             double requested = WindTurbineMath.productionJoulesPerTick(
                     openSpace,
                     currentWind,
                     host.position().getY()
             );
-            int accepted = energy.receiveEnergy((int) Math.floor(requested), false);
+            double accepted = energy.generateJoules(requested, false);
             lastProductionJoulesPerTick = accepted;
             if (lastProductionJoulesPerTick > 0.0D) {
                 host.markChanged();

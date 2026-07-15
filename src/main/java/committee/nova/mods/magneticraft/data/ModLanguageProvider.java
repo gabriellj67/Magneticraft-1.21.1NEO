@@ -196,6 +196,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("text.magneticraft.wire_connect.already_connected", chinese ? "两个端点已经连接" : "The endpoints are already connected");
         add("text.magneticraft.wire_connect.no_other_connector", chinese ? "请先潜行右击选择第一个端点" : "Sneak-use a first endpoint before connecting");
         add("tooltip.magneticraft.energy", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
+        add("tooltip.magneticraft.joules", chinese ? "储能：%s / %s J" : "Stored: %s / %s J");
         add("config.jade.plugin_magneticraft.machine_status", chinese ? "磁场工艺机器状态" : "Magneticraft Machine Status");
         add("tooltip.magneticraft.jade.process", chinese ? "进度：%s / %s（%s）" : "Progress: %s / %s (%s)");
         add("tooltip.magneticraft.jade.active", chinese ? "运行中" : "active");
@@ -223,7 +224,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.electrical.voltage_current", chinese ? "%s V · %s A" : "%s V · %s A");
         add("gui.magneticraft.electrical.throughput", chinese ? "%s J/t · %s W" : "%s J/t · %s W");
         add("gui.magneticraft.electrical.load_stress", chinese ? "负载 %s%% · 应力 %s%%" : "Load %s%% · stress %s%%");
-        add("gui.magneticraft.electrical.buffer", chinese ? "缓存 %s / %s J" : "Buffer %s / %s J");
+        add("gui.magneticraft.electrical.storage", chinese ? "储能 %s / %s J" : "Stored %s / %s J");
         add("gui.magneticraft.electrical.state", chinese ? "%s · %s" : "%s · %s");
         add("gui.magneticraft.electrical.point_tooltip", chinese
                 ? "%s V · %s C/t · %s A · %s J/t · %s W"
@@ -362,7 +363,8 @@ final class ModLanguageProvider extends LanguageProvider {
         add("container.magneticraft.mining_robot", chinese ? "采矿机器人" : "Mining Robot");
         add("gui.magneticraft.state.running", chinese ? "运行中" : "Running");
         add("gui.magneticraft.state.stopped", chinese ? "已停止" : "Stopped");
-        add("gui.magneticraft.energy.tooltip", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
+        add("gui.magneticraft.energy.tooltip", chinese ? "储能：%s / %s J" : "Stored: %s / %s J");
+        add("gui.magneticraft.forge_energy.tooltip", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
         add("gui.magneticraft.progress.tooltip", chinese ? "进度：%s / %s" : "Progress: %s / %s");
         add("gui.magneticraft.machine.rate.tooltip", chinese ? "消耗：%s/t；产出：%s/t" : "Consumption: %s/t; production: %s/t");
         add("gui.magneticraft.items.tooltip", chinese ? "物品：%s / %s" : "Items: %s / %s");
@@ -459,8 +461,8 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "潜行右击选择第一个端点，再右击同层级、同端口且同维度的端点建立连接；无效连接不消耗线卷。"
                 : "Sneak-use a first endpoint, then use an endpoint with the same tier, port type, and dimension; invalid links do not consume the coil.");
         add("guide.magneticraft.item.electric_connector.description", chinese
-                ? "壁挂式分级长距端点：低/中/高压范围为 8/16/32 格。只有低压变体可向背面设备输出最多 400 FE/t。"
-                : "A tiered wall endpoint with 8/16/32-block LV/MV/HV ranges. Only the LV variant exports up to 400 FE/t behind it.");
+                ? "壁挂式分级长距端点：低/中/高压范围为 8/16/32 格。朝外连接本模组电气端口时直接传输 J；低压变体面对仅 FE 设备时自动按 1 J = 1 FE 输出，最多 400 FE/t。"
+                : "A tiered wall endpoint with 8/16/32-block LV/MV/HV ranges. Its outward face carries native J to Magneticraft electrical ports; the LV variant automatically exports up to 400 FE/t at 1 J = 1 FE only to FE-only targets.");
         add("guide.magneticraft.item.electric_pole.description", chinese
                 ? "五格高的分级架空线路端点：低/中/高压范围为 16/32/64 格。只连接同层级电线杆且不会强加载区块。"
                 : "A five-block tiered overhead endpoint with 16/32/64-block LV/MV/HV ranges. It only links the same tier and never force-loads chunks.");
@@ -471,8 +473,8 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "三格高的无线发射塔。电压达到 60 V 后，可在 32 格范围内每刻传输最多 500 J。"
                 : "A three-block wireless transmitter. At 60 V or more it transfers up to 500 J per tick within 32 blocks.");
         add("guide.magneticraft.item.wireless_energy_receiver.description", chinese
-                ? "接收特斯拉塔电力，并按电压向背后的 Forge Energy 设备输出 0–400 FE/t。"
-                : "Receives Tesla-tower power and exports 0-400 FE/t, scaled by voltage, to a Forge Energy device behind it.");
+                ? "接收特斯拉塔传来的 J；朝外连接本模组电气端口时直接传输 J，面对仅 FE 设备时自动按 1 J = 1 FE 输出 0–400 FE/t。"
+                : "Receives J from a Tesla tower. Its outward face carries native J to Magneticraft electrical ports, or automatically exports 0-400 FE/t at 1 J = 1 FE to an FE-only target.");
         add("guide.magneticraft.item.wind_turbine.description", chinese
                 ? "风力发电机最高产生 200 J/t。叶轮平面与前方 16 格需要保持开阔；扫描不会加载区块。"
                 : "Generates up to 200 J/t. Keep the rotor plane and 16 blocks ahead clear; its scan never loads chunks.");
@@ -732,10 +734,10 @@ final class ModLanguageProvider extends LanguageProvider {
             case GASIFICATION_UNIT -> "在足够温度下按数据配方把物品转为气体，物品输入输出与流体输出可自动化。";
             case BRICK_FURNACE -> "以外部热量执行熔炼配方；更换配方不会抹除已积累进度，工作显示会短暂延迟熄灭。";
             case INFINITE_ENERGY -> "创意管理设备，持续维持 125 V 电源；没有生存配方。";
-            case RF_TRANSFORMER -> "在磁场工艺焦耳与 Forge Energy 间按 1 J = 1 FE 进行受限桥接。";
-            case ELECTRIC_ENGINE -> "从所有侧面接收或提供 FE 缓冲，并单向把磁场工艺电力转换为 FE 输出。";
+            case RF_TRANSFORMER -> "从侧面接收 Forge Energy，并按 1 FE = 1 J 写入低压原生电气节点；不维护第二份 FE 缓冲。";
+            case ELECTRIC_ENGINE -> "从中压原生电气节点消耗 J，并向朝向侧的相邻设备按 1 J = 1 FE 输出；不维护第二份 FE 缓冲。";
             case AIRLOCK -> "每 40 刻扫描半径 9 的已加载区域，以电力维持边界水泡并清除内部水体；欠压后逐步失效。";
-            case THERMOPILE -> "读取两侧温差并产生磁场工艺电力，使用 80 kJ 缓冲和 120 V 桥接。";
+            case THERMOPILE -> "读取两侧温差并直接向额定原生电气节点产生焦耳，受节点容量、输出电压和发电速率限制。";
         };
     }
 
@@ -758,10 +760,10 @@ final class ModLanguageProvider extends LanguageProvider {
             case GASIFICATION_UNIT -> "Converts items into gas from data recipes at sufficient temperature, with automated item I/O and fluid output.";
             case BRICK_FURNACE -> "Runs smelting recipes from external heat; recipe changes preserve accumulated progress and the working display lingers briefly.";
             case INFINITE_ENERGY -> "A creative administration device that continuously holds a 125 V source; it has no survival recipe.";
-            case RF_TRANSFORMER -> "Bridges Magneticraft joules and Forge Energy at 1 J = 1 FE within its transfer limits.";
-            case ELECTRIC_ENGINE -> "Exchanges its FE buffer on every side and converts Magneticraft electricity one-way into FE output.";
+            case RF_TRANSFORMER -> "Accepts Forge Energy on its sides and writes it into the low-voltage native node at 1 FE = 1 J, without a second FE buffer.";
+            case ELECTRIC_ENGINE -> "Consumes J from its medium-voltage native node and exports FE to the adjacent facing target at 1 J = 1 FE, without a second FE buffer.";
             case AIRLOCK -> "Every 40 ticks, spends electricity across the loaded radius-9 area to maintain boundary bubbles and clear interior water; it decays when undervolted.";
-            case THERMOPILE -> "Reads a temperature difference to produce Magneticraft electricity through an 80 kJ buffer and 120 V bridge.";
+            case THERMOPILE -> "Reads a temperature difference and generates joules directly into its rated native node, bounded by node capacity, output voltage, and generation rate.";
         };
     }
 

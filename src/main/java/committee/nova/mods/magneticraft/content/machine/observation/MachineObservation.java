@@ -45,10 +45,26 @@ public record MachineObservation(
         }
     }
 
-    public record EnergyStatus(int stored, int capacity) {
+    public record EnergyStatus(int stored, int capacity, EnergyUnit unit) {
         public EnergyStatus {
             capacity = Math.max(0, capacity);
-            stored = Math.max(0, Math.min(stored, capacity));
+            stored = Math.max(0, stored);
+            unit = Objects.requireNonNull(unit);
+        }
+    }
+
+    public enum EnergyUnit {
+        JOULE("tooltip.magneticraft.joules"),
+        FORGE_ENERGY("tooltip.magneticraft.energy");
+
+        private final String tooltipTranslationKey;
+
+        EnergyUnit(String tooltipTranslationKey) {
+            this.tooltipTranslationKey = tooltipTranslationKey;
+        }
+
+        public String tooltipTranslationKey() {
+            return tooltipTranslationKey;
         }
     }
 

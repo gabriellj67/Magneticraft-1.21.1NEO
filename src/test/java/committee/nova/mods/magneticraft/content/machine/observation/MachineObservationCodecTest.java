@@ -16,10 +16,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MachineObservationCodecTest {
     @Test
+    void preservesStoredEnergyAboveTheCurrentRatedCapacity() {
+        MachineObservation.EnergyStatus energy = new MachineObservation.EnergyStatus(
+                1_200, 1_000, MachineObservation.EnergyUnit.JOULE
+        );
+        MachineObservation observation = new MachineObservation(
+                Optional.empty(),
+                Optional.of(energy),
+                Optional.empty(),
+                Optional.empty(),
+                List.of(),
+                Optional.empty()
+        );
+        CompoundTag data = new CompoundTag();
+        MachineObservationCodec.write(data, observation);
+
+        assertEquals(1_200, energy.stored());
+        assertEquals(Optional.of(observation), MachineObservationCodec.read(data));
+    }
+
+    @Test
     void roundTripsOnlyThePublicMachineStatusWhitelist() {
         MachineObservation observation = new MachineObservation(
                 Optional.of(new MachineObservation.ProcessStatus(20, 100, true)),
-                Optional.of(new MachineObservation.EnergyStatus(400, 1_000)),
+                Optional.of(new MachineObservation.EnergyStatus(
+                        400, 1_000, MachineObservation.EnergyUnit.JOULE
+                )),
                 Optional.of(new MachineObservation.ElectricalStatus(
                         ResourceLocation.fromNamespaceAndPath("magneticraft", "low_voltage"),
                         ResourceLocation.fromNamespaceAndPath("magneticraft", "main"),
@@ -88,7 +110,9 @@ class MachineObservationCodecTest {
     void rejectsUnboundedElectricalIdsAndSafelyDefaultsUnknownEnums() {
         MachineObservation observation = new MachineObservation(
                 Optional.empty(),
-                Optional.of(new MachineObservation.EnergyStatus(1, 2)),
+                Optional.of(new MachineObservation.EnergyStatus(
+                        1, 2, MachineObservation.EnergyUnit.FORGE_ENERGY
+                )),
                 Optional.of(new MachineObservation.ElectricalStatus(
                         ResourceLocation.fromNamespaceAndPath("magneticraft", "low_voltage"),
                         ResourceLocation.fromNamespaceAndPath("magneticraft", "main"),
@@ -111,6 +135,8 @@ class MachineObservationCodecTest {
         CompoundTag data = new CompoundTag();
         MachineObservationCodec.write(data, observation);
         CompoundTag electrical = data.getCompound(MachineObservationCodec.ROOT_KEY).getCompound("electrical");
+        CompoundTag energy = data.getCompound(MachineObservationCodec.ROOT_KEY).getCompound("energy");
+        energy.putString("unit", "FUTURE_UNIT");
         electrical.putString("flow_direction", "FUTURE_DIRECTION");
         electrical.putString("fault_kind", "FUTURE_FAULT");
         MachineObservation.ElectricalStatus decoded = MachineObservationCodec.read(data)
@@ -119,6 +145,10 @@ class MachineObservationCodecTest {
                 .orElseThrow();
         assertEquals(ElectricalDiagnosticSource.FlowDirection.IDLE, decoded.flowDirection());
         assertEquals(ElectricalDiagnosticSource.FaultKind.NONE, decoded.faultKind());
+        assertEquals(
+                MachineObservation.EnergyUnit.FORGE_ENERGY,
+                MachineObservationCodec.read(data).orElseThrow().energy().orElseThrow().unit()
+        );
 
         electrical.putString("tier_id", "x".repeat(257));
         assertTrue(MachineObservationCodec.read(data).orElseThrow().electrical().isEmpty());

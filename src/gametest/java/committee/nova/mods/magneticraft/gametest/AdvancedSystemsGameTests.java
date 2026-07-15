@@ -281,13 +281,13 @@ public final class AdvancedSystemsGameTests {
         helper.assertTrue(controller.tryForm(player), "Grinder did not form before schema reset");
         controller.setOwner(player.getUUID());
         controller.inventory().setStackInSlot(0, new ItemStack(Items.COBBLESTONE));
-        controller.energy().setEnergyStored(5_000);
+        controller.energy().setStoredJoules(5_000);
         AdvancedMultiblockBlockEntity.serverTick(
                 helper.getLevel(), helper.absolutePos(CONTROLLER), controller.getBlockState(), controller
         );
         helper.assertTrue(controller.working(), "Grinder did not enter working state before schema reset");
         helper.assertFalse(controller.inventory().getStackInSlot(0).isEmpty(), "Grinder lost its input before schema reset");
-        helper.assertTrue(controller.energy().getEnergyStored() > 0, "Grinder lost all energy before schema reset");
+        helper.assertTrue(controller.energy().storedWholeJoules() > 0, "Grinder lost all energy before schema reset");
         helper.assertTrue(controller.progress() > 0, "Grinder did not advance before schema reset");
         helper.assertTrue(controller.totalProgress() > 0, "Grinder did not retain its active recipe before schema reset");
         helper.assertTrue(player.getUUID().equals(controller.owner()), "Grinder did not retain its owner before schema reset");
@@ -297,7 +297,7 @@ public final class AdvancedSystemsGameTests {
         controller.load(incompatible);
 
         helper.assertTrue(controller.inventory().getStackInSlot(0).isEmpty(), "Schema reset retained grinder inventory");
-        helper.assertTrue(controller.energy().getEnergyStored() == 0, "Schema reset retained grinder energy");
+        helper.assertTrue(controller.energy().storedWholeJoules() == 0, "Schema reset retained grinder energy");
         helper.assertTrue(controller.progress() == 0, "Schema reset retained grinder progress");
         helper.assertTrue(controller.totalProgress() == 0, "Schema reset retained grinder recipe duration");
         helper.assertTrue(controller.owner() == null, "Schema reset retained grinder ownership");
@@ -785,7 +785,7 @@ public final class AdvancedSystemsGameTests {
             helper.assertTrue(manager.component(NetworkDomain.ELECTRICITY, cablePosition).size() == 2,
                     "Grinder port proxy did not join the cable component");
             helper.assertTrue(controller.electricity().node().energyJoules() > 0.0D
-                            || controller.energy().getEnergyStored() > 0,
+                            || controller.energy().storedWholeJoules() > 0,
                     "Grinder port proxy did not transfer electrical energy");
             helper.getLevel().setBlock(cablePosition, Blocks.AIR.defaultBlockState(),
                     net.minecraft.world.level.block.Block.UPDATE_ALL);
@@ -870,7 +870,7 @@ public final class AdvancedSystemsGameTests {
 
         helper.assertTrue(controller.tank(0).tank().getFluidAmount() == 0,
                 "Steam engine did not consume exactly 10 mB");
-        helper.assertTrue(controller.energy().getEnergyStored() == 20,
+        helper.assertTrue(controller.energy().storedWholeJoules() == 20,
                 "Steam engine did not stage exactly 20 J in its generator cache");
         helper.runAfterDelay(2, () -> {
             helper.assertTrue(Math.abs(controller.electricity().node().energyJoules() - 20.0D) < 0.0001D,
@@ -906,8 +906,7 @@ public final class AdvancedSystemsGameTests {
         helper.assertTrue(controller.inventory().extractInternal(0, 1, false).is(Items.COBBLESTONE),
                 "Grinder internal input could not be reset for processing check");
         inputHandler.insertItem(0, new ItemStack(Items.COBBLESTONE), false);
-        controller.electricity().node().setVoltage(60.0D);
-        controller.energy().setEnergyStored(5_000);
+        controller.energy().setStoredJoules(8_000);
 
         for (int tick = 0; tick < 60; tick++) {
             AdvancedMultiblockBlockEntity.serverTick(
@@ -919,8 +918,8 @@ public final class AdvancedSystemsGameTests {
                 "Grinder did not consume its input");
         helper.assertTrue(controller.inventory().getStackInSlot(1).is(Items.GRAVEL),
                 "Grinder did not produce the guaranteed gravel output");
-        helper.assertTrue(controller.energy().getEnergyStored() == 2_600,
-                "Grinder energy accounting was not 60 x 40 FE");
+        helper.assertTrue(controller.energy().storedWholeJoules() == 5_600,
+                "Grinder energy accounting was not 60 x 40 J");
         clear(helper, occupied);
         helper.succeed();
     }
@@ -989,10 +988,9 @@ public final class AdvancedSystemsGameTests {
             OilDepositBlockEntity deposit = (OilDepositBlockEntity) helper.getBlockEntity(depositPosition);
             AdvancedMultiblockBlockEntity controller = requireController(helper, pumpjackController);
             helper.assertTrue(controller.tryForm(player), "Pumpjack did not form facing " + facing);
-            controller.energy().setEnergyStored(10_000);
+            controller.energy().setStoredJoules(12_000);
 
             for (int tick = 0; tick < 600 && controller.tank(0).tank().getFluidAmount() == 0; tick++) {
-                controller.electricity().node().setVoltage(60.0D);
                 AdvancedMultiblockBlockEntity.serverTick(
                         helper.getLevel(), helper.absolutePos(pumpjackController), controller.getBlockState(), controller
                 );
@@ -1013,7 +1011,7 @@ public final class AdvancedSystemsGameTests {
                                     + "; state=" + secondTickState
                                     + "; formed=" + controller.formed()
                                     + "; operational=" + controller.operational()
-                                    + "; energy=" + controller.energy().getEnergyStored());
+                                    + "; energy=" + controller.energy().storedWholeJoules());
                 }
                 if (tick == 60) {
                     CompoundTag persisted = controller.saveWithoutMetadata();
@@ -1028,7 +1026,7 @@ public final class AdvancedSystemsGameTests {
                                     + "; expected_drill=" + helper.absolutePos(drill)
                                     + "; actual_drill=" + controller.getBlockPos().relative(controller.facing(), 5)
                                     + "; cursor=" + persistedPumpjack.getInt("cursor_index")
-                                    + "; energy=" + controller.energy().getEnergyStored()
+                                    + "; energy=" + controller.energy().storedWholeJoules()
                                     + "; phase=" + persistedPumpjack.getString("phase")
                                     + "; block_entity=" + helper.getLevel().getBlockEntity(absoluteDeposit)
                                     + "; chunk_loaded=" + (helper.getLevel().getChunkSource().getChunkNow(
@@ -1048,14 +1046,14 @@ public final class AdvancedSystemsGameTests {
             helper.assertTrue(controller.tank(0).tank().getFluidAmount() == 1_000,
                     "Pumpjack missed nearby deposit facing " + facing
                             + "; formed=" + controller.formed()
-                            + "; energy=" + controller.energy().getEnergyStored()
+                            + "; energy=" + controller.energy().storedWholeJoules()
                             + "; reserve=" + deposit.remaining()
                             + "; drill_head=" + helper.getBlockState(drill)
                             + "; drill_below=" + helper.getBlockState(drill.below())
                             + "; state=" + finalState.getCompound("pumpjack"));
             helper.assertTrue(deposit.remaining() == OilDepositBlockEntity.DEFAULT_RESERVE_MILLIBUCKETS - 1_000,
                     "Pumpjack reserve accounting failed facing " + facing);
-            helper.assertTrue(controller.energy().getEnergyStored() == 1_840,
+            helper.assertTrue(controller.energy().storedWholeJoules() == 3_840,
                     "Pumpjack did not preserve the 8,160 J legacy work budget facing " + facing);
             helper.assertTrue(helper.getBlockState(drill).is(ModAdvancedBlocks.PUMPJACK_DRILL.get())
                             && helper.getBlockState(drill.below()).is(ModAdvancedBlocks.PUMPJACK_DRILL.get()),

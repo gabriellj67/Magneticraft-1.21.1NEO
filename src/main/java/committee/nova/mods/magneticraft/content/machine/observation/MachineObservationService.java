@@ -9,6 +9,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTa
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlockEntity;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -45,7 +46,7 @@ public final class MachineObservationService {
                         machine.progress(), machine.totalProgress(), machine.working()
                 ));
             }
-            energy = energy(machine.energy());
+            energy = machine.energy() != null ? energy(machine.energy()) : energy(machine.forgeEnergy());
             addTank(tanks, machine.primaryTank());
             addTank(tanks, machine.secondaryTank());
         } else if (blockEntity instanceof AdvancedMultiblockBlockEntity controller) {
@@ -102,7 +103,19 @@ public final class MachineObservationService {
         return energy == null
                 ? Optional.empty()
                 : Optional.of(new MachineObservation.EnergyStatus(
-                        energy.getEnergyStored(), energy.getMaxEnergyStored()
+                        energy.getEnergyStored(),
+                        energy.getMaxEnergyStored(),
+                        MachineObservation.EnergyUnit.FORGE_ENERGY
+                ));
+    }
+
+    private static Optional<MachineObservation.EnergyStatus> energy(@Nullable ElectricalPowerModule energy) {
+        return energy == null
+                ? Optional.empty()
+                : Optional.of(new MachineObservation.EnergyStatus(
+                        energy.storedWholeJoules(),
+                        energy.ratedCapacityWholeJoules(),
+                        MachineObservation.EnergyUnit.JOULE
                 ));
     }
 

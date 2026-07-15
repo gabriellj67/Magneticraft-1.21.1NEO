@@ -3,13 +3,12 @@ package committee.nova.mods.magneticraft.content.multiblock;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
-import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.BulkItemStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
-import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
@@ -80,7 +79,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private final ItemInventoryModule inventory;
     private final List<FluidTankModule> tanks;
     @Nullable
-    private final EnergyStorageModule energy;
+    private final ElectricalPowerModule energy;
     @Nullable
     private final ElectricalNetworkModule electricity;
     @Nullable
@@ -123,21 +122,13 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         shelvingStorage = createShelvingStorage();
         inventory = createInventory();
         tanks = createTanks();
-        energy = createEnergy();
         electricity = createElectricity();
+        energy = createEnergy(electricity);
         heat = createHeat();
-        if (energy != null && electricity != null) {
-            addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("advanced_electricity_bridge"),
-                    Magneticraft.id(definition.id()),
-                    electricity,
-                    energy
-            ));
-        }
         logic = new AdvancedMultiblockLogic(this);
         menuData = Int32ContainerData.readOnly(
-                () -> energy == null ? 0 : energy.getEnergyStored(),
-                () -> energy == null ? 0 : energy.getMaxEnergyStored(),
+                () -> energy == null ? 0 : energy.storedWholeJoules(),
+                () -> energy == null ? 0 : energy.ratedCapacityWholeJoules(),
                 () -> progress,
                 () -> totalProgress,
                 () -> working ? 1 : 0,
@@ -250,7 +241,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     }
 
     @Nullable
-    public EnergyStorageModule energy() {
+    public ElectricalPowerModule energy() {
         return energy;
     }
 
@@ -502,8 +493,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 return true;
             }
         }
-        return (energy != null && energy.getEnergyStored() > 0)
-                || (electricity != null && electricity.node().energyJoules() > 0.0D)
+        return (energy != null && energy.storedJoules() > 0.0D)
                 || (heat != null && Math.abs(
                 heat.node().temperatureKelvin() - HeatNode.AMBIENT_TEMPERATURE_KELVIN) > 1.0E-6D)
                 || progress > 0
@@ -927,20 +917,18 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     }
 
     @Nullable
-    private EnergyStorageModule createEnergy() {
-        if (!definition.usesElectricity()) {
+    private ElectricalPowerModule createEnergy(@Nullable ElectricalNetworkModule createdElectricity) {
+        if (createdElectricity == null) {
             return null;
         }
-        boolean generator = isElectricalGenerator();
-        return addModule(new EnergyStorageModule(
+        return addModule(new ElectricalPowerModule(
                 Magneticraft.id("advanced_energy"),
+                Magneticraft.id(definition.id()),
                 this,
-                energyCapacity(),
-                energyTransferRate(),
-                energyTransferRate(),
+                createdElectricity,
+                ElectricalPowerModule.ForgeEnergyAccess.NONE,
                 side -> false,
-                !generator,
-                generator
+                false
         ));
     }
 
@@ -1023,37 +1011,11 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         };
     }
 
-    private boolean isElectricalGenerator() {
-        return definition == MultiblockDefinition.SOLAR_PANEL
-                || definition == MultiblockDefinition.STEAM_ENGINE
-                || definition == MultiblockDefinition.STEAM_TURBINE;
-    }
-
     private ResourceLocation electricalTier() {
         return switch (definition) {
             case SOLAR_PANEL -> ElectricalNetworkModule.LOW_VOLTAGE;
             case STEAM_TURBINE -> Magneticraft.id("high_voltage");
             default -> Magneticraft.id("medium_voltage");
-        };
-    }
-
-    private int energyCapacity() {
-        return switch (definition) {
-            case STEAM_ENGINE, STEAM_TURBINE -> 80_000;
-            default -> 10_000;
-        };
-    }
-
-    private int energyTransferRate() {
-        return switch (definition) {
-            case SOLAR_PANEL -> 100;
-            case STEAM_ENGINE -> 240;
-            case STEAM_TURBINE -> 1_200;
-            case GRINDER, SIEVE -> 40;
-            case PUMPJACK -> 80;
-            case HYDRAULIC_PRESS -> 60;
-            case BIG_ELECTRIC_FURNACE -> 200;
-            default -> 0;
         };
     }
 

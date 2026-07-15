@@ -48,6 +48,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
@@ -339,8 +340,8 @@ public final class LongDistanceElectricGameTests {
                 "Cable-mounted connector did not face away from its support");
         helper.assertTrue(connector.electricity().isSideEnabled(Direction.SOUTH),
                 "Cable-mounted connector did not expose its electrical back face");
-        helper.assertFalse(connector.electricity().isSideEnabled(Direction.NORTH),
-                "Cable-mounted connector exposed electricity on its outward face");
+        helper.assertTrue(connector.electricity().isSideEnabled(Direction.NORTH),
+                "Cable-mounted connector did not expose its outward native-J face");
 
         double cableShapeMinZ = helper.getLevel().getBlockState(cableWorldPosition)
                 .getShape(helper.getLevel(), cableWorldPosition, CollisionContext.empty())
@@ -734,20 +735,116 @@ public final class LongDistanceElectricGameTests {
         connector.electricity().node().setVoltage(120.0D);
         double sourceBefore = connector.electricity().node().energyJoules();
         connector.serverTick();
-        helper.assertTrue(receiver.energy().getEnergyStored() == 400,
+        helper.assertTrue(receiver.forgeEnergy().getEnergyStored() == 400,
                 "Low-voltage connector did not export 400 FE through its outward face");
         helper.assertTrue(Math.abs(sourceBefore - connector.electricity().node().energyJoules() - 400.0D) < 1.0E-6D,
                 "Low-voltage connector violated the 1 J = 1 FE boundary");
 
-        receiver.energy().setEnergyStored(0);
+        receiver.forgeEnergy().setEnergyStored(0);
         connector.electricity().applyTierFromPlacementData(VoltageTierIds.MEDIUM);
         helper.assertTrue(connector.electricity().tierId().equals(VoltageTierIds.MEDIUM),
                 "Connector rejected its medium-voltage test tier");
         connector.electricity().node().setVoltage(480.0D);
         connector.serverTick();
-        helper.assertTrue(receiver.energy().getEnergyStored() == 0,
+        helper.assertTrue(receiver.forgeEnergy().getEnergyStored() == 0,
                 "Medium-voltage connector exposed a direct Forge Energy output");
         helper.succeed();
+    }
+
+    @GameTest(template = ADVANCED_TEMPLATE)
+    public static void wirelessReceiverExportsForgeEnergyOnlyToFeOnlyTarget(GameTestHelper helper) {
+        BlockPos receiverPosition = new BlockPos(20, 5, 20);
+        BlockPos targetPosition = receiverPosition.north();
+        helper.setBlock(
+                targetPosition,
+                ModMachineBlocks.machine(SingleBlockMachineDefinition.RF_HEATER).get().defaultBlockState()
+        );
+        helper.setBlock(
+                receiverPosition,
+                ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get().defaultBlockState()
+                        .setValue(BlockStateProperties.FACING, Direction.NORTH)
+        );
+        WirelessEnergyReceiverBlockEntity receiver = require(
+                helper, receiverPosition, WirelessEnergyReceiverBlockEntity.class
+        );
+        SingleBlockMachineBlockEntity target = require(
+                helper, targetPosition, SingleBlockMachineBlockEntity.class
+        );
+
+        receiver.electricity().node().setVoltage(120.0D);
+        double sourceBefore = receiver.electricity().node().energyJoules();
+        receiver.serverTick();
+
+        helper.assertTrue(target.forgeEnergy().getEnergyStored() == 400,
+                "Wireless receiver did not export 400 FE to an FE-only target");
+        helper.assertTrue(
+                Math.abs(sourceBefore - receiver.electricity().node().energyJoules() - 400.0D) < 1.0E-6D,
+                "Wireless receiver violated its transactional 1 J = 1 FE boundary"
+        );
+        helper.succeed();
+    }
+
+    @GameTest(template = ADVANCED_TEMPLATE)
+    public static void connectorAndWirelessReceiverPreferNativeJForHybridTargets(GameTestHelper helper) {
+        BlockPos connectorPosition = new BlockPos(20, 5, 20);
+        BlockPos connectorTargetPosition = connectorPosition.north();
+        SingleBlockMachineBlockEntity connectorTarget = placeHybridTransformer(
+                helper, connectorTargetPosition
+        );
+        helper.setBlock(
+                connectorPosition,
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get().defaultBlockState()
+                        .setValue(BlockStateProperties.FACING, Direction.NORTH)
+        );
+        ElectricConnectorBlockEntity connector = require(
+                helper, connectorPosition, ElectricConnectorBlockEntity.class
+        );
+
+        BlockPos wirelessPosition = new BlockPos(30, 5, 20);
+        BlockPos wirelessTargetPosition = wirelessPosition.north();
+        SingleBlockMachineBlockEntity wirelessTarget = placeHybridTransformer(
+                helper, wirelessTargetPosition
+        );
+        helper.setBlock(
+                wirelessPosition,
+                ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get().defaultBlockState()
+                        .setValue(BlockStateProperties.FACING, Direction.NORTH)
+        );
+        WirelessEnergyReceiverBlockEntity wireless = require(
+                helper, wirelessPosition, WirelessEnergyReceiverBlockEntity.class
+        );
+
+        for (SingleBlockMachineBlockEntity target : List.of(connectorTarget, wirelessTarget)) {
+            helper.assertTrue(target.supportsNetworkConnection(NetworkDomain.ELECTRICITY, Direction.SOUTH),
+                    "Hybrid target did not expose its native electrical port");
+            helper.assertTrue(target.getCapability(ForgeCapabilities.ENERGY, Direction.SOUTH).isPresent(),
+                    "Hybrid target did not expose its FE input for the priority regression fixture");
+            target.electricity().node().setEnergyJoules(0.0D);
+        }
+
+        connector.electricity().node().setVoltage(120.0D);
+        wireless.electricity().node().setVoltage(120.0D);
+        double connectorBefore = connector.electricity().node().energyJoules();
+        double wirelessBefore = wireless.electricity().node().energyJoules();
+
+        connector.serverTick();
+        wireless.serverTick();
+        helper.assertTrue(connectorTarget.electricity().node().energyJoules() == 0.0D,
+                "Connector selected FE before the native J path");
+        helper.assertTrue(wirelessTarget.electricity().node().energyJoules() == 0.0D,
+                "Wireless receiver selected FE before the native J path");
+        helper.assertTrue(connector.electricity().node().energyJoules() == connectorBefore,
+                "Connector consumed J while only probing the hybrid target");
+        helper.assertTrue(wireless.electricity().node().energyJoules() == wirelessBefore,
+                "Wireless receiver consumed J while only probing the hybrid target");
+
+        helper.runAfterDelay(2, () -> {
+            assertNativeTransferConserved(helper, connector.electricity().node().energyJoules(),
+                    connectorTarget.electricity().node().energyJoules(), connectorBefore, "Connector");
+            assertNativeTransferConserved(helper, wireless.electricity().node().energyJoules(),
+                    wirelessTarget.electricity().node().energyJoules(), wirelessBefore, "Wireless receiver");
+            helper.succeed();
+        });
     }
 
     @GameTest(template = ADVANCED_TEMPLATE, timeoutTicks = 40)
@@ -869,6 +966,30 @@ public final class LongDistanceElectricGameTests {
         helper.setBlock(position.relative(Direction.SOUTH), Blocks.STONE);
         helper.setBlock(position, ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get());
         return require(helper, position, WirelessEnergyReceiverBlockEntity.class);
+    }
+
+    private static SingleBlockMachineBlockEntity placeHybridTransformer(
+            GameTestHelper helper,
+            BlockPos position
+    ) {
+        helper.setBlock(
+                position,
+                ModMachineBlocks.machine(SingleBlockMachineDefinition.RF_TRANSFORMER).get().defaultBlockState()
+        );
+        return require(helper, position, SingleBlockMachineBlockEntity.class);
+    }
+
+    private static void assertNativeTransferConserved(
+            GameTestHelper helper,
+            double sourceJoules,
+            double targetJoules,
+            double beforeJoules,
+            String label
+    ) {
+        helper.assertTrue(targetJoules > 0.0D, label + " did not transmit native J to the hybrid target");
+        helper.assertTrue(sourceJoules < beforeJoules, label + " native source did not discharge");
+        helper.assertTrue(sourceJoules + targetJoules <= beforeJoules + 1.0E-6D,
+                label + " native transfer created energy");
     }
 
     private static double electricalEnergy(

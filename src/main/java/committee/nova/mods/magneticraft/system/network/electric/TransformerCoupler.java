@@ -95,7 +95,7 @@ public final class TransformerCoupler implements ElectricalCoupler {
         ElectricalNode destination = reversed ? first : second;
         VoltageTier sourceTier = reversed ? secondTier : firstTier;
         VoltageTier destinationTier = reversed ? firstTier : secondTier;
-        if (source.voltage() < sourceTier.minimumOperatingVoltage()) {
+        if (!sourceTier.meetsMinimumOperatingVoltage(source.voltage())) {
             return CouplingResult.ZERO;
         }
 

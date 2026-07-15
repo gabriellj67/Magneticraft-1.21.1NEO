@@ -37,8 +37,8 @@ final class ElectricalStatePanel {
             int top,
             Rect bounds,
             BlockPos position,
-            long bufferJoules,
-            long bufferCapacityJoules
+            long storedJoules,
+            long ratedCapacityJoules
     ) {
         MachineScreenLayout.drawInset(
                 graphics,
@@ -97,15 +97,15 @@ final class ElectricalStatePanel {
         }
 
         ElectricalReading primary = readings.get(0);
-        long shownBuffer = bufferCapacityJoules > 0L
-                ? Math.max(0L, bufferJoules)
+        long shownStored = ratedCapacityJoules > 0L
+                ? Math.max(0L, storedJoules)
                 : Math.round(primary.storedJoules());
-        long shownCapacity = bufferCapacityJoules > 0L
-                ? bufferCapacityJoules
+        long shownCapacity = ratedCapacityJoules > 0L
+                ? ratedCapacityJoules
                 : Math.round(primary.capacityJoules());
         drawLine(graphics, font, Component.translatable(
-                        "gui.magneticraft.electrical.buffer",
-                        shownBuffer,
+                        "gui.magneticraft.electrical.storage",
+                        shownStored,
                         shownCapacity
                 ), textLeft, y, textWidth, TEXT_COLOR);
         y += LINE_HEIGHT;
@@ -130,8 +130,8 @@ final class ElectricalStatePanel {
             int top,
             Rect bounds,
             BlockPos position,
-            long bufferJoules,
-            long bufferCapacityJoules
+            long storedJoules,
+            long ratedCapacityJoules
     ) {
         if (mouseX < left + bounds.x() || mouseX >= left + bounds.right()
                 || mouseY < top + bounds.y() || mouseY >= top + bounds.bottom()) {
@@ -140,7 +140,8 @@ final class ElectricalStatePanel {
         List<Component> lines = new ArrayList<>();
         lines.add(Component.translatable("gui.magneticraft.electrical.title"));
         List<ElectricalReading> readings = readings(position);
-        for (ElectricalReading reading : readings) {
+        for (int index = 0; index < readings.size(); index++) {
+            ElectricalReading reading = readings.get(index);
             TierDisplay tier = tier(reading.tierId());
             lines.add(Component.translatable(
                     "gui.magneticraft.electrical.terminal",
@@ -155,10 +156,16 @@ final class ElectricalStatePanel {
                     format(reading.joulesPerTick()),
                     format(reading.powerWatts())
             ));
+            double shownStored = index == 0 && ratedCapacityJoules > 0L
+                    ? Math.max(0L, storedJoules)
+                    : reading.storedJoules();
+            double shownCapacity = index == 0 && ratedCapacityJoules > 0L
+                    ? ratedCapacityJoules
+                    : reading.capacityJoules();
             lines.add(Component.translatable(
                     "gui.magneticraft.electrical.node_tooltip",
-                    format(reading.storedJoules()),
-                    format(reading.capacityJoules()),
+                    format(shownStored),
+                    format(shownCapacity),
                     percent(reading.loadRatio()),
                     percent(reading.thermalStress())
             ));
@@ -166,13 +173,6 @@ final class ElectricalStatePanel {
                     "gui.magneticraft.electrical.state",
                     Component.translatable(reading.faultKind().translationKey()),
                     Component.translatable(reading.flowDirection().translationKey())
-            ));
-        }
-        if (bufferCapacityJoules > 0L) {
-            lines.add(Component.translatable(
-                    "gui.magneticraft.electrical.buffer",
-                    Math.max(0L, bufferJoules),
-                    bufferCapacityJoules
             ));
         }
         if (readings.isEmpty()) {

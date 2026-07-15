@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,14 +59,14 @@ final class SingleBlockElectricalLogic {
             return;
         }
         int requested = (int) Math.ceil(plan.totalCostJoules());
-        int simulated = machine.energy().extractEnergy(requested, true);
+        int simulated = machine.energy().consumeJoules(requested, true);
         if (!plan.canAfford(simulated)) {
             startAirBubbleDecay(level);
             return;
         }
-        int removed = machine.energy().extractEnergy(requested, false);
+        int removed = machine.energy().consumeJoules(requested, false);
         if (!plan.canAfford(removed)) {
-            machine.energy().receiveEnergy(removed, false);
+            machine.energy().restoreStoredJoules(machine.energy().storedJoules() + removed);
             startAirBubbleDecay(level);
             return;
         }
@@ -127,7 +126,7 @@ final class SingleBlockElectricalLogic {
         }
         if (machine.energy() != null) {
             double generated = state.thermopileFlux / 10_000.0D * 20.0D;
-            if (machine.energy().receiveEnergy((int) Math.floor(generated), false) > 0) {
+            if (machine.energy().generateJoules(generated, false) > 0.0D) {
                 state.working = true;
                 machine.markChanged();
             }
@@ -135,40 +134,16 @@ final class SingleBlockElectricalLogic {
     }
 
     void tickElectricEngine(ServerLevel level) {
-        if (machine.energy() == null) {
+        if (machine.energy() == null || machine.electricity() == null) {
             return;
         }
-        int converted = machine.electricalBridge() == null
-                ? 0
-                : machine.electricalBridge().lastChargeTransfer();
+        Direction output = SingleBlockMachineSupport.facing(machine).getOpposite();
+        int converted = machine.energy().exportForgeEnergy(level, machine.getBlockPos(), output);
         state.lastProduction = converted;
         if (converted > 0) {
             state.working = true;
             machine.markChanged();
         }
-        Direction output = SingleBlockMachineSupport.facing(machine).getOpposite();
-        BlockPos targetPosition = machine.getBlockPos().relative(output);
-        if (!level.hasChunk(targetPosition.getX() >> 4, targetPosition.getZ() >> 4)) {
-            return;
-        }
-        BlockEntity target = level.getBlockEntity(targetPosition);
-        if (target == null) {
-            return;
-        }
-        target.getCapability(ForgeCapabilities.ENERGY, output.getOpposite()).ifPresent(storage -> {
-            int transferLimit = machine.electricalBridge() == null
-                    ? 0
-                    : machine.electricalBridge().maximumTransferJoulesPerTick();
-            int offered = machine.energy().extractEnergy(transferLimit, true);
-            int accepted = storage.receiveEnergy(offered, true);
-            if (accepted > 0) {
-                int extracted = machine.energy().extractEnergy(accepted, false);
-                int inserted = storage.receiveEnergy(extracted, false);
-                if (inserted < extracted) {
-                    machine.energy().receiveEnergy(extracted - inserted, false);
-                }
-            }
-        });
     }
 
     void startAirBubbleDecay(ServerLevel level) {

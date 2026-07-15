@@ -74,12 +74,12 @@ public final class PhysicalNetworkGameTests {
         BatteryBlockEntity battery = require(helper, FIRST, BatteryBlockEntity.class);
         ElectricCableBlockEntity cable = require(helper, MIDDLE, ElectricCableBlockEntity.class);
         ElectricFurnaceBlockEntity furnace = require(helper, LAST, ElectricFurnaceBlockEntity.class);
-        battery.energy().setEnergyStored(20_000);
+        battery.energy().setStoredJoules(20_000);
 
         helper.runAfterDelay(30, () -> {
-            helper.assertTrue(battery.energy().getEnergyStored() < 20_000, "Battery did not discharge into voltage network");
+            helper.assertTrue(battery.energy().storedWholeJoules() < 20_000, "Battery did not discharge into voltage network");
             helper.assertTrue(cable.electricity().node().voltage() > 0.0D, "Cable never acquired voltage");
-            helper.assertTrue(furnace.energy().getEnergyStored() > 0, "Electric furnace did not receive bridged network energy");
+            helper.assertTrue(furnace.energy().storedWholeJoules() > 0, "Electric furnace did not receive native network energy");
             helper.assertTrue(furnace.electricity().node().voltage() <= 125.0D, "Furnace node exceeded tier voltage");
             helper.succeed();
         });

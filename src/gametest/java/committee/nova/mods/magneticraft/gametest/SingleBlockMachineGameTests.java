@@ -437,13 +437,13 @@ public final class SingleBlockMachineGameTests {
 
         helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.ELECTRIC_HEATER, Direction.NORTH));
         SingleBlockMachineBlockEntity heater = requireMachine(helper, CENTER);
-        heater.energy().setEnergyStored(12_345);
+        heater.energy().setStoredJoules(4_000);
         heater.electricity().node().setEnergyJoules(321.0D);
         heater.heat().node().setTemperature(650.0D);
         CompoundTag missingHeaterSchema = heater.saveWithoutMetadata();
         missingHeaterSchema.remove("schema_version");
         heater.load(missingHeaterSchema);
-        helper.assertTrue(heater.energy().getEnergyStored() == 0, "Missing schema retained heater Forge Energy");
+        helper.assertTrue(heater.energy().storedWholeJoules() == 0, "Missing schema retained heater native joules");
         helper.assertTrue(
                 heater.electricity().node().energyJoules() == 0.0D,
                 "Missing schema retained heater electrical energy"
@@ -802,10 +802,10 @@ public final class SingleBlockMachineGameTests {
         helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.RF_HEATER, Direction.NORTH));
         SingleBlockMachineBlockEntity heater = requireMachine(helper, CENTER);
         double before = heater.heat().node().temperatureKelvin();
-        heater.energy().setEnergyStored(160);
+        heater.forgeEnergy().setEnergyStored(160);
         helper.runAfterDelay(2, () -> {
             helper.assertTrue(heater.heat().node().temperatureKelvin() > before, "FE heater did not convert energy to heat");
-            helper.assertTrue(heater.energy().getEnergyStored() == 0, "FE heater consumed the wrong amount");
+            helper.assertTrue(heater.forgeEnergy().getEnergyStored() == 0, "FE heater consumed the wrong amount");
 
             helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.RF_TRANSFORMER, Direction.NORTH));
             SingleBlockMachineBlockEntity transformer = requireMachine(helper, CENTER);

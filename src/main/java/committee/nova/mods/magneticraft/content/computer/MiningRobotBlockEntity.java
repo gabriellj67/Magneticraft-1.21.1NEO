@@ -6,10 +6,9 @@ import committee.nova.mods.magneticraft.content.computer.runtime.ComputerDeviceB
 import committee.nova.mods.magneticraft.content.computer.runtime.ComputerDeviceBus.DeviceCommand;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerDevice;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
-import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
-import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
@@ -56,7 +55,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
     private static final String QUARRY_TASK_TAG = "quarry_task";
 
     private final ItemInventoryModule inventory;
-    private final EnergyStorageModule energy;
+    private final ElectricalPowerModule energy;
     private final ElectricalNetworkModule electricity;
     @Nullable
     private Direction pendingMove;
@@ -80,27 +79,20 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
                 (slot, stack) -> true,
                 side -> allSlotAccess()
         ));
-        energy = addModule(new EnergyStorageModule(
-                Magneticraft.id("energy_storage"),
-                this,
-                ENERGY_CAPACITY,
-                1_000,
-                1_000,
-                side -> true,
-                true,
-                false
-        ));
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
                 ElectricalNodeKind.MACHINE,
                 side -> true
         ));
-        addModule(new ElectricalEnergyBridgeModule(
-                Magneticraft.id("electricity_bridge"),
+        energy = addModule(new ElectricalPowerModule(
+                Magneticraft.id("energy_storage"),
                 Magneticraft.id("mining_robot"),
+                this,
                 electricity,
-                energy
+                ElectricalPowerModule.ForgeEnergyAccess.NONE,
+                side -> false,
+                false
         ));
     }
 
@@ -141,7 +133,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
         }
         return switch (command) {
             case INVENTORY_COUNT -> ComputerDeviceBus.DeviceResult.complete(inventoryCount());
-            case ENERGY_STORED -> ComputerDeviceBus.DeviceResult.complete(energy.getEnergyStored());
+            case ENERGY_STORED -> ComputerDeviceBus.DeviceResult.complete(energy.storedWholeJoules());
             case QUARRY -> executeQuarry(serverLevel, argument);
             case MOVE_FRONT, MOVE_BACK, ROTATE_LEFT, ROTATE_RIGHT, ROTATE_UP, ROTATE_DOWN,
                     MINE_FRONT, SCAN_FRONT, MOVE, MINE, SCAN -> executeScheduledAction(serverLevel, command, argument);
@@ -413,7 +405,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
         if (!isSafeLoadedTarget(level, target)
                 || level.getBlockEntity(target) != null
                 || !level.getBlockState(target).canBeReplaced()
-                || energy.extractEnergy(MOVE_ENERGY_COST, true) != MOVE_ENERGY_COST) {
+                || energy.consumeJoules(MOVE_ENERGY_COST, true) != MOVE_ENERGY_COST) {
             return false;
         }
         FakePlayer player = ownerPlayer(level);
@@ -430,8 +422,8 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
 
         BlockPos source = worldPosition;
         BlockPos target = source.relative(direction);
-        int energyBefore = energy.getEnergyStored();
-        if (energy.extractEnergy(MOVE_ENERGY_COST, false) != MOVE_ENERGY_COST) {
+        double energyBefore = energy.storedJoules();
+        if (energy.consumeJoules(MOVE_ENERGY_COST, false) != MOVE_ENERGY_COST) {
             queueMoveCompletion(false);
             return;
         }
@@ -439,7 +431,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
         BlockState movedState = getBlockState();
         FakePlayer player = ownerPlayer(level);
         if (player == null) {
-            energy.setEnergyStored(energyBefore);
+            energy.restoreStoredJoules(energyBefore);
             queueMoveCompletion(false);
             return;
         }
@@ -447,14 +439,14 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
         relocating = true;
         if (!level.setBlock(target, movedState, Block.UPDATE_ALL)) {
             relocating = false;
-            energy.setEnergyStored(energyBefore);
+            energy.restoreStoredJoules(energyBefore);
             queueMoveCompletion(false);
             return;
         }
         if (ForgeEventFactory.onBlockPlace(player, replacedBlock, direction.getOpposite())) {
             replacedBlock.restore(true, true);
             relocating = false;
-            energy.setEnergyStored(energyBefore);
+            energy.restoreStoredJoules(energyBefore);
             queueMoveCompletion(false);
             return;
         }
@@ -462,7 +454,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
         if (!(targetEntity instanceof MiningRobotBlockEntity movedRobot)) {
             level.removeBlock(target, false);
             relocating = false;
-            energy.setEnergyStored(energyBefore);
+            energy.restoreStoredJoules(energyBefore);
             queueMoveCompletion(false);
             return;
         }
@@ -471,7 +463,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
             movedRobot.relocating = true;
             level.removeBlock(target, false);
             relocating = false;
-            energy.setEnergyStored(energyBefore);
+            energy.restoreStoredJoules(energyBefore);
             queueMoveCompletion(false);
             return;
         }
@@ -549,7 +541,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
         BlockState targetState = level.getBlockState(target);
         if (targetState.isAir()
                 || targetState.getDestroySpeed(level, target) < 0.0F
-                || energy.extractEnergy(MINE_ENERGY_COST, true) != MINE_ENERGY_COST) {
+                || energy.consumeJoules(MINE_ENERGY_COST, true) != MINE_ENERGY_COST) {
             return false;
         }
         FakePlayer player = ownerPlayer(level);
@@ -576,12 +568,12 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
                     || !level.getBlockState(target).equals(targetState)) {
                 return false;
             }
-            int energyBefore = energy.getEnergyStored();
-            if (energy.extractEnergy(MINE_ENERGY_COST, false) != MINE_ENERGY_COST) {
+            double energyBefore = energy.storedJoules();
+            if (energy.consumeJoules(MINE_ENERGY_COST, false) != MINE_ENERGY_COST) {
                 return false;
             }
             if (!level.destroyBlock(target, false, player)) {
-                energy.setEnergyStored(energyBefore);
+                energy.restoreStoredJoules(energyBefore);
                 return false;
             }
             IItemHandlerModifiable targetInventory = inventory.menuHandler();
@@ -642,7 +634,7 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
         return inventory;
     }
 
-    public EnergyStorageModule energy() {
+    public ElectricalPowerModule energy() {
         return energy;
     }
 

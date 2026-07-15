@@ -2,10 +2,9 @@ package committee.nova.mods.magneticraft.content.machine.electricfurnace;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
-import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
-import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
@@ -25,10 +24,9 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class ElectricFurnaceBlockEntity extends MachineBlockEntity implements MenuProvider {
     public static final int ENERGY_CAPACITY = 10_000;
-    private static final int NETWORK_TRANSFER_RATE = 200;
 
     private final ItemInventoryModule inventory;
-    private final EnergyStorageModule energy;
+    private final ElectricalPowerModule energy;
     private final ElectricalNetworkModule electricity;
     private final ElectricFurnaceProcessModule process;
     private final ContainerData data;
@@ -42,27 +40,20 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
                 (slot, stack) -> slot == 0,
                 side -> new ItemInventoryModule.SlotAccess(new int[]{0}, new int[]{1})
         ));
-        energy = addModule(new EnergyStorageModule(
-                Magneticraft.id("energy_storage"),
-                this,
-                ENERGY_CAPACITY,
-                NETWORK_TRANSFER_RATE,
-                ElectricFurnaceProcessModule.MAX_CONSUMPTION_PER_TICK,
-                side -> false,
-                false,
-                false
-        ));
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
                 ElectricalNodeKind.MACHINE,
                 side -> true
         ));
-        addModule(new ElectricalEnergyBridgeModule(
-                Magneticraft.id("electricity_bridge"),
+        energy = addModule(new ElectricalPowerModule(
+                Magneticraft.id("energy_storage"),
                 Magneticraft.id("electric_furnace"),
+                this,
                 electricity,
-                energy
+                ElectricalPowerModule.ForgeEnergyAccess.NONE,
+                side -> false,
+                false
         ));
         process = addModule(new ElectricFurnaceProcessModule(
                 Magneticraft.id("processing"),
@@ -74,8 +65,8 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
             @Override
             public int get(int index) {
                 return switch (index) {
-                    case 0 -> energy.getEnergyStored();
-                    case 1 -> energy.getMaxEnergyStored();
+                    case 0 -> energy.storedWholeJoules();
+                    case 1 -> energy.ratedCapacityWholeJoules();
                     case 2 -> process.progressUnits();
                     case 3 -> ElectricFurnaceProcessModule.TOTAL_PROGRESS_UNITS;
                     default -> 0;
@@ -85,7 +76,7 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
             @Override
             public void set(int index, int value) {
                 if (index == 0) {
-                    energy.setEnergyStored(value);
+                    energy.setStoredJoules(value);
                 }
             }
 
@@ -110,7 +101,7 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
         return inventory;
     }
 
-    public EnergyStorageModule energy() {
+    public ElectricalPowerModule energy() {
         return energy;
     }
 

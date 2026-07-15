@@ -1,18 +1,20 @@
 package committee.nova.mods.magneticraft.content.network.electric;
 
+import committee.nova.mods.magneticraft.content.machine.framework.NetworkConnectionHost;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTier;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 /** Transactional 1 J : 1 FE output used by wired and wireless adapters. */
-final class ElectricEnergyExporter {
+public final class ElectricEnergyExporter {
     private ElectricEnergyExporter() {
     }
 
-    static int export(
+    public static int export(
             ServerLevel level,
             BlockPos position,
             Direction outwardFacing,
@@ -20,15 +22,23 @@ final class ElectricEnergyExporter {
             VoltageTier tier,
             int maximumTransfer
     ) {
-        if (maximumTransfer <= 0 || node.voltage() <= tier.minimumOperatingVoltage()) {
+        if (maximumTransfer <= 0) {
             return 0;
         }
-        double fraction = Math.min(
-                1.0D,
-                Math.max(0.0D, (node.voltage() - tier.minimumOperatingVoltage())
-                        / (tier.nominalVoltage() - tier.minimumOperatingVoltage()))
-        );
+        double fraction = tier.operatingRateFraction(node.voltage());
         int rate = (int) Math.floor(fraction * maximumTransfer);
+        return exportAtMost(level, position, outwardFacing, node, rate);
+    }
+
+    /** Executes a transactional J -> FE transfer whose voltage/rate limit is already resolved. */
+    public static int exportAtMost(
+            ServerLevel level,
+            BlockPos position,
+            Direction outwardFacing,
+            ElectricalNode node,
+            int maximumTransfer
+    ) {
+        int rate = Math.max(0, maximumTransfer);
         int available = (int) Math.floor(node.removeEnergy(rate, true));
         if (available <= 0) {
             return 0;
@@ -42,12 +52,17 @@ final class ElectricEnergyExporter {
         if (target == null) {
             return 0;
         }
-        return target.getCapability(ForgeCapabilities.ENERGY, outwardFacing.getOpposite()).map(storage -> {
-            int accepted = storage.receiveEnergy(available, true);
+        Direction targetSide = outwardFacing.getOpposite();
+        if (target instanceof NetworkConnectionHost host
+                && host.supportsNetworkConnection(NetworkDomain.ELECTRICITY, targetSide)) {
+            return 0;
+        }
+        return target.getCapability(ForgeCapabilities.ENERGY, targetSide).map(storage -> {
+            int accepted = Math.min(available, Math.max(0, storage.receiveEnergy(available, true)));
             if (accepted <= 0) {
                 return 0;
             }
-            int inserted = storage.receiveEnergy(accepted, false);
+            int inserted = Math.min(accepted, Math.max(0, storage.receiveEnergy(accepted, false)));
             if (inserted > 0) {
                 node.removeEnergy(inserted, false);
             }

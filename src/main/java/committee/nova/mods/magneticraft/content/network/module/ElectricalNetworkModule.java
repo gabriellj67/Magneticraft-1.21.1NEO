@@ -22,6 +22,7 @@ import committee.nova.mods.magneticraft.system.network.electric.profile.Electric
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataSnapshot;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalProfileBinding;
+import committee.nova.mods.magneticraft.system.network.electric.profile.MachineElectricalProfile;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTier;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkManager;
@@ -268,6 +269,29 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
      * Tiered placeable devices bypass this path so their validated item identity remains authoritative.
      */
     boolean bindTierFromMachineProfile(ElectricalDataSnapshot snapshot, ResourceLocation profileTierId) {
+        Optional<VoltageTier> tier = snapshot.voltageTier(profileTierId);
+        return tier.isPresent() && bindTierFromMachineProfile(
+                snapshot,
+                profileTierId,
+                nodeKind.capacitance(tier.orElseThrow())
+        );
+    }
+
+    boolean bindMachineProfile(ElectricalDataSnapshot snapshot, MachineElectricalProfile profile) {
+        Objects.requireNonNull(profile, "profile");
+        Optional<VoltageTier> tier = snapshot.voltageTier(profile.tierId());
+        return tier.isPresent() && bindTierFromMachineProfile(
+                snapshot,
+                profile.tierId(),
+                profile.nodeCapacitanceFarads(tier.orElseThrow())
+        );
+    }
+
+    boolean bindTierFromMachineProfile(
+            ElectricalDataSnapshot snapshot,
+            ResourceLocation profileTierId,
+            double capacitanceFarads
+    ) {
         Objects.requireNonNull(snapshot, "snapshot");
         Objects.requireNonNull(profileTierId, "profileTierId");
         Optional<VoltageTier> tier = snapshot.voltageTier(profileTierId);
@@ -280,7 +304,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         tierProfileBound = true;
         VoltageTier value = tier.orElseThrow();
         node.reconfigure(
-                nodeKind.capacitance(value),
+                capacitanceFarads,
                 value.maximumVoltage(),
                 value.nodeResistanceOhms()
         );
@@ -413,7 +437,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
                 node.lastCompletedTickJoules(),
                 node.lastCompletedTickPowerWatts(),
                 node.energyJoules(),
-                node.maxEnergyJoules(),
+                node.ratedMaximumEnergyJoules(),
                 ratedCurrent > 0.0D && Double.isFinite(ratedCurrent)
                         ? terminalCurrent / ratedCurrent
                         : 0.0D,

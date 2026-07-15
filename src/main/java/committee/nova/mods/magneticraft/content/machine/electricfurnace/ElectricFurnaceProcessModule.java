@@ -2,8 +2,8 @@ package committee.nova.mods.magneticraft.content.machine.electricfurnace;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
-import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +32,7 @@ public final class ElectricFurnaceProcessModule implements MachineModule {
     private final ResourceLocation id;
     private final MachineModuleHost host;
     private final ItemInventoryModule inventory;
-    private final EnergyStorageModule energy;
+    private final ElectricalPowerModule energy;
     private int progressUnits;
     private boolean working;
     private long lastWorkingTick = Long.MIN_VALUE;
@@ -41,7 +41,7 @@ public final class ElectricFurnaceProcessModule implements MachineModule {
             ResourceLocation id,
             MachineModuleHost host,
             ItemInventoryModule inventory,
-            EnergyStorageModule energy
+            ElectricalPowerModule energy
     ) {
         this.id = Objects.requireNonNull(id);
         this.host = Objects.requireNonNull(host);
@@ -83,12 +83,12 @@ public final class ElectricFurnaceProcessModule implements MachineModule {
         }
 
         int speedUnits = quantizedSpeedUnits();
-        if (speedUnits <= 0 || energy.extractEnergy(speedUnits, true) != speedUnits) {
+        if (speedUnits <= 0 || energy.consumeJoules(speedUnits, true) != speedUnits) {
             updateWorkingState(level);
             return;
         }
 
-        energy.extractEnergy(speedUnits, false);
+        energy.consumeJoules(speedUnits, false);
         progressUnits += speedUnits;
         lastWorkingTick = level.getGameTime();
         working = true;
@@ -142,12 +142,12 @@ public final class ElectricFurnaceProcessModule implements MachineModule {
     }
 
     private int quantizedSpeedUnits() {
-        if (energy.getMaxEnergyStored() <= 0) {
+        if (energy.ratedCapacityJoules() <= 0.0D) {
             return 0;
         }
         return Math.min(
                 MAX_CONSUMPTION_PER_TICK,
-                (int) Math.floor((double) energy.getEnergyStored() * SPEED_STEPS / energy.getMaxEnergyStored())
+                (int) Math.floor(energy.storedJoules() * SPEED_STEPS / energy.ratedCapacityJoules())
         );
     }
 

@@ -16,7 +16,7 @@ import java.util.Optional;
  */
 public final class MachineObservationCodec {
     public static final String ROOT_KEY = Magneticraft.MOD_ID;
-    public static final int SCHEMA_VERSION = 2;
+    public static final int SCHEMA_VERSION = 3;
 
     private static final String SCHEMA_VERSION_KEY = "schema_version";
     private static final String PROCESS_KEY = "process";
@@ -81,6 +81,7 @@ public final class MachineObservationCodec {
         CompoundTag tag = new CompoundTag();
         tag.putInt("stored", energy.stored());
         tag.putInt("capacity", energy.capacity());
+        tag.putString("unit", energy.unit().name());
         return tag;
     }
 
@@ -140,7 +141,15 @@ public final class MachineObservationCodec {
             return Optional.empty();
         }
         CompoundTag tag = root.getCompound(ENERGY_KEY);
-        return Optional.of(new MachineObservation.EnergyStatus(tag.getInt("stored"), tag.getInt("capacity")));
+        return Optional.of(new MachineObservation.EnergyStatus(
+                tag.getInt("stored"),
+                tag.getInt("capacity"),
+                enumValue(
+                        MachineObservation.EnergyUnit.class,
+                        tag.getString("unit"),
+                        MachineObservation.EnergyUnit.FORGE_ENERGY
+                )
+        ));
     }
 
     private static Optional<MachineObservation.ElectricalStatus> readElectrical(CompoundTag root) {

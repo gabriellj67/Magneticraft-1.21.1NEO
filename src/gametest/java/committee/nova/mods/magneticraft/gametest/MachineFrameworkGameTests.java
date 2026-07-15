@@ -72,13 +72,13 @@ public final class MachineFrameworkGameTests {
         battery.reviveCaps();
         helper.assertTrue(battery.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).isPresent(),
                 "Battery item capability did not revive");
-        battery.energy().setEnergyStored(12_345);
+        battery.energy().setStoredJoules(12_345);
         battery.inventory().setStackInSlot(0, new ItemStack(ModMachineItems.LOW_BATTERY.get()));
 
         CompoundTag saved = battery.saveWithoutMetadata();
         BatteryBlockEntity restored = new BatteryBlockEntity(battery.getBlockPos(), battery.getBlockState());
         restored.load(saved);
-        helper.assertTrue(restored.energy().getEnergyStored() == 12_345, "Battery energy did not survive reload");
+        helper.assertTrue(restored.energy().storedWholeJoules() == 12_345, "Battery energy did not survive reload");
         helper.assertTrue(restored.inventory().getStackInSlot(0).is(ModMachineItems.LOW_BATTERY.get()), "Battery inventory did not survive reload");
         helper.assertTrue(
                 saved.getCompound("modules").contains("magneticraft:energy_storage"),
@@ -104,14 +104,14 @@ public final class MachineFrameworkGameTests {
     public static void machineObservationExposesOnlyAuthoritativePublicState(GameTestHelper helper) {
         helper.setBlock(TEST_POS, ModMachineBlocks.BATTERY.get());
         BatteryBlockEntity battery = requireBlockEntity(helper, TEST_POS, BatteryBlockEntity.class);
-        battery.energy().setEnergyStored(12_345);
-        battery.electricity().node().setVoltage(60.0D);
+        battery.energy().setStoredJoules(12_345);
         battery.inventory().setStackInSlot(0, new ItemStack(ModMachineItems.LOW_BATTERY.get()));
 
         MachineObservation observation = MachineObservationService.observe(battery, Direction.UP);
         helper.assertTrue(
                 observation.energy().map(energy -> energy.stored() == 12_345
-                        && energy.capacity() == BatteryBlockEntity.CAPACITY).orElse(false),
+                        && energy.capacity() == BatteryBlockEntity.CAPACITY
+                        && energy.unit() == MachineObservation.EnergyUnit.JOULE).orElse(false),
                 "Machine observation lost the authoritative energy snapshot"
         );
         helper.assertTrue(observation.electrical().isPresent(), "Machine observation lost electrical diagnostics");
@@ -155,7 +155,7 @@ public final class MachineFrameworkGameTests {
         BatteryBlockEntity battery = requireBlockEntity(helper, TEST_POS, BatteryBlockEntity.class);
         ItemStack cell = new ItemStack(ModMachineItems.LOW_BATTERY.get());
         battery.electricity().node().setVoltage(90.0D);
-        battery.energy().setEnergyStored(2_000);
+        battery.energy().setStoredJoules(2_000);
         battery.inventory().setStackInSlot(0, cell);
 
         helper.runAfterDelay(2, () -> {
@@ -163,7 +163,7 @@ public final class MachineFrameworkGameTests {
                     .map(storage -> storage.getEnergyStored())
                     .orElse(-1);
             helper.assertTrue(stored == 1_000, "Portable cell did not receive 500 FE/t");
-            helper.assertTrue(battery.energy().getEnergyStored() == 1_000, "Battery lost the wrong amount of energy");
+            helper.assertTrue(battery.energy().storedWholeJoules() == 1_000, "Battery lost the wrong amount of energy");
             ItemStack restoredCell = ItemStack.of(cell.save(new CompoundTag()));
             int restoredEnergy = restoredCell.getCapability(ForgeCapabilities.ENERGY)
                     .map(storage -> storage.getEnergyStored())
@@ -233,7 +233,7 @@ public final class MachineFrameworkGameTests {
     public static void electricFurnaceConsumesEnergyAndSmelts(GameTestHelper helper) {
         helper.setBlock(TEST_POS, ModMachineBlocks.ELECTRIC_FURNACE.get());
         ElectricFurnaceBlockEntity furnace = requireBlockEntity(helper, TEST_POS, ElectricFurnaceBlockEntity.class);
-        furnace.energy().setEnergyStored(ElectricFurnaceBlockEntity.ENERGY_CAPACITY);
+        furnace.energy().setStoredJoules(ElectricFurnaceBlockEntity.ENERGY_CAPACITY);
         furnace.inventory().setStackInSlot(0, new ItemStack(Items.RAW_IRON));
         int[] pausedProgress = new int[1];
 
@@ -255,7 +255,7 @@ public final class MachineFrameworkGameTests {
             helper.assertTrue(furnace.inventory().getStackInSlot(0).isEmpty(), "Electric furnace did not consume input");
             helper.assertTrue(furnace.inventory().getStackInSlot(1).is(Items.IRON_INGOT), "Electric furnace produced the wrong output");
             helper.assertTrue(
-                    furnace.energy().getEnergyStored() < ElectricFurnaceBlockEntity.ENERGY_CAPACITY,
+                    furnace.energy().storedWholeJoules() < ElectricFurnaceBlockEntity.ENERGY_CAPACITY,
                     "Electric furnace did not consume energy"
             );
             helper.assertFalse(furnace.getBlockState().getValue(ElectricFurnaceBlock.LIT), "Idle electric furnace stayed lit");
@@ -340,7 +340,7 @@ public final class MachineFrameworkGameTests {
     }
 
     private static void seedBatteryPersistentState(BatteryBlockEntity battery) {
-        battery.energy().setEnergyStored(12_345);
+        battery.energy().setStoredJoules(12_345);
         battery.electricity().node().setEnergyJoules(321.0D);
         battery.inventory().setStackInSlot(0, new ItemStack(ModMachineItems.LOW_BATTERY.get()));
     }
@@ -350,7 +350,7 @@ public final class MachineFrameworkGameTests {
             BatteryBlockEntity battery,
             String scenario
     ) {
-        helper.assertTrue(battery.energy().getEnergyStored() == 0, scenario + " retained Forge Energy");
+        helper.assertTrue(battery.energy().storedWholeJoules() == 0, scenario + " retained native joules");
         helper.assertTrue(
                 battery.electricity().node().energyJoules() == 0.0D,
                 scenario + " retained electrical-network energy"

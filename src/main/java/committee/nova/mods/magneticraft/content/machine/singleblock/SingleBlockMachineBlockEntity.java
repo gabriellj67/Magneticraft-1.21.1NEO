@@ -8,8 +8,8 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyS
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.GhostFilterModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
-import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalVoltageSourceModule;
 import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
@@ -68,13 +68,13 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Nullable
     private final FluidTankModule secondaryTank;
     @Nullable
-    private final EnergyStorageModule energy;
+    private final EnergyStorageModule forgeEnergy;
+    @Nullable
+    private final ElectricalPowerModule energy;
     @Nullable
     private final ElectricalNetworkModule electricity;
     @Nullable
     private final HeatNetworkModule heat;
-    @Nullable
-    private final ElectricalEnergyBridgeModule electricalBridge;
     @Nullable
     private final ElectricalVoltageSourceModule voltageSource;
     private final ContainerData menuData;
@@ -125,19 +125,18 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
         secondaryTank = tanks[1];
         reviveBoilerFluidCapability();
 
-        EnergyStorageModule createdEnergy = createEnergyStorage();
-        energy = createdEnergy;
         ElectricalNetworkModule createdElectricity = createElectricalNetwork();
         electricity = createdElectricity;
+        energy = createElectricalPower(createdElectricity);
+        forgeEnergy = createForgeEnergyStorage();
         heat = createHeatNetwork();
-        electricalBridge = createElectricalBridge(createdEnergy, createdElectricity);
         voltageSource = createVoltageSource(createdElectricity);
         logic = new SingleBlockMachineLogic(this, this.state);
         interactions = new SingleBlockMachineInteractions(this, this.state);
         fabricator = new SingleBlockFabricator(this);
         menuData = Int32ContainerData.readOnly(
-                () -> energy == null ? 0 : energy.getEnergyStored(),
-                () -> energy == null ? 0 : energy.getMaxEnergyStored(),
+                this::storedEnergyJoules,
+                this::energyCapacityJoules,
                 () -> this.state.progress,
                 () -> this.state.totalProgress,
                 () -> heat == null ? 0 : (int) Math.round(heat.node().temperatureKelvin() * 10.0D),
@@ -230,8 +229,13 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     }
 
     @Nullable
-    public EnergyStorageModule energy() {
+    public ElectricalPowerModule energy() {
         return energy;
+    }
+
+    @Nullable
+    public EnergyStorageModule forgeEnergy() {
+        return forgeEnergy;
     }
 
     @Nullable
@@ -248,11 +252,6 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Nullable
     public HeatNetworkModule heat() {
         return heat;
-    }
-
-    @Nullable
-    ElectricalEnergyBridgeModule electricalBridge() {
-        return electricalBridge;
     }
 
     @Nullable
@@ -539,34 +538,13 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     }
 
     @Nullable
-    private EnergyStorageModule createEnergyStorage() {
-        return switch (definition) {
-            case ELECTRIC_HEATER, AIRLOCK -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"), this, 10_000, 200, 200, side -> false, false, false
-            ));
-            case RF_HEATER -> addModule(new EnergyStorageModule(
+    private EnergyStorageModule createForgeEnergyStorage() {
+        return definition == SingleBlockMachineDefinition.RF_HEATER
+                ? addModule(new EnergyStorageModule(
                     Magneticraft.id("energy_storage"), this, 80_000, 80_000, 80_000,
                     side -> SingleBlockPortProfile.forgeEnergy(definition, side, facing()), true, true
-            ));
-            case THERMOPILE -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"), this, 80_000, 200, 200, side -> false, false, false
-            ));
-            case RF_TRANSFORMER -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"), this, 80_000, 100, 100,
-                    side -> SingleBlockPortProfile.forgeEnergy(definition, side, facing()), true, false
-            ));
-            case ELECTRIC_ENGINE -> addModule(new EnergyStorageModule(
-                    Magneticraft.id("energy_storage"),
-                    this,
-                    80_000,
-                    80_000,
-                    80_000,
-                    side -> SingleBlockPortProfile.forgeEnergy(definition, side, facing()),
-                    false,
-                    true
-            ));
-            default -> null;
-        };
+            ))
+                : null;
     }
 
     @Nullable
@@ -606,30 +584,38 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     }
 
     @Nullable
-    private ElectricalEnergyBridgeModule createElectricalBridge(
-            @Nullable EnergyStorageModule createdEnergy,
+    private ElectricalPowerModule createElectricalPower(
             @Nullable ElectricalNetworkModule createdElectricity
     ) {
-        if (createdEnergy == null || createdElectricity == null) {
+        if (createdElectricity == null || definition == SingleBlockMachineDefinition.INFINITE_ENERGY) {
             return null;
         }
-        return switch (definition) {
-            case ELECTRIC_HEATER, AIRLOCK, THERMOPILE -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), Magneticraft.id(definition.id()),
-                    createdElectricity, createdEnergy
-            ));
-            case RF_TRANSFORMER -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), Magneticraft.id(definition.id()),
-                    createdElectricity, createdEnergy,
-                    ElectricalEnergyBridgeModule.ExchangePolicy.FE_TO_NATIVE, false
-            ));
-            case ELECTRIC_ENGINE -> addModule(new ElectricalEnergyBridgeModule(
-                    Magneticraft.id("electricity_bridge"), Magneticraft.id(definition.id()),
-                    createdElectricity, createdEnergy,
-                    ElectricalEnergyBridgeModule.ExchangePolicy.NATIVE_TO_FE, false
-            ));
-            default -> null;
+        ElectricalPowerModule.ForgeEnergyAccess forgeAccess = switch (definition) {
+            case RF_TRANSFORMER -> ElectricalPowerModule.ForgeEnergyAccess.INPUT;
+            case ELECTRIC_ENGINE -> ElectricalPowerModule.ForgeEnergyAccess.OUTPUT;
+            default -> ElectricalPowerModule.ForgeEnergyAccess.NONE;
         };
+        return addModule(new ElectricalPowerModule(
+                Magneticraft.id("energy_storage"),
+                Magneticraft.id(definition.id()),
+                this,
+                createdElectricity,
+                forgeAccess,
+                side -> SingleBlockPortProfile.forgeEnergy(definition, side, facing()),
+                false
+        ));
+    }
+
+    private int storedEnergyJoules() {
+        return energy != null
+                ? energy.storedWholeJoules()
+                : forgeEnergy == null ? 0 : forgeEnergy.getEnergyStored();
+    }
+
+    private int energyCapacityJoules() {
+        return energy != null
+                ? energy.ratedCapacityWholeJoules()
+                : forgeEnergy == null ? 0 : forgeEnergy.getMaxEnergyStored();
     }
 
     @Nullable

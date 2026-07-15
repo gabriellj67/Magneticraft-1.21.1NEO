@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class WirelessEnergyReceiverBlockEntity extends NetworkComponentBlockEntity
         implements WirelessEnergyReceiverHost {
     private final ElectricalNetworkModule electricity;
+    private final ElectricalProfileGateModule profile;
 
     public WirelessEnergyReceiverBlockEntity(BlockPos position, BlockState state) {
         super(ModBlockEntities.WIRELESS_ENERGY_RECEIVER.get(), position, state);
@@ -25,9 +26,9 @@ public final class WirelessEnergyReceiverBlockEntity extends NetworkComponentBlo
                 Magneticraft.id("electricity"),
                 this,
                 ElectricalNodeKind.MACHINE,
-                side -> side == backSide()
+                side -> side == backSide() || side == outwardFacing()
         ));
-        addModule(new ElectricalProfileGateModule(
+        profile = addModule(new ElectricalProfileGateModule(
                 Magneticraft.id("electrical_profile"),
                 Magneticraft.id("wireless_energy_receiver"),
                 electricity,
@@ -39,6 +40,23 @@ public final class WirelessEnergyReceiverBlockEntity extends NetworkComponentBlo
     @Override
     public ElectricalNetworkModule electricity() {
         return electricity;
+    }
+
+    @Override
+    protected void tickComponent() {
+        if (level instanceof ServerLevel serverLevel
+                && profile.profile().flatMap(machineProfile -> profile.tier()
+                .map(tier -> ElectricEnergyExporter.export(
+                            serverLevel,
+                            worldPosition,
+                            outwardFacing(),
+                            electricity.node(),
+                            tier,
+                            (int) Math.floor(machineProfile.maximumTransferJoulesPerTick())
+                    )))
+                .orElse(0) > 0) {
+            markChanged();
+        }
     }
 
     @Override

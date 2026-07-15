@@ -1,10 +1,9 @@
 package committee.nova.mods.magneticraft.content.machine.windturbine;
 
 import committee.nova.mods.magneticraft.Magneticraft;
-import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlockEntity;
-import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
@@ -13,39 +12,29 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Wind turbine controller with an internal buffer and native electrical output.
+ * Wind turbine controller that generates directly into its native electrical node.
  */
 public final class WindTurbineBlockEntity extends NetworkComponentBlockEntity {
-    public static final int ENERGY_CAPACITY_JOULES = 80_000;
-    public static final int MAX_TRANSFER_JOULES_PER_TICK = 200;
-
-    private final EnergyStorageModule energy;
+    private final ElectricalPowerModule energy;
     private final ElectricalNetworkModule electricity;
     private final WindTurbineModule wind;
 
     public WindTurbineBlockEntity(BlockPos position, BlockState state) {
         super(ModBlockEntities.WIND_TURBINE.get(), position, state);
-        energy = addModule(new EnergyStorageModule(
-                Magneticraft.id("energy_storage"),
-                this,
-                ENERGY_CAPACITY_JOULES,
-                MAX_TRANSFER_JOULES_PER_TICK,
-                MAX_TRANSFER_JOULES_PER_TICK,
-                side -> false,
-                false,
-                false
-        ));
         electricity = addModule(new ElectricalNetworkModule(
                 Magneticraft.id("electricity"),
                 this,
                 ElectricalNodeKind.MACHINE,
                 this::canConnectElectricity
         ));
-        addModule(new ElectricalEnergyBridgeModule(
-                Magneticraft.id("electricity_bridge"),
+        energy = addModule(new ElectricalPowerModule(
+                Magneticraft.id("energy_storage"),
                 Magneticraft.id("wind_turbine"),
+                this,
                 electricity,
-                energy
+                ElectricalPowerModule.ForgeEnergyAccess.NONE,
+                side -> false,
+                false
         ));
         wind = addModule(new WindTurbineModule(
                 Magneticraft.id("wind_turbine"),
@@ -55,7 +44,7 @@ public final class WindTurbineBlockEntity extends NetworkComponentBlockEntity {
         ));
     }
 
-    public EnergyStorageModule energy() {
+    public ElectricalPowerModule energy() {
         return energy;
     }
 
