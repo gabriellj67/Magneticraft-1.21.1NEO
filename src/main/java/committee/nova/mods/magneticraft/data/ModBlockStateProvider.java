@@ -37,9 +37,11 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import java.util.Set;
 
 /**
- * Generates solid-block models plus invisible fluid-block state models.
+ * Generates block models plus invisible fluid-block state models.
  */
 final class ModBlockStateProvider extends BlockStateProvider {
+    private static final ResourceLocation CUTOUT_RENDER_TYPE =
+            ResourceLocation.fromNamespaceAndPath("minecraft", "cutout");
     private final ExistingFileHelper existingFileHelper;
 
     ModBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
@@ -77,7 +79,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockWithItem(
                 grate,
                 models().cubeAll("iron_grate", modLoc("block/iron_grate"))
-                        .renderType(ResourceLocation.fromNamespaceAndPath("minecraft", "cutout"))
+                        .renderType(CUTOUT_RENDER_TYPE)
         );
 
         Block electricFurnace = ModMachineBlocks.ELECTRIC_FURNACE.get();
@@ -217,7 +219,8 @@ final class ModBlockStateProvider extends BlockStateProvider {
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
             ResourceLocation controllerTexture = advancedControllerTexture(definition);
-            ModelFile idle = models().cubeAll(definition.id(), controllerTexture);
+            ModelFile idle = models().cubeAll(definition.id(), controllerTexture)
+                    .renderType(CUTOUT_RENDER_TYPE);
             ModelFile formed = emptyModel(definition.id() + "_formed", controllerTexture);
             ModelFile item = advancedControllerItemModel(definition, controllerTexture);
             horizontalBlock(
