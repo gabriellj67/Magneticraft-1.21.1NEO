@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import committee.nova.mods.magneticraft.Magneticraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -95,7 +95,9 @@ public final class LegacySceneRenderer {
         );
         Set<Integer> selectedNodes = selectedNodes(source, selection, scene);
         VertexConsumer consumer = buffers.getBuffer(
-                style.translucent() ? Sheets.translucentCullBlockSheet() : Sheets.solidBlockSheet()
+                style.translucent()
+                        ? RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS)
+                        : RenderType.entityCutoutNoCull(InventoryMenu.BLOCK_ATLAS)
         );
 
         poseStack.pushPose();

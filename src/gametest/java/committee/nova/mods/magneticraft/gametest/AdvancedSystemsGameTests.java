@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlo
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockCell;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.LegacyMultiblockCollision;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockRule;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockTransform;
@@ -46,6 +47,9 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +74,16 @@ public final class AdvancedSystemsGameTests {
             helper.assertTrue(controller.tryForm(player), definition.id() + " did not form");
             helper.assertTrue(controller.formed(), definition.id() + " lost formed state");
             helper.assertTrue(controller.operational(), definition.id() + " was not operational after validation");
+            for (BlockPos member : controller.members()) {
+                var actual = helper.getLevel().getBlockState(member).getCollisionShape(
+                        helper.getLevel(), member, CollisionContext.empty()
+                );
+                var expectedShape = LegacyMultiblockCollision.shapeAt(
+                        member, controller.getBlockPos(), definition, controller.facing()
+                );
+                helper.assertFalse(Shapes.joinIsNotEmpty(actual, expectedShape, BooleanOp.NOT_SAME),
+                        definition.id() + " collision diverged at " + member);
+            }
 
             CompoundTag saved = controller.saveWithoutMetadata();
             AdvancedMultiblockBlockEntity restored = new AdvancedMultiblockBlockEntity(

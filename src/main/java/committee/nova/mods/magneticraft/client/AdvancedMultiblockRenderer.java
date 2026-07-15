@@ -564,4 +564,15 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
             );
         }
     }
+
+    /** Released multiblock renderers were global because one controller owns the whole model. */
+    @Override
+    public boolean shouldRenderOffScreen(AdvancedMultiblockBlockEntity machine) {
+        return true;
+    }
+
+    @Override
+    public int getViewDistance() {
+        return 128;
+    }
 }

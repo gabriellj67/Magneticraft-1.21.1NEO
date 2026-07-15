@@ -113,6 +113,36 @@ public final class LongDistanceElectricGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE)
+    public static void electricPoleSegmentsUseReleasedNarrowCollision(GameTestHelper helper) {
+        BlockPos bottom = new BlockPos(4, 2, 4);
+        PoleSegment[] segments = {
+                PoleSegment.DOWN_4,
+                PoleSegment.DOWN_3,
+                PoleSegment.DOWN_2,
+                PoleSegment.DOWN_1,
+                PoleSegment.BASE
+        };
+        for (int index = 0; index < segments.length; index++) {
+            BlockPos position = bottom.above(index);
+            var state = ModNetworkBlocks.ELECTRIC_POLE.get().defaultBlockState()
+                    .setValue(ElectricPoleBlock.SEGMENT, segments[index]);
+            helper.setBlock(position, state);
+            var bounds = state.getCollisionShape(
+                    helper.getLevel(), helper.absolutePos(position), CollisionContext.empty()
+            ).bounds();
+            helper.assertTrue(Math.abs(bounds.minX - 5.0D / 16.0D) < 1.0E-9D,
+                    "Pole segment minimum X diverged from the released shape");
+            helper.assertTrue(Math.abs(bounds.minZ - 5.0D / 16.0D) < 1.0E-9D,
+                    "Pole segment minimum Z diverged from the released shape");
+            helper.assertTrue(Math.abs(bounds.maxX - 11.0D / 16.0D) < 1.0E-9D,
+                    "Pole segment maximum X diverged from the released shape");
+            helper.assertTrue(Math.abs(bounds.maxZ - 11.0D / 16.0D) < 1.0E-9D,
+                    "Pole segment maximum Z diverged from the released shape");
+        }
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE, timeoutTicks = 20)
     public static void connectorMountsOnCableAndJoinsThroughBackFace(GameTestHelper helper) {
         BlockPos cablePosition = new BlockPos(4, 4, 4);

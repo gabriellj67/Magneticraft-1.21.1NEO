@@ -7,12 +7,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
@@ -23,6 +26,7 @@ public final class ElectricPoleBlock extends NetworkComponentBlock {
     public static final EnumProperty<PoleDirection> DIRECTION = EnumProperty.create("direction", PoleDirection.class);
     public static final EnumProperty<PoleSegment> SEGMENT = EnumProperty.create("segment", PoleSegment.class);
     private static final int HEIGHT = 5;
+    private static final VoxelShape POLE_SHAPE = Block.box(5.0D, 0.0D, 5.0D, 11.0D, 16.0D, 11.0D);
     private static final ThreadLocal<Set<BlockPos>> STRUCTURE_UPDATES = ThreadLocal.withInitial(HashSet::new);
 
     private final boolean transformer;
@@ -37,6 +41,26 @@ public final class ElectricPoleBlock extends NetworkComponentBlock {
 
     public boolean isTransformer() {
         return transformer;
+    }
+
+    @Override
+    public VoxelShape getShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos position,
+            CollisionContext context
+    ) {
+        return POLE_SHAPE;
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos position,
+            CollisionContext context
+    ) {
+        return POLE_SHAPE;
     }
 
     @Nullable

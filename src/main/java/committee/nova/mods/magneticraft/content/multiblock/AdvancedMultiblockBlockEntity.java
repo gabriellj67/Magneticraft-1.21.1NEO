@@ -348,7 +348,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             return false;
         }
         setMemberCapabilities(false);
-        if (!structureSnapshot.captureAndHide(serverLevel, worldPosition, members)) {
+        if (!structureSnapshot.captureAndHide(serverLevel, worldPosition, members)
+                || !configureGapCollision(serverLevel, members)) {
+            structureSnapshot.restore(serverLevel, null);
             MultiblockMembershipService.unregister(serverLevel, worldPosition);
             setMemberCapabilities(true);
             player.displayClientMessage(Component.translatable(
@@ -607,6 +609,20 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         );
     }
 
+    private boolean configureGapCollision(ServerLevel serverLevel, List<BlockPos> members) {
+        Direction structureFacing = facing();
+        for (BlockPos member : members) {
+            if (member.equals(worldPosition)) {
+                continue;
+            }
+            if (!(serverLevel.getBlockEntity(member) instanceof MultiblockGapBlockEntity gap)) {
+                return false;
+            }
+            gap.configure(worldPosition, definition, structureFacing);
+        }
+        return true;
+    }
+
     @Override
     public void onLoad() {
         super.onLoad();
@@ -729,8 +745,10 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 unform();
                 return;
             }
-            if (structureSnapshot.isEmpty()
-                    && !structureSnapshot.captureAndHide(serverLevel, worldPosition, members())) {
+            List<BlockPos> members = members();
+            if ((structureSnapshot.isEmpty()
+                    && !structureSnapshot.captureAndHide(serverLevel, worldPosition, members))
+                    || !configureGapCollision(serverLevel, members)) {
                 unform();
                 return;
             }

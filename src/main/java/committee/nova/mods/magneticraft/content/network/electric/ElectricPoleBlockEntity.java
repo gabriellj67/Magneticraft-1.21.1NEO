@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 import java.util.Set;
 
@@ -51,6 +52,38 @@ public final class ElectricPoleBlockEntity extends NetworkComponentBlockEntity
     @Override
     public LongDistanceEndpointModule longDistance() {
         return longDistance;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        AABB bounds = new AABB(
+                worldPosition.getX() - 0.875D,
+                worldPosition.getY() - 4.0D,
+                worldPosition.getZ() - 0.875D,
+                worldPosition.getX() + 1.875D,
+                worldPosition.getY() + 1.0D,
+                worldPosition.getZ() + 1.875D
+        );
+        for (LongDistanceEndpointModule.WireView connection : longDistance.clientConnections()) {
+            BlockPos remote = connection.remotePosition();
+            AABB wire = new AABB(
+                    Math.min(worldPosition.getX(), remote.getX()) + 0.25D,
+                    Math.min(worldPosition.getY(), remote.getY()) - 1.75D,
+                    Math.min(worldPosition.getZ(), remote.getZ()) + 0.25D,
+                    Math.max(worldPosition.getX(), remote.getX()) + 0.75D,
+                    Math.max(worldPosition.getY(), remote.getY()) + 0.75D,
+                    Math.max(worldPosition.getZ(), remote.getZ()) + 0.75D
+            );
+            bounds = new AABB(
+                    Math.min(bounds.minX, wire.minX),
+                    Math.min(bounds.minY, wire.minY),
+                    Math.min(bounds.minZ, wire.minZ),
+                    Math.max(bounds.maxX, wire.maxX),
+                    Math.max(bounds.maxY, wire.maxY),
+                    Math.max(bounds.maxZ, wire.maxZ)
+            );
+        }
+        return bounds;
     }
 
     @Override

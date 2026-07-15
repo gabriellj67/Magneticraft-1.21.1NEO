@@ -60,6 +60,7 @@ public final class ModAdvancedBlocks {
                     .mapColor(MapColor.NONE)
                     .strength(3.5F, 10.0F)
                     .sound(SoundType.METAL)
+                    .dynamicShape()
                     .noOcclusion()
                     .noLootTable())
     );

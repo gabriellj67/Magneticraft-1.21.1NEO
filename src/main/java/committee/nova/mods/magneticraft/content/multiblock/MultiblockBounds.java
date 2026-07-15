@@ -41,7 +41,7 @@ public final class MultiblockBounds {
         );
     }
 
-    /** Includes small decorative model overhangs without changing structure validation. */
+    /** Includes the exact released collision geometry and a small rasterization margin. */
     public static AABB renderBounds(
             BlockPos controller,
             Direction facing,
@@ -49,14 +49,14 @@ public final class MultiblockBounds {
             MultiblockDefinition definition
     ) {
         AABB structure = worldBounds(controller, facing, mirrored, definition);
-        double topMargin = definition == MultiblockDefinition.SHELVING_UNIT ? 0.75D : 0.125D;
+        AABB legacyModel = LegacyMultiblockCollision.worldBounds(controller, definition, facing);
         return new AABB(
-                structure.minX - 0.125D,
-                structure.minY - 0.125D,
-                structure.minZ - 0.125D,
-                structure.maxX + 0.125D,
-                structure.maxY + topMargin,
-                structure.maxZ + 0.125D
+                Math.min(structure.minX, legacyModel.minX) - 0.125D,
+                Math.min(structure.minY, legacyModel.minY) - 0.125D,
+                Math.min(structure.minZ, legacyModel.minZ) - 0.125D,
+                Math.max(structure.maxX, legacyModel.maxX) + 0.125D,
+                Math.max(structure.maxY, legacyModel.maxY) + 0.125D,
+                Math.max(structure.maxZ, legacyModel.maxZ) + 0.125D
         );
     }
 }

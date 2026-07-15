@@ -9,10 +9,17 @@ import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
@@ -20,8 +27,18 @@ import org.jetbrains.annotations.Nullable;
 /** Formed-structure proxy that preserves the released 1.12 per-position port behavior. */
 public final class MultiblockGapBlockEntity extends BlockEntity
         implements MachineModuleHost, NetworkConnectionHost {
+    private static final String CONTROLLER_TAG = "controller";
+    private static final String DEFINITION_TAG = "definition";
+    private static final String FACING_TAG = "facing";
+
     private final PhysicalPortModule electricity = new PhysicalPortModule(NetworkDomain.ELECTRICITY);
     private final PhysicalPortModule heat = new PhysicalPortModule(NetworkDomain.HEAT);
+    @Nullable
+    private BlockPos controllerPosition;
+    @Nullable
+    private MultiblockDefinition definition;
+    @Nullable
+    private Direction facing;
 
     public MultiblockGapBlockEntity(BlockPos position, BlockState state) {
         super(ModBlockEntities.MULTIBLOCK_GAP.get(), position, state);
@@ -43,6 +60,98 @@ public final class MultiblockGapBlockEntity extends BlockEntity
         electricity.onUnload();
         heat.onUnload();
         super.setRemoved();
+    }
+
+    void configure(
+            BlockPos controllerPosition,
+            MultiblockDefinition definition,
+            Direction facing
+    ) {
+        if (facing.getAxis().isVertical()) {
+            throw new IllegalArgumentException("Multiblock facing must be horizontal: " + facing);
+        }
+        BlockPos stableController = controllerPosition.immutable();
+        if (stableController.equals(this.controllerPosition)
+                && definition == this.definition
+                && facing == this.facing) {
+            return;
+        }
+        this.controllerPosition = stableController;
+        this.definition = definition;
+        this.facing = facing;
+        markChangedAndSync();
+    }
+
+    VoxelShape collisionShape() {
+        return controllerPosition == null || definition == null || facing == null
+                ? Shapes.empty()
+                : LegacyMultiblockCollision.shapeAt(
+                worldPosition, controllerPosition, definition, facing
+        );
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
+        writeCollisionData(tag);
+    }
+
+    @Override
+    public void load(CompoundTag tag) {
+        super.load(tag);
+        loadCollisionData(tag);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag() {
+        CompoundTag tag = new CompoundTag();
+        writeCollisionData(tag);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag) {
+        loadCollisionData(tag);
+    }
+
+    @Nullable
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    private void writeCollisionData(CompoundTag tag) {
+        if (controllerPosition == null || definition == null || facing == null) {
+            return;
+        }
+        tag.putLong(CONTROLLER_TAG, controllerPosition.asLong());
+        tag.putString(DEFINITION_TAG, definition.id());
+        tag.putInt(FACING_TAG, facing.get3DDataValue());
+    }
+
+    private void loadCollisionData(CompoundTag tag) {
+        controllerPosition = tag.contains(CONTROLLER_TAG, Tag.TAG_LONG)
+                ? BlockPos.of(tag.getLong(CONTROLLER_TAG))
+                : null;
+        definition = tag.contains(DEFINITION_TAG, Tag.TAG_STRING)
+                ? definition(tag.getString(DEFINITION_TAG))
+                : null;
+        Direction loadedFacing = tag.contains(FACING_TAG, Tag.TAG_INT)
+                ? Direction.from3DDataValue(tag.getInt(FACING_TAG))
+                : null;
+        facing = loadedFacing != null && loadedFacing.getAxis().isHorizontal()
+                ? loadedFacing
+                : null;
+    }
+
+    @Nullable
+    private static MultiblockDefinition definition(String id) {
+        for (MultiblockDefinition candidate : MultiblockDefinition.values()) {
+            if (candidate.id().equals(id)) {
+                return candidate;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -88,6 +197,9 @@ public final class MultiblockGapBlockEntity extends BlockEntity
     @Override
     public void markChangedAndSync() {
         setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
     @Nullable
