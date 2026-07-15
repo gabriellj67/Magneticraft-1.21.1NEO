@@ -26,8 +26,8 @@
     "exclusion_leaf_sha256": "f6beb52866ea02a788d7c1ba4a2e88ecbac78bcb54c7552183363b8505a19dac",
     "derived_runtime_id_count": 80,
     "derived_runtime_id_sha256": "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451",
-    "supporting_registry_id_count": 119,
-    "supporting_registry_id_sha256": "2fa491f8f2d21d4632ec95cac8f7355254afbe3a603eccb8c036bbd682ab7268",
+    "supporting_registry_id_count": 120,
+    "supporting_registry_id_sha256": "6db128ea15b02a6c6bbb5170fd8506694d72dbc42964c7e4fa972ccf0d0f7ca0",
     "forbidden_runtime_id_count": 56,
     "forbidden_runtime_id_sha256": "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d"
   },
@@ -1059,6 +1059,7 @@
     {"registry": "recipe_serializer", "legacy_id": "hydraulic_press", "target_id": "magneticraft:hydraulic_press", "owner": "magneticraft:hydraulic_press"},
     {"registry": "recipe_serializer", "legacy_id": "oil_heater", "target_id": "magneticraft:oil_heater", "owner": "magneticraft:oil_heater"},
     {"registry": "recipe_serializer", "legacy_id": "refinery", "target_id": "magneticraft:refinery", "owner": "magneticraft:refinery"},
+    {"registry": "recipe_serializer", "internal": true, "target_id": "magneticraft:tiered_shaped", "owner": "magneticraft:electric_cable"},
 
     {"registry": "sound_event", "legacy_id": "crushing_hit", "target_id": "magneticraft:crushing_table_hit", "owner": "magneticraft:crushing_table"},
     {"registry": "sound_event", "legacy_id": "crushing_final", "target_id": "magneticraft:crushing_table_complete", "owner": "magneticraft:crushing_table"}

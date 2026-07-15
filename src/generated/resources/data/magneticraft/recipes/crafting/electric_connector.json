@@ -1,20 +1,25 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "magneticraft:tiered_shaped",
   "category": "redstone",
+  "electrical": {
+    "schema_version": 1,
+    "tier_id": "magneticraft:low_voltage"
+  },
   "key": {
-    "A": {
-      "tag": "forge:ingots/iron"
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
     },
-    "B": {
+    "I": {
       "tag": "forge:stone"
     },
-    "C": {
-      "tag": "forge:ingots/copper"
+    "S": {
+      "tag": "forge:ingots/iron"
     }
   },
   "pattern": [
-    " A ",
-    "BCB"
+    "SIS",
+    "CCC",
+    "SIS"
   ],
   "result": {
     "count": 8,

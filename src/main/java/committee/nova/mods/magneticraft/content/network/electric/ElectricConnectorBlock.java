@@ -1,12 +1,19 @@
 package committee.nova.mods.magneticraft.content.network.electric;
 
+import committee.nova.mods.magneticraft.content.item.TieredElectricalDrops;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ElectricConnectorBlock extends WallMountedElectricBlock {
     public ElectricConnectorBlock(Properties properties) {
@@ -25,5 +32,14 @@ public final class ElectricConnectorBlock extends WallMountedElectricBlock {
             LongDistanceElectricityService.get(serverLevel).removeConnectionsAt(position);
         }
         super.onRemove(oldState, level, position, newState, moving);
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        return TieredElectricalDrops.preserveTier(
+                new ArrayList<>(super.getDrops(state, builder)),
+                asItem(),
+                builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY)
+        );
     }
 }

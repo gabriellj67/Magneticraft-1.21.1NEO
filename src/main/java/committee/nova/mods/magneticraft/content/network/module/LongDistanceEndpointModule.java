@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceConnection;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceEndpointHost;
+import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceEndpoint;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistancePort;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 import net.minecraft.core.BlockPos;
@@ -24,6 +25,8 @@ public final class LongDistanceEndpointModule implements MachineModule {
     private static final String Y_TAG = "y";
     private static final String Z_TAG = "z";
     private static final String PORT_TAG = "port";
+    private static final String TERMINAL_ID_TAG = "terminal_id";
+    private static final String TIER_ID_TAG = "tier_id";
     private static final int MAX_CLIENT_CONNECTIONS = 64;
 
     private final ResourceLocation id;
@@ -74,13 +77,14 @@ public final class LongDistanceEndpointModule implements MachineModule {
         for (int index = 0; index < Math.min(all.size(), MAX_CLIENT_CONNECTIONS); index++) {
             LongDistanceConnection connection = all.get(index);
             boolean first = connection.first().position().equals(host.position());
-            BlockPos remote = first ? connection.second().position() : connection.first().position();
-            LongDistancePort port = first ? connection.first().port() : connection.second().port();
+            LongDistanceEndpoint remote = first ? connection.second() : connection.first();
             CompoundTag connectionTag = new CompoundTag();
-            connectionTag.putInt(X_TAG, remote.getX());
-            connectionTag.putInt(Y_TAG, remote.getY());
-            connectionTag.putInt(Z_TAG, remote.getZ());
-            connectionTag.putString(PORT_TAG, port.serializedName());
+            connectionTag.putInt(X_TAG, remote.position().getX());
+            connectionTag.putInt(Y_TAG, remote.position().getY());
+            connectionTag.putInt(Z_TAG, remote.position().getZ());
+            connectionTag.putString(TERMINAL_ID_TAG, remote.terminalId().toString());
+            connectionTag.putString(PORT_TAG, remote.port().serializedName());
+            connectionTag.putString(TIER_ID_TAG, remote.tierId().toString());
             connections.add(connectionTag);
         }
         tag.put(CONNECTIONS_TAG, connections);
@@ -96,9 +100,16 @@ public final class LongDistanceEndpointModule implements MachineModule {
         List<WireView> loaded = new ArrayList<>(Math.min(connections.size(), MAX_CLIENT_CONNECTIONS));
         for (int index = 0; index < Math.min(connections.size(), MAX_CLIENT_CONNECTIONS); index++) {
             CompoundTag connection = connections.getCompound(index);
+            ResourceLocation terminalId = ResourceLocation.tryParse(connection.getString(TERMINAL_ID_TAG));
+            ResourceLocation tierId = ResourceLocation.tryParse(connection.getString(TIER_ID_TAG));
+            if (terminalId == null || tierId == null) {
+                continue;
+            }
             LongDistancePort.byName(connection.getString(PORT_TAG)).ifPresent(port -> loaded.add(new WireView(
                     new BlockPos(connection.getInt(X_TAG), connection.getInt(Y_TAG), connection.getInt(Z_TAG)),
-                    port
+                    terminalId,
+                    port,
+                    tierId
             )));
         }
         clientConnections = List.copyOf(loaded);
@@ -114,9 +125,17 @@ public final class LongDistanceEndpointModule implements MachineModule {
                 : service.connectionsAt(host.position()).size();
     }
 
-    public record WireView(BlockPos remotePosition, LongDistancePort port) {
+    public record WireView(
+            BlockPos remotePosition,
+            ResourceLocation terminalId,
+            LongDistancePort port,
+            ResourceLocation tierId
+    ) {
         public WireView {
             remotePosition = remotePosition.immutable();
+            Objects.requireNonNull(terminalId);
+            Objects.requireNonNull(port);
+            Objects.requireNonNull(tierId);
         }
     }
 }

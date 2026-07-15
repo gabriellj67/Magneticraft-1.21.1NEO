@@ -4,7 +4,9 @@ import committee.nova.mods.magneticraft.content.computer.FloppyDiskItem;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.PortableEnergyItem;
+import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockItem;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -27,8 +29,10 @@ public final class ModCreativeTabs {
                     .icon(() -> new ItemStack(ModItems.component(CraftingComponent.MAGNET).get()))
                     .displayItems((parameters, output) -> {
                         ModBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
-                        ModMachineBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
-                        ModNetworkBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModMachineBlocks.blockItems().stream().map(RegistryObject::get)
+                                .forEach(item -> acceptBlockItem(output, item));
+                        ModNetworkBlocks.blockItems().stream().map(RegistryObject::get)
+                                .forEach(item -> acceptBlockItem(output, item));
                         ModAdvancedBlocks.blockItems().stream().map(RegistryObject::get)
                                 .forEach(item -> acceptAdvancedItem(output, item));
                         ModItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
@@ -59,6 +63,16 @@ public final class ModCreativeTabs {
         variant.putInt("schema_version", PORTABLE_VARIANT_SCHEMA);
         variant.putString("creative_variant", "full");
         output.accept(charged);
+    }
+
+    private static void acceptBlockItem(CreativeModeTab.Output output, Item item) {
+        if (!(item instanceof TieredElectricalBlockItem tieredItem)) {
+            output.accept(item);
+            return;
+        }
+        VoltageTierIds.BUILT_IN.forEach(tier -> output.accept(
+                TieredElectricalBlockItem.stackForTier(tieredItem.getBlock(), tier)
+        ));
     }
 
     private static void acceptAdvancedItem(CreativeModeTab.Output output, Item item) {

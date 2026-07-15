@@ -13,6 +13,7 @@ import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -51,6 +52,11 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
                 ModMachineItems.ELECTRIC_DRILL.get(),
                 ModMachineItems.ELECTRIC_CHAINSAW.get(),
                 ModMachineItems.ELECTRIC_PISTON.get(),
+                ModMachineBlocks.BATTERY.get().asItem(),
+                ModMachineBlocks.machine(SingleBlockMachineDefinition.INFINITE_ENERGY).get().asItem(),
+                ModNetworkBlocks.ELECTRIC_CABLE.get().asItem(),
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get().asItem(),
+                ModNetworkBlocks.ELECTRIC_POLE.get().asItem(),
                 ModComputerContent.FLOPPY_DISK.get()
         );
     }

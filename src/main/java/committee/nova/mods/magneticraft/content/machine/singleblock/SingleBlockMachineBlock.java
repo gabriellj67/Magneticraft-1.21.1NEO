@@ -1,5 +1,6 @@
 package committee.nova.mods.magneticraft.content.machine.singleblock;
 
+import committee.nova.mods.magneticraft.content.item.TieredElectricalDrops;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
@@ -37,6 +38,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -218,7 +220,15 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
             }
             return List.of(stack);
         }
-        return super.getDrops(state, builder);
+        List<ItemStack> drops = super.getDrops(state, builder);
+        if (definition != SingleBlockMachineDefinition.INFINITE_ENERGY) {
+            return drops;
+        }
+        return TieredElectricalDrops.preserveTier(
+                new ArrayList<>(drops),
+                asItem(),
+                builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY)
+        );
     }
 
     @Nullable

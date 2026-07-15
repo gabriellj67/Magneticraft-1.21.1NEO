@@ -1,5 +1,7 @@
 package committee.nova.mods.magneticraft.system.network.longdistance;
 
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNodeKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -12,8 +14,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WireSelectionPayloadTest {
     private static final WireSelectionPayload.Selection SELECTION = new WireSelectionPayload.Selection(
-            new ResourceLocation("minecraft", "overworld"),
-            new BlockPos(12, 64, -8)
+            ResourceLocation.fromNamespaceAndPath("minecraft", "overworld"),
+            new LongDistanceEndpoint(
+                    new BlockPos(12, 64, -8),
+                    PhysicalNodeKey.MAIN_TERMINAL,
+                    LongDistancePort.CONNECTOR,
+                    VoltageTierIds.MEDIUM
+            )
     );
 
     @Test
@@ -32,6 +39,9 @@ class WireSelectionPayloadTest {
         assertEquals(12, payload.getInt("x"));
         assertEquals(64, payload.getInt("y"));
         assertEquals(-8, payload.getInt("z"));
+        assertEquals("magneticraft:main", payload.getString("terminal_id"));
+        assertEquals("connector", payload.getString("port"));
+        assertEquals("magneticraft:medium_voltage", payload.getString("tier_id"));
         assertEquals(SELECTION, WireSelectionPayload.read(owner).orElseThrow());
         assertEquals("preserved", owner.getString("unrelated"));
     }
@@ -67,6 +77,18 @@ class WireSelectionPayloadTest {
         CompoundTag wrongCoordinateType = encodedSelection();
         wrongCoordinateType.getCompound("wire_selection").putString("x", "12");
         assertTrue(WireSelectionPayload.read(wrongCoordinateType).isEmpty());
+
+        CompoundTag invalidTerminal = encodedSelection();
+        invalidTerminal.getCompound("wire_selection").putString("terminal_id", "Invalid Terminal");
+        assertTrue(WireSelectionPayload.read(invalidTerminal).isEmpty());
+
+        CompoundTag invalidPort = encodedSelection();
+        invalidPort.getCompound("wire_selection").putString("port", "universal");
+        assertTrue(WireSelectionPayload.read(invalidPort).isEmpty());
+
+        CompoundTag missingTier = encodedSelection();
+        missingTier.getCompound("wire_selection").remove("tier_id");
+        assertTrue(WireSelectionPayload.read(missingTier).isEmpty());
     }
 
     @Test

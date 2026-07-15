@@ -1,0 +1,29 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "schema_version": 1,
+    "tier_id": "magneticraft:high_voltage"
+  },
+  "key": {
+    "C": {
+      "tag": "forge:ingots/aluminium"
+    },
+    "I": {
+      "tag": "forge:ingots/lead"
+    },
+    "S": {
+      "tag": "forge:ingots/tungsten"
+    }
+  },
+  "pattern": [
+    "SIS",
+    "CCC",
+    "SIS"
+  ],
+  "result": {
+    "count": 3,
+    "item": "magneticraft:electric_pole"
+  },
+  "show_notification": true
+}

@@ -494,6 +494,7 @@
   "message.magneticraft.hydraulic_press_mode.heavy": "重压",
   "message.magneticraft.hydraulic_press_mode.light": "轻压",
   "message.magneticraft.hydraulic_press_mode.medium": "中压",
+  "message.magneticraft.invalid_voltage_tier": "无法放置：电压层级 %s 不存在或物品数据已损坏",
   "message.magneticraft.long_distance_connections": "长距离连接：%s",
   "message.magneticraft.multiblock_formed": "%s 已组装",
   "message.magneticraft.multiblock_hologram_disabled": "多方块全息投影已关闭",

@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.item;
 
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
+import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceEndpoint;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceEndpointHost;
 import committee.nova.mods.magneticraft.system.network.longdistance.WireSelectionPayload;
 import net.minecraft.core.BlockPos;
@@ -43,24 +44,24 @@ public final class CopperWireCoilItem extends Item {
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
-        Optional<BlockPos> endpointPosition = resolveEndpointPosition(level, context.getClickedPos());
+        Optional<LongDistanceEndpoint> endpoint = resolveEndpoint(level, context.getClickedPos(), context.getClickedFace());
         Player player = context.getPlayer();
         if (player == null) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide) {
-            return endpointPosition.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;
+            return endpoint.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
-        if (!(level instanceof ServerLevel serverLevel) || endpointPosition.isEmpty()) {
+        if (!(level instanceof ServerLevel serverLevel) || endpoint.isEmpty()) {
             return InteractionResult.PASS;
         }
-        BlockPos position = endpointPosition.get();
+        BlockPos position = endpoint.get().position();
 
         ItemStack stack = context.getItemInHand();
         if (player.isShiftKeyDown()) {
             WireSelectionPayload.write(
                     stack.getOrCreateTag(),
-                    new WireSelectionPayload.Selection(serverLevel.dimension().location(), position)
+                    new WireSelectionPayload.Selection(serverLevel.dimension().location(), endpoint.get())
             );
             player.displayClientMessage(Component.translatable(
                     UPDATED_POSITION_MESSAGE,
@@ -84,8 +85,14 @@ public final class CopperWireCoilItem extends Item {
         }
 
         var attempt = LongDistanceElectricityService.get(serverLevel)
-                .connect(selection.get().position(), position);
+                .connect(selection.get().endpoint(), endpoint.get());
         player.displayClientMessage(Component.translatable(messageKey(attempt.result())), false);
+        if (attempt.result() == LongDistanceElectricityService.ConnectionResult.SUCCESS) {
+            WireSelectionPayload.clear(stack.getOrCreateTag());
+            if (!player.getAbilities().instabuild) {
+                stack.shrink(1);
+            }
+        }
         return InteractionResult.CONSUME;
     }
 
@@ -107,7 +114,11 @@ public final class CopperWireCoilItem extends Item {
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
 
-    private static Optional<BlockPos> resolveEndpointPosition(Level level, BlockPos clickedPosition) {
+    private static Optional<LongDistanceEndpoint> resolveEndpoint(
+            Level level,
+            BlockPos clickedPosition,
+            net.minecraft.core.Direction clickedFace
+    ) {
         if (!level.isLoaded(clickedPosition)) {
             return Optional.empty();
         }
@@ -115,10 +126,11 @@ public final class CopperWireCoilItem extends Item {
         BlockPos endpointPosition = state.getBlock() instanceof ElectricPoleBlock
                 ? ElectricPoleBlock.basePosition(clickedPosition, state)
                 : clickedPosition;
-        return level.isLoaded(endpointPosition)
-                && level.getBlockEntity(endpointPosition) instanceof LongDistanceEndpointHost
-                ? Optional.of(endpointPosition.immutable())
-                : Optional.empty();
+        if (!level.isLoaded(endpointPosition)
+                || !(level.getBlockEntity(endpointPosition) instanceof LongDistanceEndpointHost host)) {
+            return Optional.empty();
+        }
+        return host.longDistanceEndpointForInteraction(clickedFace);
     }
 
     private static String messageKey(LongDistanceElectricityService.ConnectionResult result) {
@@ -126,7 +138,7 @@ public final class CopperWireCoilItem extends Item {
             case SUCCESS -> SUCCESS_MESSAGE;
             case ENDPOINT_UNLOADED -> NOT_A_CONNECTOR_MESSAGE;
             case SAME_ENDPOINT -> SAME_CONNECTOR_MESSAGE;
-            case INCOMPATIBLE_PORT -> INVALID_CONNECTOR_MESSAGE;
+            case INCOMPATIBLE_PORT, INCOMPATIBLE_TIER, MISSING_PROFILE -> INVALID_CONNECTOR_MESSAGE;
             case TOO_FAR -> TOO_FAR_MESSAGE;
             case ALREADY_CONNECTED -> ALREADY_CONNECTED_MESSAGE;
         };

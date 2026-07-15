@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlo
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleTransformerBlockItem;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock;
 import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyReceiverBlock;
+import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlock;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlock;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlock;
@@ -30,15 +31,15 @@ import java.util.function.Supplier;
 public final class ModNetworkBlocks {
     private static final List<RegistryObject<? extends Item>> BLOCK_ITEMS = new ArrayList<>();
 
-    public static final RegistryObject<Block> ELECTRIC_CABLE = register(
+    public static final RegistryObject<Block> ELECTRIC_CABLE = registerTiered(
             "electric_cable",
             () -> new ElectricCableBlock(conduitProperties(MapColor.COLOR_ORANGE))
     );
-    public static final RegistryObject<Block> ELECTRIC_CONNECTOR = register(
+    public static final RegistryObject<Block> ELECTRIC_CONNECTOR = registerTiered(
             "electric_connector",
             () -> new ElectricConnectorBlock(machineProperties().noOcclusion())
     );
-    public static final RegistryObject<Block> ELECTRIC_POLE = register(
+    public static final RegistryObject<Block> ELECTRIC_POLE = registerTiered(
             "electric_pole",
             () -> new ElectricPoleBlock(poleProperties(), false)
     );
@@ -102,6 +103,15 @@ public final class ModNetworkBlocks {
     private static RegistryObject<Block> register(String id, Supplier<Block> factory) {
         RegistryObject<Block> block = ModRegistries.BLOCKS.register(id, factory);
         BLOCK_ITEMS.add(ModRegistries.ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties())));
+        return block;
+    }
+
+    private static RegistryObject<Block> registerTiered(String id, Supplier<Block> factory) {
+        RegistryObject<Block> block = ModRegistries.BLOCKS.register(id, factory);
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                id,
+                () -> new TieredElectricalBlockItem(block.get(), new Item.Properties())
+        ));
         return block;
     }
 

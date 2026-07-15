@@ -7,6 +7,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyS
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -27,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * One-million-FE battery with two portable-cell transfer slots.
  */
-public final class BatteryBlockEntity extends MachineBlockEntity implements MenuProvider {
+public final class BatteryBlockEntity extends MachineBlockEntity implements MenuProvider, TieredElectricalHost {
     public static final int CAPACITY = 1_000_000;
     public static final int ITEM_TRANSFER_RATE = 500;
     public static final int MENU_DATA_COUNT = 4;
@@ -93,6 +94,11 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
     }
 
     public ElectricalNetworkModule electricity() {
+        return electricity;
+    }
+
+    @Override
+    public ElectricalNetworkModule tieredElectricalModule() {
         return electricity;
     }
 

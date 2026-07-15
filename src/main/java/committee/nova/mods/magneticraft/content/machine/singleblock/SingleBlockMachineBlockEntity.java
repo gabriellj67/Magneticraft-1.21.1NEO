@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.GhostFi
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalEnergyBridgeModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticConnectionHost;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
@@ -46,7 +47,7 @@ import org.jetbrains.annotations.Nullable;
  * Module, capability and persistence host for the Task 5 single-block behavior strategies.
  */
 public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
-        implements MenuProvider, PneumaticConnectionHost {
+        implements MenuProvider, PneumaticConnectionHost, TieredElectricalHost {
     public static final int MENU_LOGICAL_DATA_COUNT = 17;
     public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     public static final int SLUICE_MAX_ITEMS = 10;
@@ -230,6 +231,12 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
 
     @Nullable
     public ElectricalNetworkModule electricity() {
+        return electricity;
+    }
+
+    @Override
+    @Nullable
+    public ElectricalNetworkModule tieredElectricalModule() {
         return electricity;
     }
 

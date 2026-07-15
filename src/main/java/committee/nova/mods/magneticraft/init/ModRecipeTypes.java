@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Fluid
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.GasificationRecipe;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.SluiceRecipe;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.ThermopileRecipe;
+import committee.nova.mods.magneticraft.content.recipe.TieredShapedRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -21,6 +22,8 @@ import java.util.Set;
  * Custom machine recipe registrations.
  */
 public final class ModRecipeTypes {
+    public static final RegistryObject<RecipeSerializer<TieredShapedRecipe>> TIERED_SHAPED_SERIALIZER =
+            ModRegistries.RECIPE_SERIALIZERS.register("tiered_shaped", TieredShapedRecipe.Serializer::new);
     private static final Set<MultiblockDefinition> ADVANCED_PROCESSING_MACHINES = EnumSet.of(
             MultiblockDefinition.GRINDER,
             MultiblockDefinition.SIEVE,

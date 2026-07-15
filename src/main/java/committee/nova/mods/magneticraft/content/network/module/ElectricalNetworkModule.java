@@ -9,6 +9,7 @@ import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeAccess;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataSnapshot;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalProfileBinding;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTier;
@@ -18,6 +19,7 @@ import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkNo
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNodeKey;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
@@ -28,7 +30,7 @@ import java.util.function.Predicate;
 public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         implements ElectricalDiagnosticSource, ElectricalNodeAccess, ElectricalProfileBinding {
     public static final int MODULE_SCHEMA_VERSION = 2;
-    public static final ResourceLocation LOW_VOLTAGE = Magneticraft.id("low_voltage");
+    public static final ResourceLocation LOW_VOLTAGE = VoltageTierIds.LOW;
 
     private static final String SCHEMA_VERSION_TAG = "schema_version";
     private static final String TERMINAL_ID_TAG = "terminal_id";
@@ -145,6 +147,22 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         );
         if (changed || networkRegistered()) {
             topologyChanged();
+        }
+    }
+
+    @Override
+    public void saveClientData(CompoundTag tag) {
+        tag.putString(TIER_ID_TAG, tierId.toString());
+    }
+
+    @Override
+    public void loadClientData(CompoundTag tag) {
+        if (!tag.contains(TIER_ID_TAG, Tag.TAG_STRING)) {
+            return;
+        }
+        ResourceLocation syncedTier = ResourceLocation.tryParse(tag.getString(TIER_ID_TAG));
+        if (syncedTier != null) {
+            tierId = syncedTier;
         }
     }
 

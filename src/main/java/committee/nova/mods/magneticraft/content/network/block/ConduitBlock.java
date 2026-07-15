@@ -152,7 +152,7 @@ public abstract class ConduitBlock extends NetworkComponentBlock {
         BlockPos neighborPosition = position.relative(direction);
         BlockState neighborState = level.getBlockState(neighborPosition);
         Direction neighborSide = direction.getOpposite();
-        if (connectsVisuallyTo(neighborState)) {
+        if (connectsVisuallyTo(level, position, direction, neighborState)) {
             BlockEntity neighbor = level.getBlockEntity(neighborPosition);
             return !(neighbor instanceof NetworkConnectionHost host)
                     || host.supportsNetworkConnection(connectionDomain(), neighborSide);
@@ -169,6 +169,15 @@ public abstract class ConduitBlock extends NetworkComponentBlock {
     }
 
     protected abstract NetworkDomain connectionDomain();
+
+    protected boolean connectsVisuallyTo(
+            LevelAccessor level,
+            BlockPos position,
+            Direction direction,
+            BlockState neighbor
+    ) {
+        return connectsVisuallyTo(neighbor);
+    }
 
     protected abstract boolean connectsVisuallyTo(BlockState neighbor);
 }

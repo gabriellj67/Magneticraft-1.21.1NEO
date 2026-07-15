@@ -6,8 +6,10 @@ import committee.nova.mods.magneticraft.content.network.module.ConveyorBeltModul
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.LogisticsTubeModule;
 import committee.nova.mods.magneticraft.content.network.module.LongDistanceEndpointModule;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceEndpointHost;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistancePort;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNodeKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -42,7 +44,7 @@ class ReleaseCandidateBudgetContractTest {
         assertEquals(64, endpoint.clientConnections().size());
         assertEquals(8, LongDistanceWireRenderer.segmentCount(0.0F));
         assertEquals(8, LongDistanceWireRenderer.segmentCount(4.0F));
-        assertEquals(32, LongDistanceWireRenderer.segmentCount((float) LongDistancePort.POLE.maxDistance()));
+        assertEquals(32, LongDistanceWireRenderer.segmentCount(64.0F));
         assertEquals(32, LongDistanceWireRenderer.segmentCount(Float.MAX_VALUE));
 
         int maximumVertices = endpoint.clientConnections().size()
@@ -63,7 +65,9 @@ class ReleaseCandidateBudgetContractTest {
             connection.putInt("x", index + 1);
             connection.putInt("y", 64);
             connection.putInt("z", 0);
+            connection.putString("terminal_id", PhysicalNodeKey.MAIN_TERMINAL.toString());
             connection.putString("port", LongDistancePort.POLE.serializedName());
+            connection.putString("tier_id", VoltageTierIds.HIGH.toString());
             connections.add(connection);
         }
         CompoundTag snapshot = new CompoundTag();

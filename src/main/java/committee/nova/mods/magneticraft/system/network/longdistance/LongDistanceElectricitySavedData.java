@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
@@ -12,7 +13,7 @@ import java.util.Optional;
 
 /** Durable per-dimension wire edges; loaded endpoint objects are never saved. */
 public final class LongDistanceElectricitySavedData extends SavedData {
-    public static final int SCHEMA_VERSION = 1;
+    public static final int SCHEMA_VERSION = 2;
 
     private static final String DATA_NAME = "magneticraft_long_distance_electricity";
     private static final String SCHEMA_VERSION_TAG = "schema_version";
@@ -23,6 +24,8 @@ public final class LongDistanceElectricitySavedData extends SavedData {
     private static final String Y_TAG = "y";
     private static final String Z_TAG = "z";
     private static final String PORT_TAG = "port";
+    private static final String TERMINAL_ID_TAG = "terminal_id";
+    private static final String TIER_ID_TAG = "tier_id";
 
     private final LongDistanceConnectionGraph graph = new LongDistanceConnectionGraph();
 
@@ -49,7 +52,7 @@ public final class LongDistanceElectricitySavedData extends SavedData {
             Optional<LongDistanceEndpoint> first = readEndpoint(connectionTag, FIRST_TAG);
             Optional<LongDistanceEndpoint> second = readEndpoint(connectionTag, SECOND_TAG);
             if (first.isPresent() && second.isPresent()) {
-                data.graph.connect(first.get(), second.get());
+                data.graph.restore(first.get(), second.get());
             }
         }
         return data;
@@ -71,9 +74,10 @@ public final class LongDistanceElectricitySavedData extends SavedData {
 
     public LongDistanceConnectionGraph.ConnectResult connect(
             LongDistanceEndpoint first,
-            LongDistanceEndpoint second
+            LongDistanceEndpoint second,
+            int maxDistance
     ) {
-        LongDistanceConnectionGraph.ConnectResult result = graph.connect(first, second);
+        LongDistanceConnectionGraph.ConnectResult result = graph.connect(first, second, maxDistance);
         if (result == LongDistanceConnectionGraph.ConnectResult.SUCCESS) {
             setDirty();
         }
@@ -113,7 +117,9 @@ public final class LongDistanceElectricitySavedData extends SavedData {
         tag.putInt(X_TAG, endpoint.position().getX());
         tag.putInt(Y_TAG, endpoint.position().getY());
         tag.putInt(Z_TAG, endpoint.position().getZ());
+        tag.putString(TERMINAL_ID_TAG, endpoint.terminalId().toString());
         tag.putString(PORT_TAG, endpoint.port().serializedName());
+        tag.putString(TIER_ID_TAG, endpoint.tierId().toString());
         return tag;
     }
 
@@ -125,13 +131,21 @@ public final class LongDistanceElectricitySavedData extends SavedData {
         if (!tag.contains(X_TAG, Tag.TAG_INT)
                 || !tag.contains(Y_TAG, Tag.TAG_INT)
                 || !tag.contains(Z_TAG, Tag.TAG_INT)
+                || !tag.contains(TERMINAL_ID_TAG, Tag.TAG_STRING)
+                || !tag.contains(TIER_ID_TAG, Tag.TAG_STRING)
                 || !tag.contains(PORT_TAG, Tag.TAG_STRING)) {
             return Optional.empty();
         }
-        return LongDistancePort.byName(tag.getString(PORT_TAG))
-                .map(port -> new LongDistanceEndpoint(
-                        new BlockPos(tag.getInt(X_TAG), tag.getInt(Y_TAG), tag.getInt(Z_TAG)),
-                        port
-                ));
+        ResourceLocation terminalId = ResourceLocation.tryParse(tag.getString(TERMINAL_ID_TAG));
+        ResourceLocation tierId = ResourceLocation.tryParse(tag.getString(TIER_ID_TAG));
+        if (terminalId == null || tierId == null) {
+            return Optional.empty();
+        }
+        return LongDistancePort.byName(tag.getString(PORT_TAG)).map(port -> new LongDistanceEndpoint(
+                new BlockPos(tag.getInt(X_TAG), tag.getInt(Y_TAG), tag.getInt(Z_TAG)),
+                terminalId,
+                port,
+                tierId
+        ));
     }
 }

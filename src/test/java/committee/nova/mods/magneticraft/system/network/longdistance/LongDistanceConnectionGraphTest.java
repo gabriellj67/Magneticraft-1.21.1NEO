@@ -1,7 +1,10 @@
 package committee.nova.mods.magneticraft.system.network.longdistance;
 
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNodeKey;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,23 +15,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LongDistanceConnectionGraphTest {
     @Test
-    void connectorAndPoleDistancesAreIndependentFrozenContracts() {
+    void graphUsesTheRangeSuppliedByTheResolvedTierProfile() {
         LongDistanceConnectionGraph graph = new LongDistanceConnectionGraph();
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.SUCCESS,
-                graph.connect(endpoint(0, LongDistancePort.CONNECTOR), endpoint(8, LongDistancePort.CONNECTOR))
+                graph.connect(endpoint(0, LongDistancePort.CONNECTOR), endpoint(8, LongDistancePort.CONNECTOR), 8)
         );
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.TOO_FAR,
-                graph.connect(endpoint(0, LongDistancePort.CONNECTOR), endpoint(9, LongDistancePort.CONNECTOR))
+                graph.connect(endpoint(0, LongDistancePort.CONNECTOR), endpoint(9, LongDistancePort.CONNECTOR), 8)
         );
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.SUCCESS,
-                graph.connect(endpoint(0, LongDistancePort.POLE), endpoint(16, LongDistancePort.POLE))
+                graph.connect(endpoint(0, LongDistancePort.POLE), endpoint(16, LongDistancePort.POLE), 16)
         );
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.TOO_FAR,
-                graph.connect(endpoint(0, LongDistancePort.POLE), endpoint(17, LongDistancePort.POLE))
+                graph.connect(endpoint(0, LongDistancePort.POLE), endpoint(17, LongDistancePort.POLE), 16)
         );
         assertEquals(2, graph.size());
     }
@@ -39,17 +42,21 @@ class LongDistanceConnectionGraphTest {
         LongDistanceEndpoint connector = endpoint(0, LongDistancePort.CONNECTOR);
         LongDistanceEndpoint otherConnector = endpoint(4, LongDistancePort.CONNECTOR);
 
-        assertEquals(LongDistanceConnectionGraph.ConnectResult.SAME_ENDPOINT, graph.connect(connector, connector));
+        assertEquals(LongDistanceConnectionGraph.ConnectResult.SAME_ENDPOINT, graph.connect(connector, connector, 8));
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.INCOMPATIBLE_PORT,
-                graph.connect(connector, endpoint(4, LongDistancePort.POLE))
+                graph.connect(connector, endpoint(4, LongDistancePort.POLE), 8)
+        );
+        assertEquals(
+                LongDistanceConnectionGraph.ConnectResult.INCOMPATIBLE_TIER,
+                graph.connect(connector, endpoint(4, LongDistancePort.CONNECTOR, VoltageTierIds.MEDIUM), 8)
         );
         assertEquals(0L, graph.mutationVersion());
-        assertEquals(LongDistanceConnectionGraph.ConnectResult.SUCCESS, graph.connect(connector, otherConnector));
+        assertEquals(LongDistanceConnectionGraph.ConnectResult.SUCCESS, graph.connect(connector, otherConnector, 8));
         assertEquals(1L, graph.mutationVersion());
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.ALREADY_CONNECTED,
-                graph.connect(otherConnector, connector)
+                graph.connect(otherConnector, connector, 8)
         );
         assertEquals(1L, graph.mutationVersion());
 
@@ -61,7 +68,7 @@ class LongDistanceConnectionGraphTest {
 
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.SUCCESS,
-                graph.connect(otherConnector, endpoint(8, LongDistancePort.CONNECTOR))
+                graph.connect(otherConnector, endpoint(8, LongDistancePort.CONNECTOR), 8)
         );
         var changedSnapshot = graph.connections();
         assertNotSame(steadySnapshot, changedSnapshot);
@@ -69,37 +76,38 @@ class LongDistanceConnectionGraphTest {
     }
 
     @Test
-    void transformerReconnectPrefersExistingPoleEdgeToOutOfRangeConnectorPort() {
+    void portAndTierArePartOfTheDurableEndpointIdentity() {
         LongDistanceConnectionGraph graph = new LongDistanceConnectionGraph();
         BlockPos first = new BlockPos(0, 64, 0);
         BlockPos second = new BlockPos(12, 64, 0);
+        LongDistanceEndpoint firstPole = endpoint(first, LongDistancePort.POLE, VoltageTierIds.LOW);
+        LongDistanceEndpoint secondPole = endpoint(second, LongDistancePort.POLE, VoltageTierIds.LOW);
 
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.SUCCESS,
-                graph.connect(
-                        new LongDistanceEndpoint(first, LongDistancePort.POLE),
-                        new LongDistanceEndpoint(second, LongDistancePort.POLE)
-                )
+                graph.connect(firstPole, secondPole, 16)
         );
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.ALREADY_CONNECTED,
-                graph.connect(
-                        new LongDistanceEndpoint(first, LongDistancePort.POLE),
-                        new LongDistanceEndpoint(second, LongDistancePort.POLE)
-                )
+                graph.connect(secondPole, firstPole, 16)
         );
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.TOO_FAR,
                 graph.connect(
-                        new LongDistanceEndpoint(first, LongDistancePort.CONNECTOR),
-                        new LongDistanceEndpoint(second, LongDistancePort.CONNECTOR)
+                        endpoint(first, LongDistancePort.CONNECTOR, VoltageTierIds.LOW),
+                        endpoint(second, LongDistancePort.CONNECTOR, VoltageTierIds.LOW),
+                        8
                 )
         );
         assertEquals(
-                LongDistanceElectricityService.ConnectionResult.ALREADY_CONNECTED,
-                LongDistanceElectricityService.selectConnectionResult(0, true, true)
+                LongDistanceConnectionGraph.ConnectResult.INCOMPATIBLE_TIER,
+                graph.connect(
+                        endpoint(first, LongDistancePort.POLE, VoltageTierIds.LOW),
+                        endpoint(second, LongDistancePort.POLE, VoltageTierIds.MEDIUM),
+                        32
+                )
         );
-        assertEquals(1, graph.size(), "Rejected connector attempt changed the existing pole topology");
+        assertEquals(1, graph.size(), "Rejected endpoint attempts changed the existing topology");
     }
 
     @Test
@@ -108,7 +116,7 @@ class LongDistanceConnectionGraphTest {
         for (int x = 1; x < 1_024; x++) {
             assertEquals(
                     LongDistanceConnectionGraph.ConnectResult.SUCCESS,
-                    graph.connect(endpoint(x - 1, LongDistancePort.POLE), endpoint(x, LongDistancePort.POLE))
+                    graph.connect(endpoint(x - 1, LongDistancePort.POLE), endpoint(x, LongDistancePort.POLE), 16)
             );
         }
 
@@ -125,11 +133,11 @@ class LongDistanceConnectionGraphTest {
         LongDistanceElectricitySavedData data = new LongDistanceElectricitySavedData();
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.SUCCESS,
-                data.connect(endpoint(8, LongDistancePort.CONNECTOR), endpoint(0, LongDistancePort.CONNECTOR))
+                data.connect(endpoint(8, LongDistancePort.CONNECTOR), endpoint(0, LongDistancePort.CONNECTOR), 8)
         );
         assertEquals(
                 LongDistanceConnectionGraph.ConnectResult.SUCCESS,
-                data.connect(endpoint(16, LongDistancePort.POLE), endpoint(0, LongDistancePort.POLE))
+                data.connect(endpoint(16, LongDistancePort.POLE), endpoint(0, LongDistancePort.POLE), 16)
         );
 
         CompoundTag firstSave = data.save(new CompoundTag());
@@ -151,9 +159,9 @@ class LongDistanceConnectionGraphTest {
     void endpointRemovalDeletesEveryIncidentEdgeExactlyOnce() {
         LongDistanceConnectionGraph graph = new LongDistanceConnectionGraph();
         LongDistanceEndpoint center = endpoint(0, LongDistancePort.POLE);
-        graph.connect(center, endpoint(4, LongDistancePort.POLE));
-        graph.connect(center, endpoint(8, LongDistancePort.POLE));
-        graph.connect(endpoint(8, LongDistancePort.POLE), endpoint(12, LongDistancePort.POLE));
+        graph.connect(center, endpoint(4, LongDistancePort.POLE), 16);
+        graph.connect(center, endpoint(8, LongDistancePort.POLE), 16);
+        graph.connect(endpoint(8, LongDistancePort.POLE), endpoint(12, LongDistancePort.POLE), 16);
 
         assertEquals(2, graph.removeAt(center.position()));
         assertEquals(1, graph.size());
@@ -162,6 +170,14 @@ class LongDistanceConnectionGraphTest {
     }
 
     private static LongDistanceEndpoint endpoint(int x, LongDistancePort port) {
-        return new LongDistanceEndpoint(new BlockPos(x, 64, 0), port);
+        return endpoint(new BlockPos(x, 64, 0), port, VoltageTierIds.LOW);
+    }
+
+    private static LongDistanceEndpoint endpoint(int x, LongDistancePort port, ResourceLocation tierId) {
+        return endpoint(new BlockPos(x, 64, 0), port, tierId);
+    }
+
+    private static LongDistanceEndpoint endpoint(BlockPos position, LongDistancePort port, ResourceLocation tierId) {
+        return new LongDistanceEndpoint(position, PhysicalNodeKey.MAIN_TERMINAL, port, tierId);
     }
 }

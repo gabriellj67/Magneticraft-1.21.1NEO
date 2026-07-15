@@ -112,6 +112,9 @@ final class ModLanguageProvider extends LanguageProvider {
 
         add("message.magneticraft.connection_enabled", chinese ? "%s 连接已启用" : "%s connection enabled");
         add("message.magneticraft.connection_disabled", chinese ? "%s 连接已禁用" : "%s connection disabled");
+        add("message.magneticraft.invalid_voltage_tier", chinese
+                ? "无法放置：电压层级 %s 不存在或物品数据已损坏"
+                : "Cannot place: voltage tier %s is missing or the item data is invalid");
         add("message.magneticraft.redstone_mode", chinese ? "红石控制：%s" : "Redstone control: %s");
         add("message.magneticraft.redstone_mode.ignored", chinese ? "忽略" : "Ignored");
         add("message.magneticraft.redstone_mode.requires_signal", chinese ? "需要信号" : "Requires signal");

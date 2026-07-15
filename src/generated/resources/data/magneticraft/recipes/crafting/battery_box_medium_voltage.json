@@ -1,0 +1,31 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "misc",
+  "electrical": {
+    "schema_version": 1,
+    "tier_id": "magneticraft:medium_voltage"
+  },
+  "key": {
+    "A": {
+      "item": "magneticraft:medium_voltage_battery"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/steel"
+    },
+    "C": {
+      "item": "magneticraft:iron_grate"
+    },
+    "D": {
+      "tag": "magneticraft:light_plates/lead"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "DCD",
+    "DBD"
+  ],
+  "result": {
+    "item": "magneticraft:battery_box"
+  },
+  "show_notification": true
+}

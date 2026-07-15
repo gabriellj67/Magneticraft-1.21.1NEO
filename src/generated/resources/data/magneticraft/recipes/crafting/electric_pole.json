@@ -1,18 +1,25 @@
 {
-  "type": "minecraft:crafting_shaped",
+  "type": "magneticraft:tiered_shaped",
   "category": "redstone",
+  "electrical": {
+    "schema_version": 1,
+    "tier_id": "magneticraft:low_voltage"
+  },
   "key": {
-    "A": {
-      "item": "magneticraft:electric_connector"
+    "C": {
+      "tag": "forge:ingots/copper"
     },
-    "B": {
-      "tag": "minecraft:logs"
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "S": {
+      "tag": "forge:ingots/iron"
     }
   },
   "pattern": [
-    "AAA",
-    " B ",
-    " B "
+    "SIS",
+    "CCC",
+    "SIS"
   ],
   "result": {
     "count": 3,

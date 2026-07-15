@@ -2,8 +2,10 @@ package committee.nova.mods.magneticraft.gametest;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.item.CopperWireCoilItem;
+import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlock;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
@@ -11,10 +13,14 @@ import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlo
 import committee.nova.mods.magneticraft.content.network.electric.PoleSegment;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyReceiverBlockEntity;
+import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
+import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
+import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 import net.minecraft.core.BlockPos;
@@ -22,12 +28,14 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
@@ -114,6 +122,35 @@ public final class LongDistanceElectricGameTests {
     }
 
     @GameTest(template = TEMPLATE)
+    public static void tieredCraftingRecipesExposeVersionedResultIdentity(GameTestHelper helper) {
+        assertTieredRecipe(helper, "crafting/battery_box", ModMachineBlocks.BATTERY.get().asItem(),
+                VoltageTierIds.LOW);
+        assertTieredRecipe(helper, "crafting/battery_box_medium_voltage", ModMachineBlocks.BATTERY.get().asItem(),
+                VoltageTierIds.MEDIUM);
+        assertTieredRecipe(helper, "crafting/battery_box_high_voltage", ModMachineBlocks.BATTERY.get().asItem(),
+                VoltageTierIds.HIGH);
+        assertTieredRecipe(helper, "crafting/electric_cable", ModNetworkBlocks.ELECTRIC_CABLE.get().asItem(),
+                VoltageTierIds.LOW);
+        assertTieredRecipe(helper, "crafting/electric_cable_medium_voltage",
+                ModNetworkBlocks.ELECTRIC_CABLE.get().asItem(), VoltageTierIds.MEDIUM);
+        assertTieredRecipe(helper, "crafting/electric_cable_high_voltage",
+                ModNetworkBlocks.ELECTRIC_CABLE.get().asItem(), VoltageTierIds.HIGH);
+        assertTieredRecipe(helper, "crafting/electric_connector", ModNetworkBlocks.ELECTRIC_CONNECTOR.get().asItem(),
+                VoltageTierIds.LOW);
+        assertTieredRecipe(helper, "crafting/electric_connector_medium_voltage",
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get().asItem(), VoltageTierIds.MEDIUM);
+        assertTieredRecipe(helper, "crafting/electric_connector_high_voltage",
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get().asItem(), VoltageTierIds.HIGH);
+        assertTieredRecipe(helper, "crafting/electric_pole", ModNetworkBlocks.ELECTRIC_POLE.get().asItem(),
+                VoltageTierIds.LOW);
+        assertTieredRecipe(helper, "crafting/electric_pole_medium_voltage",
+                ModNetworkBlocks.ELECTRIC_POLE.get().asItem(), VoltageTierIds.MEDIUM);
+        assertTieredRecipe(helper, "crafting/electric_pole_high_voltage",
+                ModNetworkBlocks.ELECTRIC_POLE.get().asItem(), VoltageTierIds.HIGH);
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
     public static void electricPoleSegmentsUseReleasedNarrowCollision(GameTestHelper helper) {
         BlockPos bottom = new BlockPos(4, 2, 4);
         PoleSegment[] segments = {
@@ -153,6 +190,7 @@ public final class LongDistanceElectricGameTests {
 
         Player player = helper.makeMockSurvivalPlayer();
         ItemStack connectorStack = new ItemStack(ModNetworkBlocks.ELECTRIC_CONNECTOR.get());
+        TieredElectricalItemData.forTier(VoltageTierIds.LOW).write(connectorStack);
         player.setItemInHand(InteractionHand.MAIN_HAND, connectorStack);
         InteractionResult placement = connectorStack.getItem().useOn(new UseOnContext(
                 player,
@@ -198,6 +236,150 @@ public final class LongDistanceElectricGameTests {
     }
 
     @GameTest(template = TEMPLATE)
+    public static void tieredPlacementPreservesDropIdentityAndRejectsUnknownTier(GameTestHelper helper) {
+        BlockPos position = new BlockPos(3, 4, 3);
+        BlockPos support = position.relative(Direction.SOUTH);
+        helper.setBlock(support, Blocks.STONE);
+
+        Player player = helper.makeMockSurvivalPlayer();
+        ItemStack mediumConnector = TieredElectricalBlockItem.stackForTier(
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                VoltageTierIds.MEDIUM
+        );
+        player.setItemInHand(InteractionHand.MAIN_HAND, mediumConnector);
+        InteractionResult placed = mediumConnector.getItem().useOn(new UseOnContext(
+                player,
+                InteractionHand.MAIN_HAND,
+                connectorPlacementHit(helper, support)
+        ));
+        helper.assertTrue(placed.consumesAction(), "Valid medium-voltage connector was not placed");
+        ElectricConnectorBlockEntity connector = require(helper, position, ElectricConnectorBlockEntity.class);
+        helper.assertTrue(connector.electricity().tierId().equals(VoltageTierIds.MEDIUM),
+                "Placed connector did not receive its item voltage tier");
+
+        ItemStack tieredDrop = Block.getDrops(
+                        connector.getBlockState(),
+                        helper.getLevel(),
+                        connector.getBlockPos(),
+                        connector
+                ).stream()
+                .filter(stack -> stack.is(ModNetworkBlocks.ELECTRIC_CONNECTOR.get().asItem()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Connector did not produce its block drop"));
+        helper.assertTrue(
+                TieredElectricalItemData.read(tieredDrop)
+                        .map(TieredElectricalItemData::tierId)
+                        .filter(VoltageTierIds.MEDIUM::equals)
+                        .isPresent(),
+                "Connector drop did not preserve its voltage tier"
+        );
+
+        BlockPos invalidPosition = new BlockPos(7, 4, 3);
+        BlockPos invalidSupport = invalidPosition.relative(Direction.SOUTH);
+        helper.setBlock(invalidSupport, Blocks.STONE);
+        ResourceLocation unknownTier = ResourceLocation.fromNamespaceAndPath("test", "unknown_voltage");
+        ItemStack unknownConnector = TieredElectricalBlockItem.stackForTier(
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                unknownTier
+        );
+        player.setItemInHand(InteractionHand.MAIN_HAND, unknownConnector);
+        InteractionResult rejected = unknownConnector.getItem().useOn(new UseOnContext(
+                player,
+                InteractionHand.MAIN_HAND,
+                connectorPlacementHit(helper, invalidSupport)
+        ));
+        helper.assertTrue(rejected == InteractionResult.FAIL, "Unknown voltage tier placement was not rejected");
+        helper.assertBlockPresent(Blocks.AIR, invalidPosition);
+        helper.assertTrue(unknownConnector.getCount() == 1, "Rejected tier placement consumed the item");
+
+        BlockPos fixedTierMachinePosition = new BlockPos(10, 4, 3);
+        var fixedTierMachine = ModMachineBlocks.machine(SingleBlockMachineDefinition.BRICK_FURNACE).get();
+        helper.setBlock(fixedTierMachinePosition, fixedTierMachine);
+        BlockEntity fixedTierMachineEntity = helper.getBlockEntity(fixedTierMachinePosition);
+        ItemStack fixedTierDrop = Block.getDrops(
+                        helper.getBlockState(fixedTierMachinePosition),
+                        helper.getLevel(),
+                        helper.absolutePos(fixedTierMachinePosition),
+                        fixedTierMachineEntity
+                ).stream()
+                .filter(stack -> stack.is(fixedTierMachine.asItem()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Fixed-tier machine did not produce its block drop"));
+        helper.assertTrue(TieredElectricalItemData.read(fixedTierDrop).isEmpty(),
+                "Fixed-profile machine leaked a craft-selectable tier payload into its drop");
+
+        BlockPos poleBottom = new BlockPos(14, 2, 3);
+        BlockPos poleSupport = poleBottom.below();
+        helper.setBlock(poleSupport, Blocks.STONE);
+        ItemStack mediumPole = TieredElectricalBlockItem.stackForTier(
+                ModNetworkBlocks.ELECTRIC_POLE.get(),
+                VoltageTierIds.MEDIUM
+        );
+        player.setItemInHand(InteractionHand.MAIN_HAND, mediumPole);
+        InteractionResult polePlaced = mediumPole.getItem().useOn(new UseOnContext(
+                player,
+                InteractionHand.MAIN_HAND,
+                polePlacementHit(helper, poleSupport)
+        ));
+        helper.assertTrue(polePlaced.consumesAction(), "Valid medium-voltage pole was not placed");
+        ElectricPoleBlockEntity pole = require(helper, poleBottom.above(4), ElectricPoleBlockEntity.class);
+        helper.assertTrue(pole.electricity().tierId().equals(VoltageTierIds.MEDIUM),
+                "Five-block pole did not apply its item tier to the top endpoint");
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void differentVoltageTiersDoNotFormEdgesOrVisualArms(GameTestHelper helper) {
+        BlockPos lowPosition = new BlockPos(3, 4, 3);
+        BlockPos mediumPosition = lowPosition.relative(Direction.EAST);
+        helper.setBlock(lowPosition, ModNetworkBlocks.ELECTRIC_CABLE.get());
+        helper.setBlock(mediumPosition, ModNetworkBlocks.ELECTRIC_CABLE.get());
+        ElectricCableBlockEntity low = require(helper, lowPosition, ElectricCableBlockEntity.class);
+        ElectricCableBlockEntity medium = require(helper, mediumPosition, ElectricCableBlockEntity.class);
+        medium.electricity().applyTierFromPlacementData(VoltageTierIds.MEDIUM);
+        ConduitBlock.refreshAround(helper.getLevel(), medium.getBlockPos());
+
+        BlockPos firstConnector = new BlockPos(3, 4, 8);
+        BlockPos secondConnector = new BlockPos(7, 4, 8);
+        ElectricConnectorBlockEntity lowConnector = placeConnector(helper, firstConnector);
+        ElectricConnectorBlockEntity mediumConnector = placeConnector(helper, secondConnector);
+        mediumConnector.electricity().applyTierFromPlacementData(VoltageTierIds.MEDIUM);
+
+        helper.runAfterDelay(2, () -> {
+            BlockPos lowWorld = helper.absolutePos(lowPosition);
+            BlockPos mediumWorld = helper.absolutePos(mediumPosition);
+            var manager = PhysicalNetworkService.manager(helper.getLevel());
+            helper.assertFalse(
+                    manager.neighbors(NetworkDomain.ELECTRICITY, lowWorld).contains(mediumWorld.asLong()),
+                    "Different voltage tiers joined the adjacent electrical graph"
+            );
+            helper.assertFalse(
+                    helper.getLevel().getBlockState(lowWorld).getValue(ConduitBlock.EAST),
+                    "Low-voltage cable rendered an arm toward a medium-voltage cable"
+            );
+            helper.assertFalse(
+                    helper.getLevel().getBlockState(mediumWorld).getValue(ConduitBlock.WEST),
+                    "Medium-voltage cable rendered an arm toward a low-voltage cable"
+            );
+
+            low.electricity().node().setVoltage(120.0D);
+            medium.electricity().node().setVoltage(0.0D);
+            manager.tick(helper.getLevel().getGameTime() + 2_000L);
+            helper.assertTrue(medium.electricity().node().energyJoules() == 0.0D,
+                    "Different voltage tiers exchanged adjacent electrical energy");
+
+            LongDistanceElectricityService service = LongDistanceElectricityService.get(helper.getLevel());
+            helper.assertTrue(
+                    service.connect(lowConnector.getBlockPos(), mediumConnector.getBlockPos()).result()
+                            == LongDistanceElectricityService.ConnectionResult.INCOMPATIBLE_TIER,
+                    "Different voltage tiers accepted a long-distance wire"
+            );
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE)
     public static void copperWireCoilConnectsAtEightBlocksAndRejectsNine(GameTestHelper helper) {
         BlockPos first = new BlockPos(1, 4, 2);
         BlockPos atLimit = new BlockPos(9, 4, 2);
@@ -207,7 +389,7 @@ public final class LongDistanceElectricGameTests {
         placeConnector(helper, tooFar);
 
         Player player = helper.makeMockSurvivalPlayer();
-        ItemStack coilStack = new ItemStack(ModNetworkItems.COPPER_WIRE_COIL.get());
+        ItemStack coilStack = new ItemStack(ModNetworkItems.COPPER_WIRE_COIL.get(), 2);
         player.setItemInHand(InteractionHand.MAIN_HAND, coilStack);
         CopperWireCoilItem coil = (CopperWireCoilItem) coilStack.getItem();
 
@@ -227,7 +409,7 @@ public final class LongDistanceElectricGameTests {
         helper.assertTrue(service.connect(firstWorld, helper.absolutePos(tooFar)).result()
                         == LongDistanceElectricityService.ConnectionResult.TOO_FAR,
                 "Connector wire accepted a nine-block span");
-        helper.assertTrue(coilStack.getCount() == 1, "Reusable copper wire coil was consumed");
+        helper.assertTrue(coilStack.getCount() == 1, "Successful wire connection did not consume exactly one coil");
         player.discard();
         helper.succeed();
     }
@@ -380,8 +562,9 @@ public final class LongDistanceElectricGameTests {
             tower.electricity().node().setVoltage(60.0D);
             double sourceBefore = tower.electricity().node().energyJoules();
             tower.serverTick();
-            helper.assertTrue(Math.abs(receiver.electricity().node().energyJoules() - 500.0D) < 1.0E-6D,
-                    "Tesla receiver did not receive exactly 500 J in one tick");
+            double received = receiver.electricity().node().energyJoules();
+            helper.assertTrue(Math.abs(received - 500.0D) < 1.0E-6D,
+                    "Tesla receiver did not receive exactly 500 J in one tick; received " + received + " J");
             helper.assertTrue(
                     Math.abs(tower.electricity().node().energyJoules() - (sourceBefore - 500.0D)) < 1.0E-6D,
                     "Tesla transfer did not conserve its 1 J to 1 J boundary"
@@ -462,6 +645,26 @@ public final class LongDistanceElectricGameTests {
         );
     }
 
+    private static BlockHitResult connectorPlacementHit(GameTestHelper helper, BlockPos support) {
+        BlockPos worldSupport = helper.absolutePos(support);
+        return new BlockHitResult(
+                Vec3.atCenterOf(worldSupport).add(0.0D, 0.0D, -0.5D),
+                Direction.NORTH,
+                worldSupport,
+                false
+        );
+    }
+
+    private static BlockHitResult polePlacementHit(GameTestHelper helper, BlockPos support) {
+        BlockPos worldSupport = helper.absolutePos(support);
+        return new BlockHitResult(
+                Vec3.atCenterOf(worldSupport).add(0.0D, 0.5D, 0.0D),
+                Direction.UP,
+                worldSupport,
+                false
+        );
+    }
+
     private static ElectricConnectorBlockEntity placeConnector(GameTestHelper helper, BlockPos position) {
         helper.setBlock(position.relative(Direction.SOUTH), Blocks.STONE);
         helper.setBlock(position, ModNetworkBlocks.ELECTRIC_CONNECTOR.get());
@@ -499,6 +702,26 @@ public final class LongDistanceElectricGameTests {
     ) {
         helper.assertTrue(expected.equals(ForgeRegistries.BLOCKS.getKey(block).getPath()),
                 "Block has the wrong registry id: " + expected);
+    }
+
+    private static void assertTieredRecipe(
+            GameTestHelper helper,
+            String recipePath,
+            net.minecraft.world.item.Item expectedItem,
+            ResourceLocation expectedTier
+    ) {
+        ItemStack result = helper.getLevel().getRecipeManager()
+                .byKey(Magneticraft.id(recipePath))
+                .orElseThrow(() -> new AssertionError("Missing tiered recipe " + recipePath))
+                .getResultItem(helper.getLevel().registryAccess());
+        helper.assertTrue(result.is(expectedItem), "Tiered recipe returned the wrong item: " + recipePath);
+        helper.assertTrue(
+                TieredElectricalItemData.read(result)
+                        .map(TieredElectricalItemData::tierId)
+                        .filter(expectedTier::equals)
+                        .isPresent(),
+                "Tiered recipe result lost its electrical identity: " + recipePath
+        );
     }
 
     private static <T extends BlockEntity> T require(

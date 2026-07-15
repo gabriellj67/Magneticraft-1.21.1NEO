@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SmallTankBlockItem;
 import committee.nova.mods.magneticraft.content.machine.singleblock.TubeLightBlock;
+import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -38,7 +39,7 @@ public final class ModMachineBlocks {
                     .strength(2.0F)
                     .sound(SoundType.WOOD))
     );
-    public static final RegistryObject<Block> BATTERY = register(
+    public static final RegistryObject<Block> BATTERY = registerTiered(
             "battery_box",
             () -> new BatteryBlock(machineProperties())
     );
@@ -111,6 +112,15 @@ public final class ModMachineBlocks {
         return block;
     }
 
+    private static RegistryObject<Block> registerTiered(String id, Supplier<Block> factory) {
+        RegistryObject<Block> block = ModRegistries.BLOCKS.register(id, factory);
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                id,
+                () -> new TieredElectricalBlockItem(block.get(), new Item.Properties())
+        ));
+        return block;
+    }
+
     private static RegistryObject<Block> registerMachine(SingleBlockMachineDefinition definition) {
         RegistryObject<Block> block = ModRegistries.BLOCKS.register(
                 definition.id(),
@@ -118,9 +128,11 @@ public final class ModMachineBlocks {
         );
         BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
                 definition.id(),
-                () -> definition == SingleBlockMachineDefinition.SMALL_TANK
-                        ? new SmallTankBlockItem(block.get(), new Item.Properties())
-                        : new BlockItem(block.get(), new Item.Properties())
+                () -> switch (definition) {
+                    case SMALL_TANK -> new SmallTankBlockItem(block.get(), new Item.Properties());
+                    case INFINITE_ENERGY -> new TieredElectricalBlockItem(block.get(), new Item.Properties());
+                    default -> new BlockItem(block.get(), new Item.Properties());
+                }
         ));
         return block;
     }

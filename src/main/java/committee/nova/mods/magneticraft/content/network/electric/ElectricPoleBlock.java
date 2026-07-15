@@ -1,5 +1,6 @@
 package committee.nova.mods.magneticraft.content.network.electric;
 
+import committee.nova.mods.magneticraft.content.item.TieredElectricalDrops;
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
 import net.minecraft.core.BlockPos;
@@ -14,11 +15,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /** Five-block pole whose loaded electrical endpoint lives in the top BASE segment. */
@@ -175,6 +180,15 @@ public final class ElectricPoleBlock extends NetworkComponentBlock {
 
     public static BlockPos basePosition(BlockPos position, BlockState state) {
         return position.above(state.getValue(SEGMENT).blocksBelowBase());
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        return TieredElectricalDrops.preserveTier(
+                new ArrayList<>(super.getDrops(state, builder)),
+                asItem(),
+                builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY)
+        );
     }
 
     @Override

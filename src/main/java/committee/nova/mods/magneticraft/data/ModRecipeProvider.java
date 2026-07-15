@@ -20,6 +20,7 @@ import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProces
 import committee.nova.mods.magneticraft.data.recipe.CountedCookingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.CrushingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.SingleBlockRecipeBuilder;
+import committee.nova.mods.magneticraft.data.recipe.TieredShapedFinishedRecipe;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
@@ -31,6 +32,8 @@ import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModTags;
+import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -601,16 +604,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_iron_bars", has(Blocks.IRON_BARS))
                 .save(consumer, id("crafting/iron_grate"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineBlocks.BATTERY.get())
-                .pattern("AAA")
-                .pattern("DCD")
-                .pattern("DBD")
-                .define('A', ModMachineItems.LOW_BATTERY.get())
-                .define('B', ModTags.Items.lightPlate(Metal.IRON))
-                .define('C', ModMachineBlocks.GRATE.get())
-                .define('D', Tags.Items.INGOTS_IRON)
-                .unlockedBy("has_low_voltage_battery", has(ModMachineItems.LOW_BATTERY.get()))
-                .save(consumer, id("crafting/battery_box"));
+        addTieredBatteryRecipes(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineBlocks.ELECTRIC_FURNACE.get())
                 .pattern("ABA")
@@ -630,14 +624,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_iron_ingot", has(Tags.Items.INGOTS_IRON))
                 .save(consumer, id("crafting/wrench"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_CABLE.get(), 8)
-                .pattern("CCC")
-                .pattern("WWW")
-                .pattern("CCC")
-                .define('C', ModTags.Items.ingot(Metal.COPPER))
-                .define('W', ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get())
-                .unlockedBy("has_fine_copper_wire", has(ModItems.component(CraftingComponent.FINE_COPPER_WIRE).get()))
-                .save(consumer, id("crafting/electric_cable"));
+        addTieredCableRecipes(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.HEAT_PIPE.get(), 5)
                 .pattern(" A ")
@@ -779,14 +766,7 @@ final class ModRecipeProvider extends RecipeProvider {
     }
 
     private void addLongDistanceElectricRecipes(Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_CONNECTOR.get(), 8)
-                .pattern(" A ")
-                .pattern("BCB")
-                .define('A', Tags.Items.INGOTS_IRON)
-                .define('B', Tags.Items.STONE)
-                .define('C', Tags.Items.INGOTS_COPPER)
-                .unlockedBy("has_copper_ingot", has(Tags.Items.INGOTS_COPPER))
-                .save(consumer, id("crafting/electric_connector"));
+        addTieredConnectorRecipes(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModNetworkItems.COPPER_WIRE_COIL.get())
                 .pattern(" A ")
@@ -797,14 +777,7 @@ final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_iron_light_plate", has(ModTags.Items.lightPlate(Metal.IRON)))
                 .save(consumer, id("crafting/copper_wire_coil"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_POLE.get(), 3)
-                .pattern("AAA")
-                .pattern(" B ")
-                .pattern(" B ")
-                .define('A', ModNetworkBlocks.ELECTRIC_CONNECTOR.get())
-                .define('B', ItemTags.LOGS)
-                .unlockedBy("has_electric_connector", has(ModNetworkBlocks.ELECTRIC_CONNECTOR.get()))
-                .save(consumer, id("crafting/electric_pole"));
+        addTieredPoleRecipes(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), 2)
                 .pattern(" A ")
@@ -844,6 +817,215 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
                 .unlockedBy("has_machine_casing", has(ModAdvancedBlocks.MULTIBLOCK_BASE.get()))
                 .save(consumer, id("crafting/wind_turbine"));
+    }
+
+    private void addTieredBatteryRecipes(Consumer<FinishedRecipe> consumer) {
+        tieredBattery(
+                consumer,
+                id("crafting/battery_box"),
+                VoltageTierIds.LOW,
+                ModMachineItems.LOW_BATTERY.get(),
+                Ingredient.of(ModTags.Items.lightPlate(Metal.IRON)),
+                Ingredient.of(Tags.Items.INGOTS_IRON)
+        );
+        tieredBattery(
+                consumer,
+                id("crafting/battery_box_medium_voltage"),
+                VoltageTierIds.MEDIUM,
+                ModMachineItems.MEDIUM_BATTERY.get(),
+                Ingredient.of(ModTags.Items.lightPlate(Metal.STEEL)),
+                Ingredient.of(ModTags.Items.lightPlate(Metal.LEAD))
+        );
+        tieredBattery(
+                consumer,
+                id("crafting/battery_box_high_voltage"),
+                VoltageTierIds.HIGH,
+                ModMachineItems.MEDIUM_BATTERY.get(),
+                Ingredient.of(ModTags.Items.lightPlate(Metal.TUNGSTEN)),
+                Ingredient.of(ModTags.Items.lightPlate(Metal.LEAD))
+        );
+    }
+
+    private void addTieredCableRecipes(Consumer<FinishedRecipe> consumer) {
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                8,
+                id("crafting/electric_cable"),
+                VoltageTierIds.LOW,
+                Ingredient.of(component(CraftingComponent.FINE_COPPER_WIRE)),
+                Ingredient.of(Tags.Items.INGOTS_IRON),
+                Ingredient.of(Tags.Items.INGOTS_IRON),
+                "has_fine_copper_wire",
+                has(component(CraftingComponent.FINE_COPPER_WIRE))
+        );
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                8,
+                id("crafting/electric_cable_medium_voltage"),
+                VoltageTierIds.MEDIUM,
+                Ingredient.of(component(CraftingComponent.FINE_COPPER_WIRE)),
+                Ingredient.of(ModTags.Items.ingot(Metal.LEAD)),
+                Ingredient.of(ModTags.Items.ingot(Metal.STEEL)),
+                "has_steel_ingot",
+                has(ModTags.Items.ingot(Metal.STEEL))
+        );
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                8,
+                id("crafting/electric_cable_high_voltage"),
+                VoltageTierIds.HIGH,
+                Ingredient.of(ModTags.Items.ingot(Metal.ALUMINIUM)),
+                Ingredient.of(ModTags.Items.ingot(Metal.LEAD)),
+                Ingredient.of(ModTags.Items.ingot(Metal.TUNGSTEN)),
+                "has_tungsten_ingot",
+                has(ModTags.Items.ingot(Metal.TUNGSTEN))
+        );
+    }
+
+    private void addTieredConnectorRecipes(Consumer<FinishedRecipe> consumer) {
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                8,
+                id("crafting/electric_connector"),
+                VoltageTierIds.LOW,
+                Ingredient.of(component(CraftingComponent.FINE_COPPER_WIRE)),
+                Ingredient.of(Tags.Items.STONE),
+                Ingredient.of(Tags.Items.INGOTS_IRON),
+                "has_fine_copper_wire",
+                has(component(CraftingComponent.FINE_COPPER_WIRE))
+        );
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                8,
+                id("crafting/electric_connector_medium_voltage"),
+                VoltageTierIds.MEDIUM,
+                Ingredient.of(component(CraftingComponent.FINE_COPPER_WIRE)),
+                Ingredient.of(ModTags.Items.ingot(Metal.LEAD)),
+                Ingredient.of(ModTags.Items.ingot(Metal.STEEL)),
+                "has_steel_ingot",
+                has(ModTags.Items.ingot(Metal.STEEL))
+        );
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                8,
+                id("crafting/electric_connector_high_voltage"),
+                VoltageTierIds.HIGH,
+                Ingredient.of(ModTags.Items.ingot(Metal.ALUMINIUM)),
+                Ingredient.of(ModTags.Items.ingot(Metal.LEAD)),
+                Ingredient.of(ModTags.Items.ingot(Metal.TUNGSTEN)),
+                "has_tungsten_ingot",
+                has(ModTags.Items.ingot(Metal.TUNGSTEN))
+        );
+    }
+
+    private void addTieredPoleRecipes(Consumer<FinishedRecipe> consumer) {
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_POLE.get(),
+                3,
+                id("crafting/electric_pole"),
+                VoltageTierIds.LOW,
+                Ingredient.of(ModTags.Items.ingot(Metal.COPPER)),
+                Ingredient.of(Tags.Items.INGOTS_IRON),
+                Ingredient.of(Tags.Items.INGOTS_IRON),
+                "has_copper_ingot",
+                has(ModTags.Items.ingot(Metal.COPPER))
+        );
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_POLE.get(),
+                3,
+                id("crafting/electric_pole_medium_voltage"),
+                VoltageTierIds.MEDIUM,
+                Ingredient.of(ModTags.Items.ingot(Metal.COPPER)),
+                Ingredient.of(ModTags.Items.ingot(Metal.LEAD)),
+                Ingredient.of(ModTags.Items.ingot(Metal.STEEL)),
+                "has_steel_ingot",
+                has(ModTags.Items.ingot(Metal.STEEL))
+        );
+        tieredLine(
+                consumer,
+                ModNetworkBlocks.ELECTRIC_POLE.get(),
+                3,
+                id("crafting/electric_pole_high_voltage"),
+                VoltageTierIds.HIGH,
+                Ingredient.of(ModTags.Items.ingot(Metal.ALUMINIUM)),
+                Ingredient.of(ModTags.Items.ingot(Metal.LEAD)),
+                Ingredient.of(ModTags.Items.ingot(Metal.TUNGSTEN)),
+                "has_tungsten_ingot",
+                has(ModTags.Items.ingot(Metal.TUNGSTEN))
+        );
+    }
+
+    private void tieredBattery(
+            Consumer<FinishedRecipe> consumer,
+            ResourceLocation recipeId,
+            ResourceLocation tierId,
+            ItemLike cell,
+            Ingredient structure,
+            Ingredient insulation
+    ) {
+        saveTiered(
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModMachineBlocks.BATTERY.get())
+                        .pattern("AAA")
+                        .pattern("DCD")
+                        .pattern("DBD")
+                        .define('A', cell)
+                        .define('B', structure)
+                        .define('C', ModMachineBlocks.GRATE.get())
+                        .define('D', insulation)
+                        .unlockedBy("has_electrical_cell", has(cell)),
+                consumer,
+                recipeId,
+                tierId
+        );
+    }
+
+    private void tieredLine(
+            Consumer<FinishedRecipe> consumer,
+            ItemLike result,
+            int count,
+            ResourceLocation recipeId,
+            ResourceLocation tierId,
+            Ingredient conductor,
+            Ingredient insulation,
+            Ingredient structure,
+            String unlockName,
+            CriterionTriggerInstance unlockCriterion
+    ) {
+        saveTiered(
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, result, count)
+                        .pattern("SIS")
+                        .pattern("CCC")
+                        .pattern("SIS")
+                        .define('S', structure)
+                        .define('I', insulation)
+                        .define('C', conductor)
+                        .unlockedBy(unlockName, unlockCriterion),
+                consumer,
+                recipeId,
+                tierId
+        );
+    }
+
+    private void saveTiered(
+            ShapedRecipeBuilder builder,
+            Consumer<FinishedRecipe> consumer,
+            ResourceLocation recipeId,
+            ResourceLocation tierId
+    ) {
+        TieredShapedFinishedRecipe.save(
+                builder,
+                consumer,
+                recipeId,
+                TieredElectricalItemData.forTier(tierId)
+        );
     }
 
     private void addCrushingRecipes(Consumer<FinishedRecipe> consumer) {

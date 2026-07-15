@@ -7,7 +7,9 @@ import java.util.Objects;
 public record LongDistanceConnection(LongDistanceEndpoint first, LongDistanceEndpoint second) {
     private static final Comparator<LongDistanceEndpoint> ENDPOINT_ORDER = Comparator
             .comparingLong((LongDistanceEndpoint endpoint) -> endpoint.position().asLong())
-            .thenComparingInt(endpoint -> endpoint.port().ordinal());
+            .thenComparing(endpoint -> endpoint.terminalId().toString())
+            .thenComparingInt(endpoint -> endpoint.port().ordinal())
+            .thenComparing(endpoint -> endpoint.tierId().toString());
 
     public LongDistanceConnection {
         Objects.requireNonNull(first);

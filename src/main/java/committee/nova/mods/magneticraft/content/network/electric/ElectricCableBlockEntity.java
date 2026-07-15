@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.content.network.electric;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlockEntity;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Six-way 125V cable segment.
  */
-public final class ElectricCableBlockEntity extends NetworkComponentBlockEntity {
+public final class ElectricCableBlockEntity extends NetworkComponentBlockEntity implements TieredElectricalHost {
     private final ElectricalNetworkModule electricity;
 
     public ElectricCableBlockEntity(BlockPos position, BlockState state) {
@@ -27,6 +28,11 @@ public final class ElectricCableBlockEntity extends NetworkComponentBlockEntity 
     }
 
     public ElectricalNetworkModule electricity() {
+        return electricity;
+    }
+
+    @Override
+    public ElectricalNetworkModule tieredElectricalModule() {
         return electricity;
     }
 

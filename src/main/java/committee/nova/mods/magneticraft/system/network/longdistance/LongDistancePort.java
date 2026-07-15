@@ -1,5 +1,7 @@
 package committee.nova.mods.magneticraft.system.network.longdistance;
 
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTier;
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -8,16 +10,14 @@ import java.util.Optional;
  * joined, even when both are hosted by the same kind of block.
  */
 public enum LongDistancePort {
-    CONNECTOR("connector", 8.0D, 1),
-    POLE("pole", 16.0D, 3);
+    CONNECTOR("connector", 1),
+    POLE("pole", 3);
 
     private final String serializedName;
-    private final double maxDistance;
     private final int wireCount;
 
-    LongDistancePort(String serializedName, double maxDistance, int wireCount) {
+    LongDistancePort(String serializedName, int wireCount) {
         this.serializedName = serializedName;
-        this.maxDistance = maxDistance;
         this.wireCount = wireCount;
     }
 
@@ -25,8 +25,8 @@ public enum LongDistancePort {
         return serializedName;
     }
 
-    public double maxDistance() {
-        return maxDistance;
+    public int maxDistance(VoltageTier tier) {
+        return this == CONNECTOR ? tier.connectorRange() : tier.poleRange();
     }
 
     public int wireCount() {

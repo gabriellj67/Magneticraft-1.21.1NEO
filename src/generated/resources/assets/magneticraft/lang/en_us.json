@@ -494,6 +494,7 @@
   "message.magneticraft.hydraulic_press_mode.heavy": "heavy",
   "message.magneticraft.hydraulic_press_mode.light": "light",
   "message.magneticraft.hydraulic_press_mode.medium": "medium",
+  "message.magneticraft.invalid_voltage_tier": "Cannot place: voltage tier %s is missing or the item data is invalid",
   "message.magneticraft.long_distance_connections": "Long-distance connections: %s",
   "message.magneticraft.multiblock_formed": "%s formed",
   "message.magneticraft.multiblock_hologram_disabled": "Multiblock hologram disabled",

@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_low_voltage_battery": {
+    "has_electrical_cell": {
       "conditions": {
         "items": [
           {
@@ -22,7 +22,7 @@
   },
   "requirements": [
     [
-      "has_low_voltage_battery",
+      "has_electrical_cell",
       "has_the_recipe"
     ]
   ],

@@ -99,9 +99,9 @@ class MigrationMatrixContractTest {
     private static final int DERIVED_RUNTIME_ID_COUNT = 80;
     private static final String DERIVED_RUNTIME_ID_SHA256 =
             "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451";
-    private static final int SUPPORTING_REGISTRY_ID_COUNT = 119;
+    private static final int SUPPORTING_REGISTRY_ID_COUNT = 120;
     private static final String SUPPORTING_REGISTRY_ID_SHA256 =
-            "2fa491f8f2d21d4632ec95cac8f7355254afbe3a603eccb8c036bbd682ab7268";
+            "6db128ea15b02a6c6bbb5170fd8506694d72dbc42964c7e4fa972ccf0d0f7ca0";
     private static final int FORBIDDEN_RUNTIME_ID_COUNT = 56;
     private static final String FORBIDDEN_RUNTIME_ID_SHA256 =
             "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d";
@@ -1926,12 +1926,14 @@ class MigrationMatrixContractTest {
                 namespaced("oil_heater"),
                 namespaced("refinery")
         ));
+        Set<String> recipeSerializers = new HashSet<>(recipeTypes);
+        recipeSerializers.add(namespaced("tiered_shaped"));
         return Map.of(
                 "block", Set.of(namespaced("pumpjack_drill"), namespaced("multiblock_gap")),
                 "block_entity_type", Set.copyOf(blockEntityTypes),
                 "menu", Set.copyOf(menus),
                 "recipe_type", Set.copyOf(recipeTypes),
-                "recipe_serializer", Set.copyOf(recipeTypes),
+                "recipe_serializer", Set.copyOf(recipeSerializers),
                 "sound_event", Set.of(
                         namespaced("crushing_table_hit"),
                         namespaced("crushing_table_complete")
