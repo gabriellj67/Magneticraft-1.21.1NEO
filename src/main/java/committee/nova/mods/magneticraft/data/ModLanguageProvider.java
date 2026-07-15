@@ -55,6 +55,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("voltage_tier.magneticraft.low_voltage", chinese ? "低压" : "Low Voltage");
         add("voltage_tier.magneticraft.medium_voltage", chinese ? "中压" : "Medium Voltage");
         add("voltage_tier.magneticraft.high_voltage", chinese ? "高压" : "High Voltage");
+        add("item.magneticraft.tiered_name", "[%1$s] %2$s");
         add(ModCreativeTabs.TRANSLATION_KEY, chinese ? "磁场工艺" : "Magneticraft");
         add(ModMachineBlocks.CRUSHING_TABLE.get(), chinese ? "压碎台" : "Crushing Table");
         add(ModMachineBlocks.BATTERY.get(), chinese ? "电池箱" : "Battery Box");
@@ -315,8 +316,13 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.multiblock_status", chinese ? "%s：%s" : "%s: %s");
         add("message.magneticraft.multiblock_mirrored_state", chinese ? "镜像" : "mirrored");
         add("message.magneticraft.multiblock_normal_state", chinese ? "标准" : "normal");
+        add("gui.magneticraft.multiblock_structure_state", chinese ? "结构：%s" : "Structure: %s");
         add("message.magneticraft.multiblock_hologram_enabled", chinese ? "多方块全息投影已开启" : "Multiblock hologram enabled");
         add("message.magneticraft.multiblock_hologram_disabled", chinese ? "多方块全息投影已关闭" : "Multiblock hologram disabled");
+        add("commands.magneticraft.multiblock.fill.no_controller", chinese ? "请将准星对准未组装的多方块主体" : "Look at an unformed multiblock controller");
+        add("commands.magneticraft.multiblock.fill.already_formed", chinese ? "目标多方块已经组装" : "The targeted multiblock is already formed");
+        add("commands.magneticraft.multiblock.fill.unavailable", chinese ? "无法填充未加载或越界的结构位置：%s" : "Cannot fill unloaded or out-of-bounds structure position: %s");
+        add("commands.magneticraft.multiblock.fill.success", chinese ? "已为 %s 更新 %s 个结构位置" : "Updated %s at %s structure positions");
         add("message.magneticraft.hydraulic_press_mode", chinese ? "液压机模式：%s" : "Hydraulic press mode: %s");
         add("message.magneticraft.hydraulic_press_mode.light", chinese ? "轻压" : "light");
         add("message.magneticraft.hydraulic_press_mode.medium", chinese ? "中压" : "medium");
