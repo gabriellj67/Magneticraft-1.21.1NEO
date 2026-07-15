@@ -16,7 +16,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
+import java.util.List;
 import java.util.Set;
 
 public final class ElectricConnectorBlockEntity extends NetworkComponentBlockEntity
@@ -52,6 +54,30 @@ public final class ElectricConnectorBlockEntity extends NetworkComponentBlockEnt
     @Override
     public Set<LongDistancePort> longDistancePorts() {
         return Set.of(LongDistancePort.CONNECTOR);
+    }
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        return renderBounds(worldPosition, longDistance.clientConnections());
+    }
+
+    static AABB renderBounds(BlockPos position, List<LongDistanceEndpointModule.WireView> connections) {
+        double minX = position.getX();
+        double minY = position.getY();
+        double minZ = position.getZ();
+        double maxX = position.getX() + 1.0D;
+        double maxY = position.getY() + 1.0D;
+        double maxZ = position.getZ() + 1.0D;
+        for (LongDistanceEndpointModule.WireView connection : connections) {
+            BlockPos remote = connection.remotePosition();
+            minX = Math.min(minX, remote.getX());
+            minY = Math.min(minY, Math.min(position.getY(), remote.getY()) - 2.0D);
+            minZ = Math.min(minZ, remote.getZ());
+            maxX = Math.max(maxX, remote.getX() + 1.0D);
+            maxY = Math.max(maxY, remote.getY() + 1.0D);
+            maxZ = Math.max(maxZ, remote.getZ() + 1.0D);
+        }
+        return new AABB(minX, minY, minZ, maxX, maxY, maxZ).inflate(0.25D);
     }
 
     @Override

@@ -40,6 +40,11 @@ public final class LegacyMachineGuiLayout {
     public static final int STATUS_WIDTH = 10;
     public static final int STATUS_GAP = 3;
     public static final int TANK_WIDTH = 18;
+    public static final int ELECTRICAL_PANEL_GAP = 4;
+    public static final int ELECTRICAL_PANEL_WIDTH = 112;
+    public static final int ELECTRICAL_PANEL_TOP = 14;
+    public static final int ELECTRICAL_PANEL_HEIGHT = 132;
+    public static final int ELECTRICAL_PANEL_MARGIN = 4;
 
     public static final Point BATTERY_INPUT = new Point(103, 16);
     public static final Point BATTERY_OUTPUT = new Point(103, 48);
@@ -57,6 +62,22 @@ public final class LegacyMachineGuiLayout {
 
     public static int singleBlockPlayerTop(SingleBlockMachineDefinition definition) {
         return definition == SingleBlockMachineDefinition.BOX ? BOX_PLAYER_TOP : STANDARD_PLAYER_TOP;
+    }
+
+    public static Size withElectricalPanel(Size base) {
+        return new Size(
+                base.width() + ELECTRICAL_PANEL_GAP + ELECTRICAL_PANEL_WIDTH + ELECTRICAL_PANEL_MARGIN,
+                Math.max(base.height(), ELECTRICAL_PANEL_TOP + ELECTRICAL_PANEL_HEIGHT + ELECTRICAL_PANEL_MARGIN)
+        );
+    }
+
+    public static Rect electricalPanel(int baseWidth) {
+        return new Rect(
+                baseWidth + ELECTRICAL_PANEL_GAP,
+                ELECTRICAL_PANEL_TOP,
+                ELECTRICAL_PANEL_WIDTH,
+                ELECTRICAL_PANEL_HEIGHT
+        );
     }
 
     public static List<Point> singleBlockSlots(SingleBlockMachineDefinition definition) {

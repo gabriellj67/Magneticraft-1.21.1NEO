@@ -17,10 +17,21 @@ import java.util.Locale;
  * Legacy-sized status screen shared by all advanced multiblock controllers.
  */
 public final class AdvancedMultiblockScreen extends AbstractContainerScreen<AdvancedMultiblockMenu> {
+    private final int baseImageWidth;
+    private final LegacyMachineGuiLayout.Rect electricalPanel;
+
     public AdvancedMultiblockScreen(AdvancedMultiblockMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = menu.imageWidth();
-        imageHeight = menu.imageHeight();
+        baseImageWidth = menu.imageWidth();
+        electricalPanel = menu.definition().usesElectricity()
+                ? electricalPanelBounds(menu.definition())
+                : null;
+        LegacyMachineGuiLayout.Size baseSize = new LegacyMachineGuiLayout.Size(baseImageWidth, menu.imageHeight());
+        LegacyMachineGuiLayout.Size size = electricalPanel == null
+                ? baseSize
+                : LegacyMachineGuiLayout.withElectricalPanel(baseSize);
+        imageWidth = size.width();
+        imageHeight = size.height();
         inventoryLabelX = LegacyMachineGuiLayout.STANDARD_PLAYER_LEFT;
         inventoryLabelY = menu.playerInventoryTop() - 12;
     }
@@ -29,11 +40,17 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         MachineScreenLayout.drawPanel(graphics, leftPos, topPos, imageWidth, imageHeight);
         int contentBottom = menu.definition() == MultiblockDefinition.SHELVING_UNIT ? 112 : 76;
-        graphics.fill(leftPos + 5, topPos + 14, leftPos + imageWidth - 5, topPos + contentBottom, 0xFF15191E);
+        graphics.fill(leftPos + 5, topPos + 14, leftPos + baseImageWidth - 5, topPos + contentBottom, 0xFF15191E);
         for (Slot slot : menu.slots) {
             MachineScreenLayout.drawSlot(graphics, leftPos, topPos, slot.x, slot.y);
         }
         drawStatusBars(graphics, statusBars());
+        if (electricalPanel != null) {
+            ElectricalStatePanel.render(
+                    graphics, font, leftPos, topPos, electricalPanel,
+                    menu.position(), menu.energyStored(), menu.energyCapacity()
+            );
+        }
     }
 
     @Override
@@ -41,8 +58,8 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
         Component status = statusLabel();
         Component fittedStatus = MachineScreenLayout.fitToWidth(font, status, 72);
         int statusWidth = font.width(fittedStatus);
-        int statusX = imageWidth - 8 - statusWidth;
-        int titleWidth = MachineScreenLayout.availableTitleWidth(imageWidth, titleLabelX, statusWidth);
+        int statusX = baseImageWidth - 8 - statusWidth;
+        int titleWidth = MachineScreenLayout.availableTitleWidth(baseImageWidth, titleLabelX, statusWidth);
         graphics.drawString(
                 font,
                 MachineScreenLayout.fitToWidth(font, title, titleWidth),
@@ -69,7 +86,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
                                     menu.installedChests(),
                                     menu.shelvingSlots()
                             ),
-                            imageWidth - 16
+                            baseImageWidth - 16
                     ),
                     8,
                     24,
@@ -85,6 +102,12 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
         renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTick);
         renderStatusTooltip(graphics, mouseX, mouseY, statusBars());
+        if (electricalPanel != null) {
+            ElectricalStatePanel.renderTooltip(
+                    graphics, font, mouseX, mouseY, leftPos, topPos, electricalPanel,
+                    menu.position(), menu.energyStored(), menu.energyCapacity()
+            );
+        }
         renderTooltip(graphics, mouseX, mouseY);
     }
 
@@ -199,5 +222,11 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
             return 0;
         }
         return (int) Math.min(size, (long) value * size / capacity);
+    }
+
+    static LegacyMachineGuiLayout.Rect electricalPanelBounds(MultiblockDefinition definition) {
+        return LegacyMachineGuiLayout.electricalPanel(
+                LegacyMachineGuiLayout.multiblockSize(definition).width()
+        );
     }
 }

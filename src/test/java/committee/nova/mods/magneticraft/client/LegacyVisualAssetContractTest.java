@@ -85,7 +85,7 @@ class LegacyVisualAssetContractTest {
             }
         }
         assertEquals(40, mcx);
-        assertEquals(21, gltf);
+        assertEquals(25, gltf);
         assertEquals(20, gltfBuffers);
     }
 
@@ -102,6 +102,10 @@ class LegacyVisualAssetContractTest {
         assertRuntimeModel("gasification_unit_inventory", "magneticraft:models/block/mcx/gasification_unit.mcx");
         assertRuntimeModel("inserter_inventory", "magneticraft:models/block/gltf/inserter.gltf");
         assertRuntimeModel("electric_engine_inventory", "magneticraft:models/block/gltf/electric_engine.gltf");
+        assertRuntimeModel("box_transformer", "magneticraft:models/block/gltf/box_transformer.gltf");
+        assertRuntimeModel("fuse_box", "magneticraft:models/block/gltf/fuse_box.gltf");
+        assertRuntimeModel("circuit_breaker", "magneticraft:models/block/gltf/circuit_breaker.gltf");
+        assertRuntimeModel("burnt_electric_cable", "magneticraft:models/block/gltf/burnt_electric_cable.gltf");
     }
 
     private static void assertRuntimeModel(String name, String source) throws IOException {

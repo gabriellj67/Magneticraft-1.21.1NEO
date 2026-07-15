@@ -395,6 +395,19 @@ public final class PortableElectricGameTests {
                     "Thermometer diagnostic lost Kelvin temperature");
 
             Player player = helper.makeMockSurvivalPlayer();
+            ItemStack modeMeter = new ItemStack(ModMachineItems.VOLTMETER.get());
+            player.setItemInHand(InteractionHand.MAIN_HAND, modeMeter);
+            player.setShiftKeyDown(true);
+            modeMeter.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+            helper.assertTrue("network_summary".equals(modeMeter.getOrCreateTag().getString("diagnostic_mode")),
+                    "Voltmeter did not cycle from point mode to network summary");
+            modeMeter.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+            helper.assertTrue("fault_locator".equals(modeMeter.getOrCreateTag().getString("diagnostic_mode")),
+                    "Voltmeter did not cycle from network summary to fault locator");
+            modeMeter.use(helper.getLevel(), player, InteractionHand.MAIN_HAND);
+            helper.assertTrue("point".equals(modeMeter.getOrCreateTag().getString("diagnostic_mode")),
+                    "Voltmeter did not wrap its mode payload back to point mode");
+            player.setShiftKeyDown(false);
             assertInstrumentUse(helper, player, ModMachineItems.VOLTMETER.get(), FIRST);
             assertInstrumentUse(helper, player, ModMachineItems.THERMOMETER.get(), THIRD);
             source.electricity().setSideEnabled(Direction.UP, false);

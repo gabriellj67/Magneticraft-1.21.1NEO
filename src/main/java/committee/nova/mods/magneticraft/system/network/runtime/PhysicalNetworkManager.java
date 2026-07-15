@@ -3,6 +3,10 @@ package committee.nova.mods.magneticraft.system.network.runtime;
 import committee.nova.mods.magneticraft.system.network.core.GraphMetrics;
 import committee.nova.mods.magneticraft.system.network.core.IncrementalGraph;
 import committee.nova.mods.magneticraft.system.network.core.WeightedPathfinder;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FaultKind;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FaultLocation;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FaultSearchResult;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.NetworkSummary;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalCoupler;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalEdgeTelemetry;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalLink;
@@ -19,6 +23,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +41,7 @@ import java.util.Set;
 /** Per-dimension incremental topology. Authoritative state remains block-entity owned. */
 public final class PhysicalNetworkManager {
     public static final int MAX_LOGISTICS_ROUTE_VISITS = 4_096;
+    public static final int MAX_ELECTRICAL_DIAGNOSTIC_VISITS = 4_096;
     private static final int MAX_LOGISTICS_ROUTE_CACHE_ENTRIES = 4_096;
 
     private final ServerLevel level;
@@ -61,6 +67,8 @@ public final class PhysicalNetworkManager {
     private boolean electricalTickActive;
     private List<ElectricalEdgeTelemetry> activeElectricalTelemetry = List.of();
     private List<ElectricalEdgeTelemetry> completedElectricalTelemetry = List.of();
+    private Map<ElectricalNodeAccess, Double> completedElectricalGeneration = Map.of();
+    private Map<ElectricalNodeAccess, Double> completedElectricalConsumption = Map.of();
 
     PhysicalNetworkManager(ServerLevel level) {
         this.level = level;
@@ -156,6 +164,8 @@ public final class PhysicalNetworkManager {
         }
         lastTick = gameTime;
         completedElectricalTelemetry = List.of();
+        completedElectricalGeneration = Map.of();
+        completedElectricalConsumption = Map.of();
 
         for (NetworkDomain domain : NetworkDomain.values()) {
             if (domain == NetworkDomain.ELECTRICITY) {
@@ -199,7 +209,13 @@ public final class PhysicalNetworkManager {
         try {
             entries.forEach(entry -> entry.getValue().beforeNetworkTick(this));
             accesses.forEach(access -> access.electricalNode().beginNetworkTick());
+            IdentityHashMap<ElectricalNodeAccess, Double> beforeInjection = electricalEnergySnapshot(accesses);
             participants.forEach(participant -> participant.injectElectricalEnergy(this));
+            IdentityHashMap<ElectricalNodeAccess, Double> generation = positiveEnergyDelta(
+                    beforeInjection,
+                    accesses,
+                    true
+            );
             executeElectricalCouplers(graph);
             orderedEdges(graph).forEach(pair -> transferElectrical(
                     pair.first(),
@@ -212,11 +228,19 @@ public final class PhysicalNetworkManager {
             if (level != null) {
                 LongDistanceElectricityService.tickIfPresent(level, level.getGameTime());
             }
+            IdentityHashMap<ElectricalNodeAccess, Double> beforeExtraction = electricalEnergySnapshot(accesses);
             participants.forEach(participant -> participant.extractElectricalEnergy(this));
+            IdentityHashMap<ElectricalNodeAccess, Double> consumption = positiveEnergyDelta(
+                    beforeExtraction,
+                    accesses,
+                    false
+            );
             accesses.forEach(access -> access.electricalNode().completeNetworkTick());
             entries.forEach(entry -> entry.getValue().afterNetworkTick(this));
             participants.forEach(participant -> participant.commitElectricalState(this));
             completedElectricalTelemetry = List.copyOf(activeElectricalTelemetry);
+            completedElectricalGeneration = immutableIdentityMap(generation);
+            completedElectricalConsumption = immutableIdentityMap(consumption);
         } finally {
             electricalTickActive = false;
             activeElectricalTelemetry = List.of();
@@ -331,6 +355,103 @@ public final class PhysicalNetworkManager {
         return completedElectricalTelemetry;
     }
 
+    /** Bounded, loaded-node-only summary of one same-tier electrical component. */
+    public Optional<NetworkSummary> electricalNetworkSummary(PhysicalNodeKey start, int maxVisitedNodes) {
+        Objects.requireNonNull(start, "start");
+        Optional<BoundedElectricalComponent> bounded = boundedElectricalComponent(start, maxVisitedNodes);
+        if (bounded.isEmpty()) {
+            return Optional.empty();
+        }
+        BoundedElectricalComponent component = bounded.orElseThrow();
+        Set<PhysicalNodeKey> keys = component.keys();
+        Set<ElectricalNodeAccess> counted = Collections.newSetFromMap(new IdentityHashMap<>());
+        double storedJoules = 0.0D;
+        double generation = 0.0D;
+        double consumption = 0.0D;
+        double maximumLoad = 0.0D;
+        int faults = 0;
+        for (PhysicalNodeKey key : keys) {
+            ElectricalNodeAccess access = electricalAccess(graph(NetworkDomain.ELECTRICITY).value(key).orElse(null));
+            if (access == null || !counted.add(access)) {
+                continue;
+            }
+            storedJoules += access.electricalNode().energyJoules();
+            generation += completedElectricalGeneration.getOrDefault(access, 0.0D);
+            consumption += completedElectricalConsumption.getOrDefault(access, 0.0D);
+            double rating = access.electricalRatedCurrentAmps();
+            if (Double.isFinite(rating) && rating > 0.0D) {
+                maximumLoad = Math.max(maximumLoad, maximumTerminalCurrentAmps(key) / rating);
+            }
+            if (access.electricalFaultKind() != FaultKind.NONE) {
+                faults++;
+            }
+        }
+
+        LinkedHashSet<NodePair> edges = new LinkedHashSet<>();
+        for (PhysicalNodeKey key : keys) {
+            for (PhysicalNodeKey neighbor : diagnosticElectricalNeighbors(key)) {
+                if (keys.contains(neighbor)) {
+                    edges.add(NodePair.of(key, neighbor));
+                }
+            }
+        }
+        double losses = completedElectricalTelemetry.stream()
+                .filter(edge -> keys.contains(sourceTerminal(edge)))
+                .mapToDouble(ElectricalEdgeTelemetry::lostJoulesPerTick)
+                .sum();
+        return Optional.of(new NetworkSummary(
+                keys.size(),
+                edges.size(),
+                storedJoules,
+                generation,
+                consumption,
+                losses,
+                maximumLoad,
+                faults,
+                keys.size(),
+                component.truncated()
+        ));
+    }
+
+    /** Breadth-first nearest fault search that never leaves the loaded topology. */
+    public Optional<FaultSearchResult> nearestElectricalFault(PhysicalNodeKey start, int maxVisitedNodes) {
+        Objects.requireNonNull(start, "start");
+        Optional<BoundedElectricalComponent> bounded = boundedElectricalComponent(start, maxVisitedNodes);
+        if (bounded.isEmpty()) {
+            return Optional.empty();
+        }
+        BoundedElectricalComponent component = bounded.orElseThrow();
+        FaultLocation location = null;
+        Set<ElectricalNodeAccess> checked = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (PhysicalNodeKey key : component.keys()) {
+            ElectricalNodeAccess access = electricalAccess(graph(NetworkDomain.ELECTRICITY).value(key).orElse(null));
+            if (access == null || !checked.add(access)) {
+                continue;
+            }
+            FaultKind fault = access.electricalFaultKind();
+            if (fault == FaultKind.NONE) {
+                continue;
+            }
+            BlockPos offset = key.position().subtract(start.position());
+            Optional<Direction> direction = offset.equals(BlockPos.ZERO)
+                    ? Optional.empty()
+                    : Optional.of(Direction.getNearest(offset.getX(), offset.getY(), offset.getZ()));
+            location = new FaultLocation(
+                    fault,
+                    key.terminalId(),
+                    key.position(),
+                    direction,
+                    Math.sqrt(start.position().distSqr(key.position()))
+            );
+            break;
+        }
+        return Optional.of(new FaultSearchResult(
+                Optional.ofNullable(location),
+                component.keys().size(),
+                component.truncated()
+        ));
+    }
+
     /** Maximum absolute current touching one terminal in the active (or most recently completed) tick. */
     public double maximumTerminalCurrentAmps(PhysicalNodeKey terminal) {
         Objects.requireNonNull(terminal, "terminal");
@@ -435,6 +556,55 @@ public final class PhysicalNetworkManager {
 
     public int componentCount(NetworkDomain domain) {
         return graph(domain).componentCount();
+    }
+
+    private Optional<BoundedElectricalComponent> boundedElectricalComponent(
+            PhysicalNodeKey start,
+            int maxVisitedNodes
+    ) {
+        IncrementalGraph<PhysicalNodeKey, PhysicalNetworkNode> graph = graph(NetworkDomain.ELECTRICITY);
+        if (!graph.contains(start)) {
+            return Optional.empty();
+        }
+        int limit = Math.max(1, Math.min(maxVisitedNodes, MAX_ELECTRICAL_DIAGNOSTIC_VISITS));
+        ArrayDeque<PhysicalNodeKey> pending = new ArrayDeque<>();
+        LinkedHashSet<PhysicalNodeKey> visited = new LinkedHashSet<>();
+        pending.add(start);
+        while (!pending.isEmpty() && visited.size() < limit) {
+            PhysicalNodeKey current = pending.removeFirst();
+            if (!visited.add(current)) {
+                continue;
+            }
+            diagnosticElectricalNeighbors(current).stream()
+                    .filter(neighbor -> !visited.contains(neighbor))
+                    .forEach(pending::addLast);
+        }
+        boolean truncated = !pending.isEmpty();
+        return Optional.of(new BoundedElectricalComponent(
+                Collections.unmodifiableSet(visited),
+                truncated
+        ));
+    }
+
+    private Set<PhysicalNodeKey> diagnosticElectricalNeighbors(PhysicalNodeKey key) {
+        LinkedHashSet<PhysicalNodeKey> neighbors = new LinkedHashSet<>(
+                graph(NetworkDomain.ELECTRICITY).neighbors(key)
+        );
+        completedElectricalTelemetry.stream()
+                .filter(edge -> edge.edgeType() == ElectricalEdgeTelemetry.EdgeType.LONG_DISTANCE)
+                .forEach(edge -> {
+                    if (edge.firstTerminal().equals(key)) {
+                        neighbors.add(edge.secondTerminal());
+                    } else if (edge.secondTerminal().equals(key)) {
+                        neighbors.add(edge.firstTerminal());
+                    }
+                });
+        LinkedHashSet<PhysicalNodeKey> ordered = new LinkedHashSet<>();
+        neighbors.stream()
+                .filter(neighbor -> graph(NetworkDomain.ELECTRICITY).contains(neighbor))
+                .sorted(PhysicalNodeKey.ORDER)
+                .forEach(ordered::add);
+        return ordered;
     }
 
     public GraphMetrics metrics(NetworkDomain domain) {
@@ -719,6 +889,43 @@ public final class PhysicalNetworkManager {
         return result;
     }
 
+    private static IdentityHashMap<ElectricalNodeAccess, Double> electricalEnergySnapshot(
+            Collection<ElectricalNodeAccess> accesses
+    ) {
+        IdentityHashMap<ElectricalNodeAccess, Double> snapshot = new IdentityHashMap<>();
+        accesses.forEach(access -> snapshot.put(access, access.electricalNode().energyJoules()));
+        return snapshot;
+    }
+
+    private static IdentityHashMap<ElectricalNodeAccess, Double> positiveEnergyDelta(
+            Map<ElectricalNodeAccess, Double> before,
+            Collection<ElectricalNodeAccess> accesses,
+            boolean increase
+    ) {
+        IdentityHashMap<ElectricalNodeAccess, Double> result = new IdentityHashMap<>();
+        for (ElectricalNodeAccess access : accesses) {
+            double previous = before.getOrDefault(access, access.electricalNode().energyJoules());
+            double current = access.electricalNode().energyJoules();
+            double delta = increase ? current - previous : previous - current;
+            if (Double.isFinite(delta) && delta > 0.0D) {
+                result.put(access, delta);
+            }
+        }
+        return result;
+    }
+
+    private static Map<ElectricalNodeAccess, Double> immutableIdentityMap(
+            Map<ElectricalNodeAccess, Double> source
+    ) {
+        IdentityHashMap<ElectricalNodeAccess, Double> copy = new IdentityHashMap<>();
+        copy.putAll(source);
+        return Collections.unmodifiableMap(copy);
+    }
+
+    private static PhysicalNodeKey sourceTerminal(ElectricalEdgeTelemetry telemetry) {
+        return telemetry.firstWasSource() ? telemetry.firstTerminal() : telemetry.secondTerminal();
+    }
+
     private static List<Map.Entry<PhysicalNodeKey, PhysicalNetworkNode>> orderedEntries(
             IncrementalGraph<PhysicalNodeKey, PhysicalNetworkNode> graph
     ) {
@@ -761,6 +968,12 @@ public final class PhysicalNetworkManager {
             PhysicalNodeKey preferredFirst,
             int visitLimit
     ) {
+    }
+
+    private record BoundedElectricalComponent(Set<PhysicalNodeKey> keys, boolean truncated) {
+        private BoundedElectricalComponent {
+            Objects.requireNonNull(keys, "keys");
+        }
     }
 
     private record CachedLogisticsRoute(

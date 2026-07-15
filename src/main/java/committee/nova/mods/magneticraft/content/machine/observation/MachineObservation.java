@@ -1,5 +1,6 @@
 package committee.nova.mods.magneticraft.content.machine.observation;
 
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -51,11 +52,35 @@ public record MachineObservation(
         }
     }
 
-    public record ElectricalStatus(double voltageVolts, double currentAmps, double powerWatts) {
+    public record ElectricalStatus(
+            ResourceLocation tierId,
+            ResourceLocation terminalId,
+            double voltageVolts,
+            double chargeCoulombsPerTick,
+            double currentAmps,
+            double joulesPerTick,
+            double powerWatts,
+            double storedJoules,
+            double capacityJoules,
+            double loadRatio,
+            double thermalStress,
+            ElectricalDiagnosticSource.FlowDirection flowDirection,
+            ElectricalDiagnosticSource.FaultKind faultKind
+    ) {
         public ElectricalStatus {
-            voltageVolts = finiteOrZero(voltageVolts);
-            currentAmps = finiteOrZero(currentAmps);
-            powerWatts = finiteOrZero(powerWatts);
+            tierId = Objects.requireNonNull(tierId);
+            terminalId = Objects.requireNonNull(terminalId);
+            voltageVolts = finiteNonNegativeOrZero(voltageVolts);
+            chargeCoulombsPerTick = finiteNonNegativeOrZero(chargeCoulombsPerTick);
+            currentAmps = finiteNonNegativeOrZero(currentAmps);
+            joulesPerTick = finiteNonNegativeOrZero(joulesPerTick);
+            powerWatts = finiteNonNegativeOrZero(powerWatts);
+            storedJoules = finiteNonNegativeOrZero(storedJoules);
+            capacityJoules = finiteNonNegativeOrZero(capacityJoules);
+            loadRatio = finiteNonNegativeOrZero(loadRatio);
+            thermalStress = Math.min(1.0D, finiteNonNegativeOrZero(thermalStress));
+            flowDirection = Objects.requireNonNull(flowDirection);
+            faultKind = Objects.requireNonNull(faultKind);
         }
     }
 
@@ -78,5 +103,9 @@ public record MachineObservation(
 
     private static double finiteOrZero(double value) {
         return Double.isFinite(value) ? value : 0.0D;
+    }
+
+    private static double finiteNonNegativeOrZero(double value) {
+        return Double.isFinite(value) && value >= 0.0D ? value : 0.0D;
     }
 }

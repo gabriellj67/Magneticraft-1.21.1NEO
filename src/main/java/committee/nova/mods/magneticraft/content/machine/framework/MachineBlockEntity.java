@@ -36,8 +36,10 @@ public abstract class MachineBlockEntity extends BlockEntity
     private static final int CLIENT_STATE_SYNC_INTERVAL = 4;
 
     private final MachineModuleContainer modules = new MachineModuleContainer();
-    private int lastClientStateHash;
-    private boolean hasClientStateHash;
+    private int rendererClientStateHash;
+    private boolean hasRendererClientStateHash;
+    private int lastSentClientStateHash;
+    private boolean hasSentClientStateHash;
     private boolean clientSyncRequested;
 
     protected MachineBlockEntity(BlockEntityType<?> type, BlockPos position, BlockState state) {
@@ -109,6 +111,40 @@ public abstract class MachineBlockEntity extends BlockEntity
     }
 
     @Override
+    public final Optional<ElectricalDiagnosticSource.NetworkSummary> electricalNetworkSummary(
+            Direction side,
+            int maxVisitedNodes
+    ) {
+        for (MachineModule module : modules.values()) {
+            if (module instanceof ElectricalDiagnosticSource source) {
+                Optional<ElectricalDiagnosticSource.NetworkSummary> summary =
+                        source.electricalNetworkSummary(side, maxVisitedNodes);
+                if (summary.isPresent()) {
+                    return summary;
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public final Optional<ElectricalDiagnosticSource.FaultSearchResult> nearestElectricalFault(
+            Direction side,
+            int maxVisitedNodes
+    ) {
+        for (MachineModule module : modules.values()) {
+            if (module instanceof ElectricalDiagnosticSource source) {
+                Optional<ElectricalDiagnosticSource.FaultSearchResult> fault =
+                        source.nearestElectricalFault(side, maxVisitedNodes);
+                if (fault.isPresent()) {
+                    return fault;
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public final Optional<ThermalDiagnosticSource.ThermalReading> thermalReading(Direction side) {
         for (MachineModule module : modules.values()) {
             if (module instanceof ThermalDiagnosticSource source) {
@@ -123,6 +159,22 @@ public abstract class MachineBlockEntity extends BlockEntity
 
     /** Flushes module and renderer snapshot requests as one complete BE packet. */
     protected final void finishServerTick() {
+        Level currentLevel = getLevel();
+        if (currentLevel != null && !currentLevel.isClientSide
+                && currentLevel.getGameTime() % CLIENT_STATE_SYNC_INTERVAL == 0L) {
+            List<ElectricalNetworkModule> terminals = electricalTerminals();
+            if (hasRendererClientStateHash || !terminals.isEmpty()) {
+                int combinedHash = hasRendererClientStateHash ? rendererClientStateHash : 1;
+                for (ElectricalNetworkModule terminal : terminals) {
+                    combinedHash = 31 * combinedHash + terminal.clientStateHash();
+                }
+                if (!hasSentClientStateHash || lastSentClientStateHash != combinedHash) {
+                    lastSentClientStateHash = combinedHash;
+                    hasSentClientStateHash = true;
+                    requestClientSync();
+                }
+            }
+        }
         if (clientSyncRequested) {
             clientSyncRequested = false;
             markChangedAndSync();
@@ -204,6 +256,17 @@ public abstract class MachineBlockEntity extends BlockEntity
         loadClientData(tag);
     }
 
+    @Override
+    public void onDataPacket(
+            net.minecraft.network.Connection connection,
+            ClientboundBlockEntityDataPacket packet
+    ) {
+        CompoundTag tag = packet.getTag();
+        if (tag != null) {
+            handleUpdateTag(tag);
+        }
+    }
+
     protected void saveClientData(CompoundTag tag) {
     }
 
@@ -216,15 +279,11 @@ public abstract class MachineBlockEntity extends BlockEntity
      */
     protected final void syncClientState(int stateHash) {
         Level currentLevel = getLevel();
-        if (currentLevel == null || currentLevel.isClientSide
-                || currentLevel.getGameTime() % CLIENT_STATE_SYNC_INTERVAL != 0L) {
+        if (currentLevel == null || currentLevel.isClientSide) {
             return;
         }
-        if (!hasClientStateHash || lastClientStateHash != stateHash) {
-            lastClientStateHash = stateHash;
-            hasClientStateHash = true;
-            requestClientSync();
-        }
+        rendererClientStateHash = stateHash;
+        hasRendererClientStateHash = true;
     }
 
     @Nullable
@@ -288,6 +347,15 @@ public abstract class MachineBlockEntity extends BlockEntity
     public final void requestClientSync() {
         setChanged();
         clientSyncRequested = true;
+    }
+
+    @Override
+    public final void requestModelRefresh() {
+        Level currentLevel = getLevel();
+        if (currentLevel == null || !currentLevel.isClientSide) {
+            return;
+        }
+        MachineModelRefreshQueue.enqueue(currentLevel.dimension().location(), worldPosition);
     }
 
     @Nullable

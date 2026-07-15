@@ -41,10 +41,19 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
     private Button languageButton;
     private int page;
     private Component validationMessage = Component.empty();
+    private final int baseImageWidth;
+    private final LegacyMachineGuiLayout.Rect electricalPanel;
 
     public ProgrammableScreen(ProgrammableMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        LegacyMachineGuiLayout.Size size = LegacyMachineGuiLayout.programmableSize(menu.miningRobot());
+        LegacyMachineGuiLayout.Size baseSize = LegacyMachineGuiLayout.programmableSize(menu.miningRobot());
+        baseImageWidth = baseSize.width();
+        electricalPanel = menu.miningRobot()
+                ? LegacyMachineGuiLayout.electricalPanel(baseImageWidth)
+                : null;
+        LegacyMachineGuiLayout.Size size = electricalPanel == null
+                ? baseSize
+                : LegacyMachineGuiLayout.withElectricalPanel(baseSize);
         imageWidth = size.width();
         imageHeight = size.height();
         inventoryLabelX = LegacyMachineGuiLayout.PROGRAMMABLE_PLAYER_LEFT;
@@ -130,6 +139,12 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     leftPos + STATE_LEFT + 1 + width,
                     topPos + ROBOT_ENERGY_TOP + ROBOT_ENERGY_HEIGHT - 1,
                     0xFF4DA3FF
+            );
+        }
+        if (electricalPanel != null) {
+            ElectricalStatePanel.render(
+                    graphics, font, leftPos, topPos, electricalPanel,
+                    menu.position(), menu.energyStored(), menu.energyCapacity()
             );
         }
         for (Slot slot : menu.slots) {
@@ -219,6 +234,12 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     ),
                     mouseX,
                     mouseY
+            );
+        }
+        if (electricalPanel != null) {
+            ElectricalStatePanel.renderTooltip(
+                    graphics, font, mouseX, mouseY, leftPos, topPos, electricalPanel,
+                    menu.position(), menu.energyStored(), menu.energyCapacity()
             );
         }
         renderTooltip(graphics, mouseX, mouseY);

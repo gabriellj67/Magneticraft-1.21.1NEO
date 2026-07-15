@@ -139,9 +139,54 @@
       "attack_cost_fe": 0,
       "break_cost_fe": 0,
       "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electrical_fuse.description",
+      "id": "magneticraft:electrical_fuse",
+      "translation_key": "item.magneticraft.electrical_fuse",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electrical_repair_tool.description",
+      "id": "magneticraft:electrical_repair_tool",
+      "translation_key": "item.magneticraft.electrical_repair_tool",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
       "description": "guide.magneticraft.item.electric_cable.description",
       "id": "magneticraft:electric_cable",
       "translation_key": "block.magneticraft.electric_cable",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.box_transformer.description",
+      "id": "magneticraft:box_transformer",
+      "translation_key": "block.magneticraft.box_transformer",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.fuse_box.description",
+      "id": "magneticraft:fuse_box",
+      "translation_key": "block.magneticraft.fuse_box",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.circuit_breaker.description",
+      "id": "magneticraft:circuit_breaker",
+      "translation_key": "block.magneticraft.circuit_breaker",
       "use_cost_fe": 0
     },
     {

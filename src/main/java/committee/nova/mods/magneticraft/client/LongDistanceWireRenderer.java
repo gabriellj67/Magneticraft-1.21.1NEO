@@ -7,6 +7,7 @@ import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlo
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlockEntity;
 import committee.nova.mods.magneticraft.content.network.module.LongDistanceEndpointModule;
 import committee.nova.mods.magneticraft.content.network.module.LongDistanceWireHost;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -44,7 +45,14 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
             if (!shouldRenderFrom(local, remote, remoteWireHostIsLoaded(endpoint, remote))) {
                 continue;
             }
-            renderConnection(local, remote, connection.port().wireCount(), pose, consumer);
+            renderConnection(
+                    local,
+                    remote,
+                    connection.port().wireCount(),
+                    connection.tierId(),
+                    pose,
+                    consumer
+            );
         }
     }
 
@@ -97,6 +105,7 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
             BlockPos local,
             BlockPos remote,
             int wireCount,
+            ResourceLocation tierId,
             PoseStack.Pose pose,
             VertexConsumer consumer
     ) {
@@ -109,6 +118,10 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
         float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
         int segmentCount = segmentCount(distance);
         float sag = Math.min(2.0F, distance * 0.08F);
+        int color = ElectricalTierColors.color(tierId);
+        float red = ((color >>> 16) & 0xFF) / 255.0F;
+        float green = ((color >>> 8) & 0xFF) / 255.0F;
+        float blue = (color & 0xFF) / 255.0F;
 
         for (int wire = 0; wire < wireCount; wire++) {
             float offset = (wire - (wireCount - 1) * 0.5F) * WIRE_SPACING;
@@ -117,8 +130,8 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
             for (int segment = 0; segment < segmentCount; segment++) {
                 float firstT = (float) segment / segmentCount;
                 float secondT = (float) (segment + 1) / segmentCount;
-                vertex(pose, consumer, point(deltaX, deltaY, deltaZ, firstT, sag, offsetX, offsetZ));
-                vertex(pose, consumer, point(deltaX, deltaY, deltaZ, secondT, sag, offsetX, offsetZ));
+                vertex(pose, consumer, point(deltaX, deltaY, deltaZ, firstT, sag, offsetX, offsetZ), red, green, blue);
+                vertex(pose, consumer, point(deltaX, deltaY, deltaZ, secondT, sag, offsetX, offsetZ), red, green, blue);
             }
         }
     }
@@ -144,11 +157,18 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
         );
     }
 
-    private static void vertex(PoseStack.Pose pose, VertexConsumer consumer, WirePoint point) {
+    private static void vertex(
+            PoseStack.Pose pose,
+            VertexConsumer consumer,
+            WirePoint point,
+            float red,
+            float green,
+            float blue
+    ) {
         Matrix4f matrix = pose.pose();
         Matrix3f normal = pose.normal();
         consumer.vertex(matrix, point.x(), point.y(), point.z())
-                .color(0.72F, 0.32F, 0.12F, 1.0F)
+                .color(red, green, blue, 1.0F)
                 .normal(normal, 0.0F, 1.0F, 0.0F)
                 .endVertex();
     }
@@ -160,7 +180,7 @@ public final class LongDistanceWireRenderer<T extends BlockEntity & LongDistance
 
     @Override
     public int getViewDistance() {
-        return 64;
+        return 96;
     }
 
     private record WirePoint(float x, float y, float z) {

@@ -5,7 +5,9 @@ import committee.nova.mods.magneticraft.content.machine.framework.MachineModule;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricalProtectionKind;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FaultKind;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalEdgeTelemetry;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalFaultSource;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalStressState;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalTickParticipant;
@@ -23,7 +25,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 /** Server-authoritative fuse/breaker state around one explicit same-block internal edge. */
-public final class ElectricalProtectionModule implements MachineModule, ElectricalTickParticipant {
+public final class ElectricalProtectionModule
+        implements MachineModule, ElectricalTickParticipant, ElectricalFaultSource {
     public static final double FUSE_THERMAL_CAPACITY = 42.0D;
     public static final double BREAKER_THERMAL_CAPACITY = 60.0D;
     public static final double IMMEDIATE_BREAKER_CURRENT_MULTIPLIER = 4.0D;
@@ -35,6 +38,7 @@ public final class ElectricalProtectionModule implements MachineModule, Electric
     private static final String STRESS_TAG = "thermal_stress";
     private static final String TRIPPED_TAG = "tripped";
     private static final String BLOWN_TAG = "blown";
+    private static final String REDSTONE_FORCED_OPEN_TAG = "redstone_forced_open";
 
     private final ResourceLocation id;
     private final MachineModuleHost host;
@@ -48,6 +52,8 @@ public final class ElectricalProtectionModule implements MachineModule, Electric
     private boolean tripped;
     private boolean blown;
     private boolean lastConnectionClosed;
+    private boolean lastRedstoneForcedOpen;
+    private boolean clientRedstoneForcedOpen;
 
     public ElectricalProtectionModule(
             ResourceLocation id,
@@ -64,6 +70,7 @@ public final class ElectricalProtectionModule implements MachineModule, Electric
         first.disableIntrinsicDamage();
         second.disableIntrinsicDamage();
         first.attachTickParticipant(this);
+        second.attachTickParticipant(this);
     }
 
     @Override
@@ -105,6 +112,34 @@ public final class ElectricalProtectionModule implements MachineModule, Electric
         tag.putDouble(STRESS_TAG, stress.stress());
         tag.putBoolean(TRIPPED_TAG, tripped);
         tag.putBoolean(BLOWN_TAG, blown);
+    }
+
+    @Override
+    public void loadClientData(CompoundTag tag) {
+        ResourceLocation nextRatingId = ResourceLocation.tryParse(tag.getString(RATING_ID_TAG));
+        if (nextRatingId != null && ElectricalRatingIds.isKnown(nextRatingId)) {
+            ratingId = nextRatingId;
+        }
+        ItemStack nextFuse = tag.contains(FUSE_TAG, Tag.TAG_COMPOUND)
+                ? ItemStack.of(tag.getCompound(FUSE_TAG))
+                : ItemStack.EMPTY;
+        fuse = validFuse(nextFuse) ? nextFuse.copyWithCount(1) : ItemStack.EMPTY;
+        stress.restore(tag.getDouble(STRESS_TAG));
+        tripped = tag.getBoolean(TRIPPED_TAG);
+        blown = tag.getBoolean(BLOWN_TAG);
+        clientRedstoneForcedOpen = tag.getBoolean(REDSTONE_FORCED_OPEN_TAG);
+    }
+
+    @Override
+    public void saveClientData(CompoundTag tag) {
+        tag.putString(RATING_ID_TAG, ratingId.toString());
+        if (!fuse.isEmpty()) {
+            tag.put(FUSE_TAG, fuse.save(new CompoundTag()));
+        }
+        tag.putDouble(STRESS_TAG, stress.stress());
+        tag.putBoolean(TRIPPED_TAG, tripped);
+        tag.putBoolean(BLOWN_TAG, blown);
+        tag.putBoolean(REDSTONE_FORCED_OPEN_TAG, redstoneForcedOpen());
     }
 
     @Override
@@ -197,14 +232,48 @@ public final class ElectricalProtectionModule implements MachineModule, Electric
         if (kind != ElectricalProtectionKind.FUSE_BOX || !fuse.isEmpty() || !validFuse(candidate)) {
             return false;
         }
-        TieredElectricalItemData data = TieredElectricalItemData.read(candidate).orElseThrow();
-        fuse = candidate.copyWithCount(1);
-        ratingId = data.ratingId().orElseThrow();
+        setFuseFromMenu(candidate);
+        return true;
+    }
+
+    public boolean canInsertFuse(ItemStack candidate) {
+        return kind == ElectricalProtectionKind.FUSE_BOX && fuse.isEmpty() && validFuse(candidate);
+    }
+
+    public boolean isCompatibleFuse(ItemStack candidate) {
+        return kind == ElectricalProtectionKind.FUSE_BOX && validFuse(candidate);
+    }
+
+    /** Menu-only single-slot update; accepts only an empty stack or one compatible fuse. */
+    public boolean setFuseFromMenu(ItemStack candidate) {
+        if (kind != ElectricalProtectionKind.FUSE_BOX
+                || (!candidate.isEmpty() && !validFuse(candidate))) {
+            return false;
+        }
+        if (candidate.isEmpty()) {
+            fuse = ItemStack.EMPTY;
+            ratingId = ElectricalRatingIds.STANDARD;
+        } else {
+            TieredElectricalItemData data = TieredElectricalItemData.read(candidate).orElseThrow();
+            fuse = candidate.copyWithCount(1);
+            ratingId = data.ratingId().orElseThrow();
+        }
         blown = false;
         stress.reset();
         refreshConnection();
         host.markChangedAndSync();
         return true;
+    }
+
+    public ItemStack extractFuse(int amount, boolean simulate) {
+        if (kind != ElectricalProtectionKind.FUSE_BOX || amount <= 0 || fuse.isEmpty()) {
+            return ItemStack.EMPTY;
+        }
+        ItemStack extracted = fuse.copyWithCount(1);
+        if (!simulate) {
+            setFuseFromMenu(ItemStack.EMPTY);
+        }
+        return extracted;
     }
 
     public ItemStack removeFuseForDrop() {
@@ -226,14 +295,21 @@ public final class ElectricalProtectionModule implements MachineModule, Electric
     }
 
     public void refreshConnection() {
+        boolean redstoneOpen = redstoneForcedOpen();
         boolean closed = protectionInstalled()
-                && !redstoneForcedOpen()
+                && !redstoneOpen
                 && first.electricalProfileBound()
                 && second.electricalProfileBound()
                 && first.tierId().equals(second.tierId());
         if (closed != lastConnectionClosed) {
             first.setInternalConnection(second, closed);
             lastConnectionClosed = closed;
+        }
+        if (host.level() != null
+                && !host.level().isClientSide
+                && redstoneOpen != lastRedstoneForcedOpen) {
+            lastRedstoneForcedOpen = redstoneOpen;
+            host.requestClientSync();
         }
     }
 
@@ -268,7 +344,41 @@ public final class ElectricalProtectionModule implements MachineModule, Electric
     }
 
     public boolean redstoneForcedOpen() {
-        return host.level() != null && host.level().hasNeighborSignal(host.position());
+        if (host.level() == null) {
+            return false;
+        }
+        return host.level().isClientSide
+                ? clientRedstoneForcedOpen
+                : host.level().hasNeighborSignal(host.position());
+    }
+
+    @Override
+    public FaultKind electricalFaultKind() {
+        if (blown) {
+            return FaultKind.FUSE_BLOWN;
+        }
+        if (tripped) {
+            return FaultKind.BREAKER_TRIPPED;
+        }
+        if (redstoneForcedOpen()) {
+            return FaultKind.REDSTONE_OPEN;
+        }
+        return FaultKind.NONE;
+    }
+
+    @Override
+    public double electricalRatedCurrentAmps() {
+        return ElectricalDataRegistry.INSTANCE.current()
+                .flatMap(snapshot -> snapshot.voltageTier(first.tierId()))
+                .map(tier -> (ratingId.equals(ElectricalRatingIds.HEAVY)
+                        ? tier.heavyProtectionChargePerTick()
+                        : tier.standardProtectionChargePerTick()) * ElectricalNode.TICKS_PER_SECOND)
+                .orElse(0.0D);
+    }
+
+    @Override
+    public double electricalThermalStress() {
+        return thermalStress();
     }
 
     private boolean protectionInstalled() {

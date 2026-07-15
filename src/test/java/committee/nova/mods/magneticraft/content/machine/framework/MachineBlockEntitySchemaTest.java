@@ -1,7 +1,10 @@
 package committee.nova.mods.magneticraft.content.machine.framework;
 
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,5 +33,21 @@ class MachineBlockEntitySchemaTest {
         CompoundTag future = new CompoundTag();
         future.putInt("schema_version", 2);
         assertFalse(MachineBlockEntity.hasSchema(future, 1));
+    }
+
+    @Test
+    void incrementalPacketsOverrideForgePersistentLoadRouting() throws NoSuchMethodException {
+        assertEquals(
+                MachineBlockEntity.class,
+                MachineBlockEntity.class
+                        .getMethod("onDataPacket", Connection.class, ClientboundBlockEntityDataPacket.class)
+                        .getDeclaringClass()
+        );
+        assertEquals(
+                MultiblockGapBlockEntity.class,
+                MultiblockGapBlockEntity.class
+                        .getMethod("onDataPacket", Connection.class, ClientboundBlockEntityDataPacket.class)
+                        .getDeclaringClass()
+        );
     }
 }

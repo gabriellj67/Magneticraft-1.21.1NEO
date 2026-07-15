@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.system.network.runtime;
 
 import committee.nova.mods.magneticraft.system.network.core.GraphMetrics;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FaultKind;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalCoupler;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalEdgeTelemetry;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
@@ -129,6 +130,68 @@ class PhysicalNetworkManagerElectricalTest {
         assertEquals(5L * 1_023L, manager.edgeTicks());
     }
 
+    @Test
+    void diagnosticsReportPhaseTelemetryLoadAndNearestFault() {
+        PhysicalNetworkManager manager = new PhysicalNetworkManager(null);
+        TestElectricalNode source = node(new BlockPos(0, 0, 0), FIRST_TERMINAL, LOW);
+        TestElectricalNode fault = node(new BlockPos(1, 0, 0), FIRST_TERMINAL, LOW);
+        TestElectricalNode tail = node(new BlockPos(2, 0, 0), FIRST_TERMINAL, LOW);
+        source.injectJoules = 100.0D;
+        source.consumeJoules = 10.0D;
+        source.ratedCurrentAmps = 1.0D;
+        fault.faultKind = FaultKind.MACHINE_FAULT;
+        manager.register(source);
+        manager.register(fault);
+        manager.register(tail);
+
+        manager.tick(1L);
+
+        var summary = manager.electricalNetworkSummary(
+                source.nodeKey(),
+                PhysicalNetworkManager.MAX_ELECTRICAL_DIAGNOSTIC_VISITS
+        ).orElseThrow();
+        assertEquals(3, summary.nodeCount());
+        assertEquals(2, summary.edgeCount());
+        assertEquals(100.0D, summary.generatedJoulesPerTick(), 1.0E-9D);
+        assertEquals(10.0D, summary.consumedJoulesPerTick(), 1.0E-9D);
+        assertEquals(1, summary.faultCount());
+        assertTrue(summary.maximumLoadRatio() > 0.0D);
+        assertFalse(summary.truncated());
+
+        var search = manager.nearestElectricalFault(source.nodeKey(), 4_096).orElseThrow();
+        assertFalse(search.truncated());
+        assertEquals(3, search.visitedNodes());
+        var located = search.location().orElseThrow();
+        assertEquals(FaultKind.MACHINE_FAULT, located.faultKind());
+        assertEquals(Direction.EAST, located.direction().orElseThrow());
+        assertEquals(1.0D, located.distanceBlocks(), 1.0E-9D);
+    }
+
+    @Test
+    void diagnosticsStopAtConfiguredVisitLimitWithoutLoadingAnything() {
+        PhysicalNetworkManager manager = new PhysicalNetworkManager(null);
+        TestElectricalNode start = null;
+        TestElectricalNode last = null;
+        for (int x = 0; x < 8; x++) {
+            TestElectricalNode next = node(new BlockPos(x, 0, 0), FIRST_TERMINAL, LOW);
+            manager.register(next);
+            if (start == null) {
+                start = next;
+            }
+            last = next;
+        }
+        last.faultKind = FaultKind.MACHINE_FAULT;
+
+        var summary = manager.electricalNetworkSummary(start.nodeKey(), 3).orElseThrow();
+        assertEquals(3, summary.nodeCount());
+        assertEquals(3, summary.visitedNodes());
+        assertTrue(summary.truncated());
+        var search = manager.nearestElectricalFault(start.nodeKey(), 3).orElseThrow();
+        assertEquals(3, search.visitedNodes());
+        assertTrue(search.truncated());
+        assertTrue(search.location().isEmpty());
+    }
+
     private static TestElectricalNode node(
             BlockPos position,
             ResourceLocation terminal,
@@ -163,6 +226,10 @@ class PhysicalNetworkManagerElectricalTest {
         private final List<String> phases;
         private final String phaseName;
         private int dirtyMarks;
+        private double injectJoules;
+        private double consumeJoules;
+        private double ratedCurrentAmps = Double.POSITIVE_INFINITY;
+        private FaultKind faultKind = FaultKind.NONE;
 
         private TestElectricalNode(
                 PhysicalNodeKey key,
@@ -214,6 +281,16 @@ class PhysicalNetworkManagerElectricalTest {
         }
 
         @Override
+        public double electricalRatedCurrentAmps() {
+            return ratedCurrentAmps;
+        }
+
+        @Override
+        public FaultKind electricalFaultKind() {
+            return faultKind;
+        }
+
+        @Override
         public void markElectricalStateChanged() {
             dirtyMarks++;
         }
@@ -221,11 +298,13 @@ class PhysicalNetworkManagerElectricalTest {
         @Override
         public void injectElectricalEnergy(PhysicalNetworkManager manager) {
             phases.add(phaseName + ":inject");
+            node.addEnergy(injectJoules, false);
         }
 
         @Override
         public void extractElectricalEnergy(PhysicalNetworkManager manager) {
             phases.add(phaseName + ":extract");
+            node.removeEnergy(consumeJoules, false);
         }
 
         @Override

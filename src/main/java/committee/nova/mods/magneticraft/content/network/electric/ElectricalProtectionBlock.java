@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.system.network.electric.item.TieredElect
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -74,14 +75,21 @@ public final class ElectricalProtectionBlock extends NetworkComponentBlock {
             player.displayClientMessage(Component.translatable("message.magneticraft.invalid_fuse"), true);
             return InteractionResult.FAIL;
         }
-        if (kind == ElectricalProtectionKind.CIRCUIT_BREAKER && held.isEmpty()) {
-            if (!level.isClientSide
-                    && level.getBlockEntity(position) instanceof ElectricalProtectionBlockEntity protection) {
-                protection.protection().resetBreaker();
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+        InteractionResult wrenchResult = super.use(state, level, position, player, hand, hit);
+        if (wrenchResult != InteractionResult.PASS) {
+            return wrenchResult;
         }
-        return super.use(state, level, position, player, hand, hit);
+        if (!level.isClientSide
+                && player instanceof ServerPlayer serverPlayer
+                && level.getBlockEntity(position) instanceof ElectricalProtectionBlockEntity protection) {
+            ElectricalDeviceMenu.open(
+                    serverPlayer,
+                    protection,
+                    position,
+                    ElectricalDeviceKind.from(kind)
+            );
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override

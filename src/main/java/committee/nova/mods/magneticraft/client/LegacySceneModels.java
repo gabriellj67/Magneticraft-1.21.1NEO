@@ -39,6 +39,12 @@ final class LegacySceneModels {
     );
     static final Part ELECTRIC_POLE = mcx("electric_pole", ModelSceneSelection.ALL);
     static final Part ELECTRIC_POLE_TRANSFORMER = mcx("electric_pole_transformer", ModelSceneSelection.ALL);
+    static final Part BOX_TRANSFORMER_FORWARD = gltf("box_transformer", includeNodes("arrow_forward"));
+    static final Part BOX_TRANSFORMER_REVERSE = gltf("box_transformer", includeNodes("arrow_reverse"));
+    static final Part FUSE_INTACT = gltf("fuse_box", includeNodes("fuse_intact"));
+    static final Part FUSE_BLOWN = gltf("fuse_box", includeNodes("fuse_blown"));
+    static final Part BREAKER_CLOSED = gltf("circuit_breaker", includeNodes("switch_closed"));
+    static final Part BREAKER_OPEN = gltf("circuit_breaker", includeNodes("switch_open"));
     static final Part SLUICE_BOX_BODY = mcx("sluice_box", excludeNodes("gravel"));
     static final Part SLUICE_BOX_GRAVEL = mcx("sluice_box", includeNodes("gravel"));
     static final Part SLUICE_BOX_WATER = mcx("sluice_box_water", ModelSceneSelection.ALL);

@@ -26,11 +26,18 @@ public final class LegacySceneGeometry extends SimpleUnbakedGeometry<LegacyScene
     private final ModelScene scene;
     private final Set<Integer> selectedNodes;
     private final ModelTransform sourceTransform;
+    private final ModelRenderManifest manifest;
 
-    LegacySceneGeometry(ModelScene scene, ModelSceneSelection selection, ModelTransform sourceTransform) {
+    LegacySceneGeometry(
+            ModelScene scene,
+            ModelSceneSelection selection,
+            ModelTransform sourceTransform,
+            ModelRenderManifest manifest
+    ) {
         this.scene = scene;
         selectedNodes = selection.select(scene);
         this.sourceTransform = sourceTransform;
+        this.manifest = manifest;
     }
 
     @Override
@@ -63,7 +70,7 @@ public final class LegacySceneGeometry extends SimpleUnbakedGeometry<LegacyScene
         Matrix4f worldTransform = new Matrix4f(parentTransform).mul(node.transform().matrix());
         if (selectedNodes.contains(nodeIndex)) {
             for (ModelScene.Primitive primitive : node.primitives()) {
-                bakePrimitive(primitive, worldTransform, rootTransform, modelBuilder, spriteGetter);
+                bakePrimitive(node.name(), primitive, worldTransform, rootTransform, modelBuilder, spriteGetter);
             }
         }
         for (int child : node.children()) {
@@ -72,6 +79,7 @@ public final class LegacySceneGeometry extends SimpleUnbakedGeometry<LegacyScene
     }
 
     private void bakePrimitive(
+            String nodeName,
             ModelScene.Primitive primitive,
             Matrix4f worldTransform,
             Transformation rootTransform,
@@ -90,7 +98,7 @@ public final class LegacySceneGeometry extends SimpleUnbakedGeometry<LegacyScene
         for (int face = 0; face < primitive.faceCount(); face++) {
             QuadBakingVertexConsumer.Buffered consumer = new QuadBakingVertexConsumer.Buffered();
             consumer.setSprite(sprite);
-            consumer.setTintIndex(-1);
+            consumer.setTintIndex(manifest.tintIndex(nodeName, primitive.materialName()));
             consumer.setShade(true);
             consumer.setHasAmbientOcclusion(scene.ambientOcclusion());
             Direction direction = null;

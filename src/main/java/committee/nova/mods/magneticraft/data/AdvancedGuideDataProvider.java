@@ -241,7 +241,12 @@ final class AdvancedGuideDataProvider implements DataProvider {
         items.add(electricEquipmentItem("wireless_energy_receiver", true));
         items.add(electricEquipmentItem("wind_turbine", true));
         items.add(electricEquipmentItem("wrench", false));
+        items.add(electricEquipmentItem("electrical_fuse", false));
+        items.add(electricEquipmentItem("electrical_repair_tool", false));
         items.add(electricEquipmentItem("electric_cable", true));
+        items.add(electricEquipmentItem("box_transformer", true));
+        items.add(electricEquipmentItem("fuse_box", true));
+        items.add(electricEquipmentItem("circuit_breaker", true));
         items.add(electricEquipmentItem("heat_pipe", true));
         items.add(electricEquipmentItem("insulated_heat_pipe", true));
         items.add(electricEquipmentItem("heat_sink", true));

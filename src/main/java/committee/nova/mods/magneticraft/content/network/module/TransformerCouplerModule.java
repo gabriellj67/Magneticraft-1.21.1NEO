@@ -22,6 +22,7 @@ public final class TransformerCouplerModule implements MachineModule, Electrical
     private static final String PROFILE_ID_TAG = "transformer_profile_id";
     private static final String REVERSED_TAG = "reversed";
     private static final String REDSTONE_MODE_TAG = "redstone_mode";
+    private static final String PROFILE_BOUND_TAG = "profile_bound";
 
     private final ResourceLocation id;
     private final MachineModuleHost host;
@@ -92,6 +93,29 @@ public final class TransformerCouplerModule implements MachineModule, Electrical
         tag.putString(PROFILE_ID_TAG, profileId.toString());
         tag.putBoolean(REVERSED_TAG, coupler.reversed());
         tag.putInt(REDSTONE_MODE_TAG, redstoneMode.ordinal());
+    }
+
+    @Override
+    public void loadClientData(CompoundTag tag) {
+        ResourceLocation nextProfileId = ResourceLocation.tryParse(tag.getString(PROFILE_ID_TAG));
+        int modeOrdinal = tag.getInt(REDSTONE_MODE_TAG);
+        RedstoneControlMode[] modes = RedstoneControlMode.values();
+        if (nextProfileId == null || modeOrdinal < 0 || modeOrdinal >= modes.length) {
+            profileBound = false;
+            return;
+        }
+        profileId = nextProfileId;
+        coupler.setReversed(tag.getBoolean(REVERSED_TAG));
+        redstoneMode = modes[modeOrdinal];
+        profileBound = tag.getBoolean(PROFILE_BOUND_TAG);
+    }
+
+    @Override
+    public void saveClientData(CompoundTag tag) {
+        tag.putString(PROFILE_ID_TAG, profileId.toString());
+        tag.putBoolean(REVERSED_TAG, coupler.reversed());
+        tag.putInt(REDSTONE_MODE_TAG, redstoneMode.ordinal());
+        tag.putBoolean(PROFILE_BOUND_TAG, profileBound);
     }
 
     @Override

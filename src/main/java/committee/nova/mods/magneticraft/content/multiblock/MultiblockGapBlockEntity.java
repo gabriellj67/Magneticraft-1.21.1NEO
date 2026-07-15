@@ -5,8 +5,12 @@ import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleH
 import committee.nova.mods.magneticraft.content.machine.framework.NetworkConnectionHost;
 import committee.nova.mods.magneticraft.content.network.module.AbstractPhysicalNetworkModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
+import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkNode;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -24,9 +28,11 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 /** Formed-structure proxy that preserves the released 1.12 per-position port behavior. */
 public final class MultiblockGapBlockEntity extends BlockEntity
-        implements MachineModuleHost, NetworkConnectionHost {
+        implements MachineModuleHost, NetworkConnectionHost, DiagnosticHost {
     private static final String CONTROLLER_TAG = "controller";
     private static final String DEFINITION_TAG = "definition";
     private static final String FACING_TAG = "facing";
@@ -114,6 +120,17 @@ public final class MultiblockGapBlockEntity extends BlockEntity
         loadCollisionData(tag);
     }
 
+    @Override
+    public void onDataPacket(
+            net.minecraft.network.Connection connection,
+            ClientboundBlockEntityDataPacket packet
+    ) {
+        CompoundTag tag = packet.getTag();
+        if (tag != null) {
+            handleUpdateTag(tag);
+        }
+    }
+
     @Nullable
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
@@ -172,6 +189,56 @@ public final class MultiblockGapBlockEntity extends BlockEntity
         return controller != null
                 && controller.operational()
                 && MultiblockPortLayout.supports(controller, worldPosition, domain, side);
+    }
+
+    @Override
+    public Optional<ElectricalDiagnosticSource.ElectricalReading> electricalReading(Direction side) {
+        AdvancedMultiblockBlockEntity controller = controllerForPort(NetworkDomain.ELECTRICITY, side);
+        return controller == null || controller.electricity() == null
+                ? Optional.empty()
+                : Optional.of(controller.electricity().displayReading());
+    }
+
+    @Override
+    public Optional<ElectricalDiagnosticSource.NetworkSummary> electricalNetworkSummary(
+            Direction side,
+            int maxVisitedNodes
+    ) {
+        if (!(level instanceof ServerLevel serverLevel)
+                || controllerForPort(NetworkDomain.ELECTRICITY, side) == null) {
+            return Optional.empty();
+        }
+        return PhysicalNetworkService.manager(serverLevel)
+                .electricalNetworkSummary(electricity.nodeKey(), maxVisitedNodes);
+    }
+
+    @Override
+    public Optional<ElectricalDiagnosticSource.FaultSearchResult> nearestElectricalFault(
+            Direction side,
+            int maxVisitedNodes
+    ) {
+        if (!(level instanceof ServerLevel serverLevel)
+                || controllerForPort(NetworkDomain.ELECTRICITY, side) == null) {
+            return Optional.empty();
+        }
+        return PhysicalNetworkService.manager(serverLevel)
+                .nearestElectricalFault(electricity.nodeKey(), maxVisitedNodes);
+    }
+
+    @Override
+    public Optional<ThermalDiagnosticSource.ThermalReading> thermalReading(Direction side) {
+        AdvancedMultiblockBlockEntity controller = controllerForPort(NetworkDomain.HEAT, side);
+        return controller == null ? Optional.empty() : controller.thermalReading(side);
+    }
+
+    @Nullable
+    private AdvancedMultiblockBlockEntity controllerForPort(NetworkDomain domain, Direction side) {
+        AdvancedMultiblockBlockEntity controller = controller();
+        return controller != null
+                && controller.operational()
+                && MultiblockPortLayout.supports(controller, worldPosition, domain, side)
+                ? controller
+                : null;
     }
 
     @Nullable

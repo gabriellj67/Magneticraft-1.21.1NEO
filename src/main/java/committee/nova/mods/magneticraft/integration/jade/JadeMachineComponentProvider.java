@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.integration.jade;
 
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.client.electrical.ClientVoltageTierRegistry;
 import committee.nova.mods.magneticraft.content.machine.observation.MachineObservation;
 import committee.nova.mods.magneticraft.content.machine.observation.MachineObservationCodec;
 import net.minecraft.network.chat.Component;
@@ -40,10 +41,24 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
                 "tooltip.magneticraft.energy", energy.stored(), energy.capacity()
         )));
         observation.electrical().ifPresent(electrical -> tooltip.add(Component.translatable(
-                "message.magneticraft.voltmeter",
+                "tooltip.magneticraft.jade.electrical_terminal",
+                tierName(electrical.tierId()),
+                electrical.terminalId()
+        )));
+        observation.electrical().ifPresent(electrical -> tooltip.add(Component.translatable(
+                "tooltip.magneticraft.jade.electrical_flow",
                 decimal(electrical.voltageVolts()),
+                decimal(electrical.chargeCoulombsPerTick()),
                 decimal(electrical.currentAmps()),
+                decimal(electrical.joulesPerTick()),
                 decimal(electrical.powerWatts())
+        )));
+        observation.electrical().ifPresent(electrical -> tooltip.add(Component.translatable(
+                "tooltip.magneticraft.jade.electrical_state",
+                percent(electrical.loadRatio()),
+                percent(electrical.thermalStress()),
+                Component.translatable(electrical.flowDirection().translationKey()),
+                Component.translatable(electrical.faultKind().translationKey())
         )));
         observation.thermal().ifPresent(thermal -> tooltip.add(Component.translatable(
                 "tooltip.magneticraft.jade.temperature",
@@ -71,5 +86,15 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
 
     private static String decimal(double value) {
         return String.format(Locale.ROOT, "%.2f", value);
+    }
+
+    private static String percent(double ratio) {
+        return String.format(Locale.ROOT, "%.1f%%", ratio * 100.0D);
+    }
+
+    private static Component tierName(ResourceLocation tierId) {
+        return ClientVoltageTierRegistry.current().tier(tierId)
+                .<Component>map(tier -> Component.translatable(tier.translationKey()))
+                .orElseGet(() -> Component.literal(tierId.toString()));
     }
 }

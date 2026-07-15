@@ -30,6 +30,7 @@ class GltfModelParserTest {
         assertEquals(1, scene.rootNodes().size());
         ModelScene.Primitive primitive = scene.node(0).primitives().get(0);
         assertEquals(1, primitive.faceCount());
+        assertEquals("tier_band", primitive.materialName());
         assertArrayEquals(new float[]{0.0F, 0.0F, 0.0F}, first(primitive.positions(), 3));
         assertArrayEquals(new float[]{0.0F, 1.0F, 0.0F}, last(primitive.positions(), 3));
         assertArrayEquals(new float[]{0.0F, 0.0F, 1.0F}, first(primitive.normals(), 3));
@@ -88,7 +89,7 @@ class GltfModelParserTest {
                   ],
                   "images": [{"uri": "magneticraft:blocks/test"}],
                   "textures": [{"source": 0}],
-                  "materials": [{"pbrMetallicRoughness": {"baseColorTexture": {"index": 0}}}],
+                  "materials": [{"name": "tier_band", "pbrMetallicRoughness": {"baseColorTexture": {"index": 0}}}],
                   "meshes": [{"primitives": [{
                     "attributes": {"POSITION": 0, "TEXCOORD_0": 1},
                     "indices": 2,

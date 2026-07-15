@@ -47,13 +47,16 @@ public final class GltfModelParser {
                 buffers,
                 bufferViews
         );
-        List<String> textures = parseMaterialTextures(resource, root);
-        List<List<ModelScene.Primitive>> meshes = parseMeshes(resource, root, accessors, textures);
+        List<MaterialDefinition> materials = parseMaterials(resource, root);
+        List<List<ModelScene.Primitive>> meshes = parseMeshes(resource, root, accessors, materials);
         List<ModelScene.Node> nodes = parseNodes(resource, root, meshes);
         List<Integer> roots = parseSceneRoots(resource, root, nodes.size());
         validateTree(resource, roots, nodes);
         List<ModelScene.Animation> animations = parseAnimations(resource, root, accessors, nodes.size());
-        String particle = textures.stream().filter(texture -> !MISSING_TEXTURE.equals(texture)).findFirst()
+        String particle = materials.stream()
+                .map(MaterialDefinition::texture)
+                .filter(texture -> !MISSING_TEXTURE.equals(texture))
+                .findFirst()
                 .orElse(MISSING_TEXTURE);
         return new ModelScene(
                 ModelScene.Format.GLTF,
@@ -203,7 +206,8 @@ public final class GltfModelParser {
         return accessors;
     }
 
-    private static List<String> parseMaterialTextures(String resource, JsonObject root) throws ModelParseException {
+    private static List<MaterialDefinition> parseMaterials(String resource, JsonObject root)
+            throws ModelParseException {
         JsonArray images = arrayOrEmpty(resource, root, "images", "$");
         List<String> imageUris = new ArrayList<>(images.size());
         for (int index = 0; index < images.size(); index++) {
@@ -225,10 +229,11 @@ public final class GltfModelParser {
         }
 
         JsonArray materials = arrayOrEmpty(resource, root, "materials", "$");
-        List<String> result = new ArrayList<>(materials.size());
+        List<MaterialDefinition> result = new ArrayList<>(materials.size());
         for (int index = 0; index < materials.size(); index++) {
             String path = "$.materials[" + index + "]";
             JsonObject material = McxModelParser.object(resource, materials.get(index), path);
+            String name = McxModelParser.optionalString(resource, material, "name", path);
             String texture = MISSING_TEXTURE;
             if (material.has("pbrMetallicRoughness")) {
                 JsonObject pbr = McxModelParser.object(
@@ -252,7 +257,7 @@ public final class GltfModelParser {
                     texture = textures.get(textureIndex);
                 }
             }
-            result.add(texture);
+            result.add(new MaterialDefinition(name, texture));
         }
         return result;
     }
@@ -261,7 +266,7 @@ public final class GltfModelParser {
             String resource,
             JsonObject root,
             List<Accessor> accessors,
-            List<String> materials
+            List<MaterialDefinition> materials
     ) throws ModelParseException {
         JsonArray meshes = arrayOrEmpty(resource, root, "meshes", "$");
         List<List<ModelScene.Primitive>> result = new ArrayList<>(meshes.size());
@@ -312,12 +317,24 @@ public final class GltfModelParser {
                 }
                 validateAttributeCounts(resource, path, positions, textureCoordinates, normals);
                 String texture = MISSING_TEXTURE;
+                String materialName = null;
                 if (primitive.has("material")) {
                     int material = McxModelParser.requiredInt(resource, primitive, "material", path);
                     checkIndex(resource, path + ".material", material, materials.size());
-                    texture = materials.get(material);
+                    MaterialDefinition definition = materials.get(material);
+                    texture = definition.texture();
+                    materialName = definition.name();
                 }
-                parsed.add(expandTriangles(resource, path, positions, textureCoordinates, normals, indices, texture));
+                parsed.add(expandTriangles(
+                        resource,
+                        path,
+                        positions,
+                        textureCoordinates,
+                        normals,
+                        indices,
+                        texture,
+                        materialName
+                ));
             }
             result.add(List.copyOf(parsed));
         }
@@ -346,7 +363,8 @@ public final class GltfModelParser {
             Accessor textureCoordinates,
             Accessor normals,
             int[] indices,
-            String texture
+            String texture,
+            String materialName
     ) throws ModelParseException {
         int faceCount = indices.length / 3;
         float[] outputPositions = new float[faceCount * 12];
@@ -382,7 +400,14 @@ public final class GltfModelParser {
                 copy(normals == null ? faceNormal : normals.floats(vertices[vertex]), outputNormals, face * 12 + vertex * 3);
             }
         }
-        return new ModelScene.Primitive(texture, null, outputPositions, outputTextureCoordinates, outputNormals);
+        return new ModelScene.Primitive(
+                texture,
+                null,
+                materialName,
+                outputPositions,
+                outputTextureCoordinates,
+                outputNormals
+        );
     }
 
     private static List<ModelScene.Node> parseNodes(
@@ -703,6 +728,9 @@ public final class GltfModelParser {
     }
 
     private record BufferView(int buffer, int offset, int length, int stride) {
+    }
+
+    private record MaterialDefinition(String name, String texture) {
     }
 
     private static final class Accessor {

@@ -74,10 +74,83 @@ class ElectricalNetworkModulePersistenceTest {
         assertEquals(id("missing"), missing.tierId());
     }
 
+    @Test
+    void boundedClientTelemetryRoundTripsAndMalformedNumbersFailSafe() {
+        ElectricalNetworkModule source = module(LOW, INPUT);
+        source.rebindElectricalProfile(snapshot());
+        source.node().setVoltage(120.0D);
+        source.node().beginNetworkTick();
+        source.node().removeEnergy(40.0D, false);
+        source.node().completeNetworkTick();
+        CompoundTag clientTag = new CompoundTag();
+        source.saveClientData(clientTag);
+
+        ElectricalNetworkModule restored = module(MEDIUM, INPUT);
+        restored.loadClientData(clientTag);
+        var reading = restored.syncedClientReading().orElseThrow();
+        assertEquals(LOW, reading.tierId());
+        assertEquals(INPUT, reading.terminalId());
+        assertTrue(reading.voltageVolts() > 0.0D);
+        assertEquals(40.0D, reading.joulesPerTick(), EPSILON);
+        assertEquals(800.0D, reading.powerWatts(), EPSILON);
+
+        clientTag.putDouble("voltage", Double.NaN);
+        clientTag.putDouble("stress", Double.POSITIVE_INFINITY);
+        clientTag.putString("flow", "future_flow");
+        clientTag.putString("fault", "future_fault");
+        restored.loadClientData(clientTag);
+        reading = restored.syncedClientReading().orElseThrow();
+        assertEquals(0.0D, reading.voltageVolts(), EPSILON);
+        assertEquals(0.0D, reading.thermalStress(), EPSILON);
+        assertEquals(
+                committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FlowDirection.IDLE,
+                reading.flowDirection()
+        );
+        assertEquals(
+                committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FaultKind.MISSING_PROFILE,
+                reading.faultKind()
+        );
+    }
+
+    @Test
+    void clientTierChangeRequestsExactlyOneStaticModelRefresh() {
+        TestHost host = new TestHost();
+        ElectricalNetworkModule restored = module(LOW, INPUT, host);
+        ElectricalNetworkModule source = module(MEDIUM, INPUT);
+        CompoundTag clientTag = new CompoundTag();
+        source.saveClientData(clientTag);
+
+        restored.loadClientData(clientTag);
+        restored.loadClientData(clientTag);
+
+        assertEquals(MEDIUM, restored.tierId());
+        assertEquals(1, host.modelRefreshRequests);
+    }
+
+    @Test
+    void placementTierChangeSynchronizesImmediatelyAndUnchangedIdentityDoesNotResend() {
+        TestHost host = new TestHost();
+        ElectricalNetworkModule module = module(LOW, INPUT, host);
+
+        module.applyTierFromPlacementData(MEDIUM);
+        module.applyTierFromPlacementData(MEDIUM);
+
+        assertEquals(MEDIUM, module.tierId());
+        assertEquals(1, host.syncRequests);
+    }
+
     private static ElectricalNetworkModule module(ResourceLocation tier, ResourceLocation terminal) {
+        return module(tier, terminal, new TestHost());
+    }
+
+    private static ElectricalNetworkModule module(
+            ResourceLocation tier,
+            ResourceLocation terminal,
+            MachineModuleHost host
+    ) {
         return new ElectricalNetworkModule(
                 id("electricity"),
-                new TestHost(),
+                host,
                 tier,
                 terminal,
                 ElectricalNodeKind.CONDUCTOR,
@@ -141,12 +214,21 @@ class ElectricalNetworkModulePersistenceTest {
     }
 
     private static final class TestHost implements MachineModuleHost {
+        private int modelRefreshRequests;
+        private int syncRequests;
+
         @Override
         public void markChanged() {
         }
 
         @Override
         public void markChangedAndSync() {
+            syncRequests++;
+        }
+
+        @Override
+        public void requestModelRefresh() {
+            modelRefreshRequests++;
         }
 
         @Override

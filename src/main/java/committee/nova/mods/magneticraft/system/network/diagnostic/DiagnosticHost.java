@@ -10,5 +10,19 @@ import java.util.Optional;
 public interface DiagnosticHost {
     Optional<ElectricalDiagnosticSource.ElectricalReading> electricalReading(Direction side);
 
+    default Optional<ElectricalDiagnosticSource.NetworkSummary> electricalNetworkSummary(
+            Direction side,
+            int maxVisitedNodes
+    ) {
+        return Optional.empty();
+    }
+
+    default Optional<ElectricalDiagnosticSource.FaultSearchResult> nearestElectricalFault(
+            Direction side,
+            int maxVisitedNodes
+    ) {
+        return Optional.empty();
+    }
+
     Optional<ThermalDiagnosticSource.ThermalReading> thermalReading(Direction side);
 }

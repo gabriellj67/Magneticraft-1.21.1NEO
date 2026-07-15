@@ -71,6 +71,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂整组升级" : "Inserter Stack Upgrade");
         add("container.magneticraft.battery_box", chinese ? "电池箱" : "Battery Box");
         add("container.magneticraft.electric_furnace", chinese ? "电炉" : "Electric Furnace");
+        add("container.magneticraft.box_transformer", chinese ? "箱式变压器" : "Box Transformer");
+        add("container.magneticraft.fuse_box", chinese ? "保险丝盒" : "Fuse Box");
+        add("container.magneticraft.circuit_breaker", chinese ? "断路器" : "Circuit Breaker");
         ModMachineBlocks.machines().forEach((definition, holder) -> {
             add(holder.get(), chinese ? definition.chineseName() : definition.englishName());
             add(
@@ -148,6 +151,34 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.fluid_side_mode.active", chinese ? "主动输出" : "Active output");
         add("message.magneticraft.fluid_side_mode.disabled", chinese ? "禁用" : "Disabled");
         add("message.magneticraft.voltmeter", chinese ? "%s V · %s A · %s W" : "%s V · %s A · %s W");
+        add("message.magneticraft.voltmeter.mode", chinese ? "电压表模式：%s" : "Voltmeter mode: %s");
+        add("mode.magneticraft.voltmeter.point", chinese ? "点测" : "Point probe");
+        add("mode.magneticraft.voltmeter.network_summary", chinese ? "网络摘要" : "Network summary");
+        add("mode.magneticraft.voltmeter.fault_locator", chinese ? "故障定位" : "Fault locator");
+        add("message.magneticraft.voltmeter.point", chinese
+                ? "端子 %s · %s · %s V · %s C/t · %s A · %s J/t · %s W · %s · 负载 %s · %s"
+                : "Terminal %s · %s · %s V · %s C/t · %s A · %s J/t · %s W · %s · load %s · %s");
+        add("message.magneticraft.voltmeter.network", chinese
+                ? "网络：%s 节点 / %s 边 · 储能 %s J · 发电 %s J/t · 用电 %s J/t · 损耗 %s J/t · 最大负载 %s · 故障 %s%s"
+                : "Network: %s nodes / %s edges · stored %s J · generated %s J/t · consumed %s J/t · loss %s J/t · max load %s · faults %s%s");
+        add("message.magneticraft.voltmeter.fault", chinese
+                ? "最近故障：%s · 端子 %s · %s · 距离 %s 格%s"
+                : "Nearest fault: %s · terminal %s · %s · %s blocks away%s");
+        add("message.magneticraft.voltmeter.no_fault", chinese
+                ? "已检查 %s 个节点，未发现故障%s"
+                : "No fault found across %s visited nodes%s");
+        add("message.magneticraft.voltmeter.here", chinese ? "当前位置" : "here");
+        add("message.magneticraft.voltmeter.truncated", chinese ? "（达到搜索上限）" : " (search limit reached)");
+        add("flow.magneticraft.input", chinese ? "输入" : "input");
+        add("flow.magneticraft.output", chinese ? "输出" : "output");
+        add("flow.magneticraft.bidirectional", chinese ? "双向" : "bidirectional");
+        add("flow.magneticraft.idle", chinese ? "空闲" : "idle");
+        add("fault.magneticraft.none", chinese ? "正常" : "normal");
+        add("fault.magneticraft.missing_profile", chinese ? "缺失配置" : "missing profile");
+        add("fault.magneticraft.machine_fault", chinese ? "机器故障" : "machine fault");
+        add("fault.magneticraft.fuse_blown", chinese ? "保险丝熔断" : "fuse blown");
+        add("fault.magneticraft.breaker_tripped", chinese ? "断路器跳闸" : "breaker tripped");
+        add("fault.magneticraft.redstone_open", chinese ? "红石强制断开" : "redstone-forced open");
         add("message.magneticraft.thermometer", chinese ? "%s °C" : "%s °C");
         add("message.magneticraft.voltage", chinese ? "电压：%s V" : "Voltage: %s V");
         add("message.magneticraft.long_distance_connections", chinese
@@ -168,6 +199,15 @@ final class ModLanguageProvider extends LanguageProvider {
         add("tooltip.magneticraft.jade.process", chinese ? "进度：%s / %s（%s）" : "Progress: %s / %s (%s)");
         add("tooltip.magneticraft.jade.active", chinese ? "运行中" : "active");
         add("tooltip.magneticraft.jade.idle", chinese ? "空闲" : "idle");
+        add("tooltip.magneticraft.jade.electrical_terminal", chinese
+                ? "电气端子：%s · %s"
+                : "Electrical terminal: %s · %s");
+        add("tooltip.magneticraft.jade.electrical_flow", chinese
+                ? "%s V · %s C/t · %s A · %s J/t · %s W"
+                : "%s V · %s C/t · %s A · %s J/t · %s W");
+        add("tooltip.magneticraft.jade.electrical_state", chinese
+                ? "负载 %s · 热应力 %s · %s · %s"
+                : "Load %s · thermal stress %s · %s · %s");
         add("tooltip.magneticraft.jade.temperature", chinese ? "温度：%s K" : "Temperature: %s K");
         add("tooltip.magneticraft.jade.tank", chinese ? "%s：%s / %s mB" : "%s: %s / %s mB");
         add("tooltip.magneticraft.jade.empty", chinese ? "空" : "Empty");
@@ -176,6 +216,52 @@ final class ModLanguageProvider extends LanguageProvider {
         add("tooltip.magneticraft.jade.unformed", chinese ? "未组装" : "unformed");
         add("tooltip.magneticraft.jade.operational", chinese ? "可运行" : "operational");
         add("tooltip.magneticraft.jade.paused", chinese ? "已暂停" : "paused");
+        add("gui.magneticraft.electrical.title", chinese ? "电气状态" : "Electrical Status");
+        add("gui.magneticraft.electrical.unavailable", chinese ? "当前面没有电气端子" : "No electrical terminal on this side");
+        add("gui.magneticraft.electrical.terminal", chinese ? "%s · %s" : "%s · %s");
+        add("gui.magneticraft.electrical.voltage_current", chinese ? "%s V · %s A" : "%s V · %s A");
+        add("gui.magneticraft.electrical.throughput", chinese ? "%s J/t · %s W" : "%s J/t · %s W");
+        add("gui.magneticraft.electrical.load_stress", chinese ? "负载 %s%% · 应力 %s%%" : "Load %s%% · stress %s%%");
+        add("gui.magneticraft.electrical.buffer", chinese ? "缓存 %s / %s J" : "Buffer %s / %s J");
+        add("gui.magneticraft.electrical.state", chinese ? "%s · %s" : "%s · %s");
+        add("gui.magneticraft.electrical.point_tooltip", chinese
+                ? "%s V · %s C/t · %s A · %s J/t · %s W"
+                : "%s V · %s C/t · %s A · %s J/t · %s W");
+        add("gui.magneticraft.electrical.node_tooltip", chinese
+                ? "节点 %s / %s J · 负载 %s · 应力 %s"
+                : "Node %s / %s J · load %s · stress %s");
+        add("gui.magneticraft.electrical.reset", chinese ? "复位" : "Reset");
+        add("gui.magneticraft.electrical.profile_state", chinese ? "配置：%s" : "Profile: %s");
+        add("gui.magneticraft.electrical.bound", chinese ? "已绑定" : "bound");
+        add("gui.magneticraft.electrical.missing_profile", chinese ? "缺失" : "missing");
+        add("gui.magneticraft.electrical.rating", chinese ? "额定规格：%s" : "Rating: %s");
+        add("gui.magneticraft.electrical.rating.standard", chinese ? "标准 8 C/t" : "Standard 8 C/t");
+        add("gui.magneticraft.electrical.rating.heavy", chinese ? "重型 16 C/t" : "Heavy 16 C/t");
+        add("gui.magneticraft.electrical.protection_state", chinese ? "状态：%s" : "State: %s");
+        add("gui.magneticraft.electrical.direction.forward", chinese ? "正向" : "Forward");
+        add("gui.magneticraft.electrical.direction.reverse", chinese ? "反向" : "Reverse");
+        add("gui.magneticraft.electrical.redstone.ignored", chinese ? "忽略红石" : "Ignore redstone");
+        add("gui.magneticraft.electrical.redstone.requires_signal", chinese ? "需要信号" : "Requires signal");
+        add("gui.magneticraft.electrical.redstone.requires_no_signal", chinese ? "需要无信号" : "Requires no signal");
+        add("gui.magneticraft.electrical.state.redstone_open", chinese ? "红石断开" : "redstone open");
+        add("gui.magneticraft.electrical.state.tripped", chinese ? "已跳闸" : "tripped");
+        add("gui.magneticraft.electrical.state.blown", chinese ? "已熔断" : "blown");
+        add("gui.magneticraft.electrical.state.ready", chinese ? "就绪" : "ready");
+        add("jei.magneticraft.electrical.lines", chinese
+                ? "层级决定电压、额定电流、颜色和连接距离；不同层级线路不会连接。"
+                : "The tier controls voltage, current rating, color, and connection range; unlike tiers never connect.");
+        add("jei.magneticraft.electrical.storage", chinese
+                ? "原生电力储能按层级限制容量和充放电速率，不向任意方块面暴露通用 FE。"
+                : "Native electrical storage is tier-limited and does not expose universal FE on arbitrary faces.");
+        add("jei.magneticraft.electrical.protection", chinese
+                ? "保险丝和断路器必须匹配线路层级与额定规格，并在受保护电缆之前动作。"
+                : "Fuses and breakers must match the line tier and rating, and operate before the protected cable.");
+        add("jei.magneticraft.electrical.transformers", chinese
+                ? "变压配置固定两侧层级、功率上限和效率；两侧端子保持物理隔离。"
+                : "A transformer profile fixes both tiers, transfer limit, and efficiency while keeping terminals isolated.");
+        add("jei.magneticraft.electrical.voltmeter", chinese
+                ? "潜行空中右击循环点测、网络摘要和故障定位模式。"
+                : "Sneak-use in the air to cycle point probe, network summary, and fault locator modes.");
         add("tooltip.magneticraft.small_tank.line_0", chinese
                 ? "装有 %s mB %s"
                 : "Holding %s mB of %s");
@@ -358,23 +444,23 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "命中六格内方块后反向推动使用者，也可将目标实体推离。"
                 : "Pushes its user backward after targeting a block within six blocks, or pushes a targeted entity away.");
         add("guide.magneticraft.item.voltmeter.description", chinese
-                ? "读取电力节点本刻的电压、绝对电流吞吐与功率。"
-                : "Reads voltage, absolute current throughput, and power from an electrical node for the current tick.");
+                ? "提供点测、网络摘要和故障定位三种服务端权威模式；潜行空中右击循环模式。"
+                : "Provides server-authoritative point, network-summary, and fault-locator modes; sneak-use in air to cycle modes.");
         add("guide.magneticraft.item.thermometer.description", chinese
                 ? "以一位小数的摄氏度读取热力节点温度。"
                 : "Reads a thermal node's temperature in Celsius with one decimal place.");
         add("guide.magneticraft.item.copper_wire_coil.description", chinese
-                ? "潜行右击选择第一个端点，再右击兼容端点建立连接；潜行对空气使用可清除选择。线卷不会被消耗。"
-                : "Sneak-use a first endpoint, then use a compatible endpoint to connect them; sneak-use in air clears the selection. The coil is reusable.");
+                ? "潜行右击选择第一个端点，再右击同层级、同端口且同维度的端点建立连接；无效连接不消耗线卷。"
+                : "Sneak-use a first endpoint, then use an endpoint with the same tier, port type, and dimension; invalid links do not consume the coil.");
         add("guide.magneticraft.item.electric_connector.description", chinese
-                ? "壁挂式长距离端点，连接距离上限为 8 格，并可将 60–120 V 电力按 1 J = 1 FE 输出到背后的设备。"
-                : "A wall-mounted endpoint with an 8-block wire limit that exports 60-120 V electricity behind it at 1 J = 1 FE.");
+                ? "壁挂式分级长距端点：低/中/高压范围为 8/16/32 格。只有低压变体可向背面设备输出最多 400 FE/t。"
+                : "A tiered wall endpoint with 8/16/32-block LV/MV/HV ranges. Only the LV variant exports up to 400 FE/t behind it.");
         add("guide.magneticraft.item.electric_pole.description", chinese
-                ? "五格高的三线电线杆，最多连接 16 格外的兼容电线杆。只有顶部控制部件保存和传输电力。"
-                : "A five-block, three-wire pole that connects compatible poles up to 16 blocks away. Only its top controller stores and transfers power.");
+                ? "五格高的分级架空线路端点：低/中/高压范围为 16/32/64 格。只连接同层级电线杆且不会强加载区块。"
+                : "A five-block tiered overhead endpoint with 16/32/64-block LV/MV/HV ranges. It only links the same tier and never force-loads chunks.");
         add("guide.magneticraft.item.electric_pole_transformer.description", chinese
-                ? "对完整普通电线杆使用以升级结构；同时提供电线杆与连接器端口，在两种长距离线路之间传递电力。"
-                : "Use on a complete normal pole to upgrade it; it exposes both pole and connector ports to bridge the two long-distance line types.");
+                ? "把完整电线杆升级为双端子架空变压设备；配置固定两侧层级、方向、功率上限与 96% 默认效率。"
+                : "Upgrades a complete pole into a two-terminal overhead transformer whose profile fixes tiers, direction, limit, and default 96% efficiency.");
         add("guide.magneticraft.item.tesla_tower.description", chinese
                 ? "三格高的无线发射塔。电压达到 60 V 后，可在 32 格范围内每刻传输最多 500 J。"
                 : "A three-block wireless transmitter. At 60 V or more it transfers up to 500 J per tick within 32 blocks.");
@@ -386,8 +472,18 @@ final class ModLanguageProvider extends LanguageProvider {
                 : "Generates up to 200 J/t. Keep the rotor plane and 16 blocks ahead clear; its scan never loads chunks.");
         addGuideItemDescription("wrench", "配置机器、管道与网络侧面；潜行交互用于次要配置。",
                 "Configures machine, pipe, and network sides; sneak-use selects secondary actions.");
-        addGuideItemDescription("electric_cable", "连接相邻兼容电力端口；断开后运行时图会由持久状态安全重建。",
-                "Connects adjacent compatible electrical ports; runtime graphs rebuild safely from persistent state.");
+        addGuideItemDescription("electric_cable", "只连接相邻同层级电气端子；持续过载会累积应力并烧毁电缆。",
+                "Connects adjacent same-tier electrical ports; sustained overload accumulates stress and can burn the cable.");
+        addGuideItemDescription("electrical_fuse", "按层级和 8/16 C/t 规格匹配保险丝盒；熔断后需要更换。",
+                "Matches a fuse box by tier and 8/16 C/t rating and must be replaced after it blows.");
+        addGuideItemDescription("electrical_repair_tool", "在所有端子低于标称电压 95% 时修复故障机器；耐久为 16。",
+                "Repairs a faulted machine when every terminal is below 95% nominal voltage; durability is 16.");
+        addGuideItemDescription("box_transformer", "以两个隔离端子按配置在相邻电压层级之间定向变压；GUI 可安全反向。",
+                "Transfers directionally between adjacent tiers through two isolated terminals; its GUI can reverse safely.");
+        addGuideItemDescription("fuse_box", "使用与线路同层级、同额定规格的保险丝，过载时优先熔断并断开内部边。",
+                "Uses a fuse matching line tier and rating; overload blows it and opens the internal edge first.");
+        addGuideItemDescription("circuit_breaker", "过载时跳闸，可在故障消失且无红石强制断开时从 GUI 手动复位。",
+                "Trips on overload and can be reset from its GUI only after the fault and redstone-forced open are gone.");
         addGuideItemDescription("heat_pipe", "连接热力节点并向环境散热；区块卸载时暂停。",
                 "Connects thermal nodes with environmental heat loss and pauses during chunk unload.");
         addGuideItemDescription("insulated_heat_pipe", "降低环境散热的热力传输管，不会强加载邻接区块。",

@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.integration.jade;
 
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlockEntity;
 import net.minecraft.world.level.block.Block;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
@@ -13,6 +14,7 @@ public final class MagneticraftJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(JadeMachineDataProvider.INSTANCE, MachineBlockEntity.class);
+        registration.registerBlockDataProvider(JadeMachineDataProvider.INSTANCE, MultiblockGapBlockEntity.class);
     }
 
     @Override

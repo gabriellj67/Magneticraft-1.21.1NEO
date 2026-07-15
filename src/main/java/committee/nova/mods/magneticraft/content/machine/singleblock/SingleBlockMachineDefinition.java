@@ -154,6 +154,10 @@ public enum SingleBlockMachineDefinition {
         return SingleBlockPortProfile.physicalPorts(this);
     }
 
+    public boolean usesElectricity() {
+        return physicalPorts().contains(PhysicalPort.ELECTRICITY);
+    }
+
     public String guideCategory() {
         return switch (this) {
             case BOX, SMALL_TANK -> "storage";

@@ -9,6 +9,10 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Sluic
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.ThermopileRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
+import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
+import committee.nova.mods.magneticraft.content.item.ProtectionBlockItem;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleTransformerBlockItem;
+import committee.nova.mods.magneticraft.content.network.electric.TransformerBlockItem;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
@@ -16,6 +20,9 @@ import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
+import committee.nova.mods.magneticraft.system.network.electric.item.ElectricalRatingIds;
+import committee.nova.mods.magneticraft.system.network.electric.profile.TransformerProfileIds;
+import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;
@@ -26,7 +33,12 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** Optional JEI entry point. JEI owns discovery, so the common mod never links these API types. */
 @JeiPlugin
@@ -82,6 +94,7 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
+        registerElectricalInformation(registration);
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) {
             return;
@@ -98,6 +111,65 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
                         .flatMap(type -> recipes.getAllRecipesFor(type.get()).stream())
                         .toList()
         );
+    }
+
+    private static void registerElectricalInformation(IRecipeRegistration registration) {
+        registration.addItemStackInfo(
+                tieredStacks(
+                        ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                        ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                        ModNetworkBlocks.ELECTRIC_POLE.get()
+                ),
+                Component.translatable("jei.magneticraft.electrical.lines")
+        );
+        registration.addItemStackInfo(
+                tieredStacks(
+                        ModMachineBlocks.BATTERY.get(),
+                        ModMachineBlocks.machine(SingleBlockMachineDefinition.INFINITE_ENERGY).get()
+                ),
+                Component.translatable("jei.magneticraft.electrical.storage")
+        );
+
+        List<ItemStack> protections = new ArrayList<>();
+        ProtectionBlockItem breaker = (ProtectionBlockItem) ModNetworkBlocks.CIRCUIT_BREAKER.get().asItem();
+        VoltageTierIds.BUILT_IN.forEach(tier -> {
+            protections.add(TieredElectricalBlockItem.stackForTier(ModNetworkBlocks.FUSE_BOX.get(), tier));
+            ElectricalRatingIds.BUILT_IN.forEach(rating -> {
+                protections.add(breaker.stackFor(tier, rating));
+                protections.add(ModNetworkItems.FUSE.get().stackFor(tier, rating));
+            });
+        });
+        registration.addItemStackInfo(
+                protections,
+                Component.translatable("jei.magneticraft.electrical.protection")
+        );
+
+        TransformerBlockItem box = (TransformerBlockItem) ModNetworkBlocks.BOX_TRANSFORMER.get().asItem();
+        ElectricPoleTransformerBlockItem pole =
+                (ElectricPoleTransformerBlockItem) ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get().asItem();
+        registration.addItemStackInfo(
+                List.of(
+                        box.stackForProfile(TransformerProfileIds.LV_TO_MV, VoltageTierIds.LOW),
+                        box.stackForProfile(TransformerProfileIds.MV_TO_HV, VoltageTierIds.MEDIUM),
+                        pole.stackForProfile(TransformerProfileIds.LV_TO_MV, VoltageTierIds.LOW),
+                        pole.stackForProfile(TransformerProfileIds.MV_TO_HV, VoltageTierIds.MEDIUM)
+                ),
+                Component.translatable("jei.magneticraft.electrical.transformers")
+        );
+        registration.addItemStackInfo(
+                new ItemStack(ModMachineItems.VOLTMETER.get()),
+                Component.translatable("jei.magneticraft.electrical.voltmeter")
+        );
+    }
+
+    private static List<ItemStack> tieredStacks(net.minecraft.world.level.block.Block... blocks) {
+        List<ItemStack> stacks = new ArrayList<>(blocks.length * VoltageTierIds.BUILT_IN.size());
+        for (var block : blocks) {
+            VoltageTierIds.BUILT_IN.forEach(tier ->
+                    stacks.add(TieredElectricalBlockItem.stackForTier(block, tier))
+            );
+        }
+        return List.copyOf(stacks);
     }
 
     @Override

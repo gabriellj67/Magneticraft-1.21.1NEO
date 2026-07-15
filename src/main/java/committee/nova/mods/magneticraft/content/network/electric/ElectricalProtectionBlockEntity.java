@@ -15,17 +15,22 @@ import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageT
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Containers;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /** Two isolated terminals bridged only by the protection module's explicit internal edge. */
 public final class ElectricalProtectionBlockEntity extends NetworkComponentBlockEntity
-        implements TieredElectricalHost, TieredElectricalSideHost, TieredElectricalPlacementHost {
+        implements TieredElectricalHost, TieredElectricalSideHost, TieredElectricalPlacementHost, MenuProvider {
     public static final net.minecraft.resources.ResourceLocation INPUT_TERMINAL = Magneticraft.id("input");
     public static final net.minecraft.resources.ResourceLocation OUTPUT_TERMINAL = Magneticraft.id("output");
 
@@ -109,6 +114,23 @@ public final class ElectricalProtectionBlockEntity extends NetworkComponentBlock
 
     public ElectricalProtectionModule protection() {
         return protection;
+    }
+
+    public ElectricalProtectionKind kind() {
+        return kind;
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable(kind == ElectricalProtectionKind.FUSE_BOX
+                ? "container.magneticraft.fuse_box"
+                : "container.magneticraft.circuit_breaker");
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+        return new ElectricalDeviceMenu(containerId, inventory, this);
     }
 
     public ElectricalNetworkModule input() {

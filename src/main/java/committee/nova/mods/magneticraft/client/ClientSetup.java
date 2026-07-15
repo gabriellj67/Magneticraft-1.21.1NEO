@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.client;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.client.guide.GuideRepository;
 import committee.nova.mods.magneticraft.client.model.LegacyModelLoader;
+import committee.nova.mods.magneticraft.client.model.ModelRenderManifestRegistry;
 import committee.nova.mods.magneticraft.content.computer.FloppyDiskItem;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
@@ -12,6 +13,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -36,6 +38,7 @@ public final class ClientSetup {
                     MenuScreens.register(type.get(), AdvancedMultiblockScreen::new));
             MenuScreens.register(ModMenus.COMPUTER.get(), ProgrammableScreen::new);
             MenuScreens.register(ModMenus.MINING_ROBOT.get(), ProgrammableScreen::new);
+            MenuScreens.register(ModMenus.ELECTRICAL_DEVICE.get(), ElectricalDeviceScreen::new);
             ItemProperties.register(
                     ModComputerContent.FLOPPY_DISK.get(),
                     Magneticraft.id("floppy_variant"),
@@ -58,7 +61,32 @@ public final class ClientSetup {
             BlockEntityRenderers.register(ModComputerContent.COMPUTER_BLOCK_ENTITY.get(), ComputerRenderer::new);
             BlockEntityRenderers.register(ModComputerContent.MINING_ROBOT_BLOCK_ENTITY.get(), MiningRobotRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.WIND_TURBINE.get(), WindTurbineRenderer::new);
+            BlockEntityRenderers.register(ModBlockEntities.BOX_TRANSFORMER.get(), ElectricalDeviceRenderer::new);
+            BlockEntityRenderers.register(ModBlockEntities.FUSE_BOX.get(), ElectricalDeviceRenderer::new);
+            BlockEntityRenderers.register(ModBlockEntities.CIRCUIT_BREAKER.get(), ElectricalDeviceRenderer::new);
         });
+    }
+
+    @SubscribeEvent
+    public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
+        event.register(
+                ElectricalTierColors.blockColor(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.BOX_TRANSFORMER.get(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.FUSE_BOX.get(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.CIRCUIT_BREAKER.get()
+        );
+    }
+
+    @SubscribeEvent
+    public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
+        event.register(
+                ElectricalTierColors.itemColor(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.ELECTRIC_CABLE.get().asItem(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.BOX_TRANSFORMER.get().asItem(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.FUSE_BOX.get().asItem(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.CIRCUIT_BREAKER.get().asItem()
+        );
     }
 
     @SubscribeEvent
@@ -69,6 +97,7 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void onRegisterClientReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(LegacyModelLoader.INSTANCE);
+        event.registerReloadListener(ModelRenderManifestRegistry.INSTANCE);
         event.registerReloadListener(GuideRepository.INSTANCE);
     }
 }

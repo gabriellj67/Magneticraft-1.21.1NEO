@@ -1,7 +1,139 @@
 {
-  "parent": "minecraft:block/cube_column",
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.42666668,
+        0.42666668,
+        0.42666668
+      ],
+      "translation": [
+        -0.07844177,
+        0.21333334,
+        -0.0784418
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.42666668,
+        0.42666668,
+        0.42666668
+      ],
+      "translation": [
+        0.078441784,
+        0.21333334,
+        0.07844178
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.53333336,
+        0.53333336,
+        0.53333336
+      ],
+      "translation": [
+        0,
+        0.26666668,
+        0.1386668
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.26666668,
+        0.26666668,
+        0.26666668
+      ],
+      "translation": [
+        0,
+        3.1333334,
+        0.0693334
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.6666667,
+        0.6666667,
+        0.6666667
+      ],
+      "translation": [
+        -0.12256528,
+        0.34995782,
+        0.060521975
+      ]
+    },
+    "head": {
+      "scale": [
+        1.0666667,
+        1.0666667,
+        1.0666667
+      ],
+      "translation": [
+        0,
+        0.53333336,
+        0.2773336
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "translation": [
+        -0.07353916,
+        2.6227973,
+        0.17415181
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "translation": [
+        0.073539175,
+        2.4807305,
+        0.2122185
+      ]
+    }
+  },
+  "exclude_nodes": [
+    "arrow_forward",
+    "arrow_reverse"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/box_transformer.gltf",
   "textures": {
-    "end": "magneticraft:blocks/electric_machines/rf_transformer_top",
-    "side": "magneticraft:blocks/electric_machines/rf_transformer"
-  }
+    "particle": "minecraft:block/iron_block"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
 }

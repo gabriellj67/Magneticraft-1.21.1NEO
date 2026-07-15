@@ -11,10 +11,17 @@ import net.minecraft.world.entity.player.Inventory;
  * Menu-synchronized electric furnace screen.
  */
 public final class ElectricFurnaceScreen extends AbstractContainerScreen<ElectricFurnaceMenu> {
+    static final int BASE_IMAGE_WIDTH = LegacyMachineGuiLayout.STANDARD_WIDTH;
+    static final LegacyMachineGuiLayout.Rect ELECTRICAL_PANEL =
+            LegacyMachineGuiLayout.electricalPanel(BASE_IMAGE_WIDTH);
+
     public ElectricFurnaceScreen(ElectricFurnaceMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = LegacyMachineGuiLayout.STANDARD_WIDTH;
-        imageHeight = LegacyMachineGuiLayout.STANDARD_HEIGHT;
+        LegacyMachineGuiLayout.Size size = LegacyMachineGuiLayout.withElectricalPanel(
+                new LegacyMachineGuiLayout.Size(BASE_IMAGE_WIDTH, LegacyMachineGuiLayout.STANDARD_HEIGHT)
+        );
+        imageWidth = size.width();
+        imageHeight = size.height();
     }
 
     @Override
@@ -46,6 +53,10 @@ public final class ElectricFurnaceScreen extends AbstractContainerScreen<Electri
                     mouseY
             );
         }
+        ElectricalStatePanel.renderTooltip(
+                graphics, font, mouseX, mouseY, leftPos, topPos, ELECTRICAL_PANEL,
+                menu.position(), menu.energyStored(), menu.energyCapacity()
+        );
         renderTooltip(graphics, mouseX, mouseY);
     }
 
@@ -79,5 +90,9 @@ public final class ElectricFurnaceScreen extends AbstractContainerScreen<Electri
         int capacity = menu.energyCapacity();
         int energy = capacity <= 0 ? 0 : 48 * menu.energyStored() / capacity;
         graphics.fill(left + 16, top + 68 - energy, left + 22, top + 68, 0xFF43D96B);
+        ElectricalStatePanel.render(
+                graphics, font, left, top, ELECTRICAL_PANEL,
+                menu.position(), menu.energyStored(), menu.energyCapacity()
+        );
     }
 }

@@ -99,9 +99,9 @@ class MigrationMatrixContractTest {
     private static final int DERIVED_RUNTIME_ID_COUNT = 80;
     private static final String DERIVED_RUNTIME_ID_SHA256 =
             "157535436f7f87ae76724cb72156db40b9c2196f8702019790fb052a95e13451";
-    private static final int SUPPORTING_REGISTRY_ID_COUNT = 129;
+    private static final int SUPPORTING_REGISTRY_ID_COUNT = 130;
     private static final String SUPPORTING_REGISTRY_ID_SHA256 =
-            "f7066adda8ab1ec900cf1a10ab1417b4b39e13777378118c4e4df9f991a62cc2";
+            "fa9edab1965406df6ea3d31f0ad5e3fadfc98a3f4f07c42a3be0f259f389407b";
     private static final int FORBIDDEN_RUNTIME_ID_COUNT = 56;
     private static final String FORBIDDEN_RUNTIME_ID_SHA256 =
             "42ffae6991a517df55970f1dfce895eb3feb03784187c2981964331b264e9d6d";
@@ -1906,7 +1906,8 @@ class MigrationMatrixContractTest {
                 namespaced("battery_box"),
                 namespaced("electric_furnace"),
                 namespaced("computer"),
-                namespaced("mining_robot")
+                namespaced("mining_robot"),
+                namespaced("electrical_device")
         ));
         for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
             if (definition.hasMenu()) {

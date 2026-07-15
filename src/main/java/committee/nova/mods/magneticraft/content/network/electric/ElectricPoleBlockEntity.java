@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 import java.util.Set;
+import java.util.List;
 
 public final class ElectricPoleBlockEntity extends NetworkComponentBlockEntity
         implements LongDistanceEndpointHost, LongDistanceWireHost, TransformerElectricalHost {
@@ -128,23 +129,27 @@ public final class ElectricPoleBlockEntity extends NetworkComponentBlockEntity
 
     @Override
     public AABB getRenderBoundingBox() {
+        return renderBounds(worldPosition, longDistance.clientConnections());
+    }
+
+    static AABB renderBounds(BlockPos position, List<LongDistanceEndpointModule.WireView> connections) {
         AABB bounds = new AABB(
-                worldPosition.getX() - 0.875D,
-                worldPosition.getY() - 4.0D,
-                worldPosition.getZ() - 0.875D,
-                worldPosition.getX() + 1.875D,
-                worldPosition.getY() + 1.0D,
-                worldPosition.getZ() + 1.875D
+                position.getX() - 0.875D,
+                position.getY() - 4.0D,
+                position.getZ() - 0.875D,
+                position.getX() + 1.875D,
+                position.getY() + 1.0D,
+                position.getZ() + 1.875D
         );
-        for (LongDistanceEndpointModule.WireView connection : longDistance.clientConnections()) {
+        for (LongDistanceEndpointModule.WireView connection : connections) {
             BlockPos remote = connection.remotePosition();
             AABB wire = new AABB(
-                    Math.min(worldPosition.getX(), remote.getX()) + 0.25D,
-                    Math.min(worldPosition.getY(), remote.getY()) - 1.75D,
-                    Math.min(worldPosition.getZ(), remote.getZ()) + 0.25D,
-                    Math.max(worldPosition.getX(), remote.getX()) + 0.75D,
-                    Math.max(worldPosition.getY(), remote.getY()) + 0.75D,
-                    Math.max(worldPosition.getZ(), remote.getZ()) + 0.75D
+                    Math.min(position.getX(), remote.getX()) + 0.25D,
+                    Math.min(position.getY(), remote.getY()) - 1.75D,
+                    Math.min(position.getZ(), remote.getZ()) + 0.25D,
+                    Math.max(position.getX(), remote.getX()) + 0.75D,
+                    Math.max(position.getY(), remote.getY()) + 0.75D,
+                    Math.max(position.getZ(), remote.getZ()) + 0.75D
             );
             bounds = new AABB(
                     Math.min(bounds.minX, wire.minX),

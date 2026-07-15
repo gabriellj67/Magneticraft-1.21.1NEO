@@ -258,8 +258,8 @@ class AdvancedGuideDataProviderTest {
     void portableItemGuideCapturesTheRestoredEnergyContracts() {
         JsonArray items = AdvancedGuideDataProvider.portableItemGuide().getAsJsonArray("items");
 
-        assertEquals(29, items.size());
-        assertEquals(29, items.asList().stream()
+        assertEquals(34, items.size());
+        assertEquals(34, items.asList().stream()
                 .map(element -> element.getAsJsonObject().get("id").getAsString())
                 .distinct()
                 .count());
@@ -278,6 +278,11 @@ class AdvancedGuideDataProviderTest {
                 "electric_connector",
                 "electric_pole",
                 "electric_pole_transformer",
+                "electrical_fuse",
+                "electrical_repair_tool",
+                "box_transformer",
+                "fuse_box",
+                "circuit_breaker",
                 "tesla_tower",
                 "wireless_energy_receiver",
                 "wind_turbine",

@@ -59,10 +59,21 @@ public record ModelScene(
     public record Primitive(
             String texture,
             String cullFace,
+            String materialName,
             float[] positions,
             float[] textureCoordinates,
             float[] normals
     ) {
+        public Primitive(
+                String texture,
+                String cullFace,
+                float[] positions,
+                float[] textureCoordinates,
+                float[] normals
+        ) {
+            this(texture, cullFace, null, positions, textureCoordinates, normals);
+        }
+
         public Primitive {
             positions = Arrays.copyOf(positions, positions.length);
             textureCoordinates = Arrays.copyOf(textureCoordinates, textureCoordinates.length);

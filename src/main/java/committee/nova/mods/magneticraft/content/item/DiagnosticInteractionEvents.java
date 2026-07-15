@@ -24,7 +24,8 @@ public final class DiagnosticInteractionEvents {
                     event.getLevel(),
                     event.getPos(),
                     event.getHitVec().getDirection(),
-                    event.getEntity()
+                    event.getEntity(),
+                    event.getEntity().getItemInHand(event.getHand())
             );
         } else if (item instanceof ThermometerItem) {
             ThermometerItem.inspect(

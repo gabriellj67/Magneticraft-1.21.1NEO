@@ -4,7 +4,12 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.config.MagneticraftConfig;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FaultKind;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FaultSearchResult;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.FlowDirection;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource.NetworkSummary;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalEdgeTelemetry;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalFaultSource;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalLink;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeAccess;
@@ -43,6 +48,17 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
     private static final String ENERGY_TAG = "energy_joules";
     private static final String STRESS_TAG = "thermal_stress";
     private static final String FAULTED_TAG = "faulted";
+    private static final String CLIENT_VOLTAGE_TAG = "voltage";
+    private static final String CLIENT_CHARGE_TAG = "charge_per_tick";
+    private static final String CLIENT_CURRENT_TAG = "current_amps";
+    private static final String CLIENT_JOULES_TAG = "joules_per_tick";
+    private static final String CLIENT_POWER_TAG = "power_watts";
+    private static final String CLIENT_STORED_TAG = "stored_joules";
+    private static final String CLIENT_CAPACITY_TAG = "capacity_joules";
+    private static final String CLIENT_LOAD_TAG = "load_ratio";
+    private static final String CLIENT_STRESS_TAG = "stress";
+    private static final String CLIENT_FLOW_TAG = "flow";
+    private static final String CLIENT_FAULT_TAG = "fault";
 
     private final ElectricalNode node;
     private final ElectricalNodeKind nodeKind;
@@ -55,6 +71,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
     private IntrinsicDamageProfile intrinsicDamageProfile;
     private ElectricalProfileController profileController;
     private ElectricalTickParticipant tickParticipant;
+    private ElectricalReading clientReading;
 
     /**
      * Compatibility constructor for isolated tests and old call sites. Production nodes should
@@ -275,7 +292,19 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
 
     @Override
     public void saveClientData(CompoundTag tag) {
+        ElectricalReading reading = liveReading();
         tag.putString(TIER_ID_TAG, tierId.toString());
+        tag.putDouble(CLIENT_VOLTAGE_TAG, reading.voltageVolts());
+        tag.putDouble(CLIENT_CHARGE_TAG, reading.chargeCoulombsPerTick());
+        tag.putDouble(CLIENT_CURRENT_TAG, reading.currentAmps());
+        tag.putDouble(CLIENT_JOULES_TAG, reading.joulesPerTick());
+        tag.putDouble(CLIENT_POWER_TAG, reading.powerWatts());
+        tag.putDouble(CLIENT_STORED_TAG, reading.storedJoules());
+        tag.putDouble(CLIENT_CAPACITY_TAG, reading.capacityJoules());
+        tag.putDouble(CLIENT_LOAD_TAG, reading.loadRatio());
+        tag.putDouble(CLIENT_STRESS_TAG, reading.thermalStress());
+        tag.putString(CLIENT_FLOW_TAG, reading.flowDirection().name());
+        tag.putString(CLIENT_FAULT_TAG, reading.faultKind().name());
     }
 
     @Override
@@ -284,9 +313,40 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
             return;
         }
         ResourceLocation syncedTier = ResourceLocation.tryParse(tag.getString(TIER_ID_TAG));
+        boolean tierChanged = syncedTier != null && !tierId.equals(syncedTier);
         if (syncedTier != null) {
             tierId = syncedTier;
         }
+        if (tierChanged) {
+            host().requestModelRefresh();
+        }
+        if (!tag.contains(CLIENT_VOLTAGE_TAG, Tag.TAG_DOUBLE)
+                || !tag.contains(CLIENT_CHARGE_TAG, Tag.TAG_DOUBLE)
+                || !tag.contains(CLIENT_CURRENT_TAG, Tag.TAG_DOUBLE)
+                || !tag.contains(CLIENT_JOULES_TAG, Tag.TAG_DOUBLE)
+                || !tag.contains(CLIENT_POWER_TAG, Tag.TAG_DOUBLE)
+                || !tag.contains(CLIENT_STORED_TAG, Tag.TAG_DOUBLE)
+                || !tag.contains(CLIENT_CAPACITY_TAG, Tag.TAG_DOUBLE)
+                || !tag.contains(CLIENT_LOAD_TAG, Tag.TAG_DOUBLE)
+                || !tag.contains(CLIENT_STRESS_TAG, Tag.TAG_DOUBLE)) {
+            clientReading = null;
+            return;
+        }
+        clientReading = new ElectricalReading(
+                tierId,
+                terminalId,
+                nonNegativeFinite(tag.getDouble(CLIENT_VOLTAGE_TAG)),
+                nonNegativeFinite(tag.getDouble(CLIENT_CHARGE_TAG)),
+                nonNegativeFinite(tag.getDouble(CLIENT_CURRENT_TAG)),
+                nonNegativeFinite(tag.getDouble(CLIENT_JOULES_TAG)),
+                nonNegativeFinite(tag.getDouble(CLIENT_POWER_TAG)),
+                nonNegativeFinite(tag.getDouble(CLIENT_STORED_TAG)),
+                nonNegativeFinite(tag.getDouble(CLIENT_CAPACITY_TAG)),
+                nonNegativeFinite(tag.getDouble(CLIENT_LOAD_TAG)),
+                Math.max(0.0D, Math.min(1.0D, nonNegativeFinite(tag.getDouble(CLIENT_STRESS_TAG)))),
+                enumValue(FlowDirection.class, tag.getString(CLIENT_FLOW_TAG), FlowDirection.IDLE),
+                enumValue(FaultKind.class, tag.getString(CLIENT_FAULT_TAG), FaultKind.MISSING_PROFILE)
+        );
     }
 
     @Override
@@ -305,14 +365,78 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
 
     @Override
     public Optional<ElectricalReading> electricalReading(Direction side) {
-        if (!electricalProfileBound() || !isSideEnabled(side)) {
+        if (!isSideEnabled(side)) {
             return Optional.empty();
         }
-        return Optional.of(new ElectricalReading(
+        return Optional.of(displayReading());
+    }
+
+    /** Immutable display snapshot; on the logical client this never reads authoritative server state. */
+    public ElectricalReading displayReading() {
+        return host().level() != null && host().level().isClientSide && clientReading != null
+                ? clientReading
+                : liveReading();
+    }
+
+    Optional<ElectricalReading> syncedClientReading() {
+        return Optional.ofNullable(clientReading);
+    }
+
+    /** Quantized hash used by the host's bounded block-entity update cadence. */
+    public int clientStateHash() {
+        ElectricalReading reading = liveReading();
+        return Objects.hash(
+                reading.tierId(),
+                quantized(reading.voltageVolts(), 10.0D),
+                quantized(reading.chargeCoulombsPerTick(), 100.0D),
+                quantized(reading.joulesPerTick(), 10.0D),
+                quantized(reading.storedJoules(), 1.0D),
+                quantized(reading.loadRatio(), 1_000.0D),
+                quantized(reading.thermalStress(), 1_000.0D),
+                reading.flowDirection(),
+                reading.faultKind()
+        );
+    }
+
+    private ElectricalReading liveReading() {
+        PhysicalNetworkManager manager = manager();
+        double ratedCurrent = electricalRatedCurrentAmps();
+        double terminalCurrent = manager == null
+                ? node.lastCompletedTickCurrentAmps()
+                : manager.maximumTerminalCurrentAmps(nodeKey());
+        return new ElectricalReading(
+                tierId,
+                terminalId,
                 node.voltage(),
+                node.lastCompletedTickChargeCoulombs(),
                 node.lastCompletedTickCurrentAmps(),
-                node.lastCompletedTickPowerWatts()
-        ));
+                node.lastCompletedTickJoules(),
+                node.lastCompletedTickPowerWatts(),
+                node.energyJoules(),
+                node.maxEnergyJoules(),
+                ratedCurrent > 0.0D && Double.isFinite(ratedCurrent)
+                        ? terminalCurrent / ratedCurrent
+                        : 0.0D,
+                electricalThermalStress(),
+                completedFlowDirection(manager),
+                electricalFaultKind()
+        );
+    }
+
+    @Override
+    public Optional<NetworkSummary> electricalNetworkSummary(Direction side, int maxVisitedNodes) {
+        PhysicalNetworkManager manager = manager();
+        return !isSideEnabled(side) || manager == null
+                ? Optional.empty()
+                : manager.electricalNetworkSummary(nodeKey(), maxVisitedNodes);
+    }
+
+    @Override
+    public Optional<FaultSearchResult> nearestElectricalFault(Direction side, int maxVisitedNodes) {
+        PhysicalNetworkManager manager = manager();
+        return !isSideEnabled(side) || manager == null
+                ? Optional.empty()
+                : manager.nearestElectricalFault(nodeKey(), maxVisitedNodes);
     }
 
     @Override
@@ -361,6 +485,34 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         return !faulted
                 && tierProfileBound
                 && (profileController == null || profileController.electricalControllerBound());
+    }
+
+    @Override
+    public double electricalRatedCurrentAmps() {
+        ElectricalFaultSource source = deviceFaultSource();
+        if (source != null && source.electricalRatedCurrentAmps() > 0.0D) {
+            return source.electricalRatedCurrentAmps();
+        }
+        return ratedChargePerTick() * ElectricalNode.TICKS_PER_SECOND;
+    }
+
+    @Override
+    public double electricalThermalStress() {
+        ElectricalFaultSource source = deviceFaultSource();
+        double deviceStress = source == null ? 0.0D : source.electricalThermalStress();
+        return Math.max(0.0D, Math.min(1.0D, Math.max(stress.stress(), deviceStress)));
+    }
+
+    @Override
+    public FaultKind electricalFaultKind() {
+        if (faulted) {
+            return FaultKind.MACHINE_FAULT;
+        }
+        if (!tierProfileBound || (profileController != null && !profileController.electricalControllerBound())) {
+            return FaultKind.MISSING_PROFILE;
+        }
+        ElectricalFaultSource source = deviceFaultSource();
+        return source == null ? FaultKind.NONE : source.electricalFaultKind();
     }
 
     @Override
@@ -450,17 +602,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
             return;
         }
         VoltageTier value = tier.orElseThrow();
-        double controllerRating = profileController == null
-                ? 0.0D
-                : profileController.terminalRatedChargePerTick();
-        double ratedChargePerTick = controllerRating > 0.0D
-                ? controllerRating
-                : switch (intrinsicDamageProfile) {
-                    case CABLE -> value.cableRatedChargePerTick();
-                    case OVERHEAD -> value.overheadRatedChargePerTick();
-                    case MACHINE -> value.heavyProtectionChargePerTick();
-                    case NONE -> throw new IllegalStateException("Disabled damage profile reached accumulation");
-                };
+        double ratedChargePerTick = ratedChargePerTick(value);
         double thermalCapacity = intrinsicDamageProfile == IntrinsicDamageProfile.OVERHEAD
                 ? value.overheadThermalCapacity()
                 : value.cableThermalCapacity();
@@ -492,6 +634,77 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         CABLE,
         OVERHEAD,
         MACHINE
+    }
+
+    private double ratedChargePerTick() {
+        return ElectricalDataRegistry.INSTANCE.current()
+                .flatMap(snapshot -> snapshot.voltageTier(tierId))
+                .map(this::ratedChargePerTick)
+                .orElse(0.0D);
+    }
+
+    private double ratedChargePerTick(VoltageTier tier) {
+        double controllerRating = profileController == null
+                ? 0.0D
+                : profileController.terminalRatedChargePerTick();
+        if (controllerRating > 0.0D) {
+            return controllerRating;
+        }
+        return switch (intrinsicDamageProfile) {
+            case CABLE -> tier.cableRatedChargePerTick();
+            case OVERHEAD -> tier.overheadRatedChargePerTick();
+            case MACHINE, NONE -> tier.heavyProtectionChargePerTick();
+        };
+    }
+
+    private ElectricalFaultSource deviceFaultSource() {
+        if (tickParticipant instanceof ElectricalFaultSource source) {
+            return source;
+        }
+        return profileController instanceof ElectricalFaultSource source ? source : null;
+    }
+
+    private FlowDirection completedFlowDirection(PhysicalNetworkManager manager) {
+        if (manager == null) {
+            return FlowDirection.IDLE;
+        }
+        boolean input = false;
+        boolean output = false;
+        for (ElectricalEdgeTelemetry telemetry : manager.electricalEdgeTelemetry()) {
+            boolean first = telemetry.firstTerminal().equals(nodeKey());
+            boolean second = telemetry.secondTerminal().equals(nodeKey());
+            if ((!first && !second)
+                    || telemetry.deliveredJoulesPerTick() + telemetry.lostJoulesPerTick() <= 0.0D) {
+                continue;
+            }
+            boolean source = first ? telemetry.firstWasSource() : !telemetry.firstWasSource();
+            output |= source;
+            input |= !source;
+        }
+        if (input && output) {
+            return FlowDirection.BIDIRECTIONAL;
+        }
+        if (input) {
+            return FlowDirection.INPUT;
+        }
+        return output ? FlowDirection.OUTPUT : FlowDirection.IDLE;
+    }
+
+    private static double nonNegativeFinite(double value) {
+        return Double.isFinite(value) ? Math.max(0.0D, value) : 0.0D;
+    }
+
+    private static long quantized(double value, double scale) {
+        double scaled = value * scale;
+        return Double.isFinite(scaled) ? Math.round(scaled) : Long.MAX_VALUE;
+    }
+
+    private static <E extends Enum<E>> E enumValue(Class<E> type, String name, E fallback) {
+        try {
+            return Enum.valueOf(type, name);
+        } catch (IllegalArgumentException ignored) {
+            return fallback;
+        }
     }
 
     private static ElectricalNode fallbackNode(ElectricalNodeKind nodeKind) {

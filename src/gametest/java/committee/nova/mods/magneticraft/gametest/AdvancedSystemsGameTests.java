@@ -13,6 +13,8 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockRule;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockTransform;
 import committee.nova.mods.magneticraft.content.multiblock.StructureOffset;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlockEntity;
+import committee.nova.mods.magneticraft.content.machine.observation.MachineObservationService;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
@@ -23,6 +25,7 @@ import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
+import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -97,6 +100,51 @@ public final class AdvancedSystemsGameTests {
             clear(helper, occupied);
         }
         helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 60)
+    public static void formedElectricalPortsProxyDiagnosticsFromTheirExactFace(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.GRINDER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Grinder did not form for port diagnostics");
+        MultiblockPortLayout.Port port = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(candidate -> candidate.kind() == MultiblockPortLayout.Kind.ELECTRICITY)
+                .filter(candidate -> !candidate.worldPosition(controller).equals(controller.getBlockPos()))
+                .findFirst()
+                .orElseThrow();
+
+        helper.runAfterDelay(2, () -> {
+            BlockPos portPosition = port.worldPosition(controller);
+            Direction portSide = port.worldSide(controller.facing());
+            var blockEntity = helper.getLevel().getBlockEntity(portPosition);
+            helper.assertTrue(blockEntity instanceof MultiblockGapBlockEntity,
+                    "Formed electrical port was not backed by a gap proxy");
+            DiagnosticHost diagnostics = (DiagnosticHost) blockEntity;
+            controller.electricity().node().setVoltage(360.0D);
+            helper.assertTrue(diagnostics.electricalReading(portSide).isPresent(),
+                    "Exact multiblock electrical port face did not expose point telemetry");
+            helper.assertTrue(MachineObservationService.observe(blockEntity, portSide).electrical().isPresent(),
+                    "Jade observation did not follow the multiblock electrical port proxy");
+            helper.assertTrue(diagnostics.electricalNetworkSummary(portSide, 4_096).isPresent(),
+                    "Network summary did not start at the physical multiblock port node");
+            helper.assertTrue(diagnostics.nearestElectricalFault(portSide, 4_096).isPresent(),
+                    "Fault search did not start at the physical multiblock port node");
+
+            Direction unsupported = java.util.Arrays.stream(Direction.values())
+                    .filter(side -> !MultiblockPortLayout.supports(
+                            controller, portPosition, NetworkDomain.ELECTRICITY, side
+                    ))
+                    .findFirst()
+                    .orElseThrow();
+            helper.assertTrue(diagnostics.electricalReading(unsupported).isEmpty(),
+                    "A non-port face leaked multiblock electrical telemetry");
+            clear(helper, occupied);
+            player.discard();
+            helper.succeed();
+        });
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 80)

@@ -13,13 +13,18 @@ import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageT
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /** Single-block transformer with physically isolated rear input and front output terminals. */
 public final class BoxTransformerBlockEntity extends NetworkComponentBlockEntity
-        implements TransformerElectricalHost, TieredElectricalSideHost {
+        implements TransformerElectricalHost, TieredElectricalSideHost, MenuProvider {
     private final ElectricalNetworkModule input;
     private final ElectricalNetworkModule output;
     private final TransformerCouplerModule transformer;
@@ -73,6 +78,17 @@ public final class BoxTransformerBlockEntity extends NetworkComponentBlockEntity
 
     public ElectricalNetworkModule output() {
         return output;
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("container.magneticraft.box_transformer");
+    }
+
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+        return new ElectricalDeviceMenu(containerId, inventory, this);
     }
 
     @Override

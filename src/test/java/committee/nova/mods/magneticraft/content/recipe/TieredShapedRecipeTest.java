@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.recipe;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -26,6 +27,11 @@ class TieredShapedRecipeTest {
             "medium_voltage",
             "high_voltage"
     );
+
+    @Test
+    void tieredRecipeRetainsTheVanillaCraftingRecipeContractForRecipeViewers() {
+        assertTrue(CraftingRecipe.class.isAssignableFrom(TieredShapedRecipe.class));
+    }
 
     @Test
     void allBuiltInTieredRecipesDeclareTheCustomSerializerAndVersionedResultPayload() throws IOException {

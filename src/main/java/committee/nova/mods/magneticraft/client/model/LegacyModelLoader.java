@@ -52,7 +52,12 @@ public final class LegacyModelLoader implements IGeometryLoader<LegacySceneGeome
                 translation[1],
                 translation[2]
         );
-        return new LegacySceneGeometry(load(source), selection, sourceTransform);
+        return new LegacySceneGeometry(
+                load(source),
+                selection,
+                sourceTransform,
+                ModelRenderManifestRegistry.INSTANCE.load(source)
+        );
     }
 
     public ModelScene load(ResourceLocation source) {

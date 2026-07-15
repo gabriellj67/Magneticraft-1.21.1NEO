@@ -120,7 +120,12 @@ final class ModBlockStateProvider extends BlockStateProvider {
         legacyConduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable");
         simpleBlockWithItem(
                 ModNetworkBlocks.BURNT_ELECTRIC_CABLE.get(),
-                models().cubeAll("burnt_electric_cable", mcLoc("block/black_concrete"))
+                gltfModel(
+                        "burnt_electric_cable",
+                        "burnt_electric_cable",
+                        mcLoc("block/black_concrete"),
+                        ModelSceneSelection.ALL
+                )
         );
         registerLongDistanceElectricModels();
         legacyConduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe");
@@ -585,6 +590,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
         return new ModelSceneSelection(Set.of(names), Set.of(), Set.of(), Set.of());
     }
 
+    private static ModelSceneSelection excludeNodes(String... names) {
+        return new ModelSceneSelection(Set.of(), Set.of(), Set.of(names), Set.of());
+    }
+
     private void registerPneumaticEndpoint(Block block, SingleBlockMachineDefinition definition) {
         String texture = switch (definition) {
             case RELAY -> "relay";
@@ -690,19 +699,30 @@ final class ModBlockStateProvider extends BlockStateProvider {
         poleModels(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), "electric_pole_transformer");
 
         Block boxTransformer = ModNetworkBlocks.BOX_TRANSFORMER.get();
-        ModelFile boxTransformerModel = models().cubeColumn(
+        ModelFile boxTransformerModel = gltfModel(
                 "box_transformer",
-                modLoc("blocks/electric_machines/rf_transformer"),
-                modLoc("blocks/electric_machines/rf_transformer_top")
+                "box_transformer",
+                mcLoc("block/iron_block"),
+                excludeNodes("arrow_forward", "arrow_reverse")
         );
         horizontalBlock(boxTransformer, boxTransformerModel);
         simpleBlockItem(boxTransformer, boxTransformerModel);
 
-        ModelFile fuseBoxModel = models().cubeAll("fuse_box", mcLoc("block/iron_block"));
+        ModelFile fuseBoxModel = gltfModel(
+                "fuse_box",
+                "fuse_box",
+                mcLoc("block/iron_block"),
+                excludeNodes("fuse_intact", "fuse_blown")
+        );
         horizontalBlock(ModNetworkBlocks.FUSE_BOX.get(), fuseBoxModel);
         simpleBlockItem(ModNetworkBlocks.FUSE_BOX.get(), fuseBoxModel);
 
-        ModelFile circuitBreakerModel = models().cubeAll("circuit_breaker", mcLoc("block/polished_blackstone"));
+        ModelFile circuitBreakerModel = gltfModel(
+                "circuit_breaker",
+                "circuit_breaker",
+                mcLoc("block/polished_blackstone"),
+                excludeNodes("switch_closed", "switch_open")
+        );
         horizontalBlock(ModNetworkBlocks.CIRCUIT_BREAKER.get(), circuitBreakerModel);
         simpleBlockItem(ModNetworkBlocks.CIRCUIT_BREAKER.get(), circuitBreakerModel);
 

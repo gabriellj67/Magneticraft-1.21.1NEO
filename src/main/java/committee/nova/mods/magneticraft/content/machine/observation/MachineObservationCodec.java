@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.machine.observation;
 
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -15,7 +16,7 @@ import java.util.Optional;
  */
 public final class MachineObservationCodec {
     public static final String ROOT_KEY = Magneticraft.MOD_ID;
-    public static final int SCHEMA_VERSION = 1;
+    public static final int SCHEMA_VERSION = 2;
 
     private static final String SCHEMA_VERSION_KEY = "schema_version";
     private static final String PROCESS_KEY = "process";
@@ -85,9 +86,19 @@ public final class MachineObservationCodec {
 
     private static CompoundTag writeElectrical(MachineObservation.ElectricalStatus electrical) {
         CompoundTag tag = new CompoundTag();
+        tag.putString("tier_id", electrical.tierId().toString());
+        tag.putString("terminal_id", electrical.terminalId().toString());
         tag.putDouble("voltage_volts", electrical.voltageVolts());
+        tag.putDouble("charge_coulombs_per_tick", electrical.chargeCoulombsPerTick());
         tag.putDouble("current_amps", electrical.currentAmps());
+        tag.putDouble("joules_per_tick", electrical.joulesPerTick());
         tag.putDouble("power_watts", electrical.powerWatts());
+        tag.putDouble("stored_joules", electrical.storedJoules());
+        tag.putDouble("capacity_joules", electrical.capacityJoules());
+        tag.putDouble("load_ratio", electrical.loadRatio());
+        tag.putDouble("thermal_stress", electrical.thermalStress());
+        tag.putString("flow_direction", electrical.flowDirection().name());
+        tag.putString("fault_kind", electrical.faultKind().name());
         return tag;
     }
 
@@ -137,10 +148,33 @@ public final class MachineObservationCodec {
             return Optional.empty();
         }
         CompoundTag tag = root.getCompound(ELECTRICAL_KEY);
+        ResourceLocation tierId = boundedId(tag, "tier_id");
+        ResourceLocation terminalId = boundedId(tag, "terminal_id");
+        if (tierId == null || terminalId == null) {
+            return Optional.empty();
+        }
         return Optional.of(new MachineObservation.ElectricalStatus(
+                tierId,
+                terminalId,
                 tag.getDouble("voltage_volts"),
+                tag.getDouble("charge_coulombs_per_tick"),
                 tag.getDouble("current_amps"),
-                tag.getDouble("power_watts")
+                tag.getDouble("joules_per_tick"),
+                tag.getDouble("power_watts"),
+                tag.getDouble("stored_joules"),
+                tag.getDouble("capacity_joules"),
+                tag.getDouble("load_ratio"),
+                tag.getDouble("thermal_stress"),
+                enumValue(
+                        ElectricalDiagnosticSource.FlowDirection.class,
+                        tag.getString("flow_direction"),
+                        ElectricalDiagnosticSource.FlowDirection.IDLE
+                ),
+                enumValue(
+                        ElectricalDiagnosticSource.FaultKind.class,
+                        tag.getString("fault_kind"),
+                        ElectricalDiagnosticSource.FaultKind.NONE
+                )
         ));
     }
 
@@ -183,5 +217,24 @@ public final class MachineObservationCodec {
                 tag.getBoolean("formed"),
                 tag.getBoolean("operational")
         ));
+    }
+
+    private static ResourceLocation boundedId(CompoundTag tag, String key) {
+        if (!tag.contains(key, Tag.TAG_STRING)) {
+            return null;
+        }
+        String value = tag.getString(key);
+        return value.length() <= 256 ? ResourceLocation.tryParse(value) : null;
+    }
+
+    private static <T extends Enum<T>> T enumValue(Class<T> type, String name, T fallback) {
+        if (name == null || name.length() > 64) {
+            return fallback;
+        }
+        try {
+            return Enum.valueOf(type, name);
+        } catch (IllegalArgumentException ignored) {
+            return fallback;
+        }
     }
 }

@@ -11,10 +11,17 @@ import net.minecraft.world.entity.player.Inventory;
  * Lightweight battery screen driven only by menu-synchronized data.
  */
 public final class BatteryScreen extends AbstractContainerScreen<BatteryMenu> {
+    static final int BASE_IMAGE_WIDTH = LegacyMachineGuiLayout.STANDARD_WIDTH;
+    static final LegacyMachineGuiLayout.Rect ELECTRICAL_PANEL =
+            LegacyMachineGuiLayout.electricalPanel(BASE_IMAGE_WIDTH);
+
     public BatteryScreen(BatteryMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = LegacyMachineGuiLayout.STANDARD_WIDTH;
-        imageHeight = LegacyMachineGuiLayout.STANDARD_HEIGHT;
+        LegacyMachineGuiLayout.Size size = LegacyMachineGuiLayout.withElectricalPanel(
+                new LegacyMachineGuiLayout.Size(BASE_IMAGE_WIDTH, LegacyMachineGuiLayout.STANDARD_HEIGHT)
+        );
+        imageWidth = size.width();
+        imageHeight = size.height();
     }
 
     @Override
@@ -34,6 +41,10 @@ public final class BatteryScreen extends AbstractContainerScreen<BatteryMenu> {
                     mouseY
             );
         }
+        ElectricalStatePanel.renderTooltip(
+                graphics, font, mouseX, mouseY, leftPos, topPos, ELECTRICAL_PANEL,
+                menu.position(), menu.energyStored(), menu.energyCapacity()
+        );
         renderTooltip(graphics, mouseX, mouseY);
     }
 
@@ -62,5 +73,9 @@ public final class BatteryScreen extends AbstractContainerScreen<BatteryMenu> {
         int capacity = menu.energyCapacity();
         int height = capacity <= 0 ? 0 : 45 * menu.energyStored() / capacity;
         graphics.fill(left + 84, top + 65 - height, left + 92, top + 65, 0xFF43D96B);
+        ElectricalStatePanel.render(
+                graphics, font, left, top, ELECTRICAL_PANEL,
+                menu.position(), menu.energyStored(), menu.energyCapacity()
+        );
     }
 }

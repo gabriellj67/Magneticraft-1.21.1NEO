@@ -11,6 +11,8 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
@@ -20,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 /** Vanilla shaped matching with a versioned electrical payload added to the result. */
-public final class TieredShapedRecipe implements net.minecraft.world.item.crafting.Recipe<CraftingContainer> {
+public final class TieredShapedRecipe implements CraftingRecipe {
     private static final String ELECTRICAL_TAG = "electrical";
 
     private final ShapedRecipe delegate;
@@ -63,6 +65,11 @@ public final class TieredShapedRecipe implements net.minecraft.world.item.crafti
     @Override
     public String getGroup() {
         return delegate.getGroup();
+    }
+
+    @Override
+    public CraftingBookCategory category() {
+        return delegate.category();
     }
 
     @Override

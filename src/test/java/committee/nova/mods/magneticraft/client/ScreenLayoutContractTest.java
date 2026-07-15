@@ -145,6 +145,54 @@ class ScreenLayoutContractTest {
         assertTrue(titleX + titleWidth + 6 <= statusX);
     }
 
+    @Test
+    void electricalPanelsStayInsideExpandedScreensAndOutsideLegacyContent() {
+        assertElectricalPanel(
+                new LegacyMachineGuiLayout.Size(
+                        BatteryScreen.BASE_IMAGE_WIDTH,
+                        LegacyMachineGuiLayout.STANDARD_HEIGHT
+                ),
+                BatteryScreen.ELECTRICAL_PANEL,
+                "battery"
+        );
+        assertElectricalPanel(
+                new LegacyMachineGuiLayout.Size(
+                        ElectricFurnaceScreen.BASE_IMAGE_WIDTH,
+                        LegacyMachineGuiLayout.STANDARD_HEIGHT
+                ),
+                ElectricFurnaceScreen.ELECTRICAL_PANEL,
+                "electric_furnace"
+        );
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            if (definition.hasMenu() && definition.usesElectricity()) {
+                assertElectricalPanel(
+                        LegacyMachineGuiLayout.singleBlockSize(definition),
+                        SingleBlockMachineScreen.electricalPanelBounds(definition),
+                        definition.id()
+                );
+            }
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            if (definition.usesElectricity()) {
+                assertElectricalPanel(
+                        LegacyMachineGuiLayout.multiblockSize(definition),
+                        AdvancedMultiblockScreen.electricalPanelBounds(definition),
+                        definition.id()
+                );
+            }
+        }
+        LegacyMachineGuiLayout.Size robot = LegacyMachineGuiLayout.programmableSize(true);
+        assertElectricalPanel(robot, LegacyMachineGuiLayout.electricalPanel(robot.width()), "mining_robot");
+        assertElectricalPanel(
+                new LegacyMachineGuiLayout.Size(
+                        ElectricalDeviceScreen.BASE_IMAGE_WIDTH,
+                        LegacyMachineGuiLayout.STANDARD_HEIGHT
+                ),
+                ElectricalDeviceScreen.ELECTRICAL_PANEL,
+                "electrical_device"
+        );
+    }
+
     private static boolean hasProgress(MultiblockDefinition definition) {
         return switch (definition) {
             case GRINDER, SIEVE, HYDRAULIC_PRESS, PUMPJACK, REFINERY,
@@ -158,6 +206,18 @@ class ScreenLayoutContractTest {
         for (Rect element : elements) {
             assertTrue(screen.contains(element), () -> name + " contains out-of-bounds element " + element);
         }
+    }
+
+    private static void assertElectricalPanel(
+            LegacyMachineGuiLayout.Size base,
+            Rect panel,
+            String name
+    ) {
+        LegacyMachineGuiLayout.Size expanded = LegacyMachineGuiLayout.withElectricalPanel(base);
+        assertTrue(expanded.bounds().contains(panel), () -> name + " electrical panel exceeds its screen");
+        assertFalse(base.bounds().overlaps(panel), () -> name + " electrical panel overlaps legacy content");
+        assertTrue(panel.width() >= 96 && panel.height() >= 120,
+                () -> name + " electrical panel cannot fit two terminal summaries");
     }
 
     private static void assertDisjoint(List<Rect> elements, String name) {

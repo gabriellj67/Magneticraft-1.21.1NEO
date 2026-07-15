@@ -28,11 +28,21 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
             "gui.magneticraft.inserter.reverse"
     };
     private final List<Button> inserterButtons = new ArrayList<>();
+    private final int baseImageWidth;
+    private final LegacyMachineGuiLayout.Rect electricalPanel;
 
     public SingleBlockMachineScreen(SingleBlockMachineMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = LegacyMachineGuiLayout.singleBlockSize(menu.definition()).width();
-        imageHeight = menu.imageHeight();
+        LegacyMachineGuiLayout.Size baseSize = LegacyMachineGuiLayout.singleBlockSize(menu.definition());
+        baseImageWidth = baseSize.width();
+        electricalPanel = menu.definition().usesElectricity()
+                ? electricalPanelBounds(menu.definition())
+                : null;
+        LegacyMachineGuiLayout.Size size = electricalPanel == null
+                ? baseSize
+                : LegacyMachineGuiLayout.withElectricalPanel(baseSize);
+        imageWidth = size.width();
+        imageHeight = size.height();
     }
 
     @Override
@@ -77,6 +87,12 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
         renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTick);
         renderStatusTooltips(graphics, mouseX, mouseY);
+        if (electricalPanel != null) {
+            ElectricalStatePanel.renderTooltip(
+                    graphics, font, mouseX, mouseY, leftPos, topPos, electricalPanel,
+                    menu.machinePosition(), menu.energyStored(), menu.energyCapacity()
+            );
+        }
         renderTooltip(graphics, mouseX, mouseY);
         for (int id = 0; id < inserterButtons.size(); id++) {
             if (inserterButtons.get(id).isHoveredOrFocused()) {
@@ -98,6 +114,12 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
             MachineScreenLayout.drawSlot(graphics, leftPos, topPos, slot.x, slot.y);
         }
         drawStatusBars(graphics);
+        if (electricalPanel != null) {
+            ElectricalStatePanel.render(
+                    graphics, font, leftPos, topPos, electricalPanel,
+                    menu.machinePosition(), menu.energyStored(), menu.energyCapacity()
+            );
+        }
     }
 
     @Override
@@ -109,7 +131,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
         if (status == null) {
             graphics.drawString(
                     font,
-                    MachineScreenLayout.fitToWidth(font, title, imageWidth - titleLabelX - 8),
+                    MachineScreenLayout.fitToWidth(font, title, baseImageWidth - titleLabelX - 8),
                     titleLabelX,
                     LegacyMachineGuiLayout.CONTENT_TITLE_TOP,
                     0x404040,
@@ -118,8 +140,8 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
         } else {
             Component fittedStatus = MachineScreenLayout.fitToWidth(font, status, 72);
             int statusWidth = font.width(fittedStatus);
-            int statusX = imageWidth - 8 - statusWidth;
-            int titleWidth = MachineScreenLayout.availableTitleWidth(imageWidth, titleLabelX, statusWidth);
+            int statusX = baseImageWidth - 8 - statusWidth;
+            int titleWidth = MachineScreenLayout.availableTitleWidth(baseImageWidth, titleLabelX, statusWidth);
             graphics.drawString(
                     font,
                     MachineScreenLayout.fitToWidth(font, title, titleWidth),
@@ -257,6 +279,12 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
 
     private int displayedProgressTotal() {
         return menu.totalProgress() > 0 ? menu.totalProgress() : menu.burnTotal();
+    }
+
+    static LegacyMachineGuiLayout.Rect electricalPanelBounds(SingleBlockMachineDefinition definition) {
+        return LegacyMachineGuiLayout.electricalPanel(
+                LegacyMachineGuiLayout.singleBlockSize(definition).width()
+        );
     }
 
     private static int scaled(int value, int capacity, int size) {

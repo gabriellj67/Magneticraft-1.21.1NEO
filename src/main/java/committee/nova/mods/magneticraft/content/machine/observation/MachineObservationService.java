@@ -75,7 +75,19 @@ public final class MachineObservationService {
             Direction observedSide = side == null ? Direction.UP : side;
             electrical = diagnostics.electricalReading(observedSide).map(reading ->
                     new MachineObservation.ElectricalStatus(
-                            reading.voltageVolts(), reading.currentAmps(), reading.powerWatts()
+                            reading.tierId(),
+                            reading.terminalId(),
+                            reading.voltageVolts(),
+                            reading.chargeCoulombsPerTick(),
+                            reading.currentAmps(),
+                            reading.joulesPerTick(),
+                            reading.powerWatts(),
+                            reading.storedJoules(),
+                            reading.capacityJoules(),
+                            reading.loadRatio(),
+                            reading.thermalStress(),
+                            reading.flowDirection(),
+                            reading.faultKind()
                     )
             );
             thermal = diagnostics.thermalReading(observedSide).map(reading ->

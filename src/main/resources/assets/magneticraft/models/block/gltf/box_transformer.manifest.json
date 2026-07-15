@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "tint_mappings": [
+    {"tint_index": 0, "nodes": ["tier_band"], "materials": ["tier_band"]},
+    {"tint_index": 1, "nodes": ["arrow_forward", "arrow_reverse"], "materials": ["state_indicator"]}
+  ]
+}

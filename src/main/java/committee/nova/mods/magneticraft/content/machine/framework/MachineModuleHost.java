@@ -21,6 +21,13 @@ public interface MachineModuleHost {
         markChangedAndSync();
     }
 
+    /**
+     * Requests a client-side rebuild of the host's static block model after
+     * synchronized module data changes a model input such as a tint tier.
+     */
+    default void requestModelRefresh() {
+    }
+
     @Nullable Level level();
 
     BlockPos position();

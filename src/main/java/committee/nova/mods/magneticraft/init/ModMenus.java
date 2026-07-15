@@ -7,6 +7,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMenu;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockMenu;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalDeviceMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.registries.RegistryObject;
@@ -42,6 +43,11 @@ public final class ModMenus {
                     "mining_robot",
                     () -> IForgeMenuType.create((containerId, inventory, buffer) ->
                             new ProgrammableMenu(true, containerId, inventory, buffer))
+            );
+    public static final RegistryObject<MenuType<ElectricalDeviceMenu>> ELECTRICAL_DEVICE =
+            ModRegistries.MENU_TYPES.register(
+                    "electrical_device",
+                    () -> IForgeMenuType.create(ElectricalDeviceMenu::new)
             );
 
     static {

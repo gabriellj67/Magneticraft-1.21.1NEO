@@ -70,8 +70,10 @@ public final class LegacySceneRenderer {
             RenderStyle style
     ) {
         ModelScene scene;
+        ModelRenderManifest manifest;
         try {
             scene = LegacyModelLoader.INSTANCE.load(source);
+            manifest = ModelRenderManifestRegistry.INSTANCE.load(source);
         } catch (JsonParseException exception) {
             reportOnce(source + ":load", "Unable to render legacy scene " + source, exception);
             return;
@@ -112,7 +114,8 @@ public final class LegacySceneRenderer {
                     consumer,
                     packedLight,
                     packedOverlay,
-                    style
+                    style,
+                    manifest
             );
         }
         poseStack.popPose();
@@ -201,7 +204,8 @@ public final class LegacySceneRenderer {
             VertexConsumer consumer,
             int packedLight,
             int packedOverlay,
-            RenderStyle style
+            RenderStyle style,
+            ModelRenderManifest manifest
     ) {
         ModelScene.Node node = scene.node(nodeIndex);
         ModelTransform transform = animatedTransforms.getOrDefault(nodeIndex, node.transform());
@@ -209,7 +213,16 @@ public final class LegacySceneRenderer {
         poseStack.mulPoseMatrix(transform.matrix());
         if (selectedNodes.contains(nodeIndex)) {
             for (ModelScene.Primitive primitive : node.primitives()) {
-                renderPrimitive(primitive, poseStack, consumer, packedLight, packedOverlay, style);
+                renderPrimitive(
+                        node.name(),
+                        primitive,
+                        poseStack,
+                        consumer,
+                        packedLight,
+                        packedOverlay,
+                        style,
+                        manifest
+                );
             }
         }
         for (int child : node.children()) {
@@ -222,19 +235,22 @@ public final class LegacySceneRenderer {
                     consumer,
                     packedLight,
                     packedOverlay,
-                    style
+                    style,
+                    manifest
             );
         }
         poseStack.popPose();
     }
 
     private static void renderPrimitive(
+            String nodeName,
             ModelScene.Primitive primitive,
             PoseStack poseStack,
             VertexConsumer consumer,
             int packedLight,
             int packedOverlay,
-            RenderStyle style
+            RenderStyle style,
+            ModelRenderManifest manifest
     ) {
         ResourceLocation texture = style.textureOverride() == null
                 ? ResourceLocation.tryParse(primitive.texture())
@@ -249,7 +265,8 @@ public final class LegacySceneRenderer {
         float[] textureCoordinates = primitive.textureCoordinatesView();
         float[] normals = primitive.normalsView();
         PoseStack.Pose pose = poseStack.last();
-        int tint = style.tint();
+        int tintIndex = manifest.tintIndex(nodeName, primitive.materialName());
+        int tint = style.tint(tintIndex);
         float alpha = ((tint >>> 24) & 0xFF) / 255.0F;
         float red = ((tint >>> 16) & 0xFF) / 255.0F;
         float green = ((tint >>> 8) & 0xFF) / 255.0F;
@@ -313,19 +330,42 @@ public final class LegacySceneRenderer {
     private record SelectedNodes(ModelScene scene, Set<Integer> nodes) {
     }
 
-    public record RenderStyle(int tint, @Nullable ResourceLocation textureOverride, boolean translucent) {
-        public static final RenderStyle DEFAULT = new RenderStyle(0xFFFFFFFF, null, false);
+    public record RenderStyle(
+            int tint,
+            @Nullable ResourceLocation textureOverride,
+            boolean translucent,
+            Map<Integer, Integer> tintPalette
+    ) {
+        public static final RenderStyle DEFAULT = new RenderStyle(0xFFFFFFFF, null, false, Map.of());
+
+        public RenderStyle(int tint, @Nullable ResourceLocation textureOverride, boolean translucent) {
+            this(tint, textureOverride, translucent, Map.of());
+        }
+
+        public RenderStyle {
+            tintPalette = Map.copyOf(tintPalette);
+        }
 
         public static RenderStyle tinted(int tint) {
-            return new RenderStyle(tint, null, ((tint >>> 24) & 0xFF) < 0xFF);
+            return new RenderStyle(tint, null, ((tint >>> 24) & 0xFF) < 0xFF, Map.of());
         }
 
         public static RenderStyle texture(ResourceLocation texture) {
-            return new RenderStyle(0xFFFFFFFF, texture, false);
+            return new RenderStyle(0xFFFFFFFF, texture, false, Map.of());
         }
 
         public static RenderStyle translucentTexture(ResourceLocation texture) {
-            return new RenderStyle(0xFFFFFFFF, texture, true);
+            return new RenderStyle(0xFFFFFFFF, texture, true, Map.of());
+        }
+
+        public static RenderStyle palette(Map<Integer, Integer> tintPalette) {
+            boolean translucent = tintPalette.values().stream()
+                    .anyMatch(color -> ((color >>> 24) & 0xFF) < 0xFF);
+            return new RenderStyle(0xFFFFFFFF, null, translucent, tintPalette);
+        }
+
+        int tint(int tintIndex) {
+            return tintIndex < 0 ? tint : tintPalette.getOrDefault(tintIndex, tint);
         }
     }
 }
