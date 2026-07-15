@@ -1,5 +1,6 @@
 package committee.nova.mods.magneticraft.content.machine.framework;
 
+import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
@@ -22,6 +23,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.List;
 
 /**
  * Base block entity that owns module identity, persistence and capability lifecycle.
@@ -47,7 +49,37 @@ public abstract class MachineBlockEntity extends BlockEntity
     }
 
     protected final void tickModules() {
-        modules.values().forEach(MachineModule::serverTick);
+        for (MachineModule module : modules.values()) {
+            if (!electricalFaulted() || module instanceof ElectricalNetworkModule) {
+                module.serverTick();
+            }
+        }
+    }
+
+    public final List<ElectricalNetworkModule> electricalTerminals() {
+        return modules.values().stream()
+                .filter(ElectricalNetworkModule.class::isInstance)
+                .map(ElectricalNetworkModule.class::cast)
+                .toList();
+    }
+
+    public final boolean electricalFaulted() {
+        return modules.values().stream()
+                .filter(ElectricalNetworkModule.class::isInstance)
+                .map(ElectricalNetworkModule.class::cast)
+                .anyMatch(ElectricalNetworkModule::faulted);
+    }
+
+    /** Repairs every terminal as one device transaction after validating all terminal voltages. */
+    public final boolean tryRepairElectricalFault() {
+        List<ElectricalNetworkModule> terminals = electricalTerminals();
+        if (terminals.stream().noneMatch(ElectricalNetworkModule::faulted)
+                || terminals.stream().anyMatch(terminal -> !terminal.safeToRepair())) {
+            return false;
+        }
+        terminals.forEach(ElectricalNetworkModule::repairFault);
+        markChangedAndSync();
+        return true;
     }
 
     /** Returns whether one physical-network module exposes the requested face. */

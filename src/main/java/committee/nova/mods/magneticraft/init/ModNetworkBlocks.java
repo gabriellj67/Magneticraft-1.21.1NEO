@@ -9,6 +9,9 @@ import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock
 import committee.nova.mods.magneticraft.content.network.electric.TransformerBlockItem;
 import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyReceiverBlock;
 import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
+import committee.nova.mods.magneticraft.content.item.ProtectionBlockItem;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalProtectionBlock;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalProtectionKind;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlock;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlock;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlock;
@@ -37,6 +40,10 @@ public final class ModNetworkBlocks {
             "electric_cable",
             () -> new ElectricCableBlock(conduitProperties(MapColor.COLOR_ORANGE))
     );
+    public static final RegistryObject<Block> BURNT_ELECTRIC_CABLE = register(
+            "burnt_electric_cable",
+            () -> new Block(conduitProperties(MapColor.COLOR_BLACK))
+    );
     public static final RegistryObject<Block> ELECTRIC_CONNECTOR = registerTiered(
             "electric_connector",
             () -> new ElectricConnectorBlock(machineProperties().noOcclusion())
@@ -47,6 +54,14 @@ public final class ModNetworkBlocks {
     );
     public static final RegistryObject<Block> ELECTRIC_POLE_TRANSFORMER = registerTransformerPole();
     public static final RegistryObject<Block> BOX_TRANSFORMER = registerBoxTransformer();
+    public static final RegistryObject<Block> FUSE_BOX = registerProtection(
+            "fuse_box",
+            ElectricalProtectionKind.FUSE_BOX
+    );
+    public static final RegistryObject<Block> CIRCUIT_BREAKER = registerProtection(
+            "circuit_breaker",
+            ElectricalProtectionKind.CIRCUIT_BREAKER
+    );
     public static final RegistryObject<Block> TESLA_TOWER = register(
             "tesla_tower",
             () -> new TeslaTowerBlock(machineProperties().noOcclusion())
@@ -138,6 +153,18 @@ public final class ModNetworkBlocks {
         BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
                 "box_transformer",
                 () -> new TransformerBlockItem(block.get(), new Item.Properties())
+        ));
+        return block;
+    }
+
+    private static RegistryObject<Block> registerProtection(String id, ElectricalProtectionKind kind) {
+        RegistryObject<Block> block = ModRegistries.BLOCKS.register(
+                id,
+                () -> new ElectricalProtectionBlock(machineProperties().noOcclusion(), kind)
+        );
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                id,
+                () -> new ProtectionBlockItem(block.get(), new Item.Properties(), kind)
         ));
         return block;
     }

@@ -108,6 +108,11 @@ public final class ElectricalEnergyBridgeModule
     }
 
     @Override
+    public double terminalRatedChargePerTick() {
+        return profileBound ? profile.terminalRatedChargePerTick() : 0.0D;
+    }
+
+    @Override
     public void injectElectricalEnergy(PhysicalNetworkManager manager) {
         lastNetworkToBuffer = 0;
         lastBufferToNetwork = 0;

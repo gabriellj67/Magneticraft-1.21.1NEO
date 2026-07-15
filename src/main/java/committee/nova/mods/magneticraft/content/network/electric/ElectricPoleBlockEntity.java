@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
@@ -66,6 +67,10 @@ public final class ElectricPoleBlockEntity extends NetworkComponentBlockEntity
                 side -> false
         ))
                 : null;
+        electricity.useOverheadDamageProfile();
+        if (transformedElectricity != null) {
+            transformedElectricity.useOverheadDamageProfile();
+        }
         transformerCoupler = transformer
                 ? addModule(new TransformerCouplerModule(
                 Magneticraft.id("transformer_coupler"),
@@ -158,6 +163,15 @@ public final class ElectricPoleBlockEntity extends NetworkComponentBlockEntity
         return transformer
                 ? Set.of(LongDistancePort.POLE, LongDistancePort.CONNECTOR)
                 : Set.of(LongDistancePort.POLE);
+    }
+
+    @Override
+    protected void tickElectricalFault() {
+        if (level instanceof ServerLevel serverLevel) {
+            committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService
+                    .get(serverLevel)
+                    .removeConnectionsAt(worldPosition);
+        }
     }
 
     @Override

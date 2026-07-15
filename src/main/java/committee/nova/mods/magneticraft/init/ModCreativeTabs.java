@@ -5,6 +5,10 @@ import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.PortableEnergyItem;
 import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
+import committee.nova.mods.magneticraft.content.item.ElectricalFuseItem;
+import committee.nova.mods.magneticraft.content.item.ProtectionBlockItem;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalProtectionKind;
+import committee.nova.mods.magneticraft.system.network.electric.item.ElectricalRatingIds;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleTransformerBlockItem;
 import committee.nova.mods.magneticraft.content.network.electric.TransformerBlockItem;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockItem;
@@ -42,7 +46,8 @@ public final class ModCreativeTabs {
                         ModMachineItems.creativeItems().stream()
                                 .map(RegistryObject::get)
                                 .forEach(item -> acceptMachineItem(output, item));
-                        ModNetworkItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModNetworkItems.creativeItems().stream().map(RegistryObject::get)
+                                .forEach(item -> acceptNetworkItem(output, item));
                         ModComputerContent.creativeItems().stream()
                                 .map(RegistryObject::get)
                                 .forEach(item -> acceptComputerItem(output, item));
@@ -79,6 +84,18 @@ public final class ModCreativeTabs {
             output.accept(transformerPoleItem.stackForProfile(TransformerProfileIds.MV_TO_HV, VoltageTierIds.MEDIUM));
             return;
         }
+        if (item instanceof ProtectionBlockItem protectionItem) {
+            VoltageTierIds.BUILT_IN.forEach(tier -> {
+                if (protectionItem.kind() == ElectricalProtectionKind.FUSE_BOX) {
+                    output.accept(TieredElectricalBlockItem.stackForTier(protectionItem.getBlock(), tier));
+                } else {
+                    ElectricalRatingIds.BUILT_IN.forEach(rating ->
+                            output.accept(protectionItem.stackFor(tier, rating))
+                    );
+                }
+            });
+            return;
+        }
         if (!(item instanceof TieredElectricalBlockItem tieredItem)) {
             output.accept(item);
             return;
@@ -86,6 +103,16 @@ public final class ModCreativeTabs {
         VoltageTierIds.BUILT_IN.forEach(tier -> output.accept(
                 TieredElectricalBlockItem.stackForTier(tieredItem.getBlock(), tier)
         ));
+    }
+
+    private static void acceptNetworkItem(CreativeModeTab.Output output, Item item) {
+        if (item instanceof ElectricalFuseItem fuse) {
+            VoltageTierIds.BUILT_IN.forEach(tier -> ElectricalRatingIds.BUILT_IN.forEach(rating ->
+                    output.accept(fuse.stackFor(tier, rating))
+            ));
+            return;
+        }
+        output.accept(item);
     }
 
     private static void acceptAdvancedItem(CreativeModeTab.Output output, Item item) {

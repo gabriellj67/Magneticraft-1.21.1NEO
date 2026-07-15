@@ -14,6 +14,7 @@ import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerB
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalProtectionBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyReceiverBlockEntity;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntity;
@@ -107,6 +108,22 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             BoxTransformerBlockEntity::new,
                             ModNetworkBlocks.BOX_TRANSFORMER.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<ElectricalProtectionBlockEntity>> FUSE_BOX =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "fuse_box",
+                    () -> BlockEntityType.Builder.of(
+                            ElectricalProtectionBlockEntity::new,
+                            ModNetworkBlocks.FUSE_BOX.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<ElectricalProtectionBlockEntity>> CIRCUIT_BREAKER =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "circuit_breaker",
+                    () -> BlockEntityType.Builder.of(
+                            ElectricalProtectionBlockEntity::new,
+                            ModNetworkBlocks.CIRCUIT_BREAKER.get()
                     ).build(null)
             );
     public static final RegistryObject<BlockEntityType<TeslaTowerBlockEntity>> TESLA_TOWER =

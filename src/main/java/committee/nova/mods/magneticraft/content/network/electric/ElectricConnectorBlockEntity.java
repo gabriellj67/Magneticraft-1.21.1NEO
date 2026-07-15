@@ -32,6 +32,7 @@ public final class ElectricConnectorBlockEntity extends NetworkComponentBlockEnt
                 ElectricalNodeKind.CONDUCTOR,
                 side -> side == backSide()
         ));
+        electricity.useOverheadDamageProfile();
         longDistance = addModule(new LongDistanceEndpointModule(
                 Magneticraft.id("long_distance_endpoint"),
                 this
@@ -70,6 +71,15 @@ public final class ElectricConnectorBlockEntity extends NetworkComponentBlockEnt
                 ))
                 .orElse(0) > 0) {
             markChanged();
+        }
+    }
+
+    @Override
+    protected void tickElectricalFault() {
+        if (level instanceof ServerLevel serverLevel) {
+            committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService
+                    .get(serverLevel)
+                    .removeConnectionsAt(worldPosition);
         }
     }
 

@@ -65,7 +65,11 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModMachineBlocks.TUBE_LIGHT.get());
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                ModNetworkBlocks.BURNT_ELECTRIC_CABLE.get(),
                 ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                ModNetworkBlocks.BOX_TRANSFORMER.get(),
+                ModNetworkBlocks.FUSE_BOX.get(),
+                ModNetworkBlocks.CIRCUIT_BREAKER.get(),
                 ModNetworkBlocks.TESLA_TOWER.get(),
                 ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(),
                 ModNetworkBlocks.WIND_TURBINE.get(),
@@ -79,7 +83,11 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
         );
         tag(BlockTags.NEEDS_STONE_TOOL).add(
                 ModNetworkBlocks.ELECTRIC_CABLE.get(),
+                ModNetworkBlocks.BURNT_ELECTRIC_CABLE.get(),
                 ModNetworkBlocks.ELECTRIC_CONNECTOR.get(),
+                ModNetworkBlocks.BOX_TRANSFORMER.get(),
+                ModNetworkBlocks.FUSE_BOX.get(),
+                ModNetworkBlocks.CIRCUIT_BREAKER.get(),
                 ModNetworkBlocks.TESLA_TOWER.get(),
                 ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(),
                 ModNetworkBlocks.WIND_TURBINE.get(),

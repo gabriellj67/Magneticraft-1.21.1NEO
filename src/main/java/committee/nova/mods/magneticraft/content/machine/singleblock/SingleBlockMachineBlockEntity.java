@@ -187,7 +187,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
             machine.releaseMultiblockClaim(controller);
         }
         machine.tickModules();
-        machine.logic.tick((ServerLevel) level);
+        if (machine.electricalFaulted()) {
+            machine.state.working = false;
+        } else {
+            machine.logic.tick((ServerLevel) level);
+        }
         boolean shouldBeLit = machine.definition.hasLitState() && machine.logic.isVisuallyLit();
         if (state.getValue(SingleBlockMachineBlock.LIT) != shouldBeLit) {
             level.setBlock(position, state.setValue(SingleBlockMachineBlock.LIT, shouldBeLit), Block.UPDATE_ALL);

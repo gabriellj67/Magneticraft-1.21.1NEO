@@ -27,11 +27,19 @@ public abstract class NetworkComponentBlockEntity extends MachineBlockEntity {
 
     public final void serverTick() {
         tickModules();
-        tickComponent();
+        if (electricalFaulted()) {
+            tickElectricalFault();
+        } else {
+            tickComponent();
+        }
         finishServerTick();
     }
 
     protected void tickComponent() {
+    }
+
+    /** Fault transition hook for components such as cables that replace their world block. */
+    protected void tickElectricalFault() {
     }
 
     public abstract Component configure(Direction side, boolean secondaryAction);

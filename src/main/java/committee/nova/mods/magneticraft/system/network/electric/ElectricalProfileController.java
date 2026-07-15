@@ -8,4 +8,9 @@ import committee.nova.mods.magneticraft.system.network.electric.profile.Electric
  */
 public interface ElectricalProfileController extends ElectricalProfileBinding {
     boolean electricalControllerBound();
+
+    /** Zero means that the terminal falls back to its voltage-tier equipment rating. */
+    default double terminalRatedChargePerTick() {
+        return 0.0D;
+    }
 }

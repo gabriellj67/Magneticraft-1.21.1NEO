@@ -73,6 +73,11 @@ public final class ElectricalVoltageSourceModule
     }
 
     @Override
+    public double terminalRatedChargePerTick() {
+        return profileBound ? profile.terminalRatedChargePerTick() : 0.0D;
+    }
+
+    @Override
     public void injectElectricalEnergy(PhysicalNetworkManager manager) {
         lastProductionJoules = 0.0D;
         if (!profileBound) {

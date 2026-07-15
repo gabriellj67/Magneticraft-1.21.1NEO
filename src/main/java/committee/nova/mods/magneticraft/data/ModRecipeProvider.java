@@ -33,6 +33,7 @@ import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModTags;
 import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
+import committee.nova.mods.magneticraft.system.network.electric.item.ElectricalRatingIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.TransformerProfileIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import net.minecraft.advancements.CriterionTriggerInstance;
@@ -781,6 +782,7 @@ final class ModRecipeProvider extends RecipeProvider {
 
         addTieredPoleRecipes(consumer);
         addTransformerRecipes(consumer);
+        addProtectionRecipes(consumer);
 
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.TESLA_TOWER.get())
                 .pattern("ABA")
@@ -1025,6 +1027,130 @@ final class ModRecipeProvider extends RecipeProvider {
                 consumer,
                 recipeId,
                 new TieredElectricalItemData(inputTierId, Optional.empty(), Optional.of(profileId))
+        );
+    }
+
+    private void addProtectionRecipes(Consumer<FinishedRecipe> consumer) {
+        protectionTierRecipes(
+                consumer,
+                VoltageTierIds.LOW,
+                "",
+                Ingredient.of(ModTags.Items.lightPlate(Metal.COPPER))
+        );
+        protectionTierRecipes(
+                consumer,
+                VoltageTierIds.MEDIUM,
+                "_medium_voltage",
+                Ingredient.of(ModTags.Items.lightPlate(Metal.STEEL))
+        );
+        protectionTierRecipes(
+                consumer,
+                VoltageTierIds.HIGH,
+                "_high_voltage",
+                Ingredient.of(ModTags.Items.lightPlate(Metal.TUNGSTEN))
+        );
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModNetworkItems.ELECTRICAL_REPAIR_TOOL.get())
+                .pattern("SCS")
+                .pattern(" R ")
+                .pattern(" L ")
+                .define('S', ModTags.Items.lightPlate(Metal.STEEL))
+                .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('L', ModTags.Items.lightPlate(Metal.LEAD))
+                .unlockedBy("has_steel_plate", has(ModTags.Items.lightPlate(Metal.STEEL)))
+                .save(consumer, id("crafting/electrical_repair_tool"));
+    }
+
+    private void protectionTierRecipes(
+            Consumer<FinishedRecipe> consumer,
+            ResourceLocation tierId,
+            String suffix,
+            Ingredient tierMaterial
+    ) {
+        saveRated(
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkItems.FUSE.get(), 4)
+                        .pattern(" G ")
+                        .pattern("CTC")
+                        .pattern(" G ")
+                        .define('G', Tags.Items.GLASS)
+                        .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                        .define('T', tierMaterial)
+                        .unlockedBy("has_fine_copper_wire", has(component(CraftingComponent.FINE_COPPER_WIRE))),
+                consumer,
+                id("crafting/electrical_fuse" + suffix),
+                tierId,
+                ElectricalRatingIds.STANDARD
+        );
+        saveRated(
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkItems.FUSE.get(), 2)
+                        .pattern("GTG")
+                        .pattern("CTC")
+                        .pattern("GTG")
+                        .define('G', Tags.Items.GLASS)
+                        .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                        .define('T', tierMaterial)
+                        .unlockedBy("has_fine_copper_wire", has(component(CraftingComponent.FINE_COPPER_WIRE))),
+                consumer,
+                id("crafting/heavy_electrical_fuse" + suffix),
+                tierId,
+                ElectricalRatingIds.HEAVY
+        );
+        saveTiered(
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.FUSE_BOX.get())
+                        .pattern("STS")
+                        .pattern("GRG")
+                        .pattern("SCS")
+                        .define('S', ModTags.Items.lightPlate(Metal.STEEL))
+                        .define('T', tierMaterial)
+                        .define('G', Tags.Items.GLASS)
+                        .define('R', Tags.Items.DUSTS_REDSTONE)
+                        .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                        .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE)),
+                consumer,
+                id("crafting/fuse_box" + suffix),
+                tierId
+        );
+        breakerRecipe(consumer, tierId, ElectricalRatingIds.STANDARD, suffix, tierMaterial, false);
+        breakerRecipe(consumer, tierId, ElectricalRatingIds.HEAVY, "_heavy" + suffix, tierMaterial, true);
+    }
+
+    private void breakerRecipe(
+            Consumer<FinishedRecipe> consumer,
+            ResourceLocation tierId,
+            ResourceLocation ratingId,
+            String suffix,
+            Ingredient tierMaterial,
+            boolean heavy
+    ) {
+        ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(
+                        RecipeCategory.REDSTONE,
+                        ModNetworkBlocks.CIRCUIT_BREAKER.get()
+                )
+                .pattern(heavy ? "STS" : " S ")
+                .pattern("MCR")
+                .pattern("STS")
+                .define('S', ModTags.Items.lightPlate(Metal.STEEL))
+                .define('T', tierMaterial)
+                .define('M', component(CraftingComponent.MAGNET))
+                .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .unlockedBy("has_magnet", has(component(CraftingComponent.MAGNET)));
+        saveRated(builder, consumer, id("crafting/circuit_breaker" + suffix), tierId, ratingId);
+    }
+
+    private void saveRated(
+            ShapedRecipeBuilder builder,
+            Consumer<FinishedRecipe> consumer,
+            ResourceLocation recipeId,
+            ResourceLocation tierId,
+            ResourceLocation ratingId
+    ) {
+        TieredShapedFinishedRecipe.save(
+                builder,
+                consumer,
+                recipeId,
+                new TieredElectricalItemData(tierId, Optional.of(ratingId), Optional.empty())
         );
     }
 

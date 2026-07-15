@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/circuit_breaker",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/circuit_breaker"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/circuit_breaker",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/circuit_breaker",
+      "y": 270
+    }
+  }
+}

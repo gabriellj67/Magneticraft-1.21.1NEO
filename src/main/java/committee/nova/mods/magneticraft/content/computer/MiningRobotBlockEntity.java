@@ -106,10 +106,14 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
 
     public static void serverTick(Level level, BlockPos position, BlockState state, MiningRobotBlockEntity robot) {
         robot.tickModules();
-        robot.tickActionCooldown();
-        robot.tickComputer();
+        if (!robot.electricalFaulted()) {
+            robot.tickActionCooldown();
+            robot.tickComputer();
+        }
         robot.finishServerTick();
-        if (robot.pendingMove != null && level instanceof ServerLevel serverLevel) {
+        if (!robot.electricalFaulted()
+                && robot.pendingMove != null
+                && level instanceof ServerLevel serverLevel) {
             robot.performPendingMove(serverLevel);
         }
     }

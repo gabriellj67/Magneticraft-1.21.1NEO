@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBl
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -45,5 +46,12 @@ public final class ElectricCableBlockEntity extends NetworkComponentBlockEntity 
                         : "message.magneticraft.connection_disabled",
                 Component.translatable("direction.minecraft." + side.getName())
         );
+    }
+
+    @Override
+    protected void tickElectricalFault() {
+        if (getLevel() != null && !getLevel().isClientSide) {
+            getLevel().setBlockAndUpdate(getBlockPos(), ModNetworkBlocks.BURNT_ELECTRIC_CABLE.get().defaultBlockState());
+        }
     }
 }

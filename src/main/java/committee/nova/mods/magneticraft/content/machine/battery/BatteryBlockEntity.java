@@ -77,8 +77,8 @@ public final class BatteryBlockEntity extends MachineBlockEntity implements Menu
 
     public static void serverTick(Level level, BlockPos position, BlockState state, BatteryBlockEntity battery) {
         battery.tickModules();
-        int charged = battery.chargeItem(battery.inventory.getStackInSlot(0));
-        int discharged = battery.dischargeItem(battery.inventory.getStackInSlot(1));
+        int charged = battery.electricalFaulted() ? 0 : battery.chargeItem(battery.inventory.getStackInSlot(0));
+        int discharged = battery.electricalFaulted() ? 0 : battery.dischargeItem(battery.inventory.getStackInSlot(1));
         if (charged > 0 || discharged > 0) {
             battery.markChanged();
         }

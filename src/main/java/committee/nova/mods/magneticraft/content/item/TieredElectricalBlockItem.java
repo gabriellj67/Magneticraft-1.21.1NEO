@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlo
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
+import committee.nova.mods.magneticraft.content.network.module.TieredElectricalPlacementHost;
 import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
 import net.minecraft.core.BlockPos;
@@ -62,6 +63,10 @@ public class TieredElectricalBlockItem extends BlockItem {
                 ? ElectricPoleBlock.basePosition(placedPosition, state)
                 : placedPosition;
         BlockEntity blockEntity = level.getBlockEntity(hostPosition);
+        if (blockEntity instanceof TieredElectricalPlacementHost placementHost) {
+            placementHost.applyElectricalItemData(data);
+            return;
+        }
         if (!(blockEntity instanceof TieredElectricalHost host)) {
             return;
         }

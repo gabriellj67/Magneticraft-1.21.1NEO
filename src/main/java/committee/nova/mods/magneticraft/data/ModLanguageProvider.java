@@ -95,11 +95,16 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.tank_export_disabled", chinese ? "储罐底部主动输出已禁用" : "Tank bottom export disabled");
         add(ModNetworkItems.WRENCH.get(), chinese ? "扳手" : "Wrench");
         add(ModNetworkItems.COPPER_WIRE_COIL.get(), chinese ? "铜线卷" : "Copper Wire Coil");
+        add(ModNetworkItems.FUSE.get(), chinese ? "保险丝" : "Electrical Fuse");
+        add(ModNetworkItems.ELECTRICAL_REPAIR_TOOL.get(), chinese ? "电气维修工具" : "Electrical Repair Tool");
         add(ModNetworkBlocks.ELECTRIC_CABLE.get(), chinese ? "电缆" : "Electric Cable");
+        add(ModNetworkBlocks.BURNT_ELECTRIC_CABLE.get(), chinese ? "烧毁的电缆" : "Burnt Electric Cable");
         add(ModNetworkBlocks.ELECTRIC_CONNECTOR.get(), chinese ? "电力连接器" : "Electric Connector");
         add(ModNetworkBlocks.ELECTRIC_POLE.get(), chinese ? "电线杆" : "Electric Pole");
         add(ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(), chinese ? "变压电线杆升级件" : "Transformer Pole Upgrade");
         add(ModNetworkBlocks.BOX_TRANSFORMER.get(), chinese ? "箱式变压器" : "Box Transformer");
+        add(ModNetworkBlocks.FUSE_BOX.get(), chinese ? "保险丝盒" : "Fuse Box");
+        add(ModNetworkBlocks.CIRCUIT_BREAKER.get(), chinese ? "断路器" : "Circuit Breaker");
         add(ModNetworkBlocks.TESLA_TOWER.get(), chinese ? "特斯拉塔" : "Tesla Tower");
         add(ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(), chinese ? "无线能量接收器" : "Wireless Energy Receiver");
         add(ModNetworkBlocks.WIND_TURBINE.get(), chinese ? "风力涡轮机" : "Wind Turbine");
@@ -122,6 +127,18 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.transformer_status", chinese
                 ? "变压配置：%s，反向：%s，红石模式：%s"
                 : "Transformer profile: %s, reversed: %s, redstone mode: %s");
+        add("message.magneticraft.protection_status", chinese
+                ? "保护规格：%s，应力：%s，断开：%s"
+                : "Protection rating: %s, stress: %s, open: %s");
+        add("message.magneticraft.invalid_fuse", chinese
+                ? "保险丝必须与保险丝盒的电压层级一致"
+                : "The fuse must match the fuse box voltage tier");
+        add("message.magneticraft.repair_voltage_unsafe", chinese
+                ? "维修失败：所有电气端子必须低于标称电压的 95%"
+                : "Repair failed: every electrical terminal must be below 95% of nominal voltage");
+        add("message.magneticraft.electrical_repaired", chinese
+                ? "电气设备已修复"
+                : "Electrical equipment repaired");
         add("message.magneticraft.redstone_mode", chinese ? "红石控制：%s" : "Redstone control: %s");
         add("message.magneticraft.redstone_mode.ignored", chinese ? "忽略" : "Ignored");
         add("message.magneticraft.redstone_mode.requires_signal", chinese ? "需要信号" : "Requires signal");

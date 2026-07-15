@@ -34,7 +34,13 @@ final class ModItemModelProvider extends ItemModelProvider {
                 .forEach(this::basicItem);
         ModNetworkItems.creativeItems().stream()
                 .map(RegistryObject::get)
+                .filter(item -> item != ModNetworkItems.FUSE.get()
+                        && item != ModNetworkItems.ELECTRICAL_REPAIR_TOOL.get())
                 .forEach(this::basicItem);
+        withExistingParent("electrical_fuse", mcLoc("item/generated"))
+                .texture("layer0", mcLoc("item/redstone"));
+        withExistingParent("electrical_repair_tool", mcLoc("item/handheld"))
+                .texture("layer0", mcLoc("item/iron_pickaxe"));
         registerFloppyDiskModels();
 
         for (FluidDefinition definition : FluidDefinition.values()) {

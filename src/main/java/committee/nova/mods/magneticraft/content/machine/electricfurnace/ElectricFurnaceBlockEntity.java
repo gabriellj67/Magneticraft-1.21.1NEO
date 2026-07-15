@@ -99,8 +99,9 @@ public final class ElectricFurnaceBlockEntity extends MachineBlockEntity impleme
     public static void serverTick(Level level, BlockPos position, BlockState state, ElectricFurnaceBlockEntity furnace) {
         furnace.tickModules();
         boolean lit = state.getValue(ElectricFurnaceBlock.LIT);
-        if (lit != furnace.process.working()) {
-            level.setBlock(position, state.setValue(ElectricFurnaceBlock.LIT, furnace.process.working()), 3);
+        boolean shouldBeLit = !furnace.electricalFaulted() && furnace.process.working();
+        if (lit != shouldBeLit) {
+            level.setBlock(position, state.setValue(ElectricFurnaceBlock.LIT, shouldBeLit), 3);
         }
         furnace.finishServerTick();
     }

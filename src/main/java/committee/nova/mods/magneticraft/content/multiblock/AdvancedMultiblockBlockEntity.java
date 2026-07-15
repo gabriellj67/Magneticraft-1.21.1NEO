@@ -754,7 +754,11 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         }
         if (structureReady) {
             tickModules();
-            logic.tick(serverLevel);
+            if (electricalFaulted()) {
+                setWorking(false);
+            } else {
+                logic.tick(serverLevel);
+            }
             syncClientState(visualStateHash(progress, totalProgress, working));
             finishServerTick();
         }

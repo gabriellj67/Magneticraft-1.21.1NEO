@@ -1,0 +1,35 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "rating_id": "magneticraft:heavy",
+    "schema_version": 1,
+    "tier_id": "magneticraft:medium_voltage"
+  },
+  "key": {
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "M": {
+      "item": "magneticraft:magnet"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "S": {
+      "tag": "magneticraft:light_plates/steel"
+    },
+    "T": {
+      "tag": "magneticraft:light_plates/steel"
+    }
+  },
+  "pattern": [
+    "STS",
+    "MCR",
+    "STS"
+  ],
+  "result": {
+    "item": "magneticraft:circuit_breaker"
+  },
+  "show_notification": true
+}

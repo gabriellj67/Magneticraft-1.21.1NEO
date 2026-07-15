@@ -331,6 +331,40 @@ public final class PhysicalNetworkManager {
         return completedElectricalTelemetry;
     }
 
+    /** Maximum absolute current touching one terminal in the active (or most recently completed) tick. */
+    public double maximumTerminalCurrentAmps(PhysicalNodeKey terminal) {
+        Objects.requireNonNull(terminal, "terminal");
+        List<ElectricalEdgeTelemetry> telemetry = electricalTickActive
+                ? activeElectricalTelemetry
+                : completedElectricalTelemetry;
+        return telemetry.stream()
+                .filter(edge -> edge.firstTerminal().equals(terminal) || edge.secondTerminal().equals(terminal))
+                .mapToDouble(edge -> Math.abs(edge.currentAmps()))
+                .max()
+                .orElse(0.0D);
+    }
+
+    /** Exact current through one physical edge in the active (or most recently completed) tick. */
+    public double electricalEdgeCurrentAmps(
+            PhysicalNodeKey first,
+            PhysicalNodeKey second,
+            ElectricalEdgeTelemetry.EdgeType edgeType
+    ) {
+        Objects.requireNonNull(first, "first");
+        Objects.requireNonNull(second, "second");
+        Objects.requireNonNull(edgeType, "edgeType");
+        List<ElectricalEdgeTelemetry> telemetry = electricalTickActive
+                ? activeElectricalTelemetry
+                : completedElectricalTelemetry;
+        return telemetry.stream()
+                .filter(edge -> edge.edgeType() == edgeType)
+                .filter(edge -> (edge.firstTerminal().equals(first) && edge.secondTerminal().equals(second))
+                        || (edge.firstTerminal().equals(second) && edge.secondTerminal().equals(first)))
+                .mapToDouble(ElectricalEdgeTelemetry::currentAmps)
+                .max()
+                .orElse(0.0D);
+    }
+
     /** Position-only compatibility query; prefers the conventional main terminal. */
     public Optional<PhysicalNetworkNode> node(NetworkDomain domain, BlockPos position) {
         Optional<PhysicalNetworkNode> main = node(domain, PhysicalNodeKey.main(position));

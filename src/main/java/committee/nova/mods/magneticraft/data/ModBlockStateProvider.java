@@ -118,6 +118,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         legacyConduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable");
+        simpleBlockWithItem(
+                ModNetworkBlocks.BURNT_ELECTRIC_CABLE.get(),
+                models().cubeAll("burnt_electric_cable", mcLoc("block/black_concrete"))
+        );
         registerLongDistanceElectricModels();
         legacyConduitBlock(ModNetworkBlocks.HEAT_PIPE.get(), "heat_pipe");
         legacyConduitBlock(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), "insulated_heat_pipe");
@@ -693,6 +697,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
         horizontalBlock(boxTransformer, boxTransformerModel);
         simpleBlockItem(boxTransformer, boxTransformerModel);
+
+        ModelFile fuseBoxModel = models().cubeAll("fuse_box", mcLoc("block/iron_block"));
+        horizontalBlock(ModNetworkBlocks.FUSE_BOX.get(), fuseBoxModel);
+        simpleBlockItem(ModNetworkBlocks.FUSE_BOX.get(), fuseBoxModel);
+
+        ModelFile circuitBreakerModel = models().cubeAll("circuit_breaker", mcLoc("block/polished_blackstone"));
+        horizontalBlock(ModNetworkBlocks.CIRCUIT_BREAKER.get(), circuitBreakerModel);
+        simpleBlockItem(ModNetworkBlocks.CIRCUIT_BREAKER.get(), circuitBreakerModel);
 
         Block teslaTower = ModNetworkBlocks.TESLA_TOWER.get();
         ModelFile teslaBottom = gltfModel(

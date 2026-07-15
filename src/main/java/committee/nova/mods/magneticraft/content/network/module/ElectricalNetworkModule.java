@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.network.module;
 
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.config.MagneticraftConfig;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalEdgeTelemetry;
@@ -9,6 +10,7 @@ import committee.nova.mods.magneticraft.system.network.electric.ElectricalNode;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeAccess;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalProfileController;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalStressState;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalTickParticipant;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalCoupler;
 import committee.nova.mods.magneticraft.system.network.electric.profile.ElectricalDataRegistry;
@@ -32,20 +34,25 @@ import java.util.function.Predicate;
 /** Persisted, tier-bound Magneticraft electrical terminal; Forge Energy is intentionally absent. */
 public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         implements ElectricalDiagnosticSource, ElectricalNodeAccess, ElectricalProfileBinding, ElectricalTickParticipant {
-    public static final int MODULE_SCHEMA_VERSION = 2;
+    public static final int MODULE_SCHEMA_VERSION = 3;
     public static final ResourceLocation LOW_VOLTAGE = VoltageTierIds.LOW;
 
     private static final String SCHEMA_VERSION_TAG = "schema_version";
     private static final String TERMINAL_ID_TAG = "terminal_id";
     private static final String TIER_ID_TAG = "tier_id";
     private static final String ENERGY_TAG = "energy_joules";
+    private static final String STRESS_TAG = "thermal_stress";
+    private static final String FAULTED_TAG = "faulted";
 
     private final ElectricalNode node;
     private final ElectricalNodeKind nodeKind;
     private final ResourceLocation terminalId;
     private final Predicate<Direction> sideFilter;
+    private final ElectricalStressState stress = new ElectricalStressState();
     private ResourceLocation tierId;
     private boolean tierProfileBound;
+    private boolean faulted;
+    private IntrinsicDamageProfile intrinsicDamageProfile;
     private ElectricalProfileController profileController;
     private ElectricalTickParticipant tickParticipant;
 
@@ -116,6 +123,9 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         this.terminalId = Objects.requireNonNull(terminalId, "terminalId");
         this.nodeKind = Objects.requireNonNull(nodeKind, "nodeKind");
         this.sideFilter = Objects.requireNonNull(sideFilter, "sideFilter");
+        intrinsicDamageProfile = nodeKind == ElectricalNodeKind.CONDUCTOR
+                ? IntrinsicDamageProfile.CABLE
+                : IntrinsicDamageProfile.MACHINE;
     }
 
     public ElectricalNode node() {
@@ -137,6 +147,47 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
 
     public ElectricalNodeKind nodeKind() {
         return nodeKind;
+    }
+
+    /** Protection devices own a separate calibrated state machine for their internal edge. */
+    public void disableIntrinsicDamage() {
+        intrinsicDamageProfile = IntrinsicDamageProfile.NONE;
+        stress.reset();
+        faulted = false;
+    }
+
+    public void useOverheadDamageProfile() {
+        intrinsicDamageProfile = IntrinsicDamageProfile.OVERHEAD;
+    }
+
+    public double thermalStress() {
+        return stress.stress();
+    }
+
+    public boolean faulted() {
+        return faulted;
+    }
+
+    public boolean safeToRepair() {
+        if (!faulted) {
+            return true;
+        }
+        return ElectricalDataRegistry.INSTANCE.current()
+                .flatMap(snapshot -> snapshot.voltageTier(tierId))
+                .map(tier -> node.voltage() < tier.nominalVoltage() * 0.95D)
+                .orElse(false);
+    }
+
+    /** Called only after the host has atomically validated every terminal. */
+    public boolean repairFault() {
+        if (!faulted || !safeToRepair()) {
+            return false;
+        }
+        faulted = false;
+        stress.reset();
+        markStateChanged();
+        topologyChanged();
+        return true;
     }
 
     /** Attaches one device-level profile gate. Transformer controllers may attach to two terminals. */
@@ -168,6 +219,14 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         PhysicalNetworkManager manager = manager();
         if (manager != null) {
             manager.unregisterElectricalCoupler(coupler);
+        }
+    }
+
+    public void setInternalConnection(ElectricalNetworkModule other, boolean closed) {
+        Objects.requireNonNull(other, "other");
+        PhysicalNetworkManager manager = manager();
+        if (manager != null && manager == other.manager()) {
+            manager.setInternalConnection(nodeKey(), other.nodeKey(), closed);
         }
     }
 
@@ -299,7 +358,8 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
 
     @Override
     public boolean electricalProfileBound() {
-        return tierProfileBound
+        return !faulted
+                && tierProfileBound
                 && (profileController == null || profileController.electricalControllerBound());
     }
 
@@ -341,6 +401,7 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         if (tickParticipant != null) {
             tickParticipant.commitElectricalState(manager);
         }
+        updateElectricalDamage(manager);
     }
 
     @Override
@@ -348,6 +409,8 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         tierProfileBound = false;
         if (tag.getInt(SCHEMA_VERSION_TAG) != MODULE_SCHEMA_VERSION) {
             node.setEnergyJoules(0.0D);
+            stress.reset();
+            faulted = false;
             finishLoadedBinding();
             return;
         }
@@ -355,11 +418,15 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         ResourceLocation savedTier = ResourceLocation.tryParse(tag.getString(TIER_ID_TAG));
         if (!terminalId.equals(savedTerminal) || savedTier == null) {
             node.setEnergyJoules(0.0D);
+            stress.reset();
+            faulted = false;
             finishLoadedBinding();
             return;
         }
         tierId = savedTier;
         node.setEnergyJoules(tag.getDouble(ENERGY_TAG));
+        stress.restore(tag.getDouble(STRESS_TAG));
+        faulted = tag.getBoolean(FAULTED_TAG);
         finishLoadedBinding();
     }
 
@@ -369,6 +436,62 @@ public final class ElectricalNetworkModule extends AbstractPhysicalNetworkModule
         tag.putString(TERMINAL_ID_TAG, terminalId.toString());
         tag.putString(TIER_ID_TAG, tierId.toString());
         tag.putDouble(ENERGY_TAG, node.energyJoules());
+        tag.putDouble(STRESS_TAG, stress.stress());
+        tag.putBoolean(FAULTED_TAG, faulted);
+    }
+
+    private void updateElectricalDamage(PhysicalNetworkManager manager) {
+        if (intrinsicDamageProfile == IntrinsicDamageProfile.NONE || faulted || !tierProfileBound) {
+            return;
+        }
+        Optional<VoltageTier> tier = ElectricalDataRegistry.INSTANCE.current()
+                .flatMap(snapshot -> snapshot.voltageTier(tierId));
+        if (tier.isEmpty()) {
+            return;
+        }
+        VoltageTier value = tier.orElseThrow();
+        double controllerRating = profileController == null
+                ? 0.0D
+                : profileController.terminalRatedChargePerTick();
+        double ratedChargePerTick = controllerRating > 0.0D
+                ? controllerRating
+                : switch (intrinsicDamageProfile) {
+                    case CABLE -> value.cableRatedChargePerTick();
+                    case OVERHEAD -> value.overheadRatedChargePerTick();
+                    case MACHINE -> value.heavyProtectionChargePerTick();
+                    case NONE -> throw new IllegalStateException("Disabled damage profile reached accumulation");
+                };
+        double thermalCapacity = intrinsicDamageProfile == IntrinsicDamageProfile.OVERHEAD
+                ? value.overheadThermalCapacity()
+                : value.cableThermalCapacity();
+        double coolingPerTick = intrinsicDamageProfile == IntrinsicDamageProfile.OVERHEAD
+                ? value.overheadCoolingPerTick()
+                : value.cableCoolingPerTick();
+        double before = stress.stress();
+        boolean failedNow = stress.update(
+                manager.maximumTerminalCurrentAmps(nodeKey()),
+                ratedChargePerTick * ElectricalNode.TICKS_PER_SECOND,
+                node.voltage(),
+                value.maximumVoltage(),
+                thermalCapacity,
+                coolingPerTick,
+                MagneticraftConfig.ENABLE_ELECTRICAL_DAMAGE.get() && !manager.electricalDamageSuppressed()
+        );
+        if (stress.stress() != before) {
+            markStateChanged();
+        }
+        if (failedNow) {
+            faulted = true;
+            markStateChanged();
+            topologyChanged();
+        }
+    }
+
+    private enum IntrinsicDamageProfile {
+        NONE,
+        CABLE,
+        OVERHEAD,
+        MACHINE
     }
 
     private static ElectricalNode fallbackNode(ElectricalNodeKind nodeKind) {
