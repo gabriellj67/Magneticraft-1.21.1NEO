@@ -429,9 +429,10 @@ dependencies {
 - ModDevGradle's remapped dependency configurations are non-transitive. List
   every required mod module explicitly. Ordinary Java libraries required by an
   optional mod stay on `localRuntime`; they are not passed through mod remapping.
-- Each optional runtime is disabled by default and enabled by an explicit
-  Gradle property. Base compilation, tests and server/client startup must not
-  load or link optional-mod classes.
+- Each optional runtime is controlled by an explicit boolean Gradle property.
+  A tracked development default may enable integrations under active visual
+  testing, but the base-installation matrix must pass every property as false,
+  and published metadata/POMs must remain optional and dependency-free.
 
 ### 4. Validation and error matrix
 

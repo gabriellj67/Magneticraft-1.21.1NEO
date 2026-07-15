@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +21,7 @@ class OptionalIntegrationContractTest {
     private static final Path GENERATED = Path.of("src/generated/resources");
 
     @Test
-    void optionalVersionsAreFixedAndDevelopmentRuntimesAreOptIn() throws IOException {
+    void optionalVersionsAreFixedAndDevelopmentRuntimeFlagsAreExplicit() throws IOException {
         Map<String, String> properties = Files.readAllLines(Path.of("gradle.properties")).stream()
                 .filter(line -> !line.isBlank() && !line.startsWith("#") && line.contains("="))
                 .map(line -> line.split("=", 2))
@@ -32,10 +33,14 @@ class OptionalIntegrationContractTest {
         assertEquals("3.11.2.166", properties.get("tconstruct_version"));
         assertEquals("11.13.1+forge", properties.get("jade_version"));
         assertEquals("[11.13.1,12)", properties.get("jade_version_range"));
-        assertEquals("false", properties.get("enable_jei_runtime"));
-        assertEquals("false", properties.get("enable_crafttweaker_runtime"));
-        assertEquals("false", properties.get("enable_tconstruct_runtime"));
-        assertEquals("false", properties.get("enable_jade_runtime"));
+        for (String flag : List.of(
+                "enable_jei_runtime",
+                "enable_crafttweaker_runtime",
+                "enable_tconstruct_runtime",
+                "enable_jade_runtime"
+        )) {
+            assertTrue(Set.of("true", "false").contains(properties.get(flag)), flag);
+        }
         assertFalse(properties.entrySet().stream()
                 .filter(entry -> entry.getKey().endsWith("_version"))
                 .map(Map.Entry::getValue)
