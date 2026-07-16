@@ -72,6 +72,18 @@ class GeneratedTextureAssetContractTest {
         assertBlockTextures("circuit_breaker", Set.of("magneticraft:block/electrical_breaker_housing"));
         assertBlockTextures("burnt_electric_cable", Set.of("magneticraft:block/burnt_electric_cable"));
         assertItemTextures("electrical_fuse", Set.of("magneticraft:item/electrical_fuse"));
+        assertItemTextures(
+                "electrical_fuse_heavy_low_voltage",
+                Set.of("magneticraft:item/electrical_fuse_heavy_low_voltage")
+        );
+        assertItemTextures(
+                "electrical_fuse_heavy_medium_voltage",
+                Set.of("magneticraft:item/electrical_fuse_heavy_medium_voltage")
+        );
+        assertItemTextures(
+                "electrical_fuse_heavy_high_voltage",
+                Set.of("magneticraft:item/electrical_fuse_heavy_high_voltage")
+        );
         assertItemTextures("electrical_repair_tool", Set.of("magneticraft:item/electrical_repair_tool"));
     }
 
@@ -83,6 +95,9 @@ class GeneratedTextureAssetContractTest {
         assertTexture("block/burnt_electric_cable", false);
         assertTexture("block/electrical_indicator", false);
         assertTexture("item/electrical_fuse", true);
+        assertTexture("item/electrical_fuse_heavy_low_voltage", true);
+        assertTexture("item/electrical_fuse_heavy_medium_voltage", true);
+        assertTexture("item/electrical_fuse_heavy_high_voltage", true);
         assertTexture("item/electrical_repair_tool", true);
     }
 

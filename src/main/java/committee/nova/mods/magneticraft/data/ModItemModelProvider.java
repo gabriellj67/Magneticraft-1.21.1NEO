@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.data;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.computer.FloppyDiskVisualVariant;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
+import committee.nova.mods.magneticraft.content.item.ElectricalFuseVisualVariant;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModItems;
@@ -37,8 +38,7 @@ final class ModItemModelProvider extends ItemModelProvider {
                 .filter(item -> item != ModNetworkItems.FUSE.get()
                         && item != ModNetworkItems.ELECTRICAL_REPAIR_TOOL.get())
                 .forEach(this::basicItem);
-        withExistingParent("electrical_fuse", mcLoc("item/generated"))
-                .texture("layer0", modLoc("item/electrical_fuse"));
+        registerElectricalFuseModels();
         withExistingParent("electrical_repair_tool", mcLoc("item/handheld"))
                 .texture("layer0", modLoc("item/electrical_repair_tool"));
         registerFloppyDiskModels();
@@ -69,6 +69,21 @@ final class ModItemModelProvider extends ItemModelProvider {
             ).texture("layer0", modLoc("item/floppy_disk_" + variant.textureIndex()));
             root.override()
                     .predicate(Magneticraft.id("floppy_variant"), variant.textureIndex())
+                    .model(variantModel)
+                    .end();
+        }
+    }
+
+    private void registerElectricalFuseModels() {
+        String itemId = ModNetworkItems.FUSE.getId().getPath();
+        ItemModelBuilder root = withExistingParent(itemId, mcLoc("item/generated"))
+                .texture("layer0", modLoc("item/" + itemId));
+        for (ElectricalFuseVisualVariant variant : ElectricalFuseVisualVariant.values()) {
+            String variantId = itemId + "_" + variant.modelSuffix();
+            ItemModelBuilder variantModel = withExistingParent(variantId, mcLoc("item/generated"))
+                    .texture("layer0", modLoc("item/" + variantId));
+            root.override()
+                    .predicate(Magneticraft.id("fuse_variant"), variant.predicateValue())
                     .model(variantModel)
                     .end();
         }

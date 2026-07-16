@@ -5,9 +5,11 @@ import committee.nova.mods.magneticraft.client.guide.GuideRepository;
 import committee.nova.mods.magneticraft.client.model.LegacyModelLoader;
 import committee.nova.mods.magneticraft.client.model.ModelRenderManifestRegistry;
 import committee.nova.mods.magneticraft.content.computer.FloppyDiskItem;
+import committee.nova.mods.magneticraft.content.item.ElectricalFuseVisualVariant;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
+import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -43,6 +45,13 @@ public final class ClientSetup {
                     ModComputerContent.FLOPPY_DISK.get(),
                     Magneticraft.id("floppy_variant"),
                     (stack, level, entity, seed) -> FloppyDiskItem.visualVariant(stack).textureIndex()
+            );
+            ItemProperties.register(
+                    ModNetworkItems.FUSE.get(),
+                    Magneticraft.id("fuse_variant"),
+                    (stack, level, entity, seed) -> ElectricalFuseVisualVariant.from(stack)
+                            .map(ElectricalFuseVisualVariant::predicateValue)
+                            .orElse(0)
             );
             BlockEntityRenderers.register(ModBlockEntities.CRUSHING_TABLE.get(), CrushingTableRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.CONVEYOR_BELT.get(), ConveyorBeltRenderer::new);
