@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "count": 1,
+  "ingredient": {
+    "item": "magneticraft:limestone_cobblestone"
+  },
+  "result": "magneticraft:limestone_cobblestone_stairs"
+}

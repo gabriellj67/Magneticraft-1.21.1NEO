@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "magneticraft:block/limestone",
+    "side": "magneticraft:block/limestone",
+    "top": "magneticraft:block/limestone"
+  }
+}

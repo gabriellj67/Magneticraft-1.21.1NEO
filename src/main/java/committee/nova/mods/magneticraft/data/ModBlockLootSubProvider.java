@@ -35,7 +35,15 @@ final class ModBlockLootSubProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        ModBlocks.all().values().stream().map(RegistryObject::get).forEach(this::dropSelf);
+        Set<Block> decorativeSlabs = ModBlocks.decorativeFamilies().values().stream()
+                .map(family -> (Block) family.slab().get())
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        ModBlocks.blockItems().stream()
+                .map(RegistryObject::get)
+                .map(Block::byItem)
+                .filter(block -> !decorativeSlabs.contains(block))
+                .forEach(this::dropSelf);
+        decorativeSlabs.forEach(slab -> add(slab, createSlabItemTable(slab)));
         ModMachineBlocks.blockItems().forEach(item -> dropSelf(Block.byItem(item.get())));
         Set<Block> structureBlocks = Set.of(
                 ModNetworkBlocks.ELECTRIC_POLE.get(),
@@ -76,7 +84,7 @@ final class ModBlockLootSubProvider extends BlockLootSubProvider {
     @Override
     protected Iterable<Block> getKnownBlocks() {
         return Stream.of(
-                ModBlocks.all().values().stream().map(RegistryObject::get),
+                ModBlocks.blockItems().stream().map(RegistryObject::get).map(Block::byItem),
                 ModMachineBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
                 ModNetworkBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
                 ModAdvancedBlocks.blockItems().stream()

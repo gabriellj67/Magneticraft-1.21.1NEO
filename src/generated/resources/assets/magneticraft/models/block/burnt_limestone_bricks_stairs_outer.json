@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "magneticraft:block/burnt_limestone_bricks",
+    "side": "magneticraft:block/burnt_limestone_bricks",
+    "top": "magneticraft:block/burnt_limestone_bricks"
+  }
+}

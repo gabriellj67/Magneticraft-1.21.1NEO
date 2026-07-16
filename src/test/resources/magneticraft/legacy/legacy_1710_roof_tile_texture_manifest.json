@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "source_repository": "ipl-adm/magneticraft-legacy-1.7.10",
+  "source_ref": "master",
+  "release_file": "magneticraft-0.6.0-final",
+  "artifacts": [
+    {
+      "source": "textures/blocks/roofTile_0.png",
+      "runtime": "textures/block/roof_tile_0.png",
+      "sha256": "309b94de29286f80be207798dedad1c90a85b1069032f73b68d078ee2dae96e7"
+    },
+    {
+      "source": "textures/blocks/roofTile_1.png",
+      "runtime": "textures/block/roof_tile_1.png",
+      "sha256": "1d9898140118e2c427080c7f64e59d4aa7358874c75d95a7c2307743240d2987"
+    },
+    {
+      "source": "textures/blocks/roofTile_2.png",
+      "runtime": "textures/block/roof_tile_2.png",
+      "sha256": "7306bedfe27846dd23de27c0784f563c59d35295916ad67e07938459fa962960"
+    },
+    {
+      "source": "textures/blocks/roofTile_3.png",
+      "runtime": "textures/block/roof_tile_3.png",
+      "sha256": "cb76965b14a2643ddd8216f47d03a5ee5b9409fcf6c563ccf339b2a1c33b77db"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.gametest;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
@@ -37,6 +38,8 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -51,6 +54,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -368,6 +372,63 @@ public final class BaseContentGameTests {
                         .anyMatch(item -> Objects.equals(ForgeRegistries.ITEMS.getKey(item), tubeLight)),
                 "tube_light was incorrectly filtered as internal content"
         );
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void decorativeFamiliesUseStableIdsShapesAndMiningTags(GameTestHelper helper) {
+        helper.assertTrue(ModBlocks.decorativeFamilies().size() == 9, "decorative family count changed");
+        Set<Item> decorativeItems = new HashSet<>();
+        for (DecorativeBlockFamily family : DecorativeBlockFamily.values()) {
+            ModBlocks.DecorativeFamilyBlocks blocks = ModBlocks.decorativeFamily(family);
+            assertBlockItemId(helper, family.stairsId(), blocks.stairs());
+            assertBlockItemId(helper, family.slabId(), blocks.slab());
+            helper.assertTrue(blocks.stairs().get() instanceof StairBlock,
+                    family.stairsId() + " is not a stair block");
+            helper.assertTrue(blocks.slab().get() instanceof SlabBlock,
+                    family.slabId() + " is not a slab block");
+            helper.assertTrue(blocks.stairs().get().defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE),
+                    family.stairsId() + " is missing the pickaxe mining tag");
+            helper.assertTrue(blocks.slab().get().defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE),
+                    family.slabId() + " is missing the pickaxe mining tag");
+            helper.assertTrue(decorativeItems.add(blocks.stairs().get().asItem()),
+                    family.stairsId() + " appeared twice in the decorative catalogue");
+            helper.assertTrue(decorativeItems.add(blocks.slab().get().asItem()),
+                    family.slabId() + " appeared twice in the decorative catalogue");
+            if (family.registersBase()) {
+                assertBlockItemId(helper, family.baseId(), blocks.base());
+                helper.assertTrue(blocks.base().get().defaultBlockState().is(BlockTags.MINEABLE_WITH_PICKAXE),
+                        family.baseId() + " is missing the pickaxe mining tag");
+                helper.assertTrue(decorativeItems.add(blocks.base().get().asItem()),
+                        family.baseId() + " appeared twice in the decorative catalogue");
+            } else {
+                helper.assertTrue(blocks.base() == ModBlocks.get(Objects.requireNonNull(family.existingBase())),
+                        family.baseId() + " did not reuse its existing base block");
+            }
+        }
+        long creativeOccurrences = ModBlocks.blockItems().stream()
+                .map(RegistryObject::get)
+                .filter(decorativeItems::contains)
+                .count();
+        helper.assertTrue(decorativeItems.size() == 19, "decorative creative projection is incomplete");
+        helper.assertTrue(creativeOccurrences == decorativeItems.size(),
+                "a decorative item appears more than once in the creative projection");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void decorativeRecipesUsePlannedYields(GameTestHelper helper) {
+        for (DecorativeBlockFamily family : DecorativeBlockFamily.values()) {
+            ModBlocks.DecorativeFamilyBlocks blocks = ModBlocks.decorativeFamily(family);
+            assertRecipeResult(helper, "crafting/" + family.stairsId(), blocks.stairs().get().asItem(), 4);
+            assertRecipeResult(helper, "crafting/" + family.slabId(), blocks.slab().get().asItem(), 6);
+            assertRecipeResult(helper, "stonecutting/" + family.stairsId(), blocks.stairs().get().asItem(), 1);
+            assertRecipeResult(helper, "stonecutting/" + family.slabId(), blocks.slab().get().asItem(), 2);
+        }
+        ModBlocks.DecorativeFamilyBlocks roof = ModBlocks.decorativeFamily(
+                DecorativeBlockFamily.TERRACOTTA_ROOF_TILE
+        );
+        assertRecipeResult(helper, "crafting/roof_tile", roof.base().get().asItem(), 2);
         helper.succeed();
     }
 

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "magneticraft:block/limestone_cobblestone",
+    "side": "magneticraft:block/limestone_cobblestone",
+    "top": "magneticraft:block/limestone_cobblestone"
+  }
+}

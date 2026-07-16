@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.client.model.ModelSceneSelection;
 import committee.nova.mods.magneticraft.client.model.ModelTransform;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlock;
@@ -27,6 +28,11 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
@@ -44,6 +50,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             ResourceLocation.fromNamespaceAndPath("minecraft", "cutout");
     private static final ResourceLocation UNMOUNTED_MULTIBLOCK_TEXTURE =
             Magneticraft.id("blocks/multiblocks/unmounted_multiblock");
+    private static final int ROOF_TILE_VARIANTS = 4;
     private final ExistingFileHelper existingFileHelper;
 
     ModBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
@@ -57,6 +64,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             Block block = ModBlocks.get(definition).get();
             simpleBlockWithItem(block, cubeAll(block));
         }
+        registerDecorativeFamilies();
 
         Block crushingTable = ModMachineBlocks.CRUSHING_TABLE.get();
         ModelFile crushingModel = mcxModel(
@@ -850,6 +858,118 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private ModelFile advancedGltfModel(String generatedName, String sourceName, ResourceLocation particle) {
         return gltfModel(generatedName, sourceName, particle, ModelSceneSelection.ALL);
+    }
+
+    private void registerDecorativeFamilies() {
+        ModBlocks.decorativeFamilies().forEach((family, blocks) -> {
+            if (family.weightedTextures()) {
+                registerWeightedRoofTileFamily(family, blocks);
+            } else {
+                registerStoneDecorationFamily(family, blocks);
+            }
+        });
+    }
+
+    private void registerStoneDecorationFamily(
+            DecorativeBlockFamily family,
+            ModBlocks.DecorativeFamilyBlocks blocks
+    ) {
+        ResourceLocation texture = modLoc("block/" + family.baseId());
+        String stairsName = family.stairsId();
+        ModelFile stairs = models().stairs(stairsName, texture, texture, texture);
+        ModelFile stairsInner = models().stairsInner(stairsName + "_inner", texture, texture, texture);
+        ModelFile stairsOuter = models().stairsOuter(stairsName + "_outer", texture, texture, texture);
+        stairsBlock(blocks.stairs().get(), stairs, stairsInner, stairsOuter);
+        simpleBlockItem(blocks.stairs().get(), stairs);
+
+        String slabName = family.slabId();
+        ModelFile slab = models().slab(slabName, texture, texture, texture);
+        ModelFile slabTop = models().slabTop(slabName + "_top", texture, texture, texture);
+        ModelFile doubleSlab = models().getExistingFile(modLoc("block/" + family.baseId()));
+        slabBlock(blocks.slab().get(), slab, slabTop, doubleSlab);
+        simpleBlockItem(blocks.slab().get(), slab);
+    }
+
+    private void registerWeightedRoofTileFamily(
+            DecorativeBlockFamily family,
+            ModBlocks.DecorativeFamilyBlocks blocks
+    ) {
+        ModelFile[] cubes = new ModelFile[ROOF_TILE_VARIANTS];
+        ModelFile[] stairs = new ModelFile[ROOF_TILE_VARIANTS];
+        ModelFile[] stairsInner = new ModelFile[ROOF_TILE_VARIANTS];
+        ModelFile[] stairsOuter = new ModelFile[ROOF_TILE_VARIANTS];
+        ModelFile[] slabs = new ModelFile[ROOF_TILE_VARIANTS];
+        ModelFile[] slabTops = new ModelFile[ROOF_TILE_VARIANTS];
+        for (int variant = 0; variant < ROOF_TILE_VARIANTS; variant++) {
+            ResourceLocation texture = modLoc("block/roof_tile_" + variant);
+            cubes[variant] = models().cubeAll(family.baseId() + "_" + variant, texture);
+            stairs[variant] = models().stairs(family.stairsId() + "_" + variant, texture, texture, texture);
+            stairsInner[variant] = models().stairsInner(
+                    family.stairsId() + "_inner_" + variant, texture, texture, texture
+            );
+            stairsOuter[variant] = models().stairsOuter(
+                    family.stairsId() + "_outer_" + variant, texture, texture, texture
+            );
+            slabs[variant] = models().slab(family.slabId() + "_" + variant, texture, texture, texture);
+            slabTops[variant] = models().slabTop(
+                    family.slabId() + "_top_" + variant, texture, texture, texture
+            );
+        }
+
+        simpleBlock(blocks.base().get(), weightedModels(cubes, 0, 0, false));
+        simpleBlockItem(blocks.base().get(), cubes[0]);
+        weightedStairsBlock(blocks.stairs().get(), stairs, stairsInner, stairsOuter);
+        simpleBlockItem(blocks.stairs().get(), stairs[0]);
+        getVariantBuilder(blocks.slab().get())
+                .partialState().with(SlabBlock.TYPE, SlabType.BOTTOM)
+                .addModels(weightedModels(slabs, 0, 0, false))
+                .partialState().with(SlabBlock.TYPE, SlabType.TOP)
+                .addModels(weightedModels(slabTops, 0, 0, false))
+                .partialState().with(SlabBlock.TYPE, SlabType.DOUBLE)
+                .addModels(weightedModels(cubes, 0, 0, false));
+        simpleBlockItem(blocks.slab().get(), slabs[0]);
+    }
+
+    private void weightedStairsBlock(
+            StairBlock block,
+            ModelFile[] stairs,
+            ModelFile[] stairsInner,
+            ModelFile[] stairsOuter
+    ) {
+        getVariantBuilder(block).forAllStatesExcept(state -> {
+            Direction facing = state.getValue(StairBlock.FACING);
+            Half half = state.getValue(StairBlock.HALF);
+            StairsShape shape = state.getValue(StairBlock.SHAPE);
+            int rotationY = (int) facing.getClockWise().toYRot();
+            if (shape == StairsShape.INNER_LEFT || shape == StairsShape.OUTER_LEFT) {
+                rotationY += 270;
+            }
+            if (shape != StairsShape.STRAIGHT && half == Half.TOP) {
+                rotationY += 90;
+            }
+            rotationY %= 360;
+            ModelFile[] selected = shape == StairsShape.STRAIGHT
+                    ? stairs
+                    : shape == StairsShape.INNER_LEFT || shape == StairsShape.INNER_RIGHT
+                    ? stairsInner
+                    : stairsOuter;
+            return weightedModels(selected, half == Half.BOTTOM ? 0 : 180, rotationY,
+                    rotationY != 0 || half == Half.TOP);
+        }, StairBlock.WATERLOGGED);
+    }
+
+    /** The four released roof textures were orientation-selected evenly; weighted variants preserve that distribution. */
+    private static ConfiguredModel[] weightedModels(
+            ModelFile[] models,
+            int rotationX,
+            int rotationY,
+            boolean uvLock
+    ) {
+        ConfiguredModel[] configured = new ConfiguredModel[models.length];
+        for (int index = 0; index < models.length; index++) {
+            configured[index] = new ConfiguredModel(models[index], rotationX, rotationY, uvLock, 1);
+        }
+        return configured;
     }
 
     private void registerLongDistanceElectricModels() {

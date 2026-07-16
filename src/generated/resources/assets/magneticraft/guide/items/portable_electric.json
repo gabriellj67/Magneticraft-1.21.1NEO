@@ -368,6 +368,177 @@
       "id": "magneticraft:oil_deposit",
       "translation_key": "block.magneticraft.oil_deposit",
       "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_stairs.description",
+      "id": "magneticraft:limestone_stairs",
+      "translation_key": "block.magneticraft.limestone_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_slab.description",
+      "id": "magneticraft:limestone_slab",
+      "translation_key": "block.magneticraft.limestone_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_bricks_stairs.description",
+      "id": "magneticraft:limestone_bricks_stairs",
+      "translation_key": "block.magneticraft.limestone_bricks_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_bricks_slab.description",
+      "id": "magneticraft:limestone_bricks_slab",
+      "translation_key": "block.magneticraft.limestone_bricks_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_cobblestone_stairs.description",
+      "id": "magneticraft:limestone_cobblestone_stairs",
+      "translation_key": "block.magneticraft.limestone_cobblestone_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_cobblestone_slab.description",
+      "id": "magneticraft:limestone_cobblestone_slab",
+      "translation_key": "block.magneticraft.limestone_cobblestone_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_stairs.description",
+      "id": "magneticraft:burnt_limestone_stairs",
+      "translation_key": "block.magneticraft.burnt_limestone_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_slab.description",
+      "id": "magneticraft:burnt_limestone_slab",
+      "translation_key": "block.magneticraft.burnt_limestone_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_bricks_stairs.description",
+      "id": "magneticraft:burnt_limestone_bricks_stairs",
+      "translation_key": "block.magneticraft.burnt_limestone_bricks_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_bricks_slab.description",
+      "id": "magneticraft:burnt_limestone_bricks_slab",
+      "translation_key": "block.magneticraft.burnt_limestone_bricks_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_cobblestone_stairs.description",
+      "id": "magneticraft:burnt_limestone_cobblestone_stairs",
+      "translation_key": "block.magneticraft.burnt_limestone_cobblestone_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_cobblestone_slab.description",
+      "id": "magneticraft:burnt_limestone_cobblestone_slab",
+      "translation_key": "block.magneticraft.burnt_limestone_cobblestone_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_tiles_stairs.description",
+      "id": "magneticraft:limestone_tiles_stairs",
+      "translation_key": "block.magneticraft.limestone_tiles_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_tiles_slab.description",
+      "id": "magneticraft:limestone_tiles_slab",
+      "translation_key": "block.magneticraft.limestone_tiles_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.inverted_limestone_tiles_stairs.description",
+      "id": "magneticraft:inverted_limestone_tiles_stairs",
+      "translation_key": "block.magneticraft.inverted_limestone_tiles_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.inverted_limestone_tiles_slab.description",
+      "id": "magneticraft:inverted_limestone_tiles_slab",
+      "translation_key": "block.magneticraft.inverted_limestone_tiles_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.roof_tile.description",
+      "id": "magneticraft:roof_tile",
+      "translation_key": "block.magneticraft.roof_tile",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.roof_tile_stairs.description",
+      "id": "magneticraft:roof_tile_stairs",
+      "translation_key": "block.magneticraft.roof_tile_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.roof_tile_slab.description",
+      "id": "magneticraft:roof_tile_slab",
+      "translation_key": "block.magneticraft.roof_tile_slab",
+      "use_cost_fe": 0
     }
   ],
   "schema_version": 1

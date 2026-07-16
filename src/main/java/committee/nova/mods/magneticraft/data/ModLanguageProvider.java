@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.data;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.config.MagneticraftConfig;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
@@ -351,6 +352,37 @@ final class ModLanguageProvider extends LanguageProvider {
             add(
                     ModBlocks.get(definition).get(),
                     chinese ? definition.chineseName() : definition.englishName()
+            );
+        }
+        for (DecorativeBlockFamily family : DecorativeBlockFamily.values()) {
+            ModBlocks.DecorativeFamilyBlocks blocks = ModBlocks.decorativeFamily(family);
+            if (family.registersBase()) {
+                add(blocks.base().get(), chinese ? family.chineseName() : family.englishName());
+                addGuideItemDescription(
+                        family.baseId(),
+                        "由砖制成的装饰屋瓦；放置时等权使用四种旧版纹理。",
+                        "Decorative roof tiles made from bricks, using four equally weighted legacy textures."
+                );
+            }
+            add(
+                    blocks.stairs().get(),
+                    chinese ? family.chineseName() + "楼梯" : family.englishName() + " Stairs"
+            );
+            add(
+                    blocks.slab().get(),
+                    chinese ? family.chineseName() + "台阶" : family.englishName() + " Slab"
+            );
+            addGuideItemDescription(
+                    family.stairsId(),
+                    family.chineseName() + "的楼梯形态；可用六个基块制作四个，也可通过切石机加工。",
+                    "The stair form of " + family.englishName()
+                            + "; craft four from six base blocks or use a stonecutter."
+            );
+            addGuideItemDescription(
+                    family.slabId(),
+                    family.chineseName() + "的半高台阶；可用三个基块制作六个，也可通过切石机加工。",
+                    "The half-height slab form of " + family.englishName()
+                            + "; craft six from three base blocks or use a stonecutter."
             );
         }
         for (FluidDefinition definition : FluidDefinition.values()) {

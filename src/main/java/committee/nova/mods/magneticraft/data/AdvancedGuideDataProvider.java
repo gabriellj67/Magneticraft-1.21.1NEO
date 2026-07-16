@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.content.computer.MiningRobotBlockEntity;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
@@ -274,6 +275,13 @@ final class AdvancedGuideDataProvider implements DataProvider {
         items.add(electricEquipmentItem("mining_robot", true));
         items.add(electricEquipmentItem("floppy_disk", false));
         items.add(electricEquipmentItem("oil_deposit", true));
+        for (DecorativeBlockFamily family : DecorativeBlockFamily.values()) {
+            if (family.registersBase()) {
+                items.add(electricEquipmentItem(family.baseId(), true));
+            }
+            items.add(electricEquipmentItem(family.stairsId(), true));
+            items.add(electricEquipmentItem(family.slabId(), true));
+        }
         root.add("items", items);
         return root;
     }

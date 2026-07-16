@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.data;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
@@ -41,6 +42,13 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 case IRON -> tag(BlockTags.NEEDS_IRON_TOOL).add(block);
                 case NONE -> {
                 }
+            }
+        }
+        for (DecorativeBlockFamily family : DecorativeBlockFamily.values()) {
+            ModBlocks.DecorativeFamilyBlocks blocks = ModBlocks.decorativeFamily(family);
+            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(blocks.stairs().get(), blocks.slab().get());
+            if (family.registersBase()) {
+                tag(BlockTags.MINEABLE_WITH_PICKAXE).add(blocks.base().get());
             }
         }
         tag(BlockTags.MINEABLE_WITH_AXE).add(ModMachineBlocks.CRUSHING_TABLE.get());

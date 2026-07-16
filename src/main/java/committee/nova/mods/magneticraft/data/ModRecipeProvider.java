@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.content.computer.FloppyDiskItem;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
@@ -44,6 +45,7 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
@@ -1908,6 +1910,52 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('B', block(BaseBlockDefinition.BURNT_LIMESTONE))
                 .unlockedBy("has_burnt_limestone", has(block(BaseBlockDefinition.BURNT_LIMESTONE)))
                 .save(consumer, id("crafting/inverted_limestone_tiles"));
+
+        ModBlocks.DecorativeFamilyBlocks roof = ModBlocks.decorativeFamily(
+                DecorativeBlockFamily.TERRACOTTA_ROOF_TILE
+        );
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, roof.base().get(), 2)
+                .pattern("B B")
+                .pattern(" B ")
+                .pattern("B B")
+                .define('B', Items.BRICK)
+                .unlockedBy("has_brick", has(Items.BRICK))
+                .save(consumer, id("crafting/roof_tile"));
+
+        for (DecorativeBlockFamily family : DecorativeBlockFamily.values()) {
+            ModBlocks.DecorativeFamilyBlocks blocks = ModBlocks.decorativeFamily(family);
+            Block base = blocks.base().get();
+            String unlock = "has_" + family.baseId();
+
+            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, blocks.slab().get(), 6)
+                    .pattern("BBB")
+                    .define('B', base)
+                    .unlockedBy(unlock, has(base))
+                    .save(consumer, id("crafting/" + family.slabId()));
+            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, blocks.stairs().get(), 4)
+                    .pattern("B  ")
+                    .pattern("BB ")
+                    .pattern("BBB")
+                    .define('B', base)
+                    .unlockedBy(unlock, has(base))
+                    .save(consumer, id("crafting/" + family.stairsId()));
+
+            SingleItemRecipeBuilder.stonecutting(
+                            Ingredient.of(base),
+                            RecipeCategory.BUILDING_BLOCKS,
+                            blocks.slab().get(),
+                            2
+                    )
+                    .unlockedBy(unlock, has(base))
+                    .save(consumer, id("stonecutting/" + family.slabId()));
+            SingleItemRecipeBuilder.stonecutting(
+                            Ingredient.of(base),
+                            RecipeCategory.BUILDING_BLOCKS,
+                            blocks.stairs().get()
+                    )
+                    .unlockedBy(unlock, has(base))
+                    .save(consumer, id("stonecutting/" + family.stairsId()));
+        }
     }
 
     private void addComponentRecipes(Consumer<FinishedRecipe> consumer) {

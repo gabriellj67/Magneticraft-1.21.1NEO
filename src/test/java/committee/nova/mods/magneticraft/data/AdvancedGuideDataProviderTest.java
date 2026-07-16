@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.content.computer.MiningRobotBlockEntity;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptRuntime;
 import committee.nova.mods.magneticraft.content.computer.runtime.VirtualDisk;
@@ -261,8 +262,8 @@ class AdvancedGuideDataProviderTest {
     void portableItemGuideCapturesTheRestoredEnergyContracts() {
         JsonArray items = AdvancedGuideDataProvider.portableItemGuide().getAsJsonArray("items");
 
-        assertEquals(41, items.size());
-        assertEquals(41, items.asList().stream()
+        assertEquals(60, items.size());
+        assertEquals(60, items.asList().stream()
                 .map(element -> element.getAsJsonObject().get("id").getAsString())
                 .distinct()
                 .count());
@@ -317,6 +318,20 @@ class AdvancedGuideDataProviderTest {
             assertEquals("guide.magneticraft.item." + id + ".description",
                     equipment.get("description").getAsString());
         }
+        for (DecorativeBlockFamily family : DecorativeBlockFamily.values()) {
+            if (family.registersBase()) {
+                assertGuideItem(items, family.baseId());
+            }
+            assertGuideItem(items, family.stairsId());
+            assertGuideItem(items, family.slabId());
+        }
+    }
+
+    private static void assertGuideItem(JsonArray items, String id) {
+        JsonObject entry = item(items, "magneticraft:" + id);
+        assertEquals("block.magneticraft." + id, entry.get("translation_key").getAsString());
+        assertEquals("guide.magneticraft.item." + id + ".description",
+                entry.get("description").getAsString());
     }
 
     @Test

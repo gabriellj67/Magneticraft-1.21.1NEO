@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "magneticraft:block/roof_tile_0",
+    "side": "magneticraft:block/roof_tile_0",
+    "top": "magneticraft:block/roof_tile_0"
+  }
+}

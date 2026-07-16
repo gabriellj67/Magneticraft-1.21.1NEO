@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "count": 2,
+  "ingredient": {
+    "item": "magneticraft:limestone_tiles"
+  },
+  "result": "magneticraft:limestone_tiles_slab"
+}
