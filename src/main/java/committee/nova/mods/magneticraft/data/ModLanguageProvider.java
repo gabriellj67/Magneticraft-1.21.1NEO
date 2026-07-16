@@ -56,6 +56,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add("voltage_tier.magneticraft.medium_voltage", chinese ? "中压" : "Medium Voltage");
         add("voltage_tier.magneticraft.high_voltage", chinese ? "高压" : "High Voltage");
         add("item.magneticraft.tiered_name", "[%1$s] %2$s");
+        add("item.magneticraft.tiered_rated_name", "[%1$s · %2$s] %3$s");
+        add("electrical_rating.magneticraft.standard", chinese ? "标准" : "Standard");
+        add("electrical_rating.magneticraft.heavy", chinese ? "重载" : "Heavy");
         add(ModCreativeTabs.TRANSLATION_KEY, chinese ? "磁场工艺" : "Magneticraft");
         add(ModMachineBlocks.CRUSHING_TABLE.get(), chinese ? "压碎台" : "Crushing Table");
         add(ModMachineBlocks.BATTERY.get(), chinese ? "电池箱" : "Battery Box");

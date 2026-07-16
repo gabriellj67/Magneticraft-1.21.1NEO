@@ -401,6 +401,10 @@ class GeneratedDataContractTest {
         assertTrue(wrenchTag.getAsJsonArray("values").asList().stream()
                 .anyMatch(value -> value.getAsString().equals("magneticraft:wrench")));
         for (String key : Set.of(
+                "item.magneticraft.tiered_name",
+                "item.magneticraft.tiered_rated_name",
+                "electrical_rating.magneticraft.standard",
+                "electrical_rating.magneticraft.heavy",
                 "message.magneticraft.connection_enabled",
                 "message.magneticraft.connection_disabled",
                 "message.magneticraft.redstone_mode",
