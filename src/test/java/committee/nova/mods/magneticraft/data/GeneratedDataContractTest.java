@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.OreBlockDefinition;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
@@ -248,8 +249,10 @@ class GeneratedDataContractTest {
         expectedCrafting.forEach(GeneratedDataContractTest::assertFile);
 
         Set<Path> expectedSmelting = new HashSet<>();
-        for (String ore : Set.of("galena_ore", "cobalt_ore", "tungsten_ore")) {
-            expectedSmelting.add(recipe("smelting/" + ore));
+        for (OreBlockDefinition ore : OreBlockDefinition.values()) {
+            if (ore.processedMetal() != null) {
+                expectedSmelting.add(recipe("smelting/" + ore.block().id()));
+            }
         }
         for (Metal metal : Metal.values()) {
             if (MaterialForm.DUST.appliesTo(metal)) {
@@ -266,7 +269,7 @@ class GeneratedDataContractTest {
         }
         expectedSmelting.add(recipe("smelting/limestone"));
         expectedSmelting.add(recipe("smelting/limestone_cobblestone"));
-        assertEquals(47, expectedSmelting.size());
+        assertEquals(52, expectedSmelting.size());
         expectedSmelting.forEach(GeneratedDataContractTest::assertFile);
 
         JsonObject galena = readObject(recipe("smelting/galena_rocky_chunk"));
@@ -627,6 +630,27 @@ class GeneratedDataContractTest {
         assertRecipeDirectory("fluid_fuel", 10, "magneticraft:industrial_combustion_chamber");
         JsonObject sand = readObject(recipe("sluice_box/sand"));
         assertEquals(9, sand.getAsJsonArray("results").size());
+        assertChanceResult(
+                readObject(recipe("sluice_box/galena_rocky_chunk")),
+                "magneticraft:silver_dust",
+                0.025F
+        );
+        assertChanceResult(
+                readObject(recipe("sluice_box/iron_rocky_chunk")),
+                "magneticraft:nickel_dust",
+                0.025F
+        );
+        JsonObject nickelSluice = readObject(recipe("sluice_box/nickel_rocky_chunk"));
+        assertFalse(hasResult(nickelSluice, "magneticraft:tin_dust"));
+        assertFalse(hasResult(nickelSluice, "magneticraft:osmium_dust"));
+        assertChanceResult(
+                readObject(recipe("advanced_processing/sieve_nickel_rocky_chunk")),
+                "magneticraft:osmium_dust",
+                0.25F
+        );
+        JsonObject cobaltSieve = readObject(recipe("advanced_processing/sieve_cobalt_rocky_chunk"));
+        assertChanceResult(cobaltSieve, "magneticraft:mithril_dust", 0.01F);
+        assertFalse(hasResult(cobaltSieve, "magneticraft:osmium_dust"));
         JsonObject log = readObject(recipe("gasification_unit/00_logs"));
         assertEquals("minecraft:charcoal", log.getAsJsonObject("item_result").get("item").getAsString());
         assertEquals(150, log.getAsJsonObject("fluid_result").get("amount").getAsInt());
@@ -635,6 +659,26 @@ class GeneratedDataContractTest {
         JsonObject diesel = readObject(recipe("fluid_fuel/diesel"));
         assertEquals(10_000, diesel.get("duration").getAsInt());
         assertEquals(80.0D, diesel.get("power").getAsDouble());
+    }
+
+    private static void assertChanceResult(JsonObject recipe, String item, float chance) {
+        JsonObject result = recipe.getAsJsonArray("results").asList().stream()
+                .map(JsonElement::getAsJsonObject)
+                .filter(candidate -> resultItem(candidate).equals(item))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing result " + item));
+        assertEquals(chance, result.get("chance").getAsFloat(), 0.0001F, item);
+    }
+
+    private static boolean hasResult(JsonObject recipe, String item) {
+        return recipe.getAsJsonArray("results").asList().stream()
+                .map(JsonElement::getAsJsonObject)
+                .anyMatch(candidate -> resultItem(candidate).equals(item));
+    }
+
+    private static String resultItem(JsonObject result) {
+        JsonObject stack = result.has("stack") ? result.getAsJsonObject("stack") : result;
+        return stack.get("item").getAsString();
     }
 
     @Test

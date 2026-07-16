@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.data;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.OreBlockDefinition;
 import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
@@ -92,10 +93,9 @@ final class ModItemTagsProvider extends ItemTagsProvider {
     }
 
     private void addOreAndStorageTags() {
-        addOre(BaseBlockDefinition.GALENA_ORE, "galena", "lead", "silver");
-        addOre(BaseBlockDefinition.COBALT_ORE, "cobalt");
-        addOre(BaseBlockDefinition.TUNGSTEN_ORE, "tungsten");
-        addOre(BaseBlockDefinition.PYRITE_ORE, "pyrite", "sulfur");
+        for (OreBlockDefinition ore : OreBlockDefinition.values()) {
+            addOre(ore.block(), ore.forgeMaterials());
+        }
         tag(ModTags.Items.ore("copper")).add(Blocks.COPPER_ORE.asItem(), Blocks.DEEPSLATE_COPPER_ORE.asItem());
 
         addStorage(BaseBlockDefinition.LEAD_BLOCK, "lead");
@@ -106,7 +106,7 @@ final class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.storageBlock("copper")).add(Blocks.COPPER_BLOCK.asItem());
     }
 
-    private void addOre(BaseBlockDefinition definition, String... materials) {
+    private void addOre(BaseBlockDefinition definition, Iterable<String> materials) {
         Item item = ModBlocks.get(definition).get().asItem();
         tag(Tags.Items.ORES).add(item);
         tag(Tags.Items.ORES_IN_GROUND_STONE).add(item);

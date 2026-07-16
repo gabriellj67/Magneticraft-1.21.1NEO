@@ -9,14 +9,6 @@
   "results": [
     {
       "item": "magneticraft:osmium_chunk"
-    },
-    {
-      "chance": 0.15,
-      "item": "magneticraft:mithril_dust"
-    },
-    {
-      "chance": 0.15,
-      "item": "magneticraft:nickel_dust"
     }
   ]
 }

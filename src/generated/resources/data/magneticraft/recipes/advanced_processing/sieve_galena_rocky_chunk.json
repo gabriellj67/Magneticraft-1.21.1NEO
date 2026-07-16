@@ -11,7 +11,8 @@
       "item": "magneticraft:lead_chunk"
     },
     {
-      "item": "magneticraft:silver_chunk"
+      "chance": 0.025,
+      "item": "magneticraft:silver_dust"
     }
   ]
 }

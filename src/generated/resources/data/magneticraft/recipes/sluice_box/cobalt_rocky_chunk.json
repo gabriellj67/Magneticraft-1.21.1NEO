@@ -10,15 +10,9 @@
       }
     },
     {
-      "chance": 0.15,
+      "chance": 0.01,
       "stack": {
         "item": "magneticraft:mithril_dust"
-      }
-    },
-    {
-      "chance": 0.15,
-      "stack": {
-        "item": "magneticraft:osmium_dust"
       }
     },
     {

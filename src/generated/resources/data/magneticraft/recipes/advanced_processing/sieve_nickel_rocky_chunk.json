@@ -11,12 +11,8 @@
       "item": "magneticraft:nickel_chunk"
     },
     {
-      "chance": 0.15,
-      "item": "magneticraft:iron_dust"
-    },
-    {
-      "chance": 0.15,
-      "item": "magneticraft:tin_dust"
+      "chance": 0.25,
+      "item": "magneticraft:osmium_dust"
     }
   ]
 }

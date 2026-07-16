@@ -2,6 +2,9 @@
   "values": [
     "magneticraft:galena_ore",
     "magneticraft:pyrite_ore",
+    "magneticraft:zinc_ore",
+    "magneticraft:bauxite_ore",
+    "magneticraft:tin_ore",
     "magneticraft:battery_box",
     "magneticraft:iron_grate",
     "magneticraft:electric_furnace",

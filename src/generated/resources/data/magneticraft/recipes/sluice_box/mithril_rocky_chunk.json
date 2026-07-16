@@ -12,18 +12,6 @@
     {
       "chance": 0.15,
       "stack": {
-        "item": "magneticraft:osmium_dust"
-      }
-    },
-    {
-      "chance": 0.15,
-      "stack": {
-        "item": "magneticraft:zinc_dust"
-      }
-    },
-    {
-      "chance": 0.15,
-      "stack": {
         "item": "minecraft:cobblestone"
       }
     }

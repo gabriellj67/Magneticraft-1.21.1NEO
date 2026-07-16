@@ -12,10 +12,6 @@
     },
     {
       "chance": 0.15,
-      "item": "magneticraft:nickel_dust"
-    },
-    {
-      "chance": 0.15,
       "item": "magneticraft:iron_dust"
     }
   ]

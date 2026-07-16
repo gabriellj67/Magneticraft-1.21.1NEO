@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.data;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.OreBlockDefinition;
 import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
@@ -138,10 +139,9 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 ModComputerContent.MINING_ROBOT.get()
         );
 
-        addOre(BaseBlockDefinition.GALENA_ORE, "galena", "lead", "silver");
-        addOre(BaseBlockDefinition.COBALT_ORE, "cobalt");
-        addOre(BaseBlockDefinition.TUNGSTEN_ORE, "tungsten");
-        addOre(BaseBlockDefinition.PYRITE_ORE, "pyrite", "sulfur");
+        for (OreBlockDefinition ore : OreBlockDefinition.values()) {
+            addOre(ore.block(), ore.forgeMaterials());
+        }
         tag(ModTags.Blocks.ore("copper")).add(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE);
 
         addStorage(BaseBlockDefinition.LEAD_BLOCK, "lead");
@@ -167,7 +167,7 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
         );
     }
 
-    private void addOre(BaseBlockDefinition definition, String... materials) {
+    private void addOre(BaseBlockDefinition definition, Iterable<String> materials) {
         Block block = ModBlocks.get(definition).get();
         tag(Tags.Blocks.ORES).add(block);
         tag(Tags.Blocks.ORES_IN_GROUND_STONE).add(block);

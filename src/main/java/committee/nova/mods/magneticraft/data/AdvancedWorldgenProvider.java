@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.content.block.OreBlockDefinition;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -10,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -19,13 +21,7 @@ final class AdvancedWorldgenProvider implements DataProvider {
     private static final String STONE_REPLACEABLES = "minecraft:stone_ore_replaceables";
     private static final String DEEPSLATE_REPLACEABLES = "minecraft:deepslate_ore_replaceables";
 
-    private static final List<DepositDefinition> DEPOSITS = List.of(
-            DepositDefinition.counted("galena_ore", "magneticraft:galena_ore", 8, 10, 2, 79),
-            DepositDefinition.counted("tungsten_ore", "magneticraft:tungsten_ore", 8, 8, 20, 59),
-            DepositDefinition.counted("pyrite_ore", "magneticraft:pyrite_ore", 9, 9, 30, 99),
-            DepositDefinition.gaussian("limestone", "magneticraft:limestone", 32, 3, 0.9D, 0, 5, 16, 63),
-            DepositDefinition.sector("oil_deposit", "magneticraft:oil_deposit")
-    );
+    private static final List<DepositDefinition> DEPOSITS = depositsWithOres();
 
     private final PackOutput.PathProvider configuredFeatures;
     private final PackOutput.PathProvider placedFeatures;
@@ -100,7 +96,12 @@ final class AdvancedWorldgenProvider implements DataProvider {
         }
 
         JsonObject frequency = new JsonObject();
-        frequency.addProperty("type", "minecraft:count");
+        if (deposit.frequencyType() == FrequencyType.RARITY) {
+            frequency.addProperty("type", "minecraft:rarity_filter");
+            frequency.addProperty("chance", deposit.frequency());
+        } else {
+            frequency.addProperty("type", "minecraft:count");
+        }
         if (deposit.frequencyType() == FrequencyType.CLAMPED_NORMAL) {
             JsonObject count = new JsonObject();
             count.addProperty("type", "minecraft:clamped_normal");
@@ -168,8 +169,18 @@ final class AdvancedWorldgenProvider implements DataProvider {
         return DataProvider.saveStable(output, json, path);
     }
 
+    private static List<DepositDefinition> depositsWithOres() {
+        List<DepositDefinition> deposits = new ArrayList<>();
+        Arrays.stream(OreBlockDefinition.values()).map(DepositDefinition::ore).forEach(deposits::add);
+        deposits.add(DepositDefinition.gaussian(
+                "limestone", "magneticraft:limestone", 32, 3, 0.9D, 0, 5, 16, 63));
+        deposits.add(DepositDefinition.sector("oil_deposit", "magneticraft:oil_deposit"));
+        return List.copyOf(deposits);
+    }
+
     enum FrequencyType {
         COUNT,
+        RARITY,
         CLAMPED_NORMAL,
         SECTOR
     }
@@ -210,6 +221,27 @@ final class AdvancedWorldgenProvider implements DataProvider {
         ) {
             return new DepositDefinition(
                     id, block, veinSize, FrequencyType.COUNT, count, 0.0D, count, count, minY, maxY);
+        }
+
+        static DepositDefinition rare(
+                String id,
+                String block,
+                int veinSize,
+                int chance,
+                int minY,
+                int maxY
+        ) {
+            return new DepositDefinition(
+                    id, block, veinSize, FrequencyType.RARITY, chance, 0.0D, 0, 0, minY, maxY);
+        }
+
+        static DepositDefinition ore(OreBlockDefinition ore) {
+            String id = ore.block().id();
+            String block = Magneticraft.MOD_ID + ":" + id;
+            if (ore.rarity() > 0) {
+                return rare(id, block, ore.veinSize(), ore.rarity(), ore.minY(), ore.maxY());
+            }
+            return counted(id, block, ore.veinSize(), ore.count(), ore.minY(), ore.maxY());
         }
 
         static DepositDefinition gaussian(

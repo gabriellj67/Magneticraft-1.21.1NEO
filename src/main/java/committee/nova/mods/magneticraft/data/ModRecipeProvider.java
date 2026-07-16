@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.block.BaseBlockDefinition;
+import committee.nova.mods.magneticraft.content.block.OreBlockDefinition;
 import committee.nova.mods.magneticraft.content.block.DecorativeBlockFamily;
 import committee.nova.mods.magneticraft.content.computer.FloppyDiskItem;
 import committee.nova.mods.magneticraft.content.computer.runtime.ScriptLanguage;
@@ -286,11 +287,15 @@ final class ModRecipeProvider extends RecipeProvider {
             List<AdvancedProcessingRecipe.ChanceResult> outputs = new ArrayList<>();
             if (metal == Metal.GALENA) {
                 outputs.add(output(ModItems.material(MaterialForm.CHUNK, Metal.LEAD).get(), 1, 1.0F));
-                outputs.add(output(ModItems.material(MaterialForm.CHUNK, Metal.SILVER).get(), 1, 1.0F));
+                outputs.add(output(ModItems.material(MaterialForm.DUST, Metal.SILVER).get(), 1, 0.025F));
             } else if (MaterialForm.CHUNK.appliesTo(metal)) {
                 outputs.add(output(ModItems.material(MaterialForm.CHUNK, metal).get(), 1, 1.0F));
-                for (Metal subProduct : sluiceSubProducts(metal).stream().limit(2).toList()) {
-                    outputs.add(output(ModItems.material(MaterialForm.DUST, subProduct).get(), 1, 0.15F));
+                for (MetalByproduct subProduct : advancedSieveByproducts(metal)) {
+                    outputs.add(output(
+                            ModItems.material(MaterialForm.DUST, subProduct.metal()).get(),
+                            1,
+                            subProduct.chance()
+                    ));
                 }
             }
             if (!outputs.isEmpty()) {
@@ -1596,11 +1601,14 @@ final class ModRecipeProvider extends RecipeProvider {
             List<SluiceRecipe.ChanceOutput> outputs = new ArrayList<>();
             if (metal == Metal.GALENA) {
                 outputs.add(chance(ModItems.material(MaterialForm.CHUNK, Metal.LEAD).get(), 1.0F));
-                outputs.add(chance(ModItems.material(MaterialForm.CHUNK, Metal.SILVER).get(), 1.0F));
+                outputs.add(chance(ModItems.material(MaterialForm.DUST, Metal.SILVER).get(), 0.025F));
             } else {
                 outputs.add(chance(ModItems.material(MaterialForm.CHUNK, metal).get(), 1.0F));
-                for (Metal subProduct : sluiceSubProducts(metal)) {
-                    outputs.add(chance(ModItems.material(MaterialForm.DUST, subProduct).get(), 0.15F));
+                for (MetalByproduct subProduct : sluiceByproducts(metal)) {
+                    outputs.add(chance(
+                            ModItems.material(MaterialForm.DUST, subProduct.metal()).get(),
+                            subProduct.chance()
+                    ));
                 }
             }
             outputs.add(chance(Blocks.COBBLESTONE, 0.15F));
@@ -1765,24 +1773,40 @@ final class ModRecipeProvider extends RecipeProvider {
         );
     }
 
-    private static List<Metal> sluiceSubProducts(Metal metal) {
+    private static List<MetalByproduct> sluiceByproducts(Metal metal) {
         return switch (metal) {
-            case IRON -> List.of(Metal.NICKEL, Metal.ALUMINIUM);
-            case GOLD -> List.of(Metal.COPPER, Metal.SILVER);
-            case COPPER -> List.of(Metal.GOLD, Metal.IRON);
-            case LEAD -> List.of(Metal.SILVER);
-            case COBALT -> List.of(Metal.MITHRIL, Metal.OSMIUM);
-            case TUNGSTEN -> List.of(Metal.IRON);
-            case ALUMINIUM -> List.of(Metal.NICKEL, Metal.IRON);
-            case GALENA -> List.of(Metal.LEAD, Metal.SILVER);
-            case MITHRIL -> List.of(Metal.OSMIUM, Metal.ZINC);
-            case NICKEL -> List.of(Metal.IRON, Metal.TIN);
-            case OSMIUM -> List.of(Metal.MITHRIL, Metal.NICKEL);
-            case SILVER -> List.of(Metal.LEAD);
-            case TIN -> List.of(Metal.IRON, Metal.ALUMINIUM);
-            case ZINC -> List.of(Metal.NICKEL, Metal.TIN);
+            case IRON -> List.of(byproduct(Metal.NICKEL, 0.025F), byproduct(Metal.ALUMINIUM, 0.15F));
+            case GOLD -> List.of(byproduct(Metal.COPPER, 0.15F), byproduct(Metal.SILVER, 0.15F));
+            case COPPER -> List.of(byproduct(Metal.GOLD, 0.15F), byproduct(Metal.IRON, 0.15F));
+            case LEAD -> List.of(byproduct(Metal.SILVER, 0.025F));
+            case COBALT -> List.of(byproduct(Metal.MITHRIL, 0.01F));
+            case TUNGSTEN -> List.of(byproduct(Metal.IRON, 0.15F));
+            case ALUMINIUM -> List.of(byproduct(Metal.IRON, 0.15F));
+            case SILVER -> List.of(byproduct(Metal.LEAD, 0.15F));
+            case TIN -> List.of(byproduct(Metal.IRON, 0.15F), byproduct(Metal.ALUMINIUM, 0.15F));
+            case ZINC -> List.of(byproduct(Metal.NICKEL, 0.15F), byproduct(Metal.TIN, 0.15F));
+            case GALENA, MITHRIL, NICKEL, OSMIUM -> List.of();
             case STEEL, BRASS, CARBIDE -> List.of();
         };
+    }
+
+    private static List<MetalByproduct> advancedSieveByproducts(Metal metal) {
+        if (metal == Metal.NICKEL) {
+            return List.of(byproduct(Metal.OSMIUM, 0.25F));
+        }
+        return sluiceByproducts(metal);
+    }
+
+    private static MetalByproduct byproduct(Metal metal, float chance) {
+        return new MetalByproduct(metal, chance);
+    }
+
+    private record MetalByproduct(Metal metal, float chance) {
+        private MetalByproduct {
+            if (!(chance > 0.0F && chance <= 1.0F)) {
+                throw new IllegalArgumentException("Byproduct chance must be in (0, 1]");
+            }
+        }
     }
 
     private static SluiceRecipe.ChanceOutput chance(ItemLike item, float chance) {
@@ -2031,27 +2055,19 @@ final class ModRecipeProvider extends RecipeProvider {
     }
 
     private void addSmeltingRecipes(Consumer<FinishedRecipe> consumer) {
-        smelt(
-                consumer,
-                "galena_ore",
-                ModTags.Items.ore("galena"),
-                ModItems.ingot(Metal.LEAD),
-                1
-        );
-        smelt(
-                consumer,
-                "cobalt_ore",
-                ModTags.Items.ore("cobalt"),
-                ModItems.ingot(Metal.COBALT),
-                1
-        );
-        smelt(
-                consumer,
-                "tungsten_ore",
-                ModTags.Items.ore("tungsten"),
-                ModItems.ingot(Metal.TUNGSTEN),
-                1
-        );
+        for (OreBlockDefinition ore : OreBlockDefinition.values()) {
+            if (ore.processedMetal() == null) {
+                continue;
+            }
+            Metal product = ore.processedMetal() == Metal.GALENA ? Metal.LEAD : ore.processedMetal();
+            smelt(
+                    consumer,
+                    ore.block().id(),
+                    ModTags.Items.ore(ore.forgeMaterials().get(0)),
+                    ModItems.ingot(product),
+                    1
+            );
+        }
 
         for (Metal metal : Metal.values()) {
             if (MaterialForm.DUST.appliesTo(metal)) {

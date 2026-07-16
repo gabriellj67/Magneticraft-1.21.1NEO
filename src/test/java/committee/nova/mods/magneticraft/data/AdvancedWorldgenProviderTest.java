@@ -9,33 +9,56 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdvancedWorldgenProviderTest {
     private static final Set<String> EXPECTED_IDS = Set.of(
             "galena_ore",
+            "cobalt_ore",
             "tungsten_ore",
             "pyrite_ore",
+            "zinc_ore",
+            "bauxite_ore",
+            "silver_ore",
+            "nickel_ore",
+            "tin_ore",
             "limestone",
             "oil_deposit"
     );
 
-    private static final Map<String, CountedOreContract> COUNTED_ORES = Map.of(
-            "galena_ore", new CountedOreContract("magneticraft:galena_ore", 8, 10, 2, 80),
-            "tungsten_ore", new CountedOreContract("magneticraft:tungsten_ore", 8, 8, 20, 60),
-            "pyrite_ore", new CountedOreContract("magneticraft:pyrite_ore", 9, 9, 30, 100)
+    private static final Map<String, CountedOreContract> COUNTED_ORES = Map.ofEntries(
+            Map.entry("galena_ore", new CountedOreContract("magneticraft:galena_ore", 8, 10, 2, 80)),
+            Map.entry("cobalt_ore", new CountedOreContract("magneticraft:cobalt_ore", 6, 4, -32, 33)),
+            Map.entry("tungsten_ore", new CountedOreContract("magneticraft:tungsten_ore", 8, 8, 20, 60)),
+            Map.entry("pyrite_ore", new CountedOreContract("magneticraft:pyrite_ore", 9, 9, 30, 100)),
+            Map.entry("zinc_ore", new CountedOreContract("magneticraft:zinc_ore", 7, 6, 0, 65)),
+            Map.entry("bauxite_ore", new CountedOreContract("magneticraft:bauxite_ore", 7, 5, 32, 113)),
+            Map.entry("nickel_ore", new CountedOreContract("magneticraft:nickel_ore", 5, 4, -24, 41)),
+            Map.entry("tin_ore", new CountedOreContract("magneticraft:tin_ore", 6, 4, -16, 49))
     );
 
     @Test
-    void catalogueContainsOnlyReleasedDepositsAndDoesNotRestoreCobalt() {
+    void catalogueContainsEveryReleasedDepositExactlyOnce() {
         Set<String> ids = new HashSet<>();
         for (AdvancedWorldgenProvider.DepositDefinition deposit : AdvancedWorldgenProvider.deposits()) {
             assertTrue(ids.add(deposit.id()), "Duplicate deposit ID " + deposit.id());
         }
 
         assertEquals(EXPECTED_IDS, ids);
-        assertFalse(ids.contains("cobalt_ore"));
+    }
+
+    @Test
+    void silverUsesOneInTwoChunkRarityPlacement() {
+        AdvancedWorldgenProvider.DepositDefinition silver = deposit("silver_ore");
+        assertEquals(AdvancedWorldgenProvider.FrequencyType.RARITY, silver.frequencyType());
+        assertEquals(2, silver.frequency());
+        assertEquals(-48, silver.minY());
+        assertEquals(16, silver.maxY());
+
+        JsonArray placement = AdvancedWorldgenProvider.placedFeature(silver).getAsJsonArray("placement");
+        assertEquals("minecraft:rarity_filter", placement.get(0).getAsJsonObject().get("type").getAsString());
+        assertEquals(2, placement.get(0).getAsJsonObject().get("chance").getAsInt());
+        assertUniformHeight(placement.get(2).getAsJsonObject(), -48, 16);
     }
 
     @Test

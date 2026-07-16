@@ -3,6 +3,11 @@
     "magneticraft:galena_ore",
     "magneticraft:cobalt_ore",
     "magneticraft:tungsten_ore",
-    "magneticraft:pyrite_ore"
+    "magneticraft:pyrite_ore",
+    "magneticraft:zinc_ore",
+    "magneticraft:bauxite_ore",
+    "magneticraft:silver_ore",
+    "magneticraft:nickel_ore",
+    "magneticraft:tin_ore"
   ]
 }

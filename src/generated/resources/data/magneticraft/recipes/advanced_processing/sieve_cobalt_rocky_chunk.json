@@ -11,12 +11,8 @@
       "item": "magneticraft:cobalt_chunk"
     },
     {
-      "chance": 0.15,
+      "chance": 0.01,
       "item": "magneticraft:mithril_dust"
-    },
-    {
-      "chance": 0.15,
-      "item": "magneticraft:osmium_dust"
     }
   ]
 }

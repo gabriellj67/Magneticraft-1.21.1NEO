@@ -73,7 +73,7 @@ class ContentCatalogTest {
     void baseCataloguesHaveStableUniqueIds() {
         assertUniqueIds(
                 Arrays.stream(BaseBlockDefinition.values()).map(BaseBlockDefinition::id).toArray(String[]::new),
-                17
+                22
         );
         assertUniqueIds(
                 Arrays.stream(CraftingComponent.values()).map(CraftingComponent::id).toArray(String[]::new),

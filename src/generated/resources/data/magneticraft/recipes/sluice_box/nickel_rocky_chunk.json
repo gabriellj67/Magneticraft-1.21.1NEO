@@ -12,18 +12,6 @@
     {
       "chance": 0.15,
       "stack": {
-        "item": "magneticraft:iron_dust"
-      }
-    },
-    {
-      "chance": 0.15,
-      "stack": {
-        "item": "magneticraft:tin_dust"
-      }
-    },
-    {
-      "chance": 0.15,
-      "stack": {
         "item": "minecraft:cobblestone"
       }
     }

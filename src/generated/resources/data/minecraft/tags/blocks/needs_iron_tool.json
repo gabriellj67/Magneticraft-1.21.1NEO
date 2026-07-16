@@ -2,6 +2,8 @@
   "values": [
     "magneticraft:cobalt_ore",
     "magneticraft:tungsten_ore",
+    "magneticraft:silver_ore",
+    "magneticraft:nickel_ore",
     "magneticraft:carbide_block"
   ]
 }
