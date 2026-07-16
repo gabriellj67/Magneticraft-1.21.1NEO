@@ -4,6 +4,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
+import java.util.UUID;
+
 /**
  * Durable, loader-independent runtime state shared by the single-block behavior strategies.
  */
@@ -24,6 +26,7 @@ final class SingleBlockMachineState {
     private static final String THERMOPILE_FLUX_TAG = "thermopile_flux";
     private static final String LAST_WORKING_TICK_TAG = "last_working_tick";
     private static final String FUEL_ENERGY_TAG = "fuel_energy_joules";
+    private static final String OWNER_TAG = "owner";
 
     int progress;
     int totalProgress;
@@ -47,6 +50,7 @@ final class SingleBlockMachineState {
     long lastWorkingTick = -1L;
     int lastConsumption;
     int lastProduction;
+    UUID owner;
 
     void recordWorking(long gameTime) {
         lastWorkingTick = Math.max(0L, gameTime);
@@ -102,6 +106,9 @@ final class SingleBlockMachineState {
         tag.putDouble(THERMOPILE_FLUX_TAG, thermopileFlux);
         tag.putLong(LAST_WORKING_TICK_TAG, lastWorkingTick);
         tag.putDouble(FUEL_ENERGY_TAG, fuelEnergyJoules);
+        if (owner != null) {
+            tag.putUUID(OWNER_TAG, owner);
+        }
     }
 
     void load(CompoundTag tag) {
@@ -126,6 +133,7 @@ final class SingleBlockMachineState {
                 : -1L;
         double loadedFuelEnergy = tag.getDouble(FUEL_ENERGY_TAG);
         fuelEnergyJoules = Double.isFinite(loadedFuelEnergy) ? Math.max(0.0D, loadedFuelEnergy) : 0.0D;
+        owner = tag.hasUUID(OWNER_TAG) ? tag.getUUID(OWNER_TAG) : null;
     }
 
     private void loadInserterFlags(int flags) {

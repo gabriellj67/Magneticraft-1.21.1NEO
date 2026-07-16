@@ -38,6 +38,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -74,6 +75,11 @@ public final class SingleBlockMachineGameTests {
             );
         }
         helper.assertTrue(
+                ForgeRegistries.BLOCKS.getKey(ModMachineBlocks.PERMANENT_MAGNET.get())
+                        .equals(Magneticraft.id("permanent_magnet")),
+                "Permanent magnet registration is missing"
+        );
+        helper.assertTrue(
                 helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipeTypes.SLUICE_TYPE.get()).size() == 16,
                 "Sluice recipe inventory is incomplete"
         );
@@ -90,6 +96,52 @@ public final class SingleBlockMachineGameTests {
                 "Fluid-fuel recipe inventory is incomplete"
         );
         helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 55)
+    public static void blockBreakerStopsAtPermanentMagnetThenStoresDrops(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.BLOCK_BREAKER, Direction.NORTH));
+        SingleBlockMachineBlockEntity breaker = requireMachine(helper, CENTER);
+        Player owner = helper.makeMockSurvivalPlayer();
+        breaker.setOwner(owner.getUUID());
+        breaker.energy().setStoredJoules(10_000.0D);
+        helper.setBlock(CENTER.north(), ModMachineBlocks.PERMANENT_MAGNET.get());
+        helper.setBlock(CENTER.north(2), Blocks.STONE);
+
+        int firstDelay = intervalDelay(helper, breaker, 20);
+        helper.runAfterDelay(firstDelay + 2, () -> {
+            helper.assertTrue(helper.getBlockState(CENTER.north(2)).is(Blocks.STONE),
+                    "Block breaker crossed a permanent-magnet stop marker");
+            helper.setBlock(CENTER.north(), Blocks.AIR);
+            helper.runAfterDelay(20, () -> {
+                helper.assertTrue(helper.getBlockState(CENTER.north(2)).isAir(),
+                        "Block breaker did not remove the first block in range");
+                helper.assertTrue(breaker.inventory().getStackInSlot(0).is(Items.COBBLESTONE),
+                        "Block breaker did not store the harvested drop");
+                helper.assertTrue(breaker.energy().storedWholeJoules() <= 9_500,
+                        "Block breaker did not consume its 500 J action cost");
+                helper.succeed();
+            });
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 35)
+    public static void sprinklerHydratesLoadedFarmlandAndConsumesWater(GameTestHelper helper) {
+        helper.setBlock(CENTER, machineState(SingleBlockMachineDefinition.SPRINKLER, Direction.NORTH));
+        SingleBlockMachineBlockEntity sprinkler = requireMachine(helper, CENTER);
+        Player owner = helper.makeMockSurvivalPlayer();
+        sprinkler.setOwner(owner.getUUID());
+        sprinkler.primaryTank().tank().fill(new FluidStack(Fluids.WATER, 100), IFluidHandler.FluidAction.EXECUTE);
+        BlockPos farmland = CENTER.below(2);
+        helper.setBlock(farmland, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 0));
+
+        helper.runAfterDelay(intervalDelay(helper, sprinkler, 20) + 2, () -> {
+            helper.assertTrue(helper.getBlockState(farmland).getValue(FarmBlock.MOISTURE) == FarmBlock.MAX_MOISTURE,
+                    "Sprinkler did not hydrate farmland in its 7x7 area");
+            helper.assertTrue(sprinkler.primaryTank().tank().getFluidAmount() == 99,
+                    "Sprinkler did not consume exactly one mB for the serviced column");
+            helper.succeed();
+        });
     }
 
     @GameTest(template = TEMPLATE)
@@ -867,6 +919,19 @@ public final class SingleBlockMachineGameTests {
         return ModMachineBlocks.machine(definition).get().defaultBlockState()
                 .setValue(SingleBlockMachineBlock.FACING, facing)
                 .setValue(SingleBlockMachineBlock.MASTER, true);
+    }
+
+    private static int intervalDelay(
+            GameTestHelper helper,
+            SingleBlockMachineBlockEntity machine,
+            int interval
+    ) {
+        long phase = Math.floorMod(
+                helper.getLevel().getGameTime() + machine.getBlockPos().hashCode(),
+                interval
+        );
+        int delay = (int) ((interval - phase) % interval);
+        return delay == 0 ? interval : delay;
     }
 
     private static SingleBlockMachineBlockEntity requireMachine(GameTestHelper helper, BlockPos position) {

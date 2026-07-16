@@ -26,7 +26,7 @@ class SingleBlockRecipeTest {
     void singleBlockInventoryHasStableUniqueIds() {
         Set<String> ids = new HashSet<>();
         Arrays.stream(SingleBlockMachineDefinition.values()).forEach(definition -> ids.add(definition.id()));
-        assertEquals(23, ids.size());
+        assertEquals(25, ids.size());
         assertTrue(ids.containsAll(Set.of(
                 "sluice_box",
                 "gasification_unit",

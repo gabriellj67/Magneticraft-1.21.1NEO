@@ -80,6 +80,10 @@ public final class ModMachineBlocks {
             "geothermal_drill_pipe",
             () -> new Block(machineProperties().noLootTable())
     );
+    public static final RegistryObject<Block> PERMANENT_MAGNET = register(
+            "permanent_magnet",
+            () -> new Block(machineProperties())
+    );
 
     static {
         for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {

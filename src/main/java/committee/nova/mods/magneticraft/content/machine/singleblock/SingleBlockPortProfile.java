@@ -28,6 +28,12 @@ public final class SingleBlockPortProfile {
                     SingleBlockMachineDefinition.PhysicalPort.FLUID_OUTPUT
             );
             case INSERTER -> Set.of(SingleBlockMachineDefinition.PhysicalPort.ITEM_TRANSFER);
+            case BLOCK_BREAKER -> Set.of(
+                    SingleBlockMachineDefinition.PhysicalPort.ITEM,
+                    SingleBlockMachineDefinition.PhysicalPort.GHOST_FILTER,
+                    SingleBlockMachineDefinition.PhysicalPort.ELECTRICITY
+            );
+            case SPRINKLER -> Set.of(SingleBlockMachineDefinition.PhysicalPort.FLUID_INPUT);
             case WATER_GENERATOR -> Set.of(SingleBlockMachineDefinition.PhysicalPort.FLUID_OUTPUT);
             case RELAY -> Set.of(
                     SingleBlockMachineDefinition.PhysicalPort.ITEM,
@@ -94,6 +100,9 @@ public final class SingleBlockPortProfile {
                     : new ItemInventoryModule.SlotAccess(all, all);
             case GASIFICATION_UNIT, BRICK_FURNACE ->
                     new ItemInventoryModule.SlotAccess(new int[]{0}, new int[]{1});
+            case BLOCK_BREAKER -> side == facing.getOpposite()
+                    ? new ItemInventoryModule.SlotAccess(new int[0], all)
+                    : ItemInventoryModule.NONE;
             default -> new ItemInventoryModule.SlotAccess(all, all);
         };
     }
@@ -119,6 +128,9 @@ public final class SingleBlockPortProfile {
             case INTERNAL_COMBUSTION_ENGINE -> tank == 0 && side == Direction.UP
                     ? FluidTankModule.TankAccess.INPUT
                     : FluidTankModule.TankAccess.NONE;
+            case SPRINKLER -> tank == 0
+                    ? FluidTankModule.TankAccess.INPUT
+                    : FluidTankModule.TankAccess.NONE;
             default -> FluidTankModule.TankAccess.NONE;
         };
     }
@@ -141,6 +153,7 @@ public final class SingleBlockPortProfile {
     ) {
         return switch (definition) {
             case ELECTRIC_HEATER, INFINITE_ENERGY, AIRLOCK, THERMOPILE, RF_TRANSFORMER, ELECTRIC_ENGINE -> true;
+            case BLOCK_BREAKER -> side == facing.getOpposite();
             case INTERNAL_COMBUSTION_ENGINE -> side == facing.getOpposite();
             default -> false;
         };

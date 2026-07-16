@@ -29,6 +29,8 @@ final class SingleBlockMachineLogic {
             case SLUICE_BOX -> automation.tickSluice(level);
             case FEEDING_TROUGH -> automation.tickFeedingTrough(level);
             case INSERTER -> automation.tickInserter(level);
+            case BLOCK_BREAKER -> automation.tickBlockBreaker(level);
+            case SPRINKLER -> automation.tickSprinkler(level);
             case WATER_GENERATOR -> automation.tickWaterGenerator();
             case RELAY -> automation.tickRelay(level);
             case TRANSPOSER -> automation.tickTransposer(level);

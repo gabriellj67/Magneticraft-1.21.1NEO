@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import committee.nova.mods.magneticraft.config.MagneticraftConfig;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.SluiceRecipe;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
+import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.content.world.ProtectedWorldMutation;
 import committee.nova.mods.magneticraft.system.network.logistics.ItemHandlerTransactions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,14 +14,24 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.common.util.FakePlayerFactory;
 
 import java.util.ArrayList;
@@ -32,6 +44,12 @@ import java.util.UUID;
  */
 final class SingleBlockAutomationLogic {
     private static final int FEEDING_TROUGH_INTERVAL = 400;
+    private static final int BLOCK_BREAKER_INTERVAL = 20;
+    private static final int BLOCK_BREAKER_RANGE = 16;
+    private static final int BLOCK_BREAKER_ENERGY_COST = 500;
+    private static final int SPRINKLER_INTERVAL = 20;
+    private static final int SPRINKLER_RADIUS = 3;
+    private static final int SPRINKLER_DEPTH = 7;
     private static final GameProfile FEEDING_TROUGH_PROFILE = new GameProfile(
             UUID.fromString("d0f15bc8-6eb3-4a1b-8b5d-d3fdf5140321"),
             "FeedingTrough"
@@ -140,6 +158,152 @@ final class SingleBlockAutomationLogic {
             state.working = true;
             machine.markChangedAndSync();
         }
+    }
+
+    void tickBlockBreaker(ServerLevel level) {
+        if (Math.floorMod(level.getGameTime() + machine.getBlockPos().hashCode(), BLOCK_BREAKER_INTERVAL) != 0
+                || level.hasNeighborSignal(machine.getBlockPos())
+                || machine.inventory() == null
+                || machine.energy() == null
+                || machine.energy().consumeJoules(BLOCK_BREAKER_ENERGY_COST, true) != BLOCK_BREAKER_ENERGY_COST) {
+            return;
+        }
+        Direction direction = SingleBlockMachineSupport.facing(machine);
+        for (int distance = 1; distance <= BLOCK_BREAKER_RANGE; distance++) {
+            BlockPos target = machine.getBlockPos().relative(direction, distance);
+            if (!ProtectedWorldMutation.isSafeLoadedTarget(level, target)) {
+                return;
+            }
+            BlockState targetState = level.getBlockState(target);
+            if (targetState.is(ModMachineBlocks.PERMANENT_MAGNET.get())) {
+                return;
+            }
+            if (!targetState.isAir()) {
+                breakBlock(level, target, targetState, direction.getOpposite());
+                return;
+            }
+        }
+    }
+
+    private void breakBlock(ServerLevel level, BlockPos target, BlockState targetState, Direction face) {
+        if (level.getBlockEntity(target) != null || targetState.getDestroySpeed(level, target) < 0.0F) {
+            return;
+        }
+        FakePlayer player = ProtectedWorldMutation.ownerPlayer(level, state.owner, machine.getBlockPos());
+        if (player == null || !ProtectedWorldMutation.mayModify(level, player, machine.getBlockPos(), target, face)) {
+            return;
+        }
+        ItemStack tool = new ItemStack(Items.DIAMOND_PICKAXE);
+        if (targetState.requiresCorrectToolForDrops() && !tool.isCorrectToolForDrops(targetState)) {
+            return;
+        }
+        ItemStackHandler staged = copyInventory();
+        List<ItemStack> drops = Block.getDrops(targetState, level, target, null, player, tool);
+        for (ItemStack drop : drops) {
+            if (!SingleBlockMachineSupport.filterAllows(machine, state, drop, true)
+                    || !ItemHandlerHelper.insertItemStacked(staged, drop.copy(), false).isEmpty()) {
+                return;
+            }
+        }
+        ItemStack previousTool = player.getMainHandItem();
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, tool);
+        try {
+            if (ForgeHooks.onBlockBreakEvent(level, GameType.SURVIVAL, player, target) == -1
+                    || !level.getBlockState(target).equals(targetState)) {
+                return;
+            }
+            double energyBefore = machine.energy().storedJoules();
+            if (machine.energy().consumeJoules(BLOCK_BREAKER_ENERGY_COST, false) != BLOCK_BREAKER_ENERGY_COST) {
+                return;
+            }
+            if (!level.destroyBlock(target, false, player)) {
+                machine.energy().restoreStoredJoules(energyBefore);
+                return;
+            }
+            IItemHandlerModifiable inventory = machine.inventory().menuHandler();
+            for (int slot = 0; slot < inventory.getSlots(); slot++) {
+                inventory.setStackInSlot(slot, staged.getStackInSlot(slot).copy());
+            }
+            state.lastConsumption = BLOCK_BREAKER_ENERGY_COST;
+            state.recordWorking(level.getGameTime());
+            machine.markChangedAndSync();
+        } finally {
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, previousTool);
+        }
+    }
+
+    private ItemStackHandler copyInventory() {
+        ItemStackHandler copy = new ItemStackHandler(machine.inventory().slots());
+        for (int slot = 0; slot < copy.getSlots(); slot++) {
+            copy.setStackInSlot(slot, machine.inventory().getStackInSlot(slot).copy());
+        }
+        return copy;
+    }
+
+    void tickSprinkler(ServerLevel level) {
+        if (Math.floorMod(level.getGameTime() + machine.getBlockPos().hashCode(), SPRINKLER_INTERVAL) != 0
+                || machine.primaryTank() == null
+                || machine.primaryTank().tank().getFluidAmount() <= 0) {
+            return;
+        }
+        FakePlayer player = ProtectedWorldMutation.ownerPlayer(level, state.owner, machine.getBlockPos());
+        if (player == null) {
+            return;
+        }
+        int serviced = 0;
+        for (int x = -SPRINKLER_RADIUS; x <= SPRINKLER_RADIUS; x++) {
+            for (int z = -SPRINKLER_RADIUS; z <= SPRINKLER_RADIUS; z++) {
+                if (serviced >= machine.primaryTank().tank().getFluidAmount()) {
+                    break;
+                }
+                if (serviceSprinklerColumn(level, player, x, z)) {
+                    serviced++;
+                }
+            }
+        }
+        if (serviced > 0) {
+            machine.primaryTank().tank().drain(serviced, IFluidHandler.FluidAction.EXECUTE);
+            state.lastConsumption = serviced;
+            state.recordWorking(level.getGameTime());
+            machine.markChangedAndSync();
+        }
+    }
+
+    private boolean serviceSprinklerColumn(ServerLevel level, FakePlayer player, int x, int z) {
+        for (int depth = 1; depth <= SPRINKLER_DEPTH; depth++) {
+            BlockPos target = machine.getBlockPos().offset(x, -depth, z);
+            if (!ProtectedWorldMutation.isSafeLoadedTarget(level, target)) {
+                return false;
+            }
+            BlockState targetState = level.getBlockState(target);
+            if (targetState.isAir()) {
+                continue;
+            }
+            if (!ProtectedWorldMutation.mayModify(
+                    level, player, machine.getBlockPos(), target, Direction.UP
+            )) {
+                return false;
+            }
+            boolean changed = false;
+            if (targetState.getBlock() instanceof FarmBlock
+                    && targetState.getValue(FarmBlock.MOISTURE) < FarmBlock.MAX_MOISTURE) {
+                changed = level.setBlock(target, targetState.setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE), Block.UPDATE_CLIENTS);
+            }
+            BlockPos cropPosition = target.above();
+            BlockState crop = level.getBlockState(cropPosition);
+            if (crop.getBlock() instanceof BonemealableBlock growable
+                    && level.random.nextFloat() < 0.002F
+                    && ProtectedWorldMutation.isSafeLoadedTarget(level, cropPosition)
+                    && ProtectedWorldMutation.mayModify(
+                    level, player, machine.getBlockPos(), cropPosition, Direction.UP
+            ) && growable.isValidBonemealTarget(level, cropPosition, crop, false)
+                    && growable.isBonemealSuccess(level, level.random, cropPosition, crop)) {
+                growable.performBonemeal(level, level.random, cropPosition, crop);
+                changed = true;
+            }
+            return changed;
+        }
+        return false;
     }
 
     void tickWaterGenerator() {

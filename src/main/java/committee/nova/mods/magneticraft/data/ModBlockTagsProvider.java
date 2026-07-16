@@ -56,12 +56,14 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 ModMachineBlocks.BATTERY.get(),
                 ModMachineBlocks.GRATE.get(),
-                ModMachineBlocks.ELECTRIC_FURNACE.get()
+                ModMachineBlocks.ELECTRIC_FURNACE.get(),
+                ModMachineBlocks.PERMANENT_MAGNET.get()
         );
         tag(BlockTags.NEEDS_STONE_TOOL).add(
                 ModMachineBlocks.BATTERY.get(),
                 ModMachineBlocks.GRATE.get(),
-                ModMachineBlocks.ELECTRIC_FURNACE.get()
+                ModMachineBlocks.ELECTRIC_FURNACE.get(),
+                ModMachineBlocks.PERMANENT_MAGNET.get()
         );
         ModMachineBlocks.machines().forEach((definition, holder) -> {
             if (definition.isWooden()) {

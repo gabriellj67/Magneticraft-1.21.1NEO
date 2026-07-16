@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "B": {
+      "tag": "forge:dusts/redstone"
+    },
+    "C": {
+      "item": "magneticraft:motor"
+    },
+    "D": {
+      "item": "minecraft:diamond_pickaxe"
+    },
+    "E": {
+      "item": "magneticraft:low_voltage_battery"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "CDC",
+    "AEA"
+  ],
+  "result": {
+    "item": "magneticraft:block_breaker"
+  },
+  "show_notification": true
+}

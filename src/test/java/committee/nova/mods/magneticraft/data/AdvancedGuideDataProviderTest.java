@@ -73,7 +73,13 @@ class AdvancedGuideDataProviderTest {
             assertEquals(definition.inventorySlots(), contract.inventorySlots(), definition.id());
             assertEquals(definition.ghostSlots(), contract.ghostSlots(), definition.id());
             assertEquals(definition.slotRoles().size(), contract.slotRoles().size(), definition.id());
-            assertEquals("ignored", contract.redstoneControl(), definition.id());
+            assertEquals(
+                    definition == SingleBlockMachineDefinition.BLOCK_BREAKER
+                            ? "requires_no_signal"
+                            : "ignored",
+                    contract.redstoneControl(),
+                    definition.id()
+            );
             assertEquals(
                     definition.automationProfile().name().toLowerCase(java.util.Locale.ROOT),
                     contract.automationProfile(),

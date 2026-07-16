@@ -124,7 +124,9 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
     ) {
         super.setPlacedBy(level, position, state, placer, stack);
         if (!level.isClientSide
-                && definition == SingleBlockMachineDefinition.GEOTHERMAL_PUMP
+                && (definition == SingleBlockMachineDefinition.GEOTHERMAL_PUMP
+                || definition == SingleBlockMachineDefinition.BLOCK_BREAKER
+                || definition == SingleBlockMachineDefinition.SPRINKLER)
                 && placer instanceof Player player
                 && level.getBlockEntity(position) instanceof SingleBlockMachineBlockEntity machine) {
             machine.setOwner(player.getUUID());

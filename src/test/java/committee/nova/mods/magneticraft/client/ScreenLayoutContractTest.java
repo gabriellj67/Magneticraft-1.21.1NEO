@@ -33,7 +33,17 @@ class ScreenLayoutContractTest {
             if (definition != SingleBlockMachineDefinition.BOX
                     && definition != SingleBlockMachineDefinition.FABRICATOR
                     && definition != SingleBlockMachineDefinition.INSERTER) {
-                controls.addAll(LegacyMachineGuiLayout.singleBlockStatusBars(true, true, true, true).stream()
+                boolean primaryFluid = definition.physicalPorts().contains(
+                        SingleBlockMachineDefinition.PhysicalPort.FLUID_INPUT
+                ) || definition.physicalPorts().contains(
+                        SingleBlockMachineDefinition.PhysicalPort.FLUID_OUTPUT
+                );
+                boolean secondaryFluid = definition == SingleBlockMachineDefinition.STEAM_BOILER;
+                boolean progress = definition.processingKind()
+                        != SingleBlockMachineDefinition.ProcessingKind.NONE;
+                controls.addAll(LegacyMachineGuiLayout.singleBlockStatusBars(
+                                definition.usesElectricity(), primaryFluid, secondaryFluid, progress
+                        ).stream()
                         .map(LegacyMachineGuiLayout.StatusBar::bounds)
                         .toList());
             }

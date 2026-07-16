@@ -114,6 +114,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         ModMachineBlocks.machines().forEach((definition, holder) ->
                 registerSingleBlockMachineModel(holder.get(), definition));
+        simpleBlockWithItem(
+                ModMachineBlocks.PERMANENT_MAGNET.get(),
+                models().cubeAll("permanent_magnet", modLoc("item/magnet"))
+                        .renderType(CUTOUT_RENDER_TYPE)
+        );
         simpleBlock(
                 ModMachineBlocks.AIR_BUBBLE.get(),
                 models().cubeAll("air_bubble", modLoc("blocks/machines/air_bubble"))
@@ -295,6 +300,20 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private void registerSingleBlockMachineModel(Block block, SingleBlockMachineDefinition definition) {
         switch (definition) {
+            case BLOCK_BREAKER -> {
+                ModelFile model = models().orientable(
+                        definition.id(),
+                        modLoc("block/electrical_breaker_housing"),
+                        modLoc("block/electrical_enclosure"),
+                        modLoc("block/electrical_breaker_housing")
+                );
+                directionalSingleBlock(block, model);
+                simpleBlockItem(block, model);
+            }
+            case SPRINKLER -> simpleBlockWithItem(
+                    block,
+                    models().cubeAll(definition.id(), modLoc("blocks/machines/water_generator"))
+            );
             case BOX -> simpleBlockWithItem(
                     block,
                     models().cubeAll(definition.id(), modLoc("blocks/machines/box"))

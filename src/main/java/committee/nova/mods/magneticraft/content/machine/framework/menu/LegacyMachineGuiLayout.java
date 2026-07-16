@@ -95,6 +95,10 @@ public final class LegacyMachineGuiLayout {
                 positions.add(new Point(97, 5));
                 addGrid(positions, 3, 3, 23, 5);
             }
+            case BLOCK_BREAKER -> {
+                addGrid(positions, 3, 3, 46, 5);
+                addGrid(positions, 3, 3, 105, 5);
+            }
             case RELAY, FILTER, TRANSPOSER -> addGrid(positions, 3, 3, 62, 5);
             case COMBUSTION_CHAMBER -> positions.add(new Point(94, 32));
             case GASIFICATION_UNIT -> {

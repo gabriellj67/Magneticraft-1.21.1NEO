@@ -1473,6 +1473,24 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', Items.WATER_BUCKET)
                 .unlockedBy("has_water_bucket", has(Items.WATER_BUCKET))
                 .save(consumer, id("crafting/water_generator"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.BLOCK_BREAKER))
+                .pattern("ABA").pattern("CDC").pattern("AEA")
+                .define('A', ModTags.Items.lightPlate(Metal.IRON)).define('B', Tags.Items.DUSTS_REDSTONE)
+                .define('C', component(CraftingComponent.MOTOR)).define('D', Items.DIAMOND_PICKAXE)
+                .define('E', ModMachineItems.LOW_BATTERY.get())
+                .unlockedBy("has_motor", has(component(CraftingComponent.MOTOR)))
+                .save(consumer, id("crafting/block_breaker"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, machine(SingleBlockMachineDefinition.SPRINKLER))
+                .pattern(" A ").pattern("BCB").pattern(" B ")
+                .define('A', ModNetworkBlocks.IRON_PIPE.get()).define('B', ModTags.Items.lightPlate(Metal.COPPER))
+                .define('C', Items.WATER_BUCKET)
+                .unlockedBy("has_water_bucket", has(Items.WATER_BUCKET))
+                .save(consumer, id("crafting/sprinkler"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModMachineBlocks.PERMANENT_MAGNET.get())
+                .pattern("IRI").pattern("I I").pattern("IRI")
+                .define('I', Tags.Items.INGOTS_IRON).define('R', Tags.Items.DUSTS_REDSTONE)
+                .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
+                .save(consumer, id("crafting/permanent_magnet"));
         automationEndpoint(consumer, SingleBlockMachineDefinition.RELAY, ModTags.Items.lightPlate(Metal.IRON));
         automationEndpoint(consumer, SingleBlockMachineDefinition.FILTER, component(CraftingComponent.IRON_MESH));
         automationEndpoint(consumer, SingleBlockMachineDefinition.TRANSPOSER, component(CraftingComponent.MOTOR));

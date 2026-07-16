@@ -1,0 +1,88 @@
+{
+  "variants": {
+    "facing=down,lit=false,master=false": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=down,lit=false,master=true": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=down,lit=true,master=false": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=down,lit=true,master=true": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=east,lit=false,master=false": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 90
+    },
+    "facing=east,lit=false,master=true": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 90
+    },
+    "facing=east,lit=true,master=false": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 90
+    },
+    "facing=east,lit=true,master=true": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 90
+    },
+    "facing=north,lit=false,master=false": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=north,lit=false,master=true": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=north,lit=true,master=false": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=north,lit=true,master=true": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=south,lit=false,master=false": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 180
+    },
+    "facing=south,lit=false,master=true": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 180
+    },
+    "facing=south,lit=true,master=false": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 180
+    },
+    "facing=south,lit=true,master=true": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 180
+    },
+    "facing=up,lit=false,master=false": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=up,lit=false,master=true": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=up,lit=true,master=false": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=up,lit=true,master=true": {
+      "model": "magneticraft:block/block_breaker"
+    },
+    "facing=west,lit=false,master=false": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 270
+    },
+    "facing=west,lit=false,master=true": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 270
+    },
+    "facing=west,lit=true,master=false": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 270
+    },
+    "facing=west,lit=true,master=true": {
+      "model": "magneticraft:block/block_breaker",
+      "y": 270
+    }
+  }
+}

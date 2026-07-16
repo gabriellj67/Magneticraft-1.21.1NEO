@@ -270,10 +270,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     }
 
     public void setOwner(@Nullable UUID owner) {
+        state.owner = owner;
         if (geothermalPumpState != null) {
             geothermalPumpState.setOwner(owner);
-            markChangedAndSync();
         }
+        markChangedAndSync();
     }
 
     @Nullable
@@ -558,6 +559,12 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
                     this::isFluidFuel,
                     side -> SingleBlockPortProfile.fluid(definition, 0, side)
             ));
+            case SPRINKLER -> primary = addModule(tank(
+                    "water",
+                    1_000,
+                    fluid -> fluid.getFluid().defaultFluidState().is(FluidTags.WATER),
+                    side -> SingleBlockPortProfile.fluid(definition, 0, side)
+            ));
             default -> {
             }
         }
@@ -587,7 +594,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     private ElectricalNetworkModule createElectricalNetwork() {
         return switch (definition) {
             case ELECTRIC_HEATER, INFINITE_ENERGY, AIRLOCK, THERMOPILE, RF_TRANSFORMER, ELECTRIC_ENGINE,
-                    INTERNAL_COMBUSTION_ENGINE ->
+                    INTERNAL_COMBUSTION_ENGINE, BLOCK_BREAKER ->
                     addModule(new ElectricalNetworkModule(
                             Magneticraft.id("electricity"),
                             this,
@@ -676,6 +683,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
             case INSERTER -> (slot == 0 && !SingleBlockMachineSupport.isInserterUpgrade(stack))
                     || (slot >= 1 && slot <= 2 && SingleBlockMachineSupport.isInserterUpgrade(stack));
             case FILTER -> slot == 0 && SingleBlockMachineSupport.filterAllows(this, state, stack, true);
+            case BLOCK_BREAKER -> false;
             case COMBUSTION_CHAMBER -> slot == 0 && SingleBlockMachineSupport.isCombustionFuel(stack);
             case GASIFICATION_UNIT -> slot == 0
                     && SingleBlockMachineSupport.findGasificationRecipe(this, stack).isPresent();

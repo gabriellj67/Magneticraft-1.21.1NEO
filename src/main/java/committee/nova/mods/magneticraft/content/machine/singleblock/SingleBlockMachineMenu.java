@@ -124,6 +124,18 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
             }
             case RELAY -> addMachineSlots(inventory, 0, layout, true);
             case FILTER, TRANSPOSER -> addGhostSlots(filters, layout);
+            case BLOCK_BREAKER -> {
+                addGhostSlots(filters, layout.subList(0, 9));
+                for (int slot = 0; slot < 9; slot++) {
+                    LegacyMachineGuiLayout.Point output = layout.get(9 + slot);
+                    addSlot(new SlotItemHandler(inventory, slot, output.x(), output.y()) {
+                        @Override
+                        public boolean mayPlace(ItemStack stack) {
+                            return false;
+                        }
+                    });
+                }
+            }
             case COMBUSTION_CHAMBER -> addMachineSlot(inventory, 0, layout.get(0), true);
             case GASIFICATION_UNIT, BRICK_FURNACE -> {
                 addMachineSlot(inventory, 0, layout.get(0), true);

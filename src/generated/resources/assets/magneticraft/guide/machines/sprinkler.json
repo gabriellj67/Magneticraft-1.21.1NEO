@@ -1,0 +1,17 @@
+{
+  "automation_profile": "all_sides",
+  "category": "utility",
+  "description": "guide.magneticraft.machine.sprinkler.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:sprinkler",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "fluid_input"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.sprinkler"
+}

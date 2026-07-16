@@ -20,7 +20,12 @@ class SingleBlockMachineDefinitionContractTest {
         for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
             assertTrue(ids.add(definition.id()), "Duplicate machine id: " + definition.id());
             assertEquals(definition.inventorySlots(), definition.slotRoles().size(), definition.id());
-            assertEquals(SingleBlockMachineDefinition.RedstoneControl.IGNORED, definition.redstoneControl());
+            assertEquals(
+                    definition == SingleBlockMachineDefinition.BLOCK_BREAKER
+                            ? SingleBlockMachineDefinition.RedstoneControl.REQUIRES_NO_SIGNAL
+                            : SingleBlockMachineDefinition.RedstoneControl.IGNORED,
+                    definition.redstoneControl()
+            );
             assertFalse(definition.guideCategory().isBlank(), definition.id());
         }
     }

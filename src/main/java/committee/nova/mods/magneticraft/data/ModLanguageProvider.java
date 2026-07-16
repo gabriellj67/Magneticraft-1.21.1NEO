@@ -108,6 +108,7 @@ final class ModLanguageProvider extends LanguageProvider {
         );
         add(ModMachineBlocks.TUBE_LIGHT.get(), chinese ? "管灯" : "Tube Light");
         add(ModMachineBlocks.GEOTHERMAL_DRILL_PIPE.get(), chinese ? "地热钻管" : "Geothermal Drill Pipe");
+        add(ModMachineBlocks.PERMANENT_MAGNET.get(), chinese ? "永久磁铁" : "Permanent Magnet");
         add("message.magneticraft.oil_prospector.insufficient_energy", chinese
                 ? "电量不足：扫描需要 %s J"
                 : "Insufficient energy: a scan requires %s J");
@@ -676,6 +677,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.machine.slots", chinese ? "槽位用途：%s" : "Slot roles: %s");
         add("gui.magneticraft.guide.machine.ports", chinese ? "外部端口：%s" : "Physical ports: %s");
         add("gui.magneticraft.guide.redstone.ignored", chinese ? "忽略" : "Ignored");
+        add("gui.magneticraft.guide.redstone.requires_no_signal", chinese ? "无红石信号时运行" : "Runs without signal");
         addGuideValues("processing", new String[][]{
                 {"none", "无", "None"},
                 {"crushing_table", "压碎", "Crushing"},
@@ -876,6 +878,8 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String singleBlockGuideChinese(SingleBlockMachineDefinition definition) {
         return switch (definition) {
+            case BLOCK_BREAKER -> "每 20 刻沿正面扫描最多 16 格，消耗 500 J 破坏首个符合过滤条件的方块；永久磁铁会中止扫描，产物进入九格缓冲。";
+            case SPRINKLER -> "使用水覆盖下方 7×7 农田，保持耕地湿润并小概率促进作物生长；只处理已加载区块。";
             case INTERNAL_COMBUSTION_ENGINE -> "消耗流体燃料并按 70% 电能、30% 热量分配；温度超过 423.15 K 后逐步降功率，达到 773.15 K 时停机。";
             case GEOTHERMAL_PUMP -> "只在已加载区块中向下铺设钻管；发现熔岩层后按需将源方块转为黑曜石并输出热量。";
             case BOX -> "提供 27 格木制存储，所有侧面均可进行物品自动化。";
@@ -904,6 +908,8 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String singleBlockGuideEnglish(SingleBlockMachineDefinition definition) {
         return switch (definition) {
+            case BLOCK_BREAKER -> "Every 20 ticks, scans up to 16 blocks ahead and spends 500 J to break the first filter-matching block; a permanent magnet stops the scan and drops enter its nine-slot buffer.";
+            case SPRINKLER -> "Uses water across the 7x7 farmland area below it, hydrating soil and occasionally advancing crops without loading chunks.";
             case INTERNAL_COMBUSTION_ENGINE -> "Consumes fluid fuel and preserves a 70% electrical / 30% thermal split, throttling above 423.15 K and stopping at 773.15 K.";
             case GEOTHERMAL_PUMP -> "Extends drill pipe only through loaded chunks, then converts discovered lava sources to obsidian on demand to produce heat.";
             case BOX -> "Provides 27 wooden storage slots with item automation on every side.";

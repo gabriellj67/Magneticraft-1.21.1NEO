@@ -7,6 +7,8 @@ import java.util.Set;
  * Stable identifiers and player-facing metadata for the legacy single-block inventory.
  */
 public enum SingleBlockMachineDefinition {
+    BLOCK_BREAKER("block_breaker", "Block Breaker", "方块破坏器", 9, 9, true, FacingMode.HORIZONTAL, false),
+    SPRINKLER("sprinkler", "Sprinkler", "洒水器", 0, 0, true, FacingMode.NONE, false),
     BOX("wooden_crate", "Wooden Crate", "木箱", 27, 0, true, FacingMode.NONE, false),
     SLUICE_BOX("sluice_box", "Sluice Box", "淘洗槽", 1, 0, false, FacingMode.HORIZONTAL, true),
     FABRICATOR("fabricator", "Fabricator", "装配台", 9, 9, true, FacingMode.NONE, false),
@@ -112,6 +114,7 @@ public enum SingleBlockMachineDefinition {
             case BOX -> repeated(SlotRole.STORAGE, 27);
             case SLUICE_BOX, FEEDING_TROUGH -> List.of(SlotRole.INPUT);
             case FABRICATOR, RELAY -> repeated(SlotRole.STORAGE, inventorySlots);
+            case BLOCK_BREAKER -> repeated(SlotRole.OUTPUT, inventorySlots);
             case FILTER -> List.of(SlotRole.INTERNAL_BUFFER);
             case INSERTER -> List.of(SlotRole.CARRIED, SlotRole.UPGRADE, SlotRole.UPGRADE);
             case COMBUSTION_CHAMBER -> List.of(SlotRole.FUEL);
@@ -132,9 +135,9 @@ public enum SingleBlockMachineDefinition {
         };
     }
 
-    /** Released Nova single-block machines did not gate their work on redstone. */
+    /** Stable redstone behavior exposed by the guide and runtime implementation. */
     public RedstoneControl redstoneControl() {
-        return RedstoneControl.IGNORED;
+        return this == BLOCK_BREAKER ? RedstoneControl.REQUIRES_NO_SIGNAL : RedstoneControl.IGNORED;
     }
 
     /** Stable player-facing description of the capability side contract. */
@@ -167,7 +170,7 @@ public enum SingleBlockMachineDefinition {
         return switch (this) {
             case BOX, SMALL_TANK -> "storage";
             case SLUICE_BOX, FABRICATOR, GASIFICATION_UNIT, BRICK_FURNACE -> "processing";
-            case FEEDING_TROUGH, INSERTER, RELAY, FILTER, TRANSPOSER, AIRLOCK -> "utility";
+            case FEEDING_TROUGH, INSERTER, BLOCK_BREAKER, SPRINKLER, RELAY, FILTER, TRANSPOSER, AIRLOCK -> "utility";
             default -> "energy";
         };
     }
@@ -202,7 +205,8 @@ public enum SingleBlockMachineDefinition {
     }
 
     public enum RedstoneControl {
-        IGNORED
+        IGNORED,
+        REQUIRES_NO_SIGNAL
     }
 
     public enum AutomationProfile {
