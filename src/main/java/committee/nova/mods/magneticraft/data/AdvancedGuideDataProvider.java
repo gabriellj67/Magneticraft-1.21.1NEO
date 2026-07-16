@@ -234,6 +234,7 @@ final class AdvancedGuideDataProvider implements DataProvider {
         ));
         items.add(portableItem("voltmeter", 0, 0, 0, 0));
         items.add(portableItem("thermometer", 0, 0, 0, 0));
+        items.add(portableItem("pressure_gauge", 0, 0, 0, 0));
         items.add(portableItem(
                 "oil_prospector",
                 OilProspectorItem.ENERGY_CAPACITY_JOULES,
@@ -261,6 +262,8 @@ final class AdvancedGuideDataProvider implements DataProvider {
         items.add(electricEquipmentItem("iron_fluid_pipe", true));
         items.add(electricEquipmentItem("pneumatic_tube", true));
         items.add(electricEquipmentItem("pneumatic_restriction_tube", true));
+        items.add(electricEquipmentItem("brass_pressure_pipe", true));
+        items.add(electricEquipmentItem("pressure_tank", true));
         items.add(electricEquipmentItem("conveyor_belt", true));
         items.add(electricEquipmentItem("inserter_speed_upgrade", false));
         items.add(electricEquipmentItem("inserter_stack_upgrade", false));

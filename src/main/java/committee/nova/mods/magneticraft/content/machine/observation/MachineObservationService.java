@@ -72,6 +72,7 @@ public final class MachineObservationService {
 
         Optional<MachineObservation.ElectricalStatus> electrical = Optional.empty();
         Optional<MachineObservation.ThermalStatus> thermal = Optional.empty();
+        Optional<MachineObservation.PressureStatus> pressure = Optional.empty();
         if (blockEntity instanceof DiagnosticHost diagnostics) {
             Direction observedSide = side == null ? Direction.UP : side;
             electrical = diagnostics.electricalReading(observedSide).map(reading ->
@@ -94,9 +95,18 @@ public final class MachineObservationService {
             thermal = diagnostics.thermalReading(observedSide).map(reading ->
                     new MachineObservation.ThermalStatus(reading.temperatureKelvin())
             );
+            pressure = diagnostics.pressureReading(observedSide).map(reading ->
+                    new MachineObservation.PressureStatus(
+                            reading.gasId(),
+                            reading.pressureKpa(),
+                            reading.gasKpaLiters(),
+                            reading.capacityKpaLiters(),
+                            reading.fillRatio()
+                    )
+            );
         }
 
-        return new MachineObservation(process, energy, electrical, thermal, tanks, structure);
+        return new MachineObservation(process, energy, electrical, thermal, pressure, tanks, structure);
     }
 
     private static Optional<MachineObservation.EnergyStatus> energy(@Nullable EnergyStorageModule energy) {

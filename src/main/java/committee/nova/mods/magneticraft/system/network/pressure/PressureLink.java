@@ -1,5 +1,7 @@
 package committee.nova.mods.magneticraft.system.network.pressure;
 
+import net.minecraft.resources.ResourceLocation;
+
 /**
  * Conservative gas equalization between two pressure volumes.
  */
@@ -21,6 +23,11 @@ public final class PressureLink {
         }
         PressureNode source = first.pressureKpa() >= second.pressureKpa() ? first : second;
         PressureNode target = source == first ? second : first;
+        ResourceLocation sourceGas = source.gasId().orElse(null);
+        ResourceLocation targetGas = target.gasId().orElse(null);
+        if (sourceGas == null || targetGas != null && !sourceGas.equals(targetGas)) {
+            return Transfer.ZERO;
+        }
         double difference = source.pressureKpa() - target.pressureKpa();
         if (difference <= EPSILON) {
             return Transfer.ZERO;
@@ -38,9 +45,9 @@ public final class PressureLink {
             return Transfer.ZERO;
         }
 
-        withdrawn = source.removeGas(withdrawn, false);
+        withdrawn = source.extract(sourceGas, withdrawn, false).gasKpaLiters();
         double leaked = withdrawn * leakFraction;
-        double delivered = target.addGas(withdrawn - leaked, false);
+        double delivered = target.insert(new PressureGasStack(sourceGas, withdrawn - leaked), false);
         return new Transfer(withdrawn, delivered, leaked, source == first);
     }
 

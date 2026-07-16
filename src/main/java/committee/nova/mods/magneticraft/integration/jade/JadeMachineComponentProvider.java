@@ -64,6 +64,19 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
                 "tooltip.magneticraft.jade.temperature",
                 decimal(thermal.temperatureKelvin())
         )));
+        observation.pressure().ifPresent(pressure -> tooltip.add(Component.translatable(
+                "tooltip.magneticraft.jade.pressure",
+                pressure.gasId().map(ResourceLocation::toString).orElseGet(() ->
+                        Component.translatable("tooltip.magneticraft.jade.empty").getString()),
+                decimal(pressure.pressureKpa()),
+                decimal(pressure.gasKpaLiters()),
+                decimal(pressure.capacityKpaLiters())
+        )));
+        observation.pressure().filter(MachineObservation.PressureStatus::warning)
+                .ifPresent(pressure -> tooltip.add(Component.translatable(
+                        "tooltip.magneticraft.jade.pressure_warning",
+                        percent(pressure.fillRatio())
+                )));
         for (MachineObservation.TankStatus tank : observation.tanks()) {
             tooltip.add(Component.translatable(
                     "tooltip.magneticraft.jade.tank",

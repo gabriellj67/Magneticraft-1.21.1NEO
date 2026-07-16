@@ -45,7 +45,7 @@ public final class MachineModuleContainer {
             }
             CompoundTag moduleTag = root.getCompound(key);
             if (!moduleTag.contains(SCHEMA_VERSION_TAG, Tag.TAG_INT)
-                    || moduleTag.getInt(SCHEMA_VERSION_TAG) != module.persistenceSchemaVersion()) {
+                    || !module.canLoadPersistenceSchema(moduleTag.getInt(SCHEMA_VERSION_TAG))) {
                 module.resetPersistentState();
                 return;
             }

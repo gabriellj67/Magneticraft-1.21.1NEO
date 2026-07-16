@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlock;
 import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntity;
@@ -14,6 +15,9 @@ import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBl
 import committee.nova.mods.magneticraft.content.network.module.ConveyorRoute;
 import committee.nova.mods.magneticraft.content.network.module.FluidPipeModule;
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeBlockEntity;
+import committee.nova.mods.magneticraft.content.network.pressure.BrassPressurePipeBlockEntity;
+import committee.nova.mods.magneticraft.content.network.pressure.PressureTankBlockEntity;
+import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
@@ -216,7 +220,7 @@ public final class PhysicalNetworkGameTests {
             helper.setBlock(MIDDLE, ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get());
             PneumaticTubeBlockEntity source = require(helper, FIRST, PneumaticTubeBlockEntity.class);
             PneumaticTubeBlockEntity target = require(helper, MIDDLE, PneumaticTubeBlockEntity.class);
-            source.pressure().node().setPressureKpa(600.0D);
+            source.pressure().node().setPressureKpa(Magneticraft.id("steam"), 600.0D);
             double gasBefore = source.pressure().node().gasKpaLiters() + target.pressure().node().gasKpaLiters();
 
             helper.runAfterDelay(3, () -> {
@@ -225,6 +229,43 @@ public final class PhysicalNetworkGameTests {
                 helper.assertTrue(target.pressure().node().pressureKpa() > 0.0D, "Restriction tube did not transmit pressure");
                 helper.succeed();
             });
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void typedPressureTankConvertsOnlyGasAndFeedsBrassPipe(GameTestHelper helper) {
+        helper.setBlock(FIRST, ModNetworkBlocks.PRESSURE_TANK.get());
+        helper.setBlock(MIDDLE, ModNetworkBlocks.BRASS_PRESSURE_PIPE.get());
+        refreshConduit(helper, MIDDLE);
+        PressureTankBlockEntity tank = require(helper, FIRST, PressureTankBlockEntity.class);
+        IFluidHandler west = tank.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.WEST)
+                .orElseThrow(AssertionError::new);
+        IFluidHandler east = tank.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.EAST)
+                .orElseThrow(AssertionError::new);
+        FluidStack steam = new FluidStack(ModFluids.get(FluidDefinition.STEAM).source().get(), 1_000);
+
+        helper.assertTrue(west.fill(new FluidStack(Fluids.WATER, 1_000), IFluidHandler.FluidAction.EXECUTE) == 0,
+                "Pressure tank accepted a non-gaseous fluid");
+        helper.assertTrue(west.fill(steam, IFluidHandler.FluidAction.SIMULATE) == 1_000,
+                "Pressure tank simulation rejected valid steam");
+        helper.assertTrue(tank.pressure().node().gasKpaLiters() == 0.0D,
+                "Pressure tank simulation mutated authoritative gas");
+        helper.assertTrue(east.fill(steam, IFluidHandler.FluidAction.EXECUTE) == 1_000,
+                "Pressure tank did not accept valid steam from every face");
+        double before = tank.pressure().node().gasKpaLiters();
+        helper.assertTrue(Math.abs(before - 297.6D) < 1.0E-6D,
+                "Pressure conversion did not use the fixed 293.15 K ratio");
+
+        helper.runAfterDelay(3, () -> {
+            BrassPressurePipeBlockEntity pipe = require(helper, MIDDLE, BrassPressurePipeBlockEntity.class);
+            double after = tank.pressure().node().gasKpaLiters() + pipe.pressure().node().gasKpaLiters();
+            helper.assertTrue(Math.abs(after - before) < 1.0E-6D,
+                    "Tank-to-pipe transfer did not conserve typed gas");
+            helper.assertTrue(pipe.pressure().node().gasId().filter(Magneticraft.id("steam")::equals).isPresent(),
+                    "Empty brass pipe did not adopt the incoming gas type");
+            helper.assertTrue(pipe.pressure().node().gasKpaLiters() > 0.0D,
+                    "Brass pressure pipe did not receive gas");
+            helper.succeed();
         });
     }
 
@@ -284,7 +325,7 @@ public final class PhysicalNetworkGameTests {
         });
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 55)
+    @GameTest(template = TEMPLATE, timeoutTicks = 145)
     public static void pneumaticTubeRoutesPersistedItemIntoInventory(GameTestHelper helper) {
         helper.setBlock(FIRST, ModNetworkBlocks.PNEUMATIC_TUBE.get());
         helper.setBlock(MIDDLE, ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get());
@@ -307,7 +348,7 @@ public final class PhysicalNetworkGameTests {
         restored.load(saved);
         helper.assertTrue(restored.logistics().itemsSnapshot().size() == 1, "In-flight item did not survive reload");
 
-        helper.runAfterDelay(36, () -> {
+        helper.runAfterDelay(132, () -> {
             ChestBlockEntity chest = require(helper, LAST, ChestBlockEntity.class);
             helper.assertTrue(chest.getItem(0).is(Items.IRON_INGOT), "Tube routed the wrong item");
             helper.assertTrue(chest.getItem(0).getCount() == 7, "Tube duplicated or lost item count");
@@ -316,7 +357,7 @@ public final class PhysicalNetworkGameTests {
         });
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 40)
+    @GameTest(template = TEMPLATE, timeoutTicks = 80)
     public static void pneumaticIntersectionRoundRobinsEqualPriorityOutputs(GameTestHelper helper) {
         helper.setBlock(FIRST, Blocks.CHEST);
         helper.setBlock(MIDDLE, ModNetworkBlocks.PNEUMATIC_TUBE.get());
@@ -327,7 +368,7 @@ public final class PhysicalNetworkGameTests {
         input.insertItem(0, new ItemStack(Items.IRON_INGOT), false);
         input.insertItem(0, new ItemStack(Items.GOLD_INGOT), false);
 
-        helper.runAfterDelay(20, () -> {
+        helper.runAfterDelay(70, () -> {
             ChestBlockEntity first = require(helper, FIRST, ChestBlockEntity.class);
             ChestBlockEntity last = require(helper, LAST, ChestBlockEntity.class);
             helper.assertTrue(!first.getItem(0).isEmpty(), "Round robin starved west output");

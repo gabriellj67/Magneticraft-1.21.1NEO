@@ -261,8 +261,8 @@ class AdvancedGuideDataProviderTest {
     void portableItemGuideCapturesTheRestoredEnergyContracts() {
         JsonArray items = AdvancedGuideDataProvider.portableItemGuide().getAsJsonArray("items");
 
-        assertEquals(35, items.size());
-        assertEquals(35, items.asList().stream()
+        assertEquals(38, items.size());
+        assertEquals(38, items.asList().stream()
                 .map(element -> element.getAsJsonObject().get("id").getAsString())
                 .distinct()
                 .count());
@@ -276,6 +276,8 @@ class AdvancedGuideDataProviderTest {
         assertEquals(ElectricPistonItem.PUSH_COST, piston.get("use_cost_fe").getAsInt());
         JsonObject voltmeter = item(items, "magneticraft:voltmeter");
         assertEquals(0, voltmeter.get("capacity_fe").getAsInt());
+        JsonObject pressureGauge = item(items, "magneticraft:pressure_gauge");
+        assertEquals(0, pressureGauge.get("capacity_fe").getAsInt());
         for (String id : List.of(
                 "copper_wire_coil",
                 "electric_connector",
@@ -297,6 +299,8 @@ class AdvancedGuideDataProviderTest {
                 "iron_fluid_pipe",
                 "pneumatic_tube",
                 "pneumatic_restriction_tube",
+                "brass_pressure_pipe",
+                "pressure_tank",
                 "conveyor_belt",
                 "inserter_speed_upgrade",
                 "inserter_stack_upgrade",

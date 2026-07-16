@@ -57,7 +57,7 @@ public final class PneumaticTubeRenderer implements BlockEntityRenderer<Pneumati
     private static double[] offset(LogisticsTubeModule.TravelingItemView item, float interpolationTicks) {
         double progress = Math.min(
                 LogisticsTubeModule.MAX_PROGRESS,
-                item.progress() + interpolationTicks * LogisticsTubeModule.PROGRESS_PER_TICK
+                item.progress() + interpolationTicks * item.progressPerTick()
         );
         Direction direction;
         double distance;

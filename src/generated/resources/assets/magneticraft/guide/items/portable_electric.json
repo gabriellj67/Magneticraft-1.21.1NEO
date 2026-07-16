@@ -66,6 +66,15 @@
     {
       "attack_cost_fe": 0,
       "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.pressure_gauge.description",
+      "id": "magneticraft:pressure_gauge",
+      "translation_key": "item.magneticraft.pressure_gauge",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
       "capacity_fe": 25000,
       "description": "guide.magneticraft.item.oil_prospector.description",
       "id": "magneticraft:oil_prospector",
@@ -250,6 +259,24 @@
       "description": "guide.magneticraft.item.pneumatic_restriction_tube.description",
       "id": "magneticraft:pneumatic_restriction_tube",
       "translation_key": "block.magneticraft.pneumatic_restriction_tube",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.brass_pressure_pipe.description",
+      "id": "magneticraft:brass_pressure_pipe",
+      "translation_key": "block.magneticraft.brass_pressure_pipe",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.pressure_tank.description",
+      "id": "magneticraft:pressure_tank",
+      "translation_key": "block.magneticraft.pressure_tank",
       "use_cost_fe": 0
     },
     {

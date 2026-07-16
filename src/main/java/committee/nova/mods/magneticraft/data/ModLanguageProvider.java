@@ -74,6 +74,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModMachineItems.VOLTMETER.get(), chinese ? "电压表" : "Voltmeter");
         add(ModMachineItems.THERMOMETER.get(), chinese ? "温度计" : "Thermometer");
         add(ModMachineItems.OIL_PROSPECTOR.get(), chinese ? "油量探测器" : "Oil Prospector");
+        add(ModMachineItems.PRESSURE_GAUGE.get(), chinese ? "压力表" : "Pressure Gauge");
         add(ModMachineItems.INSERTER_SPEED_UPGRADE.get(), chinese ? "机械臂速度升级" : "Inserter Speed Upgrade");
         add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂批量升级" : "Inserter Stack Upgrade");
         add("container.magneticraft.battery_box", chinese ? "电池箱" : "Battery Box");
@@ -81,6 +82,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("container.magneticraft.box_transformer", chinese ? "箱式变压器" : "Box Transformer");
         add("container.magneticraft.fuse_box", chinese ? "保险丝盒" : "Fuse Box");
         add("container.magneticraft.circuit_breaker", chinese ? "断路器" : "Circuit Breaker");
+        add("container.magneticraft.pressure_tank", chinese ? "压力罐" : "Pressure Tank");
         ModMachineBlocks.machines().forEach((definition, holder) -> {
             add(holder.get(), chinese ? definition.chineseName() : definition.englishName());
             add(
@@ -138,6 +140,8 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModNetworkBlocks.IRON_PIPE.get(), chinese ? "铁质流体管" : "Iron Fluid Pipe");
         add(ModNetworkBlocks.PNEUMATIC_TUBE.get(), chinese ? "气动管" : "Pneumatic Tube");
         add(ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(), chinese ? "气动限制管" : "Pneumatic Restriction Tube");
+        add(ModNetworkBlocks.BRASS_PRESSURE_PIPE.get(), chinese ? "黄铜压力管" : "Brass Pressure Pipe");
+        add(ModNetworkBlocks.PRESSURE_TANK.get(), chinese ? "压力罐" : "Pressure Tank");
         add(ModNetworkBlocks.CONVEYOR_BELT.get(), chinese ? "传送带" : "Conveyor Belt");
 
         add("message.magneticraft.connection_enabled", chinese ? "%s 连接已启用" : "%s connection enabled");
@@ -201,6 +205,10 @@ final class ModLanguageProvider extends LanguageProvider {
         add("fault.magneticraft.breaker_tripped", chinese ? "断路器跳闸" : "breaker tripped");
         add("fault.magneticraft.redstone_open", chinese ? "红石强制断开" : "redstone-forced open");
         add("message.magneticraft.thermometer", chinese ? "%s °C" : "%s °C");
+        add("message.magneticraft.pressure_gauge", chinese
+                ? "%s：%s kPa（%s bar / %s psi）· %s/%s kPa·L%s"
+                : "%s: %s kPa (%s bar / %s psi) · %s/%s kPa·L%s");
+        add("message.magneticraft.pressure_gauge.warning", chinese ? " · 压力接近额定上限" : " · near rated pressure");
         add("message.magneticraft.voltage", chinese ? "电压：%s V" : "Voltage: %s V");
         add("message.magneticraft.long_distance_connections", chinese
                 ? "长距离连接：%s"
@@ -231,6 +239,12 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "负载 %s · 过载度 %s · %s · %s"
                 : "Load %s · thermal stress %s · %s · %s");
         add("tooltip.magneticraft.jade.temperature", chinese ? "温度：%s K" : "Temperature: %s K");
+        add("tooltip.magneticraft.jade.pressure", chinese
+                ? "%s：%s kPa · %s/%s kPa·L"
+                : "%s: %s kPa · %s/%s kPa·L");
+        add("tooltip.magneticraft.jade.pressure_warning", chinese
+                ? "警告：压力已达额定容量的 %s"
+                : "Warning: pressure is at %s of rated capacity");
         add("tooltip.magneticraft.jade.tank", chinese ? "%s：%s / %s mB" : "%s: %s / %s mB");
         add("tooltip.magneticraft.jade.empty", chinese ? "空" : "Empty");
         add("tooltip.magneticraft.jade.structure", chinese ? "结构：%s，%s" : "Structure: %s, %s");
@@ -287,6 +301,14 @@ final class ModLanguageProvider extends LanguageProvider {
         add("tooltip.magneticraft.small_tank.line_0", chinese
                 ? "装有 %s mB %s"
                 : "Holding %s mB of %s");
+        add("gui.magneticraft.pressure.value", chinese
+                ? "压力：%s kPa / %s bar / %s psi"
+                : "Pressure: %s kPa / %s bar / %s psi");
+        add("gui.magneticraft.pressure.amount", chinese
+                ? "存量：%s / %s kPa·L"
+                : "Amount: %s / %s kPa·L");
+        add("gui.magneticraft.pressure.warning", chinese ? "警告：压力接近额定上限" : "Warning: near rated pressure");
+        add("gui.magneticraft.pressure.empty", chinese ? "空" : "Empty");
 
         ModItems.materials().forEach((form, metals) -> metals.forEach((metal, holder) ->
                 add(holder.get(), chinese ? form.chineseName(metal) : form.englishName(metal))
@@ -499,6 +521,13 @@ final class ModLanguageProvider extends LanguageProvider {
         add("guide.magneticraft.item.thermometer.description", chinese
                 ? "以一位小数的摄氏度读取热力节点温度。"
                 : "Reads a thermal node's temperature in Celsius with one decimal place.");
+        add("guide.magneticraft.item.pressure_gauge.description", chinese
+                ? "按点击面读取气体类型、kPa、bar、psi、存量与容量；不支持的面不会拦截交互。"
+                : "Reads gas type, kPa, bar, psi, amount, and capacity from the clicked face; unsupported faces do not consume the interaction.");
+        addGuideItemDescription("brass_pressure_pipe", "输送单一类型气体；容量 2 L，额定压力 20,000 kPa。",
+                "Carries one gas type with 2 L volume and a 20,000 kPa rating.");
+        addGuideItemDescription("pressure_tank", "储存单一类型气体；容量 16 L，所有面均可连接压力网络与气态流体管线。",
+                "Stores one gas type in 16 L and connects pressure networks and gaseous fluid handlers on every face.");
         add("guide.magneticraft.item.copper_wire_coil.description", chinese
                 ? "潜行右击选择第一个端点，再右击同层级、同端口且同维度的端点建立连接；无效连接不消耗线卷。"
                 : "Sneak-use a first endpoint, then use an endpoint with the same tier, port type, and dimension; invalid links do not consume the coil.");

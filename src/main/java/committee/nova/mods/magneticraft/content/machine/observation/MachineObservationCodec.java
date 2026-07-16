@@ -16,13 +16,14 @@ import java.util.Optional;
  */
 public final class MachineObservationCodec {
     public static final String ROOT_KEY = Magneticraft.MOD_ID;
-    public static final int SCHEMA_VERSION = 3;
+    public static final int SCHEMA_VERSION = 4;
 
     private static final String SCHEMA_VERSION_KEY = "schema_version";
     private static final String PROCESS_KEY = "process";
     private static final String ENERGY_KEY = "energy";
     private static final String ELECTRICAL_KEY = "electrical";
     private static final String THERMAL_KEY = "thermal";
+    private static final String PRESSURE_KEY = "pressure";
     private static final String TANKS_KEY = "tanks";
     private static final String STRUCTURE_KEY = "structure";
 
@@ -40,6 +41,7 @@ public final class MachineObservationCodec {
         observation.energy().ifPresent(energy -> root.put(ENERGY_KEY, writeEnergy(energy)));
         observation.electrical().ifPresent(electrical -> root.put(ELECTRICAL_KEY, writeElectrical(electrical)));
         observation.thermal().ifPresent(thermal -> root.put(THERMAL_KEY, writeThermal(thermal)));
+        observation.pressure().ifPresent(pressure -> root.put(PRESSURE_KEY, writePressure(pressure)));
         if (!observation.tanks().isEmpty()) {
             ListTag tanks = new ListTag();
             observation.tanks().forEach(tank -> tanks.add(writeTank(tank)));
@@ -63,6 +65,7 @@ public final class MachineObservationCodec {
                 readEnergy(root),
                 readElectrical(root),
                 readThermal(root),
+                readPressure(root),
                 readTanks(root),
                 readStructure(root)
         );
@@ -106,6 +109,16 @@ public final class MachineObservationCodec {
     private static CompoundTag writeThermal(MachineObservation.ThermalStatus thermal) {
         CompoundTag tag = new CompoundTag();
         tag.putDouble("temperature_kelvin", thermal.temperatureKelvin());
+        return tag;
+    }
+
+    private static CompoundTag writePressure(MachineObservation.PressureStatus pressure) {
+        CompoundTag tag = new CompoundTag();
+        pressure.gasId().ifPresent(id -> tag.putString("gas_id", id.toString()));
+        tag.putDouble("pressure_kpa", pressure.pressureKpa());
+        tag.putDouble("gas_kpa_liters", pressure.gasKpaLiters());
+        tag.putDouble("capacity_kpa_liters", pressure.capacityKpaLiters());
+        tag.putDouble("fill_ratio", pressure.fillRatio());
         return tag;
     }
 
@@ -193,6 +206,21 @@ public final class MachineObservationCodec {
         }
         return Optional.of(new MachineObservation.ThermalStatus(
                 root.getCompound(THERMAL_KEY).getDouble("temperature_kelvin")
+        ));
+    }
+
+    private static Optional<MachineObservation.PressureStatus> readPressure(CompoundTag root) {
+        if (!root.contains(PRESSURE_KEY, Tag.TAG_COMPOUND)) {
+            return Optional.empty();
+        }
+        CompoundTag tag = root.getCompound(PRESSURE_KEY);
+        Optional<ResourceLocation> gasId = Optional.ofNullable(boundedId(tag, "gas_id"));
+        return Optional.of(new MachineObservation.PressureStatus(
+                gasId,
+                tag.getDouble("pressure_kpa"),
+                tag.getDouble("gas_kpa_liters"),
+                tag.getDouble("capacity_kpa_liters"),
+                tag.getDouble("fill_ratio")
         ));
     }
 

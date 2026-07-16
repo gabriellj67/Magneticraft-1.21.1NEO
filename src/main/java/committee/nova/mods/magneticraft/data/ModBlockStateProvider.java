@@ -145,6 +145,12 @@ final class ModBlockStateProvider extends BlockStateProvider {
         legacyConduitBlock(ModNetworkBlocks.IRON_PIPE.get(), "iron_fluid_pipe");
         legacyConduitBlock(ModNetworkBlocks.PNEUMATIC_TUBE.get(), "pneumatic_tube");
         legacyConduitBlock(ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(), "pneumatic_restriction_tube");
+        brassPressurePipeBlock();
+        simpleBlockWithItem(
+                ModNetworkBlocks.PRESSURE_TANK.get(),
+                models().cubeAll("pressure_tank", modLoc("blocks/fluid_machines/pressure_tank"))
+                        .renderType(CUTOUT_RENDER_TYPE)
+        );
 
         Block heatSink = ModNetworkBlocks.HEAT_SINK.get();
         ModelFile heatSinkModel = mcxModel(
@@ -525,6 +531,85 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 .addModel()
                 .end();
         addConduitArms(multipart, artifactName, sourceName, particle, false);
+    }
+
+    private void brassPressurePipeBlock() {
+        Block block = ModNetworkBlocks.BRASS_PRESSURE_PIPE.get();
+        ResourceLocation texture = modLoc("blocks/fluid_machines/brass_pressure_pipe");
+        MultiPartBlockStateBuilder multipart = getMultipartBuilder(block);
+        multipart.part()
+                .modelFile(cuboidModel("brass_pressure_pipe_center", texture, 4, 4, 4, 12, 12, 12))
+                .addModel()
+                .end();
+        addPressurePipeArm(multipart, Direction.DOWN, texture, 4, 0, 4, 12, 4, 12);
+        addPressurePipeArm(multipart, Direction.UP, texture, 4, 12, 4, 12, 16, 12);
+        addPressurePipeArm(multipart, Direction.NORTH, texture, 4, 4, 0, 12, 12, 4);
+        addPressurePipeArm(multipart, Direction.SOUTH, texture, 4, 4, 12, 12, 12, 16);
+        addPressurePipeArm(multipart, Direction.WEST, texture, 0, 4, 4, 4, 12, 12);
+        addPressurePipeArm(multipart, Direction.EAST, texture, 12, 4, 4, 16, 12, 12);
+
+        BlockModelBuilder inventory = models().withExistingParent("brass_pressure_pipe", mcLoc("block/block"))
+                .texture("particle", texture)
+                .texture("all", texture);
+        addCuboid(inventory, 4, 4, 4, 12, 12, 12);
+        addCuboid(inventory, 4, 0, 4, 12, 4, 12);
+        addCuboid(inventory, 4, 12, 4, 12, 16, 12);
+        simpleBlockItem(block, inventory);
+    }
+
+    private void addPressurePipeArm(
+            MultiPartBlockStateBuilder multipart,
+            Direction direction,
+            ResourceLocation texture,
+            float fromX,
+            float fromY,
+            float fromZ,
+            float toX,
+            float toY,
+            float toZ
+    ) {
+        multipart.part()
+                .modelFile(cuboidModel(
+                        "brass_pressure_pipe_" + direction.getName(),
+                        texture,
+                        fromX, fromY, fromZ, toX, toY, toZ
+                ))
+                .addModel()
+                .condition(ConduitBlock.property(direction), true)
+                .end();
+    }
+
+    private BlockModelBuilder cuboidModel(
+            String name,
+            ResourceLocation texture,
+            float fromX,
+            float fromY,
+            float fromZ,
+            float toX,
+            float toY,
+            float toZ
+    ) {
+        BlockModelBuilder model = models().withExistingParent(name, mcLoc("block/block"))
+                .texture("particle", texture)
+                .texture("all", texture);
+        addCuboid(model, fromX, fromY, fromZ, toX, toY, toZ);
+        return model;
+    }
+
+    private static void addCuboid(
+            BlockModelBuilder model,
+            float fromX,
+            float fromY,
+            float fromZ,
+            float toX,
+            float toY,
+            float toZ
+    ) {
+        model.element()
+                .from(fromX, fromY, fromZ)
+                .to(toX, toY, toZ)
+                .allFaces((direction, face) -> face.texture("#all"))
+                .end();
     }
 
     private void pneumaticConduitBlock(

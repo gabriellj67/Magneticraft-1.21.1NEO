@@ -22,6 +22,8 @@ import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity
 import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlockEntity;
 import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBlockEntity;
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeBlockEntity;
+import committee.nova.mods.magneticraft.content.network.pressure.BrassPressurePipeBlockEntity;
+import committee.nova.mods.magneticraft.content.network.pressure.PressureTankBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -196,6 +198,22 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             PneumaticTubeBlockEntity::new,
                             ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<BrassPressurePipeBlockEntity>> BRASS_PRESSURE_PIPE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "brass_pressure_pipe",
+                    () -> BlockEntityType.Builder.of(
+                            BrassPressurePipeBlockEntity::new,
+                            ModNetworkBlocks.BRASS_PRESSURE_PIPE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<PressureTankBlockEntity>> PRESSURE_TANK =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "pressure_tank",
+                    () -> BlockEntityType.Builder.of(
+                            PressureTankBlockEntity::new,
+                            ModNetworkBlocks.PRESSURE_TANK.get()
                     ).build(null)
             );
     public static final RegistryObject<BlockEntityType<ConveyorBeltBlockEntity>> CONVEYOR_BELT =

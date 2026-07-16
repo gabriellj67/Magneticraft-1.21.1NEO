@@ -5,6 +5,8 @@ import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeB
 import committee.nova.mods.magneticraft.system.network.logistics.ItemHandlerTransactions;
 import committee.nova.mods.magneticraft.system.network.logistics.LogisticsNetworkNode;
 import committee.nova.mods.magneticraft.system.network.logistics.LogisticsRouteDecision;
+import committee.nova.mods.magneticraft.system.network.pressure.PressureLogisticsMath;
+import committee.nova.mods.magneticraft.system.network.pressure.PressureNode;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkManager;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkNode;
@@ -35,8 +37,6 @@ import java.util.Optional;
 public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule implements LogisticsNetworkNode {
     public static final int MAX_PROGRESS = 128;
     public static final int CENTER_PROGRESS = MAX_PROGRESS / 2;
-    /** Eight ticks to the center and eight more to the exit. */
-    public static final int PROGRESS_PER_TICK = 8;
     public static final int MAX_PAYLOADS = 64;
     public static final int MAX_ROUTE_VISITS = PhysicalNetworkManager.MAX_LOGISTICS_ROUTE_VISITS;
 
@@ -68,14 +68,20 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
     }
 
     public List<TravelingItemView> itemsSnapshot() {
+        double movement = currentProgressPerTick();
         return items.stream()
                 .map(item -> new TravelingItemView(
                         item.stack.copy(),
                         item.progress,
                         item.incoming,
-                        item.outgoing
+                        item.outgoing,
+                        movement
                 ))
                 .toList();
+    }
+
+    public double currentProgressPerTick() {
+        return PressureLogisticsMath.progressPerTick(pressureNode().pressureKpa());
     }
 
     public long clientSnapshotTick() {
@@ -128,6 +134,7 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
         boolean changed = false;
         boolean structuralChange = false;
         List<TravelingItem> removed = new ArrayList<>();
+        double progressPerTick = currentProgressPerTick();
 
         for (TravelingItem item : List.copyOf(items)) {
             if (item.lastMovedTick == gameTime) {
@@ -136,22 +143,27 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
             item.lastMovedTick = gameTime;
 
             if (item.progress < CENTER_PROGRESS) {
-                item.progress = Math.min(CENTER_PROGRESS, item.progress + PROGRESS_PER_TICK);
+                item.progress = Math.min(CENTER_PROGRESS, item.progress + progressPerTick);
                 changed = true;
-                if (item.progress == CENTER_PROGRESS) {
+                if (item.progress >= CENTER_PROGRESS) {
                     structuralChange |= chooseRoute(manager, item);
                 }
                 // Reaching the center and entering the outgoing half are distinct tick phases.
                 continue;
             }
-            if (item.progress == CENTER_PROGRESS && item.outgoing == null) {
+            if (item.progress >= CENTER_PROGRESS && item.outgoing == null) {
                 structuralChange |= chooseRoute(manager, item);
             }
             if (item.outgoing != null && item.progress < MAX_PROGRESS) {
-                item.progress = Math.min(MAX_PROGRESS, item.progress + PROGRESS_PER_TICK);
+                item.progress = Math.min(MAX_PROGRESS, item.progress + progressPerTick);
                 changed = true;
             }
             if (item.progress >= MAX_PROGRESS && item.outgoing != null) {
+                if (!item.segmentGasCharged) {
+                    consumeSegmentGas(item.stack.getCount());
+                    item.segmentGasCharged = true;
+                    changed = true;
+                }
                 TransferOutcome outcome = transferOut(manager, item, gameTime);
                 if (outcome.status() == TransferStatus.REMOVED) {
                     removed.add(item);
@@ -163,6 +175,7 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
                 } else if (outcome.status() == TransferStatus.INVALID_ROUTE) {
                     item.outgoing = null;
                     item.progress = CENTER_PROGRESS;
+                    item.segmentGasCharged = false;
                     structuralChange = true;
                 }
             }
@@ -284,6 +297,22 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
                 : new TransferOutcome(TransferStatus.PARTIAL, remainder);
     }
 
+    private PressureNode pressureNode() {
+        if (host() instanceof PneumaticTubeBlockEntity tube) {
+            return tube.pressure().node();
+        }
+        throw new IllegalStateException("Logistics tube requires a pneumatic pressure host");
+    }
+
+    private void consumeSegmentGas(int itemCount) {
+        PressureNode node = pressureNode();
+        node.gasId().ifPresent(gas -> node.extract(
+                gas,
+                PressureLogisticsMath.segmentCostKpaLiters(itemCount),
+                false
+        ));
+    }
+
     private boolean enqueue(ItemStack stack, Direction incoming, long gameTime) {
         if (stack.isEmpty() || items.size() >= MAX_PAYLOADS || !isSideEnabled(incoming)) {
             return false;
@@ -311,21 +340,23 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
 
     public record TravelingItemView(
             ItemStack stack,
-            int progress,
+            double progress,
             Direction incoming,
-            @Nullable Direction outgoing
+            @Nullable Direction outgoing,
+            double progressPerTick
     ) {
     }
 
     private static final class TravelingItem {
         private ItemStack stack;
-        private int progress;
+        private double progress;
         private Direction incoming;
         @Nullable
         private Direction outgoing;
+        private boolean segmentGasCharged;
         private long lastMovedTick = Long.MIN_VALUE;
 
-        private TravelingItem(ItemStack stack, int progress, Direction incoming, @Nullable Direction outgoing) {
+        private TravelingItem(ItemStack stack, double progress, Direction incoming, @Nullable Direction outgoing) {
             this.stack = stack;
             this.progress = Math.max(0, Math.min(MAX_PROGRESS, progress));
             this.incoming = incoming;
@@ -335,9 +366,10 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
         private CompoundTag save() {
             CompoundTag tag = new CompoundTag();
             tag.put("item", stack.save(new CompoundTag()));
-            tag.putInt("progress", progress);
+            tag.putDouble("progress", progress);
             tag.putInt("incoming", incoming.ordinal());
             tag.putInt("outgoing", outgoing == null ? -1 : outgoing.ordinal());
+            tag.putBoolean("segment_gas_charged", segmentGasCharged);
             return tag;
         }
 
@@ -345,12 +377,14 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
             Direction incoming = direction(tag.getInt("incoming"), Direction.UP);
             int outgoingOrdinal = tag.getInt("outgoing");
             Direction outgoing = outgoingOrdinal < 0 ? null : direction(outgoingOrdinal, null);
-            return new TravelingItem(
+            TravelingItem item = new TravelingItem(
                     ItemStack.of(tag.getCompound("item")),
-                    tag.getInt("progress"),
+                    tag.getDouble("progress"),
                     incoming,
                     outgoing
             );
+            item.segmentGasCharged = tag.getBoolean("segment_gas_charged");
+            return item;
         }
 
         @Nullable

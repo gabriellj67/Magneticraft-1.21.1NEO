@@ -82,6 +82,8 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 ModNetworkBlocks.IRON_PIPE.get(),
                 ModNetworkBlocks.PNEUMATIC_TUBE.get(),
                 ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
+                ModNetworkBlocks.BRASS_PRESSURE_PIPE.get(),
+                ModNetworkBlocks.PRESSURE_TANK.get(),
                 ModNetworkBlocks.CONVEYOR_BELT.get()
         );
         tag(BlockTags.NEEDS_STONE_TOOL).add(
@@ -100,6 +102,8 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 ModNetworkBlocks.IRON_PIPE.get(),
                 ModNetworkBlocks.PNEUMATIC_TUBE.get(),
                 ModNetworkBlocks.PNEUMATIC_RESTRICTION_TUBE.get(),
+                ModNetworkBlocks.BRASS_PRESSURE_PIPE.get(),
+                ModNetworkBlocks.PRESSURE_TANK.get(),
                 ModNetworkBlocks.CONVEYOR_BELT.get()
         );
         tag(BlockTags.MINEABLE_WITH_AXE).add(

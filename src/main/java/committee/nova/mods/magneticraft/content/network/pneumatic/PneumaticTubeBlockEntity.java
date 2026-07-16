@@ -54,6 +54,12 @@ public final class PneumaticTubeBlockEntity extends NetworkComponentBlockEntity 
     }
 
     @Override
+    protected void tickComponent() {
+        syncClientState(31 * pressure.node().gasId().hashCode()
+                + Double.hashCode(pressure.node().gasKpaLiters()));
+    }
+
+    @Override
     public Component configure(Direction side, boolean secondaryAction) {
         if (secondaryAction) {
             logistics.cycleRedstoneMode();

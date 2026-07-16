@@ -25,6 +25,7 @@ class MachineObservationCodecTest {
                 Optional.of(energy),
                 Optional.empty(),
                 Optional.empty(),
+                Optional.empty(),
                 List.of(),
                 Optional.empty()
         );
@@ -58,6 +59,13 @@ class MachineObservationCodecTest {
                         ElectricalDiagnosticSource.FaultKind.NONE
                 )),
                 Optional.of(new MachineObservation.ThermalStatus(525.0D)),
+                Optional.of(new MachineObservation.PressureStatus(
+                        Optional.of(ResourceLocation.fromNamespaceAndPath("magneticraft", "steam")),
+                        100.0D,
+                        200.0D,
+                        2_000.0D,
+                        0.1D
+                )),
                 List.of(new MachineObservation.TankStatus(
                         Optional.of(ResourceLocation.fromNamespaceAndPath("magneticraft", "heavy_oil")),
                         750,
@@ -72,7 +80,7 @@ class MachineObservationCodecTest {
         assertEquals(Optional.of(observation), MachineObservationCodec.read(data));
         CompoundTag root = data.getCompound(MachineObservationCodec.ROOT_KEY);
         assertEquals(
-                Set.of("schema_version", "process", "energy", "electrical", "thermal", "tanks", "structure"),
+                Set.of("schema_version", "process", "energy", "electrical", "thermal", "pressure", "tanks", "structure"),
                 root.getAllKeys()
         );
         String encoded = root.toString();
@@ -84,6 +92,7 @@ class MachineObservationCodecTest {
     @Test
     void rejectsUnknownSchemaAndBoundsTankCount() {
         MachineObservation observation = new MachineObservation(
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -128,6 +137,7 @@ class MachineObservationCodecTest {
                         ElectricalDiagnosticSource.FlowDirection.OUTPUT,
                         ElectricalDiagnosticSource.FaultKind.NONE
                 )),
+                Optional.empty(),
                 Optional.empty(),
                 List.of(),
                 Optional.empty()

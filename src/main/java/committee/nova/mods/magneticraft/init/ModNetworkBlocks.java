@@ -18,6 +18,8 @@ import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlock;
 import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlock;
 import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBlock;
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeBlock;
+import committee.nova.mods.magneticraft.content.network.pressure.BrassPressurePipeBlock;
+import committee.nova.mods.magneticraft.content.network.pressure.PressureTankBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -97,6 +99,14 @@ public final class ModNetworkBlocks {
     public static final RegistryObject<Block> PNEUMATIC_RESTRICTION_TUBE = register(
             "pneumatic_restriction_tube",
             () -> new PneumaticTubeBlock(conduitProperties(MapColor.COLOR_RED))
+    );
+    public static final RegistryObject<Block> BRASS_PRESSURE_PIPE = register(
+            "brass_pressure_pipe",
+            () -> new BrassPressurePipeBlock(conduitProperties(MapColor.COLOR_YELLOW))
+    );
+    public static final RegistryObject<Block> PRESSURE_TANK = register(
+            "pressure_tank",
+            () -> new PressureTankBlock(machineProperties())
     );
     public static final RegistryObject<Block> CONVEYOR_BELT = register(
             "conveyor_belt",

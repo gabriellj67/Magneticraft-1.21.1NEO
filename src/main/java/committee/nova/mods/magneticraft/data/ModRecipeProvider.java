@@ -739,6 +739,22 @@ final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_pneumatic_tube", has(ModNetworkBlocks.PNEUMATIC_TUBE.get()))
                 .save(consumer, id("crafting/pneumatic_restriction_tube"));
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.BRASS_PRESSURE_PIPE.get(), 8)
+                .pattern("BGB")
+                .define('B', ModTags.Items.ingot(Metal.BRASS))
+                .define('G', Tags.Items.GLASS)
+                .unlockedBy("has_brass_ingot", has(ModTags.Items.ingot(Metal.BRASS)))
+                .save(consumer, id("crafting/brass_pressure_pipe"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNetworkBlocks.PRESSURE_TANK.get())
+                .pattern("BBB")
+                .pattern("BIB")
+                .pattern("BBB")
+                .define('B', ModTags.Items.ingot(Metal.BRASS))
+                .define('I', Tags.Items.STORAGE_BLOCKS_IRON)
+                .unlockedBy("has_brass_ingot", has(ModTags.Items.ingot(Metal.BRASS)))
+                .save(consumer, id("crafting/pressure_tank"));
+
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.CONVEYOR_BELT.get(), 12)
                 .pattern("BAB")
                 .pattern("BCB")
@@ -827,6 +843,16 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('T', ModTags.Items.ingot(Metal.TUNGSTEN))
                 .unlockedBy("has_low_voltage_battery", has(ModMachineItems.LOW_BATTERY.get()))
                 .save(consumer, id("crafting/oil_prospector"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModMachineItems.PRESSURE_GAUGE.get())
+                .pattern(" B ")
+                .pattern("BGB")
+                .pattern(" R ")
+                .define('B', ModTags.Items.ingot(Metal.BRASS))
+                .define('G', Tags.Items.GLASS_PANES)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .unlockedBy("has_brass_ingot", has(ModTags.Items.ingot(Metal.BRASS)))
+                .save(consumer, id("crafting/pressure_gauge"));
     }
 
     private void addLongDistanceElectricRecipes(Consumer<FinishedRecipe> consumer) {

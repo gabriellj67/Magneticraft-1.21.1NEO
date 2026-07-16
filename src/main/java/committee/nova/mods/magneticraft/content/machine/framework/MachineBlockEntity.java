@@ -4,6 +4,7 @@ import committee.nova.mods.magneticraft.content.network.module.ElectricalNetwork
 import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
+import committee.nova.mods.magneticraft.system.network.diagnostic.PressureDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkNode;
 import net.minecraft.core.BlockPos;
@@ -149,6 +150,19 @@ public abstract class MachineBlockEntity extends BlockEntity
         for (MachineModule module : modules.values()) {
             if (module instanceof ThermalDiagnosticSource source) {
                 Optional<ThermalDiagnosticSource.ThermalReading> reading = source.thermalReading(side);
+                if (reading.isPresent()) {
+                    return reading;
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public final Optional<PressureDiagnosticSource.PressureReading> pressureReading(Direction side) {
+        for (MachineModule module : modules.values()) {
+            if (module instanceof PressureDiagnosticSource source) {
+                Optional<PressureDiagnosticSource.PressureReading> reading = source.pressureReading(side);
                 if (reading.isPresent()) {
                     return reading;
                 }

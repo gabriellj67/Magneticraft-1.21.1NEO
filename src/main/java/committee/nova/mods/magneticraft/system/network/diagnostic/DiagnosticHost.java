@@ -25,4 +25,8 @@ public interface DiagnosticHost {
     }
 
     Optional<ThermalDiagnosticSource.ThermalReading> thermalReading(Direction side);
+
+    default Optional<PressureDiagnosticSource.PressureReading> pressureReading(Direction side) {
+        return Optional.empty();
+    }
 }

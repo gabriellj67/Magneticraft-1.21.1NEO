@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "B": {
+      "tag": "forge:ingots/brass"
+    },
+    "G": {
+      "tag": "forge:glass_panes"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "pattern": [
+    " B ",
+    "BGB",
+    " R "
+  ],
+  "result": {
+    "item": "magneticraft:pressure_gauge"
+  },
+  "show_notification": true
+}

@@ -15,6 +15,7 @@ public record MachineObservation(
         Optional<EnergyStatus> energy,
         Optional<ElectricalStatus> electrical,
         Optional<ThermalStatus> thermal,
+        Optional<PressureStatus> pressure,
         List<TankStatus> tanks,
         Optional<StructureStatus> structure
 ) {
@@ -25,6 +26,7 @@ public record MachineObservation(
         energy = Objects.requireNonNull(energy);
         electrical = Objects.requireNonNull(electrical);
         thermal = Objects.requireNonNull(thermal);
+        pressure = Objects.requireNonNull(pressure);
         tanks = List.copyOf(Objects.requireNonNull(tanks).stream().limit(MAX_TANKS).toList());
         structure = Objects.requireNonNull(structure);
     }
@@ -34,6 +36,7 @@ public record MachineObservation(
                 && energy.isEmpty()
                 && electrical.isEmpty()
                 && thermal.isEmpty()
+                && pressure.isEmpty()
                 && tanks.isEmpty()
                 && structure.isEmpty();
     }
@@ -103,6 +106,26 @@ public record MachineObservation(
     public record ThermalStatus(double temperatureKelvin) {
         public ThermalStatus {
             temperatureKelvin = finiteOrZero(temperatureKelvin);
+        }
+    }
+
+    public record PressureStatus(
+            Optional<ResourceLocation> gasId,
+            double pressureKpa,
+            double gasKpaLiters,
+            double capacityKpaLiters,
+            double fillRatio
+    ) {
+        public PressureStatus {
+            gasId = Objects.requireNonNull(gasId);
+            pressureKpa = finiteNonNegativeOrZero(pressureKpa);
+            gasKpaLiters = finiteNonNegativeOrZero(gasKpaLiters);
+            capacityKpaLiters = finiteNonNegativeOrZero(capacityKpaLiters);
+            fillRatio = Math.min(1.0D, finiteNonNegativeOrZero(fillRatio));
+        }
+
+        public boolean warning() {
+            return fillRatio >= 0.9D;
         }
     }
 

@@ -18,6 +18,13 @@ public interface MachineModule {
         return 1;
     }
 
+    /**
+     * Allows a module to opt into explicit migration from an older payload.
+     */
+    default boolean canLoadPersistenceSchema(int schemaVersion) {
+        return schemaVersion == persistenceSchemaVersion();
+    }
+
     default void load(CompoundTag tag) {
     }
 

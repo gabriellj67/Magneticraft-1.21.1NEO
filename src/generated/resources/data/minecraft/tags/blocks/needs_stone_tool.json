@@ -40,6 +40,8 @@
     "magneticraft:iron_fluid_pipe",
     "magneticraft:pneumatic_tube",
     "magneticraft:pneumatic_restriction_tube",
+    "magneticraft:brass_pressure_pipe",
+    "magneticraft:pressure_tank",
     "magneticraft:conveyor_belt",
     "magneticraft:machine_casing",
     "magneticraft:corrugated_iron",
