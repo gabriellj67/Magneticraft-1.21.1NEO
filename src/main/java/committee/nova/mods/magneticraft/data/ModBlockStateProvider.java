@@ -120,6 +120,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
                         ModelSceneSelection.ALL
                 )
         );
+        simpleBlock(
+                ModMachineBlocks.GEOTHERMAL_DRILL_PIPE.get(),
+                models().cubeColumn(
+                        "geothermal_drill_pipe",
+                        modLoc("blocks/multiblock_parts/pumpjack_drill_side"),
+                        modLoc("blocks/multiblock_parts/pumpjack_drill")
+                )
+        );
 
         legacyConduitBlock(ModNetworkBlocks.ELECTRIC_CABLE.get(), "electric_cable");
         simpleBlockWithItem(
@@ -220,9 +228,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
-            ModelFile idle = definition == MultiblockDefinition.POLYMERIZER
-                    ? polymerizerControllerModel(definition.id())
-                    : models().cubeAll(definition.id(), UNMOUNTED_MULTIBLOCK_TEXTURE);
+            ModelFile idle = switch (definition) {
+                case POLYMERIZER -> polymerizerControllerModel(definition.id());
+                case STIRLING_GENERATOR -> stirlingControllerModel(definition.id());
+                default -> models().cubeAll(definition.id(), UNMOUNTED_MULTIBLOCK_TEXTURE);
+            };
             ModelFile formed = emptyModel(definition.id() + "_formed", UNMOUNTED_MULTIBLOCK_TEXTURE);
             ModelFile item = advancedControllerItemModel(definition, UNMOUNTED_MULTIBLOCK_TEXTURE);
             horizontalBlock(
@@ -395,6 +405,26 @@ final class ModBlockStateProvider extends BlockStateProvider {
                     gltfModel(definition.id() + "_inventory", "electric_engine",
                             modLoc("blocks/electric_machines/electric_engine"), ModelSceneSelection.ALL)
             );
+            case INTERNAL_COMBUSTION_ENGINE -> {
+                ModelFile model = models().orientable(
+                        definition.id(),
+                        modLoc("blocks/electric_machines/combustion_gen_side1"),
+                        modLoc("blocks/electric_machines/combustion_gen_back"),
+                        modLoc("blocks/electric_machines/combustion_gen_top")
+                ).renderType(CUTOUT_RENDER_TYPE);
+                directionalSingleBlock(block, model);
+                simpleBlockItem(block, model);
+            }
+            case GEOTHERMAL_PUMP -> {
+                ModelFile model = models().orientable(
+                        definition.id(),
+                        modLoc("block/geothermal_pump"),
+                        modLoc("block/geothermal_pump_front_off"),
+                        modLoc("block/geothermal_pump_top")
+                );
+                directionalSingleBlock(block, model);
+                simpleBlockItem(block, model);
+            }
         }
     }
 
@@ -421,6 +451,13 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 .modelFile(state.getValue(SingleBlockMachineBlock.LIT) ? on : off)
                 .build());
         simpleBlockItem(block, off);
+    }
+
+    private void directionalSingleBlock(Block block, ModelFile model) {
+        getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(model)
+                .rotationY(vanillaHorizontalRotation(state.getValue(SingleBlockMachineBlock.FACING)))
+                .build());
     }
 
     private void registerLitHorizontal(
@@ -703,6 +740,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             case SOLAR_MIRROR -> advancedMcxModel(generatedName, "solar_mirror", particle);
             case SOLAR_PANEL -> advancedMcxModel(generatedName, "solar_panel", particle);
             case SOLAR_TOWER -> advancedMcxModel(generatedName, "solar_tower", particle);
+            case STIRLING_GENERATOR -> stirlingControllerModel(generatedName);
             case STEAM_ENGINE -> advancedGltfModel(generatedName, "steam_engine", particle);
             case STEAM_TURBINE -> advancedGltfModel(generatedName, "steam_turbine", particle);
         };
@@ -711,6 +749,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
     private ModelFile polymerizerControllerModel(String name) {
         ResourceLocation side = modLoc("block/polymerizer_side");
         return models().orientable(name, side, modLoc("block/polymerizer_front"), side);
+    }
+
+    private ModelFile stirlingControllerModel(String name) {
+        return models().cubeColumn(
+                name,
+                modLoc("block/stirling_generator"),
+                modLoc("block/stirling_generator_head")
+        );
     }
 
     private ModelFile advancedMcxModel(String generatedName, String sourceName, ResourceLocation particle) {

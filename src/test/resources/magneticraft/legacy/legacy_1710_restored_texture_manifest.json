@@ -43,6 +43,36 @@
       "source": "textures/blocks/chassis.png",
       "runtime": "textures/block/polymerizer_side.png",
       "sha256": "788ad7b37f6e6166811979a3dda55469e075b34759bf9fe5feac58d184c6a2c2"
+    },
+    {
+      "source": "textures/items/oil_prospector.png",
+      "runtime": "textures/item/oil_prospector.png",
+      "sha256": "3a93912183b379f072e3dd2d2ad408543a8907435fd2fda671dfef66efa214f5"
+    },
+    {
+      "source": "textures/blocks/geothermal_pump.png",
+      "runtime": "textures/block/geothermal_pump.png",
+      "sha256": "cfcf8ac63ab221d487e1da8983c7769a487e56e0a89a2fddbf21f10d2cf4fa2d"
+    },
+    {
+      "source": "textures/blocks/geothermal_pump_top.png",
+      "runtime": "textures/block/geothermal_pump_top.png",
+      "sha256": "a9f89dee8fb847286f541fd5b82eba9a8caf148c955a6480230bd1b9719222da"
+    },
+    {
+      "source": "textures/blocks/geothermal_pump_front_off.png",
+      "runtime": "textures/block/geothermal_pump_front_off.png",
+      "sha256": "4e3d88c453aac411f677e4a01416f38c462e200a04e4b032d0931be78b7a935e"
+    },
+    {
+      "source": "textures/blocks/stirling_generator.png",
+      "runtime": "textures/block/stirling_generator.png",
+      "sha256": "cfcf8ac63ab221d487e1da8983c7769a487e56e0a89a2fddbf21f10d2cf4fa2d"
+    },
+    {
+      "source": "textures/blocks/stirling_generator_head.png",
+      "runtime": "textures/block/stirling_generator_head.png",
+      "sha256": "6b413a2bdea374d26d5856ed524904d4fe686d3b70cf377bac54a7bcc8dc414a"
     }
   ]
 }

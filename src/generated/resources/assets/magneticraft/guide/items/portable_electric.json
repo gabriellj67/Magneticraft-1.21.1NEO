@@ -66,6 +66,15 @@
     {
       "attack_cost_fe": 0,
       "break_cost_fe": 0,
+      "capacity_fe": 25000,
+      "description": "guide.magneticraft.item.oil_prospector.description",
+      "id": "magneticraft:oil_prospector",
+      "translation_key": "item.magneticraft.oil_prospector",
+      "use_cost_fe": 500
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
       "capacity_fe": 0,
       "description": "guide.magneticraft.item.copper_wire_coil.description",
       "id": "magneticraft:copper_wire_coil",

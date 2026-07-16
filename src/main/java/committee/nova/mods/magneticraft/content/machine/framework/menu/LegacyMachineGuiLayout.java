@@ -136,6 +136,7 @@ public final class LegacyMachineGuiLayout {
             case POLYMERIZER -> List.of(new Point(98, 17), new Point(98, 49));
             case BIG_ELECTRIC_FURNACE -> List.of(new Point(108, 17), new Point(108, 49));
             case BIG_COMBUSTION_CHAMBER -> List.of(new Point(104, 33));
+            case STIRLING_GENERATOR -> List.of(new Point(104, 33));
             default -> List.of();
         };
     }

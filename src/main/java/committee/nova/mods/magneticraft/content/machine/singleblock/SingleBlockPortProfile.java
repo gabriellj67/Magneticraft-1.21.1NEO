@@ -69,6 +69,12 @@ public final class SingleBlockPortProfile {
                     SingleBlockMachineDefinition.PhysicalPort.ELECTRICITY,
                     SingleBlockMachineDefinition.PhysicalPort.FORGE_ENERGY
             );
+            case INTERNAL_COMBUSTION_ENGINE -> Set.of(
+                    SingleBlockMachineDefinition.PhysicalPort.FLUID_INPUT,
+                    SingleBlockMachineDefinition.PhysicalPort.ELECTRICITY,
+                    SingleBlockMachineDefinition.PhysicalPort.HEAT
+            );
+            case GEOTHERMAL_PUMP -> Set.of(SingleBlockMachineDefinition.PhysicalPort.HEAT);
         };
     }
 
@@ -110,6 +116,9 @@ public final class SingleBlockPortProfile {
             case GASIFICATION_UNIT -> tank == 0
                     ? FluidTankModule.TankAccess.OUTPUT
                     : FluidTankModule.TankAccess.NONE;
+            case INTERNAL_COMBUSTION_ENGINE -> tank == 0 && side == Direction.UP
+                    ? FluidTankModule.TankAccess.INPUT
+                    : FluidTankModule.TankAccess.NONE;
             default -> FluidTankModule.TankAccess.NONE;
         };
     }
@@ -132,6 +141,7 @@ public final class SingleBlockPortProfile {
     ) {
         return switch (definition) {
             case ELECTRIC_HEATER, INFINITE_ENERGY, AIRLOCK, THERMOPILE, RF_TRANSFORMER, ELECTRIC_ENGINE -> true;
+            case INTERNAL_COMBUSTION_ENGINE -> side == facing.getOpposite();
             default -> false;
         };
     }
@@ -145,6 +155,8 @@ public final class SingleBlockPortProfile {
             case COMBUSTION_CHAMBER -> side == Direction.UP;
             case ELECTRIC_HEATER, RF_HEATER -> side != null && side.getAxis() == Direction.Axis.Y;
             case STEAM_BOILER, GASIFICATION_UNIT, BRICK_FURNACE -> true;
+            case INTERNAL_COMBUSTION_ENGINE -> side == Direction.DOWN;
+            case GEOTHERMAL_PUMP -> side == Direction.UP;
             default -> false;
         };
     }

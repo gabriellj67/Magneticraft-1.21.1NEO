@@ -194,7 +194,8 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
         );
         registration.addRecipeCatalysts(
                 FLUID_FUEL,
-                ModAdvancedBlocks.controller(MultiblockDefinition.BIG_COMBUSTION_CHAMBER).get()
+                ModAdvancedBlocks.controller(MultiblockDefinition.BIG_COMBUSTION_CHAMBER).get(),
+                ModMachineBlocks.machine(SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE).get()
         );
         registration.addRecipeCatalysts(
                 ADVANCED_PROCESSING,

@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.content.computer.runtime.VirtualDisk;
 import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.item.ElectricPistonItem;
 import committee.nova.mods.magneticraft.content.item.ElectricToolItem;
+import committee.nova.mods.magneticraft.content.item.OilProspectorItem;
 import committee.nova.mods.magneticraft.content.item.LowBatteryItem;
 import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
@@ -233,6 +234,13 @@ final class AdvancedGuideDataProvider implements DataProvider {
         ));
         items.add(portableItem("voltmeter", 0, 0, 0, 0));
         items.add(portableItem("thermometer", 0, 0, 0, 0));
+        items.add(portableItem(
+                "oil_prospector",
+                OilProspectorItem.ENERGY_CAPACITY_JOULES,
+                0,
+                0,
+                OilProspectorItem.SCAN_COST_JOULES
+        ));
         items.add(electricEquipmentItem("copper_wire_coil", false));
         items.add(electricEquipmentItem("electric_connector", true));
         items.add(electricEquipmentItem("electric_pole", true));

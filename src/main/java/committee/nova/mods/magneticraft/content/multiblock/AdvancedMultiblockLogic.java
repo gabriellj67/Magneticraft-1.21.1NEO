@@ -52,6 +52,10 @@ final class AdvancedMultiblockLogic {
     private static final int PUMPJACK_PIPE_CHECK_INTERVAL = 80;
     private static final int COMBUSTION_WORK_PER_TICK = 40;
     private static final double SOLID_FUEL_POWER = 10.0D;
+    private static final int STIRLING_MAX_FUEL_WORK_PER_TICK = 16;
+    private static final double STIRLING_EFFICIENCY = 0.75D;
+    private static final double STIRLING_MAX_HEAT_PER_TICK = 160.0D;
+    private static final double STIRLING_MAX_OUTPUT_PER_TICK = 120.0D;
     private static final double COMBUSTION_MAX_TEMPERATURE = 2_273.15D;
     private static final int REFINERY_STEAM_PER_TICK = 20;
 
@@ -99,6 +103,7 @@ final class AdvancedMultiblockLogic {
         switch (machine.definition()) {
             case SOLAR_PANEL -> tickSolarPanel(level);
             case SOLAR_TOWER -> tickSolarTower();
+            case STIRLING_GENERATOR -> tickStirlingGenerator();
             case STEAM_ENGINE -> tickSteamGenerator(120, 240.0D);
             case STEAM_TURBINE -> tickSteamGenerator(600, 1_200.0D);
             case GRINDER, SIEVE, HYDRAULIC_PRESS -> tickAdvancedProcessing(level);
@@ -183,6 +188,64 @@ final class AdvancedMultiblockLogic {
         );
         machine.energy().generateJoules(operations * STEAM_ENERGY_PER_OPERATION, false);
         machine.setWorking(true);
+    }
+
+    private void tickStirlingGenerator() {
+        if (machine.energy() == null || machine.heat() == null || machine.inventory() == null) {
+            return;
+        }
+        double acceptedOutput = machine.energy().generateJoules(STIRLING_MAX_OUTPUT_PER_TICK, true);
+        if (acceptedOutput <= 1.0E-9D) {
+            return;
+        }
+
+        double availableHeat = excessHeatAboveAmbient();
+        double desiredHeat = Math.min(STIRLING_MAX_HEAT_PER_TICK, acceptedOutput / STIRLING_EFFICIENCY);
+        if (availableHeat + 1.0E-9D < desiredHeat) {
+            if (machine.burnTicks() <= 0) {
+                ItemStack fuel = machine.inventory().getStackInSlot(0);
+                int burnTime = ForgeHooks.getBurnTime(fuel, RecipeType.SMELTING);
+                if (burnTime > 0) {
+                    machine.inventory().extractInternal(0, 1, false);
+                    machine.startBurn(burnTime, SOLID_FUEL_POWER);
+                }
+            }
+            if (machine.burnTicks() > 0) {
+                int requestedWork = Math.min(
+                        STIRLING_MAX_FUEL_WORK_PER_TICK,
+                        Math.max(1, (int) Math.ceil((desiredHeat - availableHeat) / SOLID_FUEL_POWER))
+                );
+                int work = machine.consumeBurnWork(requestedWork);
+                if (work > 0) {
+                    machine.heat().node().addHeat(work * SOLID_FUEL_POWER, false);
+                    availableHeat = excessHeatAboveAmbient();
+                }
+            }
+        }
+
+        double convertedHeat = Math.min(
+                Math.min(STIRLING_MAX_HEAT_PER_TICK, availableHeat),
+                acceptedOutput / STIRLING_EFFICIENCY
+        );
+        if (convertedHeat <= 1.0E-9D) {
+            return;
+        }
+        double requestedOutput = convertedHeat * STIRLING_EFFICIENCY;
+        double generated = machine.energy().generateJoules(requestedOutput, false);
+        if (generated <= 1.0E-9D) {
+            return;
+        }
+        machine.heat().node().removeHeat(generated / STIRLING_EFFICIENCY, false);
+        machine.setWorking(true);
+    }
+
+    private double excessHeatAboveAmbient() {
+        return Math.max(
+                0.0D,
+                machine.heat().node().internalEnergyJoules()
+                        - HeatNode.AMBIENT_TEMPERATURE_KELVIN
+                        * machine.heat().node().heatCapacityJoulesPerKelvin()
+        );
     }
 
     private void tickAdvancedProcessing(ServerLevel level) {

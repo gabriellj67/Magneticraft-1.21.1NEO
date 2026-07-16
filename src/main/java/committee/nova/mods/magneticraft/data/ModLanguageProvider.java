@@ -73,6 +73,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModMachineItems.ELECTRIC_PISTON.get(), chinese ? "电动活塞" : "Electric Piston");
         add(ModMachineItems.VOLTMETER.get(), chinese ? "电压表" : "Voltmeter");
         add(ModMachineItems.THERMOMETER.get(), chinese ? "温度计" : "Thermometer");
+        add(ModMachineItems.OIL_PROSPECTOR.get(), chinese ? "油量探测器" : "Oil Prospector");
         add(ModMachineItems.INSERTER_SPEED_UPGRADE.get(), chinese ? "机械臂速度升级" : "Inserter Speed Upgrade");
         add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂批量升级" : "Inserter Stack Upgrade");
         add("container.magneticraft.battery_box", chinese ? "电池箱" : "Battery Box");
@@ -100,6 +101,20 @@ final class ModLanguageProvider extends LanguageProvider {
                 chinese ? "物品不符合气动过滤样本" : "Item does not match the pneumatic filter samples"
         );
         add(ModMachineBlocks.TUBE_LIGHT.get(), chinese ? "管灯" : "Tube Light");
+        add(ModMachineBlocks.GEOTHERMAL_DRILL_PIPE.get(), chinese ? "地热钻管" : "Geothermal Drill Pipe");
+        add("message.magneticraft.oil_prospector.insufficient_energy", chinese
+                ? "电量不足：扫描需要 %s J"
+                : "Insufficient energy: a scan requires %s J");
+        add("message.magneticraft.oil_prospector.not_found", chinese
+                ? "未探测到已生成油田"
+                : "No generated oil field was detected");
+        add("message.magneticraft.oil_prospector.result", chinese
+                ? "油田位于%s方向，中心距离约%s格，油层高度 Y %s–%s；已探明剩余 %s mB（%s%%）"
+                : "Oil field %s, center about %s blocks away, layer Y %s–%s; surveyed reserve %s mB (%s%%)");
+        add("message.magneticraft.oil_prospector.depleted", chinese
+                ? "油田位于%s方向，中心距离约%s格，油层高度 Y %s–%s；已探明剩余 %s mB（%s%%）：储量耗尽"
+                : "Oil field %s, center about %s blocks away, layer Y %s–%s; surveyed reserve %s mB (%s%%): depleted");
+        addOilProspectorDirections();
         add("message.magneticraft.tank_export_enabled", chinese ? "储罐底部主动输出已启用" : "Tank bottom export enabled");
         add("message.magneticraft.tank_export_disabled", chinese ? "储罐底部主动输出已禁用" : "Tank bottom export disabled");
         add(ModNetworkItems.WRENCH.get(), chinese ? "扳手" : "Wrench");
@@ -200,7 +215,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("text.magneticraft.wire_connect.same_connector", chinese ? "不能将端点连接到自身" : "An endpoint cannot connect to itself");
         add("text.magneticraft.wire_connect.already_connected", chinese ? "两个端点已经连接" : "The endpoints are already connected");
         add("text.magneticraft.wire_connect.no_other_connector", chinese ? "请先潜行右击选择第一个端点" : "Sneak-use a first endpoint before connecting");
-        add("tooltip.magneticraft.energy", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
+        add("tooltip.magneticraft.energy", chinese ? "能量：%s / %s J" : "Energy: %s / %s J");
         add("tooltip.magneticraft.joules", chinese ? "储能：%s / %s J" : "Stored: %s / %s J");
         add("config.jade.plugin_magneticraft.machine_status", chinese ? "磁场工艺机器状态" : "Magneticraft Machine Status");
         add("tooltip.magneticraft.jade.process", chinese ? "进度：%s / %s（%s）" : "Progress: %s / %s (%s)");
@@ -545,6 +560,8 @@ final class ModLanguageProvider extends LanguageProvider {
                 "Stores versioned programs and a virtual filesystem; corrupt, future-version, and read-only preset media fail safely.");
         addGuideItemDescription("oil_deposit", "保存有限原油储量；抽油机只在油藏与结构均已加载且有效时抽取。",
                 "Stores a finite crude-oil reserve that a pumpjack extracts only while source and structure are loaded and valid.");
+        addGuideItemDescription("oil_prospector", "消耗 500 J 扫描点击位置水平 128 格内已生成并登记的油田，只报告方向、约略距离、高度范围与剩余比例。",
+                "Spends 500 J to survey registered generated oil fields within 128 horizontal blocks, reporting only direction, rounded distance, height range, and remaining reserve.");
         addMultiblockGuideTranslations();
         add("gui.magneticraft.guide.layer", chinese ? "层 %s/%s" : "Layer %s/%s");
         add("gui.magneticraft.guide.yes", chinese ? "是" : "yes");
@@ -588,7 +605,9 @@ final class ModLanguageProvider extends LanguageProvider {
                 {"electric_top_bottom_back", "顶部、底部与背面电力端口", "Electrical ports on the top, bottom, and back"},
                 {"electricity_with_vertical_heat", "全侧电网与垂直热端口", "Electricity on all sides with vertical heat ports"},
                 {"all_sides_forge_energy_with_vertical_heat", "全侧 Forge Energy 与垂直热端口", "Forge Energy on all sides with vertical heat ports"},
-                {"pneumatic_only", "仅气动网络", "Pneumatic network only"}
+                {"pneumatic_only", "仅气动网络", "Pneumatic network only"},
+                {"fluid_top_electric_rear_heat_bottom", "顶部流体输入、后部电力输出与底部热输出", "Top fluid input, rear electrical output, and bottom heat output"},
+                {"heat_top", "顶部热输出", "Top heat output"}
         });
         addGuideValues("slot", new String[][]{
                 {"storage", "存储", "Storage"},
@@ -663,6 +682,26 @@ final class ModLanguageProvider extends LanguageProvider {
         add("guide.magneticraft.item." + id + ".description", chinese ? chineseText : englishText);
     }
 
+    private void addOilProspectorDirections() {
+        String[][] directions = {
+                {"here", "当前位置", "at the current position"},
+                {"north", "北", "north"},
+                {"northeast", "东北", "northeast"},
+                {"east", "东", "east"},
+                {"southeast", "东南", "southeast"},
+                {"south", "南", "south"},
+                {"southwest", "西南", "southwest"},
+                {"west", "西", "west"},
+                {"northwest", "西北", "northwest"}
+        };
+        for (String[] direction : directions) {
+            add(
+                    "message.magneticraft.oil_prospector.direction." + direction[0],
+                    chinese ? direction[1] : direction[2]
+            );
+        }
+    }
+
     private void addMultiblockGuideTranslations() {
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             add(
@@ -674,6 +713,7 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String multiblockGuideChinese(MultiblockDefinition definition) {
         return switch (definition) {
+            case STIRLING_GENERATOR -> "接收外部热量或燃烧固体燃料，以 75% 热电效率输出低压 J；输出受阻时不抽热也不耗燃料。";
             case POLYMERIZER -> "达到配方最低温度后持续消耗热量，将液态塑料制成塑料片，或用天然气与硫磺制成橡胶；输入或输出受阻时暂停。";
             case BIG_COMBUSTION_CHAMBER -> "燃烧固体燃料并向大型热力网络供热；结构或输出受阻时保留燃料。";
             case BIG_ELECTRIC_FURNACE -> "使用原生电力执行高容量熔炼；完整输出可提交时才消耗输入。";
@@ -696,6 +736,7 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String multiblockGuideEnglish(MultiblockDefinition definition) {
         return switch (definition) {
+            case STIRLING_GENERATOR -> "Accepts external heat or burns solid fuel and converts heat to low-voltage joules at 75% efficiency; blocked output consumes neither heat nor fuel.";
             case POLYMERIZER -> "Consumes heat above the recipe temperature to turn liquid plastic into sheets or natural gas and sulfur into rubber, pausing under input or output backpressure.";
             case BIG_COMBUSTION_CHAMBER -> "Burns solid fuel into a large thermal network and preserves fuel while structure or output is blocked.";
             case BIG_ELECTRIC_FURNACE -> "Performs high-capacity smelting with native electricity and consumes input only when full output can commit.";
@@ -745,6 +786,8 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String singleBlockGuideChinese(SingleBlockMachineDefinition definition) {
         return switch (definition) {
+            case INTERNAL_COMBUSTION_ENGINE -> "消耗流体燃料并按 70% 电能、30% 热量分配；温度超过 423.15 K 后逐步降功率，达到 773.15 K 时停机。";
+            case GEOTHERMAL_PUMP -> "只在已加载区块中向下铺设钻管；发现熔岩层后按需将源方块转为黑曜石并输出热量。";
             case BOX -> "提供 27 格木制存储，所有侧面均可进行物品自动化。";
             case SLUICE_BOX -> "成链放置并供水后处理淘洗配方；上游状态改变会重置已加载的下游链路。";
             case FEEDING_TROUGH -> "每 400 刻尝试用小麦、胡萝卜或小麦种子喂养范围内两只可繁殖动物。";
@@ -771,6 +814,8 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String singleBlockGuideEnglish(SingleBlockMachineDefinition definition) {
         return switch (definition) {
+            case INTERNAL_COMBUSTION_ENGINE -> "Consumes fluid fuel and preserves a 70% electrical / 30% thermal split, throttling above 423.15 K and stopping at 773.15 K.";
+            case GEOTHERMAL_PUMP -> "Extends drill pipe only through loaded chunks, then converts discovered lava sources to obsidian on demand to produce heat.";
             case BOX -> "Provides 27 wooden storage slots with item automation on every side.";
             case SLUICE_BOX -> "Processes sluice recipes when chained and watered; upstream changes reset the loaded downstream chain.";
             case FEEDING_TROUGH -> "Every 400 ticks, attempts to feed two breedable animals with wheat, carrots, or wheat seeds.";

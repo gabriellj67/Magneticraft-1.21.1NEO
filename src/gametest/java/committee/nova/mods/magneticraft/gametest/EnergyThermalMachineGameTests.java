@@ -8,7 +8,10 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyS
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.item.OilProspectorItem;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
+import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
+import committee.nova.mods.magneticraft.content.worldgen.OilDepositSavedData;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
@@ -19,12 +22,17 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
@@ -449,6 +457,114 @@ public final class EnergyThermalMachineGameTests {
             );
             helper.succeed();
         });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 10)
+    public static void internalCombustionEnginePreservesSplitAndBlocksAllConsumptionWhenFull(
+            GameTestHelper helper
+    ) {
+        helper.setBlock(
+                CENTER,
+                ModMachineBlocks.machine(SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE).get()
+                        .defaultBlockState()
+                        .setValue(SingleBlockMachineBlock.FACING, Direction.NORTH)
+        );
+        SingleBlockMachineBlockEntity engine = requireBlockEntity(
+                helper, CENTER, SingleBlockMachineBlockEntity.class
+        );
+        ElectricalPowerModule energy = requirePower(helper, engine);
+        engine.heat().node().setTemperature(293.15D);
+        energy.setStoredJoules(0.0D);
+        engine.primaryTank().tank().fill(
+                new FluidStack(ModFluids.get(FluidDefinition.DIESEL).source().get(), 2),
+                IFluidHandler.FluidAction.EXECUTE
+        );
+        double initialHeat = engine.heat().node().internalEnergyJoules();
+
+        SingleBlockMachineBlockEntity.serverTick(
+                helper.getLevel(), engine.getBlockPos(), engine.getBlockState(), engine
+        );
+
+        double electricalGain = energy.storedJoules();
+        double thermalGain = engine.heat().node().internalEnergyJoules() - initialHeat;
+        helper.assertTrue(Math.abs(electricalGain - 120.0D) < 1.0E-6D,
+                "Internal combustion engine exceeded or missed its 120 J/t output");
+        helper.assertTrue(Math.abs(electricalGain / (electricalGain + thermalGain) - 0.70D) < 1.0E-6D,
+                "Internal combustion engine broke its 70/30 energy split");
+        helper.assertTrue(engine.primaryTank().tank().getFluidAmount() == 1,
+                "Internal combustion engine did not stage exactly one fuel mB");
+        helper.assertFalse(engine.getCapability(ForgeCapabilities.ENERGY, Direction.SOUTH).isPresent(),
+                "Internal combustion engine exposed a Forge Energy conversion path");
+
+        energy.setStoredJoules(energy.ratedCapacityJoules());
+        int blockedFuel = engine.primaryTank().tank().getFluidAmount();
+        double blockedHeat = engine.heat().node().internalEnergyJoules();
+        SingleBlockMachineBlockEntity.serverTick(
+                helper.getLevel(), engine.getBlockPos(), engine.getBlockState(), engine
+        );
+        helper.assertTrue(engine.primaryTank().tank().getFluidAmount() == blockedFuel,
+                "Full electrical output consumed another fuel mB");
+        helper.assertTrue(Math.abs(engine.heat().node().internalEnergyJoules() - blockedHeat) < 1.0E-6D,
+                "Full electrical output produced unbuffered heat");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 10)
+    public static void geothermalPumpConsumesOneLoadedLavaSourceOnDemand(GameTestHelper helper) {
+        SingleBlockMachineBlockEntity pump = placeMachine(
+                helper, SingleBlockMachineDefinition.GEOTHERMAL_PUMP
+        );
+        Player owner = helper.makeMockSurvivalPlayer();
+        pump.setOwner(owner.getUUID());
+        helper.setBlock(CENTER.below(), Blocks.LAVA);
+        double initialHeat = pump.heat().node().internalEnergyJoules();
+
+        SingleBlockMachineBlockEntity.serverTick(
+                helper.getLevel(), pump.getBlockPos(), pump.getBlockState(), pump
+        );
+
+        helper.assertTrue(helper.getBlockState(CENTER.below()).is(Blocks.OBSIDIAN),
+                "Geothermal pump did not replace its registered loaded lava source with obsidian");
+        helper.assertTrue(Math.abs(pump.heat().node().internalEnergyJoules() - initialHeat - 120.0D) < 1.0E-6D,
+                "Geothermal pump did not respect its 120 J/t heat output");
+        owner.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 10)
+    public static void oilProspectorChargesEveryAttemptExceptInsufficientEnergy(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        ItemStack prospector = new ItemStack(ModMachineItems.OIL_PROSPECTOR.get());
+        var storage = prospector.getCapability(ForgeCapabilities.ENERGY)
+                .orElseThrow(AssertionError::new);
+        storage.receiveEnergy(1_000, false);
+        player.setItemInHand(InteractionHand.MAIN_HAND, prospector);
+        BlockPos absolute = helper.absolutePos(CENTER);
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false);
+
+        InteractionResult emptySurvey = prospector.useOn(
+                new UseOnContext(player, InteractionHand.MAIN_HAND, hit)
+        );
+        helper.assertTrue(emptySurvey.consumesAction() && storage.getEnergyStored() == 500,
+                "Oil prospector did not charge 500 J for a completed no-result scan");
+
+        OilDepositSavedData.get(helper.getLevel()).register(
+                absolute,
+                absolute,
+                OilDepositBlockEntity.DEFAULT_RESERVE_MILLIBUCKETS
+        );
+        InteractionResult knownSurvey = prospector.useOn(
+                new UseOnContext(player, InteractionHand.MAIN_HAND, hit)
+        );
+        helper.assertTrue(knownSurvey.consumesAction() && storage.getEnergyStored() == 0,
+                "Oil prospector did not charge 500 J for a successful scan");
+        prospector.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit));
+        helper.assertTrue(storage.getEnergyStored() == 0,
+                "Oil prospector changed its balance after rejecting an underpowered scan");
+        helper.assertTrue(((OilProspectorItem) prospector.getItem()).capacity() == 25_000,
+                "Oil prospector did not expose its 25 kJ portable energy capacity");
+        player.discard();
+        helper.succeed();
     }
 
     private static SingleBlockMachineBlockEntity placeMachine(

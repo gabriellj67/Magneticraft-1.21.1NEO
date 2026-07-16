@@ -24,6 +24,7 @@ class MultiblockPortLayoutTest {
             Map.entry(MultiblockDefinition.POLYMERIZER, 4),
             Map.entry(MultiblockDefinition.REFINERY, 15),
             Map.entry(MultiblockDefinition.SOLAR_TOWER, 1),
+            Map.entry(MultiblockDefinition.STIRLING_GENERATOR, 3),
             Map.entry(MultiblockDefinition.BIG_COMBUSTION_CHAMBER, 13),
             Map.entry(MultiblockDefinition.BIG_STEAM_BOILER, 141),
             Map.entry(MultiblockDefinition.BIG_ELECTRIC_FURNACE, 4)
@@ -66,6 +67,21 @@ class MultiblockPortLayoutTest {
                         "FLUID@0,4,-1:UP"
                 ),
                 MultiblockPortLayout.ports(MultiblockDefinition.POLYMERIZER).stream()
+                        .map(port -> port.kind() + "@" + port.offset().x() + "," + port.offset().y() + ","
+                                + port.offset().z() + ":" + port.side().name())
+                        .collect(java.util.stream.Collectors.toSet())
+        );
+    }
+
+    @Test
+    void stirlingGeneratorSeparatesFuelHeatAndLowVoltageOutput() {
+        assertEquals(
+                Set.of(
+                        "ITEM@0,0,0:SOUTH",
+                        "HEAT@0,0,-1:NORTH",
+                        "ELECTRICITY@0,2,0:UP"
+                ),
+                MultiblockPortLayout.ports(MultiblockDefinition.STIRLING_GENERATOR).stream()
                         .map(port -> port.kind() + "@" + port.offset().x() + "," + port.offset().y() + ","
                                 + port.offset().z() + ":" + port.side().name())
                         .collect(java.util.stream.Collectors.toSet())

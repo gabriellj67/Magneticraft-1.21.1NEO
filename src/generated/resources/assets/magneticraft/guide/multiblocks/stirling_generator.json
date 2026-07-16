@@ -1,0 +1,99 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 1
+  },
+  "category": "energy",
+  "controller": "magneticraft:stirling_generator",
+  "description": "guide.magneticraft.multiblock.stirling_generator.description",
+  "id": "magneticraft:stirling_generator",
+  "layers": [
+    [
+      "##",
+      "#M",
+      "##"
+    ],
+    [
+      "##",
+      "#C",
+      "##"
+    ],
+    [
+      "##",
+      "#E",
+      "##"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:stirling_generator",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:machine_casing",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:electrical_machine_casing",
+      "rule": "electric",
+      "symbol": "E"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "side": "south"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "side": "north"
+      },
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 0,
+          "y": 2,
+          "z": 0
+        },
+        "side": "up"
+      }
+    ],
+    "electricity": true,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": true,
+    "inventory_slots": 1
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 2,
+    "y": 3,
+    "z": 3
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.stirling_generator"
+}

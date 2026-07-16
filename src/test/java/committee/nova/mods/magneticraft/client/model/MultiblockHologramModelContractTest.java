@@ -27,13 +27,21 @@ class MultiblockHologramModelContractTest {
             String id = definition.id();
             JsonObject worldModel = read("models/block/" + id + ".json");
             boolean polymerizer = definition == MultiblockDefinition.POLYMERIZER;
-            assertEquals(polymerizer ? "minecraft:block/orientable" : "minecraft:block/cube_all",
+            boolean stirlingGenerator = definition == MultiblockDefinition.STIRLING_GENERATOR;
+            assertEquals(polymerizer
+                            ? "minecraft:block/orientable"
+                            : stirlingGenerator ? "minecraft:block/cube_column" : "minecraft:block/cube_all",
                     worldModel.get("parent").getAsString(), id);
             assertFalse(worldModel.has("loader"), id + " world model must not obscure the hologram");
             if (polymerizer) {
                 assertEquals("magneticraft:block/polymerizer_front",
                         worldModel.getAsJsonObject("textures").get("front").getAsString());
                 assertEquals("magneticraft:block/polymerizer_side",
+                        worldModel.getAsJsonObject("textures").get("side").getAsString());
+            } else if (stirlingGenerator) {
+                assertEquals("magneticraft:block/stirling_generator_head",
+                        worldModel.getAsJsonObject("textures").get("end").getAsString());
+                assertEquals("magneticraft:block/stirling_generator",
                         worldModel.getAsJsonObject("textures").get("side").getAsString());
             } else {
                 assertEquals(UNMOUNTED_TEXTURE,
@@ -61,8 +69,9 @@ class MultiblockHologramModelContractTest {
                     itemModel.get("parent").getAsString(), id);
 
             JsonObject sceneModel = read("models/block/" + id + "_item.json");
-            if (polymerizer) {
-                assertEquals("minecraft:block/orientable", sceneModel.get("parent").getAsString());
+            if (polymerizer || stirlingGenerator) {
+                assertEquals(polymerizer ? "minecraft:block/orientable" : "minecraft:block/cube_column",
+                        sceneModel.get("parent").getAsString());
                 assertFalse(sceneModel.has("loader"));
                 assertFalse(sceneModel.has("model"));
             } else {

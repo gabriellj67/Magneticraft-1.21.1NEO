@@ -665,9 +665,11 @@ class GeneratedDataContractTest {
             assertEquals(8, blockState.getAsJsonObject("variants").size(), id + " state coverage");
             JsonObject controllerModel = readObject(ASSETS.resolve("models/block/" + id + ".json"));
             assertEquals(
-                    definition == MultiblockDefinition.POLYMERIZER
-                            ? "minecraft:block/orientable"
-                            : "minecraft:block/cube_all",
+                    switch (definition) {
+                        case POLYMERIZER -> "minecraft:block/orientable";
+                        case STIRLING_GENERATOR -> "minecraft:block/cube_column";
+                        default -> "minecraft:block/cube_all";
+                    },
                     controllerModel.get("parent").getAsString(),
                     id
             );

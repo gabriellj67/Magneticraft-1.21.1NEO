@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.machine.singleblock;
 
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.ThermopileRecipe;
+import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.FluidFuelRecipe;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlockEntity;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,6 +30,9 @@ import java.util.Set;
  */
 final class SingleBlockElectricalLogic {
     private static final double AIRLOCK_MIN_VOLTAGE = 60.0D;
+    private static final double INTERNAL_ENGINE_ELECTRIC_FRACTION = 0.70D;
+    private static final double INTERNAL_ENGINE_HEAT_FRACTION = 0.30D;
+    private static final double INTERNAL_ENGINE_MAX_ELECTRICAL_OUTPUT = 120.0D;
 
     private final SingleBlockMachineBlockEntity machine;
     private final SingleBlockMachineState state;
@@ -131,6 +136,81 @@ final class SingleBlockElectricalLogic {
                 machine.markChanged();
             }
         }
+    }
+
+    void tickInternalCombustionEngine(ServerLevel level) {
+        state.lastConsumption = 0;
+        state.lastProduction = 0;
+        if (machine.primaryTank() == null || machine.energy() == null || machine.heat() == null) {
+            return;
+        }
+
+        double temperature = machine.heat().node().temperatureKelvin();
+        double throttle = SingleBlockMachineMath.internalCombustionThrottle(temperature);
+        if (throttle <= 0.0D) {
+            return;
+        }
+        double maximumRawEnergy = INTERNAL_ENGINE_MAX_ELECTRICAL_OUTPUT
+                / INTERNAL_ENGINE_ELECTRIC_FRACTION * throttle;
+        double heatHeadroom = Math.max(
+                0.0D,
+                (SingleBlockMachineMath.INTERNAL_ENGINE_CUTOFF_TEMPERATURE_KELVIN - temperature)
+                        * machine.heat().node().heatCapacityJoulesPerKelvin()
+        );
+        double electricityHeadroom = machine.energy().generateJoules(
+                INTERNAL_ENGINE_MAX_ELECTRICAL_OUTPUT * throttle,
+                true
+        );
+        if (electricityHeadroom <= 0.0D || heatHeadroom <= 0.0D) {
+            return;
+        }
+
+        if (state.fuelEnergyJoules <= 1.0E-9D) {
+            Optional<FluidFuelRecipe> recipe = currentFluidFuel(level);
+            if (recipe.isEmpty()) {
+                return;
+            }
+            var drained = machine.primaryTank().tank().drain(1, IFluidHandler.FluidAction.EXECUTE);
+            if (drained.getAmount() != 1) {
+                return;
+            }
+            state.fuelEnergyJoules = recipe.get().totalEnergyPerMilliBucket();
+        }
+
+        double rawEnergy = Math.min(
+                Math.min(maximumRawEnergy, state.fuelEnergyJoules),
+                Math.min(
+                        electricityHeadroom / INTERNAL_ENGINE_ELECTRIC_FRACTION,
+                        heatHeadroom / INTERNAL_ENGINE_HEAT_FRACTION
+                )
+        );
+        if (rawEnergy <= 1.0E-9D) {
+            return;
+        }
+        double electricalEnergy = rawEnergy * INTERNAL_ENGINE_ELECTRIC_FRACTION;
+        double thermalEnergy = rawEnergy * INTERNAL_ENGINE_HEAT_FRACTION;
+        double inserted = machine.energy().generateJoules(electricalEnergy, false);
+        if (inserted + 1.0E-9D < electricalEnergy) {
+            return;
+        }
+        machine.heat().node().addHeat(thermalEnergy, false);
+        state.fuelEnergyJoules = Math.max(0.0D, state.fuelEnergyJoules - rawEnergy);
+        state.lastConsumption = (int) Math.round(rawEnergy);
+        state.lastProduction = (int) Math.round(inserted);
+        state.working = true;
+        machine.markChanged();
+    }
+
+    private Optional<FluidFuelRecipe> currentFluidFuel(ServerLevel level) {
+        if (machine.primaryTank() == null || machine.primaryTank().tank().getFluid().isEmpty()) {
+            return Optional.empty();
+        }
+        var fluid = machine.primaryTank().tank().getFluid().getFluid();
+        return level.getRecipeManager()
+                .getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get())
+                .stream()
+                .filter(recipe -> recipe.fluid() == fluid)
+                .findFirst();
     }
 
     void startAirBubbleDecay(ServerLevel level) {

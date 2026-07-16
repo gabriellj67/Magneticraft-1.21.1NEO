@@ -24,7 +24,7 @@ public final class ElectricalDataGameTests {
         ElectricalDataSnapshot snapshot = ElectricalDataRegistry.INSTANCE.currentOrThrow();
         helper.assertTrue(snapshot.voltageTiers().size() == 3, "Built-in voltage tiers did not load atomically");
         helper.assertTrue(snapshot.transformerProfiles().size() == 2, "Built-in transformer profiles are incomplete");
-        helper.assertTrue(snapshot.machineProfiles().size() == 20, "Built-in machine profiles are incomplete");
+        helper.assertTrue(snapshot.machineProfiles().size() == 22, "Built-in machine profiles are incomplete");
 
         PhysicalNetworkManager manager = PhysicalNetworkService.manager(helper.getLevel());
         manager.onElectricalProfilesReloaded(snapshot, 2);

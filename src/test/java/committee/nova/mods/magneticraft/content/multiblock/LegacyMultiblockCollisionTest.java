@@ -106,6 +106,7 @@ class LegacyMultiblockCollisionTest {
         counts.put(MultiblockDefinition.SOLAR_MIRROR, 4);
         counts.put(MultiblockDefinition.SOLAR_PANEL, 33);
         counts.put(MultiblockDefinition.SOLAR_TOWER, 12);
+        counts.put(MultiblockDefinition.STIRLING_GENERATOR, 1);
         counts.put(MultiblockDefinition.STEAM_ENGINE, 76);
         counts.put(MultiblockDefinition.STEAM_TURBINE, 51);
         return Map.copyOf(counts);

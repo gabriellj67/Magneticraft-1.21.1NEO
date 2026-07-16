@@ -4,7 +4,9 @@ import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.GasificationRecipe;
 import committee.nova.mods.magneticraft.init.ModFluids;
+import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
+import committee.nova.mods.magneticraft.content.world.ProtectedWorldMutation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -13,12 +15,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.Optional;
+import java.util.Iterator;
 
 /**
  * Heat production and heat-driven processing behavior.
@@ -30,6 +34,9 @@ final class SingleBlockThermalLogic {
     private static final double FURNACE_MINIMUM_TEMPERATURE = 60.0D + CELSIUS_OFFSET;
     private static final int PROCESS_SCALE = 40;
     private static final int WORKING_GRACE_TICKS = 20;
+    private static final double GEOTHERMAL_MAX_TEMPERATURE_KELVIN = 1_473.15D;
+    private static final double GEOTHERMAL_SOURCE_ENERGY_JOULES = 200_000.0D;
+    private static final double GEOTHERMAL_MAX_OUTPUT_JOULES_PER_TICK = 120.0D;
 
     private final SingleBlockMachineBlockEntity machine;
     private final SingleBlockMachineState state;
@@ -209,6 +216,99 @@ final class SingleBlockThermalLogic {
             state.progress = 0;
         }
         machine.markChanged();
+    }
+
+    void tickGeothermalPump(ServerLevel level) {
+        resetRates();
+        GeothermalPumpState geothermal = machine.geothermalPumpState();
+        if (geothermal == null || geothermal.owner() == null || machine.heat() == null) {
+            return;
+        }
+
+        BlockPos drillPosition = geothermal.drillPosition(machine.getBlockPos());
+        if (ProtectedWorldMutation.isSafeLoadedTarget(level, drillPosition)) {
+            if (level.getFluidState(drillPosition).is(net.minecraft.tags.FluidTags.LAVA)) {
+                geothermal.startSearch(drillPosition);
+                if (!geothermal.searchComplete() && geothermal.scanLoadedLava(level)) {
+                    machine.markChanged();
+                }
+            } else if (level.getGameTime() % 20L == 0L) {
+                if (level.getBlockState(drillPosition).is(ModMachineBlocks.GEOTHERMAL_DRILL_PIPE.get())) {
+                    geothermal.advanceDrill();
+                    machine.markChanged();
+                } else if (ProtectedWorldMutation.replaceWithoutDrops(
+                        level,
+                        geothermal.owner(),
+                        machine.getBlockPos(),
+                        drillPosition,
+                        Direction.UP,
+                        ModMachineBlocks.GEOTHERMAL_DRILL_PIPE.get().defaultBlockState()
+                )) {
+                    geothermal.advanceDrill();
+                    machine.markChanged();
+                }
+            }
+        }
+
+        produceGeothermalHeat(level, geothermal);
+    }
+
+    private void produceGeothermalHeat(ServerLevel level, GeothermalPumpState geothermal) {
+        double temperature = machine.heat().node().temperatureKelvin();
+        if (temperature >= GEOTHERMAL_MAX_TEMPERATURE_KELVIN) {
+            return;
+        }
+        double headroom = (GEOTHERMAL_MAX_TEMPERATURE_KELVIN - temperature)
+                * machine.heat().node().heatCapacityJoulesPerKelvin();
+        if (headroom <= 1.0E-9D) {
+            return;
+        }
+        if (geothermal.remainingEnergyJoules() <= 1.0E-9D && !consumeLavaSource(level, geothermal)) {
+            return;
+        }
+
+        double produced = Math.min(
+                Math.min(GEOTHERMAL_MAX_OUTPUT_JOULES_PER_TICK, geothermal.remainingEnergyJoules()),
+                headroom
+        );
+        if (produced <= 1.0E-9D) {
+            return;
+        }
+        machine.heat().node().addHeat(produced, false);
+        geothermal.setRemainingEnergyJoules(geothermal.remainingEnergyJoules() - produced);
+        state.lastProduction = (int) Math.round(produced);
+        state.working = true;
+        machine.markChanged();
+    }
+
+    private boolean consumeLavaSource(ServerLevel level, GeothermalPumpState geothermal) {
+        Iterator<BlockPos> iterator = geothermal.sources().iterator();
+        while (iterator.hasNext()) {
+            BlockPos source = iterator.next();
+            if (!ProtectedWorldMutation.isSafeLoadedTarget(level, source)) {
+                continue;
+            }
+            if (!level.getFluidState(source).isSource()
+                    || !level.getFluidState(source).is(net.minecraft.tags.FluidTags.LAVA)) {
+                iterator.remove();
+                machine.markChanged();
+                continue;
+            }
+            if (ProtectedWorldMutation.replaceWithoutDrops(
+                    level,
+                    geothermal.owner(),
+                    machine.getBlockPos(),
+                    source,
+                    Direction.UP,
+                    Blocks.OBSIDIAN.defaultBlockState()
+            )) {
+                iterator.remove();
+                geothermal.setRemainingEnergyJoules(GEOTHERMAL_SOURCE_ENERGY_JOULES);
+                machine.markChanged();
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean canAcceptGasification(GasificationRecipe recipe) {

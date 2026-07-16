@@ -10,6 +10,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /** Durable finite reserves and oil-field ownership, independent of loaded chunks. */
 public final class OilDepositSavedData extends SavedData {
@@ -125,8 +126,60 @@ public final class OilDepositSavedData extends SavedData {
         return deposits.size();
     }
 
+    /**
+     * Returns the nearest stable aggregate whose field origin is within the horizontal radius.
+     * This method is read-only and never consults or loads chunks.
+     */
+    public Optional<OilFieldSurvey> survey(BlockPos origin, int radius) {
+        int boundedRadius = Math.max(0, radius);
+        long radiusSquared = (long) boundedRadius * boundedRadius;
+        Map<BlockPos, SurveyAccumulator> fields = new HashMap<>();
+        deposits.forEach((position, deposit) -> fields
+                .computeIfAbsent(deposit.fieldOrigin(), ignored -> new SurveyAccumulator())
+                .add(position, deposit.remainingMillibuckets()));
+        return fields.entrySet().stream()
+                .filter(entry -> horizontalDistanceSquared(origin, entry.getKey()) <= radiusSquared)
+                .sorted(Comparator
+                        .comparingLong((Map.Entry<BlockPos, SurveyAccumulator> entry) ->
+                                horizontalDistanceSquared(origin, entry.getKey()))
+                        .thenComparingLong(entry -> entry.getKey().asLong()))
+                .map(entry -> entry.getValue().survey(entry.getKey()))
+                .findFirst();
+    }
+
     private static int bounded(int remaining) {
         return Math.max(0, Math.min(OilDepositBlockEntity.DEFAULT_RESERVE_MILLIBUCKETS, remaining));
+    }
+
+    private static long horizontalDistanceSquared(BlockPos first, BlockPos second) {
+        long deltaX = (long) first.getX() - second.getX();
+        long deltaZ = (long) first.getZ() - second.getZ();
+        return deltaX * deltaX + deltaZ * deltaZ;
+    }
+
+    private static final class SurveyAccumulator {
+        private int minimumY = Integer.MAX_VALUE;
+        private int maximumY = Integer.MIN_VALUE;
+        private long remaining;
+        private int count;
+
+        void add(BlockPos position, int remainingMillibuckets) {
+            minimumY = Math.min(minimumY, position.getY());
+            maximumY = Math.max(maximumY, position.getY());
+            remaining += remainingMillibuckets;
+            count++;
+        }
+
+        OilFieldSurvey survey(BlockPos fieldOrigin) {
+            return new OilFieldSurvey(
+                    fieldOrigin,
+                    minimumY,
+                    maximumY,
+                    remaining,
+                    (long) count * OilDepositBlockEntity.DEFAULT_RESERVE_MILLIBUCKETS,
+                    count
+            );
+        }
     }
 
     public record Deposit(BlockPos fieldOrigin, int remainingMillibuckets) {

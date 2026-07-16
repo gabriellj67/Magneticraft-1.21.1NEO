@@ -422,6 +422,10 @@ public final class LegacyMultiblockCollision {
                 MultiblockDefinition.POLYMERIZER, Direction.NORTH, 0.0D, 0.0D, 0.0D,
                 new double[]{-16.0D, 0.0D, -32.0D, 32.0D, 80.0D, 16.0D}
         );
+        register(
+                MultiblockDefinition.STIRLING_GENERATOR, Direction.NORTH, 0.0D, 0.0D, 0.0D,
+                new double[]{-16.0D, 0.0D, -16.0D, 16.0D, 48.0D, 32.0D}
+        );
         if (AUTHORED.size() != MultiblockDefinition.values().length) {
             throw new IllegalStateException("Incomplete legacy multiblock collision catalogue");
         }

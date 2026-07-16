@@ -23,6 +23,7 @@ final class SingleBlockMachineState {
     private static final String ACTIVE_RECIPE_TAG = "active_recipe";
     private static final String THERMOPILE_FLUX_TAG = "thermopile_flux";
     private static final String LAST_WORKING_TICK_TAG = "last_working_tick";
+    private static final String FUEL_ENERGY_TAG = "fuel_energy_joules";
 
     int progress;
     int totalProgress;
@@ -42,6 +43,7 @@ final class SingleBlockMachineState {
     boolean inserterGrabItems;
     String activeRecipe = "";
     double thermopileFlux;
+    double fuelEnergyJoules;
     long lastWorkingTick = -1L;
     int lastConsumption;
     int lastProduction;
@@ -99,6 +101,7 @@ final class SingleBlockMachineState {
         tag.putString(ACTIVE_RECIPE_TAG, activeRecipe);
         tag.putDouble(THERMOPILE_FLUX_TAG, thermopileFlux);
         tag.putLong(LAST_WORKING_TICK_TAG, lastWorkingTick);
+        tag.putDouble(FUEL_ENERGY_TAG, fuelEnergyJoules);
     }
 
     void load(CompoundTag tag) {
@@ -121,6 +124,8 @@ final class SingleBlockMachineState {
         lastWorkingTick = tag.contains(LAST_WORKING_TICK_TAG, Tag.TAG_LONG)
                 ? Math.max(-1L, tag.getLong(LAST_WORKING_TICK_TAG))
                 : -1L;
+        double loadedFuelEnergy = tag.getDouble(FUEL_ENERGY_TAG);
+        fuelEnergyJoules = Double.isFinite(loadedFuelEnergy) ? Math.max(0.0D, loadedFuelEnergy) : 0.0D;
     }
 
     private void loadInserterFlags(int flags) {

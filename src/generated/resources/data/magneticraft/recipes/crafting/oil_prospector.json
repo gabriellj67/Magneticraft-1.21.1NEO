@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "B": {
+      "item": "magneticraft:low_voltage_battery"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "T": {
+      "tag": "forge:ingots/tungsten"
+    }
+  },
+  "pattern": [
+    "B",
+    "I",
+    "T"
+  ],
+  "result": {
+    "item": "magneticraft:oil_prospector"
+  },
+  "show_notification": true
+}

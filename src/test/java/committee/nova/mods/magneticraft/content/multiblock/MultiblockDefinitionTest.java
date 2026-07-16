@@ -36,6 +36,7 @@ class MultiblockDefinitionTest {
             "solar_mirror",
             "solar_panel",
             "solar_tower",
+            "stirling_generator",
             "steam_engine",
             "steam_turbine"
     );
@@ -55,6 +56,7 @@ class MultiblockDefinitionTest {
             Map.entry("solar_mirror", "3,3,3@1,0,0|AMA/###/A#A;AAA/ARA/AAA;AAA/ARA/AAA"),
             Map.entry("solar_panel", "3,1,3@1,0,0|EME/EEE/EEE"),
             Map.entry("solar_tower", "3,3,3@1,0,0|#M#/###/###;#R#/RCR/#R#;#R#/RCR/#R#"),
+            Map.entry("stirling_generator", "2,3,3@1,0,1|##/#M/##;##/#C/##;##/#E/##"),
             Map.entry("steam_engine", "3,4,4@0,1,0|.../.../.G./.G.;M../b../bGC/bGY;R../Y../GG./.G.;#../#../#../..."),
             Map.entry("steam_turbine", "3,3,5@1,0,0|#M#/GGG/GGG/GGG/#G#;G#G/TRT/TRT/#R#/GGG;#G#/GCG/GGG/GGG/#G#")
     );
@@ -74,6 +76,7 @@ class MultiblockDefinitionTest {
             Map.entry("solar_mirror", new CellCounts(27, 7)),
             Map.entry("solar_panel", new CellCounts(9, 9)),
             Map.entry("solar_tower", new CellCounts(27, 27)),
+            Map.entry("stirling_generator", new CellCounts(18, 18)),
             Map.entry("steam_engine", new CellCounts(18, 18)),
             Map.entry("steam_turbine", new CellCounts(45, 45))
     );
@@ -93,6 +96,7 @@ class MultiblockDefinitionTest {
             Map.entry("solar_mirror", "a9987da89d62d924d23ffd875517b292c14216bba54dd3ec1f89308fae194cf9"),
             Map.entry("solar_panel", "36c254d3722cc5f3844ab6dbd88e848b62a65217755ad94efcc5350ae480d2ba"),
             Map.entry("solar_tower", "d539623ffcfb97c0b560d843c35a5cf9130676afb74330207b9f56012dbcf72e"),
+            Map.entry("stirling_generator", "2d36660a441e3a9267f7f7548b8f68f4a7d6f0dab1eec1534d2648c489c89aaa"),
             Map.entry("steam_engine", "0c7ef1c1c8e0b4e17efb4df8990a180aaac6c9818891001423ed3d216fd433d1"),
             Map.entry("steam_turbine", "0c1f07230ad48ffa92c4279bef0136483a9b78634d6ee403644565d95f2b83a6")
     );

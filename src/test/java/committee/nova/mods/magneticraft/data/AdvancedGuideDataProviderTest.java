@@ -173,7 +173,7 @@ class AdvancedGuideDataProviderTest {
             assertEquals(MultiblockPortLayout.ports(definition).size(),
                     ports.getAsJsonArray("connections").size());
         }
-        assertEquals(17, ids.size());
+        assertEquals(18, ids.size());
     }
 
     @Test
@@ -261,8 +261,8 @@ class AdvancedGuideDataProviderTest {
     void portableItemGuideCapturesTheRestoredEnergyContracts() {
         JsonArray items = AdvancedGuideDataProvider.portableItemGuide().getAsJsonArray("items");
 
-        assertEquals(34, items.size());
-        assertEquals(34, items.asList().stream()
+        assertEquals(35, items.size());
+        assertEquals(35, items.asList().stream()
                 .map(element -> element.getAsJsonObject().get("id").getAsString())
                 .distinct()
                 .count());

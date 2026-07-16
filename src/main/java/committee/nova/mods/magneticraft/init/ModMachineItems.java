@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.item.ElectricDrillItem;
 import committee.nova.mods.magneticraft.content.item.ElectricPistonItem;
 import committee.nova.mods.magneticraft.content.item.LowBatteryItem;
 import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
+import committee.nova.mods.magneticraft.content.item.OilProspectorItem;
 import committee.nova.mods.magneticraft.content.item.ThermometerItem;
 import committee.nova.mods.magneticraft.content.item.VoltmeterItem;
 import net.minecraft.world.item.Item;
@@ -30,6 +31,8 @@ public final class ModMachineItems {
             ModRegistries.ITEMS.register("voltmeter", VoltmeterItem::new);
     public static final RegistryObject<Item> THERMOMETER =
             ModRegistries.ITEMS.register("thermometer", ThermometerItem::new);
+    public static final RegistryObject<Item> OIL_PROSPECTOR =
+            ModRegistries.ITEMS.register("oil_prospector", OilProspectorItem::new);
     public static final RegistryObject<Item> INSERTER_SPEED_UPGRADE =
             ModRegistries.ITEMS.register("inserter_speed_upgrade", () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> INSERTER_STACK_UPGRADE =
@@ -50,6 +53,7 @@ public final class ModMachineItems {
                 ELECTRIC_PISTON,
                 VOLTMETER,
                 THERMOMETER,
+                OIL_PROSPECTOR,
                 INSERTER_SPEED_UPGRADE,
                 INSERTER_STACK_UPGRADE
         );

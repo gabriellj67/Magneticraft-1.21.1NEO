@@ -30,7 +30,7 @@ class Legacy1710RestoredTextureContractTest {
         assertEquals("magneticraft-0.6.0-final", manifest.get("release_file").getAsString());
 
         Set<String> runtimePaths = new HashSet<>();
-        assertEquals(8, manifest.getAsJsonArray("artifacts").size());
+        assertEquals(14, manifest.getAsJsonArray("artifacts").size());
         for (JsonElement element : manifest.getAsJsonArray("artifacts")) {
             JsonObject artifact = element.getAsJsonObject();
             String source = artifact.get("source").getAsString();

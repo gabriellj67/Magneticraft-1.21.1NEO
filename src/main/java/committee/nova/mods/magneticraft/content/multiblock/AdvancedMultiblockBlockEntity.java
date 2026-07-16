@@ -980,7 +980,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                             new int[]{0},
                             recoverySide ? allSlots(slots) : range(1, slots)
                     );
-            case BIG_COMBUSTION_CHAMBER -> new ItemInventoryModule.SlotAccess(
+            case BIG_COMBUSTION_CHAMBER, STIRLING_GENERATOR -> new ItemInventoryModule.SlotAccess(
                     new int[]{0},
                     recoverySide ? new int[]{0} : new int[0]
             );
@@ -1006,7 +1006,8 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             case BIG_ELECTRIC_FURNACE -> serverLevel.getRecipeManager()
                     .getRecipeFor(RecipeType.SMELTING, new SimpleContainer(stack), serverLevel)
                     .isPresent();
-            case BIG_COMBUSTION_CHAMBER -> ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) > 0;
+            case BIG_COMBUSTION_CHAMBER, STIRLING_GENERATOR ->
+                    ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) > 0;
             case POLYMERIZER -> serverLevel.getRecipeManager()
                     .getAllRecipesFor(ModRecipeTypes.POLYMERIZING_TYPE.get())
                     .stream()
@@ -1017,7 +1018,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
 
     private ResourceLocation electricalTier() {
         return switch (definition) {
-            case SOLAR_PANEL -> ElectricalNetworkModule.LOW_VOLTAGE;
+            case SOLAR_PANEL, STIRLING_GENERATOR -> ElectricalNetworkModule.LOW_VOLTAGE;
             case STEAM_TURBINE -> Magneticraft.id("high_voltage");
             default -> Magneticraft.id("medium_voltage");
         };

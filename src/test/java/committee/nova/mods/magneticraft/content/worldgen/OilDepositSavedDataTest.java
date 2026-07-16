@@ -165,4 +165,38 @@ class OilDepositSavedDataTest {
                 restored.depositAt(DEPOSIT_POSITION)
         );
     }
+
+    @Test
+    void surveyAggregatesOneFieldAndSelectsTheNearestOriginDeterministically() {
+        OilDepositSavedData data = new OilDepositSavedData();
+        BlockPos fartherOrigin = new BlockPos(80, 20, 0);
+        data.register(new BlockPos(80, 12, 0), fartherOrigin, 9_000);
+        data.register(new BlockPos(16, 18, 0), FIELD_ORIGIN, 7_500);
+        data.register(new BlockPos(24, 42, 0), FIELD_ORIGIN, 2_500);
+
+        OilFieldSurvey survey = data.survey(BlockPos.ZERO, 128).orElseThrow();
+
+        assertEquals(FIELD_ORIGIN, survey.origin());
+        assertEquals(18, survey.minimumY());
+        assertEquals(42, survey.maximumY());
+        assertEquals(10_000L, survey.remainingMillibuckets());
+        assertEquals(20_000L, survey.knownCapacityMillibuckets());
+        assertEquals(2, survey.depositCount());
+        assertEquals(50, survey.remainingPercent());
+        assertFalse(survey.depleted());
+    }
+
+    @Test
+    void surveyIsReadOnlyIncludesDepletedFieldsAndHonorsHorizontalRadius() {
+        OilDepositSavedData data = new OilDepositSavedData();
+        data.register(DEPOSIT_POSITION, FIELD_ORIGIN, 0);
+        CompoundTag before = data.save(new CompoundTag());
+
+        OilFieldSurvey depleted = data.survey(BlockPos.ZERO, 128).orElseThrow();
+
+        assertTrue(depleted.depleted());
+        assertEquals(0, depleted.remainingPercent());
+        assertEquals(before, data.save(new CompoundTag()));
+        assertTrue(data.survey(new BlockPos(512, 0, 512), 128).isEmpty());
+    }
 }

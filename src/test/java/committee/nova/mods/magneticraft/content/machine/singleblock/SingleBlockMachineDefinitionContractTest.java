@@ -140,5 +140,22 @@ class SingleBlockMachineDefinitionContractTest {
                 SingleBlockMachineDefinition.ELECTRIC_ENGINE, Direction.NORTH, facing));
         assertFalse(SingleBlockPortProfile.forgeEnergy(
                 SingleBlockMachineDefinition.ELECTRIC_HEATER, Direction.NORTH, facing));
+
+        assertEquals(FluidTankModule.TankAccess.INPUT, SingleBlockPortProfile.fluid(
+                SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE, 0, Direction.UP));
+        assertEquals(FluidTankModule.TankAccess.NONE, SingleBlockPortProfile.fluid(
+                SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE, 0, Direction.DOWN));
+        assertTrue(SingleBlockPortProfile.electricity(
+                SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE, Direction.WEST, facing));
+        assertFalse(SingleBlockPortProfile.electricity(
+                SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE, Direction.EAST, facing));
+        assertTrue(SingleBlockPortProfile.heat(
+                SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE, Direction.DOWN, facing));
+        assertFalse(SingleBlockPortProfile.forgeEnergy(
+                SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE, Direction.WEST, facing));
+        assertTrue(SingleBlockPortProfile.heat(
+                SingleBlockMachineDefinition.GEOTHERMAL_PUMP, Direction.UP, facing));
+        assertFalse(SingleBlockPortProfile.heat(
+                SingleBlockMachineDefinition.GEOTHERMAL_PUMP, Direction.DOWN, facing));
     }
 }

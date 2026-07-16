@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyS
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.GhostFilterModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
+import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.FluidFuelRecipe;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalVoltageSourceModule;
@@ -17,6 +18,7 @@ import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticConne
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModFluids;
+import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import net.minecraft.core.BlockPos;
@@ -44,6 +46,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 /**
  * Module, capability and persistence host for the Task 5 single-block behavior strategies.
  */
@@ -55,6 +59,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     public static final int SLUICE_DURATION = 80;
     private static final String MULTIBLOCK_CONTROLLER_TAG = "multiblock_controller";
     private static final String DISPLAY_ITEM_TAG = "display_item";
+    private static final String GEOTHERMAL_PUMP_TAG = "geothermal_pump";
 
     private final SingleBlockMachineDefinition definition;
     @Nullable
@@ -79,6 +84,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     private final ElectricalVoltageSourceModule voltageSource;
     private final ContainerData menuData;
     private final SingleBlockMachineState state = new SingleBlockMachineState();
+    @Nullable
+    private final GeothermalPumpState geothermalPumpState;
     private final SingleBlockMachineLogic logic;
     private final SingleBlockMachineInteractions interactions;
     private final SingleBlockFabricator fabricator;
@@ -131,6 +138,9 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
         forgeEnergy = createForgeEnergyStorage();
         heat = createHeatNetwork();
         voltageSource = createVoltageSource(createdElectricity);
+        geothermalPumpState = definition == SingleBlockMachineDefinition.GEOTHERMAL_PUMP
+                ? new GeothermalPumpState()
+                : null;
         logic = new SingleBlockMachineLogic(this, this.state);
         interactions = new SingleBlockMachineInteractions(this, this.state);
         fabricator = new SingleBlockFabricator(this);
@@ -252,6 +262,18 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Nullable
     public HeatNetworkModule heat() {
         return heat;
+    }
+
+    @Nullable
+    GeothermalPumpState geothermalPumpState() {
+        return geothermalPumpState;
+    }
+
+    public void setOwner(@Nullable UUID owner) {
+        if (geothermalPumpState != null) {
+            geothermalPumpState.setOwner(owner);
+            markChangedAndSync();
+        }
     }
 
     @Nullable
@@ -425,6 +447,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Override
     protected void saveMachineData(CompoundTag tag) {
         state.save(tag);
+        if (geothermalPumpState != null) {
+            CompoundTag geothermalTag = new CompoundTag();
+            geothermalPumpState.save(geothermalTag);
+            tag.put(GEOTHERMAL_PUMP_TAG, geothermalTag);
+        }
         if (multiblockController != null) {
             tag.putLong(MULTIBLOCK_CONTROLLER_TAG, multiblockController.asLong());
         }
@@ -433,6 +460,9 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Override
     protected void loadMachineData(CompoundTag tag) {
         state.load(tag);
+        if (geothermalPumpState != null) {
+            geothermalPumpState.load(tag.getCompound(GEOTHERMAL_PUMP_TAG));
+        }
         multiblockController = tag.contains(MULTIBLOCK_CONTROLLER_TAG)
                 ? BlockPos.of(tag.getLong(MULTIBLOCK_CONTROLLER_TAG))
                 : null;
@@ -522,6 +552,12 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
                     fluid -> fluid.getFluid() == ModFluids.get(FluidDefinition.WOOD_GAS).source().get(),
                     side -> SingleBlockPortProfile.fluid(definition, 0, side)
             ));
+            case INTERNAL_COMBUSTION_ENGINE -> primary = addModule(tank(
+                    "fuel",
+                    4_000,
+                    this::isFluidFuel,
+                    side -> SingleBlockPortProfile.fluid(definition, 0, side)
+            ));
             default -> {
             }
         }
@@ -550,7 +586,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Nullable
     private ElectricalNetworkModule createElectricalNetwork() {
         return switch (definition) {
-            case ELECTRIC_HEATER, INFINITE_ENERGY, AIRLOCK, THERMOPILE, RF_TRANSFORMER, ELECTRIC_ENGINE ->
+            case ELECTRIC_HEATER, INFINITE_ENERGY, AIRLOCK, THERMOPILE, RF_TRANSFORMER, ELECTRIC_ENGINE,
+                    INTERNAL_COMBUSTION_ENGINE ->
                     addModule(new ElectricalNetworkModule(
                             Magneticraft.id("electricity"),
                             this,
@@ -575,7 +612,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
                     Magneticraft.id("heat"), this, new HeatNode(1.0D, 73.0D), Double.MAX_VALUE,
                     side -> SingleBlockPortProfile.heat(definition, side, facing())
             ));
-            case STEAM_BOILER, GASIFICATION_UNIT, BRICK_FURNACE -> addModule(new HeatNetworkModule(
+            case STEAM_BOILER, GASIFICATION_UNIT, BRICK_FURNACE, INTERNAL_COMBUSTION_ENGINE, GEOTHERMAL_PUMP ->
+                    addModule(new HeatNetworkModule(
                     Magneticraft.id("heat"), this, new HeatNode(1.0D, 73.0D), Double.MAX_VALUE,
                     side -> SingleBlockPortProfile.heat(definition, side, facing())
             ));
@@ -645,6 +683,20 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
                     && SingleBlockMachineSupport.findSmeltingRecipe(this, stack).isPresent();
             default -> true;
         };
+    }
+
+    private boolean isFluidFuel(FluidStack fluid) {
+        if (fluid.isEmpty()) {
+            return false;
+        }
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return true;
+        }
+        return serverLevel.getRecipeManager()
+                .getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get())
+                .stream()
+                .map(FluidFuelRecipe::fluid)
+                .anyMatch(candidate -> candidate == fluid.getFluid());
     }
 
     @Nullable

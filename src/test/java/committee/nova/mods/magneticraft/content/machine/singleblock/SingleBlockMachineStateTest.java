@@ -18,6 +18,7 @@ class SingleBlockMachineStateTest {
         original.tankExportEnabled = true;
         original.activeRecipe = "magneticraft:test";
         original.thermopileFlux = 12.5D;
+        original.fuelEnergyJoules = 345.5D;
         assertTrue(original.toggleInserterFlag(0));
         assertTrue(original.toggleInserterFlag(4));
 
@@ -33,6 +34,7 @@ class SingleBlockMachineStateTest {
         assertTrue(restored.tankExportEnabled);
         assertEquals("magneticraft:test", restored.activeRecipe);
         assertEquals(12.5D, restored.thermopileFlux);
+        assertEquals(345.5D, restored.fuelEnergyJoules);
         assertEquals(original.inserterFlags(), restored.inserterFlags());
     }
 
@@ -43,6 +45,7 @@ class SingleBlockMachineStateTest {
         tag.putInt("total_progress", -2);
         tag.putInt("fluid_output_cursor", -1);
         tag.putDouble("thermopile_flux", Double.NaN);
+        tag.putDouble("fuel_energy_joules", Double.POSITIVE_INFINITY);
 
         SingleBlockMachineState state = new SingleBlockMachineState();
         state.load(tag);
@@ -51,6 +54,7 @@ class SingleBlockMachineStateTest {
         assertEquals(0, state.totalProgress);
         assertEquals(5, state.fluidOutputCursor);
         assertEquals(0.0D, state.thermopileFlux);
+        assertEquals(0.0D, state.fuelEnergyJoules);
         assertEquals((1 << 2) | (1 << 3), state.inserterFlags());
         int flags = state.inserterFlags();
         assertFalse(state.toggleInserterFlag(99));

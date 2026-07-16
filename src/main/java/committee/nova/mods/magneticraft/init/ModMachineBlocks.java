@@ -76,6 +76,10 @@ public final class ModMachineBlocks {
                     .lightLevel(state -> 15)
                     .noOcclusion())
     );
+    public static final RegistryObject<Block> GEOTHERMAL_DRILL_PIPE = ModRegistries.BLOCKS.register(
+            "geothermal_drill_pipe",
+            () -> new Block(machineProperties().noLootTable())
+    );
 
     static {
         for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {

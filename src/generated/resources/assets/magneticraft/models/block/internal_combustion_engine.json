@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "front": "magneticraft:blocks/electric_machines/combustion_gen_back",
+    "side": "magneticraft:blocks/electric_machines/combustion_gen_side1",
+    "top": "magneticraft:blocks/electric_machines/combustion_gen_top"
+  }
+}

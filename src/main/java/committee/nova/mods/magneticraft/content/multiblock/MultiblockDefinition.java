@@ -154,6 +154,15 @@ public enum MultiblockDefinition {
                     layer("#R#", "RCR", "#R#")
             )
     ),
+    STIRLING_GENERATOR(
+            "stirling_generator", "Stirling Generator", "斯特林发电机",
+            new StructureOffset(2, 3, 3), new StructureOffset(1, 0, 1),
+            layers(
+                    layer("##", "#M", "##"),
+                    layer("##", "#C", "##"),
+                    layer("##", "#E", "##")
+            )
+    ),
     STEAM_ENGINE(
             "steam_engine", "Steam Engine", "蒸汽机",
             new StructureOffset(3, 4, 4), new StructureOffset(0, 1, 0),
@@ -277,7 +286,7 @@ public enum MultiblockDefinition {
             case GRINDER -> 3;
             case SIEVE -> 4;
             case HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE, POLYMERIZER -> 2;
-            case BIG_COMBUSTION_CHAMBER -> 1;
+            case BIG_COMBUSTION_CHAMBER, STIRLING_GENERATOR -> 1;
             default -> 0;
         };
     }
@@ -314,7 +323,7 @@ public enum MultiblockDefinition {
 
     public boolean usesElectricity() {
         return switch (this) {
-            case SOLAR_PANEL, STEAM_ENGINE, STEAM_TURBINE, GRINDER, SIEVE,
+            case SOLAR_PANEL, STIRLING_GENERATOR, STEAM_ENGINE, STEAM_TURBINE, GRINDER, SIEVE,
                     HYDRAULIC_PRESS, PUMPJACK, BIG_ELECTRIC_FURNACE -> true;
             default -> false;
         };
@@ -322,7 +331,8 @@ public enum MultiblockDefinition {
 
     public boolean usesHeat() {
         return switch (this) {
-            case SOLAR_TOWER, OIL_HEATER, POLYMERIZER, BIG_COMBUSTION_CHAMBER, BIG_STEAM_BOILER -> true;
+            case SOLAR_TOWER, STIRLING_GENERATOR, OIL_HEATER, POLYMERIZER,
+                    BIG_COMBUSTION_CHAMBER, BIG_STEAM_BOILER -> true;
             default -> false;
         };
     }

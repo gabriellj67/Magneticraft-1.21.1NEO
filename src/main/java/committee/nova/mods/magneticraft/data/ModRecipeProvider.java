@@ -620,6 +620,7 @@ final class ModRecipeProvider extends RecipeProvider {
             case SOLAR_MIRROR -> Items.GLASS_PANE;
             case SOLAR_PANEL -> Blocks.DAYLIGHT_DETECTOR;
             case SOLAR_TOWER -> Blocks.GLOWSTONE;
+            case STIRLING_GENERATOR -> Items.COAL;
             case STEAM_ENGINE -> Items.MINECART;
             case STEAM_TURBINE -> Items.LIGHTNING_ROD;
         };
@@ -816,6 +817,16 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', Tags.Items.INGOTS_IRON)
                 .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
                 .save(consumer, id("crafting/thermometer"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModMachineItems.OIL_PROSPECTOR.get())
+                .pattern("B")
+                .pattern("I")
+                .pattern("T")
+                .define('B', ModMachineItems.LOW_BATTERY.get())
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('T', ModTags.Items.ingot(Metal.TUNGSTEN))
+                .unlockedBy("has_low_voltage_battery", has(ModMachineItems.LOW_BATTERY.get()))
+                .save(consumer, id("crafting/oil_prospector"));
     }
 
     private void addLongDistanceElectricRecipes(Consumer<FinishedRecipe> consumer) {
@@ -1417,6 +1428,28 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', component(CraftingComponent.MOTOR)).define('D', Blocks.PISTON)
                 .unlockedBy("has_motor", has(component(CraftingComponent.MOTOR)))
                 .save(consumer, id("crafting/electric_engine"));
+        ShapedRecipeBuilder.shaped(
+                        RecipeCategory.REDSTONE,
+                        machine(SingleBlockMachineDefinition.INTERNAL_COMBUSTION_ENGINE)
+                )
+                .pattern("IVI").pattern("IMI").pattern("PBP")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('V', ModNetworkBlocks.IRON_PIPE.get())
+                .define('M', component(CraftingComponent.ALTERNATOR))
+                .define('P', ModItems.PLASTIC_SHEET.get())
+                .define('B', ModMachineItems.LOW_BATTERY.get())
+                .unlockedBy("has_alternator", has(component(CraftingComponent.ALTERNATOR)))
+                .save(consumer, id("crafting/internal_combustion_engine"));
+        ShapedRecipeBuilder.shaped(
+                        RecipeCategory.REDSTONE,
+                        machine(SingleBlockMachineDefinition.GEOTHERMAL_PUMP)
+                )
+                .pattern("TTT").pattern("THT").pattern("TDT")
+                .define('T', ModTags.Items.ingot(Metal.CARBIDE))
+                .define('H', ModNetworkBlocks.HEAT_PIPE.get())
+                .define('D', ModMachineItems.ELECTRIC_DRILL.get())
+                .unlockedBy("has_carbide_ingot", has(ModTags.Items.ingot(Metal.CARBIDE)))
+                .save(consumer, id("crafting/geothermal_pump"));
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModMachineBlocks.TUBE_LIGHT.get())
                 .pattern(" A ").pattern("BCB")
                 .define('A', Tags.Items.INGOTS_IRON).define('B', Tags.Items.NUGGETS_IRON)

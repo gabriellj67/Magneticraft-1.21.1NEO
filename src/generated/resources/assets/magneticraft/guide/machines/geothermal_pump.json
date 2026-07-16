@@ -1,0 +1,17 @@
+{
+  "automation_profile": "heat_top",
+  "category": "energy",
+  "description": "guide.magneticraft.machine.geothermal_pump.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:geothermal_pump",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "heat"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.geothermal_pump"
+}

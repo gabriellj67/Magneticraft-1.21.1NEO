@@ -72,6 +72,11 @@ public final class MultiblockPortLayout {
                 network(0, 0, 0, Direction.SOUTH, Kind.ELECTRICITY)
         ));
         layouts.put(MultiblockDefinition.STEAM_ENGINE, steamEngine());
+        layouts.put(MultiblockDefinition.STIRLING_GENERATOR, List.of(
+                item(0, 0, 0, Direction.SOUTH, slots(0), slots()),
+                network(0, 0, -1, Direction.NORTH, Kind.HEAT),
+                network(0, 2, 0, Direction.UP, Kind.ELECTRICITY)
+        ));
         layouts.put(MultiblockDefinition.STEAM_TURBINE, steamTurbine());
         layouts.put(MultiblockDefinition.GRINDER, grinder());
         layouts.put(MultiblockDefinition.SIEVE, sieve());

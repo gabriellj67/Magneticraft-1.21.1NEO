@@ -62,7 +62,10 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
                 tag(BlockTags.NEEDS_STONE_TOOL).add(holder.get());
             }
         });
-        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(ModMachineBlocks.TUBE_LIGHT.get());
+        tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
+                ModMachineBlocks.TUBE_LIGHT.get(),
+                ModMachineBlocks.GEOTHERMAL_DRILL_PIPE.get()
+        );
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 ModNetworkBlocks.ELECTRIC_CABLE.get(),
                 ModNetworkBlocks.BURNT_ELECTRIC_CABLE.get(),

@@ -27,7 +27,12 @@ public enum SingleBlockMachineDefinition {
     AIRLOCK("airlock", "Airlock", "气闸", 0, 0, true, FacingMode.NONE, false),
     THERMOPILE("thermopile", "Thermopile", "热电堆", 0, 0, true, FacingMode.NONE, false),
     RF_TRANSFORMER("forge_energy_transformer", "Forge Energy Transformer", "FE 转换器", 0, 0, true, FacingMode.NONE, false),
-    ELECTRIC_ENGINE("electric_engine", "Electric Engine", "电力引擎", 0, 0, true, FacingMode.ALL, false);
+    ELECTRIC_ENGINE("electric_engine", "Electric Engine", "电力引擎", 0, 0, true, FacingMode.ALL, false),
+    INTERNAL_COMBUSTION_ENGINE(
+            "internal_combustion_engine", "Internal Combustion Engine", "内燃机",
+            0, 0, true, FacingMode.HORIZONTAL, false
+    ),
+    GEOTHERMAL_PUMP("geothermal_pump", "Geothermal Pump", "地热泵", 0, 0, true, FacingMode.HORIZONTAL, false);
 
     private final String id;
     private final String englishName;
@@ -143,6 +148,8 @@ public enum SingleBlockMachineDefinition {
             case RF_HEATER -> AutomationProfile.ALL_SIDES_FORGE_ENERGY_WITH_VERTICAL_HEAT;
             case GASIFICATION_UNIT, BRICK_FURNACE -> AutomationProfile.ITEM_INPUT_OUTPUT;
             case WATER_GENERATOR -> AutomationProfile.FLUID_OUTPUT_ALL_SIDES;
+            case INTERNAL_COMBUSTION_ENGINE -> AutomationProfile.FLUID_TOP_ELECTRIC_REAR_HEAT_BOTTOM;
+            case GEOTHERMAL_PUMP -> AutomationProfile.HEAT_TOP;
             default -> AutomationProfile.ALL_SIDES;
         };
     }
@@ -207,6 +214,8 @@ public enum SingleBlockMachineDefinition {
         BOILER_ALL_SIDES,
         ELECTRICITY_WITH_VERTICAL_HEAT,
         ALL_SIDES_FORGE_ENERGY_WITH_VERTICAL_HEAT,
+        FLUID_TOP_ELECTRIC_REAR_HEAT_BOTTOM,
+        HEAT_TOP,
         PNEUMATIC_ONLY
     }
 

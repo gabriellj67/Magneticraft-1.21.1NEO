@@ -26,8 +26,15 @@ class SingleBlockRecipeTest {
     void singleBlockInventoryHasStableUniqueIds() {
         Set<String> ids = new HashSet<>();
         Arrays.stream(SingleBlockMachineDefinition.values()).forEach(definition -> ids.add(definition.id()));
-        assertEquals(21, ids.size());
-        assertTrue(ids.containsAll(Set.of("sluice_box", "gasification_unit", "thermopile", "electric_engine")));
+        assertEquals(23, ids.size());
+        assertTrue(ids.containsAll(Set.of(
+                "sluice_box",
+                "gasification_unit",
+                "thermopile",
+                "electric_engine",
+                "internal_combustion_engine",
+                "geothermal_pump"
+        )));
     }
 
     @Test
@@ -51,5 +58,14 @@ class SingleBlockRecipeTest {
         double conductivity = SingleBlockMachineMath.balancedConductivity(293.15D);
         assertTrue(Double.isFinite(conductivity));
         assertTrue(conductivity > 0.0D);
+    }
+
+    @Test
+    void internalCombustionEngineThrottlesLinearlyAcrossItsThermalWindow() {
+        assertEquals(1.0D, SingleBlockMachineMath.internalCombustionThrottle(293.15D));
+        assertEquals(1.0D, SingleBlockMachineMath.internalCombustionThrottle(423.15D));
+        assertEquals(0.5D, SingleBlockMachineMath.internalCombustionThrottle(598.15D), 1.0E-9D);
+        assertEquals(0.0D, SingleBlockMachineMath.internalCombustionThrottle(773.15D));
+        assertEquals(0.0D, SingleBlockMachineMath.internalCombustionThrottle(Double.NaN));
     }
 }

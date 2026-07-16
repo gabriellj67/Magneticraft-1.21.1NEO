@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": {
+      "item": "magneticraft:low_voltage_battery"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "M": {
+      "item": "magneticraft:alternator"
+    },
+    "P": {
+      "item": "magneticraft:plastic_sheet"
+    },
+    "V": {
+      "item": "magneticraft:iron_fluid_pipe"
+    }
+  },
+  "pattern": [
+    "IVI",
+    "IMI",
+    "PBP"
+  ],
+  "result": {
+    "item": "magneticraft:internal_combustion_engine"
+  },
+  "show_notification": true
+}

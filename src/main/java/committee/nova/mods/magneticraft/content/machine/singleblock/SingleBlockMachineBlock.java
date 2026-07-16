@@ -123,6 +123,12 @@ public final class SingleBlockMachineBlock extends BaseEntityBlock {
             ItemStack stack
     ) {
         super.setPlacedBy(level, position, state, placer, stack);
+        if (!level.isClientSide
+                && definition == SingleBlockMachineDefinition.GEOTHERMAL_PUMP
+                && placer instanceof Player player
+                && level.getBlockEntity(position) instanceof SingleBlockMachineBlockEntity machine) {
+            machine.setOwner(player.getUUID());
+        }
         if (!level.isClientSide && definition.doubleLength() && state.getValue(MASTER)) {
             Direction facing = state.getValue(FACING);
             level.setBlock(

@@ -52,8 +52,9 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
                 machine.getBlockPos(),
                 packedLight
         );
-        if (machine.definition() == MultiblockDefinition.POLYMERIZER) {
-            renderPolymerizer(machine, poseStack, buffers, sceneLight, packedOverlay);
+        if (machine.definition() == MultiblockDefinition.POLYMERIZER
+                || machine.definition() == MultiblockDefinition.STIRLING_GENERATOR) {
+            renderRegisteredStructure(machine, poseStack, buffers, sceneLight, packedOverlay);
             return;
         }
         poseStack.pushPose();
@@ -315,6 +316,8 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
                     LegacySceneModels.SOLAR_TOWER, null, 0.0D,
                     0.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
             );
+            case STIRLING_GENERATOR ->
+                    throw new IllegalStateException("Stirling generator uses its structure renderer");
             case STEAM_ENGINE -> {
                 translateAndRender(
                         LegacySceneModels.STEAM_ENGINE_BODY, machine.working() ? "animation" : null, animationSeconds,
@@ -331,12 +334,8 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
         }
     }
 
-    /**
-     * The 1.7.10 polymerizer was a Techne-only scene rather than a portable MCX/glTF asset.
-     * Rebuild its exact registered 3x5x3 structure from the same rules used by formation,
-     * avoiding an unrelated machine model and keeping facing semantics authoritative.
-     */
-    private static void renderPolymerizer(
+    /** Renders restored machines directly from the same registered cells used by formation. */
+    private static void renderRegisteredStructure(
             AdvancedMultiblockBlockEntity machine,
             PoseStack poseStack,
             MultiBufferSource buffers,

@@ -31,6 +31,7 @@ import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkService;
 import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
+import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -1258,6 +1259,58 @@ public final class AdvancedSystemsGameTests {
                 "Combustion chamber did not preserve its released bidirectional fluid tank");
         clear(helper, occupied);
         helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 80)
+    public static void stirlingGeneratorConservesHeatAndStopsWhenItsOutputIsFull(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.STIRLING_GENERATOR, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Stirling generator did not form");
+        helper.runAfterDelay(2, () -> {
+            controller.energy().setStoredJoules(0.0D);
+            controller.heat().node().setTemperature(HeatNode.AMBIENT_TEMPERATURE_KELVIN);
+            controller.inventory().setStackInSlot(0, new ItemStack(Items.COAL));
+            double ambientHeat = controller.heat().node().internalEnergyJoules();
+            helper.assertTrue(controller.operational(), "Stirling generator was not operational after formation");
+            helper.assertTrue(controller.energy().electricalControllerBound(),
+                    "Stirling generator did not bind its electrical profile");
+            helper.assertTrue(controller.energy().ratedCapacityWholeJoules() == 16_000,
+                    "Stirling generator buffer was not 16 kJ; actual="
+                            + controller.energy().ratedCapacityWholeJoules());
+            helper.assertTrue(Math.abs(controller.energy().generateJoules(120.0D, true) - 120.0D) < 1.0E-6D,
+                    "Stirling generator simulation rejected its 120 J output; accepted="
+                            + controller.energy().generateJoules(120.0D, true));
+            helper.assertTrue(!controller.inventory().getStackInSlot(0).isEmpty(),
+                    "Stirling generator rejected coal from its fuel slot");
+
+            AdvancedMultiblockBlockEntity.serverTick(
+                    helper.getLevel(), controller.getBlockPos(), controller.getBlockState(), controller
+            );
+
+            helper.assertTrue(Math.abs(controller.energy().storedJoules() - 120.0D) < 1.0E-6D,
+                    "Stirling generator did not cap electrical production at 120 J/t; actual="
+                            + controller.energy().storedJoules());
+            helper.assertTrue(Math.abs(controller.heat().node().internalEnergyJoules() - ambientHeat) < 1.0E-6D,
+                    "Stirling generator did not convert 160 J heat into 120 J electricity at 75%");
+            helper.assertTrue(controller.inventory().getStackInSlot(0).isEmpty(),
+                    "Stirling generator did not consume exactly one solid fuel item");
+            int remainingBurn = controller.burnTicks();
+
+            controller.energy().setStoredJoules(controller.energy().ratedCapacityJoules());
+            AdvancedMultiblockBlockEntity.serverTick(
+                    helper.getLevel(), controller.getBlockPos(), controller.getBlockState(), controller
+            );
+            helper.assertTrue(controller.burnTicks() == remainingBurn,
+                    "Blocked Stirling output continued consuming solid fuel work");
+            helper.assertTrue(Math.abs(controller.heat().node().internalEnergyJoules() - ambientHeat) < 1.0E-6D,
+                    "Blocked Stirling output continued extracting or producing heat");
+            clear(helper, occupied);
+            player.discard();
+            helper.succeed();
+        });
     }
 
     private static List<ItemStack> controllerDrops(

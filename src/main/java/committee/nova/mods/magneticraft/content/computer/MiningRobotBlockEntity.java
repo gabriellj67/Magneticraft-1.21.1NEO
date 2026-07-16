@@ -1,6 +1,5 @@
 package committee.nova.mods.magneticraft.content.computer;
 
-import com.mojang.authlib.GameProfile;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.computer.runtime.ComputerDeviceBus;
 import committee.nova.mods.magneticraft.content.computer.runtime.ComputerDeviceBus.DeviceCommand;
@@ -9,6 +8,7 @@ import committee.nova.mods.magneticraft.content.computer.vm.ComputerOpcode;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
+import committee.nova.mods.magneticraft.content.world.ProtectedWorldMutation;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import net.minecraft.core.BlockPos;
@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -36,7 +35,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Server-authoritative robot host with atomic inventory/energy checks for every world action.
@@ -595,23 +593,16 @@ public final class MiningRobotBlockEntity extends ProgrammableBlockEntity {
     }
 
     private boolean isSafeLoadedTarget(ServerLevel level, BlockPos target) {
-        return !level.isOutsideBuildHeight(target)
-                && level.getWorldBorder().isWithinBounds(target)
-                && level.hasChunk(target.getX() >> 4, target.getZ() >> 4);
+        return ProtectedWorldMutation.isSafeLoadedTarget(level, target);
     }
 
     private boolean mayModify(ServerLevel level, FakePlayer player, BlockPos target, Direction face) {
-        player.setPos(worldPosition.getX() + 0.5D, worldPosition.getY() + 0.5D, worldPosition.getZ() + 0.5D);
-        return level.mayInteract(player, target) && player.mayUseItemAt(target, face, ItemStack.EMPTY);
+        return ProtectedWorldMutation.mayModify(level, player, worldPosition, target, face);
     }
 
     @Nullable
     private FakePlayer ownerPlayer(ServerLevel level) {
-        UUID ownerId = owner();
-        if (ownerId == null) {
-            return null;
-        }
-        return FakePlayerFactory.get(level, new GameProfile(ownerId, "[Magneticraft]"));
+        return ProtectedWorldMutation.ownerPlayer(level, owner(), worldPosition);
     }
 
     @Nullable
