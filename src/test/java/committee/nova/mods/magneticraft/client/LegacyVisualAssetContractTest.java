@@ -19,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LegacyVisualAssetContractTest {
-    private static final Path MANIFEST = Path.of("scripts/legacy_model_manifest.json");
+    private static final Path MANIFEST = Path.of(
+            "src/test/resources/magneticraft/legacy/legacy_model_manifest.json"
+    );
     private static final Path RUNTIME_ASSETS = Path.of("src/main/resources/assets/magneticraft");
     private static final Set<String> ROLES = Set.of(
             "static_block",

@@ -340,7 +340,7 @@ def verifyReleaseArtifact = tasks.register("verifyReleaseArtifact") {
             throw new GradleException("Production JAR is missing release entries: ${missingEntries}")
         }
 
-        def forbiddenPrefixes = [".references/", ".trellis/", "run/", "build/"]
+        def forbiddenPrefixes = [".references/", "run/", "build/"]
         def forbiddenExtensions = [".glb"]
         def forbiddenEntry = { String entry ->
             forbiddenPrefixes.any(entry::startsWith)

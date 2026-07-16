@@ -13,12 +13,11 @@ from `0.2.0`; later releases may only add forward migrations.
 
 ## Current status
 
-The repository is the `1.0.0` complete gameplay migration. Every published
-Nova 1.12 gameplay entry is assigned exactly once in the migration matrix, and
-every retained or rebuilt entry has executable evidence. Historical MCX/glTF
-assets are packaged unchanged and rendered through a reload-aware scene loader;
-bounded block-entity renderers sample named parts and continuous animations. The frozen registry
-and persistence contracts remain unchanged from `0.2.0`.
+The repository implements the `1.0.0` gameplay migration target. Historical
+MCX/glTF assets are packaged unchanged and rendered through a reload-aware
+scene loader; bounded block-entity renderers sample named parts and continuous
+animations. The frozen registry and persistence contracts remain unchanged
+from `0.2.0`.
 
 JEI, CraftTweaker, Tinkers' Construct and Jade support is optional.
 Magneticraft does not embed their classes or require them in a base
@@ -26,18 +25,6 @@ installation. Jade `11.13.1+forge` is isolated behind its plugin boundary and
 receives only server-authoritative observation snapshots. Long-distance
 electricity uses Magneticraft-owned endpoints and persisted connection graphs;
 Strut Your Stuff is not a runtime dependency.
-
-See the [authoritative migration matrix](docs/porting/migration-matrix.md),
-[machine-readable registry map](docs/porting/registry-id-map.json),
-[base-content migration map](docs/porting/base-content.md),
-[machine framework notes](docs/porting/machine-framework.md) and
-[legacy model contract](docs/MODEL_CONVERSION.md) for stable IDs and explicit
-conversion boundaries. The Chinese
-[1.0.0 visual and release report](docs/porting/1.0.0-visual-release.md) and
-[release notes](docs/porting/1.0.0-release-notes.md) record the final scope and
-verification evidence. The earlier
-[release-readiness report](docs/porting/release-readiness.md) is retained only
-as a historical feasibility snapshot.
 
 ## Runtime requirements
 

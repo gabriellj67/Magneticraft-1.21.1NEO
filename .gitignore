@@ -22,23 +22,6 @@ libs-*/
 .DS_Store
 Thumbs.db
 
-# Local agent and code-index state
-.agents/
-.codegraph/
-.codex/
-.spec-workflow/
-
-# Trellis local runtime; committed code specifications remain visible
-.trellis/*
-!.trellis/spec/
-.trellis/spec/*
-!.trellis/spec/backend/
-!.trellis/spec/backend/**
-
-# Serena local caches and per-machine overrides
-.serena/cache/
-.serena/project.local.yml
-
 # JVM crash and temporary files
 hs_err_pid*
 replay_pid*

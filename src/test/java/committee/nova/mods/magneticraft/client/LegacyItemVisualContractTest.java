@@ -18,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LegacyItemVisualContractTest {
-    private static final Path MANIFEST = Path.of("scripts/legacy_item_texture_manifest.json");
+    private static final Path MANIFEST = Path.of(
+            "src/test/resources/magneticraft/legacy/legacy_item_texture_manifest.json"
+    );
     private static final Path RUNTIME_ASSETS = Path.of("src/main/resources/assets/magneticraft");
     private static final Path GENERATED_MODELS =
             Path.of("src/generated/resources/assets/magneticraft/models/item");

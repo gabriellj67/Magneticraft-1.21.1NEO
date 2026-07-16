@@ -19,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class LegacySourceModelParserContractTest {
-    private static final Path MANIFEST = Path.of("scripts/legacy_model_manifest.json");
+    private static final Path MANIFEST = Path.of(
+            "src/test/resources/magneticraft/legacy/legacy_model_manifest.json"
+    );
     private static final Path GLTF_ROOT = Path.of("src/main/resources/assets/magneticraft/models/block/gltf");
 
     @Test
