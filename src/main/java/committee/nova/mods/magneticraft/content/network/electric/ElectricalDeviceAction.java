@@ -6,7 +6,11 @@ import io.netty.handler.codec.DecoderException;
 public enum ElectricalDeviceAction {
     REVERSE_TRANSFORMER,
     CYCLE_REDSTONE_MODE,
-    RESET_BREAKER;
+    RESET_BREAKER,
+    CYCLE_CONTROL_REDSTONE,
+    CYCLE_RESISTOR_FIRST_RING,
+    CYCLE_RESISTOR_SECOND_RING,
+    CYCLE_RESISTOR_MULTIPLIER_RING;
 
     public static ElectricalDeviceAction decode(int ordinal) {
         ElectricalDeviceAction[] values = values();

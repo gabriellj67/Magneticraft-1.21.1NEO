@@ -1,0 +1,31 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "schema_version": 1,
+    "tier_id": "magneticraft:high_voltage"
+  },
+  "key": {
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "D": {
+      "tag": "forge:ingots/carbide"
+    },
+    "G": {
+      "tag": "forge:glass"
+    },
+    "T": {
+      "tag": "magneticraft:light_plates/tungsten"
+    }
+  },
+  "pattern": [
+    " C ",
+    "TDT",
+    " G "
+  ],
+  "result": {
+    "item": "magneticraft:diode"
+  },
+  "show_notification": true
+}

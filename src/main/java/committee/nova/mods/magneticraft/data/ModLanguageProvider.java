@@ -82,6 +82,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add("container.magneticraft.box_transformer", chinese ? "箱式变压器" : "Box Transformer");
         add("container.magneticraft.fuse_box", chinese ? "保险丝盒" : "Fuse Box");
         add("container.magneticraft.circuit_breaker", chinese ? "断路器" : "Circuit Breaker");
+        add("container.magneticraft.electric_switch", chinese ? "电气开关" : "Electric Switch");
+        add("container.magneticraft.diode", chinese ? "二极管" : "Diode");
+        add("container.magneticraft.resistor", chinese ? "可调电阻" : "Adjustable Resistor");
         add("container.magneticraft.pressure_tank", chinese ? "压力罐" : "Pressure Tank");
         ModMachineBlocks.machines().forEach((definition, holder) -> {
             add(holder.get(), chinese ? definition.chineseName() : definition.englishName());
@@ -131,6 +134,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModNetworkBlocks.BOX_TRANSFORMER.get(), chinese ? "箱式变压器" : "Box Transformer");
         add(ModNetworkBlocks.FUSE_BOX.get(), chinese ? "保险丝盒" : "Fuse Box");
         add(ModNetworkBlocks.CIRCUIT_BREAKER.get(), chinese ? "断路器" : "Circuit Breaker");
+        add(ModNetworkBlocks.ELECTRIC_SWITCH.get(), chinese ? "电气开关" : "Electric Switch");
+        add(ModNetworkBlocks.DIODE.get(), chinese ? "二极管" : "Diode");
+        add(ModNetworkBlocks.RESISTOR.get(), chinese ? "可调电阻" : "Adjustable Resistor");
         add(ModNetworkBlocks.TESLA_TOWER.get(), chinese ? "特斯拉塔" : "Tesla Tower");
         add(ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(), chinese ? "无线能量接收器" : "Wireless Energy Receiver");
         add(ModNetworkBlocks.WIND_TURBINE.get(), chinese ? "风力发电机" : "Wind Turbine");
@@ -158,6 +164,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.protection_status", chinese
                 ? "保护规格：%s，过载度：%s，已断开：%s"
                 : "Protection rating: %s, stress: %s, open: %s");
+        add("message.magneticraft.electrical_control_status", chinese
+                ? "%s：导通 %s，设定电阻 %s Ω"
+                : "%s: conducting %s, configured resistance %s Ω");
         add("message.magneticraft.invalid_fuse", chinese
                 ? "保险丝必须与保险丝盒的电压层级一致"
                 : "The fuse must match the fuse box voltage tier");
@@ -276,9 +285,23 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.electrical.protection_state", chinese ? "状态：%s" : "State: %s");
         add("gui.magneticraft.electrical.direction.forward", chinese ? "正向" : "Forward");
         add("gui.magneticraft.electrical.direction.reverse", chinese ? "反向" : "Reverse");
+        add("gui.magneticraft.electrical.direction.none", chinese ? "无电流" : "No current");
+        add("gui.magneticraft.electrical.direction.back_to_front", chinese ? "后端 → 前端" : "Back → front");
+        add("gui.magneticraft.electrical.direction.front_to_back", chinese ? "前端 → 后端" : "Front → back");
         add("gui.magneticraft.electrical.redstone.ignored", chinese ? "忽略红石" : "Ignore redstone");
         add("gui.magneticraft.electrical.redstone.requires_signal", chinese ? "有红石信号时启用" : "Requires signal");
         add("gui.magneticraft.electrical.redstone.requires_no_signal", chinese ? "无红石信号时启用" : "Requires no signal");
+        add("gui.magneticraft.electrical.switch_redstone.ignored", chinese ? "忽略红石，始终导通" : "Ignore redstone, always conduct");
+        add("gui.magneticraft.electrical.switch_redstone.requires_signal", chinese ? "有信号时导通" : "Conduct with signal");
+        add("gui.magneticraft.electrical.switch_redstone.requires_no_signal", chinese ? "无信号时导通" : "Conduct without signal");
+        add("gui.magneticraft.electrical.control_state", chinese ? "状态：%s" : "State: %s");
+        add("gui.magneticraft.electrical.state.conducting", chinese ? "导通" : "conducting");
+        add("gui.magneticraft.electrical.state.open", chinese ? "断开" : "open");
+        add("gui.magneticraft.electrical.control_telemetry", chinese
+                ? "%s · %s A · 损耗 %s J/t"
+                : "%s · %s A · loss %s J/t");
+        add("gui.magneticraft.electrical.resistance", chinese ? "电阻：%s Ω" : "Resistance: %s Ω");
+        add("gui.magneticraft.electrical.resistor_ring", chinese ? "色环 %s：%s" : "Band %s: %s");
         add("gui.magneticraft.electrical.state.redstone_open", chinese ? "红石断开" : "redstone open");
         add("gui.magneticraft.electrical.state.tripped", chinese ? "已跳闸" : "tripped");
         add("gui.magneticraft.electrical.state.blown", chinese ? "已熔断" : "blown");
@@ -563,6 +586,12 @@ final class ModLanguageProvider extends LanguageProvider {
                 "Uses a fuse matching line tier and rating; overload blows it and opens the internal edge first.");
         addGuideItemDescription("circuit_breaker", "过载时跳闸，可在故障消失且无红石强制断开时从 GUI 手动复位。",
                 "Trips on overload and can be reset from its GUI only after the fault and redstone-forced open are gone.");
+        addGuideItemDescription("electric_switch", "前后端子相互隔离，并按无信号导通、有信号导通或始终导通三种红石模式控制连接。",
+                "Keeps front and back isolated and connects them according to conduct-without-signal, conduct-with-signal, or always-conduct redstone modes.");
+        addGuideItemDescription("diode", "只允许电能从后端流向前端，且仅在后端电压高于前端时导通，不附加正向压降。",
+                "Allows energy only from back to front while back voltage exceeds front voltage, with no added forward drop.");
+        addGuideItemDescription("resistor", "用三色环设定 R=(前两位)×10^第三位 Ω，按欧姆定律双向传输并把电阻损耗散入环境。",
+                "Uses three bands for R=(first two digits)×10^third digit Ω, transfers bidirectionally by Ohm's law, and dissipates resistive loss.");
         addGuideItemDescription("heat_pipe", "连接热力节点并向环境散热；区块卸载时暂停。",
                 "Connects thermal nodes with environmental heat loss and pauses during chunk unload.");
         addGuideItemDescription("insulated_heat_pipe", "降低环境散热的热力传输管，不会强加载邻接区块。",

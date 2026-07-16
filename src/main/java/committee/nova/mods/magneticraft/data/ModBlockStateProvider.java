@@ -903,6 +903,25 @@ final class ModBlockStateProvider extends BlockStateProvider {
         horizontalBlock(ModNetworkBlocks.CIRCUIT_BREAKER.get(), circuitBreakerModel);
         simpleBlockItem(ModNetworkBlocks.CIRCUIT_BREAKER.get(), circuitBreakerModel);
 
+        electricalControlModel(
+                ModNetworkBlocks.ELECTRIC_SWITCH.get(),
+                "electric_switch",
+                modLoc("block/electrical_breaker_housing"),
+                modLoc("block/electrical_indicator")
+        );
+        electricalControlModel(
+                ModNetworkBlocks.DIODE.get(),
+                "diode",
+                modLoc("block/electrical_indicator"),
+                modLoc("blocks/ore_block/copper_block")
+        );
+        electricalControlModel(
+                ModNetworkBlocks.RESISTOR.get(),
+                "resistor",
+                modLoc("blocks/ore_block/copper_block"),
+                modLoc("block/electrical_indicator")
+        );
+
         Block teslaTower = ModNetworkBlocks.TESLA_TOWER.get();
         ModelFile teslaBottom = gltfModel(
                 "tesla_tower_bottom",
@@ -941,6 +960,22 @@ final class ModBlockStateProvider extends BlockStateProvider {
                         new ModelTransform(0.0F, -5.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F)
                 )
         );
+    }
+
+    private void electricalControlModel(
+            Block block,
+            String name,
+            ResourceLocation front,
+            ResourceLocation top
+    ) {
+        ModelFile model = models().orientable(
+                name,
+                modLoc("block/electrical_enclosure"),
+                front,
+                top
+        );
+        horizontalBlock(block, model);
+        simpleBlockItem(block, model);
     }
 
     private void historicalDirectionalBlock(

@@ -1136,6 +1136,24 @@ final class ModRecipeProvider extends RecipeProvider {
                 "_high_voltage",
                 Ingredient.of(ModTags.Items.lightPlate(Metal.TUNGSTEN))
         );
+        electricalControlTierRecipes(
+                consumer,
+                VoltageTierIds.LOW,
+                "",
+                Ingredient.of(ModTags.Items.lightPlate(Metal.COPPER))
+        );
+        electricalControlTierRecipes(
+                consumer,
+                VoltageTierIds.MEDIUM,
+                "_medium_voltage",
+                Ingredient.of(ModTags.Items.lightPlate(Metal.STEEL))
+        );
+        electricalControlTierRecipes(
+                consumer,
+                VoltageTierIds.HIGH,
+                "_high_voltage",
+                Ingredient.of(ModTags.Items.lightPlate(Metal.TUNGSTEN))
+        );
 
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModNetworkItems.ELECTRICAL_REPAIR_TOOL.get())
                 .pattern("SCS")
@@ -1147,6 +1165,56 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('L', ModTags.Items.lightPlate(Metal.LEAD))
                 .unlockedBy("has_steel_plate", has(ModTags.Items.lightPlate(Metal.STEEL)))
                 .save(consumer, id("crafting/electrical_repair_tool"));
+    }
+
+    private void electricalControlTierRecipes(
+            Consumer<FinishedRecipe> consumer,
+            ResourceLocation tierId,
+            String suffix,
+            Ingredient tierMaterial
+    ) {
+        saveTiered(
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.ELECTRIC_SWITCH.get())
+                        .pattern(" S ")
+                        .pattern("CTC")
+                        .pattern(" R ")
+                        .define('S', ModTags.Items.lightPlate(Metal.STEEL))
+                        .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                        .define('T', tierMaterial)
+                        .define('R', Tags.Items.DUSTS_REDSTONE)
+                        .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE)),
+                consumer,
+                id("crafting/electric_switch" + suffix),
+                tierId
+        );
+        saveTiered(
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.DIODE.get())
+                        .pattern(" C ")
+                        .pattern("TDT")
+                        .pattern(" G ")
+                        .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                        .define('T', tierMaterial)
+                        .define('D', ModTags.Items.ingot(Metal.CARBIDE))
+                        .define('G', Tags.Items.GLASS)
+                        .unlockedBy("has_carbide_ingot", has(ModTags.Items.ingot(Metal.CARBIDE))),
+                consumer,
+                id("crafting/diode" + suffix),
+                tierId
+        );
+        saveTiered(
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.RESISTOR.get())
+                        .pattern(" B ")
+                        .pattern("CTC")
+                        .pattern(" R ")
+                        .define('B', ModTags.Items.ingot(Metal.BRASS))
+                        .define('C', component(CraftingComponent.FINE_COPPER_WIRE))
+                        .define('T', tierMaterial)
+                        .define('R', Tags.Items.DUSTS_REDSTONE)
+                        .unlockedBy("has_brass_ingot", has(ModTags.Items.ingot(Metal.BRASS))),
+                consumer,
+                id("crafting/resistor" + suffix),
+                tierId
+        );
     }
 
     private void protectionTierRecipes(

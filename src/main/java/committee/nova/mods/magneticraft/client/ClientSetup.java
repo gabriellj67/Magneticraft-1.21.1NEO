@@ -84,7 +84,10 @@ public final class ClientSetup {
                 committee.nova.mods.magneticraft.init.ModNetworkBlocks.ELECTRIC_CABLE.get(),
                 committee.nova.mods.magneticraft.init.ModNetworkBlocks.BOX_TRANSFORMER.get(),
                 committee.nova.mods.magneticraft.init.ModNetworkBlocks.FUSE_BOX.get(),
-                committee.nova.mods.magneticraft.init.ModNetworkBlocks.CIRCUIT_BREAKER.get()
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.CIRCUIT_BREAKER.get(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.ELECTRIC_SWITCH.get(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.DIODE.get(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.RESISTOR.get()
         );
     }
 
@@ -95,7 +98,10 @@ public final class ClientSetup {
                 committee.nova.mods.magneticraft.init.ModNetworkBlocks.ELECTRIC_CABLE.get().asItem(),
                 committee.nova.mods.magneticraft.init.ModNetworkBlocks.BOX_TRANSFORMER.get().asItem(),
                 committee.nova.mods.magneticraft.init.ModNetworkBlocks.FUSE_BOX.get().asItem(),
-                committee.nova.mods.magneticraft.init.ModNetworkBlocks.CIRCUIT_BREAKER.get().asItem()
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.CIRCUIT_BREAKER.get().asItem(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.ELECTRIC_SWITCH.get().asItem(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.DIODE.get().asItem(),
+                committee.nova.mods.magneticraft.init.ModNetworkBlocks.RESISTOR.get().asItem()
         );
     }
 

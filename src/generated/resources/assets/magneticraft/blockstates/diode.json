@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/diode",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/diode"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/diode",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/diode",
+      "y": 270
+    }
+  }
+}

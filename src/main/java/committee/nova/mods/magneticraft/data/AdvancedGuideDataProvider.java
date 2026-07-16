@@ -256,6 +256,9 @@ final class AdvancedGuideDataProvider implements DataProvider {
         items.add(electricEquipmentItem("box_transformer", true));
         items.add(electricEquipmentItem("fuse_box", true));
         items.add(electricEquipmentItem("circuit_breaker", true));
+        items.add(electricEquipmentItem("electric_switch", true));
+        items.add(electricEquipmentItem("diode", true));
+        items.add(electricEquipmentItem("resistor", true));
         items.add(electricEquipmentItem("heat_pipe", true));
         items.add(electricEquipmentItem("insulated_heat_pipe", true));
         items.add(electricEquipmentItem("heat_sink", true));

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/electric_switch",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/electric_switch"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/electric_switch",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/electric_switch",
+      "y": 270
+    }
+  }
+}

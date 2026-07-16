@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/resistor",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/resistor"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/resistor",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/resistor",
+      "y": 270
+    }
+  }
+}

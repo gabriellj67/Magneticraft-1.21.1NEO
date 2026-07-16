@@ -12,6 +12,8 @@ import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.content.item.ProtectionBlockItem;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricalProtectionBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricalProtectionKind;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalControlBlock;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalControlKind;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlock;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlock;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlock;
@@ -64,6 +66,9 @@ public final class ModNetworkBlocks {
             "circuit_breaker",
             ElectricalProtectionKind.CIRCUIT_BREAKER
     );
+    public static final RegistryObject<Block> ELECTRIC_SWITCH = registerElectricalControl(ElectricalControlKind.SWITCH);
+    public static final RegistryObject<Block> DIODE = registerElectricalControl(ElectricalControlKind.DIODE);
+    public static final RegistryObject<Block> RESISTOR = registerElectricalControl(ElectricalControlKind.RESISTOR);
     public static final RegistryObject<Block> TESLA_TOWER = register(
             "tesla_tower",
             () -> new TeslaTowerBlock(machineProperties().noOcclusion())
@@ -175,6 +180,18 @@ public final class ModNetworkBlocks {
         BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
                 id,
                 () -> new ProtectionBlockItem(block.get(), new Item.Properties(), kind)
+        ));
+        return block;
+    }
+
+    private static RegistryObject<Block> registerElectricalControl(ElectricalControlKind kind) {
+        RegistryObject<Block> block = ModRegistries.BLOCKS.register(
+                kind.id(),
+                () -> new ElectricalControlBlock(machineProperties().noOcclusion(), kind)
+        );
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                kind.id(),
+                () -> new TieredElectricalBlockItem(block.get(), new Item.Properties())
         ));
         return block;
     }

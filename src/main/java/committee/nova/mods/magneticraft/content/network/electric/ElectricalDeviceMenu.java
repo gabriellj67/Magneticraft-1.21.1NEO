@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.network.electric;
 
 import committee.nova.mods.magneticraft.content.machine.framework.menu.AbstractMachineMenu;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalControlModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalProtectionModule;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import committee.nova.mods.magneticraft.system.network.electric.item.ElectricalRatingIds;
@@ -23,11 +24,11 @@ import net.minecraftforge.network.NetworkHooks;
 
 import java.util.Objects;
 
-/** Server-authoritative transformer/protection controls with one optional fuse slot. */
+/** Server-authoritative controls and telemetry for all isolated two-terminal electrical devices. */
 public final class ElectricalDeviceMenu extends AbstractMachineMenu {
     public static final int FUSE_SLOT_X = 80;
     public static final int FUSE_SLOT_Y = 43;
-    public static final int DATA_COUNT = 8;
+    public static final int DATA_COUNT = 16;
 
     private static final int REVERSED = 0;
     private static final int REDSTONE_MODE = 1;
@@ -37,6 +38,13 @@ public final class ElectricalDeviceMenu extends AbstractMachineMenu {
     private static final int REDSTONE_FORCED_OPEN = 5;
     private static final int THERMAL_STRESS_MILLIS = 6;
     private static final int HEAVY_RATING = 7;
+    private static final int FIRST_RING = 8;
+    private static final int SECOND_RING = 9;
+    private static final int MULTIPLIER_RING = 10;
+    private static final int CONTROL_LOSS_MILLIJOULES = 11;
+    private static final int CONTROL_CURRENT_MILLIAMPS = 12;
+    private static final int CONTROL_DIRECTION = 13;
+    private static final int CONTROL_ENABLED = 14;
 
     private final BlockPos position;
     private final ElectricalDeviceKind kind;
@@ -66,6 +74,14 @@ public final class ElectricalDeviceMenu extends AbstractMachineMenu {
             ElectricalProtectionBlockEntity protection
     ) {
         this(containerId, inventory, protection.getBlockPos(), ElectricalDeviceKind.from(protection.kind()), protection);
+    }
+
+    public ElectricalDeviceMenu(
+            int containerId,
+            Inventory inventory,
+            ElectricalControlBlockEntity control
+    ) {
+        this(containerId, inventory, control.getBlockPos(), ElectricalDeviceKind.from(control.kind()), control);
     }
 
     private ElectricalDeviceMenu(
@@ -138,6 +154,10 @@ public final class ElectricalDeviceMenu extends AbstractMachineMenu {
                     && current instanceof ElectricalProtectionBlockEntity protection
                     && protection.kind() == ElectricalProtectionKind.CIRCUIT_BREAKER
                     && protection.protection().resetBreaker();
+            case CYCLE_CONTROL_REDSTONE -> applyControlAction(current, ElectricalControlKind.SWITCH, -1);
+            case CYCLE_RESISTOR_FIRST_RING -> applyControlAction(current, ElectricalControlKind.RESISTOR, 0);
+            case CYCLE_RESISTOR_SECOND_RING -> applyControlAction(current, ElectricalControlKind.RESISTOR, 1);
+            case CYCLE_RESISTOR_MULTIPLIER_RING -> applyControlAction(current, ElectricalControlKind.RESISTOR, 2);
         };
     }
 
@@ -183,6 +203,46 @@ public final class ElectricalDeviceMenu extends AbstractMachineMenu {
         return data.get(HEAVY_RATING) != 0;
     }
 
+    public RedstoneControlMode controlRedstoneMode() {
+        return transformerRedstoneMode();
+    }
+
+    public int resistorFirstRing() {
+        return data.get(FIRST_RING);
+    }
+
+    public int resistorSecondRing() {
+        return data.get(SECOND_RING);
+    }
+
+    public int resistorMultiplierRing() {
+        return data.get(MULTIPLIER_RING);
+    }
+
+    public double resistorOhms() {
+        return Math.max(
+                1.0D,
+                (resistorFirstRing() * 10.0D + resistorSecondRing())
+                        * Math.pow(10.0D, resistorMultiplierRing())
+        );
+    }
+
+    public double controlLossJoules() {
+        return data.get(CONTROL_LOSS_MILLIJOULES) / 1_000.0D;
+    }
+
+    public double controlCurrentAmps() {
+        return data.get(CONTROL_CURRENT_MILLIAMPS) / 1_000.0D;
+    }
+
+    public TransferDirection controlDirection() {
+        return TransferDirection.decode(data.get(CONTROL_DIRECTION));
+    }
+
+    public boolean controlEnabled() {
+        return data.get(CONTROL_ENABLED) != 0;
+    }
+
     @Override
     protected boolean movePlayerStackToMachine(ItemStack stack) {
         return kind == ElectricalDeviceKind.FUSE_BOX
@@ -200,9 +260,22 @@ public final class ElectricalDeviceMenu extends AbstractMachineMenu {
         return true;
     }
 
+    private boolean applyControlAction(BlockEntity current, ElectricalControlKind expectedKind, int ring) {
+        if (!(current instanceof ElectricalControlBlockEntity control) || control.kind() != expectedKind) {
+            return false;
+        }
+        if (ring < 0) {
+            control.control().cycleRedstoneMode();
+        } else {
+            control.control().cycleRing(ring);
+        }
+        return true;
+    }
+
     private static ContainerData deviceData(BlockEntity device) {
         if (!(device instanceof BoxTransformerBlockEntity)
-                && !(device instanceof ElectricalProtectionBlockEntity)) {
+                && !(device instanceof ElectricalProtectionBlockEntity)
+                && !(device instanceof ElectricalControlBlockEntity)) {
             throw new IllegalArgumentException("Unsupported electrical menu device " + device);
         }
         return new ContainerData() {
@@ -213,6 +286,21 @@ public final class ElectricalDeviceMenu extends AbstractMachineMenu {
                         case REVERSED -> transformer.transformerCoupler().reversed() ? 1 : 0;
                         case REDSTONE_MODE -> transformer.transformerCoupler().redstoneMode().ordinal();
                         case PROFILE_BOUND -> transformer.transformerCoupler().electricalControllerBound() ? 1 : 0;
+                        default -> 0;
+                    };
+                }
+                if (device instanceof ElectricalControlBlockEntity control) {
+                    ElectricalControlModule module = control.control();
+                    var transfer = module.lastTransfer();
+                    return switch (index) {
+                        case REDSTONE_MODE -> module.redstoneMode().ordinal();
+                        case FIRST_RING -> module.firstRing();
+                        case SECOND_RING -> module.secondRing();
+                        case MULTIPLIER_RING -> module.multiplierRing();
+                        case CONTROL_LOSS_MILLIJOULES -> scaled(module.lastTransfer().lostJoules());
+                        case CONTROL_CURRENT_MILLIAMPS -> scaled(module.coupler().lastCurrentAmps());
+                        case CONTROL_DIRECTION -> !transfer.moved() ? 0 : transfer.firstWasSource() ? 1 : 2;
+                        case CONTROL_ENABLED -> module.enabled() ? 1 : 0;
                         default -> 0;
                     };
                 }
@@ -240,6 +328,33 @@ public final class ElectricalDeviceMenu extends AbstractMachineMenu {
                 return DATA_COUNT;
             }
         };
+    }
+
+    private static int scaled(double value) {
+        if (!Double.isFinite(value) || value <= 0.0D) {
+            return 0;
+        }
+        return (int) Math.min(Integer.MAX_VALUE, Math.round(value * 1_000.0D));
+    }
+
+    public enum TransferDirection {
+        NONE("gui.magneticraft.electrical.direction.none"),
+        BACK_TO_FRONT("gui.magneticraft.electrical.direction.back_to_front"),
+        FRONT_TO_BACK("gui.magneticraft.electrical.direction.front_to_back");
+
+        private final String translationKey;
+
+        TransferDirection(String translationKey) {
+            this.translationKey = translationKey;
+        }
+
+        public String translationKey() {
+            return translationKey;
+        }
+
+        private static TransferDirection decode(int value) {
+            return value == 1 ? BACK_TO_FRONT : value == 2 ? FRONT_TO_BACK : NONE;
+        }
     }
 
     private static final class FuseSlotHandler implements IItemHandlerModifiable {

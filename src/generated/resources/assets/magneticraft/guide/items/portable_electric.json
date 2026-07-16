@@ -211,6 +211,33 @@
       "attack_cost_fe": 0,
       "break_cost_fe": 0,
       "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_switch.description",
+      "id": "magneticraft:electric_switch",
+      "translation_key": "block.magneticraft.electric_switch",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.diode.description",
+      "id": "magneticraft:diode",
+      "translation_key": "block.magneticraft.diode",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.resistor.description",
+      "id": "magneticraft:resistor",
+      "translation_key": "block.magneticraft.resistor",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
       "description": "guide.magneticraft.item.heat_pipe.description",
       "id": "magneticraft:heat_pipe",
       "translation_key": "block.magneticraft.heat_pipe",

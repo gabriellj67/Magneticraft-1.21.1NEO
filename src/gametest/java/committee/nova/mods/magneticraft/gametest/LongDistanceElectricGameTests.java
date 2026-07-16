@@ -12,6 +12,8 @@ import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerB
 import committee.nova.mods.magneticraft.content.network.electric.ElectricConnectorBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlockEntity;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalControlBlock;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalControlBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.PoleSegment;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyReceiverBlockEntity;
@@ -119,6 +121,9 @@ public final class LongDistanceElectricGameTests {
         assertBlockId(helper, "electric_pole", ModNetworkBlocks.ELECTRIC_POLE.get());
         assertBlockId(helper, "electric_pole_transformer", ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get());
         assertBlockId(helper, "box_transformer", ModNetworkBlocks.BOX_TRANSFORMER.get());
+        assertBlockId(helper, "electric_switch", ModNetworkBlocks.ELECTRIC_SWITCH.get());
+        assertBlockId(helper, "diode", ModNetworkBlocks.DIODE.get());
+        assertBlockId(helper, "resistor", ModNetworkBlocks.RESISTOR.get());
         assertBlockId(helper, "tesla_tower", ModNetworkBlocks.TESLA_TOWER.get());
         assertBlockId(helper, "wireless_energy_receiver", ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get());
         assertBlockId(helper, "wind_turbine", ModNetworkBlocks.WIND_TURBINE.get());
@@ -144,6 +149,11 @@ public final class LongDistanceElectricGameTests {
                 "Box transformer block entity has the wrong registry id"
         );
         helper.assertTrue(
+                "electrical_control".equals(ForgeRegistries.BLOCK_ENTITY_TYPES
+                        .getKey(ModBlockEntities.ELECTRICAL_CONTROL.get()).getPath()),
+                "Electrical control block entity has the wrong registry id"
+        );
+        helper.assertTrue(
                 "tesla_tower".equals(ForgeRegistries.BLOCK_ENTITY_TYPES
                         .getKey(ModBlockEntities.TESLA_TOWER.get()).getPath()),
                 "Tesla tower block entity has the wrong registry id"
@@ -165,6 +175,8 @@ public final class LongDistanceElectricGameTests {
         placePole(helper, new BlockPos(40, 8, 1), true);
         require(helper, new BlockPos(45, 8, 1), BoxTransformerBlockEntity.class,
                 () -> helper.setBlock(new BlockPos(45, 8, 1), ModNetworkBlocks.BOX_TRANSFORMER.get()));
+        require(helper, new BlockPos(47, 8, 1), ElectricalControlBlockEntity.class,
+                () -> helper.setBlock(new BlockPos(47, 8, 1), ModNetworkBlocks.ELECTRIC_SWITCH.get()));
         require(helper, new BlockPos(1, 4, 5), TeslaTowerBlockEntity.class,
                 () -> helper.setBlock(new BlockPos(1, 4, 5), ModNetworkBlocks.TESLA_TOWER.get()));
         require(helper, new BlockPos(5, 4, 5), WirelessEnergyReceiverBlockEntity.class,
@@ -228,6 +240,9 @@ public final class LongDistanceElectricGameTests {
                 VoltageTierIds.MEDIUM,
                 TransformerProfileIds.MV_TO_HV
         );
+        assertElectricalControlRecipes(helper, "electric_switch", ModNetworkBlocks.ELECTRIC_SWITCH.get().asItem());
+        assertElectricalControlRecipes(helper, "diode", ModNetworkBlocks.DIODE.get().asItem());
+        assertElectricalControlRecipes(helper, "resistor", ModNetworkBlocks.RESISTOR.get().asItem());
         helper.succeed();
     }
 
@@ -279,6 +294,112 @@ public final class LongDistanceElectricGameTests {
                         .isPresent(),
                 "Box transformer drop lost its transformer profile"
         );
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 20)
+    public static void electricalControlsKeepTwoTerminalsAndHonorTheirTransferRules(GameTestHelper helper) {
+        var manager = PhysicalNetworkService.manager(helper.getLevel());
+
+        BlockPos switchPosition = new BlockPos(3, 4, 3);
+        helper.setBlock(switchPosition, ModNetworkBlocks.ELECTRIC_SWITCH.get().defaultBlockState()
+                .setValue(ElectricalControlBlock.FACING, Direction.NORTH));
+        ElectricalControlBlockEntity electricSwitch = require(
+                helper, switchPosition, ElectricalControlBlockEntity.class
+        );
+        helper.assertTrue(electricSwitch.back().connectionSides().equals(java.util.Set.of(Direction.SOUTH)),
+                "Switch back terminal is exposed on the wrong side");
+        helper.assertTrue(electricSwitch.front().connectionSides().equals(java.util.Set.of(Direction.NORTH)),
+                "Switch front terminal is exposed on the wrong side");
+        electricSwitch.back().node().setVoltage(120.0D);
+        electricSwitch.front().node().setVoltage(0.0D);
+        manager.tick(helper.getLevel().getGameTime() + 3_000L);
+        helper.assertTrue(electricSwitch.control().lastTransfer().moved(),
+                "Default no-signal switch did not conduct");
+        electricSwitch.control().cycleRedstoneMode();
+        electricSwitch.back().node().setVoltage(120.0D);
+        electricSwitch.front().node().setVoltage(0.0D);
+        manager.tick(helper.getLevel().getGameTime() + 3_001L);
+        helper.assertTrue(electricSwitch.front().node().energyJoules() == 0.0D,
+                "Signal-required switch conducted without a signal");
+
+        BlockPos diodePosition = new BlockPos(6, 4, 3);
+        helper.setBlock(diodePosition, ModNetworkBlocks.DIODE.get().defaultBlockState()
+                .setValue(ElectricalControlBlock.FACING, Direction.NORTH));
+        ElectricalControlBlockEntity diode = require(helper, diodePosition, ElectricalControlBlockEntity.class);
+        diode.back().node().setVoltage(120.0D);
+        diode.front().node().setVoltage(0.0D);
+        manager.tick(helper.getLevel().getGameTime() + 3_002L);
+        helper.assertTrue(diode.control().lastTransfer().moved()
+                        && diode.control().lastTransfer().firstWasSource(),
+                "Diode did not conduct from back to front");
+        diode.back().node().setVoltage(0.0D);
+        diode.front().node().setVoltage(120.0D);
+        double diodeFrontBefore = diode.front().node().energyJoules();
+        manager.tick(helper.getLevel().getGameTime() + 3_003L);
+        helper.assertTrue(!diode.control().lastTransfer().moved()
+                        && diode.front().node().energyJoules() == diodeFrontBefore,
+                "Diode allowed reverse current");
+
+        BlockPos resistorPosition = new BlockPos(9, 4, 3);
+        helper.setBlock(resistorPosition, ModNetworkBlocks.RESISTOR.get().defaultBlockState()
+                .setValue(ElectricalControlBlock.FACING, Direction.NORTH));
+        ElectricalControlBlockEntity resistor = require(helper, resistorPosition, ElectricalControlBlockEntity.class);
+        resistor.back().node().setVoltage(120.0D);
+        resistor.front().node().setVoltage(0.0D);
+        double resistorBefore = resistor.back().node().energyJoules() + resistor.front().node().energyJoules();
+        manager.tick(helper.getLevel().getGameTime() + 3_004L);
+        double resistorAfter = resistor.back().node().energyJoules() + resistor.front().node().energyJoules();
+        helper.assertTrue(resistor.control().coupler().lastCurrentAmps() > 0.0D,
+                "Resistor did not transfer by Ohm's law");
+        helper.assertTrue(Math.abs(
+                        resistorBefore - resistorAfter - resistor.control().lastTransfer().lostJoules()
+                ) < 1.0E-6D,
+                "Resistor loss did not conserve energy");
+
+        resistor.control().cycleRing(0);
+        helper.assertTrue(resistor.applyElectricalItemData(TieredElectricalItemData.forTier(VoltageTierIds.MEDIUM)),
+                "Resistor rejected a valid medium-voltage tier");
+        ItemStack drop = Block.getDrops(
+                        resistor.getBlockState(),
+                        helper.getLevel(),
+                        resistor.getBlockPos(),
+                        resistor
+                ).stream()
+                .filter(stack -> stack.is(ModNetworkBlocks.RESISTOR.get().asItem()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Resistor did not produce its block drop"));
+        helper.assertTrue(
+                TieredElectricalItemData.read(drop)
+                        .filter(data -> data.tierId().equals(VoltageTierIds.MEDIUM))
+                        .filter(data -> data.ratingId().isEmpty() && data.transformerProfileId().isEmpty())
+                        .isPresent(),
+                "Resistor drop did not preserve only its voltage tier"
+        );
+        BlockPos replacementPosition = new BlockPos(12, 4, 3);
+        helper.setBlock(replacementPosition, ModNetworkBlocks.RESISTOR.get());
+        ElectricalControlBlockEntity replacement = require(
+                helper, replacementPosition, ElectricalControlBlockEntity.class
+        );
+        helper.assertTrue(replacement.control().firstRing() == 0
+                        && replacement.control().secondRing() == 1
+                        && replacement.control().multiplierRing() == 0,
+                "Newly placed resistor did not restore default control settings");
+
+        Player player = helper.makeMockSurvivalPlayer();
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModNetworkItems.WRENCH.get()));
+        BlockPos switchWorld = helper.absolutePos(switchPosition);
+        electricSwitch.getBlockState().getBlock().use(
+                electricSwitch.getBlockState(),
+                helper.getLevel(),
+                switchWorld,
+                player,
+                InteractionHand.MAIN_HAND,
+                new BlockHitResult(Vec3.atCenterOf(switchWorld), Direction.UP, switchWorld, false)
+        );
+        helper.assertTrue(helper.getBlockState(switchPosition).getValue(ElectricalControlBlock.FACING)
+                        == Direction.EAST,
+                "Wrench did not rotate the electrical control device");
         helper.succeed();
     }
 
@@ -1043,6 +1164,18 @@ public final class LongDistanceElectricGameTests {
                         .isPresent(),
                 "Tiered recipe result lost its electrical identity: " + recipePath
         );
+    }
+
+    private static void assertElectricalControlRecipes(
+            GameTestHelper helper,
+            String baseName,
+            net.minecraft.world.item.Item expectedItem
+    ) {
+        assertTieredRecipe(helper, "crafting/" + baseName, expectedItem, VoltageTierIds.LOW);
+        assertTieredRecipe(helper, "crafting/" + baseName + "_medium_voltage", expectedItem,
+                VoltageTierIds.MEDIUM);
+        assertTieredRecipe(helper, "crafting/" + baseName + "_high_voltage", expectedItem,
+                VoltageTierIds.HIGH);
     }
 
     private static void assertTransformerRecipe(
