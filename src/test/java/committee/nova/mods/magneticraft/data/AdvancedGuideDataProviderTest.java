@@ -118,6 +118,7 @@ class AdvancedGuideDataProviderTest {
                     MultiblockDefinition.SIEVE,
                     MultiblockDefinition.OIL_HEATER,
                     MultiblockDefinition.REFINERY,
+                    MultiblockDefinition.POLYMERIZER,
                     MultiblockDefinition.BIG_COMBUSTION_CHAMBER,
                     MultiblockDefinition.BIG_ELECTRIC_FURNACE
             ).contains(definition);
@@ -126,7 +127,9 @@ class AdvancedGuideDataProviderTest {
                 assertEquals(
                         definition == MultiblockDefinition.BIG_ELECTRIC_FURNACE
                                 ? "minecraft:smelting"
-                                : "magneticraft:" + definition.id(),
+                                : definition == MultiblockDefinition.POLYMERIZER
+                                        ? "magneticraft:polymerizing"
+                                        : "magneticraft:" + definition.id(),
                         guide.get("recipe_type").getAsString(),
                         definition.id()
                 );
@@ -170,7 +173,7 @@ class AdvancedGuideDataProviderTest {
             assertEquals(MultiblockPortLayout.ports(definition).size(),
                     ports.getAsJsonArray("connections").size());
         }
-        assertEquals(16, ids.size());
+        assertEquals(17, ids.size());
     }
 
     @Test

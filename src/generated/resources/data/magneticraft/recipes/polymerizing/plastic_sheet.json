@@ -1,0 +1,13 @@
+{
+  "type": "magneticraft:polymerizing",
+  "duration": 100,
+  "fluid": {
+    "amount": 250,
+    "fluid": "magneticraft:liquid_plastic"
+  },
+  "heat_per_tick": 20.0,
+  "minimum_temperature": 423.15,
+  "result": {
+    "item": "magneticraft:plastic_sheet"
+  }
+}

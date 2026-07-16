@@ -975,7 +975,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         }
         boolean recoverySide = side == facing().getOpposite();
         return switch (definition) {
-            case GRINDER, SIEVE, HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE ->
+            case GRINDER, SIEVE, HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE, POLYMERIZER ->
                     new ItemInventoryModule.SlotAccess(
                             new int[]{0},
                             recoverySide ? allSlots(slots) : range(1, slots)
@@ -1007,6 +1007,10 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                     .getRecipeFor(RecipeType.SMELTING, new SimpleContainer(stack), serverLevel)
                     .isPresent();
             case BIG_COMBUSTION_CHAMBER -> ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) > 0;
+            case POLYMERIZER -> serverLevel.getRecipeManager()
+                    .getAllRecipesFor(ModRecipeTypes.POLYMERIZING_TYPE.get())
+                    .stream()
+                    .anyMatch(recipe -> recipe.ingredient().filter(value -> value.test(stack)).isPresent());
             default -> false;
         };
     }

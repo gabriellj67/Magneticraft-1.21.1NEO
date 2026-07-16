@@ -11,6 +11,7 @@ public enum BaseBlockDefinition {
     LEAD_BLOCK("lead_block", "Lead Block", "铅块", Category.STORAGE, MiningTier.NONE),
     COBALT_BLOCK("cobalt_block", "Cobalt Block", "钴块", Category.STORAGE, MiningTier.NONE),
     TUNGSTEN_BLOCK("tungsten_block", "Tungsten Block", "钨块", Category.STORAGE, MiningTier.NONE),
+    CARBIDE_BLOCK("carbide_block", "Carbide Block", "碳化物块", Category.STORAGE, MiningTier.IRON),
     SULFUR_BLOCK("sulfur_block", "Sulfur Block", "硫磺块", Category.STORAGE, MiningTier.NONE),
     LIMESTONE("limestone", "Limestone", "石灰石", Category.DECORATION, MiningTier.NONE),
     LIMESTONE_BRICKS("limestone_bricks", "Limestone Bricks", "石灰石砖", Category.DECORATION, MiningTier.NONE),

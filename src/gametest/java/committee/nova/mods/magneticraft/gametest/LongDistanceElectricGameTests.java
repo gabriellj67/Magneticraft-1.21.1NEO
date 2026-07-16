@@ -91,7 +91,8 @@ public final class LongDistanceElectricGameTests {
 
         for (ItemStack stack : List.of(cable, fuse, transformer, transformerPole)) {
             String serializedName = Component.Serializer.toJson(stack.getItem().getName(stack));
-            helper.assertTrue(serializedName.contains("item.magneticraft.tiered_name"),
+            helper.assertTrue(serializedName.contains("item.magneticraft.tiered_name")
+                            || serializedName.contains("item.magneticraft.tiered_rated_name"),
                     "Tiered item did not expose its voltage tier in the display name: " + stack.getItem());
             helper.assertTrue(serializedName.contains("voltage_tier.magneticraft."),
                     "Tiered item display name did not resolve a voltage-tier translation: " + stack.getItem());

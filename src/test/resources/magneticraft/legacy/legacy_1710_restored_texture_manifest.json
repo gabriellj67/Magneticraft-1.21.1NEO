@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "source_repository": "ipl-adm/magneticraft-legacy-1.7.10",
+  "source_ref": "master",
+  "release_file": "magneticraft-0.6.0-final",
+  "artifacts": [
+    {
+      "source": "textures/items/ingot_brass.png",
+      "runtime": "textures/item/brass_ingot.png",
+      "sha256": "26a0cde639c10d004c2a632008cef63856f4e24d8986fa71ce994174b715eaf5"
+    },
+    {
+      "source": "textures/items/dust_brass.png",
+      "runtime": "textures/item/brass_dust.png",
+      "sha256": "d1eed91db6cc8556618b12006c6e2140bd44043311e926b80d656bf8e1536081"
+    },
+    {
+      "source": "textures/items/ingot_carbide.png",
+      "runtime": "textures/item/carbide_ingot.png",
+      "sha256": "8935936176868971927524d9b62ba95b4a48c878e82c156433e7b77a0f2ebc14"
+    },
+    {
+      "source": "textures/items/plastic.png",
+      "runtime": "textures/item/plastic_sheet.png",
+      "sha256": "ab5035dc0ca30006c71c6e6fb99292abc5622ab5c1ccbf36d327dee055ae1ec9"
+    },
+    {
+      "source": "textures/items/rubber.png",
+      "runtime": "textures/item/rubber.png",
+      "sha256": "b5db80552f972952fc16a5702feb5170e7d3ea36befd8709b008c9488e5c3797"
+    },
+    {
+      "source": "textures/blocks/block_carbide.png",
+      "runtime": "textures/block/carbide_block.png",
+      "sha256": "ae35e9c65f12f9a22f9bf284c410a5d453f8556293df9444b19640d7a65d28f5"
+    },
+    {
+      "source": "textures/blocks/polimerizer.png",
+      "runtime": "textures/block/polymerizer_front.png",
+      "sha256": "ee9ee9aae6c350f32a9873dbeeac09fa07d84cb721eae42cb1acdc516b551f30"
+    },
+    {
+      "source": "textures/blocks/chassis.png",
+      "runtime": "textures/block/polymerizer_side.png",
+      "sha256": "788ad7b37f6e6166811979a3dda55469e075b34759bf9fe5feac58d184c6a2c2"
+    }
+  ]
+}

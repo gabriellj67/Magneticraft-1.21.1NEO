@@ -98,6 +98,7 @@ class LegacyMultiblockCollisionTest {
         counts.put(MultiblockDefinition.GRINDER, 56);
         counts.put(MultiblockDefinition.HYDRAULIC_PRESS, 42);
         counts.put(MultiblockDefinition.OIL_HEATER, 15);
+        counts.put(MultiblockDefinition.POLYMERIZER, 1);
         counts.put(MultiblockDefinition.PUMPJACK, 85);
         counts.put(MultiblockDefinition.REFINERY, 34);
         counts.put(MultiblockDefinition.SHELVING_UNIT, 4);

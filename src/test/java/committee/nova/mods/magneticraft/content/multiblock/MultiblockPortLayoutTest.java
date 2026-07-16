@@ -21,6 +21,7 @@ class MultiblockPortLayoutTest {
             Map.entry(MultiblockDefinition.HYDRAULIC_PRESS, 4),
             Map.entry(MultiblockDefinition.PUMPJACK, 2),
             Map.entry(MultiblockDefinition.OIL_HEATER, 11),
+            Map.entry(MultiblockDefinition.POLYMERIZER, 4),
             Map.entry(MultiblockDefinition.REFINERY, 15),
             Map.entry(MultiblockDefinition.SOLAR_TOWER, 1),
             Map.entry(MultiblockDefinition.BIG_COMBUSTION_CHAMBER, 13),
@@ -53,6 +54,22 @@ class MultiblockPortLayoutTest {
         assertEquals(new BlockPos(8, 65, 10), port.worldPosition(
                 new BlockPos(10, 64, 10), Direction.EAST));
         assertEquals(Direction.WEST, port.worldSide(Direction.EAST));
+    }
+
+    @Test
+    void polymerizerExposesOnlyItsFourDeclaredControllerRelativePorts() {
+        assertEquals(
+                Set.of(
+                        "ITEM@-1,1,-1:WEST",
+                        "ITEM@1,1,-1:EAST",
+                        "HEAT@0,3,-2:NORTH",
+                        "FLUID@0,4,-1:UP"
+                ),
+                MultiblockPortLayout.ports(MultiblockDefinition.POLYMERIZER).stream()
+                        .map(port -> port.kind() + "@" + port.offset().x() + "," + port.offset().y() + ","
+                                + port.offset().z() + ":" + port.side().name())
+                        .collect(java.util.stream.Collectors.toSet())
+        );
     }
 
     @Test

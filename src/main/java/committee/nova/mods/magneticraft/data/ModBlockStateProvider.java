@@ -220,7 +220,9 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Block controller = ModAdvancedBlocks.controller(definition).get();
-            ModelFile idle = models().cubeAll(definition.id(), UNMOUNTED_MULTIBLOCK_TEXTURE);
+            ModelFile idle = definition == MultiblockDefinition.POLYMERIZER
+                    ? polymerizerControllerModel(definition.id())
+                    : models().cubeAll(definition.id(), UNMOUNTED_MULTIBLOCK_TEXTURE);
             ModelFile formed = emptyModel(definition.id() + "_formed", UNMOUNTED_MULTIBLOCK_TEXTURE);
             ModelFile item = advancedControllerItemModel(definition, UNMOUNTED_MULTIBLOCK_TEXTURE);
             horizontalBlock(
@@ -693,6 +695,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             case GRINDER -> advancedGltfModel(generatedName, "grinder", particle);
             case HYDRAULIC_PRESS -> advancedGltfModel(generatedName, "hydraulic_press", particle);
             case OIL_HEATER -> advancedMcxModel(generatedName, "oil_heater", particle);
+            case POLYMERIZER -> polymerizerControllerModel(generatedName);
             case PUMPJACK -> advancedMcxModel(generatedName, "pumpjack", particle);
             case REFINERY -> advancedMcxModel(generatedName, "refinery", particle);
             case SHELVING_UNIT -> advancedMcxModel(generatedName, "shelving_unit", particle);
@@ -703,6 +706,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
             case STEAM_ENGINE -> advancedGltfModel(generatedName, "steam_engine", particle);
             case STEAM_TURBINE -> advancedGltfModel(generatedName, "steam_turbine", particle);
         };
+    }
+
+    private ModelFile polymerizerControllerModel(String name) {
+        ResourceLocation side = modLoc("block/polymerizer_side");
+        return models().orientable(name, side, modLoc("block/polymerizer_front"), side);
     }
 
     private ModelFile advancedMcxModel(String generatedName, String sourceName, ResourceLocation particle) {

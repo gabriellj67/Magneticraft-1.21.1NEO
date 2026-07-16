@@ -26,11 +26,20 @@ class MultiblockHologramModelContractTest {
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             String id = definition.id();
             JsonObject worldModel = read("models/block/" + id + ".json");
-            assertEquals("minecraft:block/cube_all", worldModel.get("parent").getAsString(), id);
+            boolean polymerizer = definition == MultiblockDefinition.POLYMERIZER;
+            assertEquals(polymerizer ? "minecraft:block/orientable" : "minecraft:block/cube_all",
+                    worldModel.get("parent").getAsString(), id);
             assertFalse(worldModel.has("loader"), id + " world model must not obscure the hologram");
-            assertEquals(UNMOUNTED_TEXTURE,
-                    worldModel.getAsJsonObject("textures").get("all").getAsString(),
-                    id + " unformed controller must use the original shared texture");
+            if (polymerizer) {
+                assertEquals("magneticraft:block/polymerizer_front",
+                        worldModel.getAsJsonObject("textures").get("front").getAsString());
+                assertEquals("magneticraft:block/polymerizer_side",
+                        worldModel.getAsJsonObject("textures").get("side").getAsString());
+            } else {
+                assertEquals(UNMOUNTED_TEXTURE,
+                        worldModel.getAsJsonObject("textures").get("all").getAsString(),
+                        id + " unformed controller must use the original shared texture");
+            }
             assertFalse(worldModel.has("render_type"), id + " opaque controller texture must stay solid");
 
             JsonObject formedModel = read("models/block/" + id + "_formed.json");
@@ -52,10 +61,16 @@ class MultiblockHologramModelContractTest {
                     itemModel.get("parent").getAsString(), id);
 
             JsonObject sceneModel = read("models/block/" + id + "_item.json");
-            assertTrue(sceneModel.has("loader"), id + " inventory model lost its legacy scene");
-            assertTrue(sceneModel.has("model"), id + " inventory model lost its source model");
-            assertEquals(UNMOUNTED_TEXTURE,
-                    sceneModel.getAsJsonObject("textures").get("particle").getAsString(), id);
+            if (polymerizer) {
+                assertEquals("minecraft:block/orientable", sceneModel.get("parent").getAsString());
+                assertFalse(sceneModel.has("loader"));
+                assertFalse(sceneModel.has("model"));
+            } else {
+                assertTrue(sceneModel.has("loader"), id + " inventory model lost its legacy scene");
+                assertTrue(sceneModel.has("model"), id + " inventory model lost its source model");
+                assertEquals(UNMOUNTED_TEXTURE,
+                        sceneModel.getAsJsonObject("textures").get("particle").getAsString(), id);
+            }
         }
     }
 

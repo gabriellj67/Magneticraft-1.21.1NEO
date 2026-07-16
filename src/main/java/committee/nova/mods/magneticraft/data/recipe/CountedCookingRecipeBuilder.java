@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  * Emits Forge's counted cooking-result JSON extension while retaining vanilla smelting semantics.
  *
  * <p>Adapted from MochiButter/Magneticraft's GPL-2.0 FurnaceMultiRecipeBuilder and reduced to the
- * single smelting behavior required by the Nova 1.12 recipe contract.</p>
+ * counted smelting and blasting behavior required by the material recipe contract.</p>
  */
 public final class CountedCookingRecipeBuilder implements RecipeBuilder {
     private final Item result;
@@ -74,6 +74,23 @@ public final class CountedCookingRecipeBuilder implements RecipeBuilder {
                 experience,
                 cookingTime,
                 RecipeSerializer.SMELTING_RECIPE
+        );
+    }
+
+    public static CountedCookingRecipeBuilder blasting(
+            Ingredient ingredient,
+            ItemLike result,
+            int count,
+            float experience,
+            int cookingTime
+    ) {
+        return new CountedCookingRecipeBuilder(
+                ingredient,
+                result,
+                count,
+                experience,
+                cookingTime,
+                RecipeSerializer.BLASTING_RECIPE
         );
     }
 

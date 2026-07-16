@@ -9,6 +9,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Sluic
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.ThermopileRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
+import committee.nova.mods.magneticraft.content.multiblock.recipe.PolymerizerRecipe;
 import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.content.item.ProtectionBlockItem;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleTransformerBlockItem;
@@ -50,6 +51,8 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
     public static final RecipeType<FluidFuelRecipe> FLUID_FUEL = type("fluid_fuel", FluidFuelRecipe.class);
     public static final RecipeType<AdvancedProcessingRecipe> ADVANCED_PROCESSING =
             type("advanced_processing", AdvancedProcessingRecipe.class);
+    public static final RecipeType<PolymerizerRecipe> POLYMERIZING =
+            type("polymerizing", PolymerizerRecipe.class);
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -88,7 +91,8 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
                 new GasificationRecipeCategory(guiHelper),
                 new ThermopileRecipeCategory(guiHelper),
                 new FluidFuelRecipeCategory(guiHelper),
-                new AdvancedProcessingRecipeCategory(guiHelper)
+                new AdvancedProcessingRecipeCategory(guiHelper),
+                new PolymerizerRecipeCategory(guiHelper)
         );
     }
 
@@ -105,6 +109,7 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
         registration.addRecipes(GASIFICATION, recipes.getAllRecipesFor(ModRecipeTypes.GASIFICATION_TYPE.get()));
         registration.addRecipes(THERMOPILE, recipes.getAllRecipesFor(ModRecipeTypes.THERMOPILE_TYPE.get()));
         registration.addRecipes(FLUID_FUEL, recipes.getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get()));
+        registration.addRecipes(POLYMERIZING, recipes.getAllRecipesFor(ModRecipeTypes.POLYMERIZING_TYPE.get()));
         registration.addRecipes(
                 ADVANCED_PROCESSING,
                 ModRecipeTypes.advancedProcessingTypes().values().stream()
@@ -198,6 +203,10 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
                 ModAdvancedBlocks.controller(MultiblockDefinition.HYDRAULIC_PRESS).get(),
                 ModAdvancedBlocks.controller(MultiblockDefinition.OIL_HEATER).get(),
                 ModAdvancedBlocks.controller(MultiblockDefinition.REFINERY).get()
+        );
+        registration.addRecipeCatalysts(
+                POLYMERIZING,
+                ModAdvancedBlocks.controller(MultiblockDefinition.POLYMERIZER).get()
         );
     }
 

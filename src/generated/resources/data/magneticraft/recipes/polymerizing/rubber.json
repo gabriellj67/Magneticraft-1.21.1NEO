@@ -1,0 +1,16 @@
+{
+  "type": "magneticraft:polymerizing",
+  "duration": 200,
+  "fluid": {
+    "amount": 500,
+    "fluid": "magneticraft:natural_gas"
+  },
+  "heat_per_tick": 40.0,
+  "ingredient": {
+    "tag": "magneticraft:sulfur"
+  },
+  "minimum_temperature": 473.15,
+  "result": {
+    "item": "magneticraft:rubber"
+  }
+}

@@ -133,6 +133,7 @@ public final class LegacyMachineGuiLayout {
                     new Point(130, 49)
             );
             case HYDRAULIC_PRESS -> List.of(new Point(98, 17), new Point(98, 49));
+            case POLYMERIZER -> List.of(new Point(98, 17), new Point(98, 49));
             case BIG_ELECTRIC_FURNACE -> List.of(new Point(108, 17), new Point(108, 49));
             case BIG_COMBUSTION_CHAMBER -> List.of(new Point(104, 33));
             default -> List.of();

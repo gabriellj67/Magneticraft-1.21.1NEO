@@ -4,14 +4,19 @@ import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMac
 import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.StatusBar;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockMenu;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Legacy-sized status screen shared by all advanced multiblock controllers.
@@ -97,12 +102,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
         graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
         Component structureState = MachineScreenLayout.fitToWidth(
                 font,
-                Component.translatable(
-                        "gui.magneticraft.multiblock_structure_state",
-                        Component.translatable(menu.mirrored()
-                                ? "message.magneticraft.multiblock_mirrored_state"
-                                : "message.magneticraft.multiblock_normal_state")
-                ),
+                structureOverview(),
                 baseImageWidth - inventoryLabelX - font.width(playerInventoryTitle) - 12
         );
         graphics.drawString(
@@ -126,6 +126,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
                     menu.position(), menu.energyStored(), menu.energyCapacity()
             );
         }
+        renderStructureTooltip(graphics, mouseX, mouseY);
         renderTooltip(graphics, mouseX, mouseY);
     }
 
@@ -228,6 +229,76 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
         return Component.translatable(
                 menu.working() ? "gui.magneticraft.state.running" : "gui.magneticraft.state.stopped"
         );
+    }
+
+    private Component structureOverview() {
+        return Component.translatable(
+                "gui.magneticraft.multiblock_overview",
+                Component.translatable(menu.formed()
+                        ? "gui.magneticraft.multiblock.formed"
+                        : "gui.magneticraft.multiblock.unformed"),
+                Component.translatable("direction.minecraft." + menu.facing().getName()),
+                MultiblockPortLayout.ports(menu.definition()).size()
+        );
+    }
+
+    private void renderStructureTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        int startX = leftPos + inventoryLabelX + font.width(playerInventoryTitle) + 4;
+        int endX = leftPos + baseImageWidth - 8;
+        int startY = topPos + inventoryLabelY - 2;
+        if (mouseX < startX || mouseX >= endX || mouseY < startY || mouseY >= startY + 12) {
+            return;
+        }
+
+        List<Component> lines = new ArrayList<>();
+        lines.add(Component.translatable(
+                "gui.magneticraft.multiblock_structure_detail",
+                Component.translatable(menu.mirrored()
+                        ? "message.magneticraft.multiblock_mirrored_state"
+                        : "message.magneticraft.multiblock_normal_state")
+        ));
+        for (PortGroup group : groupedPorts().values()) {
+            lines.add(Component.translatable(
+                    "gui.magneticraft.multiblock_port_status",
+                    Component.translatable("gui.magneticraft.multiblock.port_kind." + group.kind()),
+                    Component.translatable("gui.magneticraft.multiblock.port_mode." + group.mode()),
+                    Component.translatable("direction.minecraft." + group.side().getName()),
+                    group.count(),
+                    Component.translatable(menu.formed()
+                            ? "gui.magneticraft.multiblock.port_active"
+                            : "gui.magneticraft.multiblock.port_inactive")
+            ));
+        }
+        graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+    }
+
+    private Map<String, PortGroup> groupedPorts() {
+        Map<String, PortGroup> groups = new LinkedHashMap<>();
+        for (MultiblockPortLayout.Port port : MultiblockPortLayout.ports(menu.definition())) {
+            String kind = port.kind().name().toLowerCase(Locale.ROOT);
+            String mode = portMode(port);
+            Direction side = port.worldSide(menu.facing());
+            String key = kind + ":" + mode + ":" + side.getName();
+            groups.compute(key, (ignored, existing) -> existing == null
+                    ? new PortGroup(kind, mode, side, 1)
+                    : new PortGroup(kind, mode, side, existing.count() + 1));
+        }
+        return groups;
+    }
+
+    private static String portMode(MultiblockPortLayout.Port port) {
+        return switch (port.kind()) {
+            case FLUID -> port.fluidAccess().name().toLowerCase(Locale.ROOT);
+            case ITEM -> {
+                boolean input = port.itemAccess().insertSlots().length > 0;
+                boolean output = port.itemAccess().extractSlots().length > 0;
+                yield input && output ? "both" : input ? "input" : "output";
+            }
+            case ELECTRICITY, HEAT -> "connection";
+        };
+    }
+
+    private record PortGroup(String kind, String mode, Direction side, int count) {
     }
 
     private boolean inside(int mouseX, int mouseY, LegacyMachineGuiLayout.Rect bounds) {

@@ -17,6 +17,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Sluic
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.HydraulicPressMode;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
+import committee.nova.mods.magneticraft.content.multiblock.recipe.PolymerizerRecipe;
 import committee.nova.mods.magneticraft.data.recipe.CountedCookingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.CrushingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.SingleBlockRecipeBuilder;
@@ -98,6 +99,7 @@ final class ModRecipeProvider extends RecipeProvider {
         addFluidFuelRecipes(consumer);
         addAdvancedCraftingRecipes(consumer);
         addAdvancedProcessingRecipes(consumer);
+        addPolymerizingRecipes(consumer);
     }
 
     private void addAdvancedCraftingRecipes(Consumer<FinishedRecipe> consumer) {
@@ -554,6 +556,53 @@ final class ModRecipeProvider extends RecipeProvider {
         );
     }
 
+    private void addPolymerizingRecipes(Consumer<FinishedRecipe> consumer) {
+        polymerizing(
+                consumer,
+                "plastic_sheet",
+                Optional.empty(),
+                FluidDefinition.PLASTIC,
+                250,
+                new ItemStack(ModItems.PLASTIC_SHEET.get()),
+                100,
+                423.15D,
+                20.0D
+        );
+        polymerizing(
+                consumer,
+                "rubber",
+                Optional.of(Ingredient.of(ModTags.Items.SULFUR)),
+                FluidDefinition.NATURAL_GAS,
+                500,
+                new ItemStack(ModItems.RUBBER.get()),
+                200,
+                473.15D,
+                40.0D
+        );
+    }
+
+    private void polymerizing(
+            Consumer<FinishedRecipe> consumer,
+            String name,
+            Optional<Ingredient> ingredient,
+            FluidDefinition fluid,
+            int fluidAmount,
+            ItemStack result,
+            int duration,
+            double minimumTemperatureKelvin,
+            double heatPerTick
+    ) {
+        consumer.accept(new PolymerizingResult(
+                id("polymerizing/" + name),
+                ingredient,
+                new FluidStack(ModFluids.get(fluid).source().get(), fluidAmount),
+                result,
+                duration,
+                minimumTemperatureKelvin,
+                heatPerTick
+        ));
+    }
+
     private static ItemLike controllerMarker(MultiblockDefinition definition) {
         return switch (definition) {
             case BIG_COMBUSTION_CHAMBER -> Items.COAL;
@@ -563,6 +612,7 @@ final class ModRecipeProvider extends RecipeProvider {
             case GRINDER -> Items.DIAMOND;
             case HYDRAULIC_PRESS -> Blocks.PISTON;
             case OIL_HEATER -> Items.MAGMA_CREAM;
+            case POLYMERIZER -> ModItems.PLASTIC_SHEET.get();
             case PUMPJACK -> Items.BUCKET;
             case REFINERY -> Items.BREWING_STAND;
             case SHELVING_UNIT -> Blocks.BOOKSHELF;
@@ -1602,7 +1652,7 @@ final class ModRecipeProvider extends RecipeProvider {
             case SILVER -> List.of(Metal.LEAD);
             case TIN -> List.of(Metal.IRON, Metal.ALUMINIUM);
             case ZINC -> List.of(Metal.NICKEL, Metal.TIN);
-            case STEEL -> List.of();
+            case STEEL, BRASS, CARBIDE -> List.of();
         };
     }
 
@@ -1627,6 +1677,29 @@ final class ModRecipeProvider extends RecipeProvider {
     }
 
     private void addMaterialConversions(Consumer<FinishedRecipe> consumer) {
+        ShapelessRecipeBuilder.shapeless(
+                        RecipeCategory.MISC,
+                        ModItems.material(MaterialForm.DUST, Metal.BRASS).get(),
+                        2
+                )
+                .requires(ModTags.Items.dust(Metal.COPPER))
+                .requires(ModTags.Items.dust(Metal.ZINC))
+                .unlockedBy("has_copper_dust", has(ModTags.Items.dust(Metal.COPPER)))
+                .save(consumer, id("crafting/brass_dust"));
+
+        ShapedRecipeBuilder.shaped(
+                        RecipeCategory.MISC,
+                        ModItems.material(MaterialForm.INGOT, Metal.CARBIDE).get(),
+                        8
+                )
+                .pattern("CCC")
+                .pattern("CTC")
+                .pattern("CCC")
+                .define('C', ItemTags.COALS)
+                .define('T', ModTags.Items.ingot(Metal.TUNGSTEN))
+                .unlockedBy("has_tungsten_ingot", has(ModTags.Items.ingot(Metal.TUNGSTEN)))
+                .save(consumer, id("crafting/carbide_ingot"));
+
         for (Metal metal : Metal.values()) {
             if (!MaterialForm.NUGGET.appliesTo(metal)) {
                 continue;
@@ -1666,6 +1739,14 @@ final class ModRecipeProvider extends RecipeProvider {
                 ModItems.ingot(Metal.TUNGSTEN),
                 ModTags.Items.storageBlock("tungsten"),
                 block(BaseBlockDefinition.TUNGSTEN_BLOCK)
+        );
+        packAndUnpack(
+                consumer,
+                "carbide_block",
+                ModTags.Items.ingot(Metal.CARBIDE),
+                ModItems.ingot(Metal.CARBIDE),
+                ModTags.Items.storageBlock("carbide"),
+                block(BaseBlockDefinition.CARBIDE_BLOCK)
         );
         packAndUnpack(
                 consumer,
@@ -1828,6 +1909,16 @@ final class ModRecipeProvider extends RecipeProvider {
                 );
             }
         }
+
+        CountedCookingRecipeBuilder.blasting(
+                        Ingredient.of(ModTags.Items.dust(Metal.BRASS)),
+                        ModItems.ingot(Metal.BRASS),
+                        1,
+                        LEGACY_SMELTING_EXPERIENCE,
+                        SMELTING_TIME_TICKS / 2
+                )
+                .unlockedBy("has_brass_dust", has(ModTags.Items.dust(Metal.BRASS)))
+                .save(consumer, id("blasting/brass_dust"));
 
         smelt(
                 consumer,
@@ -2067,6 +2158,78 @@ final class ModRecipeProvider extends RecipeProvider {
         @Override
         public RecipeSerializer<?> getType() {
             return ModRecipeTypes.advancedProcessingSerializer(machine).get();
+        }
+
+        @Nullable
+        @Override
+        public JsonObject serializeAdvancement() {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public ResourceLocation getAdvancementId() {
+            return null;
+        }
+    }
+
+    private record PolymerizingResult(
+            ResourceLocation id,
+            Optional<Ingredient> ingredient,
+            FluidStack fluid,
+            ItemStack result,
+            int duration,
+            double minimumTemperatureKelvin,
+            double heatPerTick
+    ) implements FinishedRecipe {
+        private PolymerizingResult {
+            PolymerizerRecipe validated = new PolymerizerRecipe(
+                    id,
+                    ingredient,
+                    fluid,
+                    result,
+                    duration,
+                    minimumTemperatureKelvin,
+                    heatPerTick
+            );
+            ingredient = validated.ingredient();
+            fluid = validated.fluidInput();
+            result = validated.result();
+        }
+
+        @Override
+        public void serializeRecipeData(JsonObject json) {
+            ingredient.ifPresent(value -> json.add("ingredient", value.toJson()));
+            JsonObject fluidJson = new JsonObject();
+            fluidJson.addProperty(
+                    "fluid",
+                    Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(fluid.getFluid())).toString()
+            );
+            fluidJson.addProperty("amount", fluid.getAmount());
+            json.add("fluid", fluidJson);
+
+            JsonObject resultJson = new JsonObject();
+            resultJson.addProperty(
+                    "item",
+                    Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(result.getItem())).toString()
+            );
+            if (result.getCount() != 1) {
+                resultJson.addProperty("count", result.getCount());
+            }
+            json.add("result", resultJson);
+            json.addProperty("duration", duration);
+            json.addProperty("minimum_temperature", minimumTemperatureKelvin);
+            json.addProperty("heat_per_tick", heatPerTick);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return id;
+        }
+
+        @Override
+        public RecipeSerializer<?> getType() {
+            return ModRecipeTypes.POLYMERIZING_SERIALIZER.get();
         }
 
         @Nullable

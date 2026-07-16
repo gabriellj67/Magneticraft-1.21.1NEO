@@ -418,6 +418,10 @@ public final class LegacyMultiblockCollision {
                 2.000, 2.000, -64.000, 46.000, 46.000, -63.000
                 }
         );
+        register(
+                MultiblockDefinition.POLYMERIZER, Direction.NORTH, 0.0D, 0.0D, 0.0D,
+                new double[]{-16.0D, 0.0D, -32.0D, 32.0D, 80.0D, 16.0D}
+        );
         if (AUTHORED.size() != MultiblockDefinition.values().length) {
             throw new IllegalStateException("Incomplete legacy multiblock collision catalogue");
         }

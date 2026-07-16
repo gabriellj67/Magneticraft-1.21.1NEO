@@ -53,6 +53,8 @@ public final class ModTags {
         public static final TagKey<Item> WRENCHES = forge("tools/wrenches");
         public static final TagKey<Item> SULFUR = mod("sulfur");
         public static final TagKey<Item> SULFUR_DUST = forge("dusts/sulfur");
+        public static final TagKey<Item> PLASTIC_SHEETS = forge("plates/plastic");
+        public static final TagKey<Item> RUBBER = forge("rubber");
 
         private Items() {
         }

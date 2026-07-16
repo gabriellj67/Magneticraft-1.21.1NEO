@@ -31,9 +31,19 @@ public final class ModItems {
             "guide_book",
             () -> new Item(new Item.Properties().stacksTo(1))
     );
+    public static final RegistryObject<Item> PLASTIC_SHEET = ModRegistries.ITEMS.register(
+            "plastic_sheet",
+            () -> new Item(new Item.Properties())
+    );
+    public static final RegistryObject<Item> RUBBER = ModRegistries.ITEMS.register(
+            "rubber",
+            () -> new Item(new Item.Properties())
+    );
 
     static {
         CREATIVE_ITEMS.add(GUIDE_BOOK);
+        CREATIVE_ITEMS.add(PLASTIC_SHEET);
+        CREATIVE_ITEMS.add(RUBBER);
         registerMaterials();
         registerComponents();
         registerHammers();

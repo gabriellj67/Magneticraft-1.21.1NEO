@@ -33,6 +33,12 @@ public final class MultiblockPortProfile {
             case BIG_COMBUSTION_CHAMBER -> List.of(port(
                     definition, 0, "fluid_fuel", List.of(COMBUSTION_FUEL_RECIPE)
             ));
+            case POLYMERIZER -> List.of(port(
+                    definition, 0, "feed_input", List.of(
+                            fluid(FluidDefinition.PLASTIC),
+                            fluid(FluidDefinition.NATURAL_GAS)
+                    )
+            ));
             case OIL_HEATER -> List.of(
                     port(definition, 0, "feed_input", List.of(
                                     fluid(FluidDefinition.OIL), WATER_TAG)),

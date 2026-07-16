@@ -10,6 +10,8 @@
     "magneticraft:osmium_ingot",
     "magneticraft:silver_ingot",
     "magneticraft:tin_ingot",
-    "magneticraft:zinc_ingot"
+    "magneticraft:zinc_ingot",
+    "magneticraft:brass_ingot",
+    "magneticraft:carbide_ingot"
   ]
 }

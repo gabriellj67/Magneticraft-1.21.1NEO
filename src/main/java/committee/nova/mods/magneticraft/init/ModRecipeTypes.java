@@ -7,6 +7,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Sluic
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.ThermopileRecipe;
 import committee.nova.mods.magneticraft.content.recipe.TieredShapedRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
+import committee.nova.mods.magneticraft.content.multiblock.recipe.PolymerizerRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -61,6 +62,9 @@ public final class ModRecipeTypes {
                     MultiblockDefinition.BIG_COMBUSTION_CHAMBER.id(),
                     FluidFuelRecipe.Serializer::new
             );
+    public static final RegistryObject<RecipeType<PolymerizerRecipe>> POLYMERIZING_TYPE = type("polymerizing");
+    public static final RegistryObject<RecipeSerializer<PolymerizerRecipe>> POLYMERIZING_SERIALIZER =
+            ModRegistries.RECIPE_SERIALIZERS.register("polymerizing", PolymerizerRecipe.Serializer::new);
     static {
         for (MultiblockDefinition definition : ADVANCED_PROCESSING_MACHINES) {
             ADVANCED_PROCESSING_TYPES.put(definition, type(definition.id()));

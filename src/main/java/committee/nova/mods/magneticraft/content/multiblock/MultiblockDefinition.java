@@ -77,6 +77,17 @@ public enum MultiblockDefinition {
                     layer("YYY", "RRR", "RRR")
             )
     ),
+    POLYMERIZER(
+            "polymerizer", "Polymerizer", "聚合器",
+            new StructureOffset(3, 5, 3), new StructureOffset(1, 0, 0),
+            layers(
+                    layer("#M#", "###", "###"),
+                    layer("###", "#A#", "###"),
+                    layer("###", "#A#", "###"),
+                    layer("###", "#A#", "#C#"),
+                    layer("###", "#T#", "###")
+            )
+    ),
     PUMPJACK(
             "pumpjack", "Pumpjack", "抽油机",
             new StructureOffset(3, 5, 6), new StructureOffset(1, 0, 0),
@@ -265,7 +276,7 @@ public enum MultiblockDefinition {
             case SHELVING_UNIT -> 648;
             case GRINDER -> 3;
             case SIEVE -> 4;
-            case HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE -> 2;
+            case HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE, POLYMERIZER -> 2;
             case BIG_COMBUSTION_CHAMBER -> 1;
             default -> 0;
         };
@@ -277,7 +288,7 @@ public enum MultiblockDefinition {
 
     public int tankCount() {
         return switch (this) {
-            case STEAM_ENGINE, STEAM_TURBINE, PUMPJACK, BIG_COMBUSTION_CHAMBER -> 1;
+            case STEAM_ENGINE, STEAM_TURBINE, PUMPJACK, BIG_COMBUSTION_CHAMBER, POLYMERIZER -> 1;
             case OIL_HEATER, BIG_STEAM_BOILER -> 2;
             case REFINERY -> 5;
             default -> 0;
@@ -293,6 +304,7 @@ public enum MultiblockDefinition {
             case STEAM_TURBINE -> 32_000;
             case PUMPJACK -> 64_000;
             case BIG_COMBUSTION_CHAMBER -> 4_000;
+            case POLYMERIZER -> 4_000;
             case OIL_HEATER -> 16_000;
             case BIG_STEAM_BOILER -> index == 0 ? 16_000 : 128_000;
             case REFINERY -> index == 1 ? 64_000 : 16_000;
@@ -310,7 +322,7 @@ public enum MultiblockDefinition {
 
     public boolean usesHeat() {
         return switch (this) {
-            case SOLAR_TOWER, OIL_HEATER, BIG_COMBUSTION_CHAMBER, BIG_STEAM_BOILER -> true;
+            case SOLAR_TOWER, OIL_HEATER, POLYMERIZER, BIG_COMBUSTION_CHAMBER, BIG_STEAM_BOILER -> true;
             default -> false;
         };
     }

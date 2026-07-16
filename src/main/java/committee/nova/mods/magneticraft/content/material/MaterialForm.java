@@ -1,25 +1,19 @@
 package committee.nova.mods.magneticraft.content.material;
 
-import java.util.function.Predicate;
-
-/**
- * Visible material forms that replace the legacy metadata item containers.
- */
+/** Visible material forms that replace the legacy metadata item containers. */
 public enum MaterialForm {
-    INGOT("ingot", metal -> !metal.isComposite() && !metal.hasVanillaIngot()),
-    NUGGET("nugget", metal -> !metal.isComposite() && !metal.hasVanillaNugget()),
-    LIGHT_PLATE("light_plate", metal -> metal.isUseful() && !metal.isComposite()),
-    HEAVY_PLATE("heavy_plate", metal -> metal.isUseful() && !metal.isComposite()),
-    CHUNK("chunk", metal -> metal.isOre() && !metal.isComposite()),
-    DUST("dust", metal -> !metal.isComposite()),
-    ROCKY_CHUNK("rocky_chunk", Metal::isOre);
+    INGOT("ingot"),
+    NUGGET("nugget"),
+    LIGHT_PLATE("light_plate"),
+    HEAVY_PLATE("heavy_plate"),
+    CHUNK("chunk"),
+    DUST("dust"),
+    ROCKY_CHUNK("rocky_chunk");
 
     private final String suffix;
-    private final Predicate<Metal> predicate;
 
-    MaterialForm(String suffix, Predicate<Metal> predicate) {
+    MaterialForm(String suffix) {
         this.suffix = suffix;
-        this.predicate = predicate;
     }
 
     public String suffix() {
@@ -27,7 +21,7 @@ public enum MaterialForm {
     }
 
     public boolean appliesTo(Metal metal) {
-        return predicate.test(metal);
+        return metal.supports(this);
     }
 
     public String id(Metal metal) {

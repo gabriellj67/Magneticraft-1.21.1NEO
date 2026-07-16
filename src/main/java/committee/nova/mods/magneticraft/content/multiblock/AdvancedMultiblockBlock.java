@@ -37,7 +37,7 @@ import java.util.Objects;
 import java.util.List;
 
 /**
- * Shared controller shell for all sixteen immutable multiblock definitions.
+ * Shared controller shell for every immutable multiblock definition.
  */
 public final class AdvancedMultiblockBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -109,6 +109,8 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
                 buffer.writeBlockPos(position);
                 buffer.writeEnum(definition);
                 buffer.writeBoolean(controller.mirrored());
+                buffer.writeEnum(controller.facing());
+                buffer.writeBoolean(controller.formed());
             });
         } else {
             controller.describe(serverPlayer);

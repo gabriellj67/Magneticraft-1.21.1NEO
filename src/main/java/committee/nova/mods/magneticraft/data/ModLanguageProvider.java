@@ -36,6 +36,8 @@ final class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        add("jei.magneticraft.polymerizing", chinese ? "聚合" : "Polymerizing");
+        add("jei.magneticraft.heat_per_tick", chinese ? "热耗：%s J/t" : "Heat: %s J/t");
         add(
                 MagneticraftConfig.CRUSHING_TABLE_CAUSES_FIRE_TRANSLATION_KEY,
                 chinese ? "压碎烈焰棒时点燃玩家" : "Crushing Table Causes Fire"
@@ -274,6 +276,8 @@ final class ModLanguageProvider extends LanguageProvider {
         ModItems.materials().forEach((form, metals) -> metals.forEach((metal, holder) ->
                 add(holder.get(), chinese ? form.chineseName(metal) : form.englishName(metal))
         ));
+        add(ModItems.PLASTIC_SHEET.get(), chinese ? "塑料片" : "Plastic Sheet");
+        add(ModItems.RUBBER.get(), chinese ? "橡胶" : "Rubber");
         for (CraftingComponent component : CraftingComponent.values()) {
             add(
                     ModItems.component(component).get(),
@@ -323,6 +327,24 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.multiblock_mirrored_state", chinese ? "镜像" : "mirrored");
         add("message.magneticraft.multiblock_normal_state", chinese ? "非镜像" : "normal");
         add("gui.magneticraft.multiblock_structure_state", chinese ? "结构：%s" : "Structure: %s");
+        add("gui.magneticraft.multiblock_overview", chinese ? "%1$s · 朝向%2$s · 端口%3$s" : "%1$s · %2$s · %3$s ports");
+        add("gui.magneticraft.multiblock.formed", chinese ? "已成型" : "Formed");
+        add("gui.magneticraft.multiblock.unformed", chinese ? "未成型" : "Unformed");
+        add("gui.magneticraft.multiblock_structure_detail", chinese ? "结构形态：%s" : "Structure layout: %s");
+        add("gui.magneticraft.multiblock_port_status", chinese
+                ? "%1$s%2$s · %3$s面 ×%4$s · %5$s"
+                : "%1$s %2$s · %3$s ×%4$s · %5$s");
+        add("gui.magneticraft.multiblock.port_active", chinese ? "已开放" : "Available");
+        add("gui.magneticraft.multiblock.port_inactive", chinese ? "已关闭" : "Unavailable");
+        add("gui.magneticraft.multiblock.port_kind.item", chinese ? "物品" : "Item");
+        add("gui.magneticraft.multiblock.port_kind.fluid", chinese ? "流体" : "Fluid");
+        add("gui.magneticraft.multiblock.port_kind.electricity", chinese ? "电力" : "Electricity");
+        add("gui.magneticraft.multiblock.port_kind.heat", chinese ? "热力" : "Heat");
+        add("gui.magneticraft.multiblock.port_mode.input", chinese ? "输入" : "input");
+        add("gui.magneticraft.multiblock.port_mode.output", chinese ? "输出" : "output");
+        add("gui.magneticraft.multiblock.port_mode.both", chinese ? "双向" : "bidirectional");
+        add("gui.magneticraft.multiblock.port_mode.connection", chinese ? "连接" : "connection");
+        add("gui.magneticraft.multiblock.port_mode.none", chinese ? "禁用" : "disabled");
         add("message.magneticraft.multiblock_hologram_enabled", chinese ? "多方块全息投影已开启" : "Multiblock hologram enabled");
         add("message.magneticraft.multiblock_hologram_disabled", chinese ? "多方块全息投影已关闭" : "Multiblock hologram disabled");
         add("commands.magneticraft.multiblock.fill.no_controller", chinese ? "请将准星对准未成型的多方块主体" : "Look at an unformed multiblock controller");
@@ -652,6 +674,7 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String multiblockGuideChinese(MultiblockDefinition definition) {
         return switch (definition) {
+            case POLYMERIZER -> "达到配方最低温度后持续消耗热量，将液态塑料制成塑料片，或用天然气与硫磺制成橡胶；输入或输出受阻时暂停。";
             case BIG_COMBUSTION_CHAMBER -> "燃烧固体燃料并向大型热力网络供热；结构或输出受阻时保留燃料。";
             case BIG_ELECTRIC_FURNACE -> "使用原生电力执行高容量熔炼；完整输出可提交时才消耗输入。";
             case BIG_STEAM_BOILER -> "把水与热量转换为蒸汽；输出空间不足时暂停工作，并保留已有的水、蒸汽和热量。";
@@ -673,6 +696,7 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String multiblockGuideEnglish(MultiblockDefinition definition) {
         return switch (definition) {
+            case POLYMERIZER -> "Consumes heat above the recipe temperature to turn liquid plastic into sheets or natural gas and sulfur into rubber, pausing under input or output backpressure.";
             case BIG_COMBUSTION_CHAMBER -> "Burns solid fuel into a large thermal network and preserves fuel while structure or output is blocked.";
             case BIG_ELECTRIC_FURNACE -> "Performs high-capacity smelting with native electricity and consumes input only when full output can commit.";
             case BIG_STEAM_BOILER -> "Converts water and heat into steam while preserving all input, output, and thermal state under backpressure.";

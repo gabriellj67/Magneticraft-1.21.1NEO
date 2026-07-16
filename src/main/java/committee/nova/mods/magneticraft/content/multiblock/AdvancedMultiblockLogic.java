@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.FluidFuelRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
+import committee.nova.mods.magneticraft.content.multiblock.recipe.PolymerizerRecipe;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
@@ -105,6 +106,7 @@ final class AdvancedMultiblockLogic {
             case BIG_COMBUSTION_CHAMBER -> tickBigCombustion(level);
             case BIG_STEAM_BOILER -> tickBigSteamBoiler();
             case OIL_HEATER -> tickOilHeater(level);
+            case POLYMERIZER -> tickPolymerizer(level);
             case REFINERY -> tickRefinery(level);
             case PUMPJACK -> tickPumpjack(level);
             case SOLAR_MIRROR -> tickSolarMirror(level);
@@ -413,6 +415,46 @@ final class AdvancedMultiblockLogic {
             machine.tank(1).tank().fill(output, IFluidHandler.FluidAction.EXECUTE);
             machine.resetProgress();
         }
+    }
+
+    private void tickPolymerizer(ServerLevel level) {
+        if (machine.heat() == null || machine.tank(0) == null || machine.inventory() == null) {
+            return;
+        }
+        ItemStack input = machine.inventory().getStackInSlot(0);
+        FluidStack fluid = machine.tank(0).tank().getFluid();
+        PolymerizerRecipe recipe = level.getRecipeManager()
+                .getAllRecipesFor(ModRecipeTypes.POLYMERIZING_TYPE.get())
+                .stream()
+                .filter(candidate -> candidate.matches(input, fluid))
+                .findFirst()
+                .orElse(null);
+        if (recipe == null || !outputsFit(List.of(recipe.result()))) {
+            return;
+        }
+        if (machine.heat().node().temperatureKelvin() < recipe.minimumTemperatureKelvin()
+                || machine.heat().node().removeHeat(recipe.heatPerTick(), true) < recipe.heatPerTick()) {
+            return;
+        }
+        if (!machine.recipeMatches(recipe.getId(), recipe.duration())) {
+            machine.startRecipe(recipe.getId(), recipe.duration());
+        }
+        machine.heat().node().removeHeat(recipe.heatPerTick(), false);
+        machine.advanceProgress();
+        machine.setWorking(true);
+        if (machine.progress() < recipe.duration()) {
+            return;
+        }
+
+        machine.tank(0).tank().drain(recipe.fluidInput().getAmount(), IFluidHandler.FluidAction.EXECUTE);
+        if (recipe.ingredient().isPresent()) {
+            machine.inventory().extractInternal(0, 1, false);
+        }
+        ItemStack remainder = machine.inventory().menuHandler().insertItem(1, recipe.result(), false);
+        if (!remainder.isEmpty()) {
+            throw new IllegalStateException("Simulated polymerizer output no longer fits: " + recipe.getId());
+        }
+        machine.resetProgress();
     }
 
     private void tickRefinery(ServerLevel level) {

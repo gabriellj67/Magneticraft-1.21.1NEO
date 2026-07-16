@@ -22,12 +22,12 @@ class ContentCatalogTest {
     @Test
     void materialFormsMatchTheLegacyVisibleVariants() {
         Map<MaterialForm, Integer> expectedCounts = new EnumMap<>(MaterialForm.class);
-        expectedCounts.put(MaterialForm.INGOT, 11);
+        expectedCounts.put(MaterialForm.INGOT, 13);
         expectedCounts.put(MaterialForm.NUGGET, 12);
         expectedCounts.put(MaterialForm.LIGHT_PLATE, 6);
         expectedCounts.put(MaterialForm.HEAVY_PLATE, 6);
         expectedCounts.put(MaterialForm.CHUNK, 13);
-        expectedCounts.put(MaterialForm.DUST, 14);
+        expectedCounts.put(MaterialForm.DUST, 15);
         expectedCounts.put(MaterialForm.ROCKY_CHUNK, 14);
 
         Set<String> ids = new HashSet<>();
@@ -43,7 +43,7 @@ class ContentCatalogTest {
             }
         }
 
-        assertEquals(76, total);
+        assertEquals(79, total);
     }
 
     @Test
@@ -64,10 +64,16 @@ class ContentCatalogTest {
     }
 
     @Test
+    void restoredIndustrialMaterialsDeclareOnlyTheirSupportedForms() {
+        assertEquals(Set.of(MaterialForm.INGOT, MaterialForm.DUST), Metal.BRASS.supportedForms());
+        assertEquals(Set.of(MaterialForm.INGOT), Metal.CARBIDE.supportedForms());
+    }
+
+    @Test
     void baseCataloguesHaveStableUniqueIds() {
         assertUniqueIds(
                 Arrays.stream(BaseBlockDefinition.values()).map(BaseBlockDefinition::id).toArray(String[]::new),
-                16
+                17
         );
         assertUniqueIds(
                 Arrays.stream(CraftingComponent.values()).map(CraftingComponent::id).toArray(String[]::new),

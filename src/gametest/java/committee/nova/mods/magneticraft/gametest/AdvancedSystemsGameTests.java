@@ -23,6 +23,7 @@ import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
@@ -844,10 +845,60 @@ public final class AdvancedSystemsGameTests {
                 .sum();
         int fluidFuels = helper.getLevel().getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get()).size();
-        helper.assertTrue(processingRecipes == 93,
-                "Expected 93 advanced processing recipes, loaded " + processingRecipes);
+        int polymerizing = helper.getLevel().getRecipeManager()
+                .getAllRecipesFor(ModRecipeTypes.POLYMERIZING_TYPE.get()).size();
+        helper.assertTrue(processingRecipes == 94,
+                "Expected 94 advanced processing recipes, loaded " + processingRecipes);
         helper.assertTrue(fluidFuels == 10,
                 "Expected 10 fluid fuel recipes, loaded " + fluidFuels);
+        helper.assertTrue(polymerizing == 2,
+                "Expected 2 polymerizing recipes, loaded " + polymerizing);
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 180)
+    public static void polymerizerHonorsFluidPortTemperatureAndPerTickHeatCost(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        List<BlockPos> occupied = build(
+                helper, MultiblockDefinition.POLYMERIZER, CONTROLLER, Direction.NORTH, false
+        );
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Polymerizer did not form");
+
+        MultiblockPortLayout.Port fluidPort = MultiblockPortLayout.ports(controller.definition()).stream()
+                .filter(port -> port.kind() == MultiblockPortLayout.Kind.FLUID)
+                .findFirst()
+                .orElseThrow();
+        IFluidHandler input = helper.getLevel().getBlockEntity(fluidPort.worldPosition(controller))
+                .getCapability(ForgeCapabilities.FLUID_HANDLER, fluidPort.worldSide(controller.facing()))
+                .orElseThrow(AssertionError::new);
+        helper.assertTrue(input.fill(
+                new FluidStack(ModFluids.get(FluidDefinition.PLASTIC).source().get(), 250),
+                IFluidHandler.FluidAction.EXECUTE
+        ) == 250, "Polymerizer rejected liquid plastic through its top input");
+
+        controller.heat().node().setTemperature(400.0D);
+        AdvancedMultiblockBlockEntity.serverTick(
+                helper.getLevel(), helper.absolutePos(CONTROLLER), controller.getBlockState(), controller
+        );
+        helper.assertTrue(controller.progress() == 0 && controller.tank(0).tank().getFluidAmount() == 250,
+                "Polymerizer advanced below its recipe minimum temperature");
+
+        controller.heat().node().setTemperature(500.0D);
+        double initialHeat = controller.heat().node().internalEnergyJoules();
+        for (int tick = 0; tick < 100; tick++) {
+            AdvancedMultiblockBlockEntity.serverTick(
+                    helper.getLevel(), helper.absolutePos(CONTROLLER), controller.getBlockState(), controller
+            );
+        }
+        helper.assertTrue(controller.tank(0).tank().getFluidAmount() == 0,
+                "Polymerizer did not consume exactly 250 mB liquid plastic");
+        helper.assertTrue(controller.inventory().getStackInSlot(1).is(ModItems.PLASTIC_SHEET.get()),
+                "Polymerizer did not produce one plastic sheet");
+        helper.assertTrue(Math.abs(initialHeat - controller.heat().node().internalEnergyJoules() - 2_000.0D) < 0.001D,
+                "Polymerizer heat accounting was not 100 x 20 J");
+        clear(helper, occupied);
+        player.discard();
         helper.succeed();
     }
 

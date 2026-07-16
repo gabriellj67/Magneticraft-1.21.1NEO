@@ -81,6 +81,12 @@ public final class MultiblockPortLayout {
                 fluid(0, 0, 0, Direction.SOUTH, 0, FluidTankModule.TankAccess.BOTH)
         ));
         layouts.put(MultiblockDefinition.OIL_HEATER, oilHeater());
+        layouts.put(MultiblockDefinition.POLYMERIZER, List.of(
+                item(-1, 1, -1, Direction.WEST, slots(0), slots()),
+                item(1, 1, -1, Direction.EAST, slots(), slots(1)),
+                network(0, 3, -2, Direction.NORTH, Kind.HEAT),
+                fluid(0, 4, -1, Direction.UP, 0, FluidTankModule.TankAccess.INPUT)
+        ));
         layouts.put(MultiblockDefinition.REFINERY, refinery());
         layouts.put(MultiblockDefinition.SOLAR_TOWER, List.of(
                 network(0, 0, -1, Direction.DOWN, Kind.HEAT)

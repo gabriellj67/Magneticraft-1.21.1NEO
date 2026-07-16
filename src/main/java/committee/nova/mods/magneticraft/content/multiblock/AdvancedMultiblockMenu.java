@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32Cont
 import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -25,6 +26,8 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
     private final BlockPos position;
     private final MultiblockDefinition definition;
     private final boolean mirrored;
+    private final Direction facing;
+    private final boolean formed;
     private final ContainerLevelAccess access;
     private final ContainerData data;
     private final int machineSlots;
@@ -41,6 +44,8 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
                 buffer.readBlockPos(),
                 validateDefinition(definition, buffer.readEnum(MultiblockDefinition.class)),
                 buffer.readBoolean(),
+                buffer.readEnum(Direction.class),
+                buffer.readBoolean(),
                 null
         );
     }
@@ -56,6 +61,8 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
                 controller.getBlockPos(),
                 controller.definition(),
                 controller.mirrored(),
+                controller.facing(),
+                controller.formed(),
                 controller
         );
     }
@@ -66,12 +73,16 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
             BlockPos position,
             MultiblockDefinition definition,
             boolean mirrored,
+            Direction facing,
+            boolean formed,
             AdvancedMultiblockBlockEntity controller
     ) {
         super(ModMenus.advancedMultiblock(definition).get(), containerId);
         this.position = position.immutable();
         this.definition = definition;
         this.mirrored = mirrored;
+        this.facing = facing;
+        this.formed = formed;
         access = ContainerLevelAccess.create(playerInventory.player.level(), position);
         data = controller == null
                 ? new SimpleContainerData(AdvancedMultiblockBlockEntity.MENU_DATA_COUNT)
@@ -126,6 +137,14 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
 
     public boolean mirrored() {
         return mirrored;
+    }
+
+    public Direction facing() {
+        return facing;
+    }
+
+    public boolean formed() {
+        return formed;
     }
 
     public int imageWidth() {
@@ -215,7 +234,7 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
 
     private static boolean isOutputSlot(MultiblockDefinition definition, int slot) {
         return slot > 0 && switch (definition) {
-            case GRINDER, SIEVE, HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE -> true;
+            case GRINDER, SIEVE, HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE, POLYMERIZER -> true;
             default -> false;
         };
     }

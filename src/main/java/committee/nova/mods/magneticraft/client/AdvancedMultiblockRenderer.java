@@ -52,6 +52,10 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
                 machine.getBlockPos(),
                 packedLight
         );
+        if (machine.definition() == MultiblockDefinition.POLYMERIZER) {
+            renderPolymerizer(machine, poseStack, buffers, sceneLight, packedOverlay);
+            return;
+        }
         poseStack.pushPose();
         MachineRenderHelper.faceMachine(poseStack, legacyModelFacing(machine.facing()));
         renderScene(machine, partialTick, poseStack, buffers, sceneLight, packedOverlay);
@@ -288,6 +292,7 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
                     LegacySceneModels.OIL_HEATER, null, 0.0D,
                     -1.0D, 0.0D, 0.0D, poseStack, buffers, packedLight, packedOverlay
             );
+            case POLYMERIZER -> throw new IllegalStateException("Polymerizer uses its structure renderer");
             case PUMPJACK -> {
                 poseStack.pushPose();
                 MachineRenderHelper.rotateAroundCenterY(poseStack, 90.0F);
@@ -324,6 +329,87 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
                     animationTick, machine.working(), poseStack, buffers, packedLight, packedOverlay
             );
         }
+    }
+
+    /**
+     * The 1.7.10 polymerizer was a Techne-only scene rather than a portable MCX/glTF asset.
+     * Rebuild its exact registered 3x5x3 structure from the same rules used by formation,
+     * avoiding an unrelated machine model and keeping facing semantics authoritative.
+     */
+    private static void renderPolymerizer(
+            AdvancedMultiblockBlockEntity machine,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
+        BlockPos controller = machine.getBlockPos();
+        renderStructureBlock(
+                dispatcher,
+                machine.getBlockState().setValue(
+                        committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlock.FORMED,
+                        false
+                ),
+                0,
+                0,
+                0,
+                poseStack,
+                buffers,
+                packedLight,
+                packedOverlay
+        );
+        for (MultiblockCell cell : machine.definition().memberCells()) {
+            if (cell.rule() == MultiblockRule.CONTROLLER) {
+                continue;
+            }
+            BlockPos worldPosition = MultiblockTransform.worldPosition(
+                    controller,
+                    cell.offset(),
+                    machine.definition().center(),
+                    machine.facing(),
+                    machine.mirrored()
+            );
+            renderStructureBlock(
+                    dispatcher,
+                    cell.rule().previewState(machine.facing()),
+                    worldPosition.getX() - controller.getX(),
+                    worldPosition.getY() - controller.getY(),
+                    worldPosition.getZ() - controller.getZ(),
+                    poseStack,
+                    buffers,
+                    packedLight,
+                    packedOverlay
+            );
+        }
+    }
+
+    private static void renderStructureBlock(
+            BlockRenderDispatcher dispatcher,
+            BlockState state,
+            int x,
+            int y,
+            int z,
+            PoseStack poseStack,
+            MultiBufferSource buffers,
+            int packedLight,
+            int packedOverlay
+    ) {
+        if (state.isAir()) {
+            return;
+        }
+        poseStack.pushPose();
+        poseStack.translate(x, y, z);
+        dispatcher.renderSingleBlock(
+                state,
+                poseStack,
+                buffers,
+                packedLight,
+                packedOverlay,
+                ModelData.EMPTY,
+                null
+        );
+        poseStack.popPose();
     }
 
     private static void translateAndRender(

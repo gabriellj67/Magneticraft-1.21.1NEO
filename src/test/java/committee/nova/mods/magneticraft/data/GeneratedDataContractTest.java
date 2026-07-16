@@ -221,7 +221,7 @@ class GeneratedDataContractTest {
                 expectedCrafting.add(recipe("crafting/" + metal.id() + "_ingot_to_material"));
             }
         }
-        for (String storage : Set.of("lead_block", "cobalt_block", "tungsten_block", "sulfur_block")) {
+        for (String storage : Set.of("lead_block", "cobalt_block", "tungsten_block", "carbide_block", "sulfur_block")) {
             expectedCrafting.add(recipe("crafting/" + storage + "_from_material"));
             expectedCrafting.add(recipe("crafting/" + storage + "_to_material"));
         }
@@ -236,13 +236,15 @@ class GeneratedDataContractTest {
                 "magnet",
                 "iron_mesh",
                 "fabric_mesh",
+                "brass_dust",
+                "carbide_ingot",
                 "stone_hammer",
                 "iron_hammer",
                 "steel_hammer"
         )) {
             expectedCrafting.add(recipe("crafting/" + recipe));
         }
-        assertEquals(45, expectedCrafting.size());
+        assertEquals(49, expectedCrafting.size());
         expectedCrafting.forEach(GeneratedDataContractTest::assertFile);
 
         Set<Path> expectedSmelting = new HashSet<>();
@@ -264,7 +266,7 @@ class GeneratedDataContractTest {
         }
         expectedSmelting.add(recipe("smelting/limestone"));
         expectedSmelting.add(recipe("smelting/limestone_cobblestone"));
-        assertEquals(46, expectedSmelting.size());
+        assertEquals(47, expectedSmelting.size());
         expectedSmelting.forEach(GeneratedDataContractTest::assertFile);
 
         JsonObject galena = readObject(recipe("smelting/galena_rocky_chunk"));
@@ -273,6 +275,26 @@ class GeneratedDataContractTest {
             assertEquals("minecraft:smelting", readObject(path).get("type").getAsString(), path.toString());
             assertFalse(path.toString().contains("blasting"), path.toString());
         }
+        JsonObject brassBlasting = readObject(recipe("blasting/brass_dust"));
+        assertEquals("minecraft:blasting", brassBlasting.get("type").getAsString());
+        assertEquals("magneticraft:brass_ingot", brassBlasting.getAsJsonObject("result").get("item").getAsString());
+
+        JsonObject plastic = readObject(recipe("polymerizing/plastic_sheet"));
+        assertEquals("magneticraft:polymerizing", plastic.get("type").getAsString());
+        assertFalse(plastic.has("ingredient"));
+        assertEquals("magneticraft:liquid_plastic", plastic.getAsJsonObject("fluid").get("fluid").getAsString());
+        assertEquals(250, plastic.getAsJsonObject("fluid").get("amount").getAsInt());
+        assertEquals(100, plastic.get("duration").getAsInt());
+        assertEquals(423.15D, plastic.get("minimum_temperature").getAsDouble());
+        assertEquals(20.0D, plastic.get("heat_per_tick").getAsDouble());
+
+        JsonObject rubber = readObject(recipe("polymerizing/rubber"));
+        assertTrue(rubber.has("ingredient"));
+        assertEquals("magneticraft:natural_gas", rubber.getAsJsonObject("fluid").get("fluid").getAsString());
+        assertEquals(500, rubber.getAsJsonObject("fluid").get("amount").getAsInt());
+        assertEquals(200, rubber.get("duration").getAsInt());
+        assertEquals(473.15D, rubber.get("minimum_temperature").getAsDouble());
+        assertEquals(40.0D, rubber.get("heat_per_tick").getAsDouble());
     }
 
     @Test
@@ -642,7 +664,19 @@ class GeneratedDataContractTest {
             JsonObject blockState = readObject(ASSETS.resolve("blockstates/" + id + ".json"));
             assertEquals(8, blockState.getAsJsonObject("variants").size(), id + " state coverage");
             JsonObject controllerModel = readObject(ASSETS.resolve("models/block/" + id + ".json"));
-            assertEquals("minecraft:block/cube_all", controllerModel.get("parent").getAsString(), id);
+            assertEquals(
+                    definition == MultiblockDefinition.POLYMERIZER
+                            ? "minecraft:block/orientable"
+                            : "minecraft:block/cube_all",
+                    controllerModel.get("parent").getAsString(),
+                    id
+            );
+            if (definition == MultiblockDefinition.POLYMERIZER) {
+                JsonObject textures = controllerModel.getAsJsonObject("textures");
+                assertEquals("magneticraft:block/polymerizer_front", textures.get("front").getAsString());
+                assertEquals("magneticraft:block/polymerizer_side", textures.get("side").getAsString());
+                assertEquals("magneticraft:block/polymerizer_side", textures.get("top").getAsString());
+            }
             assertFalse(controllerModel.has("loader"), id + " world model must not obscure the hologram");
             assertFile(ASSETS.resolve("models/block/" + id + "_formed.json"));
             assertFile(ASSETS.resolve("models/block/" + id + "_item.json"));

@@ -26,6 +26,9 @@ class MultiblockPortProfileTest {
                     tank(0, 16_000, "feed_input", List.of(fluid("crude_oil"), "#minecraft:water")),
                     tank(1, 16_000, "product_output", List.of(fluid("heated_crude_oil"), fluid("steam")))
             )),
+            Map.entry(MultiblockDefinition.POLYMERIZER, List.of(tank(
+                    0, 4_000, "feed_input", List.of(fluid("liquid_plastic"), fluid("natural_gas"))
+            ))),
             Map.entry(MultiblockDefinition.PUMPJACK, List.of(tank(
                     0, 64_000, "oil_output", List.of(fluid("crude_oil"))
             ))),

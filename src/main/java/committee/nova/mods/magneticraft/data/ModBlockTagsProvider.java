@@ -126,6 +126,7 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
         addStorage(BaseBlockDefinition.LEAD_BLOCK, "lead");
         addStorage(BaseBlockDefinition.COBALT_BLOCK, "cobalt");
         addStorage(BaseBlockDefinition.TUNGSTEN_BLOCK, "tungsten");
+        addStorage(BaseBlockDefinition.CARBIDE_BLOCK, "carbide");
         addStorage(BaseBlockDefinition.SULFUR_BLOCK, "sulfur");
         tag(ModTags.Blocks.storageBlock("copper")).add(Blocks.COPPER_BLOCK);
 

@@ -1,0 +1,14 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "forge:ingots/brass"
+  },
+  "machine": "grinder",
+  "results": [
+    {
+      "item": "magneticraft:brass_dust"
+    }
+  ]
+}

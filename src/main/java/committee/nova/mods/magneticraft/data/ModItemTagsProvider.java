@@ -46,6 +46,8 @@ final class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.SULFUR).add(sulfur);
         tag(ModTags.Items.SULFUR_DUST).add(sulfur);
         tag(Tags.Items.DUSTS).add(sulfur);
+        tag(ModTags.Items.PLASTIC_SHEETS).add(ModItems.PLASTIC_SHEET.get());
+        tag(ModTags.Items.RUBBER).add(ModItems.RUBBER.get());
 
         tag(ModTags.Items.HAMMERS).add(
                 ModItems.hammer(HammerType.STONE).get(),
@@ -99,6 +101,7 @@ final class ModItemTagsProvider extends ItemTagsProvider {
         addStorage(BaseBlockDefinition.LEAD_BLOCK, "lead");
         addStorage(BaseBlockDefinition.COBALT_BLOCK, "cobalt");
         addStorage(BaseBlockDefinition.TUNGSTEN_BLOCK, "tungsten");
+        addStorage(BaseBlockDefinition.CARBIDE_BLOCK, "carbide");
         addStorage(BaseBlockDefinition.SULFUR_BLOCK, "sulfur");
         tag(ModTags.Items.storageBlock("copper")).add(Blocks.COPPER_BLOCK.asItem());
     }
