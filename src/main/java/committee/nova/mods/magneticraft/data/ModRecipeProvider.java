@@ -78,6 +78,7 @@ import java.util.function.Consumer;
 final class ModRecipeProvider extends RecipeProvider {
     private static final float LEGACY_SMELTING_EXPERIENCE = 0.1F;
     private static final int SMELTING_TIME_TICKS = 200;
+    private static final float GALENA_SILVER_CHANCE = 0.25F;
 
     ModRecipeProvider(PackOutput output) {
         super(output);
@@ -287,7 +288,11 @@ final class ModRecipeProvider extends RecipeProvider {
             List<AdvancedProcessingRecipe.ChanceResult> outputs = new ArrayList<>();
             if (metal == Metal.GALENA) {
                 outputs.add(output(ModItems.material(MaterialForm.CHUNK, Metal.LEAD).get(), 1, 1.0F));
-                outputs.add(output(ModItems.material(MaterialForm.DUST, Metal.SILVER).get(), 1, 0.025F));
+                outputs.add(output(
+                        ModItems.material(MaterialForm.DUST, Metal.SILVER).get(),
+                        1,
+                        GALENA_SILVER_CHANCE
+                ));
             } else if (MaterialForm.CHUNK.appliesTo(metal)) {
                 outputs.add(output(ModItems.material(MaterialForm.CHUNK, metal).get(), 1, 1.0F));
                 for (MetalByproduct subProduct : advancedSieveByproducts(metal)) {
@@ -1601,7 +1606,10 @@ final class ModRecipeProvider extends RecipeProvider {
             List<SluiceRecipe.ChanceOutput> outputs = new ArrayList<>();
             if (metal == Metal.GALENA) {
                 outputs.add(chance(ModItems.material(MaterialForm.CHUNK, Metal.LEAD).get(), 1.0F));
-                outputs.add(chance(ModItems.material(MaterialForm.DUST, Metal.SILVER).get(), 0.025F));
+                outputs.add(chance(
+                        ModItems.material(MaterialForm.DUST, Metal.SILVER).get(),
+                        GALENA_SILVER_CHANCE
+                ));
             } else {
                 outputs.add(chance(ModItems.material(MaterialForm.CHUNK, metal).get(), 1.0F));
                 for (MetalByproduct subProduct : sluiceByproducts(metal)) {

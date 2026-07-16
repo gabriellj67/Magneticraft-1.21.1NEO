@@ -10,7 +10,7 @@
       }
     },
     {
-      "chance": 0.025,
+      "chance": 0.25,
       "stack": {
         "item": "magneticraft:silver_dust"
       }

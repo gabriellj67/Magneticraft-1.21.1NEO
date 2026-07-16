@@ -633,7 +633,12 @@ class GeneratedDataContractTest {
         assertChanceResult(
                 readObject(recipe("sluice_box/galena_rocky_chunk")),
                 "magneticraft:silver_dust",
-                0.025F
+                0.25F
+        );
+        assertChanceResult(
+                readObject(recipe("advanced_processing/sieve_galena_rocky_chunk")),
+                "magneticraft:silver_dust",
+                0.25F
         );
         assertChanceResult(
                 readObject(recipe("sluice_box/iron_rocky_chunk")),
