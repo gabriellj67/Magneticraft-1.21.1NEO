@@ -50,11 +50,11 @@ public enum MaterialForm {
         return switch (this) {
             case INGOT -> metal.chineseName() + "锭";
             case NUGGET -> metal.chineseName() + "粒";
-            case LIGHT_PLATE -> "轻薄" + metal.chineseName() + "板";
-            case HEAVY_PLATE -> "厚重" + metal.chineseName() + "板";
-            case CHUNK -> "细块" + metal.chineseName() + "矿";
+            case LIGHT_PLATE -> "轻型" + metal.chineseName() + "板";
+            case HEAVY_PLATE -> "重型" + metal.chineseName() + "板";
+            case CHUNK -> metal.chineseName() + "矿碎块";
             case DUST -> metal.chineseName() + "粉";
-            case ROCKY_CHUNK -> metal.chineseName() + "砾岩";
+            case ROCKY_CHUNK -> "含石" + metal.chineseName() + "矿碎块";
         };
     }
 }

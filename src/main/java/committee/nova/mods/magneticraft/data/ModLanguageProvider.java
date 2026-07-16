@@ -72,7 +72,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModMachineItems.VOLTMETER.get(), chinese ? "电压表" : "Voltmeter");
         add(ModMachineItems.THERMOMETER.get(), chinese ? "温度计" : "Thermometer");
         add(ModMachineItems.INSERTER_SPEED_UPGRADE.get(), chinese ? "机械臂速度升级" : "Inserter Speed Upgrade");
-        add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂整组升级" : "Inserter Stack Upgrade");
+        add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂批量升级" : "Inserter Stack Upgrade");
         add("container.magneticraft.battery_box", chinese ? "电池箱" : "Battery Box");
         add("container.magneticraft.electric_furnace", chinese ? "电炉" : "Electric Furnace");
         add("container.magneticraft.box_transformer", chinese ? "箱式变压器" : "Box Transformer");
@@ -114,7 +114,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModNetworkBlocks.CIRCUIT_BREAKER.get(), chinese ? "断路器" : "Circuit Breaker");
         add(ModNetworkBlocks.TESLA_TOWER.get(), chinese ? "特斯拉塔" : "Tesla Tower");
         add(ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(), chinese ? "无线能量接收器" : "Wireless Energy Receiver");
-        add(ModNetworkBlocks.WIND_TURBINE.get(), chinese ? "风力涡轮机" : "Wind Turbine");
+        add(ModNetworkBlocks.WIND_TURBINE.get(), chinese ? "风力发电机" : "Wind Turbine");
         add(ModNetworkBlocks.HEAT_PIPE.get(), chinese ? "热管" : "Heat Pipe");
         add(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), chinese ? "保温热管" : "Insulated Heat Pipe");
         add(ModNetworkBlocks.HEAT_SINK.get(), chinese ? "散热器" : "Heat Sink");
@@ -135,7 +135,7 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "变压配置：%s，反向：%s，红石模式：%s"
                 : "Transformer profile: %s, reversed: %s, redstone mode: %s");
         add("message.magneticraft.protection_status", chinese
-                ? "保护规格：%s，应力：%s，断开：%s"
+                ? "保护规格：%s，过载度：%s，已断开：%s"
                 : "Protection rating: %s, stress: %s, open: %s");
         add("message.magneticraft.invalid_fuse", chinese
                 ? "保险丝必须与保险丝盒的电压层级一致"
@@ -148,16 +148,16 @@ final class ModLanguageProvider extends LanguageProvider {
                 : "Electrical equipment repaired");
         add("message.magneticraft.redstone_mode", chinese ? "红石控制：%s" : "Redstone control: %s");
         add("message.magneticraft.redstone_mode.ignored", chinese ? "忽略" : "Ignored");
-        add("message.magneticraft.redstone_mode.requires_signal", chinese ? "需要信号" : "Requires signal");
-        add("message.magneticraft.redstone_mode.requires_no_signal", chinese ? "需要无信号" : "Requires no signal");
+        add("message.magneticraft.redstone_mode.requires_signal", chinese ? "有红石信号时启用" : "Requires signal");
+        add("message.magneticraft.redstone_mode.requires_no_signal", chinese ? "无红石信号时启用" : "Requires no signal");
         add("message.magneticraft.fluid_side_mode", chinese ? "%s 端口：%s" : "%s port: %s");
-        add("message.magneticraft.fluid_side_mode.passive", chinese ? "被动接口" : "Passive I/O");
+        add("message.magneticraft.fluid_side_mode.passive", chinese ? "被动输入/输出" : "Passive I/O");
         add("message.magneticraft.fluid_side_mode.active", chinese ? "主动输出" : "Active output");
         add("message.magneticraft.fluid_side_mode.disabled", chinese ? "禁用" : "Disabled");
         add("message.magneticraft.voltmeter", chinese ? "%s V · %s A · %s W" : "%s V · %s A · %s W");
         add("message.magneticraft.voltmeter.mode", chinese ? "电压表模式：%s" : "Voltmeter mode: %s");
         add("mode.magneticraft.voltmeter.point", chinese ? "点测" : "Point probe");
-        add("mode.magneticraft.voltmeter.network_summary", chinese ? "网络摘要" : "Network summary");
+        add("mode.magneticraft.voltmeter.network_summary", chinese ? "网络概览" : "Network summary");
         add("mode.magneticraft.voltmeter.fault_locator", chinese ? "故障定位" : "Fault locator");
         add("message.magneticraft.voltmeter.point", chinese
                 ? "端子 %s · %s · %s V · %s C/t · %s A · %s J/t · %s W · %s · 负载 %s · %s"
@@ -211,29 +211,29 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "%s V · %s C/t · %s A · %s J/t · %s W"
                 : "%s V · %s C/t · %s A · %s J/t · %s W");
         add("tooltip.magneticraft.jade.electrical_state", chinese
-                ? "负载 %s · 热应力 %s · %s · %s"
+                ? "负载 %s · 过载度 %s · %s · %s"
                 : "Load %s · thermal stress %s · %s · %s");
         add("tooltip.magneticraft.jade.temperature", chinese ? "温度：%s K" : "Temperature: %s K");
         add("tooltip.magneticraft.jade.tank", chinese ? "%s：%s / %s mB" : "%s: %s / %s mB");
         add("tooltip.magneticraft.jade.empty", chinese ? "空" : "Empty");
         add("tooltip.magneticraft.jade.structure", chinese ? "结构：%s，%s" : "Structure: %s, %s");
-        add("tooltip.magneticraft.jade.formed", chinese ? "已组装" : "formed");
-        add("tooltip.magneticraft.jade.unformed", chinese ? "未组装" : "unformed");
+        add("tooltip.magneticraft.jade.formed", chinese ? "已成型" : "formed");
+        add("tooltip.magneticraft.jade.unformed", chinese ? "未成型" : "unformed");
         add("tooltip.magneticraft.jade.operational", chinese ? "可运行" : "operational");
         add("tooltip.magneticraft.jade.paused", chinese ? "已暂停" : "paused");
         add("gui.magneticraft.electrical.title", chinese ? "电气状态" : "Electrical Status");
-        add("gui.magneticraft.electrical.unavailable", chinese ? "当前面没有电气端子" : "No electrical terminal on this side");
+        add("gui.magneticraft.electrical.unavailable", chinese ? "此侧没有电气端口" : "No electrical terminal on this side");
         add("gui.magneticraft.electrical.terminal", chinese ? "%s · %s" : "%s · %s");
         add("gui.magneticraft.electrical.voltage_current", chinese ? "%s V · %s A" : "%s V · %s A");
         add("gui.magneticraft.electrical.throughput", chinese ? "%s J/t · %s W" : "%s J/t · %s W");
-        add("gui.magneticraft.electrical.load_stress", chinese ? "负载 %s%% · 应力 %s%%" : "Load %s%% · stress %s%%");
+        add("gui.magneticraft.electrical.load_stress", chinese ? "负载 %s%% · 过载度 %s%%" : "Load %s%% · stress %s%%");
         add("gui.magneticraft.electrical.storage", chinese ? "储能 %s / %s J" : "Stored %s / %s J");
         add("gui.magneticraft.electrical.state", chinese ? "%s · %s" : "%s · %s");
         add("gui.magneticraft.electrical.point_tooltip", chinese
                 ? "%s V · %s C/t · %s A · %s J/t · %s W"
                 : "%s V · %s C/t · %s A · %s J/t · %s W");
         add("gui.magneticraft.electrical.node_tooltip", chinese
-                ? "节点 %s / %s J · 负载 %s · 应力 %s"
+                ? "节点储能 %s / %s J · 负载 %s · 过载度 %s"
                 : "Node %s / %s J · load %s · stress %s");
         add("gui.magneticraft.electrical.reset", chinese ? "复位" : "Reset");
         add("gui.magneticraft.electrical.profile_state", chinese ? "配置：%s" : "Profile: %s");
@@ -241,13 +241,13 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.electrical.missing_profile", chinese ? "缺失" : "missing");
         add("gui.magneticraft.electrical.rating", chinese ? "额定规格：%s" : "Rating: %s");
         add("gui.magneticraft.electrical.rating.standard", chinese ? "标准 8 C/t" : "Standard 8 C/t");
-        add("gui.magneticraft.electrical.rating.heavy", chinese ? "重型 16 C/t" : "Heavy 16 C/t");
+        add("gui.magneticraft.electrical.rating.heavy", chinese ? "重载 16 C/t" : "Heavy 16 C/t");
         add("gui.magneticraft.electrical.protection_state", chinese ? "状态：%s" : "State: %s");
         add("gui.magneticraft.electrical.direction.forward", chinese ? "正向" : "Forward");
         add("gui.magneticraft.electrical.direction.reverse", chinese ? "反向" : "Reverse");
         add("gui.magneticraft.electrical.redstone.ignored", chinese ? "忽略红石" : "Ignore redstone");
-        add("gui.magneticraft.electrical.redstone.requires_signal", chinese ? "需要信号" : "Requires signal");
-        add("gui.magneticraft.electrical.redstone.requires_no_signal", chinese ? "需要无信号" : "Requires no signal");
+        add("gui.magneticraft.electrical.redstone.requires_signal", chinese ? "有红石信号时启用" : "Requires signal");
+        add("gui.magneticraft.electrical.redstone.requires_no_signal", chinese ? "无红石信号时启用" : "Requires no signal");
         add("gui.magneticraft.electrical.state.redstone_open", chinese ? "红石断开" : "redstone open");
         add("gui.magneticraft.electrical.state.tripped", chinese ? "已跳闸" : "tripped");
         add("gui.magneticraft.electrical.state.blown", chinese ? "已熔断" : "blown");
@@ -318,21 +318,21 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.multiblock_unloaded", chinese ? "结构位置 %s 所在区块未加载" : "Structure position %s is in an unloaded chunk");
         add("message.magneticraft.multiblock_mismatch", chinese ? "结构位置 %s 应满足 %s" : "Structure position %s must match %s");
         add("message.magneticraft.multiblock_member_conflict", chinese ? "结构部件已属于另一个多方块" : "A structure member belongs to another multiblock");
-        add("message.magneticraft.multiblock_formed", chinese ? "%s 已组装" : "%s formed");
+        add("message.magneticraft.multiblock_formed", chinese ? "%s 已成型" : "%s formed");
         add("message.magneticraft.multiblock_status", chinese ? "%s：%s" : "%s: %s");
         add("message.magneticraft.multiblock_mirrored_state", chinese ? "镜像" : "mirrored");
-        add("message.magneticraft.multiblock_normal_state", chinese ? "标准" : "normal");
+        add("message.magneticraft.multiblock_normal_state", chinese ? "非镜像" : "normal");
         add("gui.magneticraft.multiblock_structure_state", chinese ? "结构：%s" : "Structure: %s");
         add("message.magneticraft.multiblock_hologram_enabled", chinese ? "多方块全息投影已开启" : "Multiblock hologram enabled");
         add("message.magneticraft.multiblock_hologram_disabled", chinese ? "多方块全息投影已关闭" : "Multiblock hologram disabled");
-        add("commands.magneticraft.multiblock.fill.no_controller", chinese ? "请将准星对准未组装的多方块主体" : "Look at an unformed multiblock controller");
+        add("commands.magneticraft.multiblock.fill.no_controller", chinese ? "请将准星对准未成型的多方块主体" : "Look at an unformed multiblock controller");
         add("commands.magneticraft.multiblock.fill.already_formed", chinese ? "目标多方块已经组装" : "The targeted multiblock is already formed");
         add("commands.magneticraft.multiblock.fill.unavailable", chinese ? "无法填充未加载或越界的结构位置：%s" : "Cannot fill unloaded or out-of-bounds structure position: %s");
         add("commands.magneticraft.multiblock.fill.success", chinese ? "已为 %s 更新 %s 个结构位置" : "Updated %s at %s structure positions");
         add("message.magneticraft.hydraulic_press_mode", chinese ? "液压机模式：%s" : "Hydraulic press mode: %s");
-        add("message.magneticraft.hydraulic_press_mode.light", chinese ? "轻压" : "light");
-        add("message.magneticraft.hydraulic_press_mode.medium", chinese ? "中压" : "medium");
-        add("message.magneticraft.hydraulic_press_mode.heavy", chinese ? "重压" : "heavy");
+        add("message.magneticraft.hydraulic_press_mode.light", chinese ? "轻型" : "light");
+        add("message.magneticraft.hydraulic_press_mode.medium", chinese ? "中型" : "medium");
+        add("message.magneticraft.hydraulic_press_mode.heavy", chinese ? "重型" : "heavy");
         add("message.magneticraft.shelving_capacity", chinese ? "已安装箱体 %s/%s，可用槽位 %s" : "%s/%s chests installed; %s slots available");
         add("message.magneticraft.shelving_requires_formed", chinese ? "请先组装货架结构" : "Form the shelving structure first");
         add("message.magneticraft.shelving_owner_denied", chinese ? "无权升级此货架" : "You cannot upgrade this shelving unit");
@@ -415,7 +415,7 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "源码上限：%s 字节；输出上限：%s 字符"
                 : "Source limit: %s bytes; output limit: %s characters");
         add("gui.magneticraft.guide.computer.tick_limits", chinese
-                ? "每 tick：%s 条指令，%s 次设备调用"
+                ? "每游戏刻：%s 条指令，%s 次设备调用"
                 : "Per tick: %s instructions, %s device calls");
         add("gui.magneticraft.guide.computer.storage_limits", chinese
                 ? "软盘：%s 字节/%s 条目；采石场最大边长：%s"
@@ -423,11 +423,11 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.computer.examples", chinese ? "示例：%s" : "Examples: %s");
         add("gui.magneticraft.guide.computer.commands", chinese ? "命令：%s" : "Commands: %s");
         add("gui.magneticraft.guide.computer.security", chinese
-                ? "服务端权威：%s；防重放：%s；主机文件：%s；外部网络：%s；区块强加载：%s"
+                ? "服务端验证：%s；重复请求防护：%s；服务器文件访问：%s；外部网络：%s；区块强加载：%s"
                 : "Server authority: %s; replay protection: %s; host files: %s; outbound network: %s; chunk loading: %s");
         add("guide.magneticraft.computer.language.forth.name", chinese ? "Forth" : "Forth");
         add("guide.magneticraft.computer.language.forth.description", chinese
-                ? "有界的栈式 Forth 核心，包含历史算术、控制流、词典和设备词；栈、词典及每 tick 执行量均受限制。"
+                ? "受限的栈式 Forth 核心，包含历史算术、控制流、词典和设备词；栈、词典及每游戏刻执行量均有上限。"
                 : "A bounded stack-based Forth core with historical arithmetic, control flow, dictionary, and device words; stacks, dictionary, and per-tick execution are limited.");
         add("guide.magneticraft.computer.language.lisp.name", chinese ? "Lisp" : "Lisp");
         add("guide.magneticraft.computer.language.lisp.description", chinese
@@ -457,7 +457,7 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "命中六格内方块后反向推动使用者，也可将目标实体推离。"
                 : "Pushes its user backward after targeting a block within six blocks, or pushes a targeted entity away.");
         add("guide.magneticraft.item.voltmeter.description", chinese
-                ? "提供点测、网络摘要和故障定位三种服务端权威模式；潜行空中右击循环模式。"
+                ? "提供点测、网络概览和故障定位三种模式；潜行时对空气右击可切换模式，结果由服务端计算。"
                 : "Provides server-authoritative point, network-summary, and fault-locator modes; sneak-use in air to cycle modes.");
         add("guide.magneticraft.item.thermometer.description", chinese
                 ? "以一位小数的摄氏度读取热力节点温度。"
@@ -485,7 +485,7 @@ final class ModLanguageProvider extends LanguageProvider {
                 : "Generates up to 200 J/t. Keep the rotor plane and 16 blocks ahead clear; its scan never loads chunks.");
         addGuideItemDescription("wrench", "配置机器、管道与网络侧面；潜行交互用于次要配置。",
                 "Configures machine, pipe, and network sides; sneak-use selects secondary actions.");
-        addGuideItemDescription("electric_cable", "只连接相邻同层级电气端子；持续过载会累积应力并烧毁电缆。",
+        addGuideItemDescription("electric_cable", "只连接相邻且同电压层级的电气端口；持续过载会提高过载度，达到上限后电缆将烧毁。",
                 "Connects adjacent same-tier electrical ports; sustained overload accumulates stress and can burn the cable.");
         addGuideItemDescription("electrical_fuse", "按层级和 8/16 C/t 规格匹配保险丝盒；熔断后需要更换。",
                 "Matches a fuse box by tier and 8/16 C/t rating and must be replaced after it blows.");
@@ -503,21 +503,21 @@ final class ModLanguageProvider extends LanguageProvider {
                 "A thermal pipe with reduced environmental loss that never force-loads neighboring chunks.");
         addGuideItemDescription("heat_sink", "从热网主动耗散热量，用于限制机器与管网温度。",
                 "Deliberately dissipates thermal-network energy to limit machine and pipe temperatures.");
-        addGuideItemDescription("iron_fluid_pipe", "在兼容流体端点之间执行先模拟后提交的有界传输。",
+        addGuideItemDescription("iron_fluid_pipe", "在兼容的流体端口之间输送流体；只有目标能够接收时才会完成传输。",
                 "Performs bounded simulate-then-commit transfers between compatible fluid endpoints.");
-        addGuideItemDescription("pneumatic_tube", "构成有界气动物流图；载荷在目标阻塞或卸载时保留。",
+        addGuideItemDescription("pneumatic_tube", "组成气动物流网络；目标堵塞或所在区块未加载时，运输中的物品不会丢失。",
                 "Forms a bounded pneumatic logistics graph whose payloads survive blocked or unloaded targets.");
         addGuideItemDescription("pneumatic_restriction_tube", "提高该路径的物流代价，使搜索优先选择普通气动管。",
                 "Raises route cost so logistics searches prefer ordinary pneumatic tubes when possible.");
-        addGuideItemDescription("conveyor_belt", "以内部载荷模型水平搬运物品，支持右键存取、转角与阻塞回压。",
+        addGuideItemDescription("conveyor_belt", "水平搬运物品；支持右键放入或取出、转弯连接，前方堵塞时停止输送。",
                 "Moves an internal item payload horizontally with right-click access, corners, and blockage backpressure.");
         addGuideItemDescription("inserter_speed_upgrade", "缩短机械臂动作间隔；只对机械臂的真实升级槽生效。",
                 "Reduces inserter action delay and applies only through its real upgrade slot.");
         addGuideItemDescription("inserter_stack_upgrade", "允许机械臂单次搬运更大物品组，不绕过目标容量检查。",
                 "Lets an inserter move larger stacks without bypassing destination-capacity checks.");
-        addGuideItemDescription("computer", "运行有界 Forth、Lisp 或 Shell 程序，并通过服务端验证的内部设备总线访问世界。",
+        addGuideItemDescription("computer", "运行受限的 Forth、Lisp 或 Shell 程序，并通过由服务端验证的内部设备总线访问世界。",
                 "Runs bounded Forth, Lisp, or Shell programs and reaches the world only through a server-validated device bus.");
-        addGuideItemDescription("mining_robot", "按权限、能量、距离、区块和每 tick 预算执行移动、扫描、采掘与采石场任务。",
+        addGuideItemDescription("mining_robot", "按权限、能量、距离、区块和每游戏刻执行上限完成移动、扫描、采掘与采石场任务。",
                 "Executes movement, scan, mining, and quarry tasks under permission, energy, range, chunk, and tick budgets.");
         addGuideItemDescription("floppy_disk", "保存版本化程序与虚拟文件系统；损坏、未来版本及只读预置介质会安全拒绝写入。",
                 "Stores versioned programs and a virtual filesystem; corrupt, future-version, and read-only preset media fail safely.");
@@ -538,14 +538,14 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.category.oil", chinese ? "石油" : "Oil");
         add("gui.magneticraft.guide.category.energy", chinese ? "能源" : "Energy");
         add("gui.magneticraft.guide.category.utility", chinese ? "实用设备" : "Utility");
-        add("gui.magneticraft.guide.machine.inventory", chinese ? "物品槽：%s；幽灵槽：%s" : "Item slots: %s; ghost slots: %s");
+        add("gui.magneticraft.guide.machine.inventory", chinese ? "物品槽：%s；虚拟槽：%s" : "Item slots: %s; ghost slots: %s");
         add("gui.magneticraft.guide.machine.menu", chinese ? "界面：%s" : "Menu: %s");
         add("gui.magneticraft.guide.machine.redstone", chinese ? "红石控制：%s" : "Redstone control: %s");
         add("gui.magneticraft.guide.machine.processing", chinese ? "处理类型：%s" : "Processing: %s");
         add("gui.magneticraft.guide.machine.recipe", chinese ? "配方入口：%s" : "Recipe entry: %s");
         add("gui.magneticraft.guide.machine.automation", chinese ? "自动化：%s" : "Automation: %s");
-        add("gui.magneticraft.guide.machine.slots", chinese ? "槽位职责：%s" : "Slot roles: %s");
-        add("gui.magneticraft.guide.machine.ports", chinese ? "物理端口：%s" : "Physical ports: %s");
+        add("gui.magneticraft.guide.machine.slots", chinese ? "槽位用途：%s" : "Slot roles: %s");
+        add("gui.magneticraft.guide.machine.ports", chinese ? "外部端口：%s" : "Physical ports: %s");
         add("gui.magneticraft.guide.redstone.ignored", chinese ? "忽略" : "Ignored");
         addGuideValues("processing", new String[][]{
                 {"none", "无", "None"},
@@ -582,7 +582,7 @@ final class ModLanguageProvider extends LanguageProvider {
         addGuideValues("port", new String[][]{
                 {"item", "物品", "Item"},
                 {"item_transfer", "物品搬运", "Item transfer"},
-                {"ghost_filter", "幽灵过滤", "Ghost filter"},
+                {"ghost_filter", "虚拟过滤槽", "Ghost filter"},
                 {"fluid_input", "流体输入", "Fluid input"},
                 {"fluid_output", "流体输出", "Fluid output"},
                 {"forge_energy", "Forge Energy", "Forge Energy"},
@@ -654,20 +654,20 @@ final class ModLanguageProvider extends LanguageProvider {
         return switch (definition) {
             case BIG_COMBUSTION_CHAMBER -> "燃烧固体燃料并向大型热力网络供热；结构或输出受阻时保留燃料。";
             case BIG_ELECTRIC_FURNACE -> "使用原生电力执行高容量熔炼；完整输出可提交时才消耗输入。";
-            case BIG_STEAM_BOILER -> "把水与热量转换为蒸汽；输入、输出和热状态在回压下全部保留。";
-            case CONTAINER -> "以单一物品标识和有界计数提供大宗存储，模拟插取无副作用。";
+            case BIG_STEAM_BOILER -> "把水与热量转换为蒸汽；输出空间不足时暂停工作，并保留已有的水、蒸汽和热量。";
+            case CONTAINER -> "用于大量存储同一种物品，存储数量存在上限；自动化模拟输入或输出时不会改变库存。";
             case GRINDER -> "执行研磨高级加工配方，库存、能量、配方和进度均可持久化。";
-            case HYDRAULIC_PRESS -> "按轻压、中压或重压模式执行匹配配方，模式切换由服务端验证。";
+            case HYDRAULIC_PRESS -> "按轻型、中型或重型冲压模式处理对应配方；模式切换由服务端确认。";
             case OIL_HEATER -> "消耗热量把原油转换为加热原油，输出罐不足时暂停。";
             case PUMPJACK -> "从已加载的有限油藏抽取原油，不强加载区块且不会使储量为负。";
-            case REFINERY -> "把加热原油原子分离到五个带职责的储罐，任一输出受阻时暂停。";
+            case REFINERY -> "将加热原油一次性分离到五个专用储罐；任一输出储罐已满时暂停。";
             case SHELVING_UNIT -> "通过受所有权保护的箱体升级解锁存储槽，自动化无法访问未解锁容量。";
             case SIEVE -> "执行筛分高级加工配方，只有完整产物可接收时才提交输入。";
             case SOLAR_MIRROR -> "在日照和加载条件允许时向有效太阳能塔贡献聚光热量。";
-            case SOLAR_PANEL -> "在天空无遮挡的日照条件下产生原生电力，夜晚或回压时暂停。";
+            case SOLAR_PANEL -> "在天空无遮挡的日照条件下产生原生电力；夜晚或电网无法继续接收能量时暂停发电。";
             case SOLAR_TOWER -> "汇集有效反射镜的聚光贡献，并从声明的热力端口输出热量。";
-            case STEAM_ENGINE -> "消耗蒸汽并产生原生电力，电网回压时保留输入流体。";
-            case STEAM_TURBINE -> "以有界速率把蒸汽转换为原生电力，卸载期间安全暂停。";
+            case STEAM_ENGINE -> "消耗蒸汽并产生原生电力；电网无法继续接收能量时停止消耗蒸汽。";
+            case STEAM_TURBINE -> "以设定的最高速率将蒸汽转换为 J；所在区块卸载时暂停工作。";
         };
     }
 
@@ -724,13 +724,13 @@ final class ModLanguageProvider extends LanguageProvider {
             case BOX -> "提供 27 格木制存储，所有侧面均可进行物品自动化。";
             case SLUICE_BOX -> "成链放置并供水后处理淘洗配方；上游状态改变会重置已加载的下游链路。";
             case FEEDING_TROUGH -> "每 400 刻尝试用小麦、胡萝卜或小麦种子喂养范围内两只可繁殖动物。";
-            case SMALL_TANK -> "保存单种流体并支持侧面输入输出；容器交互原子化，失败时不会吞掉容器。";
-            case FABRICATOR -> "用幽灵槽记录合成图样并读取相邻库存；右击结果清除图样，左击请求合成。";
-            case INSERTER -> "在相邻库存间搬运物品，可配置过滤、方向、速度升级和整组升级。";
+            case SMALL_TANK -> "保存单种流体并支持侧面输入输出；使用桶等容器交互时，只有完整操作能够成功才会执行，失败时不会消耗容器。";
+            case FABRICATOR -> "用虚拟槽记录合成图样并读取相邻库存；右击结果清除图样，左击请求合成。";
+            case INSERTER -> "在相邻库存间搬运物品，可配置过滤、方向、速度升级和批量升级。";
             case WATER_GENERATOR -> "内置无限水源，六个侧面各自最多输出 20 mB/t，且不会强加载区块。";
             case RELAY -> "在气动物流网络与九格物品缓冲之间转接，输出面不接受普通物品自动化。";
-            case FILTER -> "用幽灵样本约束气动载荷，只在气动网络中工作。";
-            case TRANSPOSER -> "按幽灵样本在气动网络与相邻目标间转置物品。";
+            case FILTER -> "用虚拟样本约束气动载荷，只在气动网络中工作。";
+            case TRANSPOSER -> "按虚拟样本在气动网络与相邻目标间转运物品。";
             case COMBUSTION_CHAMBER -> "燃烧内部燃料并向热端口供热；门板用于直接装填或切换状态。";
             case STEAM_BOILER -> "从任意侧面接收水和输出蒸汽，以热量驱动转换；主动输出遵循旧版目标侧规则。";
             case ELECTRIC_HEATER -> "以每刻 80 J 的批量将磁场工艺电力转为热量；电力不足 80 J 时停止转换，机器热量会逐步散失。";
@@ -738,10 +738,10 @@ final class ModLanguageProvider extends LanguageProvider {
             case GASIFICATION_UNIT -> "在足够温度下按数据配方把物品转为气体，物品输入输出与流体输出可自动化。";
             case BRICK_FURNACE -> "以外部热量执行熔炼配方；更换配方不会抹除已积累进度，工作显示会短暂延迟熄灭。";
             case INFINITE_ENERGY -> "创意管理设备，持续维持 125 V 电源；没有生存配方。";
-            case RF_TRANSFORMER -> "从侧面接收 Forge Energy，并按 1 FE = 1 J 写入低压原生电气节点；不维护第二份 FE 缓冲。";
-            case ELECTRIC_ENGINE -> "仅连接中压原生电气节点，不再暴露或转换 Forge Energy；需要向 FE 设备供能时，请通过匹配电压层级的电力连接器输出。";
+            case RF_TRANSFORMER -> "从侧面接收 FE，并按 1 FE = 1 J 输入低压 J 电网；机器内部不会额外保存一份 FE。";
+            case ELECTRIC_ENGINE -> "仅接入中压 J 电网，不会直接输出或转换 FE；如需为 FE 设备供电，请使用同层级电力连接器。";
             case AIRLOCK -> "每 40 刻扫描半径 9 的已加载区域，以电力维持边界水泡并清除内部水体；欠压后逐步失效。";
-            case THERMOPILE -> "读取两侧温差并直接向额定原生电气节点产生焦耳，受节点容量、输出电压和发电速率限制。";
+            case THERMOPILE -> "根据两侧温差向对应层级的 J 电网发电；发电量受节点容量、输出电压和发电速率限制。";
         };
     }
 
