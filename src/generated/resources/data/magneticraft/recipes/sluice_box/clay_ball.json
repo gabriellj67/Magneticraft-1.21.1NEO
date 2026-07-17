@@ -1,0 +1,14 @@
+{
+  "type": "magneticraft:sluice_box",
+  "ingredient": {
+    "item": "minecraft:clay_ball"
+  },
+  "results": [
+    {
+      "chance": 0.25,
+      "stack": {
+        "item": "magneticraft:borax"
+      }
+    }
+  ]
+}

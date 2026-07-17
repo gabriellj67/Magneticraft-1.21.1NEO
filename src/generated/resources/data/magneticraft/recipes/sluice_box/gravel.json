@@ -14,6 +14,12 @@
       "stack": {
         "item": "minecraft:flint"
       }
+    },
+    {
+      "chance": 0.01,
+      "stack": {
+        "item": "magneticraft:zircon_sand"
+      }
     }
   ]
 }

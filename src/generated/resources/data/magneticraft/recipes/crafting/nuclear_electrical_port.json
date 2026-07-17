@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_facility_casing"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "W": {
+      "item": "magneticraft:fine_copper_wire"
+    }
+  },
+  "pattern": [
+    "WWW",
+    "RCR",
+    "WWW"
+  ],
+  "result": {
+    "item": "magneticraft:nuclear_electrical_port"
+  },
+  "show_notification": true
+}

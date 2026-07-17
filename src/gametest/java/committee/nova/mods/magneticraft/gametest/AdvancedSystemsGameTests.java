@@ -848,8 +848,8 @@ public final class AdvancedSystemsGameTests {
                 .getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get()).size();
         int polymerizing = helper.getLevel().getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.POLYMERIZING_TYPE.get()).size();
-        helper.assertTrue(processingRecipes == 94,
-                "Expected 94 advanced processing recipes, loaded " + processingRecipes);
+        helper.assertTrue(processingRecipes == 95,
+                "Expected 95 advanced processing recipes, loaded " + processingRecipes);
         helper.assertTrue(fluidFuels == 10,
                 "Expected 10 fluid fuel recipes, loaded " + fluidFuels);
         helper.assertTrue(polymerizing == 2,

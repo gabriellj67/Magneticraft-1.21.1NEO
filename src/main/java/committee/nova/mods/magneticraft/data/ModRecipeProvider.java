@@ -12,6 +12,9 @@ import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.material.Metal;
+import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
+import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType;
+import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearProcessRecipe;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMath;
@@ -24,6 +27,7 @@ import committee.nova.mods.magneticraft.data.recipe.CountedCookingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.CrushingRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.SingleBlockRecipeBuilder;
 import committee.nova.mods.magneticraft.data.recipe.TieredShapedFinishedRecipe;
+import committee.nova.mods.magneticraft.data.recipe.NuclearProcessRecipeBuilder;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
@@ -33,6 +37,8 @@ import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
+import committee.nova.mods.magneticraft.init.ModNuclearItems;
+import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.init.ModTags;
 import committee.nova.mods.magneticraft.system.network.electric.item.TieredElectricalItemData;
@@ -90,6 +96,8 @@ final class ModRecipeProvider extends RecipeProvider {
         addStorageConversions(consumer);
         addDecorationRecipes(consumer);
         addComponentRecipes(consumer);
+        addNuclearMaterialRecipes(consumer);
+        addNuclearFacilityRecipes(consumer);
         addHammerRecipes(consumer);
         addSmeltingRecipes(consumer);
         addMachineCraftingRecipes(consumer);
@@ -104,6 +112,121 @@ final class ModRecipeProvider extends RecipeProvider {
         addAdvancedCraftingRecipes(consumer);
         addAdvancedProcessingRecipes(consumer);
         addPolymerizingRecipes(consumer);
+    }
+
+    private void addNuclearFacilityRecipes(Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.FACILITY_CASING.get(), 4)
+                .pattern("ZIZ")
+                .pattern("ICI")
+                .pattern("ZIZ")
+                .define('Z', ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_INGOT).get())
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('C', ModAdvancedBlocks.MULTIBLOCK_BASE.get())
+                .unlockedBy("has_zirconium_alloy", has(ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_INGOT).get()))
+                .save(consumer, id("crafting/nuclear_facility_casing"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.PROCESS_CORE.get())
+                .pattern("CRC")
+                .pattern("RMR")
+                .pattern("CRC")
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('M', component(CraftingComponent.MOTOR))
+                .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                .save(consumer, id("crafting/nuclear_process_core"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.CENTRIFUGE_STAGE.get())
+                .pattern("CMC")
+                .pattern("RIR")
+                .pattern("CMC")
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .define('M', component(CraftingComponent.MOTOR))
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('I', Tags.Items.INGOTS_IRON)
+                .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                .save(consumer, id("crafting/centrifuge_stage"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.ITEM_INPUT_PORT.get())
+                .pattern(" I ").pattern("ICI").pattern(" I ")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                .save(consumer, id("crafting/nuclear_item_input_port"));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.ITEM_OUTPUT_PORT.get())
+                .requires(ModNuclearBlocks.ITEM_INPUT_PORT.get())
+                .unlockedBy("has_nuclear_input_port", has(ModNuclearBlocks.ITEM_INPUT_PORT.get()))
+                .save(consumer, id("crafting/nuclear_item_output_port"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.ELECTRICAL_PORT.get())
+                .pattern("WWW").pattern("RCR").pattern("WWW")
+                .define('W', component(CraftingComponent.FINE_COPPER_WIRE))
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                .save(consumer, id("crafting/nuclear_electrical_port"));
+        for (NuclearFacilityType type : NuclearFacilityType.values()) {
+            ItemLike center = type == NuclearFacilityType.CENTRIFUGE_CASCADE
+                    ? ModNuclearBlocks.CENTRIFUGE_STAGE.get()
+                    : ModNuclearBlocks.PROCESS_CORE.get();
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModNuclearBlocks.controller(type).get())
+                    .pattern("RCR").pattern("MNM").pattern("RCR")
+                    .define('R', Tags.Items.DUSTS_REDSTONE)
+                    .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                    .define('M', component(CraftingComponent.MOTOR))
+                    .define('N', center)
+                    .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                    .save(consumer, id("crafting/" + type.id()));
+        }
+
+        nuclearProcess(consumer, "uranium_concentrate", NuclearFacilityType.URANIUM_PROCESSOR,
+                List.of(counted(ModNuclearItems.material(NuclearMaterial.URANIUM_DUST).get(), 4)),
+                List.of(new ItemStack(ModNuclearItems.material(NuclearMaterial.URANIUM_CONCENTRATE).get(), 3)),
+                200, 80);
+        nuclearProcess(consumer, "uranium_hexafluoride", NuclearFacilityType.URANIUM_PROCESSOR,
+                List.of(
+                        counted(ModNuclearItems.material(NuclearMaterial.URANIUM_CONCENTRATE).get(), 3),
+                        counted(ModNuclearItems.material(NuclearMaterial.EMPTY_URANIUM_HEXAFLUORIDE_CYLINDER).get(), 1)
+                ),
+                List.of(new ItemStack(ModNuclearItems.material(NuclearMaterial.URANIUM_HEXAFLUORIDE_CYLINDER).get())),
+                300, 120);
+        nuclearProcess(consumer, "uranium_enrichment", NuclearFacilityType.CENTRIFUGE_CASCADE,
+                List.of(counted(ModNuclearItems.material(NuclearMaterial.URANIUM_HEXAFLUORIDE_CYLINDER).get(), 1)),
+                List.of(
+                        new ItemStack(ModNuclearItems.material(NuclearMaterial.LOW_ENRICHED_URANIUM).get(), 2),
+                        new ItemStack(ModNuclearItems.material(NuclearMaterial.DEPLETED_URANIUM).get(), 6),
+                        new ItemStack(ModNuclearItems.material(NuclearMaterial.EMPTY_URANIUM_HEXAFLUORIDE_CYLINDER).get())
+                ),
+                800, 160);
+        nuclearProcess(consumer, "uranium_dioxide_pellet", NuclearFacilityType.FUEL_FABRICATOR,
+                List.of(counted(ModNuclearItems.material(NuclearMaterial.LOW_ENRICHED_URANIUM).get(), 1)),
+                List.of(new ItemStack(ModNuclearItems.material(NuclearMaterial.URANIUM_DIOXIDE_PELLET).get(), 8)),
+                240, 100);
+        int[] pellets = {12, 18, 24};
+        committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade[] grades =
+                committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade.values();
+        for (int index = 0; index < grades.length; index++) {
+            var grade = grades[index];
+            nuclearProcess(consumer, grade.id(), NuclearFacilityType.FUEL_FABRICATOR,
+                    List.of(
+                            counted(ModNuclearItems.material(NuclearMaterial.URANIUM_DIOXIDE_PELLET).get(), pellets[index]),
+                            counted(ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_CLADDING).get(), 4)
+                    ),
+                    List.of(new ItemStack(ModNuclearItems.fuelAssembly(grade).get())),
+                    400 + index * 100, 120 + index * 20);
+        }
+    }
+
+    private void nuclearProcess(
+            Consumer<FinishedRecipe> consumer,
+            String id,
+            NuclearFacilityType facility,
+            List<NuclearProcessRecipe.CountedIngredient> ingredients,
+            List<ItemStack> results,
+            int duration,
+            int joulesPerTick
+    ) {
+        NuclearProcessRecipeBuilder.save(consumer, id("nuclear_processing/" + id), facility,
+                ingredients, results, duration, joulesPerTick);
+    }
+
+    private static NuclearProcessRecipe.CountedIngredient counted(ItemLike item, int count) {
+        return new NuclearProcessRecipe.CountedIngredient(Ingredient.of(item), count);
     }
 
     private void addAdvancedCraftingRecipes(Consumer<FinishedRecipe> consumer) {
@@ -320,12 +443,12 @@ final class ModRecipeProvider extends RecipeProvider {
         sieve(consumer, "gravel", Ingredient.of(Blocks.GRAVEL), List.of(
                 output(Items.FLINT, 1, 1.0F),
                 output(Items.FLINT, 1, 0.15F),
-                output(Items.FLINT, 1, 0.05F)
+                output(ModNuclearItems.material(NuclearMaterial.ZIRCON_SAND).get(), 1, 0.01F)
         ), 50);
         sieve(consumer, "sand", Ingredient.of(Blocks.SAND), List.of(
                 output(Items.GOLD_NUGGET, 1, 0.04F),
                 output(Items.GOLD_NUGGET, 1, 0.02F),
-                output(Items.QUARTZ, 1, 0.01F)
+                output(ModNuclearItems.material(NuclearMaterial.ZIRCON_SAND).get(), 1, 0.02F)
         ), 80);
         sieve(consumer, "soul_sand", Ingredient.of(Blocks.SOUL_SAND), List.of(
                 output(Items.QUARTZ, 1, 0.15F),
@@ -1411,6 +1534,30 @@ final class ModRecipeProvider extends RecipeProvider {
                 2,
                 1
         );
+        crush(
+                consumer,
+                "uranium_ore",
+                Ingredient.of(ModTags.Items.ore("uranium")),
+                ModNuclearItems.material(NuclearMaterial.URANIUM_DUST).get(),
+                2,
+                2
+        );
+        crush(
+                consumer,
+                "zircon_sand",
+                Ingredient.of(ModNuclearItems.material(NuclearMaterial.ZIRCON_SAND).get()),
+                ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_DUST).get(),
+                1,
+                1
+        );
+        crush(
+                consumer,
+                "borax",
+                Ingredient.of(ModNuclearItems.material(NuclearMaterial.BORAX).get()),
+                ModNuclearItems.material(NuclearMaterial.BORON_DUST).get(),
+                1,
+                1
+        );
 
         crush(consumer, "limestone", Ingredient.of(block(BaseBlockDefinition.LIMESTONE)), block(BaseBlockDefinition.COBBLED_LIMESTONE), 1, 0);
         crush(consumer, "burnt_limestone", Ingredient.of(block(BaseBlockDefinition.BURNT_LIMESTONE)), block(BaseBlockDefinition.COBBLED_BURNT_LIMESTONE), 1, 0);
@@ -1649,7 +1796,11 @@ final class ModRecipeProvider extends RecipeProvider {
                 consumer,
                 id("sluice_box/gravel"),
                 Ingredient.of(Blocks.GRAVEL),
-                List.of(chance(Items.FLINT, 1.0F), chance(Items.FLINT, 0.15F))
+                List.of(
+                        chance(Items.FLINT, 1.0F),
+                        chance(Items.FLINT, 0.15F),
+                        chance(ModNuclearItems.material(NuclearMaterial.ZIRCON_SAND).get(), 0.01F)
+                )
         );
         List<SluiceRecipe.ChanceOutput> gold = new ArrayList<>();
         float chance = 0.01F;
@@ -1657,7 +1808,57 @@ final class ModRecipeProvider extends RecipeProvider {
             gold.add(chance(Items.GOLD_NUGGET, chance));
             chance *= 0.5F;
         }
+        gold.add(chance(ModNuclearItems.material(NuclearMaterial.ZIRCON_SAND).get(), 0.02F));
         SingleBlockRecipeBuilder.sluice(consumer, id("sluice_box/sand"), Ingredient.of(Blocks.SAND), gold);
+        SingleBlockRecipeBuilder.sluice(
+                consumer,
+                id("sluice_box/clay_ball"),
+                Ingredient.of(Items.CLAY_BALL),
+                List.of(chance(ModNuclearItems.material(NuclearMaterial.BORAX).get(), 0.25F))
+        );
+    }
+
+    private void addNuclearMaterialRecipes(Consumer<FinishedRecipe> consumer) {
+        Item zirconiumDust = ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_DUST).get();
+        Item zirconiumBlend = ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_BLEND).get();
+        Item zirconiumIngot = ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_INGOT).get();
+        Item boronDust = ModNuclearItems.material(NuclearMaterial.BORON_DUST).get();
+        Item boronBlend = ModNuclearItems.material(NuclearMaterial.BORON_CARBIDE_BLEND).get();
+        Item boronCarbide = ModNuclearItems.material(NuclearMaterial.BORON_CARBIDE).get();
+
+        ShapedRecipeBuilder.shaped(
+                        RecipeCategory.MISC,
+                        ModNuclearItems.material(NuclearMaterial.EMPTY_URANIUM_HEXAFLUORIDE_CYLINDER).get()
+                )
+                .pattern(" I ")
+                .pattern("I I")
+                .pattern("III")
+                .define('I', ModTags.Items.heavyPlate(Metal.IRON))
+                .unlockedBy("has_iron_heavy_plate", has(ModTags.Items.heavyPlate(Metal.IRON)))
+                .save(consumer, id("crafting/empty_uranium_hexafluoride_cylinder"));
+
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, zirconiumBlend)
+                .requires(zirconiumDust, 2)
+                .requires(ModItems.ingot(Metal.CARBIDE))
+                .unlockedBy("has_zirconium_dust", has(zirconiumDust))
+                .save(consumer, id("crafting/zirconium_alloy_blend"));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, boronBlend)
+                .requires(boronDust, 3)
+                .requires(ModItems.ingot(Metal.CARBIDE))
+                .unlockedBy("has_boron_dust", has(boronDust))
+                .save(consumer, id("crafting/boron_carbide_blend"));
+
+        smelt(consumer, "zirconium_alloy_blend", zirconiumBlend, zirconiumIngot, 1);
+        smelt(consumer, "boron_carbide_blend", boronBlend, boronCarbide, 1);
+        press(
+                consumer,
+                "zirconium_alloy_cladding",
+                Ingredient.of(zirconiumIngot),
+                1,
+                ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_CLADDING).get(),
+                HydraulicPressMode.HEAVY,
+                160
+        );
     }
 
     private void addGasificationRecipes(Consumer<FinishedRecipe> consumer) {

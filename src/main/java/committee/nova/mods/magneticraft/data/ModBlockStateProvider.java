@@ -23,6 +23,7 @@ import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
@@ -62,7 +63,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         for (BaseBlockDefinition definition : BaseBlockDefinition.values()) {
             Block block = ModBlocks.get(definition).get();
-            simpleBlockWithItem(block, cubeAll(block));
+            if (definition == BaseBlockDefinition.URANIUM_ORE) {
+                simpleBlockWithItem(
+                        block,
+                        models().cubeAll(definition.id(), modLoc("block/uranium_ore"))
+                );
+            } else {
+                simpleBlockWithItem(block, cubeAll(block));
+            }
         }
         registerDecorativeFamilies();
 
@@ -261,6 +269,31 @@ final class ModBlockStateProvider extends BlockStateProvider {
             simpleBlockItem(controller, item);
         }
 
+        ModelFile nuclearCasing = models().cubeAll(
+                "nuclear_facility_casing",
+                modLoc("blocks/multiblock_parts/base_side")
+        );
+        simpleBlockWithItem(ModNuclearBlocks.FACILITY_CASING.get(), nuclearCasing);
+        simpleBlockWithItem(
+                ModNuclearBlocks.PROCESS_CORE.get(),
+                models().cubeAll("nuclear_process_core", modLoc("blocks/multiblock_parts/striped"))
+        );
+        simpleBlockWithItem(
+                ModNuclearBlocks.CENTRIFUGE_STAGE.get(),
+                models().cubeAll("centrifuge_stage", modLoc("blocks/multiblock_parts/electric"))
+        );
+        registerNuclearPort(ModNuclearBlocks.ITEM_INPUT_PORT.get(), "nuclear_item_input_port",
+                modLoc("blocks/multiblock_parts/base_side"));
+        registerNuclearPort(ModNuclearBlocks.ITEM_OUTPUT_PORT.get(), "nuclear_item_output_port",
+                modLoc("blocks/multiblock_parts/striped"));
+        registerNuclearPort(ModNuclearBlocks.ELECTRICAL_PORT.get(), "nuclear_electrical_port",
+                modLoc("blocks/multiblock_parts/electric"));
+        ModNuclearBlocks.controllers().forEach((type, holder) -> {
+            ModelFile model = models().cubeAll(type.id(), UNMOUNTED_MULTIBLOCK_TEXTURE);
+            horizontalBlock(holder.get(), ignored -> model);
+            simpleBlockItem(holder.get(), model);
+        });
+
         simpleBlockWithItem(
                 ModAdvancedBlocks.OIL_DEPOSIT.get(),
                 models().cubeAll("oil_deposit", modLoc("blocks/ore_block/oil_source_1"))
@@ -296,6 +329,12 @@ final class ModBlockStateProvider extends BlockStateProvider {
                     .texture("particle", Magneticraft.id("fluid/" + definition.id() + "_still"));
             simpleBlock(ModFluids.get(definition).block().get(), model);
         }
+    }
+
+    private void registerNuclearPort(Block block, String id, ResourceLocation texture) {
+        ModelFile model = models().cubeAll(id, texture);
+        horizontalBlock(block, model);
+        simpleBlockItem(block, model);
     }
 
     private void registerSingleBlockMachineModel(Block block, SingleBlockMachineDefinition definition) {

@@ -624,12 +624,12 @@ class GeneratedDataContractTest {
         assertFalse(Files.exists(ASSETS.resolve("models/item/air_bubble.json")));
         assertFalse(Files.exists(DATA.resolve("loot_tables/blocks/air_bubble.json")));
 
-        assertRecipeDirectory("sluice_box", 16, "magneticraft:sluice_box");
+        assertRecipeDirectory("sluice_box", 17, "magneticraft:sluice_box");
         assertRecipeDirectory("gasification_unit", 28, "magneticraft:gasification_unit");
         assertRecipeDirectory("thermopile", 33, "magneticraft:thermopile");
         assertRecipeDirectory("fluid_fuel", 10, "magneticraft:industrial_combustion_chamber");
         JsonObject sand = readObject(recipe("sluice_box/sand"));
-        assertEquals(9, sand.getAsJsonArray("results").size());
+        assertEquals(10, sand.getAsJsonArray("results").size());
         assertChanceResult(
                 readObject(recipe("sluice_box/galena_rocky_chunk")),
                 "magneticraft:silver_dust",

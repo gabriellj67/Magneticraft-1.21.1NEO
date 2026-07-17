@@ -50,6 +50,8 @@ public final class ModRegistries {
     public static void register(IEventBus modBus) {
         ModBlocks.bootstrap();
         ModItems.bootstrap();
+        ModNuclearItems.bootstrap();
+        ModNuclearBlocks.bootstrap();
         ModFluids.bootstrap();
         ModMachineBlocks.bootstrap();
         ModMachineItems.bootstrap();

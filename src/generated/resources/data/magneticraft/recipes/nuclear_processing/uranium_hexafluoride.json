@@ -1,0 +1,24 @@
+{
+  "type": "magneticraft:nuclear_processing",
+  "duration_ticks": 300,
+  "facility": "uranium_processor",
+  "ingredients": [
+    {
+      "count": 3,
+      "ingredient": {
+        "item": "magneticraft:uranium_concentrate"
+      }
+    },
+    {
+      "ingredient": {
+        "item": "magneticraft:empty_uranium_hexafluoride_cylinder"
+      }
+    }
+  ],
+  "joules_per_tick": 120,
+  "results": [
+    {
+      "item": "magneticraft:uranium_hexafluoride_cylinder"
+    }
+  ]
+}

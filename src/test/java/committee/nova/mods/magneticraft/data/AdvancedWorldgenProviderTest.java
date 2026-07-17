@@ -22,6 +22,7 @@ class AdvancedWorldgenProviderTest {
             "silver_ore",
             "nickel_ore",
             "tin_ore",
+            "uranium_ore",
             "limestone",
             "oil_deposit"
     );
@@ -34,7 +35,8 @@ class AdvancedWorldgenProviderTest {
             Map.entry("zinc_ore", new CountedOreContract("magneticraft:zinc_ore", 7, 6, 0, 65)),
             Map.entry("bauxite_ore", new CountedOreContract("magneticraft:bauxite_ore", 7, 5, 32, 113)),
             Map.entry("nickel_ore", new CountedOreContract("magneticraft:nickel_ore", 5, 4, -24, 41)),
-            Map.entry("tin_ore", new CountedOreContract("magneticraft:tin_ore", 6, 4, -16, 49))
+            Map.entry("tin_ore", new CountedOreContract("magneticraft:tin_ore", 6, 4, -16, 49)),
+            Map.entry("uranium_ore", new CountedOreContract("magneticraft:uranium_ore", 5, 3, -48, 25))
     );
 
     @Test

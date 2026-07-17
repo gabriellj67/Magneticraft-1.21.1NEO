@@ -1,0 +1,12 @@
+{
+  "cladding_failure_temperature_kelvin": 1450.0,
+  "decay_heat_fraction": 0.055,
+  "design_life_ticks": 540000,
+  "enrichment_percent": 2.5,
+  "initial_reactivity": 0.85,
+  "load_follow_rate_per_tick": 0.0025,
+  "schema_version": 1,
+  "temperature_coefficient_per_kelvin": -2.5E-4,
+  "thermal_power_joules_per_tick": 16000.0,
+  "void_coefficient": -0.3
+}

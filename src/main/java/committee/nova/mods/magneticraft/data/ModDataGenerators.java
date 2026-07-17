@@ -63,6 +63,7 @@ public final class ModDataGenerators {
         );
         generator.addProvider(event.includeServer(), ModLootTableProvider.create(output));
         generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
+        generator.addProvider(event.includeServer(), new NuclearDataProvider(output));
         generator.addProvider(event.includeServer(), new AdvancedWorldgenProvider(output));
         generator.addProvider(event.includeServer(), new AdvancedGameTestStructureProvider(output));
     }

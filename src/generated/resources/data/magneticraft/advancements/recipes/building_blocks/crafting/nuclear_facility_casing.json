@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/nuclear_facility_casing"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_zirconium_alloy": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "magneticraft:zirconium_alloy_ingot"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_zirconium_alloy",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/nuclear_facility_casing"
+    ]
+  },
+  "sends_telemetry_event": false
+}

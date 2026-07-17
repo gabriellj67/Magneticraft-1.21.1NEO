@@ -1,0 +1,25 @@
+{
+  "type": "magneticraft:nuclear_processing",
+  "duration_ticks": 600,
+  "facility": "fuel_fabricator",
+  "ingredients": [
+    {
+      "count": 24,
+      "ingredient": {
+        "item": "magneticraft:uranium_dioxide_pellet"
+      }
+    },
+    {
+      "count": 4,
+      "ingredient": {
+        "item": "magneticraft:zirconium_alloy_cladding"
+      }
+    }
+  ],
+  "joules_per_tick": 160,
+  "results": [
+    {
+      "item": "magneticraft:high_enrichment_fuel_assembly"
+    }
+  ]
+}

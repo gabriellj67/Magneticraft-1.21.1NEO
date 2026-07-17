@@ -1,0 +1,26 @@
+{
+  "type": "magneticraft:nuclear_processing",
+  "duration_ticks": 800,
+  "facility": "centrifuge_cascade",
+  "ingredients": [
+    {
+      "ingredient": {
+        "item": "magneticraft:uranium_hexafluoride_cylinder"
+      }
+    }
+  ],
+  "joules_per_tick": 160,
+  "results": [
+    {
+      "count": 2,
+      "item": "magneticraft:low_enriched_uranium"
+    },
+    {
+      "count": 6,
+      "item": "magneticraft:depleted_uranium"
+    },
+    {
+      "item": "magneticraft:empty_uranium_hexafluoride_cylinder"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleBlock;
 import committee.nova.mods.magneticraft.content.network.electric.PoleSegment;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock;
@@ -77,6 +78,9 @@ final class ModBlockLootSubProvider extends BlockLootSubProvider {
                 .map(item -> Block.byItem(item.get()))
                 .filter(block -> block != ModAdvancedBlocks.OIL_DEPOSIT.get())
                 .forEach(this::dropSelf);
+        ModNuclearBlocks.blockItems().stream()
+                .map(item -> Block.byItem(item.get()))
+                .forEach(this::dropSelf);
         dropSelf(ModComputerContent.COMPUTER.get());
         dropSelf(ModComputerContent.MINING_ROBOT.get());
     }
@@ -90,6 +94,7 @@ final class ModBlockLootSubProvider extends BlockLootSubProvider {
                 ModAdvancedBlocks.blockItems().stream()
                         .map(item -> Block.byItem(item.get()))
                         .filter(block -> block != ModAdvancedBlocks.OIL_DEPOSIT.get()),
+                ModNuclearBlocks.blockItems().stream().map(item -> Block.byItem(item.get())),
                 Stream.of(ModComputerContent.COMPUTER.get(), ModComputerContent.MINING_ROBOT.get())
         ).flatMap(stream -> stream)::iterator;
     }

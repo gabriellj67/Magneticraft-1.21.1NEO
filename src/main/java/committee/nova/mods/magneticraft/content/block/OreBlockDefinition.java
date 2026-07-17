@@ -15,7 +15,8 @@ public enum OreBlockDefinition {
             "bauxite", "aluminium", "aluminum"),
     SILVER(BaseBlockDefinition.SILVER_ORE, Metal.SILVER, 4, 0, 2, -48, 16, "silver"),
     NICKEL(BaseBlockDefinition.NICKEL_ORE, Metal.NICKEL, 5, 4, 0, -24, 40, "nickel"),
-    TIN(BaseBlockDefinition.TIN_ORE, Metal.TIN, 6, 4, 0, -16, 48, "tin");
+    TIN(BaseBlockDefinition.TIN_ORE, Metal.TIN, 6, 4, 0, -16, 48, "tin"),
+    URANIUM(BaseBlockDefinition.URANIUM_ORE, null, 5, 3, 0, -48, 24, "uranium");
 
     private final BaseBlockDefinition block;
     private final Metal processedMetal;

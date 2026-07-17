@@ -4,6 +4,16 @@
     "magneticraft:tungsten_ore",
     "magneticraft:silver_ore",
     "magneticraft:nickel_ore",
-    "magneticraft:carbide_block"
+    "magneticraft:uranium_ore",
+    "magneticraft:carbide_block",
+    "magneticraft:nuclear_facility_casing",
+    "magneticraft:nuclear_process_core",
+    "magneticraft:centrifuge_stage",
+    "magneticraft:nuclear_item_input_port",
+    "magneticraft:nuclear_item_output_port",
+    "magneticraft:nuclear_electrical_port",
+    "magneticraft:uranium_processor",
+    "magneticraft:centrifuge_cascade",
+    "magneticraft:fuel_fabricator"
   ]
 }

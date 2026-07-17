@@ -16,8 +16,8 @@
       "item": "minecraft:gold_nugget"
     },
     {
-      "chance": 0.01,
-      "item": "minecraft:quartz"
+      "chance": 0.02,
+      "item": "magneticraft:zircon_sand"
     }
   ]
 }

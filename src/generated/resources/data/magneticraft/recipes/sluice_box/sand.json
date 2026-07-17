@@ -57,6 +57,12 @@
       "stack": {
         "item": "minecraft:gold_nugget"
       }
+    },
+    {
+      "chance": 0.02,
+      "stack": {
+        "item": "magneticraft:zircon_sand"
+      }
     }
   ]
 }

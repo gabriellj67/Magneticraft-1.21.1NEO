@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/zirconium_alloy_blend"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_zirconium_dust": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "magneticraft:zirconium_dust"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_zirconium_dust",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/zirconium_alloy_blend"
+    ]
+  },
+  "sends_telemetry_event": false
+}

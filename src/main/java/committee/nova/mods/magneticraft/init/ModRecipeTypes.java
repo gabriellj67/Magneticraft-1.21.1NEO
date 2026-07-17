@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Gasif
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.SluiceRecipe;
 import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.ThermopileRecipe;
 import committee.nova.mods.magneticraft.content.recipe.TieredShapedRecipe;
+import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearProcessRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.PolymerizerRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
@@ -25,6 +26,10 @@ import java.util.Set;
 public final class ModRecipeTypes {
     public static final RegistryObject<RecipeSerializer<TieredShapedRecipe>> TIERED_SHAPED_SERIALIZER =
             ModRegistries.RECIPE_SERIALIZERS.register("tiered_shaped", TieredShapedRecipe.Serializer::new);
+    public static final RegistryObject<RecipeType<NuclearProcessRecipe>> NUCLEAR_PROCESSING_TYPE =
+            type("nuclear_processing");
+    public static final RegistryObject<RecipeSerializer<NuclearProcessRecipe>> NUCLEAR_PROCESSING_SERIALIZER =
+            ModRegistries.RECIPE_SERIALIZERS.register("nuclear_processing", NuclearProcessRecipe.Serializer::new);
     private static final Set<MultiblockDefinition> ADVANCED_PROCESSING_MACHINES = EnumSet.of(
             MultiblockDefinition.GRINDER,
             MultiblockDefinition.SIEVE,

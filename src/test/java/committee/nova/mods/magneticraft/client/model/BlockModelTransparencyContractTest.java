@@ -41,7 +41,7 @@ class BlockModelTransparencyContractTest {
                     .sorted()
                     .toList();
         }
-        assertEquals(142, blockstates.size(), "all registered blocks must remain in the generated model audit");
+        assertEquals(152, blockstates.size(), "all registered blocks must remain in the generated model audit");
 
         Set<String> rootModels = new TreeSet<>();
         for (Path blockstate : blockstates) {

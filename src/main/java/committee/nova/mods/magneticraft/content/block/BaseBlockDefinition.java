@@ -13,6 +13,7 @@ public enum BaseBlockDefinition {
     SILVER_ORE("silver_ore", "Silver Ore", "银矿石", Category.ORE, MiningTier.IRON),
     NICKEL_ORE("nickel_ore", "Pentlandite Ore", "镍黄铁矿石", Category.ORE, MiningTier.IRON),
     TIN_ORE("tin_ore", "Cassiterite Ore", "锡石矿石", Category.ORE, MiningTier.STONE),
+    URANIUM_ORE("uranium_ore", "Uranium Ore", "铀矿石", Category.ORE, MiningTier.IRON),
     LEAD_BLOCK("lead_block", "Lead Block", "铅块", Category.STORAGE, MiningTier.NONE),
     COBALT_BLOCK("cobalt_block", "Cobalt Block", "钴块", Category.STORAGE, MiningTier.NONE),
     TUNGSTEN_BLOCK("tungsten_block", "Tungsten Block", "钨块", Category.STORAGE, MiningTier.NONE),

@@ -11,6 +11,8 @@ import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
+import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
@@ -21,6 +23,8 @@ import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
+import committee.nova.mods.magneticraft.init.ModNuclearItems;
+import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.LanguageProvider;
 
@@ -63,6 +67,49 @@ final class ModLanguageProvider extends LanguageProvider {
         add("electrical_rating.magneticraft.standard", chinese ? "标准" : "Standard");
         add("electrical_rating.magneticraft.heavy", chinese ? "重载" : "Heavy");
         add(ModCreativeTabs.TRANSLATION_KEY, chinese ? "磁场工艺" : "Magneticraft");
+        ModNuclearItems.materials().forEach((material, holder) -> add(
+                holder.get(),
+                chinese ? material.chineseName() : material.englishName()
+        ));
+        ModNuclearItems.fuelAssemblies().forEach((grade, holder) -> add(
+                holder.get(),
+                chinese ? grade.chineseName() : grade.englishName()
+        ));
+        add(ModNuclearBlocks.FACILITY_CASING.get(), chinese ? "\u6838\u8bbe\u65bd\u5916\u58f3" : "Nuclear Facility Casing");
+        add(ModNuclearBlocks.PROCESS_CORE.get(), chinese ? "\u6838\u5de5\u827a\u5904\u7406\u5355\u5143" : "Nuclear Process Core");
+        add(ModNuclearBlocks.CENTRIFUGE_STAGE.get(), chinese ? "\u79bb\u5fc3\u7ea7" : "Centrifuge Stage");
+        add(ModNuclearBlocks.ITEM_INPUT_PORT.get(), chinese ? "\u6838\u8bbe\u65bd\u7269\u54c1\u8f93\u5165\u7aef\u53e3" : "Nuclear Item Input Port");
+        add(ModNuclearBlocks.ITEM_OUTPUT_PORT.get(), chinese ? "\u6838\u8bbe\u65bd\u7269\u54c1\u8f93\u51fa\u7aef\u53e3" : "Nuclear Item Output Port");
+        add(ModNuclearBlocks.ELECTRICAL_PORT.get(), chinese ? "\u6838\u8bbe\u65bd\u7535\u6c14\u7aef\u53e3" : "Nuclear Electrical Port");
+        add(ModNuclearBlocks.controller(committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType.URANIUM_PROCESSOR).get(),
+                chinese ? "\u94c0\u6d78\u53d6\u8f6c\u5316\u8bbe\u65bd" : "Uranium Processing Facility");
+        add(ModNuclearBlocks.controller(committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType.CENTRIFUGE_CASCADE).get(),
+                chinese ? "\u94c0\u79bb\u5fc3\u7ea7\u8054" : "Uranium Centrifuge Cascade");
+        add(ModNuclearBlocks.controller(committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType.FUEL_FABRICATOR).get(),
+                chinese ? "\u6838\u71c3\u6599\u5236\u9020\u8bbe\u65bd" : "Nuclear Fuel Fabrication Facility");
+        add("gui.magneticraft.nuclear_facility.structure", chinese ? "\u7ed3\u6784\uff1a%s x %s x %s\uff08%s\uff09" : "Structure: %s x %s x %s (%s)");
+        add("gui.magneticraft.nuclear_facility.direction", chinese ? "\u671d\u5411\uff1a%s" : "Facing: %s");
+        add("gui.magneticraft.nuclear_facility.ports", chinese ? "\u7aef\u53e3 I/O/J\uff1a%s / %s / %s" : "Ports I/O/J: %s / %s / %s");
+        add("gui.magneticraft.nuclear_facility.columns", chinese ? "\u6709\u6548\u5904\u7406\u5217\uff1a%s" : "Active process columns: %s");
+        add("gui.magneticraft.nuclear_facility.input", chinese ? "\u8f93\u5165" : "Input");
+        add("gui.magneticraft.nuclear_facility.output", chinese ? "\u8f93\u51fa" : "Output");
+        add("gui.magneticraft.nuclear_facility.port_present", chinese ? "\u5df2\u8fde\u63a5" : "present");
+        add("gui.magneticraft.nuclear_facility.port_missing", chinese ? "\u7f3a\u5931" : "missing");
+        add("message.magneticraft.nuclear_facility.invalid", chinese ? "\u6838\u8bbe\u65bd\u7ed3\u6784\u65e0\u6548\uff1a%s @ %s" : "Invalid nuclear facility: %s @ %s");
+        add("message.magneticraft.nuclear_facility.reason.unloaded", chinese ? "\u7ed3\u6784\u533a\u5757\u672a\u52a0\u8f7d" : "structure chunk is unloaded");
+        add("message.magneticraft.nuclear_facility.reason.port_facing", chinese ? "\u7aef\u53e3\u671d\u5411\u9519\u8bef" : "port faces the wrong direction");
+        add("message.magneticraft.nuclear_facility.reason.invalid_depth", chinese ? "\u8bbe\u65bd\u6df1\u5ea6\u8d85\u51fa\u8303\u56f4" : "facility depth is outside its range");
+        for (committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityPartRole role
+                : committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityPartRole.values()) {
+            add("message.magneticraft.nuclear_facility.reason.expected_" + role.name().toLowerCase(java.util.Locale.ROOT),
+                    chinese ? "\u7ed3\u6784\u90e8\u4ef6\u4e0d\u5339\u914d\uff1a" + role.name() : "expected " + role.name().toLowerCase(java.util.Locale.ROOT));
+        }
+        add("item.magneticraft.fuel_assembly.burnup", chinese ? "燃耗：%s%%" : "Burnup: %s%%");
+        add("item.magneticraft.fuel_assembly.cladding", chinese ? "包壳完整度：%s%%" : "Cladding: %s%%");
+        add("item.magneticraft.fuel_assembly.temperature", chinese ? "燃料温度：%s K" : "Fuel temperature: %s K");
+        add("item.magneticraft.fuel_assembly.invalid_state", chinese
+                ? "燃料状态数据无效；禁止装堆"
+                : "Invalid fuel state; reactor loading is blocked");
         add(ModMachineBlocks.CRUSHING_TABLE.get(), chinese ? "压碎台" : "Crushing Table");
         add(ModMachineBlocks.BATTERY.get(), chinese ? "电池箱" : "Battery Box");
         add(ModMachineBlocks.GRATE.get(), chinese ? "铁格栅" : "Iron Grate");

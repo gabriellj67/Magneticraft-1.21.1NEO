@@ -4,11 +4,14 @@ import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.computer.FloppyDiskVisualVariant;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.item.ElectricalFuseVisualVariant;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
+import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
+import committee.nova.mods.magneticraft.init.ModNuclearItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
@@ -30,6 +33,7 @@ final class ModItemModelProvider extends ItemModelProvider {
         ModItems.creativeItems().stream()
                 .map(RegistryObject::get)
                 .forEach(this::basicItem);
+        registerNuclearItemModels();
         ModMachineItems.creativeItems().stream()
                 .map(RegistryObject::get)
                 .forEach(this::basicItem);
@@ -53,6 +57,31 @@ final class ModItemModelProvider extends ItemModelProvider {
                     .fluid(family.source().get())
                     .end();
         }
+    }
+
+    private void registerNuclearItemModels() {
+        ModNuclearItems.materials().forEach((material, holder) -> withExistingParent(
+                holder.getId().getPath(),
+                mcLoc("item/generated")
+        ).texture("layer0", nuclearMaterialTexture(material)));
+        for (NuclearFuelGrade grade : NuclearFuelGrade.values()) {
+            withExistingParent(grade.id(), mcLoc("item/generated"))
+                    .texture("layer0", modLoc("item/electric_piston"));
+        }
+    }
+
+    private ResourceLocation nuclearMaterialTexture(NuclearMaterial material) {
+        return switch (material) {
+            case URANIUM_DUST, URANIUM_CONCENTRATE, LOW_ENRICHED_URANIUM, DEPLETED_URANIUM,
+                    ZIRCON_SAND, ZIRCONIUM_DUST, ZIRCONIUM_ALLOY_BLEND, BORAX, BORON_DUST,
+                    BORON_CARBIDE_BLEND, BORON_CARBIDE ->
+                    modLoc("item/aluminium_dust");
+            case EMPTY_URANIUM_HEXAFLUORIDE_CYLINDER, URANIUM_HEXAFLUORIDE_CYLINDER ->
+                    modLoc("item/low_voltage_battery");
+            case URANIUM_DIOXIDE_PELLET -> mcLoc("item/clay_ball");
+            case ZIRCONIUM_ALLOY_INGOT -> modLoc("item/carbide_ingot");
+            case ZIRCONIUM_ALLOY_CLADDING -> modLoc("item/copper_wire_coil");
+        };
     }
 
     private void registerFloppyDiskModels() {

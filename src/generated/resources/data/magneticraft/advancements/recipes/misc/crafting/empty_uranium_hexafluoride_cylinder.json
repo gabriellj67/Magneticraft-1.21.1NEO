@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_iron_heavy_plate": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "magneticraft:heavy_plates/iron"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/empty_uranium_hexafluoride_cylinder"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_iron_heavy_plate",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/empty_uranium_hexafluoride_cylinder"
+    ]
+  },
+  "sends_telemetry_event": false
+}

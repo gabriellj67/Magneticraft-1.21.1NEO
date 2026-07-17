@@ -7,10 +7,13 @@ import committee.nova.mods.magneticraft.content.item.CraftingComponent;
 import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.material.Metal;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
+import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModItems;
 import committee.nova.mods.magneticraft.init.ModTags;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
+import committee.nova.mods.magneticraft.init.ModNuclearItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
@@ -49,6 +52,11 @@ final class ModItemTagsProvider extends ItemTagsProvider {
         tag(Tags.Items.DUSTS).add(sulfur);
         tag(ModTags.Items.PLASTIC_SHEETS).add(ModItems.PLASTIC_SHEET.get());
         tag(ModTags.Items.RUBBER).add(ModItems.RUBBER.get());
+        tag(ModTags.Items.URANIUM_DUSTS).add(ModNuclearItems.material(NuclearMaterial.URANIUM_DUST).get());
+        tag(ModTags.Items.ZIRCONIUM_DUSTS).add(ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_DUST).get());
+        tag(ModTags.Items.BORON_DUSTS).add(ModNuclearItems.material(NuclearMaterial.BORON_DUST).get());
+        ModNuclearItems.fuelAssemblies().forEach((grade, holder) ->
+                tag(ModTags.Items.NUCLEAR_FUEL_ASSEMBLIES).add(holder.get()));
 
         tag(ModTags.Items.HAMMERS).add(
                 ModItems.hammer(HammerType.STONE).get(),

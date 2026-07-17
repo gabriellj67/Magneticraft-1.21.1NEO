@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.init.ModComputerContent;
 import committee.nova.mods.magneticraft.init.ModTags;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
@@ -131,6 +132,11 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
             Block block = Block.byItem(item.get());
             tag(BlockTags.MINEABLE_WITH_PICKAXE).add(block);
             tag(BlockTags.NEEDS_STONE_TOOL).add(block);
+        });
+        ModNuclearBlocks.blockItems().forEach(item -> {
+            Block block = Block.byItem(item.get());
+            tag(BlockTags.MINEABLE_WITH_PICKAXE).add(block);
+            tag(BlockTags.NEEDS_IRON_TOOL).add(block);
         });
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 ModComputerContent.COMPUTER.get(),

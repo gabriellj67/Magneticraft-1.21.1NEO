@@ -80,7 +80,7 @@ public final class SingleBlockMachineGameTests {
                 "Permanent magnet registration is missing"
         );
         helper.assertTrue(
-                helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipeTypes.SLUICE_TYPE.get()).size() == 16,
+                helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipeTypes.SLUICE_TYPE.get()).size() == 17,
                 "Sluice recipe inventory is incomplete"
         );
         helper.assertTrue(

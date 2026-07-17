@@ -1,0 +1,20 @@
+{
+  "type": "magneticraft:nuclear_processing",
+  "duration_ticks": 200,
+  "facility": "uranium_processor",
+  "ingredients": [
+    {
+      "count": 4,
+      "ingredient": {
+        "item": "magneticraft:uranium_dust"
+      }
+    }
+  ],
+  "joules_per_tick": 80,
+  "results": [
+    {
+      "count": 3,
+      "item": "magneticraft:uranium_concentrate"
+    }
+  ]
+}

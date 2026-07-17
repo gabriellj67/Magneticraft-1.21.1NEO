@@ -42,6 +42,7 @@ public final class ClientSetup {
             MenuScreens.register(ModMenus.MINING_ROBOT.get(), ProgrammableScreen::new);
             MenuScreens.register(ModMenus.ELECTRICAL_DEVICE.get(), ElectricalDeviceScreen::new);
             MenuScreens.register(ModMenus.PRESSURE_TANK.get(), PressureTankScreen::new);
+            MenuScreens.register(ModMenus.NUCLEAR_FACILITY.get(), NuclearFacilityScreen::new);
             ItemProperties.register(
                     ModComputerContent.FLOPPY_DISK.get(),
                     Magneticraft.id("floppy_variant"),

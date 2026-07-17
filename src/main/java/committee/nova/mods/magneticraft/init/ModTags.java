@@ -55,6 +55,10 @@ public final class ModTags {
         public static final TagKey<Item> SULFUR_DUST = forge("dusts/sulfur");
         public static final TagKey<Item> PLASTIC_SHEETS = forge("plates/plastic");
         public static final TagKey<Item> RUBBER = forge("rubber");
+        public static final TagKey<Item> NUCLEAR_FUEL_ASSEMBLIES = mod("nuclear_fuel_assemblies");
+        public static final TagKey<Item> URANIUM_DUSTS = forge("dusts/uranium");
+        public static final TagKey<Item> ZIRCONIUM_DUSTS = forge("dusts/zirconium");
+        public static final TagKey<Item> BORON_DUSTS = forge("dusts/boron");
 
         private Items() {
         }

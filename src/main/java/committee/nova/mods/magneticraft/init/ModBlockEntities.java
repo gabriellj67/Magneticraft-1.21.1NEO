@@ -9,6 +9,8 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityControllerBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityPortBlockEntity;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
@@ -40,6 +42,26 @@ public final class ModBlockEntities {
             SINGLE_BLOCK_MACHINES = new EnumMap<>(SingleBlockMachineDefinition.class);
     private static final Map<MultiblockDefinition, RegistryObject<BlockEntityType<AdvancedMultiblockBlockEntity>>>
             ADVANCED_MULTIBLOCKS = new EnumMap<>(MultiblockDefinition.class);
+    public static final RegistryObject<BlockEntityType<NuclearFacilityControllerBlockEntity>>
+            NUCLEAR_FACILITY_CONTROLLER = ModRegistries.BLOCK_ENTITY_TYPES.register(
+            "nuclear_facility_controller",
+            () -> BlockEntityType.Builder.of(
+                    NuclearFacilityControllerBlockEntity::new,
+                    ModNuclearBlocks.controllers().values().stream()
+                            .map(RegistryObject::get)
+                            .toArray(net.minecraft.world.level.block.Block[]::new)
+            ).build(null)
+    );
+    public static final RegistryObject<BlockEntityType<NuclearFacilityPortBlockEntity>>
+            NUCLEAR_FACILITY_PORT = ModRegistries.BLOCK_ENTITY_TYPES.register(
+            "nuclear_facility_port",
+            () -> BlockEntityType.Builder.of(
+                    NuclearFacilityPortBlockEntity::new,
+                    ModNuclearBlocks.ITEM_INPUT_PORT.get(),
+                    ModNuclearBlocks.ITEM_OUTPUT_PORT.get(),
+                    ModNuclearBlocks.ELECTRICAL_PORT.get()
+            ).build(null)
+    );
     public static final RegistryObject<BlockEntityType<MultiblockGapBlockEntity>> MULTIBLOCK_GAP =
             ModRegistries.BLOCK_ENTITY_TYPES.register(
                     "multiblock_gap",

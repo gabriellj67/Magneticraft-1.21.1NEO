@@ -50,7 +50,7 @@ class ElectricalDataParserTest {
         ElectricalDataSnapshot snapshot = result.snapshot().orElseThrow();
         assertEquals(4, snapshot.voltageTiers().size());
         assertEquals(3, snapshot.transformerProfiles().size());
-        assertEquals(24, snapshot.machineProfiles().size());
+        assertEquals(25, snapshot.machineProfiles().size());
         assertEquals(120.0, snapshot.voltageTier(LOW).orElseThrow().nominalVoltage());
         assertEquals(0xD98245, snapshot.voltageTier(LOW).orElseThrow().colorRgb());
         assertEquals(16_000_000L, snapshot.voltageTier(HIGH).orElseThrow().batteryCapacityJoules());

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "magneticraft:boron_dust"
+    },
+    {
+      "item": "magneticraft:boron_dust"
+    },
+    {
+      "item": "magneticraft:boron_dust"
+    },
+    {
+      "item": "magneticraft:carbide_ingot"
+    }
+  ],
+  "result": {
+    "item": "magneticraft:boron_carbide_blend"
+  }
+}

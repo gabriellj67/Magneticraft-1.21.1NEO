@@ -43,6 +43,8 @@ public final class ModCreativeTabs {
                         ModAdvancedBlocks.blockItems().stream().map(RegistryObject::get)
                                 .forEach(item -> acceptAdvancedItem(output, item));
                         ModItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModNuclearItems.creativeItems().stream().map(RegistryObject::get).forEach(output::accept);
+                        ModNuclearBlocks.blockItems().stream().map(RegistryObject::get).forEach(output::accept);
                         ModMachineItems.creativeItems().stream()
                                 .map(RegistryObject::get)
                                 .forEach(item -> acceptMachineItem(output, item));
