@@ -13,6 +13,7 @@ import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.material.Metal;
 import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearControllerUpgrade;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType;
@@ -295,6 +296,31 @@ final class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_containment", has(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get()))
                 .save(consumer, id("crafting/pressurized_water_reactor_controller"));
 
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,
+                        ModNuclearItems.controllerUpgrade(NuclearControllerUpgrade.PROTECTION).get())
+                .requires(Items.COMPARATOR)
+                .requires(Items.QUARTZ)
+                .requires(component(CraftingComponent.FINE_COPPER_WIRE))
+                .unlockedBy("has_reactor_controller", has(ModNuclearBlocks.REACTOR_CONTROLLER.get()))
+                .save(consumer, id("crafting/reactor_protection_upgrade"));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,
+                        ModNuclearItems.controllerUpgrade(NuclearControllerUpgrade.REGULATION).get())
+                .requires(ModNuclearItems.controllerUpgrade(NuclearControllerUpgrade.PROTECTION).get())
+                .requires(Items.REPEATER)
+                .requires(Items.CLOCK)
+                .unlockedBy("has_protection_upgrade",
+                        has(ModNuclearItems.controllerUpgrade(NuclearControllerUpgrade.PROTECTION).get()))
+                .save(consumer, id("crafting/reactor_regulation_upgrade"));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC,
+                        ModNuclearItems.controllerUpgrade(NuclearControllerUpgrade.LOAD_FOLLOWING).get())
+                .requires(ModNuclearItems.controllerUpgrade(NuclearControllerUpgrade.REGULATION).get())
+                .requires(Items.OBSERVER)
+                .requires(Items.LAPIS_LAZULI)
+                .unlockedBy("has_regulation_upgrade",
+                        has(ModNuclearItems.controllerUpgrade(NuclearControllerUpgrade.REGULATION).get()))
+                .save(consumer, id("crafting/reactor_load_following_upgrade"));
+
+        ItemLike[] fuelChannelMarkers = {Items.LIME_DYE, Items.YELLOW_DYE, Items.RED_DYE};
         for (NuclearFuelGrade grade : NuclearFuelGrade.values()) {
             NuclearReactorColumnType column = switch (grade) {
                 case LOW_ENRICHMENT -> NuclearReactorColumnType.FUEL_LOW;
@@ -304,8 +330,10 @@ final class ModRecipeProvider extends RecipeProvider {
             ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS,
                             ModNuclearBlocks.reactorColumn(column).get())
                     .requires(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get())
-                    .requires(ModNuclearItems.fuelAssembly(grade).get())
-                    .unlockedBy("has_fuel_assembly", has(ModNuclearItems.fuelAssembly(grade).get()))
+                    .requires(ModNuclearItems.material(NuclearMaterial.URANIUM_DIOXIDE_PELLET).get())
+                    .requires(fuelChannelMarkers[grade.ordinal()])
+                    .unlockedBy("has_fuel_pellet",
+                            has(ModNuclearItems.material(NuclearMaterial.URANIUM_DIOXIDE_PELLET).get()))
                     .save(consumer, id("crafting/reactor_" + column.name().toLowerCase(java.util.Locale.ROOT)));
         }
         NuclearReactorColumnType[] controls = {

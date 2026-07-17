@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.init;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyItem;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
 import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearControllerUpgrade;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -18,6 +19,8 @@ public final class ModNuclearItems {
             new EnumMap<>(NuclearMaterial.class);
     private static final Map<NuclearFuelGrade, RegistryObject<FuelAssemblyItem>> FUEL_ASSEMBLIES =
             new EnumMap<>(NuclearFuelGrade.class);
+    private static final Map<NuclearControllerUpgrade, RegistryObject<Item>> CONTROLLER_UPGRADES =
+            new EnumMap<>(NuclearControllerUpgrade.class);
     private static final List<RegistryObject<? extends Item>> CREATIVE_ITEMS = new ArrayList<>();
 
     static {
@@ -35,6 +38,12 @@ public final class ModNuclearItems {
                     () -> new FuelAssemblyItem(grade)
             );
             FUEL_ASSEMBLIES.put(grade, item);
+            CREATIVE_ITEMS.add(item);
+        }
+        for (NuclearControllerUpgrade upgrade : NuclearControllerUpgrade.values()) {
+            RegistryObject<Item> item = ModRegistries.ITEMS.register(
+                    upgrade.id(), () -> new Item(new Item.Properties().stacksTo(1)));
+            CONTROLLER_UPGRADES.put(upgrade, item);
             CREATIVE_ITEMS.add(item);
         }
     }
@@ -67,6 +76,18 @@ public final class ModNuclearItems {
 
     public static Map<NuclearFuelGrade, RegistryObject<FuelAssemblyItem>> fuelAssemblies() {
         return Collections.unmodifiableMap(FUEL_ASSEMBLIES);
+    }
+
+    public static RegistryObject<Item> controllerUpgrade(NuclearControllerUpgrade upgrade) {
+        RegistryObject<Item> item = CONTROLLER_UPGRADES.get(upgrade);
+        if (item == null) {
+            throw new IllegalArgumentException("No controller upgrade registered for " + upgrade);
+        }
+        return item;
+    }
+
+    public static Map<NuclearControllerUpgrade, RegistryObject<Item>> controllerUpgrades() {
+        return Collections.unmodifiableMap(CONTROLLER_UPGRADES);
     }
 
     public static List<RegistryObject<? extends Item>> creativeItems() {

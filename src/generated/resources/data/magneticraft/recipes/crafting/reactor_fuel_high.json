@@ -6,7 +6,10 @@
       "item": "magneticraft:reactor_column_segment"
     },
     {
-      "item": "magneticraft:high_enrichment_fuel_assembly"
+      "item": "magneticraft:uranium_dioxide_pellet"
+    },
+    {
+      "item": "minecraft:red_dye"
     }
   ],
   "result": {

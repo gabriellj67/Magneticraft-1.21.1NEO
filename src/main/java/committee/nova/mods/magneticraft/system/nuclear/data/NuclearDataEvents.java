@@ -15,10 +15,12 @@ public final class NuclearDataEvents {
     @SubscribeEvent
     public static void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(NuclearDataReloadListener.INSTANCE);
+        event.addListener(ReactorParameterReloadListener.INSTANCE);
     }
 
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         NuclearDataRegistry.INSTANCE.reset();
+        ReactorParameterRegistry.INSTANCE.reset();
     }
 }

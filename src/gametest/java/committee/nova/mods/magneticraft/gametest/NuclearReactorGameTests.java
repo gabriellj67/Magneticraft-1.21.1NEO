@@ -4,17 +4,29 @@ import com.mojang.authlib.GameProfile;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorColumnCoordinate;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorRodGroup;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearControllerUpgrade;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorAction;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorColumnBlock;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorControllerBlock;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorControllerBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPortBlock;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPortBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorOperatingState;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorInterlock;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorControlMode;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorStructure;
 import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
+import committee.nova.mods.magneticraft.init.ModNuclearItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.gametest.GameTestHolder;
@@ -41,20 +53,7 @@ public final class NuclearReactorGameTests {
         Direction facing = Direction.NORTH;
         BlockPos controllerPosition = helper.absolutePos(new BlockPos(8, 2, 8));
         Map<ReactorColumnCoordinate, NuclearReactorColumnType> columns = columns(width, length);
-        for (int y = 0; y < height; y++) {
-            for (int z = 0; z < length; z++) {
-                for (int x = 0; x < width; x++) {
-                    NuclearReactorStructure.ExpectedPart expected = NuclearReactorStructure.expectedPart(
-                            width, length, height, x, y, z, columns, facing);
-                    BlockPos position = NuclearReactorStructure.worldPosition(
-                            controllerPosition, facing, width, x, y, z);
-                    helper.getLevel().setBlock(position, state(expected), Block.UPDATE_ALL);
-                }
-            }
-        }
-        helper.assertTrue(helper.getLevel().getBlockEntity(controllerPosition)
-                        instanceof NuclearReactorControllerBlockEntity,
-                "Reactor controller block entity was not created");
+        buildReactor(helper, controllerPosition, width, length, height, facing, columns);
         NuclearReactorControllerBlockEntity controller =
                 (NuclearReactorControllerBlockEntity) helper.getLevel().getBlockEntity(controllerPosition);
         ServerPlayer operator = operator(helper, controllerPosition);
@@ -77,6 +76,177 @@ public final class NuclearReactorGameTests {
                     "Controller block state remained formed after structure damage");
             helper.succeed();
         });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 160)
+    public static void reactorControlsConsumeNativeJAndStationLossScramsWithoutErasingFuel(GameTestHelper helper) {
+        int width = 7;
+        int length = 7;
+        int height = 7;
+        Direction facing = Direction.NORTH;
+        BlockPos controllerPosition = helper.absolutePos(new BlockPos(8, 2, 8));
+        Map<ReactorColumnCoordinate, NuclearReactorColumnType> layout = columns(width, length);
+        buildReactor(helper, controllerPosition, width, length, height, facing, layout);
+        NuclearReactorControllerBlockEntity controller =
+                (NuclearReactorControllerBlockEntity) helper.getLevel().getBlockEntity(controllerPosition);
+        ServerPlayer owner = operator(helper, controllerPosition);
+        helper.assertTrue(controller.tryForm(owner), "Complete variable reactor did not form");
+
+        BlockPos electricalPosition = controller.snapshot().orElseThrow().ports()
+                .get(committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortType.ELECTRICAL);
+        helper.assertTrue(helper.getLevel().getBlockEntity(electricalPosition)
+                        instanceof NuclearReactorPortBlockEntity,
+                "Claimed electrical penetration has no reactor port entity");
+        NuclearReactorPortBlockEntity electrical =
+                (NuclearReactorPortBlockEntity) helper.getLevel().getBlockEntity(electricalPosition);
+        helper.assertTrue(electrical.electricity() != null,
+                "Electrical penetration did not expose the native-J module");
+        electrical.electricity().node().setEnergyJoules(20_000.0D);
+
+        ReactorColumnCoordinate fuelCoordinate = new ReactorColumnCoordinate(0, 0);
+        owner.setItemInHand(InteractionHand.MAIN_HAND,
+                new ItemStack(ModNuclearItems.fuelAssembly(NuclearFuelGrade.STANDARD_ENRICHMENT).get()));
+        helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                        NuclearReactorAction.Type.LOAD_FUEL_FROM_HAND,
+                        null, null, fuelCoordinate, 0, false)),
+                "Owner could not load a matching stateful fuel assembly");
+        owner.setItemInHand(InteractionHand.MAIN_HAND,
+                new ItemStack(ModNuclearItems.controllerUpgrade(NuclearControllerUpgrade.REGULATION).get()));
+        helper.assertTrue(controller.applyAction(owner,
+                        NuclearReactorAction.simple(NuclearReactorAction.Type.INSTALL_UPGRADE)),
+                "Closed-loop regulation upgrade was not installed");
+
+        double requiredFlow = controller.estimate().requiredCoolantFlowMilliBucketsPerTick();
+        helper.onEachTick(() -> controller.reportCoolantFlow(requiredFlow));
+        helper.runAfterDelay(3, () -> {
+            helper.assertTrue(controller.stationPowerAvailable(),
+                    "Charged electrical port did not supply reactor station service");
+            ServerPlayer intruder = operator(helper, controllerPosition);
+            helper.assertTrue(!controller.applyAction(intruder,
+                            NuclearReactorAction.simple(NuclearReactorAction.Type.START)),
+                    "Non-owner bypassed reactor control permissions");
+            helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                            NuclearReactorAction.Type.SET_OVERRIDE, null, null, null, 1, false)),
+                    "Engineering override confirmation was not armed");
+            helper.assertTrue(!controller.engineeringOverride(),
+                    "Engineering override enabled without the second confirmation");
+            helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                            NuclearReactorAction.Type.SET_OVERRIDE, null, null, null, 1, true)),
+                    "Owner confirmation did not enable engineering override");
+            helper.assertTrue(controller.lastOverrideOperator().orElseThrow().equals(owner.getUUID()),
+                    "Confirmed engineering override did not retain its operator audit record");
+            helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                            NuclearReactorAction.Type.SET_ROD_GROUP,
+                            ReactorRodGroup.A, null, null, 500, false)),
+                    "Rod group A did not accept its independent insertion command");
+            helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                            NuclearReactorAction.Type.SET_MODE,
+                            null, ReactorControlMode.POWER, null, 0, false)),
+                    "Regulation upgrade did not unlock closed-loop power control");
+            helper.assertTrue(controller.applyAction(owner,
+                            NuclearReactorAction.simple(NuclearReactorAction.Type.START)),
+                    "Powered and cooled reactor did not enter startup");
+
+            helper.runAfterDelay(10, () -> {
+                double burnup = controller.fuelState(fuelCoordinate).orElseThrow().burnupFraction();
+                helper.assertTrue(burnup > 0.0D, "Running reactor did not advance per-column burnup");
+                helper.assertTrue(controller.runtime().decayHeatJoulesPerTick() > 0.0D,
+                        "Running reactor did not accumulate durable decay heat");
+                helper.assertTrue(controller.rodInsertion(ReactorRodGroup.A) < 0.5D,
+                        "Closed-loop power control did not adjust the commanded rod group");
+                electrical.electricity().node().setEnergyJoules(0.0D);
+                helper.runAfterDelay(2, () -> {
+                    helper.assertTrue(controller.operatingState() == ReactorOperatingState.SCRAMMED,
+                            "Station-service loss did not cause an immediate SCRAM");
+                    helper.assertTrue("station_power".equals(controller.scramReason()),
+                            "Station-service SCRAM did not retain its deterministic reason");
+                    helper.assertTrue(!controller.engineeringOverride(),
+                            "SCRAM did not clear the visible engineering override");
+                    helper.assertTrue(controller.rodInsertion(ReactorRodGroup.A) == 1.0D,
+                            "SCRAM did not fully insert rod group A");
+                    helper.assertTrue(controller.fuelState(fuelCoordinate).orElseThrow()
+                                    .burnupFraction() >= burnup,
+                            "SCRAM erased the loaded assembly burnup state");
+                    helper.assertTrue(controller.runtime().decayHeatJoulesPerTick() > 0.0D,
+                            "SCRAM incorrectly erased decay heat");
+                    helper.succeed();
+                });
+            });
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void reactorRuntimeNbtRoundTripsAndFutureSchemaFailsSafeWithoutDataLoss(GameTestHelper helper) {
+        int width = 7;
+        int length = 7;
+        int height = 7;
+        Direction facing = Direction.NORTH;
+        BlockPos controllerPosition = helper.absolutePos(new BlockPos(8, 2, 8));
+        buildReactor(helper, controllerPosition, width, length, height, facing, columns(width, length));
+        NuclearReactorControllerBlockEntity controller =
+                (NuclearReactorControllerBlockEntity) helper.getLevel().getBlockEntity(controllerPosition);
+        ServerPlayer owner = operator(helper, controllerPosition);
+        helper.assertTrue(controller.tryForm(owner), "Complete variable reactor did not form");
+
+        ReactorColumnCoordinate coordinate = new ReactorColumnCoordinate(0, 0);
+        owner.setItemInHand(InteractionHand.MAIN_HAND,
+                new ItemStack(ModNuclearItems.fuelAssembly(NuclearFuelGrade.STANDARD_ENRICHMENT).get()));
+        helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                        NuclearReactorAction.Type.LOAD_FUEL_FROM_HAND,
+                        null, null, coordinate, 0, false)),
+                "Matching assembly did not load before NBT round-trip");
+        helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                        NuclearReactorAction.Type.SET_ROD_GROUP,
+                        ReactorRodGroup.A, null, null, 375, false)),
+                "Rod group did not accept pre-save insertion state");
+        CompoundTag saved = controller.saveWithFullMetadata();
+        controller.load(saved);
+        helper.assertTrue(controller.formed(), "Valid NBT round-trip lost the immutable structure snapshot");
+        helper.assertTrue(controller.fuelState(coordinate).isPresent(),
+                "Valid NBT round-trip lost the loaded fuel column");
+        helper.assertTrue(Math.abs(controller.rodInsertion(ReactorRodGroup.A) - 0.375D) < 1.0E-9D,
+                "Valid NBT round-trip changed rod group A insertion");
+
+        CompoundTag future = saved.copy();
+        CompoundTag futureRuntime = future.getCompound("reactor_runtime");
+        futureRuntime.putInt("schema_version", 2);
+        futureRuntime.putString("future_marker", "preserve-me");
+        future.put("reactor_runtime", futureRuntime);
+        controller.load(future);
+        CompoundTag preserved = controller.saveWithFullMetadata().getCompound("reactor_runtime");
+        helper.assertTrue(controller.operatingState() == ReactorOperatingState.SCRAMMED,
+                "Unknown runtime schema did not fail into a safe SCRAM");
+        helper.assertTrue(controller.interlocks().contains(ReactorInterlock.RUNTIME_DATA),
+                "Unknown runtime schema did not expose its non-overridable data interlock");
+        helper.assertTrue(preserved.getInt("schema_version") == 2
+                        && "preserve-me".equals(preserved.getString("future_marker")),
+                "Unknown runtime schema was overwritten instead of preserving raw data");
+        helper.succeed();
+    }
+
+    private static void buildReactor(
+            GameTestHelper helper,
+            BlockPos controllerPosition,
+            int width,
+            int length,
+            int height,
+            Direction facing,
+            Map<ReactorColumnCoordinate, NuclearReactorColumnType> columns
+    ) {
+        for (int y = 0; y < height; y++) {
+            for (int z = 0; z < length; z++) {
+                for (int x = 0; x < width; x++) {
+                    NuclearReactorStructure.ExpectedPart expected = NuclearReactorStructure.expectedPart(
+                            width, length, height, x, y, z, columns, facing);
+                    BlockPos position = NuclearReactorStructure.worldPosition(
+                            controllerPosition, facing, width, x, y, z);
+                    helper.getLevel().setBlock(position, state(expected), Block.UPDATE_ALL);
+                }
+            }
+        }
+        helper.assertTrue(helper.getLevel().getBlockEntity(controllerPosition)
+                        instanceof NuclearReactorControllerBlockEntity,
+                "Reactor controller block entity was not created");
     }
 
     private static Map<ReactorColumnCoordinate, NuclearReactorColumnType> columns(int width, int length) {

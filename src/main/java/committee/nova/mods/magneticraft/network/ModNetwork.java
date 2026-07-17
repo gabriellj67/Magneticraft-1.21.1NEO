@@ -13,7 +13,7 @@ import java.util.Optional;
  * Narrow protocol for server-authoritative machine-menu actions.
  */
 public final class ModNetwork {
-    private static final String PROTOCOL = "4";
+    private static final String PROTOCOL = "5";
     private static final SimpleChannel CHANNEL = NetworkRegistry.ChannelBuilder
             .named(Magneticraft.id("machine"))
             .networkProtocolVersion(() -> PROTOCOL)
@@ -62,6 +62,14 @@ public final class ModNetwork {
                 ElectricalDeviceActionMessage::handle,
                 Optional.of(NetworkDirection.PLAY_TO_SERVER)
         );
+        CHANNEL.registerMessage(
+                4,
+                NuclearReactorActionMessage.class,
+                NuclearReactorActionMessage::encode,
+                NuclearReactorActionMessage::decode,
+                NuclearReactorActionMessage::handle,
+                Optional.of(NetworkDirection.PLAY_TO_SERVER)
+        );
         registered = true;
     }
 
@@ -79,5 +87,9 @@ public final class ModNetwork {
 
     public static void syncVoltageTiers(ServerPlayer player, SyncVoltageTiersMessage message) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), message);
+    }
+
+    public static void controlNuclearReactor(NuclearReactorActionMessage message) {
+        CHANNEL.sendToServer(message);
     }
 }

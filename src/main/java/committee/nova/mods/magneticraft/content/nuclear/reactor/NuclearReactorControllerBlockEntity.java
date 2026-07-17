@@ -1,38 +1,59 @@
 package committee.nova.mods.magneticraft.content.nuclear.reactor;
 
+import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortType;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorSnapshot;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorColumnCoordinate;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorRodGroup;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyItem;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyState;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
+import committee.nova.mods.magneticraft.init.ModNuclearItems;
 import committee.nova.mods.magneticraft.system.nuclear.data.NuclearDataRegistry;
+import committee.nova.mods.magneticraft.system.nuclear.data.ReactorParameterRegistry;
+import committee.nova.mods.magneticraft.system.nuclear.data.ReactorParameters;
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorLayoutEstimate;
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorLayoutSimulator;
+import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorRuntimeModel;
+import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorRuntimeResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-/** Owns the immutable formed snapshot and the structure-change-only static estimate. */
+/** Owns structure, permissions, controls and all durable per-column PWR runtime state. */
 public final class NuclearReactorControllerBlockEntity extends MachineBlockEntity implements MenuProvider {
     private static final int STRUCTURE_CHECK_INTERVAL = 40;
+    private static final int RUNTIME_SCHEMA_VERSION = 1;
+    private static final int OVERRIDE_CONFIRMATION_TICKS = 200;
     private static final String OWNER_TAG = "owner";
     private static final String SNAPSHOT_TAG = "reactor_snapshot";
+    private static final String RUNTIME_TAG = "reactor_runtime";
 
     @Nullable
     private UUID owner;
@@ -40,6 +61,30 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
     private NuclearReactorSnapshot snapshot;
     private ReactorLayoutEstimate estimate = ReactorLayoutEstimate.empty("unformed");
     private long estimateGeneration = Long.MIN_VALUE;
+    private final Map<ReactorColumnCoordinate, FuelAssemblyState> fuelStates = new LinkedHashMap<>();
+    private final EnumMap<ReactorRodGroup, Double> rodInsertion = ReactorRuntimeModel.fullyInsertedRods();
+    private ReactorRuntimeResult runtime = ReactorRuntimeResult.empty(Map.of());
+    private ReactorOperatingState operatingState = ReactorOperatingState.SHUTDOWN;
+    private ReactorControlMode controlMode = ReactorControlMode.MANUAL;
+    private ReactorAutomationLevel automationLevel = ReactorAutomationLevel.NONE;
+    private double targetPowerFraction = 1.0D;
+    private boolean engineeringOverride;
+    @Nullable
+    private UUID overrideRequester;
+    private long overrideConfirmationDeadline;
+    @Nullable
+    private UUID lastOverrideOperator;
+    private long lastOverrideGameTime;
+    private int startupTicksRemaining;
+    private long lastRuntimeGameTime;
+    private double reportedCoolantFlow;
+    private long coolantFlowReportTick = Long.MIN_VALUE;
+    private boolean stationPowerAvailable;
+    private int stationJoulesRequired;
+    private int stationJoulesAvailable;
+    private String scramReason = "none";
+    @Nullable
+    private CompoundTag rejectedRuntimeTag;
 
     public NuclearReactorControllerBlockEntity(BlockPos position, BlockState state) {
         super(ModBlockEntities.NUCLEAR_REACTOR_CONTROLLER.get(), position, state);
@@ -53,14 +98,14 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
             controller.revalidate();
             controller.refreshEstimateIfDataChanged();
         }
+        controller.tickRuntime();
         controller.finishServerTick();
     }
 
     public Direction facing() {
         BlockState state = getBlockState();
         return state.hasProperty(NuclearReactorControllerBlock.FACING)
-                ? state.getValue(NuclearReactorControllerBlock.FACING)
-                : Direction.NORTH;
+                ? state.getValue(NuclearReactorControllerBlock.FACING) : Direction.NORTH;
     }
 
     public boolean formed() {
@@ -75,6 +120,101 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         return estimate;
     }
 
+    public ReactorRuntimeResult runtime() {
+        return runtime;
+    }
+
+    public ReactorOperatingState operatingState() {
+        return operatingState;
+    }
+
+    public ReactorControlMode controlMode() {
+        return controlMode;
+    }
+
+    public ReactorAutomationLevel automationLevel() {
+        return automationLevel;
+    }
+
+    public double targetPowerFraction() {
+        return targetPowerFraction;
+    }
+
+    public double rodInsertion(ReactorRodGroup group) {
+        return rodInsertion.getOrDefault(group, 1.0D);
+    }
+
+    public Map<ReactorColumnCoordinate, FuelAssemblyState> fuelStates() {
+        return Map.copyOf(fuelStates);
+    }
+
+    public Optional<FuelAssemblyState> fuelState(ReactorColumnCoordinate coordinate) {
+        return Optional.ofNullable(fuelStates.get(coordinate));
+    }
+
+    public boolean engineeringOverride() {
+        return engineeringOverride;
+    }
+
+    public boolean stationPowerAvailable() {
+        return stationPowerAvailable;
+    }
+
+    public int stationJoulesRequired() {
+        return stationJoulesRequired;
+    }
+
+    public int stationJoulesAvailable() {
+        return stationJoulesAvailable;
+    }
+
+    public double actualCoolantFlow() {
+        return level != null && level.getGameTime() - coolantFlowReportTick <= 2L
+                ? reportedCoolantFlow : 0.0D;
+    }
+
+    public String scramReason() {
+        return scramReason;
+    }
+
+    public Optional<UUID> lastOverrideOperator() {
+        return Optional.ofNullable(lastOverrideOperator);
+    }
+
+    public long lastOverrideGameTime() {
+        return lastOverrideGameTime;
+    }
+
+    public EnumSet<ReactorInterlock> interlocks() {
+        EnumSet<ReactorInterlock> result = EnumSet.noneOf(ReactorInterlock.class);
+        if (snapshot == null) {
+            result.add(ReactorInterlock.STRUCTURE);
+        }
+        if (fuelStates.isEmpty()) {
+            result.add(ReactorInterlock.FUEL);
+        }
+        if (!stationPowerAvailable) {
+            result.add(ReactorInterlock.STATION_POWER);
+        }
+        if (actualCoolantFlow() + 1.0E-9D < estimate.requiredCoolantFlowMilliBucketsPerTick()
+                * parameters().minimumCoolantFraction()) {
+            result.add(ReactorInterlock.COOLANT_FLOW);
+        }
+        if (automationLevel == ReactorAutomationLevel.NONE) {
+            result.add(ReactorInterlock.INSTRUMENTATION);
+        }
+        if (runtime.minimumCladdingIntegrity() <= 0.2D) {
+            result.add(ReactorInterlock.CLADDING);
+        }
+        if (runtime.hottestTemperatureKelvin() >= parameters().forcedScramTemperatureKelvin()) {
+            result.add(ReactorInterlock.OVER_TEMPERATURE);
+        }
+        if (rejectedRuntimeTag != null) {
+            result.add(ReactorInterlock.RUNTIME_DATA);
+        }
+        return result;
+    }
+
     public void setOwner(UUID owner) {
         this.owner = owner;
         markChanged();
@@ -82,36 +222,93 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
 
     public boolean canManage(Player player) {
         return player.distanceToSqr(
-                worldPosition.getX() + 0.5D,
-                worldPosition.getY() + 0.5D,
-                worldPosition.getZ() + 0.5D
-        ) <= 64.0D && (owner == null || owner.equals(player.getUUID())
+                worldPosition.getX() + 0.5D, worldPosition.getY() + 0.5D, worldPosition.getZ() + 0.5D
+        ) <= 64.0D && player.getAbilities().mayBuild
+                && (owner == null || owner.equals(player.getUUID())
                 || player instanceof ServerPlayer serverPlayer && serverPlayer.hasPermissions(2));
     }
 
     public boolean tryForm(ServerPlayer player) {
         NuclearReactorStructure.Result result = validateAny();
         if (result.snapshot().isEmpty()) {
-            player.displayClientMessage(Component.translatable(
-                    "message.magneticraft.reactor.invalid",
-                    Component.translatable("message.magneticraft.reactor.reason." + result.reason()),
-                    result.position().toShortString()
-            ), true);
+            invalidMessage(player, result.reason(), result.position());
             return false;
         }
-        applySnapshot(result.snapshot().orElseThrow());
+        NuclearReactorSnapshot next = result.snapshot().orElseThrow();
+        if (!loadedFuelMatches(next)) {
+            invalidMessage(player, "loaded_fuel_layout_mismatch", worldPosition);
+            return false;
+        }
+        if (owner == null) {
+            owner = player.getUUID();
+        }
+        applySnapshot(next);
         return true;
     }
 
     public void unform() {
+        NuclearReactorSnapshot current = snapshot;
+        if (current != null) {
+            releasePorts(current);
+        }
         snapshot = null;
         estimate = ReactorLayoutEstimate.empty("unformed");
+        estimateGeneration = Long.MIN_VALUE;
+        forcedScram("structure");
         updateFormedState(false);
         markChangedAndSync();
     }
 
+    public void reportCoolantFlow(double milliBucketsPerTick) {
+        if (level == null || level.isClientSide || !Double.isFinite(milliBucketsPerTick)) {
+            return;
+        }
+        reportedCoolantFlow = Math.max(0.0D, milliBucketsPerTick);
+        coolantFlowReportTick = level.getGameTime();
+    }
+
+    public boolean applyAction(ServerPlayer player, NuclearReactorAction action) {
+        if (!canManage(player) || action == null || rejectedRuntimeTag != null) {
+            return false;
+        }
+        boolean changed = switch (action.type()) {
+            case SET_ROD_GROUP -> setRodGroup(action.group(), action.value() / 1000.0D);
+            case SCRAM -> forcedScram("manual");
+            case RESET -> resetScram();
+            case START -> start();
+            case STOP -> stop();
+            case SET_MODE -> setControlMode(action.mode());
+            case SET_TARGET_POWER -> setTargetPower(action.value() / 1000.0D);
+            case SET_OVERRIDE -> setEngineeringOverride(player, action.value() != 0, action.confirmed());
+            case LOAD_FUEL_FROM_HAND -> loadFuel(player, action.coordinate());
+            case UNLOAD_FUEL -> unloadFuel(player, action.coordinate());
+            case INSTALL_UPGRADE -> installUpgrade(player);
+        };
+        if (changed) {
+            markChangedAndSync();
+        }
+        return changed;
+    }
+
     public void writeMenuData(FriendlyByteBuf buffer) {
         NuclearReactorMenu.write(buffer, worldPosition, snapshot, estimate);
+    }
+
+    public void dropLoadedFuel() {
+        if (level == null || level.isClientSide) {
+            return;
+        }
+        for (FuelAssemblyState state : fuelStates.values()) {
+            ItemStack stack = itemFor(state);
+            if (!stack.isEmpty()) {
+                level.addFreshEntity(new ItemEntity(level,
+                        worldPosition.getX() + 0.5D, worldPosition.getY() + 0.8D,
+                        worldPosition.getZ() + 0.5D, stack));
+            }
+        }
+        fuelStates.clear();
+        runtime = ReactorRuntimeResult.empty(Map.of());
+        markChanged();
     }
 
     @Override
@@ -123,8 +320,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
     @Override
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         return canManage(player) && snapshot != null
-                ? new NuclearReactorMenu(containerId, inventory, this)
-                : null;
+                ? new NuclearReactorMenu(containerId, inventory, this) : null;
     }
 
     @Override
@@ -135,6 +331,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         if (snapshot != null) {
             tag.put(SNAPSHOT_TAG, NuclearReactorSnapshotCodec.save(snapshot));
         }
+        tag.put(RUNTIME_TAG, saveRuntime());
     }
 
     @Override
@@ -145,14 +342,323 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
                 : null;
         estimate = ReactorLayoutEstimate.empty(snapshot == null ? "unformed" : "awaiting_nuclear_data");
         estimateGeneration = Long.MIN_VALUE;
+        loadRuntime(tag.getCompound(RUNTIME_TAG));
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        if (level != null && !level.isClientSide && snapshot != null) {
-            refreshEstimate();
+        if (level == null || level.isClientSide) {
+            return;
         }
+        if (snapshot != null) {
+            refreshEstimate();
+            claimPorts(snapshot);
+        }
+        long now = level.getGameTime();
+        if (lastRuntimeGameTime > 0L && now > lastRuntimeGameTime && !fuelStates.isEmpty()) {
+            NuclearDataRegistry.INSTANCE.current().ifPresent(data -> {
+                runtime = ReactorRuntimeModel.catchUpDecay(
+                        fuelStates, data.fuelDefinitions(), now - lastRuntimeGameTime, now, parameters());
+                replaceFuelStates(runtime.fuelStates());
+            });
+            if (operatingState.producesFissionHeat()) {
+                forcedScram("chunk_unload");
+            }
+        }
+        lastRuntimeGameTime = now;
+    }
+
+    private void tickRuntime() {
+        if (level == null || level.isClientSide) {
+            return;
+        }
+        long now = level.getGameTime();
+        stationJoulesRequired = snapshot == null ? 0 : parameters().stationInstrumentationJoulesPerTick()
+                + (operatingState.producesFissionHeat() ? parameters().stationRunningJoulesPerTick() : 0);
+        NuclearReactorPortBlockEntity electricalPort = electricalPort();
+        stationJoulesAvailable = electricalPort == null ? 0 : electricalPort.storedJoules();
+        stationPowerAvailable = stationJoulesRequired == 0 || electricalPort != null
+                && electricalPort.consumeJoules(stationJoulesRequired, true) == stationJoulesRequired;
+        if (stationPowerAvailable && stationJoulesRequired > 0) {
+            electricalPort.consumeJoules(stationJoulesRequired, false);
+        }
+        if (operatingState.producesFissionHeat() && !stationPowerAvailable) {
+            forcedScram("station_power");
+        }
+        if (operatingState.producesFissionHeat() && snapshot == null) {
+            forcedScram("structure");
+        }
+        applyAutomaticControl();
+        if (operatingState == ReactorOperatingState.STARTUP && startupTicksRemaining > 0) {
+            startupTicksRemaining--;
+            if (startupTicksRemaining == 0) {
+                operatingState = ReactorOperatingState.RUNNING;
+            }
+        }
+        updateFuelRuntime(now);
+        EnumSet<ReactorInterlock> active = interlocks();
+        if (operatingState.producesFissionHeat()) {
+            if (active.contains(ReactorInterlock.OVER_TEMPERATURE)) {
+                forcedScram("over_temperature");
+            } else if (active.contains(ReactorInterlock.CLADDING)) {
+                forcedScram("cladding");
+            } else if (automationLevel.supports(ReactorAutomationLevel.PROTECTION)
+                    && active.stream().anyMatch(interlock -> !engineeringOverride || !interlock.overrideAllowed())) {
+                forcedScram("protection_interlock");
+            }
+        }
+        if (operatingState == ReactorOperatingState.DECAY_HEAT
+                && runtime.decayHeatJoulesPerTick() < 1.0D
+                && runtime.hottestTemperatureKelvin() <= parameters().safeUnloadTemperatureKelvin()) {
+            operatingState = ReactorOperatingState.SHUTDOWN;
+        }
+        lastRuntimeGameTime = now;
+        if (!fuelStates.isEmpty() || operatingState != ReactorOperatingState.SHUTDOWN) {
+            markChanged();
+        }
+    }
+
+    private void updateFuelRuntime(long now) {
+        if (fuelStates.isEmpty()) {
+            runtime = ReactorRuntimeResult.empty(Map.of());
+            return;
+        }
+        NuclearReactorSnapshot current = snapshot;
+        Optional<committee.nova.mods.magneticraft.system.nuclear.data.NuclearDataSnapshot> data =
+                NuclearDataRegistry.INSTANCE.current();
+        if (current == null || data.isEmpty()) {
+            if (data.isPresent()) {
+                runtime = ReactorRuntimeModel.catchUpDecay(
+                        fuelStates, data.orElseThrow().fuelDefinitions(), 1L, now, parameters());
+                replaceFuelStates(runtime.fuelStates());
+            }
+            return;
+        }
+        double command = operatingState == ReactorOperatingState.STARTUP
+                ? targetPowerFraction * (1.0D - startupTicksRemaining
+                / (double) Math.max(1, parameters().startupTicks())) : targetPowerFraction;
+        runtime = ReactorRuntimeModel.step(
+                current, estimate, fuelStates, data.orElseThrow().fuelDefinitions(), rodInsertion,
+                command, actualCoolantFlow(), operatingState.producesFissionHeat(), now, parameters());
+        replaceFuelStates(runtime.fuelStates());
+    }
+
+    private void applyAutomaticControl() {
+        if (level == null || !operatingState.producesFissionHeat()
+                || controlMode == ReactorControlMode.MANUAL
+                || !automationLevel.supports(controlMode.requiredLevel())) {
+            return;
+        }
+        double requested = switch (controlMode) {
+            case MANUAL, POWER -> targetPowerFraction;
+            case TEMPERATURE -> runtime.hottestTemperatureKelvin()
+                    > parameters().forcedScramTemperatureKelvin() * 0.85D ? 0.25D : targetPowerFraction;
+            case LOAD_FOLLOWING -> level.getBestNeighborSignal(worldPosition) / 15.0D;
+        };
+        double available = Math.max(1.0D, estimate.powerDensityJoulesPerTick()
+                * Math.max(1, estimate.columns().size()));
+        double actual = runtime.fissionPowerJoulesPerTick() / available;
+        double direction = actual < requested ? -1.0D : 1.0D;
+        double step = parameters().automaticRodStepPerTick() * direction;
+        for (ReactorRodGroup group : ReactorRodGroup.values()) {
+            rodInsertion.put(group, clamp(rodInsertion(group) + step, 0.0D, 1.0D));
+        }
+    }
+
+    private boolean start() {
+        if (operatingState != ReactorOperatingState.SHUTDOWN || snapshot == null || fuelStates.isEmpty()) {
+            return false;
+        }
+        EnumSet<ReactorInterlock> active = interlocks();
+        if (active.stream().anyMatch(interlock -> !engineeringOverride || !interlock.overrideAllowed())) {
+            return false;
+        }
+        operatingState = ReactorOperatingState.STARTUP;
+        startupTicksRemaining = parameters().startupTicks();
+        scramReason = "none";
+        return true;
+    }
+
+    private boolean stop() {
+        if (!operatingState.producesFissionHeat()) {
+            return false;
+        }
+        insertAllRods();
+        operatingState = ReactorOperatingState.DECAY_HEAT;
+        return true;
+    }
+
+    private boolean forcedScram(String reason) {
+        boolean changed = operatingState != ReactorOperatingState.SCRAMMED || !reason.equals(scramReason);
+        insertAllRods();
+        operatingState = ReactorOperatingState.SCRAMMED;
+        startupTicksRemaining = 0;
+        scramReason = reason;
+        engineeringOverride = false;
+        overrideRequester = null;
+        return changed;
+    }
+
+    private boolean resetScram() {
+        if (operatingState != ReactorOperatingState.SCRAMMED) {
+            return false;
+        }
+        EnumSet<ReactorInterlock> active = interlocks();
+        if (active.contains(ReactorInterlock.STRUCTURE)
+                || active.contains(ReactorInterlock.STATION_POWER)
+                || active.contains(ReactorInterlock.CLADDING)
+                || active.contains(ReactorInterlock.OVER_TEMPERATURE)) {
+            return false;
+        }
+        operatingState = runtime.decayHeatJoulesPerTick() > 1.0D
+                ? ReactorOperatingState.DECAY_HEAT : ReactorOperatingState.SHUTDOWN;
+        scramReason = "none";
+        engineeringOverride = false;
+        return true;
+    }
+
+    private boolean setRodGroup(@Nullable ReactorRodGroup group, double insertion) {
+        if (group == null || operatingState == ReactorOperatingState.SCRAMMED) {
+            return false;
+        }
+        double next = clamp(insertion, 0.0D, 1.0D);
+        if (rodInsertion(group) == next) {
+            return false;
+        }
+        rodInsertion.put(group, next);
+        return true;
+    }
+
+    private boolean setControlMode(@Nullable ReactorControlMode mode) {
+        if (mode == null || !automationLevel.supports(mode.requiredLevel()) || mode == controlMode) {
+            return false;
+        }
+        controlMode = mode;
+        return true;
+    }
+
+    private boolean setTargetPower(double fraction) {
+        double next = clamp(fraction, 0.0D, 1.0D);
+        if (next == targetPowerFraction) {
+            return false;
+        }
+        targetPowerFraction = next;
+        return true;
+    }
+
+    private boolean setEngineeringOverride(ServerPlayer player, boolean enabled, boolean confirmed) {
+        if (!enabled) {
+            boolean changed = engineeringOverride || overrideRequester != null;
+            engineeringOverride = false;
+            overrideRequester = null;
+            return changed;
+        }
+        long now = level == null ? 0L : level.getGameTime();
+        if (!confirmed) {
+            overrideRequester = player.getUUID();
+            overrideConfirmationDeadline = now + OVERRIDE_CONFIRMATION_TICKS;
+            return true;
+        }
+        if (!player.getUUID().equals(overrideRequester) || now > overrideConfirmationDeadline) {
+            return false;
+        }
+        overrideRequester = null;
+        engineeringOverride = true;
+        lastOverrideOperator = player.getUUID();
+        lastOverrideGameTime = now;
+        return true;
+    }
+
+    private boolean loadFuel(ServerPlayer player, @Nullable ReactorColumnCoordinate coordinate) {
+        NuclearReactorSnapshot current = snapshot;
+        if (current == null || coordinate == null || fuelStates.containsKey(coordinate)) {
+            return false;
+        }
+        NuclearReactorColumnType type = current.columns().get(coordinate);
+        ItemStack held = player.getMainHandItem();
+        if (type == null || !type.isFuel() || !(held.getItem() instanceof FuelAssemblyItem item)
+                || item.grade() != type.fuelGrade()) {
+            return false;
+        }
+        Optional<FuelAssemblyState> state = item.state(held);
+        if (state.isEmpty()) {
+            return false;
+        }
+        FuelAssemblyState value = state.orElseThrow();
+        fuelStates.put(coordinate, new FuelAssemblyState(
+                value.fuelId(), value.burnupFraction(), value.poisonFraction(), value.decayHeatJoules(),
+                value.temperatureKelvin(), value.claddingIntegrity(),
+                level == null ? value.lastUpdateGameTime() : level.getGameTime()));
+        held.shrink(1);
+        return true;
+    }
+
+    private boolean unloadFuel(ServerPlayer player, @Nullable ReactorColumnCoordinate coordinate) {
+        if (coordinate == null || operatingState.producesFissionHeat()) {
+            return false;
+        }
+        FuelAssemblyState state = fuelStates.get(coordinate);
+        if (state == null || state.temperatureKelvin() > parameters().safeUnloadTemperatureKelvin()) {
+            return false;
+        }
+        fuelStates.remove(coordinate);
+        ItemStack stack = itemFor(state);
+        if (!player.getInventory().add(stack)) {
+            player.drop(stack, false);
+        }
+        return true;
+    }
+
+    private boolean installUpgrade(ServerPlayer player) {
+        ItemStack held = player.getMainHandItem();
+        for (NuclearControllerUpgrade upgrade : NuclearControllerUpgrade.values()) {
+            if (held.is(ModNuclearItems.controllerUpgrade(upgrade).get())
+                    && upgrade.level().ordinal() > automationLevel.ordinal()) {
+                automationLevel = upgrade.level();
+                held.shrink(1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ItemStack itemFor(FuelAssemblyState state) {
+        for (var entry : ModNuclearItems.fuelAssemblies().entrySet()) {
+            if (entry.getKey().definitionId().equals(state.fuelId())) {
+                ItemStack stack = new ItemStack(entry.getValue().get());
+                ((FuelAssemblyItem) stack.getItem()).writeState(stack, state);
+                return stack;
+            }
+        }
+        Magneticraft.LOGGER.error("Cannot serialize unknown loaded fuel {}", state.fuelId());
+        return ItemStack.EMPTY;
+    }
+
+    private void insertAllRods() {
+        for (ReactorRodGroup group : ReactorRodGroup.values()) {
+            rodInsertion.put(group, 1.0D);
+        }
+    }
+
+    private boolean loadedFuelMatches(NuclearReactorSnapshot candidate) {
+        for (Map.Entry<ReactorColumnCoordinate, FuelAssemblyState> entry : fuelStates.entrySet()) {
+            NuclearReactorColumnType type = candidate.columns().get(entry.getKey());
+            if (type == null || !type.isFuel()
+                    || !type.fuelGrade().definitionId().equals(entry.getValue().fuelId())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void replaceFuelStates(Map<ReactorColumnCoordinate, FuelAssemblyState> next) {
+        fuelStates.clear();
+        fuelStates.putAll(next);
+    }
+
+    private ReactorParameters parameters() {
+        return ReactorParameterRegistry.INSTANCE.current().parameters();
     }
 
     private void revalidate() {
@@ -168,7 +674,11 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         }
         NuclearReactorSnapshot valid = result.snapshot().orElseThrow();
         if (!valid.columns().equals(current.columns()) || valid.facing() != current.facing()) {
-            applySnapshot(valid);
+            if (loadedFuelMatches(valid)) {
+                applySnapshot(valid);
+            } else {
+                unform();
+            }
         }
     }
 
@@ -192,10 +702,48 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
     }
 
     private void applySnapshot(NuclearReactorSnapshot next) {
+        NuclearReactorSnapshot previous = snapshot;
+        if (previous != null) {
+            releasePorts(previous);
+        }
         snapshot = next;
         refreshEstimate();
+        claimPorts(next);
         updateFormedState(true);
         markChangedAndSync();
+    }
+
+    private void claimPorts(NuclearReactorSnapshot value) {
+        if (level == null) {
+            return;
+        }
+        value.ports().values().forEach(position -> {
+            if (level.getBlockEntity(position) instanceof NuclearReactorPortBlockEntity port) {
+                port.claim(worldPosition);
+            }
+        });
+    }
+
+    private void releasePorts(NuclearReactorSnapshot value) {
+        if (level == null) {
+            return;
+        }
+        value.ports().values().forEach(position -> {
+            if (level.getBlockEntity(position) instanceof NuclearReactorPortBlockEntity port) {
+                port.release(worldPosition);
+            }
+        });
+    }
+
+    @Nullable
+    private NuclearReactorPortBlockEntity electricalPort() {
+        NuclearReactorSnapshot current = snapshot;
+        if (level == null || current == null) {
+            return null;
+        }
+        BlockPos position = current.ports().get(NuclearReactorPortType.ELECTRICAL);
+        return position != null && level.getBlockEntity(position) instanceof NuclearReactorPortBlockEntity port
+                && port.claimedBy(worldPosition) ? port : null;
     }
 
     private void refreshEstimate() {
@@ -216,12 +764,143 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
 
     private void refreshEstimateIfDataChanged() {
         long currentGeneration = NuclearDataRegistry.INSTANCE.current()
-                .map(data -> data.generation())
-                .orElse(Long.MIN_VALUE);
+                .map(data -> data.generation()).orElse(Long.MIN_VALUE);
         if (currentGeneration != estimateGeneration) {
             refreshEstimate();
             markChangedAndSync();
         }
+    }
+
+    private CompoundTag saveRuntime() {
+        if (rejectedRuntimeTag != null) {
+            return rejectedRuntimeTag.copy();
+        }
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("schema_version", RUNTIME_SCHEMA_VERSION);
+        tag.putString("operating_state", operatingState.name());
+        tag.putString("control_mode", controlMode.name());
+        tag.putString("automation_level", automationLevel.name());
+        tag.putDouble("target_power_fraction", targetPowerFraction);
+        tag.putBoolean("engineering_override", engineeringOverride);
+        if (lastOverrideOperator != null) {
+            tag.putUUID("last_override_operator", lastOverrideOperator);
+        }
+        tag.putLong("last_override_game_time", lastOverrideGameTime);
+        tag.putInt("startup_ticks_remaining", startupTicksRemaining);
+        tag.putLong("last_runtime_game_time", lastRuntimeGameTime);
+        tag.putString("scram_reason", scramReason);
+        CompoundTag rods = new CompoundTag();
+        for (ReactorRodGroup group : ReactorRodGroup.values()) {
+            rods.putDouble(group.name(), rodInsertion(group));
+        }
+        tag.put("rod_insertion", rods);
+        ListTag fuels = new ListTag();
+        fuelStates.forEach((coordinate, state) -> {
+            CompoundTag entry = new CompoundTag();
+            entry.putInt("x", coordinate.x());
+            entry.putInt("z", coordinate.z());
+            entry.put("state", state.save());
+            fuels.add(entry);
+        });
+        tag.put("fuel_columns", fuels);
+        return tag;
+    }
+
+    private void loadRuntime(CompoundTag tag) {
+        rejectedRuntimeTag = null;
+        fuelStates.clear();
+        insertAllRods();
+        runtime = ReactorRuntimeResult.empty(Map.of());
+        if (tag.isEmpty()) {
+            return;
+        }
+        if (tag.getInt("schema_version") != RUNTIME_SCHEMA_VERSION) {
+            rejectRuntime(tag, "runtime_schema", null);
+            return;
+        }
+        try {
+            operatingState = ReactorOperatingState.valueOf(tag.getString("operating_state"));
+            controlMode = ReactorControlMode.valueOf(tag.getString("control_mode"));
+            automationLevel = ReactorAutomationLevel.valueOf(tag.getString("automation_level"));
+            targetPowerFraction = clamp(tag.getDouble("target_power_fraction"), 0.0D, 1.0D);
+            engineeringOverride = tag.getBoolean("engineering_override");
+            lastOverrideOperator = tag.hasUUID("last_override_operator")
+                    ? tag.getUUID("last_override_operator") : null;
+            lastOverrideGameTime = Math.max(0L, tag.getLong("last_override_game_time"));
+            startupTicksRemaining = Math.max(0, tag.getInt("startup_ticks_remaining"));
+            lastRuntimeGameTime = Math.max(0L, tag.getLong("last_runtime_game_time"));
+            scramReason = tag.getString("scram_reason");
+            CompoundTag rods = tag.getCompound("rod_insertion");
+            for (ReactorRodGroup group : ReactorRodGroup.values()) {
+                rodInsertion.put(group, clamp(rods.getDouble(group.name()), 0.0D, 1.0D));
+            }
+            for (Tag raw : tag.getList("fuel_columns", Tag.TAG_COMPOUND)) {
+                CompoundTag entry = (CompoundTag) raw;
+                ReactorColumnCoordinate coordinate = new ReactorColumnCoordinate(
+                        entry.getInt("x"), entry.getInt("z"));
+                FuelAssemblyState state = FuelAssemblyState.load(entry.getCompound("state")).orElseThrow();
+                if (fuelStates.put(coordinate, state) != null) {
+                    throw new IllegalArgumentException("duplicate fuel coordinate");
+                }
+            }
+            runtime = summaryOfFuelStates();
+        } catch (IllegalArgumentException exception) {
+            rejectRuntime(tag, "runtime_data", exception);
+        }
+    }
+
+    private void rejectRuntime(CompoundTag tag, String reason, @Nullable Exception exception) {
+        if (exception == null) {
+            Magneticraft.LOGGER.error("Rejected reactor runtime schema at {}; preserving raw data", worldPosition);
+        } else {
+            Magneticraft.LOGGER.error(
+                    "Rejected malformed reactor runtime at {}; preserving raw data", worldPosition, exception);
+        }
+        rejectedRuntimeTag = tag.copy();
+        fuelStates.clear();
+        runtime = ReactorRuntimeResult.empty(Map.of());
+        operatingState = ReactorOperatingState.SCRAMMED;
+        controlMode = ReactorControlMode.MANUAL;
+        automationLevel = ReactorAutomationLevel.NONE;
+        targetPowerFraction = 0.0D;
+        engineeringOverride = false;
+        overrideRequester = null;
+        lastOverrideOperator = null;
+        lastOverrideGameTime = 0L;
+        startupTicksRemaining = 0;
+        lastRuntimeGameTime = 0L;
+        scramReason = reason;
+        insertAllRods();
+    }
+
+    private ReactorRuntimeResult summaryOfFuelStates() {
+        if (fuelStates.isEmpty()) {
+            return ReactorRuntimeResult.empty(Map.of());
+        }
+        double decay = 0.0D;
+        double temperature = 0.0D;
+        double hottest = FuelAssemblyState.AMBIENT_TEMPERATURE_KELVIN;
+        double cladding = 1.0D;
+        double burnup = 0.0D;
+        double poison = 0.0D;
+        for (FuelAssemblyState state : fuelStates.values()) {
+            decay += state.decayHeatJoules();
+            temperature += state.temperatureKelvin();
+            hottest = Math.max(hottest, state.temperatureKelvin());
+            cladding = Math.min(cladding, state.claddingIntegrity());
+            burnup += state.burnupFraction();
+            poison += state.poisonFraction();
+        }
+        int count = fuelStates.size();
+        return new ReactorRuntimeResult(fuelStates, 0.0D, decay, decay,
+                temperature / count, hottest, cladding, burnup / count, poison / count);
+    }
+
+    private void invalidMessage(ServerPlayer player, String reason, BlockPos position) {
+        player.displayClientMessage(Component.translatable(
+                "message.magneticraft.reactor.invalid",
+                Component.translatable("message.magneticraft.reactor.reason." + reason),
+                position.toShortString()), true);
     }
 
     private void updateFormedState(boolean formed) {
@@ -281,5 +960,9 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
     ) {
         return new NuclearReactorStructure.ObservedPart(
                 kind, null, state.getValue(NuclearReactorPortBlock.FACING));
+    }
+
+    private static double clamp(double value, double minimum, double maximum) {
+        return Math.max(minimum, Math.min(maximum, value));
     }
 }

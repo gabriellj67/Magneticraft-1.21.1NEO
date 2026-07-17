@@ -1,0 +1,18 @@
+{
+  "automatic_rod_step_per_tick": 0.005,
+  "cladding_damage_per_kelvin_tick": 1.0E-6,
+  "decay_heat_loss_per_tick": 1.5E-5,
+  "decay_heat_response_per_tick": 0.01,
+  "forced_scram_temperature_kelvin": 1550.0,
+  "fuel_temperature_response_per_tick": 0.003,
+  "fuel_temperature_rise_at_full_power_kelvin": 900.0,
+  "maximum_offline_catchup_ticks": 72000,
+  "minimum_coolant_fraction": 0.85,
+  "poison_build_per_tick": 2.0E-5,
+  "poison_decay_per_tick": 5.0E-6,
+  "safe_unload_temperature_kelvin": 373.15,
+  "schema_version": 1,
+  "startup_ticks": 100,
+  "station_instrumentation_joules_per_tick": 40,
+  "station_running_joules_per_tick": 80
+}

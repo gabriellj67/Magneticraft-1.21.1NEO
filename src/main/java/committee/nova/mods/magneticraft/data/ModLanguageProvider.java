@@ -542,6 +542,15 @@ final class ModLanguageProvider extends LanguageProvider {
                 chinese ? "\u53cd\u5e94\u5806\u4eea\u8868\u7aef\u53e3" : "Reactor Instrumentation Port");
         add(ModNuclearBlocks.REACTOR_CONTROLLER.get(),
                 chinese ? "\u53ef\u5b9a\u5236\u538b\u6c34\u5806\u63a7\u5236\u5668" : "Configurable PWR Controller");
+        add(ModNuclearItems.controllerUpgrade(
+                        committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearControllerUpgrade.PROTECTION).get(),
+                chinese ? "\u53cd\u5e94\u5806\u4fdd\u62a4\u8054\u9501\u5347\u7ea7" : "Reactor Protection Interlock Upgrade");
+        add(ModNuclearItems.controllerUpgrade(
+                        committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearControllerUpgrade.REGULATION).get(),
+                chinese ? "\u53cd\u5e94\u5806\u95ed\u73af\u8c03\u8282\u5347\u7ea7" : "Reactor Closed-Loop Regulation Upgrade");
+        add(ModNuclearItems.controllerUpgrade(
+                        committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearControllerUpgrade.LOAD_FOLLOWING).get(),
+                chinese ? "\u53cd\u5e94\u5806\u8d1f\u8f7d\u8ddf\u968f\u5347\u7ea7" : "Reactor Load-Following Upgrade");
         String[] columnChinese = {
                 "\u4f4e\u5bcc\u96c6\u71c3\u6599\u5217", "\u6807\u51c6\u71c3\u6599\u5217",
                 "\u9ad8\u5bcc\u96c6\u71c3\u6599\u5217", "A \u7ec4\u63a7\u5236\u68d2\u5217",
@@ -566,12 +575,87 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.reactor.direction", chinese ? "\u671d\u5411\uff1a%s" : "Facing: %s");
         add("gui.magneticraft.reactor.dimensions", chinese ? "\u5916\u90e8\u5c3a\u5bf8\uff1a%s" : "External size: %s");
         add("gui.magneticraft.reactor.ports", chinese ? "\u7aef\u53e3\uff1a%s" : "Ports: %s");
+        add("gui.magneticraft.reactor.runtime_state", chinese ? "\u8fd0\u884c\u72b6\u6001\uff1a%s" : "Operating state: %s");
         add("gui.magneticraft.reactor.metric.power_density", chinese ? "\u529f\u7387\u5bc6\u5ea6\uff1a%s" : "Power density: %s");
         add("gui.magneticraft.reactor.metric.fuel_energy", chinese ? "\u5355\u5217\u71c3\u6599\u603b\u80fd\u91cf\uff1a%s" : "Fuel energy/column: %s");
         add("gui.magneticraft.reactor.metric.safety", chinese ? "\u5b89\u5168\u88d5\u91cf\uff1a%s" : "Safety margin: %s");
         add("gui.magneticraft.reactor.metric.load_following", chinese ? "\u8d1f\u8f7d\u8ddf\u968f\uff1a%s" : "Load following: %s");
         add("gui.magneticraft.reactor.metric.shutdown", chinese ? "\u505c\u5806\u88d5\u91cf\uff1a%s" : "Shutdown margin: %s");
         add("gui.magneticraft.reactor.metric.coolant", chinese ? "\u6240\u9700\u51b7\u5374\u6d41\u91cf\uff1a%s" : "Required coolant: %s");
+        add("gui.magneticraft.reactor.metric.thermal", chinese ? "\u5806\u82af\u603b\u70ed\u529f\u7387\uff1a%s" : "Core thermal power: %s");
+        add("gui.magneticraft.reactor.metric.target_power", chinese ? "\u76ee\u6807\u529f\u7387\uff1a%s" : "Target power: %s");
+        add("gui.magneticraft.reactor.metric.temperature", chinese ? "\u6700\u9ad8\u6e29\u5ea6\uff1a%s" : "Hottest temperature: %s");
+        add("gui.magneticraft.reactor.metric.coolant_live", chinese ? "\u5b9e\u9645/\u6240\u9700\u6d41\u91cf\uff1a%s" : "Actual/required flow: %s");
+        add("gui.magneticraft.reactor.metric.station_power", chinese ? "\u5382\u7528\u7535\uff1a%s" : "Station power: %s");
+        add("gui.magneticraft.reactor.metric.fuel_loaded", chinese ? "\u5df2\u88c5\u6599\u5217\uff1a%s" : "Loaded fuel columns: %s");
+        add("gui.magneticraft.reactor.metric.rod_group", chinese ? "\u63a7\u5236\u68d2\u7ec4\uff1a%s" : "Control rod group: %s");
+        add("gui.magneticraft.reactor.metric.automation", chinese ? "\u81ea\u52a8\u5316\uff1a%s" : "Automation: %s");
+        add("gui.magneticraft.reactor.metric.mode", chinese ? "\u63a7\u5236\u6a21\u5f0f\uff1a%s" : "Control mode: %s");
+        add("gui.magneticraft.reactor.metric.override", chinese ? "\u5de5\u7a0b\u8d85\u63a7\uff1a%s" : "Engineering override: %s");
+        add("gui.magneticraft.reactor.metric.interlocks", chinese ? "\u8054\u9501\uff1a%s" : "Interlocks: %s");
+        add("gui.magneticraft.reactor.metric.scram", chinese ? "\u505c\u5806\u539f\u56e0\uff1a%s" : "SCRAM reason: %s");
+        add("gui.magneticraft.reactor.enabled", chinese ? "\u5df2\u542f\u7528" : "Enabled");
+        add("gui.magneticraft.reactor.disabled", chinese ? "\u5df2\u7981\u7528" : "Disabled");
+        String[] statesZh = {"\u505c\u673a", "\u542f\u52a8", "\u8fd0\u884c", "\u4f59\u70ed", "\u7d27\u6025\u505c\u5806"};
+        String[] statesEn = {"Shutdown", "Starting", "Running", "Decay heat", "SCRAMMED"};
+        committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorOperatingState[] states =
+                committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorOperatingState.values();
+        for (int index = 0; index < states.length; index++) {
+            add("gui.magneticraft.reactor.state." + states[index].name().toLowerCase(java.util.Locale.ROOT),
+                    chinese ? statesZh[index] : statesEn[index]);
+        }
+        String[] modesZh = {"\u624b\u52a8", "\u5b9a\u529f\u7387", "\u5b9a\u6e29", "\u8d1f\u8f7d\u8ddf\u968f"};
+        String[] modesEn = {"Manual", "Power", "Temperature", "Load following"};
+        committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorControlMode[] modes =
+                committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorControlMode.values();
+        for (int index = 0; index < modes.length; index++) {
+            add("gui.magneticraft.reactor.mode." + modes[index].name().toLowerCase(java.util.Locale.ROOT),
+                    chinese ? modesZh[index] : modesEn[index]);
+        }
+        String[] automationZh = {"\u65e0", "\u4fdd\u62a4\u8054\u9501", "\u95ed\u73af\u8c03\u8282", "\u8d1f\u8f7d\u8ddf\u968f"};
+        String[] automationEn = {"None", "Protection", "Regulation", "Load following"};
+        committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorAutomationLevel[] automation =
+                committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorAutomationLevel.values();
+        for (int index = 0; index < automation.length; index++) {
+            add("gui.magneticraft.reactor.automation." + automation[index].name().toLowerCase(java.util.Locale.ROOT),
+                    chinese ? automationZh[index] : automationEn[index]);
+        }
+        String[] interlockZh = {"\u7ed3\u6784", "\u71c3\u6599", "\u5382\u7528\u7535", "\u51b7\u5374\u6d41\u91cf", "\u4eea\u8868", "\u5305\u58f3", "\u8d85\u6e29", "\u8fd0\u884c\u6570\u636e"};
+        String[] interlockEn = {"Structure", "Fuel", "Station power", "Coolant flow", "Instrumentation", "Cladding", "Over-temperature", "Runtime data"};
+        committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorInterlock[] interlocks =
+                committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorInterlock.values();
+        for (int index = 0; index < interlocks.length; index++) {
+            add("gui.magneticraft.reactor.interlock." + interlocks[index].name().toLowerCase(java.util.Locale.ROOT),
+                    chinese ? interlockZh[index] : interlockEn[index]);
+        }
+        add("gui.magneticraft.reactor.interlock.none", chinese ? "\u65e0" : "None");
+        add("gui.magneticraft.reactor.scram.none", chinese ? "\u65e0" : "None");
+        add("gui.magneticraft.reactor.scram.manual", chinese ? "\u624b\u52a8" : "Manual");
+        add("gui.magneticraft.reactor.scram.station_power", chinese ? "\u5382\u7528\u7535\u4e22\u5931" : "Station power lost");
+        add("gui.magneticraft.reactor.scram.structure", chinese ? "\u7ed3\u6784\u5931\u6548" : "Structure invalid");
+        add("gui.magneticraft.reactor.scram.chunk_unload", chinese ? "\u533a\u5757\u5378\u8f7d" : "Chunk unloaded");
+        add("gui.magneticraft.reactor.scram.over_temperature", chinese ? "\u5806\u82af\u8d85\u6e29" : "Core over-temperature");
+        add("gui.magneticraft.reactor.scram.cladding", chinese ? "\u5305\u58f3\u5931\u6548" : "Cladding failure");
+        add("gui.magneticraft.reactor.scram.protection_interlock", chinese ? "\u4fdd\u62a4\u8054\u9501" : "Protection interlock");
+        add("gui.magneticraft.reactor.scram.runtime_data", chinese ? "\u8fd0\u884c\u6570\u636e\u65e0\u6548" : "Invalid runtime data");
+        add("gui.magneticraft.reactor.action.start", chinese ? "\u542f\u52a8" : "Start");
+        add("gui.magneticraft.reactor.action.stop", chinese ? "\u505c\u6b62" : "Stop");
+        add("gui.magneticraft.reactor.action.scram", chinese ? "\u505c\u5806" : "SCRAM");
+        add("gui.magneticraft.reactor.action.rod_down", chinese ? "-\u68d2" : "-Rod");
+        add("gui.magneticraft.reactor.action.rod_group", chinese ? "\u68d2\u7ec4" : "Group");
+        add("gui.magneticraft.reactor.action.rod_up", chinese ? "+\u68d2" : "+Rod");
+        add("gui.magneticraft.reactor.action.load", chinese ? "\u88c5\u6599" : "Load");
+        add("gui.magneticraft.reactor.action.unload", chinese ? "\u5378\u6599" : "Unload");
+        add("gui.magneticraft.reactor.action.reset", chinese ? "\u590d\u4f4d" : "Reset");
+        add("gui.magneticraft.reactor.action.mode", chinese ? "\u6a21\u5f0f" : "Mode");
+        add("gui.magneticraft.reactor.action.upgrade", chinese ? "\u5347\u7ea7" : "Upgrade");
+        add("gui.magneticraft.reactor.action.target_down", chinese ? "-\u529f\u7387" : "-Power");
+        add("gui.magneticraft.reactor.action.target_up", chinese ? "+\u529f\u7387" : "+Power");
+        add("gui.magneticraft.reactor.action.override", chinese ? "\u8d85\u63a7" : "Override");
+        add("gui.magneticraft.reactor.action.confirm_override", chinese ? "\u786e\u8ba4\u8d85\u63a7" : "Confirm");
+        add("gui.magneticraft.reactor.column.loaded", chinese ? "\u5df2\u88c5\u6599" : "Fuel loaded");
+        add("gui.magneticraft.reactor.column.empty", chinese ? "\u672a\u88c5\u6599" : "No fuel loaded");
+        add("gui.magneticraft.reactor.column.poison", chinese ? "\u6bd2\u5316\uff1a%s%%" : "Poison: %s%%");
         add("gui.magneticraft.reactor.port.coolant_input", chinese ? "\u51b7\u6001\u4e3b\u51b7\u5374\u5242\u5165\u53e3\uff1a\u5df2\u8fde\u63a5" : "Cold primary inlet: connected");
         add("gui.magneticraft.reactor.port.coolant_output", chinese ? "\u70ed\u6001\u4e3b\u51b7\u5374\u5242\u51fa\u53e3\uff1a\u5df2\u8fde\u63a5" : "Hot primary outlet: connected");
         add("gui.magneticraft.reactor.port.electrical", chinese ? "\u5382\u7528\u7535\u7aef\u53e3\uff1a\u5df2\u8fde\u63a5" : "Station electrical port: connected");
@@ -590,6 +674,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.reactor.reason.unloaded", chinese ? "\u7ed3\u6784\u533a\u5757\u672a\u52a0\u8f7d" : "structure chunk is unloaded");
         add("message.magneticraft.reactor.reason.column_base", chinese ? "\u5185\u90e8\u903b\u8f91\u5217\u57fa\u5ea7\u4e0d\u5b8c\u6574" : "logical column base is missing");
         add("message.magneticraft.reactor.reason.required_columns", chinese ? "\u81f3\u5c11\u9700\u8981\u71c3\u6599\u3001\u63a7\u5236\u68d2\u3001\u51b7\u5374\u548c\u4eea\u8868\u5217" : "fuel, control, coolant and instrumentation columns are required");
+        add("message.magneticraft.reactor.reason.loaded_fuel_layout_mismatch",
+                chinese ? "\u5df2\u88c5\u71c3\u6599\u4e0e\u5f53\u524d\u5806\u82af\u5e03\u5c40\u4e0d\u5339\u914d"
+                        : "loaded fuel does not match the current core layout");
         for (committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorStructure.PartKind kind
                 : committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorStructure.PartKind.values()) {
             add("message.magneticraft.reactor.reason.expected_" + kind.name().toLowerCase(java.util.Locale.ROOT),

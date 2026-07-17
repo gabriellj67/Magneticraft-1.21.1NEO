@@ -3,7 +3,14 @@ package committee.nova.mods.magneticraft.content.nuclear.reactor;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortType;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -15,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 /** Directional structural penetration; runtime capabilities are added in later phases. */
-public final class NuclearReactorPortBlock extends Block {
+public final class NuclearReactorPortBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     private final NuclearReactorPortType portType;
@@ -49,5 +56,26 @@ public final class NuclearReactorPortBlock extends Block {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING);
+    }
+
+    @Override
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos position, BlockState state) {
+        return new NuclearReactorPortBlockEntity(position, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type
+    ) {
+        return level.isClientSide ? null : createTickerHelper(
+                type, committee.nova.mods.magneticraft.init.ModBlockEntities.NUCLEAR_REACTOR_PORT.get(),
+                NuclearReactorPortBlockEntity::serverTick);
     }
 }

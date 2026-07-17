@@ -12,6 +12,7 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockGapBlockEnt
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityControllerBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityPortBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorControllerBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPortBlockEntity;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
@@ -69,6 +70,16 @@ public final class ModBlockEntities {
             () -> BlockEntityType.Builder.of(
                     NuclearReactorControllerBlockEntity::new,
                     ModNuclearBlocks.REACTOR_CONTROLLER.get()
+            ).build(null)
+    );
+    public static final RegistryObject<BlockEntityType<NuclearReactorPortBlockEntity>>
+            NUCLEAR_REACTOR_PORT = ModRegistries.BLOCK_ENTITY_TYPES.register(
+            "nuclear_reactor_port",
+            () -> BlockEntityType.Builder.of(
+                    NuclearReactorPortBlockEntity::new,
+                    ModNuclearBlocks.REACTOR_MAIN_COOLANT_PORT.get(),
+                    ModNuclearBlocks.REACTOR_ELECTRICAL_PORT.get(),
+                    ModNuclearBlocks.REACTOR_INSTRUMENTATION_PORT.get()
             ).build(null)
     );
     public static final RegistryObject<BlockEntityType<MultiblockGapBlockEntity>> MULTIBLOCK_GAP =

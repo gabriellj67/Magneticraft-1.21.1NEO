@@ -68,6 +68,9 @@ final class ModItemModelProvider extends ItemModelProvider {
             withExistingParent(grade.id(), mcLoc("item/generated"))
                     .texture("layer0", modLoc("item/electric_piston"));
         }
+        ModNuclearItems.controllerUpgrades().forEach((upgrade, holder) ->
+                withExistingParent(upgrade.id(), mcLoc("item/generated"))
+                        .texture("layer0", modLoc("item/inserter_speed_upgrade")));
     }
 
     private ResourceLocation nuclearMaterialTexture(NuclearMaterial material) {

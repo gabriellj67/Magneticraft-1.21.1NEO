@@ -85,6 +85,10 @@ class ReactorLayoutSimulatorTest {
                 && first.reflection() == second.reflection()
                 && first.cooling() == second.cooling()
                 && first.shutdownWorth() == second.shutdownWorth()
+                && first.controlWorthA() == second.controlWorthA()
+                && first.controlWorthB() == second.controlWorthB()
+                && first.controlWorthC() == second.controlWorthC()
+                && first.controlWorthD() == second.controlWorthD()
                 && first.instrumentationCoverage() == second.instrumentationCoverage()
                 && first.hotspotFactor() == second.hotspotFactor();
     }

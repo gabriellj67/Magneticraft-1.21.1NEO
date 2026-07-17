@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_fuel_assembly": {
+    "has_fuel_pellet": {
       "conditions": {
         "items": [
           {
             "items": [
-              "magneticraft:standard_enrichment_fuel_assembly"
+              "magneticraft:uranium_dioxide_pellet"
             ]
           }
         ]
@@ -22,7 +22,7 @@
   },
   "requirements": [
     [
-      "has_fuel_assembly",
+      "has_fuel_pellet",
       "has_the_recipe"
     ]
   ],

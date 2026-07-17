@@ -825,14 +825,16 @@ public final class LongDistanceElectricGameTests {
             sourceBefore[0] = tower.electricity().node().energyJoules();
         });
         helper.runAfterDelay(3, () -> {
-            double received = receiver.electricity().node().energyJoules();
-            helper.assertTrue(Math.abs(received - 400.0D) < 1.0E-6D,
-                    "Tesla receiver did not receive exactly 400 J in one tick; received " + received + " J");
-            helper.assertTrue(
-                    Math.abs(tower.electricity().node().energyJoules() - (sourceBefore[0] - 400.0D)) < 1.0E-6D,
-                    "Tesla transfer did not conserve its 1 J to 1 J boundary"
-            );
-            helper.succeed();
+            helper.succeedWhen(() -> {
+                double received = receiver.electricity().node().energyJoules();
+                helper.assertTrue(Math.abs(received - 400.0D) < 1.0E-6D,
+                        "Tesla receiver did not receive exactly 400 J; received " + received + " J");
+                helper.assertTrue(
+                        Math.abs(tower.electricity().node().energyJoules()
+                                - (sourceBefore[0] - 400.0D)) < 1.0E-6D,
+                        "Tesla transfer did not conserve its 1 J to 1 J boundary"
+                );
+            });
         });
     }
 

@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_fuel_pellet": {
+    "has_regulation_upgrade": {
       "conditions": {
         "items": [
           {
             "items": [
-              "magneticraft:uranium_dioxide_pellet"
+              "magneticraft:reactor_regulation_upgrade"
             ]
           }
         ]
@@ -15,20 +15,20 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "magneticraft:crafting/reactor_fuel_low"
+        "recipe": "magneticraft:crafting/reactor_load_following_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_fuel_pellet",
+      "has_regulation_upgrade",
       "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "magneticraft:crafting/reactor_fuel_low"
+      "magneticraft:crafting/reactor_load_following_upgrade"
     ]
   },
   "sends_telemetry_event": false

@@ -63,7 +63,8 @@ public final class ReactorLayoutSimulator {
             double heat = maximumPower <= 0.0D ? 0.0D : value.power() / maximumPower;
             columns.put(entry.getKey(), new ReactorColumnEstimate(
                     value.power(), heat, value.coupling(), value.moderation(), value.reflection(),
-                    value.cooling(), value.shutdown(), value.instrumentation(), value.hotspot()
+                    value.cooling(), value.shutdown(), value.controlA(), value.controlB(),
+                    value.controlC(), value.controlD(), value.instrumentation(), value.hotspot()
             ));
             totalPower += value.power();
             totalEnergy += value.energy();
@@ -94,6 +95,10 @@ public final class ReactorLayoutSimulator {
         double moderation = 0.0D;
         double cooling = 0.0D;
         double shutdown = 0.0D;
+        double controlA = 0.0D;
+        double controlB = 0.0D;
+        double controlC = 0.0D;
+        double controlD = 0.0D;
         double instrumentation = 0.0D;
         double reflection = 0.0D;
 
@@ -113,7 +118,14 @@ public final class ReactorLayoutSimulator {
                     moderation += 0.09D * diagonalFactor;
                     cooling += 0.28D * diagonalFactor;
                 } else if (neighbour.isControlRod()) {
-                    shutdown += 0.24D * diagonalFactor;
+                    double worth = 0.24D * diagonalFactor;
+                    shutdown += worth;
+                    switch (committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorRodGroup.fromColumn(neighbour)) {
+                        case A -> controlA += worth;
+                        case B -> controlB += worth;
+                        case C -> controlC += worth;
+                        case D -> controlD += worth;
+                    }
                 } else if (neighbour == NuclearReactorColumnType.INSTRUMENTATION) {
                     instrumentation += 0.18D * diagonalFactor;
                 } else if (neighbour == NuclearReactorColumnType.REFLECTOR) {
@@ -134,7 +146,14 @@ public final class ReactorLayoutSimulator {
                     break;
                 }
                 if (seen.isControlRod()) {
-                    shutdown += 0.16D / distance;
+                    double worth = 0.16D / distance;
+                    shutdown += worth;
+                    switch (committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorRodGroup.fromColumn(seen)) {
+                        case A -> controlA += worth;
+                        case B -> controlB += worth;
+                        case C -> controlC += worth;
+                        case D -> controlD += worth;
+                    }
                 } else if (seen == NuclearReactorColumnType.COOLANT_CHANNEL) {
                     cooling += 0.10D / distance;
                 } else if (seen == NuclearReactorColumnType.INSTRUMENTATION) {
@@ -163,7 +182,8 @@ public final class ReactorLayoutSimulator {
         double shutdownMargin = clamp(shutdown * 95.0D / Math.max(0.25D, reactivity + coupling),
                 0.0D, 100.0D);
         return new RawEstimate(power, energy, coupling, moderation, reflection, cooling,
-                shutdown, instrumentation, hotspot, safety, following, shutdownMargin);
+                shutdown, controlA, controlB, controlC, controlD,
+                instrumentation, hotspot, safety, following, shutdownMargin);
     }
 
     private static ReactorColumnCoordinate offset(ReactorColumnCoordinate coordinate, int dx, int dz) {
@@ -185,6 +205,10 @@ public final class ReactorLayoutSimulator {
             double reflection,
             double cooling,
             double shutdown,
+            double controlA,
+            double controlB,
+            double controlC,
+            double controlD,
             double instrumentation,
             double hotspot,
             double safety,

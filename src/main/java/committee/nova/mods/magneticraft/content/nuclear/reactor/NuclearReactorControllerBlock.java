@@ -81,6 +81,7 @@ public final class NuclearReactorControllerBlock extends BaseEntityBlock {
     public void onRemove(BlockState state, Level level, BlockPos position, BlockState replacement, boolean moved) {
         if (!state.is(replacement.getBlock())
                 && level.getBlockEntity(position) instanceof NuclearReactorControllerBlockEntity controller) {
+            controller.dropLoadedFuel();
             controller.unform();
         }
         super.onRemove(state, level, position, replacement, moved);

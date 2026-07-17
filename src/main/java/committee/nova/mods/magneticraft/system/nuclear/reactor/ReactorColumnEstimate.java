@@ -9,7 +9,19 @@ public record ReactorColumnEstimate(
         double reflection,
         double cooling,
         double shutdownWorth,
+        double controlWorthA,
+        double controlWorthB,
+        double controlWorthC,
+        double controlWorthD,
         double instrumentationCoverage,
         double hotspotFactor
 ) {
+    public double controlWorth(committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorRodGroup group) {
+        return switch (group) {
+            case A -> controlWorthA;
+            case B -> controlWorthB;
+            case C -> controlWorthC;
+            case D -> controlWorthD;
+        };
+    }
 }
