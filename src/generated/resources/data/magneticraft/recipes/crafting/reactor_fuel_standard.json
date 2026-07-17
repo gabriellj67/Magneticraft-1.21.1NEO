@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "magneticraft:reactor_column_segment"
+    },
+    {
+      "item": "magneticraft:standard_enrichment_fuel_assembly"
+    }
+  ],
+  "result": {
+    "item": "magneticraft:reactor_fuel_standard"
+  }
+}

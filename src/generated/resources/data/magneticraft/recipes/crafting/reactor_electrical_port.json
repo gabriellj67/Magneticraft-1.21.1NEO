@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:reactor_containment_casing"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "W": {
+      "item": "magneticraft:fine_copper_wire"
+    }
+  },
+  "pattern": [
+    "WRW",
+    "RCR",
+    "WRW"
+  ],
+  "result": {
+    "item": "magneticraft:reactor_electrical_port"
+  },
+  "show_notification": true
+}

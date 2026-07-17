@@ -293,6 +293,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             horizontalBlock(holder.get(), ignored -> model);
             simpleBlockItem(holder.get(), model);
         });
+        registerNuclearReactorModels();
 
         simpleBlockWithItem(
                 ModAdvancedBlocks.OIL_DEPOSIT.get(),
@@ -335,6 +336,46 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile model = models().cubeAll(id, texture);
         horizontalBlock(block, model);
         simpleBlockItem(block, model);
+    }
+
+    private void registerNuclearReactorModels() {
+        ResourceLocation casing = modLoc("blocks/multiblock_parts/base_side");
+        ResourceLocation striped = modLoc("blocks/multiblock_parts/striped");
+        ResourceLocation electrical = modLoc("blocks/multiblock_parts/electric");
+        ResourceLocation coilSide = modLoc("blocks/multiblock_parts/copper_coil_side");
+        ResourceLocation coilEnd = modLoc("blocks/multiblock_parts/copper_coil");
+
+        simpleBlockWithItem(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get(),
+                models().cubeAll("reactor_containment_casing", casing));
+        simpleBlockWithItem(ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get(),
+                models().cubeAll("reactor_pressure_vessel", striped));
+        simpleBlockWithItem(ModNuclearBlocks.REACTOR_CONTROL_ROD_ACTUATOR.get(),
+                models().cubeColumn("reactor_control_rod_actuator", electrical, coilEnd));
+        simpleBlockWithItem(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get(),
+                models().cubeColumn("reactor_column_segment", coilSide, coilEnd));
+        registerNuclearPort(ModNuclearBlocks.REACTOR_MAIN_COOLANT_PORT.get(),
+                "reactor_main_coolant_port", coilSide);
+        registerNuclearPort(ModNuclearBlocks.REACTOR_ELECTRICAL_PORT.get(),
+                "reactor_electrical_port", electrical);
+        registerNuclearPort(ModNuclearBlocks.REACTOR_INSTRUMENTATION_PORT.get(),
+                "reactor_instrumentation_port", striped);
+
+        ModelFile controller = models().cubeAll("pressurized_water_reactor_controller", electrical);
+        horizontalBlock(ModNuclearBlocks.REACTOR_CONTROLLER.get(), ignored -> controller);
+        simpleBlockItem(ModNuclearBlocks.REACTOR_CONTROLLER.get(), controller);
+
+        ModNuclearBlocks.reactorColumns().forEach((type, holder) -> {
+            ResourceLocation texture = switch (type) {
+                case FUEL_LOW, FUEL_STANDARD, FUEL_HIGH -> coilSide;
+                case CONTROL_ROD_A, CONTROL_ROD_B, CONTROL_ROD_C, CONTROL_ROD_D -> electrical;
+                case COOLANT_CHANNEL -> casing;
+                case INSTRUMENTATION -> striped;
+                case REFLECTOR -> modLoc("blocks/multiblock_parts/corrugated_iron_side");
+            };
+            String id = "reactor_" + type.name().toLowerCase(java.util.Locale.ROOT);
+            ModelFile model = models().cubeColumn(id, texture, coilEnd);
+            simpleBlockWithItem(holder.get(), model);
+        });
     }
 
     private void registerSingleBlockMachineModel(Block block, SingleBlockMachineDefinition definition) {

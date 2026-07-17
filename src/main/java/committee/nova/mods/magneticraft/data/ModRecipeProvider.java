@@ -13,6 +13,8 @@ import committee.nova.mods.magneticraft.content.item.HammerType;
 import committee.nova.mods.magneticraft.content.material.MaterialForm;
 import committee.nova.mods.magneticraft.content.material.Metal;
 import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearProcessRecipe;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
@@ -98,6 +100,7 @@ final class ModRecipeProvider extends RecipeProvider {
         addComponentRecipes(consumer);
         addNuclearMaterialRecipes(consumer);
         addNuclearFacilityRecipes(consumer);
+        addNuclearReactorRecipes(consumer);
         addHammerRecipes(consumer);
         addSmeltingRecipes(consumer);
         addMachineCraftingRecipes(consumer);
@@ -223,6 +226,122 @@ final class ModRecipeProvider extends RecipeProvider {
     ) {
         NuclearProcessRecipeBuilder.save(consumer, id("nuclear_processing/" + id), facility,
                 ingredients, results, duration, joulesPerTick);
+    }
+
+    private void addNuclearReactorRecipes(Consumer<FinishedRecipe> consumer) {
+        ItemLike zirconium = ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_INGOT).get();
+        ItemLike boronCarbide = ModNuclearItems.material(NuclearMaterial.BORON_CARBIDE).get();
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get(), 4)
+                .pattern("ILI").pattern("LCL").pattern("ILI")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('L', ModTags.Items.ingot(Metal.LEAD))
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                .save(consumer, id("crafting/reactor_containment_casing"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get(), 4)
+                .pattern("ZIZ").pattern("ICI").pattern("ZIZ")
+                .define('Z', zirconium)
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .unlockedBy("has_zirconium_alloy", has(zirconium))
+                .save(consumer, id("crafting/reactor_pressure_vessel"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get(), 8)
+                .pattern(" I ").pattern("ICI").pattern(" I ")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('C', ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get())
+                .unlockedBy("has_pressure_vessel", has(ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get()))
+                .save(consumer, id("crafting/reactor_column_segment"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.REACTOR_CONTROL_ROD_ACTUATOR.get())
+                .pattern("RMR").pattern("CBC").pattern("RMR")
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('M', component(CraftingComponent.MOTOR))
+                .define('C', ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get())
+                .define('B', boronCarbide)
+                .unlockedBy("has_boron_carbide", has(boronCarbide))
+                .save(consumer, id("crafting/reactor_control_rod_actuator"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.REACTOR_MAIN_COOLANT_PORT.get())
+                .pattern(" P ").pattern("PCP").pattern(" P ")
+                .define('P', ModNetworkBlocks.IRON_PIPE.get())
+                .define('C', ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get())
+                .unlockedBy("has_pressure_vessel", has(ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get()))
+                .save(consumer, id("crafting/reactor_main_coolant_port"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.REACTOR_ELECTRICAL_PORT.get())
+                .pattern("WRW").pattern("RCR").pattern("WRW")
+                .define('W', component(CraftingComponent.FINE_COPPER_WIRE))
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('C', ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get())
+                .unlockedBy("has_containment", has(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get()))
+                .save(consumer, id("crafting/reactor_electrical_port"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.REACTOR_INSTRUMENTATION_PORT.get())
+                .pattern("QRQ").pattern("RCR").pattern("QRQ")
+                .define('Q', Items.QUARTZ)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('C', ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get())
+                .unlockedBy("has_containment", has(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get()))
+                .save(consumer, id("crafting/reactor_instrumentation_port"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModNuclearBlocks.REACTOR_CONTROLLER.get())
+                .pattern("RIR").pattern("ECE").pattern("RIR")
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('I', ModNuclearBlocks.REACTOR_INSTRUMENTATION_PORT.get())
+                .define('E', component(CraftingComponent.MOTOR))
+                .define('C', ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get())
+                .unlockedBy("has_containment", has(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get()))
+                .save(consumer, id("crafting/pressurized_water_reactor_controller"));
+
+        for (NuclearFuelGrade grade : NuclearFuelGrade.values()) {
+            NuclearReactorColumnType column = switch (grade) {
+                case LOW_ENRICHMENT -> NuclearReactorColumnType.FUEL_LOW;
+                case STANDARD_ENRICHMENT -> NuclearReactorColumnType.FUEL_STANDARD;
+                case HIGH_ENRICHMENT -> NuclearReactorColumnType.FUEL_HIGH;
+            };
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS,
+                            ModNuclearBlocks.reactorColumn(column).get())
+                    .requires(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get())
+                    .requires(ModNuclearItems.fuelAssembly(grade).get())
+                    .unlockedBy("has_fuel_assembly", has(ModNuclearItems.fuelAssembly(grade).get()))
+                    .save(consumer, id("crafting/reactor_" + column.name().toLowerCase(java.util.Locale.ROOT)));
+        }
+        NuclearReactorColumnType[] controls = {
+                NuclearReactorColumnType.CONTROL_ROD_A, NuclearReactorColumnType.CONTROL_ROD_B,
+                NuclearReactorColumnType.CONTROL_ROD_C, NuclearReactorColumnType.CONTROL_ROD_D
+        };
+        ItemLike[] dyes = {Items.BLUE_DYE, Items.PURPLE_DYE, Items.RED_DYE, Items.ORANGE_DYE};
+        for (int index = 0; index < controls.length; index++) {
+            NuclearReactorColumnType type = controls[index];
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS,
+                            ModNuclearBlocks.reactorColumn(type).get())
+                    .requires(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get())
+                    .requires(boronCarbide)
+                    .requires(dyes[index])
+                    .unlockedBy("has_boron_carbide", has(boronCarbide))
+                    .save(consumer, id("crafting/reactor_" + type.name().toLowerCase(java.util.Locale.ROOT)));
+        }
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.reactorColumn(NuclearReactorColumnType.COOLANT_CHANNEL).get())
+                .requires(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get())
+                .requires(ModNetworkBlocks.IRON_PIPE.get())
+                .unlockedBy("has_column_segment", has(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get()))
+                .save(consumer, id("crafting/reactor_coolant_channel"));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.reactorColumn(NuclearReactorColumnType.INSTRUMENTATION).get())
+                .requires(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get())
+                .requires(Items.QUARTZ)
+                .requires(Tags.Items.DUSTS_REDSTONE)
+                .unlockedBy("has_column_segment", has(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get()))
+                .save(consumer, id("crafting/reactor_instrumentation"));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.reactorColumn(NuclearReactorColumnType.REFLECTOR).get())
+                .requires(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get())
+                .requires(ModTags.Items.ingot(Metal.LEAD))
+                .unlockedBy("has_column_segment", has(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get()))
+                .save(consumer, id("crafting/reactor_reflector"));
     }
 
     private static NuclearProcessRecipe.CountedIngredient counted(ItemLike item, int count) {

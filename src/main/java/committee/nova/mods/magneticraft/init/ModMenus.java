@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockMenu;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityMenu;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorMenu;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricalDeviceMenu;
 import committee.nova.mods.magneticraft.content.network.pressure.PressureTankMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -60,6 +61,11 @@ public final class ModMenus {
             ModRegistries.MENU_TYPES.register(
                     "nuclear_facility",
                     () -> IForgeMenuType.create(NuclearFacilityMenu::new)
+            );
+    public static final RegistryObject<MenuType<NuclearReactorMenu>> NUCLEAR_REACTOR =
+            ModRegistries.MENU_TYPES.register(
+                    "pressurized_water_reactor",
+                    () -> IForgeMenuType.create(NuclearReactorMenu::new)
             );
 
     static {

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "B": {
+      "item": "magneticraft:boron_carbide"
+    },
+    "C": {
+      "item": "magneticraft:reactor_pressure_vessel"
+    },
+    "M": {
+      "item": "magneticraft:motor"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "RMR",
+    "CBC",
+    "RMR"
+  ],
+  "result": {
+    "item": "magneticraft:reactor_control_rod_actuator"
+  },
+  "show_notification": true
+}

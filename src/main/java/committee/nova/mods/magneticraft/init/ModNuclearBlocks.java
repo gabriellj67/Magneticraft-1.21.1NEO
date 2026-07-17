@@ -4,6 +4,11 @@ import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacility
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityPartRole;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityPortBlock;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortType;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorColumnBlock;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorControllerBlock;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPortBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -24,6 +29,8 @@ public final class ModNuclearBlocks {
     private static final List<RegistryObject<? extends Item>> BLOCK_ITEMS = new ArrayList<>();
     private static final Map<NuclearFacilityType, RegistryObject<Block>> CONTROLLERS =
             new EnumMap<>(NuclearFacilityType.class);
+    private static final Map<NuclearReactorColumnType, RegistryObject<Block>> REACTOR_COLUMNS =
+            new EnumMap<>(NuclearReactorColumnType.class);
 
     public static final RegistryObject<Block> FACILITY_CASING = register(
             "nuclear_facility_casing", () -> new Block(partProperties()));
@@ -40,6 +47,26 @@ public final class ModNuclearBlocks {
     public static final RegistryObject<Block> ELECTRICAL_PORT = register(
             "nuclear_electrical_port",
             () -> new NuclearFacilityPortBlock(NuclearFacilityPartRole.ELECTRICAL, controllerProperties()));
+    public static final RegistryObject<Block> REACTOR_CONTAINMENT_CASING = register(
+            "reactor_containment_casing", () -> new Block(partProperties()));
+    public static final RegistryObject<Block> REACTOR_PRESSURE_VESSEL = register(
+            "reactor_pressure_vessel", () -> new Block(partProperties()));
+    public static final RegistryObject<Block> REACTOR_CONTROL_ROD_ACTUATOR = register(
+            "reactor_control_rod_actuator", () -> new Block(controllerProperties()));
+    public static final RegistryObject<Block> REACTOR_COLUMN_SEGMENT = register(
+            "reactor_column_segment", () -> new Block(partProperties()));
+    public static final RegistryObject<Block> REACTOR_MAIN_COOLANT_PORT = register(
+            "reactor_main_coolant_port",
+            () -> new NuclearReactorPortBlock(NuclearReactorPortType.COOLANT_INPUT, controllerProperties()));
+    public static final RegistryObject<Block> REACTOR_ELECTRICAL_PORT = register(
+            "reactor_electrical_port",
+            () -> new NuclearReactorPortBlock(NuclearReactorPortType.ELECTRICAL, controllerProperties()));
+    public static final RegistryObject<Block> REACTOR_INSTRUMENTATION_PORT = register(
+            "reactor_instrumentation_port",
+            () -> new NuclearReactorPortBlock(NuclearReactorPortType.INSTRUMENTATION, controllerProperties()));
+    public static final RegistryObject<Block> REACTOR_CONTROLLER = register(
+            "pressurized_water_reactor_controller",
+            () -> new NuclearReactorControllerBlock(controllerProperties()));
 
     static {
         for (NuclearFacilityType type : NuclearFacilityType.values()) {
@@ -48,6 +75,12 @@ public final class ModNuclearBlocks {
                     () -> new NuclearFacilityControllerBlock(type, controllerProperties())
             );
             CONTROLLERS.put(type, block);
+        }
+        for (NuclearReactorColumnType type : NuclearReactorColumnType.values()) {
+            REACTOR_COLUMNS.put(type, register(
+                    "reactor_" + type.name().toLowerCase(java.util.Locale.ROOT),
+                    () -> new NuclearReactorColumnBlock(type, partProperties())
+            ));
         }
     }
 
@@ -71,6 +104,18 @@ public final class ModNuclearBlocks {
 
     public static List<RegistryObject<? extends Item>> blockItems() {
         return List.copyOf(BLOCK_ITEMS);
+    }
+
+    public static RegistryObject<Block> reactorColumn(NuclearReactorColumnType type) {
+        RegistryObject<Block> result = REACTOR_COLUMNS.get(type);
+        if (result == null) {
+            throw new IllegalArgumentException("No reactor column block registered for " + type);
+        }
+        return result;
+    }
+
+    public static Map<NuclearReactorColumnType, RegistryObject<Block>> reactorColumns() {
+        return Collections.unmodifiableMap(REACTOR_COLUMNS);
     }
 
     private static RegistryObject<Block> register(String id, Supplier<? extends Block> factory) {

@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_facility_casing"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "Z": {
+      "item": "magneticraft:zirconium_alloy_ingot"
+    }
+  },
+  "pattern": [
+    "ZIZ",
+    "ICI",
+    "ZIZ"
+  ],
+  "result": {
+    "count": 4,
+    "item": "magneticraft:reactor_pressure_vessel"
+  },
+  "show_notification": true
+}

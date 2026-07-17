@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "magneticraft:reactor_column_segment"
+    },
+    {
+      "item": "magneticraft:iron_fluid_pipe"
+    }
+  ],
+  "result": {
+    "item": "magneticraft:reactor_coolant_channel"
+  }
+}

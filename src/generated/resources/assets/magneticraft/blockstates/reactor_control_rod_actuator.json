@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/reactor_control_rod_actuator"
+    }
+  }
+}

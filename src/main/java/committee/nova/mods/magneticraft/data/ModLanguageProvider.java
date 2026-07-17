@@ -110,6 +110,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("item.magneticraft.fuel_assembly.invalid_state", chinese
                 ? "燃料状态数据无效；禁止装堆"
                 : "Invalid fuel state; reactor loading is blocked");
+        addNuclearReactorTranslations();
         add(ModMachineBlocks.CRUSHING_TABLE.get(), chinese ? "压碎台" : "Crushing Table");
         add(ModMachineBlocks.BATTERY.get(), chinese ? "电池箱" : "Battery Box");
         add(ModMachineBlocks.GRATE.get(), chinese ? "铁格栅" : "Iron Grate");
@@ -522,6 +523,79 @@ final class ModLanguageProvider extends LanguageProvider {
             add(opcode.descriptionTranslationKey(), chinese ? opcodeChinese(opcode) : opcodeEnglish(opcode));
         }
         addClientTranslations();
+    }
+
+    private void addNuclearReactorTranslations() {
+        add(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get(),
+                chinese ? "\u538b\u6c34\u5806\u5b89\u5168\u58f3" : "PWR Containment Casing");
+        add(ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get(),
+                chinese ? "\u538b\u6c34\u5806\u538b\u529b\u5bb9\u5668" : "PWR Pressure Vessel");
+        add(ModNuclearBlocks.REACTOR_CONTROL_ROD_ACTUATOR.get(),
+                chinese ? "\u63a7\u5236\u68d2\u6267\u884c\u5668" : "Control Rod Actuator");
+        add(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get(),
+                chinese ? "\u53cd\u5e94\u5806\u7ec4\u4ef6\u5217\u6bb5" : "Reactor Assembly Column Segment");
+        add(ModNuclearBlocks.REACTOR_MAIN_COOLANT_PORT.get(),
+                chinese ? "\u4e3b\u56de\u8def\u51b7\u5374\u5242\u7aef\u53e3" : "Primary Coolant Port");
+        add(ModNuclearBlocks.REACTOR_ELECTRICAL_PORT.get(),
+                chinese ? "\u53cd\u5e94\u5806\u7535\u6c14\u7aef\u53e3" : "Reactor Electrical Port");
+        add(ModNuclearBlocks.REACTOR_INSTRUMENTATION_PORT.get(),
+                chinese ? "\u53cd\u5e94\u5806\u4eea\u8868\u7aef\u53e3" : "Reactor Instrumentation Port");
+        add(ModNuclearBlocks.REACTOR_CONTROLLER.get(),
+                chinese ? "\u53ef\u5b9a\u5236\u538b\u6c34\u5806\u63a7\u5236\u5668" : "Configurable PWR Controller");
+        String[] columnChinese = {
+                "\u4f4e\u5bcc\u96c6\u71c3\u6599\u5217", "\u6807\u51c6\u71c3\u6599\u5217",
+                "\u9ad8\u5bcc\u96c6\u71c3\u6599\u5217", "A \u7ec4\u63a7\u5236\u68d2\u5217",
+                "B \u7ec4\u63a7\u5236\u68d2\u5217", "C \u7ec4\u63a7\u5236\u68d2\u5217",
+                "D \u7ec4\u63a7\u5236\u68d2\u5217", "\u51b7\u5374\u901a\u9053\u5217",
+                "\u5806\u82af\u4eea\u8868\u5217", "\u53cd\u5c04\u5c42\u5217"
+        };
+        String[] columnEnglish = {
+                "Low-Enrichment Fuel Column", "Standard Fuel Column", "High-Enrichment Fuel Column",
+                "Control Rod Column A", "Control Rod Column B", "Control Rod Column C", "Control Rod Column D",
+                "Coolant Channel Column", "Core Instrumentation Column", "Reflector Column"
+        };
+        committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType[] types =
+                committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType.values();
+        for (int index = 0; index < types.length; index++) {
+            add(ModNuclearBlocks.reactorColumn(types[index]).get(),
+                    chinese ? columnChinese[index] : columnEnglish[index]);
+        }
+
+        add("gui.magneticraft.reactor.formed", chinese ? "\u5df2\u6210\u578b" : "Formed");
+        add("gui.magneticraft.reactor.core_map", chinese ? "\u5806\u82af\u70ed\u529b\u56fe" : "Core Heat Map");
+        add("gui.magneticraft.reactor.direction", chinese ? "\u671d\u5411\uff1a%s" : "Facing: %s");
+        add("gui.magneticraft.reactor.dimensions", chinese ? "\u5916\u90e8\u5c3a\u5bf8\uff1a%s" : "External size: %s");
+        add("gui.magneticraft.reactor.ports", chinese ? "\u7aef\u53e3\uff1a%s" : "Ports: %s");
+        add("gui.magneticraft.reactor.metric.power_density", chinese ? "\u529f\u7387\u5bc6\u5ea6\uff1a%s" : "Power density: %s");
+        add("gui.magneticraft.reactor.metric.fuel_energy", chinese ? "\u5355\u5217\u71c3\u6599\u603b\u80fd\u91cf\uff1a%s" : "Fuel energy/column: %s");
+        add("gui.magneticraft.reactor.metric.safety", chinese ? "\u5b89\u5168\u88d5\u91cf\uff1a%s" : "Safety margin: %s");
+        add("gui.magneticraft.reactor.metric.load_following", chinese ? "\u8d1f\u8f7d\u8ddf\u968f\uff1a%s" : "Load following: %s");
+        add("gui.magneticraft.reactor.metric.shutdown", chinese ? "\u505c\u5806\u88d5\u91cf\uff1a%s" : "Shutdown margin: %s");
+        add("gui.magneticraft.reactor.metric.coolant", chinese ? "\u6240\u9700\u51b7\u5374\u6d41\u91cf\uff1a%s" : "Required coolant: %s");
+        add("gui.magneticraft.reactor.port.coolant_input", chinese ? "\u51b7\u6001\u4e3b\u51b7\u5374\u5242\u5165\u53e3\uff1a\u5df2\u8fde\u63a5" : "Cold primary inlet: connected");
+        add("gui.magneticraft.reactor.port.coolant_output", chinese ? "\u70ed\u6001\u4e3b\u51b7\u5374\u5242\u51fa\u53e3\uff1a\u5df2\u8fde\u63a5" : "Hot primary outlet: connected");
+        add("gui.magneticraft.reactor.port.electrical", chinese ? "\u5382\u7528\u7535\u7aef\u53e3\uff1a\u5df2\u8fde\u63a5" : "Station electrical port: connected");
+        add("gui.magneticraft.reactor.port.instrumentation", chinese ? "\u4eea\u8868\u7aef\u53e3\uff1a\u5df2\u8fde\u63a5" : "Instrumentation port: connected");
+        add("gui.magneticraft.reactor.column.position", chinese ? "\u5217\u4f4d\u7f6e\uff1a%s, %s" : "Column: %s, %s");
+        add("gui.magneticraft.reactor.column.power", chinese ? "\u9759\u6001\u70ed\u529f\u7387\uff1a%s" : "Static thermal power: %s");
+        add("gui.magneticraft.reactor.column.heat", chinese ? "\u5806\u82af\u70ed\u91cf\u5360\u6bd4\uff1a%s" : "Core heat share: %s");
+        add("gui.magneticraft.reactor.column.hotspot", chinese ? "\u70ed\u70b9\u56e0\u5b50\uff1a%s" : "Hotspot factor: %s");
+        add("gui.magneticraft.reactor.column.coupling", chinese ? "\u71c3\u6599\u8026\u5408\uff1a%s" : "Fuel coupling: %s");
+        add("gui.magneticraft.reactor.column.cooling", chinese ? "\u51b7\u5374\u8d21\u732e\uff1a%s" : "Cooling contribution: %s");
+        add("gui.magneticraft.reactor.column.control", chinese ? "\u505c\u5806\u4ef7\u503c\uff1a%s" : "Shutdown worth: %s");
+        add("gui.magneticraft.reactor.column.instrumentation", chinese ? "\u4eea\u8868\u8986\u76d6\uff1a%s" : "Instrumentation coverage: %s");
+        add("message.magneticraft.reactor.invalid", chinese ? "\u538b\u6c34\u5806\u7ed3\u6784\u65e0\u6548\uff1a%s @ %s" : "Invalid PWR structure: %s @ %s");
+        add("message.magneticraft.reactor.reason.no_matching_dimensions", chinese ? "\u672a\u627e\u5230\u7b26\u5408\u5c3a\u5bf8\u7684\u5bc6\u95ed\u7ed3\u6784" : "no matching sealed dimensions");
+        add("message.magneticraft.reactor.reason.invalid_dimensions", chinese ? "\u53cd\u5e94\u5806\u5c3a\u5bf8\u8d85\u51fa\u8303\u56f4" : "reactor dimensions are outside the allowed range");
+        add("message.magneticraft.reactor.reason.unloaded", chinese ? "\u7ed3\u6784\u533a\u5757\u672a\u52a0\u8f7d" : "structure chunk is unloaded");
+        add("message.magneticraft.reactor.reason.column_base", chinese ? "\u5185\u90e8\u903b\u8f91\u5217\u57fa\u5ea7\u4e0d\u5b8c\u6574" : "logical column base is missing");
+        add("message.magneticraft.reactor.reason.required_columns", chinese ? "\u81f3\u5c11\u9700\u8981\u71c3\u6599\u3001\u63a7\u5236\u68d2\u3001\u51b7\u5374\u548c\u4eea\u8868\u5217" : "fuel, control, coolant and instrumentation columns are required");
+        for (committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorStructure.PartKind kind
+                : committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorStructure.PartKind.values()) {
+            add("message.magneticraft.reactor.reason.expected_" + kind.name().toLowerCase(java.util.Locale.ROOT),
+                    chinese ? "\u7ed3\u6784\u90e8\u4ef6\u4e0d\u5339\u914d\uff1a" + kind.name()
+                            : "expected " + kind.name().toLowerCase(java.util.Locale.ROOT));
+        }
     }
 
     private void addClientTranslations() {

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/reactor_coolant_channel"
+    }
+  }
+}
