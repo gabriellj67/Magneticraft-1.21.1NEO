@@ -3,6 +3,6 @@
   "textures": {
     "front": "magneticraft:block/electrical_indicator",
     "side": "magneticraft:block/electrical_enclosure",
-    "top": "magneticraft:blocks/ore_block/copper_block"
+    "top": "magneticraft:block/ore_block/copper_block"
   }
 }

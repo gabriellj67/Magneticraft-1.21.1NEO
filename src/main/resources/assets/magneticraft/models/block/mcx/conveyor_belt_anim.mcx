@@ -1,13 +1,13 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/machines/conveyor_belt_anim",
+  "particleTexture": "magneticraft:block/machines/conveyor_belt_anim",
   "parts": [
     {
       "name": "belt",
       "from": 0,
       "to": 3,
-      "texture": "magneticraft:blocks/machines/conveyor_belt_anim"
+      "texture": "magneticraft:block/machines/conveyor_belt_anim"
     }
   ],
   "quads": {

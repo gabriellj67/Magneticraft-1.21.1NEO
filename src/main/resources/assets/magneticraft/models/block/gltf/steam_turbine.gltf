@@ -658,7 +658,7 @@
   ],
   "images": [
     {
-      "uri": "magneticraft:blocks/multiblocks/steam_turbine"
+      "uri": "magneticraft:block/multiblocks/steam_turbine"
     }
   ],
   "materials": [

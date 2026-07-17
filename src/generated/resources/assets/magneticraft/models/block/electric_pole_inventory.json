@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/electric_pole.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/electric_connectors/electric_pole"
+    "particle": "magneticraft:block/electric_connectors/electric_pole"
   },
   "translation": [
     0.0,

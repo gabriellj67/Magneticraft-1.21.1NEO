@@ -1,61 +1,61 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/machines/heat_sink",
+  "particleTexture": "magneticraft:block/machines/heat_sink",
   "parts": [
     {
       "name": "Object 0",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     },
     {
       "name": "Object 1",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     },
     {
       "name": "Object 1",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     },
     {
       "name": "Object 1",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     },
     {
       "name": "Object 1",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     },
     {
       "name": "Object 1",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     },
     {
       "name": "Object 1",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     },
     {
       "name": "Object 1",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     },
     {
       "name": "Object 1",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/machines/heat_sink"
+      "texture": "magneticraft:block/machines/heat_sink"
     }
   ],
   "quads": {

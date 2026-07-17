@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "front": "magneticraft:blocks/ore_block/copper_block",
+    "front": "magneticraft:block/ore_block/copper_block",
     "side": "magneticraft:block/electrical_enclosure",
     "top": "magneticraft:block/electrical_indicator"
   }

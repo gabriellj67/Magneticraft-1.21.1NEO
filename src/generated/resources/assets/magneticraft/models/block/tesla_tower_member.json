@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "magneticraft:blocks/electric_connectors/tesla_tower"
+    "particle": "magneticraft:block/electric_connectors/tesla_tower"
   }
 }

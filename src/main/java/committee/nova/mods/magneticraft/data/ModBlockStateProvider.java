@@ -50,7 +50,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
     private static final ResourceLocation CUTOUT_RENDER_TYPE =
             ResourceLocation.fromNamespaceAndPath("minecraft", "cutout");
     private static final ResourceLocation UNMOUNTED_MULTIBLOCK_TEXTURE =
-            Magneticraft.id("blocks/multiblocks/unmounted_multiblock");
+            Magneticraft.id("block/multiblocks/unmounted_multiblock");
     private static final int ROOF_TILE_VARIANTS = 4;
     private final ExistingFileHelper existingFileHelper;
 
@@ -78,7 +78,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile crushingModel = mcxModel(
                 "crushing_table",
                 "crushing_table",
-                modLoc("blocks/machines/crushing_table_side"),
+                modLoc("block/machines/crushing_table_side"),
                 ModelSceneSelection.ALL
         );
         simpleBlockWithItem(crushingTable, crushingModel);
@@ -87,7 +87,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile batteryModel = mcxModel(
                 "battery_box",
                 "battery",
-                modLoc("blocks/electric_machines/battery"),
+                modLoc("block/electric_machines/battery"),
                 ModelSceneSelection.ALL
         );
         legacyHorizontalBlock(battery, batteryModel, 180);
@@ -101,17 +101,17 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
 
         Block electricFurnace = ModMachineBlocks.ELECTRIC_FURNACE.get();
-        ResourceLocation electricFurnaceTexture = modLoc("blocks/electric_machines/electric_furnace");
+        ResourceLocation electricFurnaceTexture = modLoc("block/electric_machines/electric_furnace");
         ModelFile furnaceOff = models().orientable(
                 "electric_furnace",
                 electricFurnaceTexture,
-                modLoc("blocks/electric_machines/electric_furnace_front"),
+                modLoc("block/electric_machines/electric_furnace_front"),
                 electricFurnaceTexture
         );
         ModelFile furnaceOn = models().orientable(
                 "electric_furnace_on",
                 electricFurnaceTexture,
-                modLoc("blocks/electric_machines/electric_furnace_front_on"),
+                modLoc("block/electric_machines/electric_furnace_front_on"),
                 electricFurnaceTexture
         );
         horizontalBlock(
@@ -129,7 +129,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         );
         simpleBlock(
                 ModMachineBlocks.AIR_BUBBLE.get(),
-                models().cubeAll("air_bubble", modLoc("blocks/machines/air_bubble"))
+                models().cubeAll("air_bubble", modLoc("block/machines/air_bubble"))
                         .renderType(ResourceLocation.fromNamespaceAndPath("minecraft", "translucent"))
         );
         simpleBlockWithItem(
@@ -137,7 +137,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 mcxModel(
                         "tube_light",
                         "tube_light",
-                        modLoc("blocks/decoration/tube_light"),
+                        modLoc("block/decoration/tube_light"),
                         ModelSceneSelection.ALL
                 )
         );
@@ -145,8 +145,8 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 ModMachineBlocks.GEOTHERMAL_DRILL_PIPE.get(),
                 models().cubeColumn(
                         "geothermal_drill_pipe",
-                        modLoc("blocks/multiblock_parts/pumpjack_drill_side"),
-                        modLoc("blocks/multiblock_parts/pumpjack_drill")
+                        modLoc("block/multiblock_parts/pumpjack_drill_side"),
+                        modLoc("block/multiblock_parts/pumpjack_drill")
                 )
         );
 
@@ -169,7 +169,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         brassPressurePipeBlock();
         simpleBlockWithItem(
                 ModNetworkBlocks.PRESSURE_TANK.get(),
-                models().cubeAll("pressure_tank", modLoc("blocks/fluid_machines/pressure_tank"))
+                models().cubeAll("pressure_tank", modLoc("block/fluid_machines/pressure_tank"))
                         .renderType(CUTOUT_RENDER_TYPE)
         );
 
@@ -177,7 +177,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile heatSinkModel = mcxModel(
                 "heat_sink",
                 "heat_sink",
-                modLoc("blocks/machines/heat_sink"),
+                modLoc("block/machines/heat_sink"),
                 ModelSceneSelection.ALL
         );
         downFacingBlock(heatSink, heatSinkModel);
@@ -187,7 +187,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile conveyorModel = mcxModel(
                 "conveyor_belt",
                 "conveyor_belt",
-                modLoc("blocks/machines/conveyor_belt"),
+                modLoc("block/machines/conveyor_belt"),
                 ModelSceneSelection.ALL
         );
         horizontalBlock(conveyor, conveyorModel);
@@ -197,60 +197,60 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 ModAdvancedBlocks.MULTIBLOCK_BASE.get(),
                 models().cubeBottomTop(
                         "machine_casing",
-                        modLoc("blocks/multiblock_parts/base_side"),
-                        modLoc("blocks/multiblock_parts/base_bottom"),
-                        modLoc("blocks/multiblock_parts/base_top")
+                        modLoc("block/multiblock_parts/base_side"),
+                        modLoc("block/multiblock_parts/base_bottom"),
+                        modLoc("block/multiblock_parts/base_top")
                 )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.CORRUGATED_IRON.get(),
                 models().cubeColumn(
                         "corrugated_iron",
-                        modLoc("blocks/multiblock_parts/corrugated_iron_side"),
-                        modLoc("blocks/multiblock_parts/corrugated_iron")
+                        modLoc("block/multiblock_parts/corrugated_iron_side"),
+                        modLoc("block/multiblock_parts/corrugated_iron")
                 )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.COPPER_COIL.get(),
                 models().cubeColumn(
                         "copper_coil",
-                        modLoc("blocks/multiblock_parts/copper_coil_side"),
-                        modLoc("blocks/multiblock_parts/copper_coil")
+                        modLoc("block/multiblock_parts/copper_coil_side"),
+                        modLoc("block/multiblock_parts/copper_coil")
                 )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.MULTIBLOCK_COLUMN.get(),
                 models().cubeColumn(
                         "machine_support_column",
-                        modLoc("blocks/multiblock_parts/column_side"),
-                        modLoc("blocks/multiblock_parts/column_end")
+                        modLoc("block/multiblock_parts/column_side"),
+                        modLoc("block/multiblock_parts/column_end")
                 )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get(),
                 models().cubeAll(
                         "striped_machine_casing",
-                        modLoc("blocks/multiblock_parts/striped")
+                        modLoc("block/multiblock_parts/striped")
                 )
         );
         simpleBlockWithItem(
                 ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get(),
                 models().cubeAll(
                         "electrical_machine_casing",
-                        modLoc("blocks/multiblock_parts/electric")
+                        modLoc("block/multiblock_parts/electric")
                 )
         );
         simpleBlock(
                 ModAdvancedBlocks.PUMPJACK_DRILL.get(),
                 models().cubeColumn(
                         "pumpjack_drill",
-                        modLoc("blocks/multiblock_parts/pumpjack_drill_side"),
-                        modLoc("blocks/multiblock_parts/pumpjack_drill")
+                        modLoc("block/multiblock_parts/pumpjack_drill_side"),
+                        modLoc("block/multiblock_parts/pumpjack_drill")
                 )
         );
         simpleBlock(
                 ModAdvancedBlocks.MULTIBLOCK_GAP.get(),
-                emptyModel("multiblock_gap", modLoc("blocks/multiblocks/multiblock_gap"))
+                emptyModel("multiblock_gap", modLoc("block/multiblocks/multiblock_gap"))
         );
 
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
@@ -271,23 +271,23 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         ModelFile nuclearCasing = models().cubeAll(
                 "nuclear_facility_casing",
-                modLoc("blocks/multiblock_parts/base_side")
+                modLoc("block/multiblock_parts/base_side")
         );
         simpleBlockWithItem(ModNuclearBlocks.FACILITY_CASING.get(), nuclearCasing);
         simpleBlockWithItem(
                 ModNuclearBlocks.PROCESS_CORE.get(),
-                models().cubeAll("nuclear_process_core", modLoc("blocks/multiblock_parts/striped"))
+                models().cubeAll("nuclear_process_core", modLoc("block/multiblock_parts/striped"))
         );
         simpleBlockWithItem(
                 ModNuclearBlocks.CENTRIFUGE_STAGE.get(),
-                models().cubeAll("centrifuge_stage", modLoc("blocks/multiblock_parts/electric"))
+                models().cubeAll("centrifuge_stage", modLoc("block/multiblock_parts/electric"))
         );
         registerNuclearPort(ModNuclearBlocks.ITEM_INPUT_PORT.get(), "nuclear_item_input_port",
-                modLoc("blocks/multiblock_parts/base_side"));
+                modLoc("block/multiblock_parts/base_side"));
         registerNuclearPort(ModNuclearBlocks.ITEM_OUTPUT_PORT.get(), "nuclear_item_output_port",
-                modLoc("blocks/multiblock_parts/striped"));
+                modLoc("block/multiblock_parts/striped"));
         registerNuclearPort(ModNuclearBlocks.ELECTRICAL_PORT.get(), "nuclear_electrical_port",
-                modLoc("blocks/multiblock_parts/electric"));
+                modLoc("block/multiblock_parts/electric"));
         ModNuclearBlocks.controllers().forEach((type, holder) -> {
             ModelFile model = models().cubeAll(type.id(), UNMOUNTED_MULTIBLOCK_TEXTURE);
             horizontalBlock(holder.get(), ignored -> model);
@@ -299,14 +299,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         simpleBlockWithItem(
                 ModAdvancedBlocks.OIL_DEPOSIT.get(),
-                models().cubeAll("oil_deposit", modLoc("blocks/ore_block/oil_source_1"))
+                models().cubeAll("oil_deposit", modLoc("block/ore_block/oil_source_1"))
         );
 
         Block computer = ModComputerContent.COMPUTER.get();
         ModelFile computerModel = mcxModel(
                 "computer",
                 "computer",
-                modLoc("blocks/computers/computer1"),
+                modLoc("block/computers/computer1"),
                 new ModelSceneSelection(Set.of(), Set.of(), Set.of("screen"), Set.of())
         );
         horizontalBlock(computer, computerModel);
@@ -316,7 +316,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile miningRobotModel = mcxModel(
                 "mining_robot",
                 "mining_robot",
-                modLoc("blocks/computers/mining_robot"),
+                modLoc("block/computers/mining_robot"),
                 new ModelSceneSelection(
                         Set.of(),
                         Set.of(),
@@ -341,11 +341,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void registerNuclearReactorModels() {
-        ResourceLocation casing = modLoc("blocks/multiblock_parts/base_side");
-        ResourceLocation striped = modLoc("blocks/multiblock_parts/striped");
-        ResourceLocation electrical = modLoc("blocks/multiblock_parts/electric");
-        ResourceLocation coilSide = modLoc("blocks/multiblock_parts/copper_coil_side");
-        ResourceLocation coilEnd = modLoc("blocks/multiblock_parts/copper_coil");
+        ResourceLocation casing = modLoc("block/multiblock_parts/base_side");
+        ResourceLocation striped = modLoc("block/multiblock_parts/striped");
+        ResourceLocation electrical = modLoc("block/multiblock_parts/electric");
+        ResourceLocation coilSide = modLoc("block/multiblock_parts/copper_coil_side");
+        ResourceLocation coilEnd = modLoc("block/multiblock_parts/copper_coil");
 
         simpleBlockWithItem(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get(),
                 models().cubeAll("reactor_containment_casing", casing));
@@ -372,7 +372,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 case CONTROL_ROD_A, CONTROL_ROD_B, CONTROL_ROD_C, CONTROL_ROD_D -> electrical;
                 case COOLANT_CHANNEL -> casing;
                 case INSTRUMENTATION -> striped;
-                case REFLECTOR -> modLoc("blocks/multiblock_parts/corrugated_iron_side");
+                case REFLECTOR -> modLoc("block/multiblock_parts/corrugated_iron_side");
             };
             String id = "reactor_" + type.name().toLowerCase(java.util.Locale.ROOT);
             ModelFile model = models().cubeColumn(id, texture, coilEnd);
@@ -381,17 +381,17 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void registerNuclearThermalModels() {
-        ResourceLocation casing = modLoc("blocks/multiblock_parts/base_side");
-        ResourceLocation striped = modLoc("blocks/multiblock_parts/striped");
-        ResourceLocation electrical = modLoc("blocks/multiblock_parts/electric");
-        ResourceLocation coilSide = modLoc("blocks/multiblock_parts/copper_coil_side");
-        ResourceLocation coilEnd = modLoc("blocks/multiblock_parts/copper_coil");
+        ResourceLocation casing = modLoc("block/multiblock_parts/base_side");
+        ResourceLocation striped = modLoc("block/multiblock_parts/striped");
+        ResourceLocation electrical = modLoc("block/multiblock_parts/electric");
+        ResourceLocation coilSide = modLoc("block/multiblock_parts/copper_coil_side");
+        ResourceLocation coilEnd = modLoc("block/multiblock_parts/copper_coil");
 
         registerNuclearPort(ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get(), "nuclear_thermal_port", striped);
         simpleBlockWithItem(ModNuclearBlocks.NUCLEAR_HEAT_EXCHANGER.get(),
                 models().cubeColumn("nuclear_heat_exchanger", coilSide, coilEnd));
         simpleBlockWithItem(ModNuclearBlocks.COOLING_TOWER_FILL.get(),
-                models().cubeAll("cooling_tower_fill", modLoc("blocks/multiblock_parts/corrugated_iron_side")));
+                models().cubeAll("cooling_tower_fill", modLoc("block/multiblock_parts/corrugated_iron_side")));
         simpleBlockWithItem(ModNuclearBlocks.COOLING_TOWER_FAN.get(),
                 models().cubeColumn("cooling_tower_fan", electrical, coilEnd));
         registerNuclearPort(ModNuclearBlocks.MAIN_COOLANT_PUMP.get(), "main_coolant_pump", coilSide);
@@ -410,11 +410,11 @@ final class ModBlockStateProvider extends BlockStateProvider {
         simpleBlockWithItem(ModNuclearBlocks.CORIUM.get(),
                 models().cubeAll("corium", mcLoc("block/magma")));
         ModelFile controller = models().cubeAll(
-                "spent_fuel_pool_controller", modLoc("blocks/multiblock_parts/electric"));
+                "spent_fuel_pool_controller", modLoc("block/multiblock_parts/electric"));
         horizontalBlock(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get(), ignored -> controller);
         simpleBlockItem(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get(), controller);
         registerNuclearPort(ModNuclearBlocks.SPENT_FUEL_POOL_PORT.get(),
-                "spent_fuel_pool_port", modLoc("blocks/multiblock_parts/striped"));
+                "spent_fuel_pool_port", modLoc("block/multiblock_parts/striped"));
     }
 
     private void registerSingleBlockMachineModel(Block block, SingleBlockMachineDefinition definition) {
@@ -431,138 +431,138 @@ final class ModBlockStateProvider extends BlockStateProvider {
             }
             case SPRINKLER -> simpleBlockWithItem(
                     block,
-                    models().cubeAll(definition.id(), modLoc("blocks/machines/water_generator"))
+                    models().cubeAll(definition.id(), modLoc("block/machines/water_generator"))
             );
             case BOX -> simpleBlockWithItem(
                     block,
-                    models().cubeAll(definition.id(), modLoc("blocks/machines/box"))
+                    models().cubeAll(definition.id(), modLoc("block/machines/box"))
             );
             case FABRICATOR -> simpleBlockWithItem(block, models().cube(
                     definition.id(),
-                    modLoc("blocks/machines/fabricator_bottom"),
-                    modLoc("blocks/machines/fabricator_top"),
-                    modLoc("blocks/machines/fabricator_side"),
-                    modLoc("blocks/machines/fabricator_side"),
-                    modLoc("blocks/machines/fabricator_side"),
-                    modLoc("blocks/machines/fabricator_side")
+                    modLoc("block/machines/fabricator_bottom"),
+                    modLoc("block/machines/fabricator_top"),
+                    modLoc("block/machines/fabricator_side"),
+                    modLoc("block/machines/fabricator_side"),
+                    modLoc("block/machines/fabricator_side"),
+                    modLoc("block/machines/fabricator_side")
             ));
             case WATER_GENERATOR -> simpleBlockWithItem(
                     block,
-                    models().cubeAll(definition.id(), modLoc("blocks/machines/water_generator"))
+                    models().cubeAll(definition.id(), modLoc("block/machines/water_generator"))
             );
             case ELECTRIC_HEATER -> registerLitColumn(
                     block,
                     definition.id(),
-                    modLoc("blocks/electric_machines/heater"),
-                    modLoc("blocks/electric_machines/heater_off"),
-                    modLoc("blocks/electric_machines/heater_on")
+                    modLoc("block/electric_machines/heater"),
+                    modLoc("block/electric_machines/heater_off"),
+                    modLoc("block/electric_machines/heater_on")
             );
             case RF_HEATER -> registerLitColumn(
                     block,
                     definition.id(),
-                    modLoc("blocks/electric_machines/rf_heater"),
-                    modLoc("blocks/electric_machines/rf_heater_off"),
-                    modLoc("blocks/electric_machines/rf_heater_on")
+                    modLoc("block/electric_machines/rf_heater"),
+                    modLoc("block/electric_machines/rf_heater_off"),
+                    modLoc("block/electric_machines/rf_heater_on")
             );
             case BRICK_FURNACE -> registerLitHorizontal(
                     block,
                     definition.id(),
-                    modLoc("blocks/heat_machines/brick_furnace"),
-                    modLoc("blocks/heat_machines/brick_furnace_top"),
-                    modLoc("blocks/heat_machines/brick_furnace_front"),
-                    modLoc("blocks/heat_machines/brick_furnace_front_on")
+                    modLoc("block/heat_machines/brick_furnace"),
+                    modLoc("block/heat_machines/brick_furnace_top"),
+                    modLoc("block/heat_machines/brick_furnace_front"),
+                    modLoc("block/heat_machines/brick_furnace_front_on")
             );
             case INFINITE_ENERGY -> simpleBlockWithItem(
                     block,
                     models().cubeColumn(
                             definition.id(),
-                            modLoc("blocks/electric_machines/infinite_energy"),
-                            modLoc("blocks/electric_machines/infinite_energy_top")
+                            modLoc("block/electric_machines/infinite_energy"),
+                            modLoc("block/electric_machines/infinite_energy_top")
                     )
             );
             case AIRLOCK -> simpleBlockWithItem(
                     block,
-                    models().cubeAll(definition.id(), modLoc("blocks/machines/airlock"))
+                    models().cubeAll(definition.id(), modLoc("block/machines/airlock"))
             );
             case THERMOPILE -> simpleBlockWithItem(
                     block,
                     models().cubeColumn(
                             definition.id(),
-                            modLoc("blocks/electric_machines/thermopile"),
-                            modLoc("blocks/electric_machines/thermopile_top")
+                            modLoc("block/electric_machines/thermopile"),
+                            modLoc("block/electric_machines/thermopile_top")
                     )
             );
             case RF_TRANSFORMER -> simpleBlockWithItem(
                     block,
                     models().cubeColumn(
                             definition.id(),
-                            modLoc("blocks/electric_machines/rf_transformer"),
-                            modLoc("blocks/electric_machines/rf_transformer_top")
+                            modLoc("block/electric_machines/rf_transformer"),
+                            modLoc("block/electric_machines/rf_transformer_top")
                     )
             );
             case RELAY, FILTER, TRANSPOSER -> registerPneumaticEndpoint(block, definition);
             case SLUICE_BOX -> registerRenderedMachine(
                     block,
                     definition,
-                    modLoc("blocks/machines/table_sieve_bottom"),
+                    modLoc("block/machines/table_sieve_bottom"),
                     mcxModel(definition.id() + "_inventory", "sluice_box_inv",
-                            modLoc("blocks/machines/table_sieve_bottom"), ModelSceneSelection.ALL)
+                            modLoc("block/machines/table_sieve_bottom"), ModelSceneSelection.ALL)
             );
             case FEEDING_TROUGH -> registerRenderedMachine(
                     block,
                     definition,
-                    modLoc("blocks/machines/feeding_trough"),
+                    modLoc("block/machines/feeding_trough"),
                     mcxModel(definition.id() + "_inventory", "feeding_trough_inv",
-                            modLoc("blocks/machines/feeding_trough"), ModelSceneSelection.ALL)
+                            modLoc("block/machines/feeding_trough"), ModelSceneSelection.ALL)
             );
             case SMALL_TANK -> registerRenderedMachine(
                     block,
                     definition,
-                    modLoc("blocks/fluid_machines/small_tank_in"),
+                    modLoc("block/fluid_machines/small_tank_in"),
                     mcxModel(definition.id() + "_inventory", "small_tank",
-                            modLoc("blocks/fluid_machines/small_tank_in"), ModelSceneSelection.ALL)
+                            modLoc("block/fluid_machines/small_tank_in"), ModelSceneSelection.ALL)
             );
             case COMBUSTION_CHAMBER -> registerRenderedMachine(
                     block,
                     definition,
-                    modLoc("blocks/machines/combustion_gen_side1"),
+                    modLoc("block/machines/combustion_gen_side1"),
                     mcxModel(definition.id() + "_inventory", "combustion_chamber",
-                            modLoc("blocks/machines/combustion_gen_side1"), ModelSceneSelection.ALL)
+                            modLoc("block/machines/combustion_gen_side1"), ModelSceneSelection.ALL)
             );
             case STEAM_BOILER -> registerRenderedMachine(
                     block,
                     definition,
-                    modLoc("blocks/machines/boiler"),
+                    modLoc("block/machines/boiler"),
                     mcxModel(definition.id() + "_inventory", "steam_boiler",
-                            modLoc("blocks/machines/boiler"), ModelSceneSelection.ALL)
+                            modLoc("block/machines/boiler"), ModelSceneSelection.ALL)
             );
             case GASIFICATION_UNIT -> registerRenderedMachine(
                     block,
                     definition,
-                    modLoc("blocks/machines/gasification_unit"),
+                    modLoc("block/machines/gasification_unit"),
                     mcxModel(definition.id() + "_inventory", "gasification_unit",
-                            modLoc("blocks/machines/gasification_unit"), ModelSceneSelection.ALL)
+                            modLoc("block/machines/gasification_unit"), ModelSceneSelection.ALL)
             );
             case INSERTER -> registerRenderedMachine(
                     block,
                     definition,
-                    modLoc("blocks/machines/inserter"),
+                    modLoc("block/machines/inserter"),
                     gltfModel(definition.id() + "_inventory", "inserter",
-                            modLoc("blocks/machines/inserter"), ModelSceneSelection.ALL)
+                            modLoc("block/machines/inserter"), ModelSceneSelection.ALL)
             );
             case ELECTRIC_ENGINE -> registerRenderedMachine(
                     block,
                     definition,
-                    modLoc("blocks/electric_machines/electric_engine"),
+                    modLoc("block/electric_machines/electric_engine"),
                     gltfModel(definition.id() + "_inventory", "electric_engine",
-                            modLoc("blocks/electric_machines/electric_engine"), ModelSceneSelection.ALL)
+                            modLoc("block/electric_machines/electric_engine"), ModelSceneSelection.ALL)
             );
             case INTERNAL_COMBUSTION_ENGINE -> {
                 ModelFile model = models().orientable(
                         definition.id(),
-                        modLoc("blocks/electric_machines/combustion_gen_side1"),
-                        modLoc("blocks/electric_machines/combustion_gen_back"),
-                        modLoc("blocks/electric_machines/combustion_gen_top")
+                        modLoc("block/electric_machines/combustion_gen_side1"),
+                        modLoc("block/electric_machines/combustion_gen_back"),
+                        modLoc("block/electric_machines/combustion_gen_top")
                 ).renderType(CUTOUT_RENDER_TYPE);
                 directionalSingleBlock(block, model);
                 simpleBlockItem(block, model);
@@ -640,12 +640,12 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private void legacyConduitBlock(Block block, String artifactName) {
         ResourceLocation particle = switch (artifactName) {
-                    case "electric_cable" -> modLoc("blocks/electric_connectors/electric_cable");
-                    case "heat_pipe" -> modLoc("blocks/fluid_machines/iron_pipe");
-                    case "insulated_heat_pipe" -> modLoc("blocks/fluid_machines/insulated_heat_pipe");
-                    case "iron_fluid_pipe" -> modLoc("blocks/fluid_machines/iron_pipe");
+                    case "electric_cable" -> modLoc("block/electric_connectors/electric_cable");
+                    case "heat_pipe" -> modLoc("block/fluid_machines/iron_pipe");
+                    case "insulated_heat_pipe" -> modLoc("block/fluid_machines/insulated_heat_pipe");
+                    case "iron_fluid_pipe" -> modLoc("block/fluid_machines/iron_pipe");
                     case "pneumatic_tube", "pneumatic_restriction_tube" ->
-                            modLoc("blocks/machines/pneumatic_tube");
+                            modLoc("block/machines/pneumatic_tube");
                     default -> throw new IllegalArgumentException("Unknown historical conduit: " + artifactName);
                 };
         String sourceName = switch (artifactName) {
@@ -681,7 +681,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private void brassPressurePipeBlock() {
         Block block = ModNetworkBlocks.BRASS_PRESSURE_PIPE.get();
-        ResourceLocation texture = modLoc("blocks/fluid_machines/brass_pressure_pipe");
+        ResourceLocation texture = modLoc("block/fluid_machines/brass_pressure_pipe");
         MultiPartBlockStateBuilder multipart = getMultipartBuilder(block);
         multipart.part()
                 .modelFile(cuboidModel("brass_pressure_pipe_center", texture, 4, 4, 4, 12, 12, 12))
@@ -906,14 +906,14 @@ final class ModBlockStateProvider extends BlockStateProvider {
             case TRANSPOSER -> "transposer";
             default -> throw new IllegalArgumentException("Not a pneumatic endpoint: " + definition);
         };
-        ResourceLocation side = modLoc("blocks/machines/" + texture + "_side");
+        ResourceLocation side = modLoc("block/machines/" + texture + "_side");
         ModelFile model = models().withExistingParent(definition.id(), modLoc("block/pneumatic_endpoint"))
-                .texture("particle", modLoc("blocks/machines/" + texture + "_front"))
+                .texture("particle", modLoc("block/machines/" + texture + "_front"))
                 .texture("down", side)
                 .texture("up", side)
-                .texture("north", modLoc("blocks/machines/" + texture + "_front"))
+                .texture("north", modLoc("block/machines/" + texture + "_front"))
                 .texture("east", side)
-                .texture("south", modLoc("blocks/machines/" + texture + "_back"))
+                .texture("south", modLoc("block/machines/" + texture + "_back"))
                 .texture("west", side);
         getVariantBuilder(block).forAllStates(state -> {
             Direction facing = state.getValue(SingleBlockMachineBlock.FACING);
@@ -1116,7 +1116,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 mcxModel(
                         "electric_connector",
                         "connector",
-                        modLoc("blocks/electric_connectors/connector"),
+                        modLoc("block/electric_connectors/connector"),
                         ModelSceneSelection.ALL
                 )
         );
@@ -1125,7 +1125,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 gltfModel(
                         "wireless_energy_receiver",
                         "energy_receiver",
-                        modLoc("blocks/electric_connectors/energy_receiver"),
+                        modLoc("block/electric_connectors/energy_receiver"),
                         ModelSceneSelection.ALL
                 )
         );
@@ -1171,12 +1171,12 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 ModNetworkBlocks.DIODE.get(),
                 "diode",
                 modLoc("block/electrical_indicator"),
-                modLoc("blocks/ore_block/copper_block")
+                modLoc("block/ore_block/copper_block")
         );
         electricalControlModel(
                 ModNetworkBlocks.RESISTOR.get(),
                 "resistor",
-                modLoc("blocks/ore_block/copper_block"),
+                modLoc("block/ore_block/copper_block"),
                 modLoc("block/electrical_indicator")
         );
 
@@ -1184,10 +1184,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ModelFile teslaBottom = gltfModel(
                 "tesla_tower_bottom",
                 "tesla_tower",
-                modLoc("blocks/electric_connectors/tesla_tower"),
+                modLoc("block/electric_connectors/tesla_tower"),
                 ModelSceneSelection.ALL
         );
-        ModelFile teslaEmpty = emptyModel("tesla_tower_member", modLoc("blocks/electric_connectors/tesla_tower"));
+        ModelFile teslaEmpty = emptyModel("tesla_tower_member", modLoc("block/electric_connectors/tesla_tower"));
         getVariantBuilder(teslaTower).forAllStates(state -> {
             TeslaTowerPart part = state.getValue(TeslaTowerBlock.PART);
             return ConfiguredModel.builder().modelFile(switch (part) {
@@ -1202,7 +1202,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 "wind_turbine",
                 "mcx",
                 "wind_turbine",
-                modLoc("blocks/electric_machines/wind_turbine"),
+                modLoc("block/electric_machines/wind_turbine"),
                 new ModelSceneSelection(Set.of("Shape2"), Set.of(), Set.of(), Set.of()),
                 new ModelTransform(0.0F, -5.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F)
         );
@@ -1213,7 +1213,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
                         "wind_turbine_inventory",
                         "mcx",
                         "wind_turbine",
-                        modLoc("blocks/electric_machines/wind_turbine"),
+                        modLoc("block/electric_machines/wind_turbine"),
                         ModelSceneSelection.ALL,
                         new ModelTransform(0.0F, -5.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F)
                 )
@@ -1268,7 +1268,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     private void poleModels(Block block, String name) {
-        ResourceLocation particle = modLoc("blocks/electric_connectors/" + name);
+        ResourceLocation particle = modLoc("block/electric_connectors/" + name);
         ModelFile empty = emptyModel(name + "_world", particle);
         ModelFile inventory = mcxModel(name + "_inventory", name, particle, ModelSceneSelection.ALL);
         getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()

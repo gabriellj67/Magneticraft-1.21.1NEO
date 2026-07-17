@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "magneticraft:blocks/machines/inserter"
+    "particle": "magneticraft:block/machines/inserter"
   }
 }

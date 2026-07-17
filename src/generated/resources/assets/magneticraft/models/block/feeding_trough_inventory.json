@@ -120,7 +120,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/feeding_trough_inv.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/machines/feeding_trough"
+    "particle": "magneticraft:block/machines/feeding_trough"
   },
   "translation": [
     0.0,

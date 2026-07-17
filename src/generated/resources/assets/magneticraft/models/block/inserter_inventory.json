@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/inserter.gltf",
   "textures": {
-    "particle": "magneticraft:blocks/machines/inserter"
+    "particle": "magneticraft:block/machines/inserter"
   },
   "translation": [
     0.0,

@@ -17,7 +17,7 @@ class McxModelParserTest {
         assertEquals(ModelScene.Format.MCX, scene.format());
         assertTrue(scene.ambientOcclusion());
         assertTrue(scene.gui3d());
-        assertEquals("magneticraft:blocks/test", scene.particleTexture());
+        assertEquals("magneticraft:block/test", scene.particleTexture());
         assertEquals(1, scene.nodes().size());
         assertEquals("rotor", scene.node(0).name());
         assertEquals(1, scene.node(0).primitives().get(0).faceCount());
@@ -42,14 +42,14 @@ class McxModelParserTest {
                 {
                   "useAmbientOcclusion": true,
                   "use3dInGui": true,
-                  "particleTexture": "magneticraft:blocks/test",
+                  "particleTexture": "magneticraft:block/test",
                   "parts": [
                     {
                       "name": "rotor",
                       "from": %d,
                       "to": %d,
                       "side": "north",
-                      "texture": "magneticraft:blocks/test"
+                      "texture": "magneticraft:block/test"
                     }
                   ],
                   "quads": {

@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "front": "magneticraft:blocks/electric_machines/electric_furnace_front",
-    "side": "magneticraft:blocks/electric_machines/electric_furnace",
-    "top": "magneticraft:blocks/electric_machines/electric_furnace"
+    "front": "magneticraft:block/electric_machines/electric_furnace_front",
+    "side": "magneticraft:block/electric_machines/electric_furnace",
+    "top": "magneticraft:block/electric_machines/electric_furnace"
   }
 }

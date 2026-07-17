@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "magneticraft:blocks/electric_connectors/electric_pole"
+    "particle": "magneticraft:block/electric_connectors/electric_pole"
   }
 }

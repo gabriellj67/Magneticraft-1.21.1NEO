@@ -2,7 +2,6 @@ package committee.nova.mods.magneticraft.data;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
-import net.minecraft.client.renderer.texture.atlas.sources.DirectoryLister;
 import net.minecraft.client.renderer.texture.atlas.sources.SingleFile;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -11,7 +10,7 @@ import net.minecraftforge.common.data.SpriteSourceProvider;
 import java.util.Optional;
 
 /**
- * Adds legacy fluid textures to Minecraft's block atlas without relocating them.
+ * Adds non-standard fluid textures to Minecraft's block atlas.
  */
 final class ModSpriteSourceProvider extends SpriteSourceProvider {
     ModSpriteSourceProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
@@ -20,7 +19,6 @@ final class ModSpriteSourceProvider extends SpriteSourceProvider {
 
     @Override
     protected void addSources() {
-        atlas(BLOCKS_ATLAS).addSource(new DirectoryLister("blocks", "blocks/"));
         for (String textureId : java.util.Arrays.stream(FluidDefinition.values())
                 .map(FluidDefinition::textureId)
                 .distinct()

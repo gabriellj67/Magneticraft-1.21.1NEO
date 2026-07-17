@@ -115,7 +115,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/connector.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/electric_connectors/connector"
+    "particle": "magneticraft:block/electric_connectors/connector"
   },
   "translation": [
     0.0,

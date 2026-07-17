@@ -93,7 +93,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/combustion_chamber.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/machines/combustion_gen_side1"
+    "particle": "magneticraft:block/machines/combustion_gen_side1"
   },
   "translation": [
     0.0,

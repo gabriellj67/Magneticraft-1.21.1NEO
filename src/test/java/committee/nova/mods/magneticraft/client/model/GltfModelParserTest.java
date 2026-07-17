@@ -26,7 +26,7 @@ class GltfModelParserTest {
         );
 
         assertEquals(ModelScene.Format.GLTF, scene.format());
-        assertEquals("magneticraft:blocks/test", scene.particleTexture());
+        assertEquals("magneticraft:block/test", scene.particleTexture());
         assertEquals(1, scene.rootNodes().size());
         ModelScene.Primitive primitive = scene.node(0).primitives().get(0);
         assertEquals(1, primitive.faceCount());
@@ -110,7 +110,7 @@ class GltfModelParserTest {
                     {"bufferView": 0, "byteOffset": 12, "componentType": 5126, "count": 3, "type": "VEC2"},
                     {"bufferView": 1, "componentType": 5121, "count": 3, "type": "SCALAR"}
                   ],
-                  "images": [{"uri": "magneticraft:blocks/test"}],
+                  "images": [{"uri": "magneticraft:block/test"}],
                   "textures": [{"source": 0}],
                   "materials": [{"name": "tier_band", "pbrMetallicRoughness": {"baseColorTexture": {"index": 0}}}],
                   "meshes": [{"primitives": [{

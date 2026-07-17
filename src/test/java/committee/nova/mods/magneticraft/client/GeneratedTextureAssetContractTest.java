@@ -26,43 +26,63 @@ class GeneratedTextureAssetContractTest {
     );
 
     @Test
+    void texturesUseCanonicalPurposeDirectories() throws IOException {
+        try (var files = Files.walk(TEXTURES)) {
+            var relativeFiles = files
+                    .filter(Files::isRegularFile)
+                    .map(TEXTURES::relativize)
+                    .toList();
+            Set<String> roots = relativeFiles.stream()
+                    .map(path -> path.getName(0).toString())
+                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
+
+            assertEquals(Set.of("block", "fluid", "item"), roots);
+            assertTrue(
+                    relativeFiles.stream().noneMatch(path ->
+                            path.toString().replace('\\', '/').contains("/unsorted/")),
+                    "Texture assets must be assigned to a semantic directory"
+            );
+        }
+    }
+
+    @Test
     void multiblockPartsUseTheRetainedNovaTexturesInsteadOfVanillaPlaceholders() throws IOException {
         assertBlockTextures("machine_casing", Set.of(
-                "magneticraft:blocks/multiblock_parts/base_bottom",
-                "magneticraft:blocks/multiblock_parts/base_side",
-                "magneticraft:blocks/multiblock_parts/base_top"
+                "magneticraft:block/multiblock_parts/base_bottom",
+                "magneticraft:block/multiblock_parts/base_side",
+                "magneticraft:block/multiblock_parts/base_top"
         ));
         assertBlockTextures("corrugated_iron", Set.of(
-                "magneticraft:blocks/multiblock_parts/corrugated_iron",
-                "magneticraft:blocks/multiblock_parts/corrugated_iron_side"
+                "magneticraft:block/multiblock_parts/corrugated_iron",
+                "magneticraft:block/multiblock_parts/corrugated_iron_side"
         ));
         assertBlockTextures("copper_coil", Set.of(
-                "magneticraft:blocks/multiblock_parts/copper_coil",
-                "magneticraft:blocks/multiblock_parts/copper_coil_side"
+                "magneticraft:block/multiblock_parts/copper_coil",
+                "magneticraft:block/multiblock_parts/copper_coil_side"
         ));
         assertBlockTextures("machine_support_column", Set.of(
-                "magneticraft:blocks/multiblock_parts/column_end",
-                "magneticraft:blocks/multiblock_parts/column_side"
+                "magneticraft:block/multiblock_parts/column_end",
+                "magneticraft:block/multiblock_parts/column_side"
         ));
         assertBlockTextures("striped_machine_casing", Set.of(
-                "magneticraft:blocks/multiblock_parts/striped"
+                "magneticraft:block/multiblock_parts/striped"
         ));
         assertBlockTextures("electrical_machine_casing", Set.of(
-                "magneticraft:blocks/multiblock_parts/electric"
+                "magneticraft:block/multiblock_parts/electric"
         ));
         assertBlockTextures("pumpjack_drill", Set.of(
-                "magneticraft:blocks/multiblock_parts/pumpjack_drill",
-                "magneticraft:blocks/multiblock_parts/pumpjack_drill_side"
+                "magneticraft:block/multiblock_parts/pumpjack_drill",
+                "magneticraft:block/multiblock_parts/pumpjack_drill_side"
         ));
         assertBlockTextures("multiblock_gap", Set.of(
-                "magneticraft:blocks/multiblocks/multiblock_gap"
+                "magneticraft:block/multiblocks/multiblock_gap"
         ));
     }
 
     @Test
     void utilityAndWorldBlocksUseTheirRetainedNovaTexturesInsteadOfVanillaPlaceholders() throws IOException {
-        assertBlockTextures("air_bubble", Set.of("magneticraft:blocks/machines/air_bubble"));
-        assertBlockTextures("oil_deposit", Set.of("magneticraft:blocks/ore_block/oil_source_1"));
+        assertBlockTextures("air_bubble", Set.of("magneticraft:block/machines/air_bubble"));
+        assertBlockTextures("oil_deposit", Set.of("magneticraft:block/ore_block/oil_source_1"));
     }
 
     @Test
@@ -89,7 +109,7 @@ class GeneratedTextureAssetContractTest {
 
     @Test
     void generatedPixelArtHasTheRequiredResolutionAndItemTransparency() throws IOException {
-        assertTexture("blocks/multiblocks/unmounted_multiblock", false);
+        assertTexture("block/multiblocks/unmounted_multiblock", false);
         assertTexture("block/electrical_enclosure", false);
         assertTexture("block/electrical_breaker_housing", false);
         assertTexture("block/burnt_electric_cable", false);

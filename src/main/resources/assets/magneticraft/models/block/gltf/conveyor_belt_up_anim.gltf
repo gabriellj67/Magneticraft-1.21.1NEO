@@ -56,7 +56,7 @@
   ],
   "images": [
     {
-      "uri": "magneticraft:blocks/machines/conveyor_belt_anim"
+      "uri": "magneticraft:block/machines/conveyor_belt_anim"
     }
   ],
   "materials": [

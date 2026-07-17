@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "magneticraft:blocks/ore_block/oil_source_1"
+    "all": "magneticraft:block/ore_block/oil_source_1"
   }
 }

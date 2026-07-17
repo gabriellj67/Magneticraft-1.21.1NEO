@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "magneticraft:blocks/multiblock_parts/striped"
+    "all": "magneticraft:block/multiblock_parts/striped"
   }
 }

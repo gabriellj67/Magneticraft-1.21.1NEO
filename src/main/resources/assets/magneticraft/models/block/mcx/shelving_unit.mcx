@@ -1,319 +1,319 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/multiblocks/shelving_unit",
+  "particleTexture": "magneticraft:block/multiblocks/shelving_unit",
   "parts": [
     {
       "name": "Shape1",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape2",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape3",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape4",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape5",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape6",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape7",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape8",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape9",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape10",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape11",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape12",
       "from": 66,
       "to": 72,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape13",
       "from": 72,
       "to": 78,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape14",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape15",
       "from": 84,
       "to": 90,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape16",
       "from": 90,
       "to": 96,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape17",
       "from": 96,
       "to": 102,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape18",
       "from": 102,
       "to": 108,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape19",
       "from": 108,
       "to": 114,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape20",
       "from": 114,
       "to": 120,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape21",
       "from": 120,
       "to": 126,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape22",
       "from": 126,
       "to": 132,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape23",
       "from": 132,
       "to": 138,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape24",
       "from": 138,
       "to": 144,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape25",
       "from": 144,
       "to": 150,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape26",
       "from": 150,
       "to": 156,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape27",
       "from": 156,
       "to": 162,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Shape28",
       "from": 162,
       "to": 168,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate1",
       "from": 168,
       "to": 174,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate2",
       "from": 174,
       "to": 180,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate3",
       "from": 180,
       "to": 186,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate4",
       "from": 186,
       "to": 192,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate5",
       "from": 192,
       "to": 198,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate6",
       "from": 198,
       "to": 204,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate7",
       "from": 204,
       "to": 210,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate8",
       "from": 210,
       "to": 216,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate9",
       "from": 216,
       "to": 222,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate10",
       "from": 222,
       "to": 228,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate11",
       "from": 228,
       "to": 234,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate12",
       "from": 234,
       "to": 240,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate13",
       "from": 240,
       "to": 246,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate14",
       "from": 246,
       "to": 252,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate15",
       "from": 252,
       "to": 258,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate16",
       "from": 258,
       "to": 264,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate17",
       "from": 264,
       "to": 270,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate18",
       "from": 270,
       "to": 276,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate19",
       "from": 276,
       "to": 282,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate20",
       "from": 282,
       "to": 288,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate21",
       "from": 288,
       "to": 294,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate22",
       "from": 294,
       "to": 300,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate23",
       "from": 300,
       "to": 306,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     },
     {
       "name": "Crate24",
       "from": 306,
       "to": 312,
-      "texture": "magneticraft:blocks/multiblocks/shelving_unit"
+      "texture": "magneticraft:block/multiblocks/shelving_unit"
     }
   ],
   "quads": {

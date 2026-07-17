@@ -120,7 +120,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/heat_sink.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/machines/heat_sink"
+    "particle": "magneticraft:block/machines/heat_sink"
   },
   "translation": [
     0.0,

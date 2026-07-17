@@ -1,91 +1,91 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/machines/feeding_trough",
+  "particleTexture": "magneticraft:block/machines/feeding_trough",
   "parts": [
     {
       "name": "Shape1",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape2",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape3",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape4",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape5",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape6",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape7",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape8",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape9",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape10",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape11",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape12",
       "from": 66,
       "to": 72,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape13",
       "from": 72,
       "to": 78,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     },
     {
       "name": "Shape14",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/machines/feeding_trough"
+      "texture": "magneticraft:block/machines/feeding_trough"
     }
   ],
   "quads": {

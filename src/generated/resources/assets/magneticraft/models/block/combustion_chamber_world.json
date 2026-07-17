@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "magneticraft:blocks/machines/combustion_gen_side1"
+    "particle": "magneticraft:block/machines/combustion_gen_side1"
   }
 }

@@ -576,45 +576,45 @@ class GeneratedDataContractTest {
             assertTrue(chinese.has(key), key);
         }
         Map.ofEntries(
-                Map.entry("wooden_crate", Map.of("all", "magneticraft:blocks/machines/box")),
+                Map.entry("wooden_crate", Map.of("all", "magneticraft:block/machines/box")),
                 Map.entry("fabricator", Map.of(
-                        "down", "magneticraft:blocks/machines/fabricator_bottom",
-                        "up", "magneticraft:blocks/machines/fabricator_top",
-                        "north", "magneticraft:blocks/machines/fabricator_side"
+                        "down", "magneticraft:block/machines/fabricator_bottom",
+                        "up", "magneticraft:block/machines/fabricator_top",
+                        "north", "magneticraft:block/machines/fabricator_side"
                 )),
-                Map.entry("water_generator", Map.of("all", "magneticraft:blocks/machines/water_generator")),
+                Map.entry("water_generator", Map.of("all", "magneticraft:block/machines/water_generator")),
                 Map.entry("electric_heater", Map.of(
-                        "side", "magneticraft:blocks/electric_machines/heater",
-                        "end", "magneticraft:blocks/electric_machines/heater_off"
+                        "side", "magneticraft:block/electric_machines/heater",
+                        "end", "magneticraft:block/electric_machines/heater_off"
                 )),
-                Map.entry("electric_heater_on", Map.of("end", "magneticraft:blocks/electric_machines/heater_on")),
+                Map.entry("electric_heater_on", Map.of("end", "magneticraft:block/electric_machines/heater_on")),
                 Map.entry("forge_energy_heater", Map.of(
-                        "side", "magneticraft:blocks/electric_machines/rf_heater",
-                        "end", "magneticraft:blocks/electric_machines/rf_heater_off"
+                        "side", "magneticraft:block/electric_machines/rf_heater",
+                        "end", "magneticraft:block/electric_machines/rf_heater_off"
                 )),
                 Map.entry("forge_energy_heater_on", Map.of(
-                        "end", "magneticraft:blocks/electric_machines/rf_heater_on"
+                        "end", "magneticraft:block/electric_machines/rf_heater_on"
                 )),
                 Map.entry("brick_furnace", Map.of(
-                        "side", "magneticraft:blocks/heat_machines/brick_furnace",
-                        "top", "magneticraft:blocks/heat_machines/brick_furnace_top",
-                        "front", "magneticraft:blocks/heat_machines/brick_furnace_front"
+                        "side", "magneticraft:block/heat_machines/brick_furnace",
+                        "top", "magneticraft:block/heat_machines/brick_furnace_top",
+                        "front", "magneticraft:block/heat_machines/brick_furnace_front"
                 )),
                 Map.entry("brick_furnace_on", Map.of(
-                        "front", "magneticraft:blocks/heat_machines/brick_furnace_front_on"
+                        "front", "magneticraft:block/heat_machines/brick_furnace_front_on"
                 )),
                 Map.entry("infinite_energy_source", Map.of(
-                        "side", "magneticraft:blocks/electric_machines/infinite_energy",
-                        "end", "magneticraft:blocks/electric_machines/infinite_energy_top"
+                        "side", "magneticraft:block/electric_machines/infinite_energy",
+                        "end", "magneticraft:block/electric_machines/infinite_energy_top"
                 )),
-                Map.entry("airlock", Map.of("all", "magneticraft:blocks/machines/airlock")),
+                Map.entry("airlock", Map.of("all", "magneticraft:block/machines/airlock")),
                 Map.entry("thermopile", Map.of(
-                        "side", "magneticraft:blocks/electric_machines/thermopile",
-                        "end", "magneticraft:blocks/electric_machines/thermopile_top"
+                        "side", "magneticraft:block/electric_machines/thermopile",
+                        "end", "magneticraft:block/electric_machines/thermopile_top"
                 )),
                 Map.entry("forge_energy_transformer", Map.of(
-                        "side", "magneticraft:blocks/electric_machines/rf_transformer",
-                        "end", "magneticraft:blocks/electric_machines/rf_transformer_top"
+                        "side", "magneticraft:block/electric_machines/rf_transformer",
+                        "end", "magneticraft:block/electric_machines/rf_transformer_top"
                 ))
         ).forEach((model, textures) -> assertModelTexturesUnchecked(model, textures));
         for (String id : Set.of("tube_light", "inserter_speed_upgrade", "inserter_stack_upgrade")) {

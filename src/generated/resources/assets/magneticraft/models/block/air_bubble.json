@@ -2,6 +2,6 @@
   "parent": "minecraft:block/cube_all",
   "render_type": "minecraft:translucent",
   "textures": {
-    "all": "magneticraft:blocks/machines/air_bubble"
+    "all": "magneticraft:block/machines/air_bubble"
   }
 }

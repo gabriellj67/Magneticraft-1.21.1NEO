@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/tesla_tower.gltf",
   "textures": {
-    "particle": "magneticraft:blocks/electric_connectors/tesla_tower"
+    "particle": "magneticraft:block/electric_connectors/tesla_tower"
   },
   "translation": [
     0.0,

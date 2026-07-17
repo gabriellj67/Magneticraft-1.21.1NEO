@@ -268,7 +268,7 @@
   ],
   "images": [
     {
-      "uri": "magneticraft:blocks/machines/pneumatic_tube"
+      "uri": "magneticraft:block/machines/pneumatic_tube"
     }
   ],
   "materials": [

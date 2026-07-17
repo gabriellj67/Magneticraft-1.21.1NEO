@@ -1,109 +1,109 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/decoration/tube_light",
+  "particleTexture": "magneticraft:block/decoration/tube_light",
   "parts": [
     {
       "name": "Shape1",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Shape2",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Shape3",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Middle light1",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Middle light2",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Right1",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Right2",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Right3",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Left1",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Left2",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Left3",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Lone ling1",
       "from": 66,
       "to": 72,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Lone light2",
       "from": 72,
       "to": 78,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Right light1",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Right light2",
       "from": 84,
       "to": 90,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Left light1",
       "from": 90,
       "to": 96,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     },
     {
       "name": "Left light2",
       "from": 96,
       "to": 102,
-      "texture": "magneticraft:blocks/decoration/tube_light"
+      "texture": "magneticraft:block/decoration/tube_light"
     }
   ],
   "quads": {

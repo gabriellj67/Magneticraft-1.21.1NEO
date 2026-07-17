@@ -123,7 +123,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/wind_turbine.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/electric_machines/wind_turbine"
+    "particle": "magneticraft:block/electric_machines/wind_turbine"
   },
   "translation": [
     0.0,

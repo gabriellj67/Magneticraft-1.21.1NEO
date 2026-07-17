@@ -93,7 +93,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/steam_boiler.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/machines/boiler"
+    "particle": "magneticraft:block/machines/boiler"
   },
   "translation": [
     0.0,

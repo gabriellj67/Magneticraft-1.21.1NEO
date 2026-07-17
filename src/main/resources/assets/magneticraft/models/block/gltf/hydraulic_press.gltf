@@ -1837,13 +1837,13 @@
   ],
   "images": [
     {
-      "uri": "magneticraft:blocks/multiblocks/hydraulic_press"
+      "uri": "magneticraft:block/multiblocks/hydraulic_press"
     },
     {
-      "uri": "magneticraft:blocks/multiblocks/hydraulic_press_aux2"
+      "uri": "magneticraft:block/multiblocks/hydraulic_press_aux2"
     },
     {
-      "uri": "magneticraft:blocks/multiblocks/hydraulic_press_aux"
+      "uri": "magneticraft:block/multiblocks/hydraulic_press_aux"
     }
   ],
   "materials": [

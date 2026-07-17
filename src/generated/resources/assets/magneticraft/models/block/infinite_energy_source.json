@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "magneticraft:blocks/electric_machines/infinite_energy_top",
-    "side": "magneticraft:blocks/electric_machines/infinite_energy"
+    "end": "magneticraft:block/electric_machines/infinite_energy_top",
+    "side": "magneticraft:block/electric_machines/infinite_energy"
   }
 }

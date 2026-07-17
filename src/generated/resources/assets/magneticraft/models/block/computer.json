@@ -123,7 +123,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/computer.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/computers/computer1"
+    "particle": "magneticraft:block/computers/computer1"
   },
   "translation": [
     0.0,

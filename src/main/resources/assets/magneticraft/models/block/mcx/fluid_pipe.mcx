@@ -1,349 +1,349 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/fluid_machines/fluid_pipe",
+  "particleTexture": "magneticraft:block/fluid_machines/fluid_pipe",
   "parts": [
     {
       "name": "center",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "center",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "center",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "center",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "center",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "center",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "center",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "center",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "center",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "wt",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "wb",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "eb",
       "from": 66,
       "to": 72,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "et",
       "from": 72,
       "to": 78,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "nt",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "nb",
       "from": 84,
       "to": 90,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "sb",
       "from": 90,
       "to": 96,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "st",
       "from": 96,
       "to": 102,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "nw",
       "from": 102,
       "to": 108,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "sw",
       "from": 108,
       "to": 114,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "se",
       "from": 114,
       "to": 120,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "ne",
       "from": 120,
       "to": 126,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "south",
       "from": 126,
       "to": 131,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "north",
       "from": 131,
       "to": 136,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "east",
       "from": 136,
       "to": 141,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "west",
       "from": 141,
       "to": 146,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "up",
       "from": 146,
       "to": 151,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "down",
       "from": 151,
       "to": 156,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "down",
       "from": 156,
       "to": 161,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "down",
       "from": 161,
       "to": 166,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "down",
       "from": 166,
       "to": 171,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "down",
       "from": 171,
       "to": 176,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "up",
       "from": 176,
       "to": 181,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "up",
       "from": 181,
       "to": 186,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "up",
       "from": 186,
       "to": 191,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "up",
       "from": 191,
       "to": 196,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "north",
       "from": 196,
       "to": 201,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "north",
       "from": 201,
       "to": 206,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "north",
       "from": 206,
       "to": 211,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "north",
       "from": 211,
       "to": 216,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "south",
       "from": 216,
       "to": 221,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "south",
       "from": 221,
       "to": 226,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "south",
       "from": 226,
       "to": 231,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "south",
       "from": 231,
       "to": 236,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "west",
       "from": 236,
       "to": 241,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "west",
       "from": 241,
       "to": 246,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "west",
       "from": 246,
       "to": 251,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "west",
       "from": 251,
       "to": 256,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "east",
       "from": 256,
       "to": 261,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "east",
       "from": 261,
       "to": 266,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "east",
       "from": 266,
       "to": 271,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "east",
       "from": 271,
       "to": 276,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "csouth",
       "from": 276,
       "to": 282,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "ceast",
       "from": 282,
       "to": 288,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "cnorth",
       "from": 288,
       "to": 294,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "cwest",
       "from": 294,
       "to": 300,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "cup",
       "from": 300,
       "to": 306,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     },
     {
       "name": "cdown",
       "from": 306,
       "to": 312,
-      "texture": "magneticraft:blocks/fluid_machines/fluid_pipe"
+      "texture": "magneticraft:block/fluid_machines/fluid_pipe"
     }
   ],
   "quads": {

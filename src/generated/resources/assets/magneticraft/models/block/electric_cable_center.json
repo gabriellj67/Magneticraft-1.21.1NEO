@@ -98,7 +98,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/electric_cable.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/electric_connectors/electric_cable"
+    "particle": "magneticraft:block/electric_connectors/electric_cable"
   },
   "translation": [
     0.0,

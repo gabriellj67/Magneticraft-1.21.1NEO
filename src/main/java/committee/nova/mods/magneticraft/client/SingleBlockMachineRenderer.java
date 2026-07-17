@@ -17,8 +17,8 @@ import net.minecraft.world.item.ItemStack;
 public final class SingleBlockMachineRenderer implements BlockEntityRenderer<SingleBlockMachineBlockEntity> {
     private static final float PIXEL = 1.0F / 16.0F;
     private static final ResourceLocation WATER_FLOW = ResourceLocation.withDefaultNamespace("block/water_flow");
-    private static final ResourceLocation SMALL_TANK_IN = Magneticraft.id("blocks/fluid_machines/small_tank_in");
-    private static final ResourceLocation SMALL_TANK_OUT = Magneticraft.id("blocks/fluid_machines/small_tank_out");
+    private static final ResourceLocation SMALL_TANK_IN = Magneticraft.id("block/fluid_machines/small_tank_in");
+    private static final ResourceLocation SMALL_TANK_OUT = Magneticraft.id("block/fluid_machines/small_tank_out");
     private static final FeedItemTransform[] FEED_ITEMS = {
             new FeedItemTransform(1, 2.0F, 1.1F, 6.0F, 90.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F),
             new FeedItemTransform(1, 7.5F, 1.5F, 7.0F, 90.0F, 30.0F, 0.0F, 0.0F, 0.0F, 0.0F),

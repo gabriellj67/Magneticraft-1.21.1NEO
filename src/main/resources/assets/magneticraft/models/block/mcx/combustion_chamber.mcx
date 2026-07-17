@@ -1,199 +1,199 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/machines/combustion_gen_side1",
+  "particleTexture": "magneticraft:block/machines/combustion_gen_side1",
   "parts": [
     {
       "name": "Shape_0",
       "from": 0,
       "to": 4,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal2"
+      "texture": "magneticraft:block/machines/combustion_gen_metal2"
     },
     {
       "name": "Shape_1",
       "from": 4,
       "to": 8,
-      "texture": "magneticraft:blocks/machines/combustion_gen_back"
+      "texture": "magneticraft:block/machines/combustion_gen_back"
     },
     {
       "name": "Shape_2",
       "from": 8,
       "to": 9,
-      "texture": "magneticraft:blocks/machines/combustion_gen_top"
+      "texture": "magneticraft:block/machines/combustion_gen_top"
     },
     {
       "name": "Shape_3",
       "from": 9,
       "to": 10,
-      "texture": "magneticraft:blocks/machines/combustion_gen_side1"
+      "texture": "magneticraft:block/machines/combustion_gen_side1"
     },
     {
       "name": "Shape_4",
       "from": 10,
       "to": 12,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal2"
+      "texture": "magneticraft:block/machines/combustion_gen_metal2"
     },
     {
       "name": "Shape_5",
       "from": 12,
       "to": 13,
-      "texture": "magneticraft:blocks/machines/combustion_gen_black_bottom"
+      "texture": "magneticraft:block/machines/combustion_gen_black_bottom"
     },
     {
       "name": "Shape_6",
       "from": 13,
       "to": 17,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal2"
+      "texture": "magneticraft:block/machines/combustion_gen_metal2"
     },
     {
       "name": "Shape_7",
       "from": 17,
       "to": 21,
-      "texture": "magneticraft:blocks/machines/combustion_gen_back"
+      "texture": "magneticraft:block/machines/combustion_gen_back"
     },
     {
       "name": "Shape_8",
       "from": 21,
       "to": 22,
-      "texture": "magneticraft:blocks/machines/combustion_gen_side1"
+      "texture": "magneticraft:block/machines/combustion_gen_side1"
     },
     {
       "name": "Shape_9",
       "from": 22,
       "to": 25,
-      "texture": "magneticraft:blocks/machines/combustion_gen_back"
+      "texture": "magneticraft:block/machines/combustion_gen_back"
     },
     {
       "name": "Shape_10",
       "from": 25,
       "to": 26,
-      "texture": "magneticraft:blocks/machines/combustion_gen_side1"
+      "texture": "magneticraft:block/machines/combustion_gen_side1"
     },
     {
       "name": "Shape_11",
       "from": 26,
       "to": 29,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal2"
+      "texture": "magneticraft:block/machines/combustion_gen_metal2"
     },
     {
       "name": "Shape_12",
       "from": 29,
       "to": 33,
-      "texture": "magneticraft:blocks/machines/combustion_gen_back"
+      "texture": "magneticraft:block/machines/combustion_gen_back"
     },
     {
       "name": "Shape_13",
       "from": 33,
       "to": 34,
-      "texture": "magneticraft:blocks/machines/combustion_gen_side2"
+      "texture": "magneticraft:block/machines/combustion_gen_side2"
     },
     {
       "name": "Shape_14",
       "from": 34,
       "to": 37,
-      "texture": "magneticraft:blocks/machines/combustion_gen_back"
+      "texture": "magneticraft:block/machines/combustion_gen_back"
     },
     {
       "name": "Shape_15",
       "from": 37,
       "to": 38,
-      "texture": "magneticraft:blocks/machines/combustion_gen_side2"
+      "texture": "magneticraft:block/machines/combustion_gen_side2"
     },
     {
       "name": "Shape_16",
       "from": 38,
       "to": 40,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal2"
+      "texture": "magneticraft:block/machines/combustion_gen_metal2"
     },
     {
       "name": "Shape_17",
       "from": 40,
       "to": 42,
-      "texture": "magneticraft:blocks/machines/combustion_gen_back"
+      "texture": "magneticraft:block/machines/combustion_gen_back"
     },
     {
       "name": "Shape_18",
       "from": 42,
       "to": 43,
-      "texture": "magneticraft:blocks/machines/combustion_gen_black_side"
+      "texture": "magneticraft:block/machines/combustion_gen_black_side"
     },
     {
       "name": "Shape_19",
       "from": 43,
       "to": 45,
-      "texture": "magneticraft:blocks/machines/combustion_gen_back"
+      "texture": "magneticraft:block/machines/combustion_gen_back"
     },
     {
       "name": "Shape_20",
       "from": 45,
       "to": 46,
-      "texture": "magneticraft:blocks/machines/combustion_gen_side2"
+      "texture": "magneticraft:block/machines/combustion_gen_side2"
     },
     {
       "name": "Shape_21",
       "from": 46,
       "to": 48,
-      "texture": "magneticraft:blocks/machines/combustion_gen_back"
+      "texture": "magneticraft:block/machines/combustion_gen_back"
     },
     {
       "name": "Shape_22",
       "from": 48,
       "to": 49,
-      "texture": "magneticraft:blocks/machines/combustion_gen_side1"
+      "texture": "magneticraft:block/machines/combustion_gen_side1"
     },
     {
       "name": "Shape_23",
       "from": 49,
       "to": 51,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal2"
+      "texture": "magneticraft:block/machines/combustion_gen_metal2"
     },
     {
       "name": "Shape_24",
       "from": 51,
       "to": 52,
-      "texture": "magneticraft:blocks/machines/combustion_gen_black_side"
+      "texture": "magneticraft:block/machines/combustion_gen_black_side"
     },
     {
       "name": "Shape_25",
       "from": 52,
       "to": 54,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal2"
+      "texture": "magneticraft:block/machines/combustion_gen_metal2"
     },
     {
       "name": "Shape_26",
       "from": 54,
       "to": 55,
-      "texture": "magneticraft:blocks/machines/combustion_gen_black_side"
+      "texture": "magneticraft:block/machines/combustion_gen_black_side"
     },
     {
       "name": "Shape_27",
       "from": 55,
       "to": 56,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal2"
+      "texture": "magneticraft:block/machines/combustion_gen_metal2"
     },
     {
       "name": "Shape_28",
       "from": 56,
       "to": 57,
-      "texture": "magneticraft:blocks/machines/combustion_gen_black_bottom"
+      "texture": "magneticraft:block/machines/combustion_gen_black_bottom"
     },
     {
       "name": "Door",
       "from": 57,
       "to": 63,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal1"
+      "texture": "magneticraft:block/machines/combustion_gen_metal1"
     },
     {
       "name": "Shape_30",
       "from": 63,
       "to": 69,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal1"
+      "texture": "magneticraft:block/machines/combustion_gen_metal1"
     },
     {
       "name": "Shape_31",
       "from": 69,
       "to": 75,
-      "texture": "magneticraft:blocks/machines/combustion_gen_metal1"
+      "texture": "magneticraft:block/machines/combustion_gen_metal1"
     }
   ],
   "quads": {

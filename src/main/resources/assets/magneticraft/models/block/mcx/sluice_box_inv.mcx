@@ -1,169 +1,169 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/machines/table_sieve_side",
+  "particleTexture": "magneticraft:block/machines/table_sieve_side",
   "parts": [
     {
       "name": "Shape_20",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_12",
       "from": 6,
       "to": 7,
-      "texture": "magneticraft:blocks/machines/table_sieve_bottom"
+      "texture": "magneticraft:block/machines/table_sieve_bottom"
     },
     {
       "name": "Shape_2",
       "from": 7,
       "to": 11,
-      "texture": "magneticraft:blocks/machines/stone_slab_top"
+      "texture": "magneticraft:block/machines/stone_slab_top"
     },
     {
       "name": "Shape_1",
       "from": 11,
       "to": 17,
-      "texture": "magneticraft:blocks/machines/table_sieve_bottom"
+      "texture": "magneticraft:block/machines/table_sieve_bottom"
     },
     {
       "name": "Shape_0",
       "from": 17,
       "to": 23,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_7",
       "from": 23,
       "to": 26,
-      "texture": "magneticraft:blocks/machines/table_sieve_trough_side"
+      "texture": "magneticraft:block/machines/table_sieve_trough_side"
     },
     {
       "name": "Shape_19",
       "from": 26,
       "to": 30,
-      "texture": "magneticraft:blocks/machines/table_sieve_trough_side"
+      "texture": "magneticraft:block/machines/table_sieve_trough_side"
     },
     {
       "name": "Shape_3",
       "from": 30,
       "to": 32,
-      "texture": "magneticraft:blocks/machines/table_sieve_stone"
+      "texture": "magneticraft:block/machines/table_sieve_stone"
     },
     {
       "name": "Shape_17",
       "from": 32,
       "to": 38,
-      "texture": "magneticraft:blocks/machines/table_sieve_filter"
+      "texture": "magneticraft:block/machines/table_sieve_filter"
     },
     {
       "name": "Shape_8",
       "from": 38,
       "to": 39,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_6",
       "from": 39,
       "to": 40,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_16",
       "from": 40,
       "to": 46,
-      "texture": "magneticraft:blocks/machines/table_sieve_bottom"
+      "texture": "magneticraft:block/machines/table_sieve_bottom"
     },
     {
       "name": "Shape_10",
       "from": 46,
       "to": 49,
-      "texture": "magneticraft:blocks/machines/table_sieve_trough_side"
+      "texture": "magneticraft:block/machines/table_sieve_trough_side"
     },
     {
       "name": "Shape_5",
       "from": 49,
       "to": 50,
-      "texture": "magneticraft:blocks/machines/table_sieve_trough_side"
+      "texture": "magneticraft:block/machines/table_sieve_trough_side"
     },
     {
       "name": "Shape_21",
       "from": 50,
       "to": 56,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_25",
       "from": 56,
       "to": 62,
-      "texture": "magneticraft:blocks/machines/table_sieve_bottom"
+      "texture": "magneticraft:block/machines/table_sieve_bottom"
     },
     {
       "name": "Shape_13",
       "from": 62,
       "to": 67,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_9",
       "from": 67,
       "to": 68,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_4",
       "from": 68,
       "to": 74,
-      "texture": "magneticraft:blocks/machines/stone_slab_top"
+      "texture": "magneticraft:block/machines/stone_slab_top"
     },
     {
       "name": "Shape_14",
       "from": 74,
       "to": 75,
-      "texture": "magneticraft:blocks/machines/table_sieve_stone"
+      "texture": "magneticraft:block/machines/table_sieve_stone"
     },
     {
       "name": "Shape_11",
       "from": 75,
       "to": 78,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_23",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/machines/table_sieve_bottom"
+      "texture": "magneticraft:block/machines/table_sieve_bottom"
     },
     {
       "name": "Shape_26",
       "from": 84,
       "to": 90,
-      "texture": "magneticraft:blocks/machines/table_sieve_bottom"
+      "texture": "magneticraft:block/machines/table_sieve_bottom"
     },
     {
       "name": "Shape_22",
       "from": 90,
       "to": 96,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     },
     {
       "name": "Shape_24",
       "from": 96,
       "to": 102,
-      "texture": "magneticraft:blocks/machines/table_sieve_bottom"
+      "texture": "magneticraft:block/machines/table_sieve_bottom"
     },
     {
       "name": "Shape_18",
       "from": 102,
       "to": 104,
-      "texture": "magneticraft:blocks/machines/table_sieve_bottom"
+      "texture": "magneticraft:block/machines/table_sieve_bottom"
     },
     {
       "name": "Shape_15",
       "from": 104,
       "to": 107,
-      "texture": "magneticraft:blocks/machines/table_sieve_side"
+      "texture": "magneticraft:block/machines/table_sieve_side"
     }
   ],
   "quads": {

@@ -1,139 +1,139 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/machines/conveyor_belt",
+  "particleTexture": "magneticraft:block/machines/conveyor_belt",
   "parts": [
     {
       "name": "back_leg2",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "front_leg2",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "panel_left",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "back_leg1",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "front_leg1",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "panel_right",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "back_leg3",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "front_leg3",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "axis1",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "axis2",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "axis3",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "axis4",
       "from": 66,
       "to": 72,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "axis5",
       "from": 72,
       "to": 78,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "axis6",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "lateral_left",
       "from": 84,
       "to": 90,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "Connection left2",
       "from": 90,
       "to": 96,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "Connection left3",
       "from": 96,
       "to": 102,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "lateral_right",
       "from": 102,
       "to": 108,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "Connection right2",
       "from": 108,
       "to": 114,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "Connection right3",
       "from": 114,
       "to": 120,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     },
     {
       "name": "belt",
       "from": 120,
       "to": 123,
-      "texture": "magneticraft:blocks/machines/conveyor_belt_anim"
+      "texture": "magneticraft:block/machines/conveyor_belt_anim"
     },
     {
       "name": "Object 22",
       "from": 123,
       "to": 126,
-      "texture": "magneticraft:blocks/machines/conveyor_belt"
+      "texture": "magneticraft:block/machines/conveyor_belt"
     }
   ],
   "quads": {

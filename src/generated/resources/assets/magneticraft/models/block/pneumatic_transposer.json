@@ -1,12 +1,12 @@
 {
   "parent": "magneticraft:block/pneumatic_endpoint",
   "textures": {
-    "down": "magneticraft:blocks/machines/transposer_side",
-    "east": "magneticraft:blocks/machines/transposer_side",
-    "north": "magneticraft:blocks/machines/transposer_front",
-    "particle": "magneticraft:blocks/machines/transposer_front",
-    "south": "magneticraft:blocks/machines/transposer_back",
-    "up": "magneticraft:blocks/machines/transposer_side",
-    "west": "magneticraft:blocks/machines/transposer_side"
+    "down": "magneticraft:block/machines/transposer_side",
+    "east": "magneticraft:block/machines/transposer_side",
+    "north": "magneticraft:block/machines/transposer_front",
+    "particle": "magneticraft:block/machines/transposer_front",
+    "south": "magneticraft:block/machines/transposer_back",
+    "up": "magneticraft:block/machines/transposer_side",
+    "west": "magneticraft:block/machines/transposer_side"
   }
 }

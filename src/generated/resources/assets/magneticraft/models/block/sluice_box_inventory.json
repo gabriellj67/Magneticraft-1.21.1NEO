@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/sluice_box_inv.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/machines/table_sieve_bottom"
+    "particle": "magneticraft:block/machines/table_sieve_bottom"
   },
   "translation": [
     0.0,

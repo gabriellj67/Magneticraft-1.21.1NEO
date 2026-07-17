@@ -1,37 +1,37 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/machines/conveyor_belt_anim",
+  "particleTexture": "magneticraft:block/machines/conveyor_belt_anim",
   "parts": [
     {
       "name": "Object 30",
       "from": 0,
       "to": 1,
-      "texture": "magneticraft:blocks/machines/conveyor_belt_anim"
+      "texture": "magneticraft:block/machines/conveyor_belt_anim"
     },
     {
       "name": "Object 30",
       "from": 1,
       "to": 2,
-      "texture": "magneticraft:blocks/machines/conveyor_belt_anim"
+      "texture": "magneticraft:block/machines/conveyor_belt_anim"
     },
     {
       "name": "Object 32",
       "from": 2,
       "to": 3,
-      "texture": "magneticraft:blocks/machines/conveyor_belt_anim"
+      "texture": "magneticraft:block/machines/conveyor_belt_anim"
     },
     {
       "name": "Object 32",
       "from": 3,
       "to": 4,
-      "texture": "magneticraft:blocks/machines/conveyor_belt_anim"
+      "texture": "magneticraft:block/machines/conveyor_belt_anim"
     },
     {
       "name": "Object 32",
       "from": 4,
       "to": 5,
-      "texture": "magneticraft:blocks/machines/conveyor_belt_anim"
+      "texture": "magneticraft:block/machines/conveyor_belt_anim"
     }
   ],
   "quads": {

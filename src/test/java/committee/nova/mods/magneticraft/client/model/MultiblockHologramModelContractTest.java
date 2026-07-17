@@ -19,7 +19,7 @@ class MultiblockHologramModelContractTest {
             "src/generated/resources/assets/magneticraft"
     );
     private static final String UNMOUNTED_TEXTURE =
-            "magneticraft:blocks/multiblocks/unmounted_multiblock";
+            "magneticraft:block/multiblocks/unmounted_multiblock";
 
     @Test
     void worldControllerAndInventorySceneUseSeparateModels() throws Exception {

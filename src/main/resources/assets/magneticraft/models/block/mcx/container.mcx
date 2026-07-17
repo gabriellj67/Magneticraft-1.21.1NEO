@@ -1,271 +1,271 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/multiblocks/container",
+  "particleTexture": "magneticraft:block/multiblocks/container",
   "parts": [
     {
       "name": "shape1",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 66,
       "to": 72,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door right",
       "from": 72,
       "to": 78,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door left",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door right",
       "from": 84,
       "to": 90,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door right",
       "from": 90,
       "to": 96,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door left",
       "from": 96,
       "to": 102,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door left",
       "from": 102,
       "to": 108,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 108,
       "to": 114,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 114,
       "to": 120,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 120,
       "to": 126,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 126,
       "to": 132,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 132,
       "to": 138,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 138,
       "to": 144,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 144,
       "to": 150,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 150,
       "to": 156,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 156,
       "to": 162,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 162,
       "to": 168,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 168,
       "to": 174,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 174,
       "to": 180,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 180,
       "to": 186,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 186,
       "to": 192,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 192,
       "to": 198,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 198,
       "to": 204,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 204,
       "to": 210,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 210,
       "to": 216,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 216,
       "to": 222,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "shape1",
       "from": 222,
       "to": 228,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door right",
       "from": 228,
       "to": 234,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door left",
       "from": 234,
       "to": 240,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door right",
       "from": 240,
       "to": 246,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door right",
       "from": 246,
       "to": 252,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door left",
       "from": 252,
       "to": 258,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     },
     {
       "name": "door left",
       "from": 258,
       "to": 264,
-      "texture": "magneticraft:blocks/multiblocks/container"
+      "texture": "magneticraft:block/multiblocks/container"
     }
   ],
   "quads": {

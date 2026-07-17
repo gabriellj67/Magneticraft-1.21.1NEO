@@ -129,7 +129,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/mining_robot.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/computers/mining_robot"
+    "particle": "magneticraft:block/computers/mining_robot"
   },
   "translation": [
     0.0,

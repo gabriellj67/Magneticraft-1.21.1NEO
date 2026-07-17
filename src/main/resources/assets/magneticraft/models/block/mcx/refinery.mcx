@@ -1,211 +1,211 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/multiblocks/refinery",
+  "particleTexture": "magneticraft:block/multiblocks/refinery",
   "parts": [
     {
       "name": "Object 1",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv1_3",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv2_3",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv3_3",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv1_1",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv2_1",
       "from": 66,
       "to": 72,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv3_1",
       "from": 72,
       "to": 78,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv1_0",
       "from": 84,
       "to": 90,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv2_0",
       "from": 90,
       "to": 96,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv3_0",
       "from": 96,
       "to": 102,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv3_2",
       "from": 102,
       "to": 108,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv2_2",
       "from": 108,
       "to": 114,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "lv1_2",
       "from": 114,
       "to": 120,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "input",
       "from": 120,
       "to": 126,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 10",
       "from": 126,
       "to": 132,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 10",
       "from": 132,
       "to": 138,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 10",
       "from": 138,
       "to": 144,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 1",
       "from": 144,
       "to": 150,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 1",
       "from": 150,
       "to": 156,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 156,
       "to": 162,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 1",
       "from": 162,
       "to": 168,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 1",
       "from": 168,
       "to": 174,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 1",
       "from": 174,
       "to": 180,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 1",
       "from": 180,
       "to": 186,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 1",
       "from": 186,
       "to": 192,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 1",
       "from": 192,
       "to": 198,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     },
     {
       "name": "Object 3",
       "from": 198,
       "to": 204,
-      "texture": "magneticraft:blocks/multiblocks/refinery"
+      "texture": "magneticraft:block/multiblocks/refinery"
     }
   ],
   "quads": {

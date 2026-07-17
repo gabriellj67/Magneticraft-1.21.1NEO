@@ -136,7 +136,7 @@
   ],
   "images": [
     {
-      "uri": "magneticraft:blocks/electric_connectors/energy_receiver"
+      "uri": "magneticraft:block/electric_connectors/energy_receiver"
     }
   ],
   "materials": [

@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "magneticraft:blocks/machines/boiler"
+    "particle": "magneticraft:block/machines/boiler"
   }
 }

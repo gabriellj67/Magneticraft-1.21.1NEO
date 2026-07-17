@@ -6,7 +6,7 @@
   "source_root": ".references/nova-1.12/src/main/resources/assets/magneticraft",
   "output_root": "src/main/resources/assets/magneticraft",
   "artifacts": [
-    {"id": "battery_box", "format": "mcx", "source": "models/block/mcx/battery.mcx", "role": "static_block", "particle": "magneticraft:blocks/electric_machines/battery"},
+    {"id": "battery_box", "format": "mcx", "source": "models/block/mcx/battery.mcx", "role": "static_block", "particle": "magneticraft:block/electric_machines/battery"},
     {"id": "computer_body", "format": "mcx", "source": "models/block/mcx/computer.mcx", "role": "static_block", "exclude_parts": ["screen"]},
     {"id": "computer_screen", "format": "mcx", "source": "models/block/mcx/computer.mcx", "role": "dynamic_part", "include_parts": ["screen"]},
     {"id": "electric_connector", "format": "mcx", "source": "models/block/mcx/connector.mcx", "role": "static_block"},

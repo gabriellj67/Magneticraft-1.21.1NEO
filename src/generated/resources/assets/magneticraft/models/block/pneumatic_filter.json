@@ -1,12 +1,12 @@
 {
   "parent": "magneticraft:block/pneumatic_endpoint",
   "textures": {
-    "down": "magneticraft:blocks/machines/filter_side",
-    "east": "magneticraft:blocks/machines/filter_side",
-    "north": "magneticraft:blocks/machines/filter_front",
-    "particle": "magneticraft:blocks/machines/filter_front",
-    "south": "magneticraft:blocks/machines/filter_back",
-    "up": "magneticraft:blocks/machines/filter_side",
-    "west": "magneticraft:blocks/machines/filter_side"
+    "down": "magneticraft:block/machines/filter_side",
+    "east": "magneticraft:block/machines/filter_side",
+    "north": "magneticraft:block/machines/filter_front",
+    "particle": "magneticraft:block/machines/filter_front",
+    "south": "magneticraft:block/machines/filter_back",
+    "up": "magneticraft:block/machines/filter_side",
+    "west": "magneticraft:block/machines/filter_side"
   }
 }

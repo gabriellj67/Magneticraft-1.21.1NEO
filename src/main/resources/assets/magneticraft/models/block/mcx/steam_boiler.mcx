@@ -1,19 +1,19 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/machines/boiler_top",
+  "particleTexture": "magneticraft:block/machines/boiler_top",
   "parts": [
     {
       "name": "Shape_0",
       "from": 0,
       "to": 2,
-      "texture": "magneticraft:blocks/machines/boiler_top"
+      "texture": "magneticraft:block/machines/boiler_top"
     },
     {
       "name": "Shape_1",
       "from": 2,
       "to": 6,
-      "texture": "magneticraft:blocks/machines/boiler"
+      "texture": "magneticraft:block/machines/boiler"
     }
   ],
   "quads": {

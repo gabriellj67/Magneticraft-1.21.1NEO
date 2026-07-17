@@ -1,73 +1,73 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/computers/mining_robot",
+  "particleTexture": "magneticraft:block/computers/mining_robot",
   "parts": [
     {
       "name": "Shape1",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "Shape2",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "Shape3",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "prop1",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "prop2",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "back",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "drill1",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "drill2",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "drill3",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "drill4",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     },
     {
       "name": "drill5",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/computers/mining_robot"
+      "texture": "magneticraft:block/computers/mining_robot"
     }
   ],
   "quads": {

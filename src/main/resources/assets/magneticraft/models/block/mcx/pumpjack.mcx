@@ -1,511 +1,511 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/multiblocks/pumpjack",
+  "particleTexture": "magneticraft:block/multiblocks/pumpjack",
   "parts": [
     {
       "name": "Base",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape2",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape2",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape2",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape2",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape6",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape7",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape8",
       "from": 42,
       "to": 48,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 48,
       "to": 54,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 54,
       "to": 60,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape8",
       "from": 60,
       "to": 66,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape8",
       "from": 66,
       "to": 72,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 72,
       "to": 78,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape14",
       "from": 78,
       "to": 84,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape14",
       "from": 84,
       "to": 90,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape14",
       "from": 90,
       "to": 96,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 96,
       "to": 102,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape18",
       "from": 102,
       "to": 108,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape19",
       "from": 108,
       "to": 114,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape19",
       "from": 114,
       "to": 120,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 120,
       "to": 126,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape23",
       "from": 126,
       "to": 132,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape24",
       "from": 132,
       "to": 138,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape26",
       "from": 138,
       "to": 144,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape26",
       "from": 144,
       "to": 150,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape26",
       "from": 150,
       "to": 156,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape26",
       "from": 156,
       "to": 162,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape35",
       "from": 162,
       "to": 168,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape35",
       "from": 168,
       "to": 174,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 174,
       "to": 180,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 180,
       "to": 186,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape23",
       "from": 186,
       "to": 192,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape37",
       "from": 192,
       "to": 198,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 198,
       "to": 204,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape37",
       "from": 204,
       "to": 210,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape37",
       "from": 210,
       "to": 216,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape37",
       "from": 216,
       "to": 222,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape37",
       "from": 222,
       "to": 228,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape37",
       "from": 228,
       "to": 234,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape37",
       "from": 234,
       "to": 240,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape37",
       "from": 240,
       "to": 246,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 246,
       "to": 252,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 252,
       "to": 258,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 258,
       "to": 264,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 264,
       "to": 270,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 270,
       "to": 276,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 276,
       "to": 282,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 282,
       "to": 288,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 288,
       "to": 294,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 294,
       "to": 300,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 300,
       "to": 306,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 306,
       "to": 312,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 312,
       "to": 318,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape20",
       "from": 318,
       "to": 324,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 324,
       "to": 330,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 330,
       "to": 336,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 336,
       "to": 342,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape7",
       "from": 342,
       "to": 348,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape7",
       "from": 348,
       "to": 354,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape7",
       "from": 354,
       "to": 360,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape7",
       "from": 360,
       "to": 366,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 366,
       "to": 372,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 372,
       "to": 378,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 378,
       "to": 384,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 384,
       "to": 390,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 390,
       "to": 396,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 396,
       "to": 402,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 402,
       "to": 408,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 408,
       "to": 414,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 414,
       "to": 420,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 420,
       "to": 426,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape38",
       "from": 426,
       "to": 432,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape26",
       "from": 432,
       "to": 438,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape9",
       "from": 438,
       "to": 444,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Object 84",
       "from": 444,
       "to": 450,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 450,
       "to": 456,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 456,
       "to": 462,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 462,
       "to": 468,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 468,
       "to": 474,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 474,
       "to": 480,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 480,
       "to": 486,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 486,
       "to": 492,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 492,
       "to": 498,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     },
     {
       "name": "Shape17",
       "from": 498,
       "to": 504,
-      "texture": "magneticraft:blocks/multiblocks/pumpjack"
+      "texture": "magneticraft:block/multiblocks/pumpjack"
     }
   ],
   "quads": {

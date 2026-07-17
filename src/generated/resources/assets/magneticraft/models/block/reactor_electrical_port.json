@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "magneticraft:blocks/multiblock_parts/electric"
+    "all": "magneticraft:block/multiblock_parts/electric"
   }
 }

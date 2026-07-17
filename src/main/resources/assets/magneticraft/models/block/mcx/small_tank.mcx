@@ -1,19 +1,19 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/fluid_machines/small_tank_in",
+  "particleTexture": "magneticraft:block/fluid_machines/small_tank_in",
   "parts": [
     {
       "name": "top",
       "from": 0,
       "to": 5,
-      "texture": "magneticraft:blocks/fluid_machines/small_tank"
+      "texture": "magneticraft:block/fluid_machines/small_tank"
     },
     {
       "name": "base",
       "from": 5,
       "to": 11,
-      "texture": "magneticraft:blocks/fluid_machines/small_tank_in"
+      "texture": "magneticraft:block/fluid_machines/small_tank_in"
     }
   ],
   "quads": {

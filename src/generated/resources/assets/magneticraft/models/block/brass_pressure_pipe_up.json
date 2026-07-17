@@ -35,7 +35,7 @@
     }
   ],
   "textures": {
-    "all": "magneticraft:blocks/fluid_machines/brass_pressure_pipe",
-    "particle": "magneticraft:blocks/fluid_machines/brass_pressure_pipe"
+    "all": "magneticraft:block/fluid_machines/brass_pressure_pipe",
+    "particle": "magneticraft:block/fluid_machines/brass_pressure_pipe"
   }
 }

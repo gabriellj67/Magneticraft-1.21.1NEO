@@ -1,49 +1,49 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/electric_connectors/electric_cable_center",
+  "particleTexture": "magneticraft:block/electric_connectors/electric_cable_center",
   "parts": [
     {
       "name": "center",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/electric_connectors/electric_cable_center"
+      "texture": "magneticraft:block/electric_connectors/electric_cable_center"
     },
     {
       "name": "east",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/electric_connectors/electric_cable"
+      "texture": "magneticraft:block/electric_connectors/electric_cable"
     },
     {
       "name": "west",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/electric_connectors/electric_cable"
+      "texture": "magneticraft:block/electric_connectors/electric_cable"
     },
     {
       "name": "north",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/electric_connectors/electric_cable"
+      "texture": "magneticraft:block/electric_connectors/electric_cable"
     },
     {
       "name": "south",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/electric_connectors/electric_cable"
+      "texture": "magneticraft:block/electric_connectors/electric_cable"
     },
     {
       "name": "down",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/electric_connectors/electric_cable"
+      "texture": "magneticraft:block/electric_connectors/electric_cable"
     },
     {
       "name": "up",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/electric_connectors/electric_cable"
+      "texture": "magneticraft:block/electric_connectors/electric_cable"
     }
   ],
   "quads": {

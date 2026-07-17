@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/mcx/conveyor_belt.mcx",
   "textures": {
-    "particle": "magneticraft:blocks/machines/conveyor_belt"
+    "particle": "magneticraft:block/machines/conveyor_belt"
   },
   "translation": [
     0.0,

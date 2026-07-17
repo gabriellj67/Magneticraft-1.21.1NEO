@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_column",
   "textures": {
-    "end": "magneticraft:blocks/multiblock_parts/corrugated_iron",
-    "side": "magneticraft:blocks/multiblock_parts/corrugated_iron_side"
+    "end": "magneticraft:block/multiblock_parts/corrugated_iron",
+    "side": "magneticraft:block/multiblock_parts/corrugated_iron_side"
   }
 }

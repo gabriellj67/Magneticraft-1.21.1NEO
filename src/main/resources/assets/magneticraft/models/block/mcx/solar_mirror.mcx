@@ -1,49 +1,49 @@
 {
   "useAmbientOcclusion": true,
   "use3dInGui": true,
-  "particleTexture": "magneticraft:blocks/multiblocks/solar_mirror",
+  "particleTexture": "magneticraft:block/multiblocks/solar_mirror",
   "parts": [
     {
       "name": "Object 0",
       "from": 0,
       "to": 6,
-      "texture": "magneticraft:blocks/multiblocks/solar_mirror"
+      "texture": "magneticraft:block/multiblocks/solar_mirror"
     },
     {
       "name": "Object 0",
       "from": 6,
       "to": 12,
-      "texture": "magneticraft:blocks/multiblocks/solar_mirror"
+      "texture": "magneticraft:block/multiblocks/solar_mirror"
     },
     {
       "name": "Object 2",
       "from": 12,
       "to": 18,
-      "texture": "magneticraft:blocks/multiblocks/solar_mirror"
+      "texture": "magneticraft:block/multiblocks/solar_mirror"
     },
     {
       "name": "mirror1",
       "from": 18,
       "to": 24,
-      "texture": "magneticraft:blocks/multiblocks/solar_mirror"
+      "texture": "magneticraft:block/multiblocks/solar_mirror"
     },
     {
       "name": "mirror2",
       "from": 24,
       "to": 30,
-      "texture": "magneticraft:blocks/multiblocks/solar_mirror"
+      "texture": "magneticraft:block/multiblocks/solar_mirror"
     },
     {
       "name": "mirror_rod",
       "from": 30,
       "to": 36,
-      "texture": "magneticraft:blocks/multiblocks/solar_mirror"
+      "texture": "magneticraft:block/multiblocks/solar_mirror"
     },
     {
       "name": "Object 6",
       "from": 36,
       "to": 42,
-      "texture": "magneticraft:blocks/multiblocks/solar_mirror"
+      "texture": "magneticraft:block/multiblocks/solar_mirror"
     }
   ],
   "quads": {

@@ -93,7 +93,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/electric_engine.gltf",
   "textures": {
-    "particle": "magneticraft:blocks/electric_machines/electric_engine"
+    "particle": "magneticraft:block/electric_machines/electric_engine"
   },
   "translation": [
     0.0,

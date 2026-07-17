@@ -125,7 +125,7 @@
   "loader": "magneticraft:legacy_scene",
   "model": "magneticraft:models/block/gltf/steam_turbine.gltf",
   "textures": {
-    "particle": "magneticraft:blocks/multiblocks/unmounted_multiblock"
+    "particle": "magneticraft:block/multiblocks/unmounted_multiblock"
   },
   "translation": [
     0.0,
