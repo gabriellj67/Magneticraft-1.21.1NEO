@@ -88,7 +88,7 @@ public final class SingleBlockMachineGameTests {
                 "Gasification recipe inventory is incomplete"
         );
         helper.assertTrue(
-                helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipeTypes.THERMOPILE_TYPE.get()).size() == 33,
+                helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipeTypes.THERMOPILE_TYPE.get()).size() == 36,
                 "Thermopile recipe inventory is incomplete"
         );
         helper.assertTrue(

@@ -214,6 +214,9 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     }
 
     private Component statusLabel() {
+        if (menu.definition() == MultiblockDefinition.STEAM_TURBINE && menu.turbineVentingActive()) {
+            return Component.translatable("gui.magneticraft.steam_turbine.venting_warning");
+        }
         if (menu.voltage() != 0.0D) {
             return Component.translatable(
                     "gui.magneticraft.voltage",

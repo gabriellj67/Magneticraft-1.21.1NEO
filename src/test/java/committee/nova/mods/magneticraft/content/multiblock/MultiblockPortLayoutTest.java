@@ -15,7 +15,7 @@ class MultiblockPortLayoutTest {
     private static final Map<MultiblockDefinition, Integer> RELEASED_PORT_COUNTS = Map.ofEntries(
             Map.entry(MultiblockDefinition.SOLAR_PANEL, 2),
             Map.entry(MultiblockDefinition.STEAM_ENGINE, 8),
-            Map.entry(MultiblockDefinition.STEAM_TURBINE, 9),
+            Map.entry(MultiblockDefinition.STEAM_TURBINE, 10),
             Map.entry(MultiblockDefinition.GRINDER, 12),
             Map.entry(MultiblockDefinition.SIEVE, 7),
             Map.entry(MultiblockDefinition.HYDRAULIC_PRESS, 4),

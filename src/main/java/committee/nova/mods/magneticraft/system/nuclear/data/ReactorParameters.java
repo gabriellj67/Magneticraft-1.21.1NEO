@@ -24,14 +24,25 @@ public record ReactorParameters(
         double forcedScramTemperatureKelvin,
         double safeUnloadTemperatureKelvin,
         double automaticRodStepPerTick,
-        int maximumOfflineCatchupTicks
+        int maximumOfflineCatchupTicks,
+        int primaryCoolantEnthalpyJoulesPerMilliBucket,
+        int mainPumpMaximumFlowMilliBucketsPerTick,
+        double mainPumpJoulesPerMilliBucket,
+        int steamGeneratorSteamPerWaterMilliBucket,
+        int turbineJoulesPerSteamMilliBucket,
+        double turbineVentingEfficiency,
+        int condenserSteamPerWaterMilliBucket,
+        double condenserHeatJoulesPerSteamMilliBucket,
+        int coolingTowerHeatJoulesPerFillBlockTick,
+        int coolingTowerHeatJoulesPerFanTick
 ) {
     public static final int SCHEMA_VERSION = 1;
     public static final ResourceLocation PWR_ID = Magneticraft.id("pressurized_water_reactor");
     public static final ReactorParameters DEFAULT = new ReactorParameters(
             PWR_ID, 40, 80, 100, 0.85D, 0.003D, 900.0D,
             0.000020D, 0.000005D, 0.010D, 0.000015D, 0.000001D,
-            1_550.0D, 373.15D, 0.005D, 72_000
+            1_550.0D, 373.15D, 0.005D, 72_000,
+            100, 1_000, 0.5D, 10, 2, 0.8D, 10, 4.0D, 25, 500
     );
 
     public ReactorParameters {
@@ -42,7 +53,13 @@ public record ReactorParameters(
                 fuelTemperatureRiseAtFullPowerKelvin, poisonBuildPerTick, poisonDecayPerTick,
                 decayHeatResponsePerTick, decayHeatLossPerTick, claddingDamagePerKelvinTick,
                 forcedScramTemperatureKelvin, safeUnloadTemperatureKelvin,
-                automaticRodStepPerTick, maximumOfflineCatchupTicks
+                automaticRodStepPerTick, maximumOfflineCatchupTicks,
+                primaryCoolantEnthalpyJoulesPerMilliBucket,
+                mainPumpMaximumFlowMilliBucketsPerTick, mainPumpJoulesPerMilliBucket,
+                steamGeneratorSteamPerWaterMilliBucket, turbineJoulesPerSteamMilliBucket,
+                turbineVentingEfficiency, condenserSteamPerWaterMilliBucket,
+                condenserHeatJoulesPerSteamMilliBucket,
+                coolingTowerHeatJoulesPerFillBlockTick, coolingTowerHeatJoulesPerFanTick
         );
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(id + ": " + String.join("; ", errors));
@@ -64,7 +81,17 @@ public record ReactorParameters(
             double forcedScramTemperatureKelvin,
             double safeUnloadTemperatureKelvin,
             double automaticRodStepPerTick,
-            int maximumOfflineCatchupTicks
+            int maximumOfflineCatchupTicks,
+            int primaryCoolantEnthalpyJoulesPerMilliBucket,
+            int mainPumpMaximumFlowMilliBucketsPerTick,
+            double mainPumpJoulesPerMilliBucket,
+            int steamGeneratorSteamPerWaterMilliBucket,
+            int turbineJoulesPerSteamMilliBucket,
+            double turbineVentingEfficiency,
+            int condenserSteamPerWaterMilliBucket,
+            double condenserHeatJoulesPerSteamMilliBucket,
+            int coolingTowerHeatJoulesPerFillBlockTick,
+            int coolingTowerHeatJoulesPerFanTick
     ) {
         ArrayList<String> errors = new ArrayList<>();
         positive("station_instrumentation_joules_per_tick", stationInstrumentationJoulesPerTick, errors);
@@ -87,6 +114,16 @@ public record ReactorParameters(
         }
         fractionExclusive("automatic_rod_step_per_tick", automaticRodStepPerTick, errors);
         positive("maximum_offline_catchup_ticks", maximumOfflineCatchupTicks, errors);
+        positive("primary_coolant_enthalpy_joules_per_millibucket", primaryCoolantEnthalpyJoulesPerMilliBucket, errors);
+        positive("main_pump_maximum_flow_millibuckets_per_tick", mainPumpMaximumFlowMilliBucketsPerTick, errors);
+        positiveFinite("main_pump_joules_per_millibucket", mainPumpJoulesPerMilliBucket, errors);
+        positive("steam_generator_steam_per_water_millibucket", steamGeneratorSteamPerWaterMilliBucket, errors);
+        positive("turbine_joules_per_steam_millibucket", turbineJoulesPerSteamMilliBucket, errors);
+        fractionExclusive("turbine_venting_efficiency", turbineVentingEfficiency, errors);
+        positive("condenser_steam_per_water_millibucket", condenserSteamPerWaterMilliBucket, errors);
+        positiveFinite("condenser_heat_joules_per_steam_millibucket", condenserHeatJoulesPerSteamMilliBucket, errors);
+        positive("cooling_tower_heat_joules_per_fill_block_tick", coolingTowerHeatJoulesPerFillBlockTick, errors);
+        positive("cooling_tower_heat_joules_per_fan_tick", coolingTowerHeatJoulesPerFanTick, errors);
         return List.copyOf(errors);
     }
 

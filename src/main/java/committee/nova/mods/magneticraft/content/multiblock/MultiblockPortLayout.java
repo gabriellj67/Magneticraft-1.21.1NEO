@@ -123,6 +123,7 @@ public final class MultiblockPortLayout {
                 }
             }
         }
+        ports.add(fluid(0, 1, -4, Direction.NORTH, 1, FluidTankModule.TankAccess.OUTPUT));
         return List.copyOf(ports);
     }
 

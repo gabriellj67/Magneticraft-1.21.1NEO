@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "magneticraft:cold_reactor_coolant",
+  "conductivity": 3.7757221068529354,
+  "temperature": 563.0
+}

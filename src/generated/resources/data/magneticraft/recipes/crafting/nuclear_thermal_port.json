@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_facility_casing"
+    },
+    "P": {
+      "item": "magneticraft:iron_fluid_pipe"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "W": {
+      "item": "magneticraft:fine_copper_wire"
+    }
+  },
+  "pattern": [
+    " P ",
+    "PCP",
+    "RWR"
+  ],
+  "result": {
+    "item": "magneticraft:nuclear_thermal_port"
+  },
+  "show_notification": true
+}

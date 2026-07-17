@@ -52,9 +52,11 @@ class MultiblockPortProfileTest {
             Map.entry(MultiblockDefinition.STEAM_ENGINE, List.of(tank(
                     0, 16_000, "steam_input", List.of(fluid("steam"))
             ))),
-            Map.entry(MultiblockDefinition.STEAM_TURBINE, List.of(tank(
-                    0, 32_000, "steam_input", List.of(fluid("steam"))
-            )))
+            Map.entry(MultiblockDefinition.STEAM_TURBINE, List.of(
+                    tank(0, 32_000, "steam_input", List.of(fluid("steam"))),
+                    tank(1, 32_000, "low_pressure_exhaust_output",
+                            List.of(fluid("low_pressure_exhaust_steam")))
+            ))
     );
 
     @Test

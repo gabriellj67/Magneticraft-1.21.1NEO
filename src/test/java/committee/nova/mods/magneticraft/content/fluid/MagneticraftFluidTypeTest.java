@@ -11,11 +11,11 @@ class MagneticraftFluidTypeTest {
     void clientTexturesAreDerivedFromConstructorSafeDescriptionIds() {
         for (FluidDefinition definition : FluidDefinition.values()) {
             assertEquals(
-                    Magneticraft.id("fluid/" + definition.id() + "_still"),
+                    Magneticraft.id("fluid/" + definition.textureId() + "_still"),
                     MagneticraftFluidType.texture(definition.translationKey(), "_still")
             );
             assertEquals(
-                    Magneticraft.id("fluid/" + definition.id() + "_flow"),
+                    Magneticraft.id("fluid/" + definition.textureId() + "_flow"),
                     MagneticraftFluidType.texture(definition.translationKey(), "_flow")
             );
         }

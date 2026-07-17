@@ -9,11 +9,17 @@ import committee.nova.mods.magneticraft.content.multiblock.recipe.PolymerizerRec
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
+import committee.nova.mods.magneticraft.system.nuclear.data.ReactorParameterRegistry;
+import committee.nova.mods.magneticraft.system.nuclear.thermal.NuclearThermalTransactions;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
@@ -26,6 +32,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 
 import java.util.List;
 import java.util.Optional;
@@ -105,7 +112,7 @@ final class AdvancedMultiblockLogic {
             case SOLAR_TOWER -> tickSolarTower();
             case STIRLING_GENERATOR -> tickStirlingGenerator();
             case STEAM_ENGINE -> tickSteamGenerator(120, 240.0D);
-            case STEAM_TURBINE -> tickSteamGenerator(600, 1_200.0D);
+            case STEAM_TURBINE -> tickSteamTurbine(level);
             case GRINDER, SIEVE, HYDRAULIC_PRESS -> tickAdvancedProcessing(level);
             case BIG_ELECTRIC_FURNACE -> tickBigElectricFurnace(level);
             case BIG_COMBUSTION_CHAMBER -> tickBigCombustion(level);
@@ -188,6 +195,68 @@ final class AdvancedMultiblockLogic {
         );
         machine.energy().generateJoules(operations * STEAM_ENERGY_PER_OPERATION, false);
         machine.setWorking(true);
+    }
+
+    private void tickSteamTurbine(ServerLevel level) {
+        machine.setTurbineVentingActive(false);
+        if (machine.energy() == null || machine.tank(0) == null || machine.tank(1) == null) {
+            return;
+        }
+        boolean connected = hasTurbineExhaustConnection(level);
+        boolean venting = !connected;
+        machine.setTurbineVentingActive(venting);
+        FluidStack steam = machine.tank(0).tank().getFluid();
+        if (steam.isEmpty() || steam.getFluid() != ModFluids.get(FluidDefinition.STEAM).source().get()) {
+            return;
+        }
+        int exhaustSpace = machine.tank(1).tank().getCapacity() - machine.tank(1).tank().getFluidAmount();
+        int accepted = (int) Math.floor(machine.energy().generateJoules(1_200.0D, true));
+        var transfer = NuclearThermalTransactions.turbine(
+                steam.getAmount(), exhaustSpace, accepted, 600, venting,
+                ReactorParameterRegistry.INSTANCE.current().parameters()
+        );
+        if (transfer.steamConsumed() <= 0) {
+            return;
+        }
+        machine.tank(0).tank().drain(transfer.steamConsumed(), IFluidHandler.FluidAction.EXECUTE);
+        if (transfer.exhaustProduced() > 0) {
+            machine.tank(1).tank().fill(
+                    new FluidStack(
+                            ModFluids.get(FluidDefinition.LOW_PRESSURE_EXHAUST_STEAM).source().get(),
+                            transfer.exhaustProduced()
+                    ),
+                    IFluidHandler.FluidAction.EXECUTE
+            );
+        }
+        machine.energy().generateJoules(transfer.energyGeneratedJoules(), false);
+        machine.setWorking(true);
+        if (transfer.vented() && level.getGameTime() % 10L == 0L) {
+            level.sendParticles(
+                    ParticleTypes.CLOUD,
+                    machine.getBlockPos().getX() + 0.5D,
+                    machine.getBlockPos().getY() + 2.5D,
+                    machine.getBlockPos().getZ() + 0.5D,
+                    4, 0.35D, 0.1D, 0.35D, 0.02D
+            );
+            if (level.getGameTime() % 40L == 0L) {
+                level.playSound(null, machine.getBlockPos(), SoundEvents.FIRE_EXTINGUISH,
+                        SoundSource.BLOCKS, 0.35F, 1.2F);
+            }
+        }
+    }
+
+    private boolean hasTurbineExhaustConnection(ServerLevel level) {
+        for (MultiblockPortLayout.Port port : MultiblockPortLayout.ports(machine.definition())) {
+            if (port.kind() != MultiblockPortLayout.Kind.FLUID || port.target() != 1) {
+                continue;
+            }
+            Direction side = port.worldSide(machine.facing());
+            BlockEntity neighbor = level.getBlockEntity(port.worldPosition(machine).relative(side));
+            if (neighbor != null && neighbor.getCapability(ForgeCapabilities.FLUID_HANDLER, side.getOpposite()).isPresent()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void tickStirlingGenerator() {

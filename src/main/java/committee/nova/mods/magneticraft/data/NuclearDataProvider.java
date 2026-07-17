@@ -73,6 +73,16 @@ final class NuclearDataProvider implements DataProvider {
         root.addProperty("safe_unload_temperature_kelvin", value.safeUnloadTemperatureKelvin());
         root.addProperty("automatic_rod_step_per_tick", value.automaticRodStepPerTick());
         root.addProperty("maximum_offline_catchup_ticks", value.maximumOfflineCatchupTicks());
+        root.addProperty("primary_coolant_enthalpy_joules_per_millibucket", value.primaryCoolantEnthalpyJoulesPerMilliBucket());
+        root.addProperty("main_pump_maximum_flow_millibuckets_per_tick", value.mainPumpMaximumFlowMilliBucketsPerTick());
+        root.addProperty("main_pump_joules_per_millibucket", value.mainPumpJoulesPerMilliBucket());
+        root.addProperty("steam_generator_steam_per_water_millibucket", value.steamGeneratorSteamPerWaterMilliBucket());
+        root.addProperty("turbine_joules_per_steam_millibucket", value.turbineJoulesPerSteamMilliBucket());
+        root.addProperty("turbine_venting_efficiency", value.turbineVentingEfficiency());
+        root.addProperty("condenser_steam_per_water_millibucket", value.condenserSteamPerWaterMilliBucket());
+        root.addProperty("condenser_heat_joules_per_steam_millibucket", value.condenserHeatJoulesPerSteamMilliBucket());
+        root.addProperty("cooling_tower_heat_joules_per_fill_block_tick", value.coolingTowerHeatJoulesPerFillBlockTick());
+        root.addProperty("cooling_tower_heat_joules_per_fan_tick", value.coolingTowerHeatJoulesPerFanTick());
         return root;
     }
 }

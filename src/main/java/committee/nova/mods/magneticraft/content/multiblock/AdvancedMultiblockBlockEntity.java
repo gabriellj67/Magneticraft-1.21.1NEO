@@ -54,7 +54,7 @@ import java.util.UUID;
  * the advanced behavior layer without changing formation semantics.
  */
 public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity implements MenuProvider {
-    public static final int MENU_LOGICAL_DATA_COUNT = 22;
+    public static final int MENU_LOGICAL_DATA_COUNT = 23;
     public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     private static final String FORMED_TAG = "formed";
     private static final String MIRRORED_TAG = "mirrored";
@@ -105,6 +105,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     @Nullable
     private ResourceLocation activeRecipe;
     private boolean working;
+    private boolean turbineVentingActive;
 
     public AdvancedMultiblockBlockEntity(BlockPos position, BlockState state) {
         this(position, state, definition(state));
@@ -148,7 +149,8 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 () -> tankAmount(3),
                 () -> tankCapacity(3),
                 () -> tankAmount(4),
-                () -> tankCapacity(4)
+                () -> tankCapacity(4),
+                () -> turbineVentingActive ? 1 : 0
         );
     }
 
@@ -307,6 +309,17 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
 
     public boolean working() {
         return working;
+    }
+
+    public boolean turbineVentingActive() {
+        return turbineVentingActive;
+    }
+
+    void setTurbineVentingActive(boolean active) {
+        if (turbineVentingActive != active) {
+            turbineVentingActive = active;
+            markChangedAndSync();
+        }
     }
 
     @Nullable
@@ -681,6 +694,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 ? tag.getList(STRUCTURE_SNAPSHOT_TAG, Tag.TAG_COMPOUND)
                 : new ListTag());
         working = false;
+        turbineVentingActive = false;
     }
 
     @Override

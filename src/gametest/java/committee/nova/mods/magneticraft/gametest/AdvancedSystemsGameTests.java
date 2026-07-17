@@ -48,6 +48,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraftforge.gametest.GameTestHolder;
@@ -1329,6 +1330,58 @@ public final class AdvancedSystemsGameTests {
 
     private static int countItem(List<ItemStack> drops, net.minecraft.world.item.Item item) {
         return drops.stream().filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    public static void steamTurbineVentsLegacyLayoutsAndBackpressuresWithClosedExhaust(GameTestHelper helper) {
+        Player player = helper.makeMockSurvivalPlayer();
+        MultiblockDefinition definition = MultiblockDefinition.STEAM_TURBINE;
+        List<BlockPos> occupied = build(helper, definition, CONTROLLER, Direction.NORTH, false);
+        AdvancedMultiblockBlockEntity controller = requireController(helper, CONTROLLER);
+        helper.assertTrue(controller.tryForm(player), "Steam turbine did not form for exhaust compatibility test");
+        controller.tank(0).tank().fill(
+                new FluidStack(ModFluids.get(FluidDefinition.STEAM).source().get(), 600),
+                IFluidHandler.FluidAction.EXECUTE);
+
+        helper.runAfterDelay(5, () -> {
+            helper.assertTrue(controller.turbineVentingActive(),
+                    "Unconnected legacy turbine did not enter visible venting mode");
+            helper.assertTrue(controller.energy().storedWholeJoules() == 960,
+                    "Legacy venting turbine did not apply the configured 20 percent efficiency loss");
+            helper.assertTrue(controller.tank(1).tank().getFluidAmount() == 0,
+                    "Legacy venting turbine unexpectedly retained exhaust");
+
+            MultiblockPortLayout.Port exhaust = MultiblockPortLayout.ports(definition).stream()
+                    .filter(port -> port.kind() == MultiblockPortLayout.Kind.FLUID && port.target() == 1)
+                    .findFirst().orElseThrow();
+            BlockPos receiverPosition = exhaust.worldPosition(controller).relative(exhaust.worldSide(controller.facing()));
+            BlockPos receiverRelative = receiverPosition.subtract(helper.absolutePos(BlockPos.ZERO));
+            helper.setBlock(receiverRelative,
+                    ModMachineBlocks.machine(SingleBlockMachineDefinition.SMALL_TANK).get().defaultBlockState());
+            occupied.add(receiverRelative);
+            helper.runAfterDelay(2, () -> {
+                BlockEntity receiver = helper.getBlockEntity(receiverRelative);
+                Direction receiverSide = exhaust.worldSide(controller.facing()).getOpposite();
+                helper.assertTrue(receiver.getCapability(ForgeCapabilities.FLUID_HANDLER, receiverSide).isPresent(),
+                        "Closed-loop exhaust receiver did not expose its fluid capability");
+                controller.tank(1).tank().fill(
+                        new FluidStack(ModFluids.get(FluidDefinition.LOW_PRESSURE_EXHAUST_STEAM).source().get(), 32_000),
+                        IFluidHandler.FluidAction.EXECUTE);
+                controller.tank(0).tank().fill(
+                        new FluidStack(ModFluids.get(FluidDefinition.STEAM).source().get(), 600),
+                        IFluidHandler.FluidAction.EXECUTE);
+                helper.runAfterDelay(5, () -> {
+                    helper.assertTrue(controller.energy().storedWholeJoules() == 960,
+                            "Closed-loop turbine generated through a full exhaust output");
+                    helper.assertTrue(controller.tank(0).tank().getFluidAmount() == 600,
+                            "Closed-loop turbine consumed steam despite exhaust backpressure");
+                    helper.assertFalse(controller.turbineVentingActive(),
+                            "Connected turbine bypassed backpressure through legacy venting");
+                    clear(helper, occupied);
+                    helper.succeed();
+                });
+            });
+        });
     }
 
     private static List<BlockPos> build(

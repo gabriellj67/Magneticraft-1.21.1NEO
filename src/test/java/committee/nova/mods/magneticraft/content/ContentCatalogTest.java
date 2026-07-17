@@ -85,7 +85,7 @@ class ContentCatalogTest {
         );
         assertUniqueIds(
                 Arrays.stream(FluidDefinition.values()).map(FluidDefinition::id).toArray(String[]::new),
-                16
+                19
         );
     }
 
@@ -107,6 +107,9 @@ class ContentCatalogTest {
         assertFluid(FluidDefinition.FUEL, 298, 700, 1000, false);
         assertFluid(FluidDefinition.OIL_RESIDUE, 298, 800, 2000, false);
         assertFluid(FluidDefinition.WOOD_GAS, 373, 1, 10, true);
+        assertFluid(FluidDefinition.COLD_REACTOR_COOLANT, 563, 740, 120, false);
+        assertFluid(FluidDefinition.HOT_REACTOR_COOLANT, 588, 690, 100, false);
+        assertFluid(FluidDefinition.LOW_PRESSURE_EXHAUST_STEAM, 373, 1, 10, true);
     }
 
     private static void assertFluid(

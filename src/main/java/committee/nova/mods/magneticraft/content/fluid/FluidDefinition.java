@@ -4,6 +4,18 @@ package committee.nova.mods.magneticraft.content.fluid;
  * Immutable fluid properties transcribed from Nova 1.12's fluid registry.
  */
 public enum FluidDefinition {
+    COLD_REACTOR_COOLANT(
+            "cold_reactor_coolant", "Cold Reactor Coolant", "冷态反应堆冷却剂",
+            563, 740, 120, false, "steam", 0xFF4E9ED4
+    ),
+    HOT_REACTOR_COOLANT(
+            "hot_reactor_coolant", "Hot Reactor Coolant", "高温反应堆冷却剂",
+            588, 690, 100, false, "steam", 0xFFFF7A3D
+    ),
+    LOW_PRESSURE_EXHAUST_STEAM(
+            "low_pressure_exhaust_steam", "Low-Pressure Exhaust Steam", "低压乏汽",
+            373, 1, 10, true, "steam", 0xFFD5DCE5
+    ),
     STEAM("steam", "Steam", "蒸汽", 373, 1, 10, true),
     OIL("crude_oil", "Crude Oil", "原油", 298, 1100, 2000, false),
     HOT_CRUDE("heated_crude_oil", "Heated Crude Oil", "加热原油", 873, 10, 20, true),
@@ -28,6 +40,8 @@ public enum FluidDefinition {
     private final int density;
     private final int viscosity;
     private final boolean gaseous;
+    private final String textureId;
+    private final int tintColor;
 
     FluidDefinition(
             String id,
@@ -38,6 +52,20 @@ public enum FluidDefinition {
             int viscosity,
             boolean gaseous
     ) {
+        this(id, englishName, chineseName, temperatureKelvin, density, viscosity, gaseous, id, 0xFFFFFFFF);
+    }
+
+    FluidDefinition(
+            String id,
+            String englishName,
+            String chineseName,
+            int temperatureKelvin,
+            int density,
+            int viscosity,
+            boolean gaseous,
+            String textureId,
+            int tintColor
+    ) {
         this.id = id;
         this.englishName = englishName;
         this.chineseName = chineseName;
@@ -45,6 +73,8 @@ public enum FluidDefinition {
         this.density = density;
         this.viscosity = viscosity;
         this.gaseous = gaseous;
+        this.textureId = textureId;
+        this.tintColor = tintColor;
     }
 
     public String id() {
@@ -73,6 +103,23 @@ public enum FluidDefinition {
 
     public boolean isGaseous() {
         return gaseous;
+    }
+
+    public String textureId() {
+        return textureId;
+    }
+
+    public int tintColor() {
+        return tintColor;
+    }
+
+    public static FluidDefinition byId(String id) {
+        for (FluidDefinition definition : values()) {
+            if (definition.id.equals(id)) {
+                return definition;
+            }
+        }
+        throw new IllegalArgumentException("Unknown Magneticraft fluid id: " + id);
     }
 
     public String translationKey() {

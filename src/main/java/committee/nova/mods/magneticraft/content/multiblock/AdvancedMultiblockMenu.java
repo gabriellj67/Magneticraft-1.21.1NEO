@@ -217,6 +217,10 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
         return value(13 + index * 2);
     }
 
+    public boolean turbineVentingActive() {
+        return value(22) != 0;
+    }
+
     @Override
     protected boolean movePlayerStackToMachine(ItemStack stack) {
         return machineSlots > 0 && moveItemStackTo(stack, 0, machineSlots, false);

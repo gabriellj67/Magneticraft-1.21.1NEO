@@ -87,6 +87,39 @@ final class ModLanguageProvider extends LanguageProvider {
                 chinese ? "\u94c0\u79bb\u5fc3\u7ea7\u8054" : "Uranium Centrifuge Cascade");
         add(ModNuclearBlocks.controller(committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType.FUEL_FABRICATOR).get(),
                 chinese ? "\u6838\u71c3\u6599\u5236\u9020\u8bbe\u65bd" : "Nuclear Fuel Fabrication Facility");
+        add(ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get(), chinese ? "\u6838\u70ed\u5de5\u7aef\u53e3" : "Nuclear Thermal Port");
+        add(ModNuclearBlocks.NUCLEAR_HEAT_EXCHANGER.get(), chinese ? "\u6838\u70ed\u4ea4\u6362\u7ec4\u4ef6" : "Nuclear Heat Exchanger");
+        add(ModNuclearBlocks.COOLING_TOWER_FILL.get(), chinese ? "\u51b7\u5374\u5854\u586b\u6599" : "Cooling Tower Fill");
+        add(ModNuclearBlocks.COOLING_TOWER_FAN.get(), chinese ? "\u51b7\u5374\u5854\u98ce\u673a" : "Cooling Tower Fan");
+        add(ModNuclearBlocks.MAIN_COOLANT_PUMP.get(), chinese ? "\u4e3b\u51b7\u5374\u5242\u6cf5" : "Main Coolant Pump");
+        add(ModNuclearBlocks.thermalController(committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalFacilityType.STEAM_GENERATOR).get(),
+                chinese ? "\u6838\u84b8\u6c7d\u53d1\u751f\u5668\u63a7\u5236\u5668" : "Nuclear Steam Generator Controller");
+        add(ModNuclearBlocks.thermalController(committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalFacilityType.CONDENSER).get(),
+                chinese ? "\u6838\u51b7\u51dd\u5668\u63a7\u5236\u5668" : "Nuclear Condenser Controller");
+        add(ModNuclearBlocks.thermalController(committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalFacilityType.COOLING_TOWER).get(),
+                chinese ? "\u6e7f\u5f0f\u51b7\u5374\u5854\u63a7\u5236\u5668" : "Wet Cooling Tower Controller");
+        add("message.magneticraft.main_coolant_pump.status", chinese
+                ? "\u4e3b\u51b7\u5374\u6cf5\uff1a%s%%\uff0c%s mB/t\uff0c%s/%s J\uff08\u6f5c\u884c\u53f3\u952e\u8c03\u8282\uff09"
+                : "Main coolant pump: %s%%, %s mB/t, %s/%s J (sneak-use to adjust)");
+        add("message.magneticraft.nuclear_thermal.invalid", chinese
+                ? "\u6838\u70ed\u5de5\u7ed3\u6784\u65e0\u6548\uff1a%s @ %s" : "Invalid nuclear thermal structure: %s @ %s");
+        add("gui.magneticraft.nuclear_thermal.structure", chinese ? "\u7ed3\u6784\uff1a%s x %s x %s\uff08%s\uff09" : "Structure: %s x %s x %s (%s)");
+        add("gui.magneticraft.nuclear_thermal.direction", chinese ? "\u671d\u5411\uff1a%s" : "Facing: %s");
+        add("gui.magneticraft.nuclear_thermal.state", chinese ? "\u72b6\u6001\uff1a%s" : "State: %s");
+        add("gui.magneticraft.nuclear_thermal.backpressure", chinese ? "\u80cc\u538b/\u8f93\u51fa\u963b\u585e" : "Backpressure / output blocked");
+        add("gui.magneticraft.nuclear_thermal.rate", chinese ? "\u6d41\u91cf\uff1a%s mB/t\uff0c\u6362\u70ed\uff1a%s J/t" : "Flow: %s mB/t, heat: %s J/t");
+        add("gui.magneticraft.nuclear_thermal.core", chinese ? "\u6362\u70ed/\u586b\u6599/\u98ce\u673a\uff1a%s/%s/%s" : "Exchange/fill/fans: %s/%s/%s");
+        add("gui.magneticraft.nuclear_thermal.temperature", chinese ? "\u51b7\u7aef\uff1a%s K" : "Cold side: %s K");
+        add("gui.magneticraft.nuclear_thermal.energy", chinese ? "\u5382\u7528\u7535\uff1a%s/%s J" : "Auxiliary power: %s/%s J");
+        add("gui.magneticraft.nuclear_thermal.ports", chinese ? "\u7aef\u53e3\uff1a%s" : "Ports: %s");
+        String[] thermalPortZh = {"\u70ed\u4e3b\u51b7\u5374\u5242\u5165", "\u51b7\u4e3b\u51b7\u5374\u5242\u51fa", "\u4e8c\u6b21\u6c34\u5165", "\u84b8\u6c7d\u51fa",
+                "\u4f4e\u538b\u4e4f\u6c7d\u5165", "\u51b7\u51dd\u6c34\u51fa", "\u8865\u6c34\u5165", "\u5382\u7528\u7535", "\u51b7\u7aef\u70ed\u7f51"};
+        committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalPortRole[] thermalRoles =
+                committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalPortRole.values();
+        for (int index = 0; index < thermalRoles.length; index++) {
+            add("gui.magneticraft.nuclear_thermal.port." + thermalRoles[index].name().toLowerCase(java.util.Locale.ROOT),
+                    chinese ? thermalPortZh[index] : thermalRoles[index].name().toLowerCase(java.util.Locale.ROOT).replace('_', ' '));
+        }
         add("gui.magneticraft.nuclear_facility.structure", chinese ? "\u7ed3\u6784\uff1a%s x %s x %s\uff08%s\uff09" : "Structure: %s x %s x %s (%s)");
         add("gui.magneticraft.nuclear_facility.direction", chinese ? "\u671d\u5411\uff1a%s" : "Facing: %s");
         add("gui.magneticraft.nuclear_facility.ports", chinese ? "\u7aef\u53e3 I/O/J\uff1a%s / %s / %s" : "Ports I/O/J: %s / %s / %s");
@@ -690,6 +723,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("container.magneticraft.computer", chinese ? "可编程计算机" : "Programmable Computer");
         add("container.magneticraft.mining_robot", chinese ? "采矿机器人" : "Mining Robot");
         add("gui.magneticraft.state.running", chinese ? "运行中" : "Running");
+        add("gui.magneticraft.steam_turbine.venting_warning", chinese ? "排汽运行 - 效率 -20%" : "Venting - 20% efficiency loss");
         add("gui.magneticraft.state.stopped", chinese ? "已停止" : "Stopped");
         add("gui.magneticraft.energy.tooltip", chinese ? "储能：%s / %s J" : "Stored: %s / %s J");
         add("gui.magneticraft.forge_energy.tooltip", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");

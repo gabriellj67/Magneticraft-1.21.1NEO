@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "magneticraft:cooling_tower_fan"
+    },
+    "M": {
+      "item": "magneticraft:motor"
+    },
+    "P": {
+      "item": "magneticraft:nuclear_thermal_port"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "RPR",
+    "MCM",
+    "RPR"
+  ],
+  "result": {
+    "item": "magneticraft:nuclear_cooling_tower"
+  },
+  "show_notification": true
+}

@@ -297,8 +297,8 @@ public enum MultiblockDefinition {
 
     public int tankCount() {
         return switch (this) {
-            case STEAM_ENGINE, STEAM_TURBINE, PUMPJACK, BIG_COMBUSTION_CHAMBER, POLYMERIZER -> 1;
-            case OIL_HEATER, BIG_STEAM_BOILER -> 2;
+            case STEAM_ENGINE, PUMPJACK, BIG_COMBUSTION_CHAMBER, POLYMERIZER -> 1;
+            case STEAM_TURBINE, OIL_HEATER, BIG_STEAM_BOILER -> 2;
             case REFINERY -> 5;
             default -> 0;
         };

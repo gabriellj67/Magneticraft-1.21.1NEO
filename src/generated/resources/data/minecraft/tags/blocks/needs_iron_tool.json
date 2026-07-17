@@ -20,6 +20,11 @@
     "magneticraft:reactor_electrical_port",
     "magneticraft:reactor_instrumentation_port",
     "magneticraft:pressurized_water_reactor_controller",
+    "magneticraft:nuclear_thermal_port",
+    "magneticraft:nuclear_heat_exchanger",
+    "magneticraft:cooling_tower_fill",
+    "magneticraft:cooling_tower_fan",
+    "magneticraft:main_coolant_pump",
     "magneticraft:uranium_processor",
     "magneticraft:centrifuge_cascade",
     "magneticraft:fuel_fabricator",
@@ -32,6 +37,9 @@
     "magneticraft:reactor_control_rod_d",
     "magneticraft:reactor_coolant_channel",
     "magneticraft:reactor_instrumentation",
-    "magneticraft:reactor_reflector"
+    "magneticraft:reactor_reflector",
+    "magneticraft:nuclear_steam_generator",
+    "magneticraft:nuclear_condenser",
+    "magneticraft:nuclear_cooling_tower"
   ]
 }

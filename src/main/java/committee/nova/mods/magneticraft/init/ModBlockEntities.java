@@ -13,6 +13,9 @@ import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacility
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityPortBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorControllerBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPortBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalControllerBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalPortBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.thermal.MainCoolantPumpBlockEntity;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
@@ -82,6 +85,32 @@ public final class ModBlockEntities {
                     ModNuclearBlocks.REACTOR_INSTRUMENTATION_PORT.get()
             ).build(null)
     );
+    public static final RegistryObject<BlockEntityType<NuclearThermalControllerBlockEntity>>
+            NUCLEAR_THERMAL_CONTROLLER = ModRegistries.BLOCK_ENTITY_TYPES.register(
+            "nuclear_thermal_controller",
+            () -> BlockEntityType.Builder.of(
+                    NuclearThermalControllerBlockEntity::new,
+                    ModNuclearBlocks.thermalControllers().values().stream()
+                            .map(RegistryObject::get)
+                            .toArray(net.minecraft.world.level.block.Block[]::new)
+            ).build(null)
+    );
+    public static final RegistryObject<BlockEntityType<NuclearThermalPortBlockEntity>>
+            NUCLEAR_THERMAL_PORT = ModRegistries.BLOCK_ENTITY_TYPES.register(
+            "nuclear_thermal_port",
+            () -> BlockEntityType.Builder.of(
+                    NuclearThermalPortBlockEntity::new,
+                    ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get()
+            ).build(null)
+    );
+    public static final RegistryObject<BlockEntityType<MainCoolantPumpBlockEntity>> MAIN_COOLANT_PUMP =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "main_coolant_pump",
+                    () -> BlockEntityType.Builder.of(
+                            MainCoolantPumpBlockEntity::new,
+                            ModNuclearBlocks.MAIN_COOLANT_PUMP.get()
+                    ).build(null)
+            );
     public static final RegistryObject<BlockEntityType<MultiblockGapBlockEntity>> MULTIBLOCK_GAP =
             ModRegistries.BLOCK_ENTITY_TYPES.register(
                     "multiblock_gap",

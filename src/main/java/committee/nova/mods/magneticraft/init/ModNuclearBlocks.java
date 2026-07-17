@@ -9,6 +9,10 @@ import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortTy
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorColumnBlock;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorControllerBlock;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPortBlock;
+import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalControllerBlock;
+import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalFacilityType;
+import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalPortBlock;
+import committee.nova.mods.magneticraft.content.nuclear.thermal.MainCoolantPumpBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -31,6 +35,8 @@ public final class ModNuclearBlocks {
             new EnumMap<>(NuclearFacilityType.class);
     private static final Map<NuclearReactorColumnType, RegistryObject<Block>> REACTOR_COLUMNS =
             new EnumMap<>(NuclearReactorColumnType.class);
+    private static final Map<NuclearThermalFacilityType, RegistryObject<Block>> THERMAL_CONTROLLERS =
+            new EnumMap<>(NuclearThermalFacilityType.class);
 
     public static final RegistryObject<Block> FACILITY_CASING = register(
             "nuclear_facility_casing", () -> new Block(partProperties()));
@@ -67,6 +73,16 @@ public final class ModNuclearBlocks {
     public static final RegistryObject<Block> REACTOR_CONTROLLER = register(
             "pressurized_water_reactor_controller",
             () -> new NuclearReactorControllerBlock(controllerProperties()));
+    public static final RegistryObject<Block> NUCLEAR_THERMAL_PORT = register(
+            "nuclear_thermal_port", () -> new NuclearThermalPortBlock(controllerProperties()));
+    public static final RegistryObject<Block> NUCLEAR_HEAT_EXCHANGER = register(
+            "nuclear_heat_exchanger", () -> new Block(partProperties()));
+    public static final RegistryObject<Block> COOLING_TOWER_FILL = register(
+            "cooling_tower_fill", () -> new Block(partProperties().noOcclusion()));
+    public static final RegistryObject<Block> COOLING_TOWER_FAN = register(
+            "cooling_tower_fan", () -> new Block(controllerProperties()));
+    public static final RegistryObject<Block> MAIN_COOLANT_PUMP = register(
+            "main_coolant_pump", () -> new MainCoolantPumpBlock(controllerProperties()));
 
     static {
         for (NuclearFacilityType type : NuclearFacilityType.values()) {
@@ -80,6 +96,11 @@ public final class ModNuclearBlocks {
             REACTOR_COLUMNS.put(type, register(
                     "reactor_" + type.name().toLowerCase(java.util.Locale.ROOT),
                     () -> new NuclearReactorColumnBlock(type, partProperties())
+            ));
+        }
+        for (NuclearThermalFacilityType type : NuclearThermalFacilityType.values()) {
+            THERMAL_CONTROLLERS.put(type, register(
+                    type.id(), () -> new NuclearThermalControllerBlock(type, controllerProperties())
             ));
         }
     }
@@ -116,6 +137,18 @@ public final class ModNuclearBlocks {
 
     public static Map<NuclearReactorColumnType, RegistryObject<Block>> reactorColumns() {
         return Collections.unmodifiableMap(REACTOR_COLUMNS);
+    }
+
+    public static RegistryObject<Block> thermalController(NuclearThermalFacilityType type) {
+        RegistryObject<Block> result = THERMAL_CONTROLLERS.get(type);
+        if (result == null) {
+            throw new IllegalArgumentException("No nuclear thermal controller registered for " + type);
+        }
+        return result;
+    }
+
+    public static Map<NuclearThermalFacilityType, RegistryObject<Block>> thermalControllers() {
+        return Collections.unmodifiableMap(THERMAL_CONTROLLERS);
     }
 
     private static RegistryObject<Block> register(String id, Supplier<? extends Block> factory) {

@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "magneticraft:low_pressure_exhaust_steam",
+  "conductivity": 13.360053440213758,
+  "temperature": 373.0
+}

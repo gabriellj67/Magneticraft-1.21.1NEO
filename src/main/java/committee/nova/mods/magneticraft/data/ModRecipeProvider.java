@@ -102,6 +102,7 @@ final class ModRecipeProvider extends RecipeProvider {
         addNuclearMaterialRecipes(consumer);
         addNuclearFacilityRecipes(consumer);
         addNuclearReactorRecipes(consumer);
+        addNuclearThermalRecipes(consumer);
         addHammerRecipes(consumer);
         addSmeltingRecipes(consumer);
         addMachineCraftingRecipes(consumer);
@@ -370,6 +371,56 @@ final class ModRecipeProvider extends RecipeProvider {
                 .requires(ModTags.Items.ingot(Metal.LEAD))
                 .unlockedBy("has_column_segment", has(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get()))
                 .save(consumer, id("crafting/reactor_reflector"));
+    }
+
+    private void addNuclearThermalRecipes(Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get())
+                .pattern(" P ").pattern("PCP").pattern("RWR")
+                .define('P', ModNetworkBlocks.IRON_PIPE.get())
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('W', component(CraftingComponent.FINE_COPPER_WIRE))
+                .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                .save(consumer, id("crafting/nuclear_thermal_port"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.NUCLEAR_HEAT_EXCHANGER.get(), 4)
+                .pattern("PCP").pattern("CCC").pattern("PCP")
+                .define('P', ModNetworkBlocks.IRON_PIPE.get())
+                .define('C', ModAdvancedBlocks.COPPER_COIL.get())
+                .unlockedBy("has_thermal_port", has(ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get()))
+                .save(consumer, id("crafting/nuclear_heat_exchanger"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.COOLING_TOWER_FILL.get(), 8)
+                .pattern("IBI").pattern("BIB").pattern("IBI")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('B', Items.IRON_BARS)
+                .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                .save(consumer, id("crafting/cooling_tower_fill"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModNuclearBlocks.COOLING_TOWER_FAN.get())
+                .pattern(" I ").pattern("IMI").pattern(" I ")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('M', component(CraftingComponent.MOTOR))
+                .unlockedBy("has_cooling_fill", has(ModNuclearBlocks.COOLING_TOWER_FILL.get()))
+                .save(consumer, id("crafting/cooling_tower_fan"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModNuclearBlocks.MAIN_COOLANT_PUMP.get())
+                .pattern("PMP").pattern("RCR").pattern("PMP")
+                .define('P', ModNetworkBlocks.IRON_PIPE.get())
+                .define('M', component(CraftingComponent.MOTOR))
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('C', ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get())
+                .unlockedBy("has_thermal_port", has(ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get()))
+                .save(consumer, id("crafting/main_coolant_pump"));
+        for (committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalFacilityType type
+                : committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalFacilityType.values()) {
+            ItemLike core = type == committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalFacilityType.COOLING_TOWER
+                    ? ModNuclearBlocks.COOLING_TOWER_FAN.get() : ModNuclearBlocks.NUCLEAR_HEAT_EXCHANGER.get();
+            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModNuclearBlocks.thermalController(type).get())
+                    .pattern("RPR").pattern("MCM").pattern("RPR")
+                    .define('R', Tags.Items.DUSTS_REDSTONE)
+                    .define('P', ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get())
+                    .define('M', component(CraftingComponent.MOTOR))
+                    .define('C', core)
+                    .unlockedBy("has_thermal_port", has(ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get()))
+                    .save(consumer, id("crafting/" + type.id()));
+        }
     }
 
     private static NuclearProcessRecipe.CountedIngredient counted(ItemLike item, int count) {

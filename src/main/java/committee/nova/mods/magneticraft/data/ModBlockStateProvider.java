@@ -294,6 +294,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             simpleBlockItem(holder.get(), model);
         });
         registerNuclearReactorModels();
+        registerNuclearThermalModels();
 
         simpleBlockWithItem(
                 ModAdvancedBlocks.OIL_DEPOSIT.get(),
@@ -327,7 +328,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
         for (FluidDefinition definition : FluidDefinition.values()) {
             ModelFile model = models().getBuilder(definition.id())
-                    .texture("particle", Magneticraft.id("fluid/" + definition.id() + "_still"));
+                    .texture("particle", Magneticraft.id("fluid/" + definition.textureId() + "_still"));
             simpleBlock(ModFluids.get(definition).block().get(), model);
         }
     }
@@ -375,6 +376,28 @@ final class ModBlockStateProvider extends BlockStateProvider {
             String id = "reactor_" + type.name().toLowerCase(java.util.Locale.ROOT);
             ModelFile model = models().cubeColumn(id, texture, coilEnd);
             simpleBlockWithItem(holder.get(), model);
+        });
+    }
+
+    private void registerNuclearThermalModels() {
+        ResourceLocation casing = modLoc("blocks/multiblock_parts/base_side");
+        ResourceLocation striped = modLoc("blocks/multiblock_parts/striped");
+        ResourceLocation electrical = modLoc("blocks/multiblock_parts/electric");
+        ResourceLocation coilSide = modLoc("blocks/multiblock_parts/copper_coil_side");
+        ResourceLocation coilEnd = modLoc("blocks/multiblock_parts/copper_coil");
+
+        registerNuclearPort(ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get(), "nuclear_thermal_port", striped);
+        simpleBlockWithItem(ModNuclearBlocks.NUCLEAR_HEAT_EXCHANGER.get(),
+                models().cubeColumn("nuclear_heat_exchanger", coilSide, coilEnd));
+        simpleBlockWithItem(ModNuclearBlocks.COOLING_TOWER_FILL.get(),
+                models().cubeAll("cooling_tower_fill", modLoc("blocks/multiblock_parts/corrugated_iron_side")));
+        simpleBlockWithItem(ModNuclearBlocks.COOLING_TOWER_FAN.get(),
+                models().cubeColumn("cooling_tower_fan", electrical, coilEnd));
+        registerNuclearPort(ModNuclearBlocks.MAIN_COOLANT_PUMP.get(), "main_coolant_pump", coilSide);
+        ModNuclearBlocks.thermalControllers().forEach((type, holder) -> {
+            ModelFile model = models().cubeAll(type.id(), casing);
+            horizontalBlock(holder.get(), ignored -> model);
+            simpleBlockItem(holder.get(), model);
         });
     }
 

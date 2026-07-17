@@ -21,10 +21,13 @@ final class ModSpriteSourceProvider extends SpriteSourceProvider {
     @Override
     protected void addSources() {
         atlas(BLOCKS_ATLAS).addSource(new DirectoryLister("blocks", "blocks/"));
-        for (FluidDefinition definition : FluidDefinition.values()) {
+        for (String textureId : java.util.Arrays.stream(FluidDefinition.values())
+                .map(FluidDefinition::textureId)
+                .distinct()
+                .toList()) {
             atlas(BLOCKS_ATLAS)
-                    .addSource(single("fluid/" + definition.id() + "_still"))
-                    .addSource(single("fluid/" + definition.id() + "_flow"));
+                    .addSource(single("fluid/" + textureId + "_still"))
+                    .addSource(single("fluid/" + textureId + "_flow"));
         }
     }
 

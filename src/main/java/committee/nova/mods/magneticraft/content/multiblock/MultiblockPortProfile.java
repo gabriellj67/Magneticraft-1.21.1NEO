@@ -24,9 +24,14 @@ public final class MultiblockPortProfile {
 
     public static List<TankPort> tanks(MultiblockDefinition definition) {
         return switch (definition) {
-            case STEAM_ENGINE, STEAM_TURBINE -> List.of(port(
+            case STEAM_ENGINE -> List.of(port(
                     definition, 0, "steam_input", List.of(fluid(FluidDefinition.STEAM))
             ));
+            case STEAM_TURBINE -> List.of(
+                    port(definition, 0, "steam_input", List.of(fluid(FluidDefinition.STEAM))),
+                    port(definition, 1, "low_pressure_exhaust_output",
+                            List.of(fluid(FluidDefinition.LOW_PRESSURE_EXHAUST_STEAM)))
+            );
             case PUMPJACK -> List.of(port(
                     definition, 0, "oil_output", List.of(fluid(FluidDefinition.OIL))
             ));

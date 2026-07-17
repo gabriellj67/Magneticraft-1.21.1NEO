@@ -19,6 +19,8 @@ import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorLayoutEsti
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorLayoutSimulator;
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorRuntimeModel;
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorRuntimeResult;
+import committee.nova.mods.magneticraft.system.nuclear.thermal.NuclearThermalTransactions;
+import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -374,6 +376,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
             return;
         }
         long now = level.getGameTime();
+        updatePrimaryCoolantFlow();
         stationJoulesRequired = snapshot == null ? 0 : parameters().stationInstrumentationJoulesPerTick()
                 + (operatingState.producesFissionHeat() ? parameters().stationRunningJoulesPerTick() : 0);
         NuclearReactorPortBlockEntity electricalPort = electricalPort();
@@ -416,6 +419,32 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         lastRuntimeGameTime = now;
         if (!fuelStates.isEmpty() || operatingState != ReactorOperatingState.SHUTDOWN) {
             markChanged();
+        }
+    }
+
+    private void updatePrimaryCoolantFlow() {
+        NuclearReactorPortBlockEntity input = port(NuclearReactorPortType.COOLANT_INPUT);
+        NuclearReactorPortBlockEntity output = port(NuclearReactorPortType.COOLANT_OUTPUT);
+        if (input == null || output == null) {
+            reportCoolantFlow(0.0D);
+            return;
+        }
+        int requested = (int) Math.ceil(Math.max(0.0D,
+                estimate.requiredCoolantFlowMilliBucketsPerTick() * 1.5D));
+        var transfer = NuclearThermalTransactions.stateConversion(
+                input.coolantAmount(FluidDefinition.COLD_REACTOR_COOLANT),
+                output.coolantSpace(FluidDefinition.HOT_REACTOR_COOLANT),
+                requested
+        );
+        reportCoolantFlow(transfer.consumed());
+        if (transfer.consumed() <= 0 || !(operatingState.producesFissionHeat()
+                || runtime.decayHeatJoulesPerTick() > 0.0D)) {
+            return;
+        }
+        int drained = input.drainCoolant(FluidDefinition.COLD_REACTOR_COOLANT, transfer.consumed());
+        int filled = output.fillCoolant(FluidDefinition.HOT_REACTOR_COOLANT, drained);
+        if (filled != drained) {
+            throw new IllegalStateException("Primary coolant transaction lost fluid after successful simulation");
         }
     }
 
@@ -717,9 +746,9 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         if (level == null) {
             return;
         }
-        value.ports().values().forEach(position -> {
+        value.ports().forEach((role, position) -> {
             if (level.getBlockEntity(position) instanceof NuclearReactorPortBlockEntity port) {
-                port.claim(worldPosition);
+                port.claim(worldPosition, role);
             }
         });
     }
@@ -744,6 +773,17 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         BlockPos position = current.ports().get(NuclearReactorPortType.ELECTRICAL);
         return position != null && level.getBlockEntity(position) instanceof NuclearReactorPortBlockEntity port
                 && port.claimedBy(worldPosition) ? port : null;
+    }
+
+    @Nullable
+    private NuclearReactorPortBlockEntity port(NuclearReactorPortType role) {
+        NuclearReactorSnapshot current = snapshot;
+        if (level == null || current == null) {
+            return null;
+        }
+        BlockPos position = current.ports().get(role);
+        return position != null && level.getBlockEntity(position) instanceof NuclearReactorPortBlockEntity port
+                && port.claimedBy(worldPosition) && port.claimedRole() == role ? port : null;
     }
 
     private void refreshEstimate() {

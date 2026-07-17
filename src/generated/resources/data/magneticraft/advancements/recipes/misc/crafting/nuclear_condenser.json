@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/nuclear_condenser"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_thermal_port": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "magneticraft:nuclear_thermal_port"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_thermal_port",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/nuclear_condenser"
+    ]
+  },
+  "sends_telemetry_event": false
+}

@@ -170,10 +170,23 @@
         "role": "steam_input",
         "side": "east",
         "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -4
+        },
+        "role": "low_pressure_exhaust_output",
+        "side": "north",
+        "target": 1
       }
     ],
     "electricity": true,
     "fluid_tank_capacities_mb": [
+      32000,
       32000
     ],
     "fluid_tanks": [
@@ -184,6 +197,14 @@
         "capacity_mb": 32000,
         "index": 0,
         "role": "steam_input"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:low_pressure_exhaust_steam"
+        ],
+        "capacity_mb": 32000,
+        "index": 1,
+        "role": "low_pressure_exhaust_output"
       }
     ],
     "heat": false,

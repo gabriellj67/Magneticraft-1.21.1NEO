@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "M": {
+      "item": "magneticraft:motor"
+    }
+  },
+  "pattern": [
+    " I ",
+    "IMI",
+    " I "
+  ],
+  "result": {
+    "item": "magneticraft:cooling_tower_fan"
+  },
+  "show_notification": true
+}

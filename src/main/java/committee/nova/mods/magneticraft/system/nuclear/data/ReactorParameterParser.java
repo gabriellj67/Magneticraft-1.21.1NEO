@@ -36,20 +36,34 @@ public final class ReactorParameterParser {
         double unloadTemperature = decimal(object, "safe_unload_temperature_kelvin", errors);
         double rodStep = decimal(object, "automatic_rod_step_per_tick", errors);
         int offlineTicks = integer(object, "maximum_offline_catchup_ticks", errors);
+        int coolantEnthalpy = integer(object, "primary_coolant_enthalpy_joules_per_millibucket", errors);
+        int pumpFlow = integer(object, "main_pump_maximum_flow_millibuckets_per_tick", errors);
+        double pumpEnergy = decimal(object, "main_pump_joules_per_millibucket", errors);
+        int steamRatio = integer(object, "steam_generator_steam_per_water_millibucket", errors);
+        int turbineEnergy = integer(object, "turbine_joules_per_steam_millibucket", errors);
+        double ventingEfficiency = decimal(object, "turbine_venting_efficiency", errors);
+        int condenserRatio = integer(object, "condenser_steam_per_water_millibucket", errors);
+        double condenserHeat = decimal(object, "condenser_heat_joules_per_steam_millibucket", errors);
+        int towerFillHeat = integer(object, "cooling_tower_heat_joules_per_fill_block_tick", errors);
+        int towerFanHeat = integer(object, "cooling_tower_heat_joules_per_fan_tick", errors);
         if (schema != ReactorParameters.SCHEMA_VERSION) {
             errors.add("schema_version must be " + ReactorParameters.SCHEMA_VERSION);
         }
         errors.addAll(ReactorParameters.validationErrors(
                 instrumentation, running, startup, minimumCoolant, temperatureResponse,
                 temperatureRise, poisonBuild, poisonDecay, decayResponse, decayLoss,
-                claddingDamage, scramTemperature, unloadTemperature, rodStep, offlineTicks));
+                claddingDamage, scramTemperature, unloadTemperature, rodStep, offlineTicks,
+                coolantEnthalpy, pumpFlow, pumpEnergy, steamRatio, turbineEnergy,
+                ventingEfficiency, condenserRatio, condenserHeat, towerFillHeat, towerFanHeat));
         if (!errors.isEmpty()) {
             return new Result(Optional.empty(), errors);
         }
         return new Result(Optional.of(new ReactorParameters(
                 id, instrumentation, running, startup, minimumCoolant, temperatureResponse,
                 temperatureRise, poisonBuild, poisonDecay, decayResponse, decayLoss,
-                claddingDamage, scramTemperature, unloadTemperature, rodStep, offlineTicks)), List.of());
+                claddingDamage, scramTemperature, unloadTemperature, rodStep, offlineTicks,
+                coolantEnthalpy, pumpFlow, pumpEnergy, steamRatio, turbineEnergy,
+                ventingEfficiency, condenserRatio, condenserHeat, towerFillHeat, towerFanHeat)), List.of());
     }
 
     private static int integer(JsonObject object, String field, List<String> errors) {

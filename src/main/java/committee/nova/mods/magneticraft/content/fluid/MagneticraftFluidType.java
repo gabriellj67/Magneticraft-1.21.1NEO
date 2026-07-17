@@ -33,8 +33,9 @@ public final class MagneticraftFluidType extends FluidType {
         // FluidType invokes this callback from its constructor, before this
         // subclass can assign definition. The description id is already
         // initialized by FluidType at that point, so it is the safe source.
-        ResourceLocation still = texture(getDescriptionId(), "_still");
-        ResourceLocation flowing = texture(getDescriptionId(), "_flow");
+        FluidDefinition clientDefinition = definition(getDescriptionId());
+        ResourceLocation still = texture(clientDefinition, "_still");
+        ResourceLocation flowing = texture(clientDefinition, "_flow");
         consumer.accept(new IClientFluidTypeExtensions() {
             @Override
             public ResourceLocation getStillTexture() {
@@ -45,13 +46,26 @@ public final class MagneticraftFluidType extends FluidType {
             public ResourceLocation getFlowingTexture() {
                 return flowing;
             }
+
+            @Override
+            public int getTintColor() {
+                return clientDefinition.tintColor();
+            }
         });
     }
 
     static ResourceLocation texture(String descriptionId, String suffix) {
+        return texture(definition(descriptionId), suffix);
+    }
+
+    private static FluidDefinition definition(String descriptionId) {
         if (!descriptionId.startsWith(DESCRIPTION_PREFIX)) {
             throw new IllegalArgumentException("Unexpected Magneticraft fluid description id: " + descriptionId);
         }
-        return Magneticraft.id("fluid/" + descriptionId.substring(DESCRIPTION_PREFIX.length()) + suffix);
+        return FluidDefinition.byId(descriptionId.substring(DESCRIPTION_PREFIX.length()));
+    }
+
+    private static ResourceLocation texture(FluidDefinition definition, String suffix) {
+        return Magneticraft.id("fluid/" + definition.textureId() + suffix);
     }
 }

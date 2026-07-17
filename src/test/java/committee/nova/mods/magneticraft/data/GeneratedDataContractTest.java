@@ -196,10 +196,10 @@ class GeneratedDataContractTest {
         for (FluidDefinition definition : FluidDefinition.values()) {
             assertFile(ASSETS.resolve("blockstates/" + definition.id() + ".json"));
             assertFile(ASSETS.resolve("models/block/" + definition.id() + ".json"));
-            assertPng(SOURCE_TEXTURES.resolve("fluid/" + definition.id() + "_still.png"));
-            assertPng(SOURCE_TEXTURES.resolve("fluid/" + definition.id() + "_flow.png"));
-            assertFile(SOURCE_TEXTURES.resolve("fluid/" + definition.id() + "_still.png.mcmeta"));
-            assertFile(SOURCE_TEXTURES.resolve("fluid/" + definition.id() + "_flow.png.mcmeta"));
+            assertPng(SOURCE_TEXTURES.resolve("fluid/" + definition.textureId() + "_still.png"));
+            assertPng(SOURCE_TEXTURES.resolve("fluid/" + definition.textureId() + "_flow.png"));
+            assertFile(SOURCE_TEXTURES.resolve("fluid/" + definition.textureId() + "_still.png.mcmeta"));
+            assertFile(SOURCE_TEXTURES.resolve("fluid/" + definition.textureId() + "_flow.png.mcmeta"));
             JsonObject bucketModel = readObject(ASSETS.resolve("models/item/" + definition.id() + "_bucket.json"));
             assertEquals("forge:fluid_container", bucketModel.get("loader").getAsString());
             assertEquals("magneticraft:" + definition.id(), bucketModel.get("fluid").getAsString());
@@ -207,10 +207,11 @@ class GeneratedDataContractTest {
             assertTrue(english.has("item.magneticraft." + definition.id() + "_bucket"), definition.id());
             assertFile(GENERATED.resolve("data/magneticraft/tags/fluids/" + definition.id() + ".json"));
             assertFile(GENERATED.resolve("data/forge/tags/fluids/" + definition.id() + ".json"));
-            assertTrue(atlasSprites.contains("magneticraft:fluid/" + definition.id() + "_still"));
-            assertTrue(atlasSprites.contains("magneticraft:fluid/" + definition.id() + "_flow"));
+            assertTrue(atlasSprites.contains("magneticraft:fluid/" + definition.textureId() + "_still"));
+            assertTrue(atlasSprites.contains("magneticraft:fluid/" + definition.textureId() + "_flow"));
         }
-        assertEquals(FluidDefinition.values().length * 2, atlasSprites.size());
+        assertEquals(java.util.Arrays.stream(FluidDefinition.values())
+                .map(FluidDefinition::textureId).distinct().count() * 2, atlasSprites.size());
     }
 
     @Test
@@ -626,7 +627,7 @@ class GeneratedDataContractTest {
 
         assertRecipeDirectory("sluice_box", 17, "magneticraft:sluice_box");
         assertRecipeDirectory("gasification_unit", 28, "magneticraft:gasification_unit");
-        assertRecipeDirectory("thermopile", 33, "magneticraft:thermopile");
+        assertRecipeDirectory("thermopile", FluidDefinition.values().length + 17L, "magneticraft:thermopile");
         assertRecipeDirectory("fluid_fuel", 10, "magneticraft:industrial_combustion_chamber");
         JsonObject sand = readObject(recipe("sluice_box/sand"));
         assertEquals(10, sand.getAsJsonArray("results").size());
