@@ -21,6 +21,7 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
         MachineObservationCodec.read(accessor.getServerData()).ifPresent(observation -> append(tooltip, observation));
+        NuclearJadeData.read(accessor.getServerData()).ifPresent(reading -> appendNuclear(tooltip, reading));
     }
 
     @Override
@@ -95,6 +96,34 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
                         ? "tooltip.magneticraft.jade.operational"
                         : "tooltip.magneticraft.jade.paused")
         )));
+    }
+
+    private static void appendNuclear(ITooltip tooltip, NuclearJadeData.Reading reading) {
+        tooltip.add(Component.translatable(
+                "tooltip.magneticraft.jade.nuclear_dose_rate", decimal(reading.doseRate())));
+        tooltip.add(Component.translatable(
+                "tooltip.magneticraft.jade.nuclear_contamination",
+                Component.translatable(reading.contaminationSource()
+                        ? "message.magneticraft.contamination.present"
+                        : "message.magneticraft.contamination.absent")));
+        if (reading.formed() != null) {
+            tooltip.add(Component.translatable(
+                    "tooltip.magneticraft.jade.nuclear_structure",
+                    Component.translatable(reading.formed()
+                            ? "tooltip.magneticraft.jade.formed"
+                            : "tooltip.magneticraft.jade.unformed")));
+        }
+        if (reading.accidentStage() != null) {
+            tooltip.add(Component.translatable(
+                    "tooltip.magneticraft.jade.nuclear_accident",
+                    Component.translatable("gui.magneticraft.reactor.accident."
+                            + reading.accidentStage().name().toLowerCase(Locale.ROOT))));
+            tooltip.add(Component.translatable(
+                    "tooltip.magneticraft.jade.nuclear_barriers",
+                    decimal(reading.pressureMegapascals()),
+                    percent(reading.vesselIntegrity()),
+                    percent(reading.containmentIntegrity())));
+        }
     }
 
     private static String decimal(double value) {

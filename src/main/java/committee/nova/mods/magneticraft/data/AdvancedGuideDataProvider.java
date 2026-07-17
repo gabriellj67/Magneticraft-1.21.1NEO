@@ -20,6 +20,10 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortProfile;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockRule;
 import committee.nova.mods.magneticraft.content.multiblock.ShelvingStorageModule;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorColumnCoordinate;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorStructure;
+import net.minecraft.core.Direction;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -31,7 +35,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -68,6 +74,14 @@ final class AdvancedGuideDataProvider implements DataProvider {
         for (MultiblockDefinition definition : MultiblockDefinition.values()) {
             Path path = multiblockGuides.json(Magneticraft.id(definition.id()));
             writes.add(DataProvider.saveStable(output, multiblockGuide(definition), path));
+        }
+        for (Map.Entry<String, Map<ReactorColumnCoordinate, NuclearReactorColumnType>> blueprint
+                : reactorBlueprintLayouts().entrySet()) {
+            writes.add(DataProvider.saveStable(
+                    output,
+                    reactorBlueprintGuide(blueprint.getKey(), blueprint.getValue()),
+                    multiblockGuides.json(Magneticraft.id("pressurized_water_reactor_" + blueprint.getKey()))
+            ));
         }
         writes.add(DataProvider.saveStable(
                 output,
@@ -125,6 +139,147 @@ final class AdvancedGuideDataProvider implements DataProvider {
         root.add("legend", legend(definition));
         root.add("ports", portSummary(definition));
         return root;
+    }
+
+    static Map<String, Map<ReactorColumnCoordinate, NuclearReactorColumnType>> reactorBlueprintLayouts() {
+        Map<String, Map<ReactorColumnCoordinate, NuclearReactorColumnType>> layouts = new LinkedHashMap<>();
+        layouts.put("robust_baseload", blueprint(
+                "FWF",
+                "RAI",
+                "FWF"
+        ));
+        layouts.put("compact_high_power", blueprint(
+                "FFF",
+                "WAW",
+                "FIF"
+        ));
+        layouts.put("fast_load_following", blueprint(
+                "AFB",
+                "WIW",
+                "CFD"
+        ));
+        return Map.copyOf(layouts);
+    }
+
+    static JsonObject reactorBlueprintGuide(
+            String blueprint,
+            Map<ReactorColumnCoordinate, NuclearReactorColumnType> columns
+    ) {
+        int width = 7;
+        int length = 7;
+        int height = 7;
+        JsonObject root = new JsonObject();
+        root.addProperty("schema_version", SCHEMA_VERSION);
+        root.addProperty("id", Magneticraft.MOD_ID + ":pressurized_water_reactor_" + blueprint);
+        root.addProperty("category", "energy");
+        root.addProperty("controller", Magneticraft.MOD_ID + ":pressurized_water_reactor_controller");
+        root.addProperty("translation_key", "guide.magneticraft.reactor.blueprint." + blueprint + ".name");
+        root.addProperty("description", "guide.magneticraft.reactor.blueprint." + blueprint + ".description");
+        root.addProperty("supports_mirroring", false);
+        root.add("size", offset(width, height, length));
+        root.add("anchor", offset(width / 2, 1, 0));
+
+        JsonArray layers = new JsonArray();
+        Map<Character, BlueprintLegend> legends = new LinkedHashMap<>();
+        for (int y = 0; y < height; y++) {
+            JsonArray rows = new JsonArray();
+            for (int z = 0; z < length; z++) {
+                StringBuilder row = new StringBuilder(width);
+                for (int x = 0; x < width; x++) {
+                    NuclearReactorStructure.ExpectedPart expected = NuclearReactorStructure.expectedPart(
+                            width, length, height, x, y, z, columns, Direction.NORTH);
+                    BlueprintLegend legend = blueprintLegend(expected);
+                    legends.putIfAbsent(legend.symbol(), legend);
+                    row.append(legend.symbol());
+                }
+                rows.add(row.toString());
+            }
+            layers.add(rows);
+        }
+        root.add("layers", layers);
+        JsonArray legendEntries = new JsonArray();
+        legends.values().forEach(legend -> {
+            JsonObject entry = new JsonObject();
+            entry.addProperty("symbol", Character.toString(legend.symbol()));
+            entry.addProperty("rule", legend.rule());
+            entry.addProperty("block", legend.block());
+            legendEntries.add(entry);
+        });
+        root.add("legend", legendEntries);
+
+        JsonObject ports = new JsonObject();
+        ports.addProperty("inventory_slots", 0);
+        ports.addProperty("bulk_item_capacity", 0);
+        ports.addProperty("electricity", true);
+        ports.addProperty("heat", false);
+        JsonArray tanks = new JsonArray();
+        tanks.add(64_000);
+        tanks.add(64_000);
+        ports.add("fluid_tank_capacities_mb", tanks);
+        root.add("ports", ports);
+        return root;
+    }
+
+    private static Map<ReactorColumnCoordinate, NuclearReactorColumnType> blueprint(String... rows) {
+        Map<ReactorColumnCoordinate, NuclearReactorColumnType> columns = new LinkedHashMap<>();
+        for (int z = 0; z < rows.length; z++) {
+            for (int x = 0; x < rows[z].length(); x++) {
+                columns.put(new ReactorColumnCoordinate(x, z), switch (rows[z].charAt(x)) {
+                    case 'F' -> NuclearReactorColumnType.FUEL_STANDARD;
+                    case 'A' -> NuclearReactorColumnType.CONTROL_ROD_A;
+                    case 'B' -> NuclearReactorColumnType.CONTROL_ROD_B;
+                    case 'C' -> NuclearReactorColumnType.CONTROL_ROD_C;
+                    case 'D' -> NuclearReactorColumnType.CONTROL_ROD_D;
+                    case 'W' -> NuclearReactorColumnType.COOLANT_CHANNEL;
+                    case 'I' -> NuclearReactorColumnType.INSTRUMENTATION;
+                    case 'R' -> NuclearReactorColumnType.REFLECTOR;
+                    default -> throw new IllegalArgumentException("Unknown reactor blueprint symbol");
+                });
+            }
+        }
+        return Map.copyOf(columns);
+    }
+
+    private static BlueprintLegend blueprintLegend(NuclearReactorStructure.ExpectedPart expected) {
+        if (expected.kind() == NuclearReactorStructure.PartKind.COLUMN_BASE) {
+            NuclearReactorColumnType column = expected.columnType();
+            char symbol = switch (column) {
+                case FUEL_LOW -> 'l';
+                case FUEL_STANDARD -> 'F';
+                case FUEL_HIGH -> 'H';
+                case CONTROL_ROD_A -> 'A';
+                case CONTROL_ROD_B -> 'B';
+                case CONTROL_ROD_C -> 'C';
+                case CONTROL_ROD_D -> 'D';
+                case COOLANT_CHANNEL -> 'W';
+                case INSTRUMENTATION -> 'I';
+                case REFLECTOR -> 'R';
+            };
+            String id = column.name().toLowerCase(Locale.ROOT);
+            return new BlueprintLegend(symbol, "reactor_" + id, "magneticraft:reactor_" + id);
+        }
+        return switch (expected.kind()) {
+            case CONTROLLER -> new BlueprintLegend('M', "reactor_controller",
+                    "magneticraft:pressurized_water_reactor_controller");
+            case CONTAINMENT_CASING -> new BlueprintLegend('#', "reactor_containment",
+                    "magneticraft:reactor_containment_casing");
+            case PRESSURE_VESSEL -> new BlueprintLegend('V', "reactor_pressure_vessel",
+                    "magneticraft:reactor_pressure_vessel");
+            case CONTROL_ROD_ACTUATOR -> new BlueprintLegend('T', "reactor_actuator",
+                    "magneticraft:reactor_control_rod_actuator");
+            case COOLANT_PORT -> new BlueprintLegend('P', "reactor_coolant_port",
+                    "magneticraft:reactor_main_coolant_port");
+            case ELECTRICAL_PORT -> new BlueprintLegend('E', "reactor_electrical_port",
+                    "magneticraft:reactor_electrical_port");
+            case INSTRUMENTATION_PORT -> new BlueprintLegend('N', "reactor_instrumentation_port",
+                    "magneticraft:reactor_instrumentation_port");
+            case COLUMN_SEGMENT -> new BlueprintLegend('S', "reactor_column_segment",
+                    "magneticraft:reactor_column_segment");
+            case COLUMN_BASE -> throw new IllegalStateException("Column base handled above");
+        };
+    }
+
+    private record BlueprintLegend(char symbol, String rule, String block) {
     }
 
     static JsonObject opcodeGuide(Collection<GuideOpcodeEntry> entries) {

@@ -32,8 +32,11 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -519,6 +522,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         applyAccidentResult(result);
         if (accidentStage != previous) {
             lastAccidentTransitionGameTime = level == null ? 0L : level.getGameTime();
+            emitAccidentFeedback(previous, accidentStage);
             markChangedAndSync();
         }
         if (accidentStage.ordinal() >= ReactorAccidentStage.LOCAL_BOILING.ordinal()
@@ -560,6 +564,37 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         vesselIntegrity = result.vesselIntegrity();
         containmentIntegrity = result.containmentIntegrity();
         accidentEnergyJoules = result.accidentEnergyJoules();
+    }
+
+    private void emitAccidentFeedback(ReactorAccidentStage previous, ReactorAccidentStage current) {
+        if (!(level instanceof ServerLevel serverLevel) || current == ReactorAccidentStage.NORMAL
+                || current.ordinal() <= previous.ordinal()) {
+            return;
+        }
+        boolean severe = current.severe();
+        serverLevel.sendParticles(
+                severe ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE,
+                worldPosition.getX() + 0.5D,
+                worldPosition.getY() + 1.5D,
+                worldPosition.getZ() + 0.5D,
+                severe ? 40 : 12,
+                severe ? 1.5D : 0.6D,
+                severe ? 1.0D : 0.4D,
+                severe ? 1.5D : 0.6D,
+                0.02D
+        );
+        if (current.ordinal() >= ReactorAccidentStage.VESSEL_BREACH.ordinal()) {
+            serverLevel.sendParticles(ParticleTypes.FLAME,
+                    worldPosition.getX() + 0.5D, worldPosition.getY() + 1.0D,
+                    worldPosition.getZ() + 0.5D, 30, 1.2D, 0.8D, 1.2D, 0.05D);
+        }
+        if (severe) {
+            serverLevel.playSound(null, worldPosition, SoundEvents.GENERIC_EXPLODE,
+                    SoundSource.BLOCKS, 1.5F, 0.7F);
+        } else {
+            serverLevel.playSound(null, worldPosition, SoundEvents.NOTE_BLOCK_BELL.value(),
+                    SoundSource.BLOCKS, 1.0F, 1.5F);
+        }
     }
 
     private void resetAccidentState() {

@@ -6,12 +6,31 @@ import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GuideRepositoryTest {
+    @Test
+    void generatedReactorStarterBlueprintsLoadThroughTheClientRepositoryContract() throws IOException {
+        for (String id : List.of("robust_baseload", "compact_high_power", "fast_load_following")) {
+            Path path = Path.of("src/generated/resources/assets/magneticraft/guide/multiblocks/"
+                    + "pressurized_water_reactor_" + id + ".json");
+            JsonObject root = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
+            GuideRepository.MultiblockGuide guide = GuideRepository.parseMultiblock(
+                    ResourceLocation.fromNamespaceAndPath("magneticraft", path.getFileName().toString()), root);
+            assertEquals(7, guide.layers().size(), id);
+            assertEquals(7, guide.layers().get(0).size(), id);
+            assertTrue(guide.legend().containsKey('M'), id);
+            assertTrue(guide.legend().containsKey('F'), id);
+            assertEquals(List.of(64_000, 64_000), guide.ports().fluidTankCapacitiesMb(), id);
+        }
+    }
+
     private static final ResourceLocation FILE = ResourceLocation.fromNamespaceAndPath(
             "magneticraft",
             "guide/multiblocks/test.json"

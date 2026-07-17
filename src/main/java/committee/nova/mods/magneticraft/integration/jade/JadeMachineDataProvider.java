@@ -23,6 +23,7 @@ enum JadeMachineDataProvider implements IServerDataProvider<BlockAccessor> {
         }
         MachineObservation observation = MachineObservationService.observe(blockEntity, accessor.getSide());
         MachineObservationCodec.write(data, observation);
+        NuclearJadeData.write(data, blockEntity);
     }
 
     @Override

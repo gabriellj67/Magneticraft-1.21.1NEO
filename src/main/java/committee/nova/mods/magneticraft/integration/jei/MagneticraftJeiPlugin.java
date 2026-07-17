@@ -10,6 +10,8 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.recipe.Therm
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.AdvancedProcessingRecipe;
 import committee.nova.mods.magneticraft.content.multiblock.recipe.PolymerizerRecipe;
+import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearProcessRecipe;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
 import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
 import committee.nova.mods.magneticraft.content.item.ProtectionBlockItem;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricPoleTransformerBlockItem;
@@ -21,6 +23,8 @@ import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
+import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
+import committee.nova.mods.magneticraft.init.ModNuclearItems;
 import committee.nova.mods.magneticraft.system.network.electric.item.ElectricalRatingIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.TransformerProfileIds;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
@@ -53,6 +57,8 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
             type("advanced_processing", AdvancedProcessingRecipe.class);
     public static final RecipeType<PolymerizerRecipe> POLYMERIZING =
             type("polymerizing", PolymerizerRecipe.class);
+    public static final RecipeType<NuclearProcessRecipe> NUCLEAR_PROCESSING =
+            type("nuclear_processing", NuclearProcessRecipe.class);
 
     @Override
     public ResourceLocation getPluginUid() {
@@ -78,7 +84,11 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
                 ModNetworkBlocks.FUSE_BOX.get().asItem(),
                 ModNetworkBlocks.CIRCUIT_BREAKER.get().asItem(),
                 ModNetworkItems.FUSE.get(),
-                ModComputerContent.FLOPPY_DISK.get()
+                ModComputerContent.FLOPPY_DISK.get(),
+                ModNuclearItems.fuelAssembly(NuclearFuelGrade.LOW_ENRICHMENT).get(),
+                ModNuclearItems.fuelAssembly(NuclearFuelGrade.STANDARD_ENRICHMENT).get(),
+                ModNuclearItems.fuelAssembly(NuclearFuelGrade.HIGH_ENRICHMENT).get(),
+                ModNuclearItems.SEALED_SPENT_FUEL_CASK.get()
         );
     }
 
@@ -92,7 +102,8 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
                 new ThermopileRecipeCategory(guiHelper),
                 new FluidFuelRecipeCategory(guiHelper),
                 new AdvancedProcessingRecipeCategory(guiHelper),
-                new PolymerizerRecipeCategory(guiHelper)
+                new PolymerizerRecipeCategory(guiHelper),
+                new NuclearProcessingRecipeCategory(guiHelper)
         );
     }
 
@@ -110,6 +121,8 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
         registration.addRecipes(THERMOPILE, recipes.getAllRecipesFor(ModRecipeTypes.THERMOPILE_TYPE.get()));
         registration.addRecipes(FLUID_FUEL, recipes.getAllRecipesFor(ModRecipeTypes.FLUID_FUEL_TYPE.get()));
         registration.addRecipes(POLYMERIZING, recipes.getAllRecipesFor(ModRecipeTypes.POLYMERIZING_TYPE.get()));
+        registration.addRecipes(NUCLEAR_PROCESSING,
+                recipes.getAllRecipesFor(ModRecipeTypes.NUCLEAR_PROCESSING_TYPE.get()));
         registration.addRecipes(
                 ADVANCED_PROCESSING,
                 ModRecipeTypes.advancedProcessingTypes().values().stream()
@@ -208,6 +221,18 @@ public final class MagneticraftJeiPlugin implements IModPlugin {
         registration.addRecipeCatalysts(
                 POLYMERIZING,
                 ModAdvancedBlocks.controller(MultiblockDefinition.POLYMERIZER).get()
+        );
+        registration.addRecipeCatalysts(
+                NUCLEAR_PROCESSING,
+                ModNuclearBlocks.controller(
+                        committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType.URANIUM_PROCESSOR
+                ).get(),
+                ModNuclearBlocks.controller(
+                        committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType.CENTRIFUGE_CASCADE
+                ).get(),
+                ModNuclearBlocks.controller(
+                        committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType.FUEL_FABRICATOR
+                ).get()
         );
     }
 

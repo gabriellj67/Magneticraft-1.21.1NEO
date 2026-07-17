@@ -16,6 +16,7 @@ import committee.nova.mods.magneticraft.content.item.MediumBatteryItem;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -33,6 +34,32 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdvancedGuideDataProviderTest {
+    @Test
+    void reactorStarterBlueprintsAreCompleteWorkingSizedLayoutsWithoutASingleScore() {
+        var layouts = AdvancedGuideDataProvider.reactorBlueprintLayouts();
+        assertEquals(Set.of("robust_baseload", "compact_high_power", "fast_load_following"),
+                layouts.keySet());
+        layouts.forEach((name, columns) -> {
+            assertEquals(9, columns.size(), name);
+            assertTrue(columns.containsValue(NuclearReactorColumnType.FUEL_STANDARD), name);
+            assertTrue(columns.values().stream().anyMatch(NuclearReactorColumnType::isControlRod), name);
+            assertTrue(columns.containsValue(NuclearReactorColumnType.COOLANT_CHANNEL), name);
+            assertTrue(columns.containsValue(NuclearReactorColumnType.INSTRUMENTATION), name);
+            JsonObject guide = AdvancedGuideDataProvider.reactorBlueprintGuide(name, columns);
+            assertEquals(7, guide.getAsJsonObject("size").get("x").getAsInt(), name);
+            assertEquals(7, guide.getAsJsonObject("size").get("y").getAsInt(), name);
+            assertEquals(7, guide.getAsJsonObject("size").get("z").getAsInt(), name);
+            JsonArray layers = guide.getAsJsonArray("layers");
+            assertEquals(7, layers.size(), name);
+            layers.forEach(layer -> {
+                assertEquals(7, layer.getAsJsonArray().size(), name);
+                layer.getAsJsonArray().forEach(row -> assertEquals(7, row.getAsString().length(), name));
+            });
+        });
+        assertEquals(4, layouts.get("fast_load_following").values().stream()
+                .filter(NuclearReactorColumnType::isControlRod).count());
+    }
+
     @Test
     void computerLanguageGuidePublishesHistoricalSurfacesAndSecurityBounds() {
         JsonObject guide = AdvancedGuideDataProvider.computerLanguageGuide();

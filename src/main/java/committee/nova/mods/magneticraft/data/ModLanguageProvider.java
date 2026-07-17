@@ -751,6 +751,8 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModNuclearItems.HEAVY_RADIATION_CHESTPLATE.get(), chinese ? "重型铅衬防辐射胸甲" : "Heavy Lead-Lined Chestplate");
         add(ModNuclearItems.HEAVY_RADIATION_LEGGINGS.get(), chinese ? "重型铅衬防辐射护腿" : "Heavy Lead-Lined Leggings");
         add(ModNuclearItems.HEAVY_RADIATION_BOOTS.get(), chinese ? "重型铅衬防辐射靴" : "Heavy Lead-Lined Boots");
+        add("item.magneticraft.radiation_protection.attenuation",
+                chinese ? "单件剂量衰减：%s%%（多件乘算）" : "Per-piece dose attenuation: %s%% (multiplicative)");
 
         add("gui.magneticraft.state.connected", chinese ? "已连接" : "Connected");
         add("gui.magneticraft.state.disconnected", chinese ? "未连接" : "Disconnected");
@@ -774,6 +776,42 @@ final class ModLanguageProvider extends LanguageProvider {
         add("message.magneticraft.spent_fuel_cask.not_cooled", chinese ? "乏燃料尚未冷却到安全封装阈值" : "Spent fuel has not cooled to the safe encapsulation threshold");
         add("item.magneticraft.sealed_spent_fuel_cask.sealed", chinese ? "已封装乏燃料（燃耗 %s%%）" : "Spent fuel sealed (burnup %s%%)");
         add("item.magneticraft.sealed_spent_fuel_cask.empty", chinese ? "空储存罐；仅接受已安全冷却的乏燃料" : "Empty; accepts only safely cooled spent fuel");
+        add("jei.magneticraft.nuclear_processing", chinese ? "核燃料前端处理" : "Nuclear Fuel Front-End Processing");
+        add("jei.magneticraft.energy_per_tick_joules", chinese ? "厂用电：%s J/t" : "Station power: %s J/t");
+        add("tooltip.magneticraft.jade.nuclear_dose_rate", chinese ? "剂量率：%s mSv/h" : "Dose rate: %s mSv/h");
+        add("tooltip.magneticraft.jade.nuclear_contamination", chinese ? "污染源：%s" : "Contamination source: %s");
+        add("tooltip.magneticraft.jade.nuclear_structure", chinese ? "核设施结构：%s" : "Nuclear structure: %s");
+        add("tooltip.magneticraft.jade.nuclear_accident", chinese ? "事故阶段：%s" : "Accident stage: %s");
+        add("tooltip.magneticraft.jade.nuclear_barriers", chinese ? "压力 %s MPa；容器 %s；安全壳 %s" : "Pressure %s MPa; vessel %s; containment %s");
+
+        add("guide.magneticraft.reactor.blueprint.robust_baseload.name", chinese ? "压水堆入门：稳健基荷" : "PWR Starter: Robust Baseload");
+        add("guide.magneticraft.reactor.blueprint.robust_baseload.description", chinese
+                ? "可工作的 7×7×7 入门结构，堆芯截面为 FWF / RAI / FWF（F 标准燃料、W 冷却、R 反射层、A 棒组、I 仪表）。它优先冷却与安全裕量；需玩家逐块搭建，并非自动搭建或最优解。"
+                : "A working 7x7x7 starter with core section FWF / RAI / FWF (F standard fuel, W coolant, R reflector, A rod group, I instrumentation). It favors cooling and safety margin; players build it manually and it is not claimed optimal.");
+        add("guide.magneticraft.reactor.blueprint.compact_high_power.name", chinese ? "压水堆入门：紧凑高功率" : "PWR Starter: Compact High Power");
+        add("guide.magneticraft.reactor.blueprint.compact_high_power.description", chinese
+                ? "可工作的 7×7×7 入门结构，堆芯截面为 FFF / WAW / FIF。更多燃料列提高功率密度，但需要更强主回路、蒸汽与冷端能力；需玩家逐块搭建，并非最优解。"
+                : "A working 7x7x7 starter with core section FFF / WAW / FIF. More fuel columns raise power density but demand a stronger primary, steam, and cold-side chain; it is manually built and not claimed optimal.");
+        add("guide.magneticraft.reactor.blueprint.fast_load_following.name", chinese ? "压水堆入门：快速调峰" : "PWR Starter: Fast Load Following");
+        add("guide.magneticraft.reactor.blueprint.fast_load_following.description", chinese
+                ? "可工作的 7×7×7 入门结构，堆芯截面为 AFB / WIW / CFD，使用 A–D 四个独立棒组获得更快负载跟随。燃料经济性与功率密度较低；需玩家逐块搭建，并非最优解。"
+                : "A working 7x7x7 starter with core section AFB / WIW / CFD and all four independent rod groups for faster load following. Fuel economy and power density are lower; it is manually built and not claimed optimal.");
+        addGuideRule("reactor_controller", "压水堆控制器", "PWR controller");
+        addGuideRule("reactor_containment", "反应堆安全壳", "Reactor containment");
+        addGuideRule("reactor_pressure_vessel", "压力容器", "Pressure vessel");
+        addGuideRule("reactor_actuator", "控制棒执行器", "Control rod actuator");
+        addGuideRule("reactor_coolant_port", "主冷却剂端口", "Primary coolant port");
+        addGuideRule("reactor_electrical_port", "厂用电端口", "Station electrical port");
+        addGuideRule("reactor_instrumentation_port", "仪表端口", "Instrumentation port");
+        addGuideRule("reactor_column_segment", "纵向组件列段", "Vertical assembly segment");
+        addGuideRule("reactor_fuel_standard", "标准燃料列", "Standard fuel column");
+        addGuideRule("reactor_control_rod_a", "A 组控制棒列", "Control rod column A");
+        addGuideRule("reactor_control_rod_b", "B 组控制棒列", "Control rod column B");
+        addGuideRule("reactor_control_rod_c", "C 组控制棒列", "Control rod column C");
+        addGuideRule("reactor_control_rod_d", "D 组控制棒列", "Control rod column D");
+        addGuideRule("reactor_coolant_channel", "冷却通道列", "Coolant channel column");
+        addGuideRule("reactor_instrumentation", "堆芯仪表列", "Core instrumentation column");
+        addGuideRule("reactor_reflector", "反射层列", "Reflector column");
     }
 
     private void addClientTranslations() {
