@@ -38,9 +38,13 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
                         ? "tooltip.magneticraft.jade.active"
                         : "tooltip.magneticraft.jade.idle")
         )));
-        observation.energy().ifPresent(energy -> tooltip.add(Component.translatable(
-                energy.unit().tooltipTranslationKey(), energy.stored(), energy.capacity()
-        )));
+        // Jade's universal providers already render Forge Energy and sided fluid
+        // capabilities. Keep this component limited to Magneticraft-native state.
+        observation.energy()
+                .filter(energy -> energy.unit() == MachineObservation.EnergyUnit.JOULE)
+                .ifPresent(energy -> tooltip.add(Component.translatable(
+                        energy.unit().tooltipTranslationKey(), energy.stored(), energy.capacity()
+                )));
         observation.electrical().ifPresent(electrical -> tooltip.add(Component.translatable(
                 "tooltip.magneticraft.jade.electrical_terminal",
                 tierName(electrical.tierId()),
@@ -78,15 +82,6 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
                         "tooltip.magneticraft.jade.pressure_warning",
                         percent(pressure.fillRatio())
                 )));
-        for (MachineObservation.TankStatus tank : observation.tanks()) {
-            tooltip.add(Component.translatable(
-                    "tooltip.magneticraft.jade.tank",
-                    tank.fluidId().map(ResourceLocation::toString).orElseGet(() ->
-                            Component.translatable("tooltip.magneticraft.jade.empty").getString()),
-                    tank.amount(),
-                    tank.capacity()
-            ));
-        }
         observation.structure().ifPresent(structure -> tooltip.add(Component.translatable(
                 "tooltip.magneticraft.jade.structure",
                 Component.translatable(structure.formed()

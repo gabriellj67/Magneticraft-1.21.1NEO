@@ -16,7 +16,7 @@ final class FluidFuelRecipeCategory extends AbstractMagneticraftRecipeCategory<F
     FluidFuelRecipeCategory(IGuiHelper guiHelper) {
         super(
                 MagneticraftJeiPlugin.FLUID_FUEL,
-                Component.translatable("block.magneticraft.industrial_combustion_chamber"),
+                Component.translatable("jei.magneticraft.fluid_fuel"),
                 ModAdvancedBlocks.controller(MultiblockDefinition.BIG_COMBUSTION_CHAMBER).get(),
                 guiHelper,
                 166,

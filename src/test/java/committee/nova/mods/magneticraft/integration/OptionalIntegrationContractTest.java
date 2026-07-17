@@ -139,6 +139,51 @@ class OptionalIntegrationContractTest {
     }
 
     @Test
+    void jadeCustomDescriptionDoesNotDuplicateUniversalCapabilityViews() throws IOException {
+        String component = Files.readString(JAVA.resolve(
+                "committee/nova/mods/magneticraft/integration/jade/JadeMachineComponentProvider.java"
+        ));
+
+        assertTrue(component.contains("MachineObservation.EnergyUnit.JOULE"));
+        assertFalse(component.contains("MachineObservation.EnergyUnit.FORGE_ENERGY"));
+        assertFalse(component.contains("observation.tanks()"));
+    }
+
+    @Test
+    void jeiDescriptionsUseNativeUnitsAndPlayerFacingStateText() throws IOException {
+        JsonObject english = readJson(GENERATED.resolve("assets/magneticraft/lang/en_us.json"));
+        JsonObject chinese = readJson(GENERATED.resolve("assets/magneticraft/lang/zh_cn.json"));
+        for (JsonObject language : List.of(english, chinese)) {
+            for (String key : List.of(
+                    "jei.magneticraft.energy_per_tick",
+                    "jei.magneticraft.power"
+            )) {
+                assertTrue(language.get(key).getAsString().contains("J/t"), key);
+                assertFalse(language.get(key).getAsString().contains("FE"), key);
+            }
+            assertTrue(language.get("jei.magneticraft.total_energy").getAsString().contains("J/mB"));
+            assertFalse(language.get("jei.magneticraft.total_energy").getAsString().contains("FE"));
+            assertTrue(language.has("jei.magneticraft.fluid_fuel"));
+            assertTrue(language.has("jei.magneticraft.block_state"));
+            assertFalse(language.has("tooltip.magneticraft.jade.tank"));
+        }
+        assertEquals("Fluid Fuel", english.get("jei.magneticraft.fluid_fuel").getAsString());
+        assertEquals("流体燃料", chinese.get("jei.magneticraft.fluid_fuel").getAsString());
+
+        String thermopile = Files.readString(JAVA.resolve(
+                "committee/nova/mods/magneticraft/integration/jei/ThermopileRecipeCategory.java"
+        ));
+        assertTrue(thermopile.contains("jei.magneticraft.block_state"));
+        assertFalse(thermopile.contains("recipe.stateProperties().toString()"));
+
+        String fluidFuel = Files.readString(JAVA.resolve(
+                "committee/nova/mods/magneticraft/integration/jei/FluidFuelRecipeCategory.java"
+        ));
+        assertTrue(fluidFuel.contains("jei.magneticraft.fluid_fuel"));
+        assertFalse(fluidFuel.contains("block.magneticraft.industrial_combustion_chamber"));
+    }
+
+    @Test
     void singleBlockRecipeFamiliesUseTheSameDataTypesExposedToJeiAndCraftTweaker() throws IOException {
         assertGeneratedRecipeFamily("crushing_table");
         assertGeneratedRecipeFamily("sluice_box");

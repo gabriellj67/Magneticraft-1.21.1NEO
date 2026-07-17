@@ -16,6 +16,8 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 final class ThermopileRecipeCategory extends AbstractMagneticraftRecipeCategory<ThermopileRecipe> {
     ThermopileRecipeCategory(IGuiHelper guiHelper) {
@@ -41,12 +43,18 @@ final class ThermopileRecipeCategory extends AbstractMagneticraftRecipeCategory<
         if (display.isEmpty()) {
             display = new ItemStack(Items.BARRIER);
         }
-        builder.addInputSlot(8, 16)
+        var inputSlot = builder.addInputSlot(8, 16)
                 .setStandardSlotBackground()
                 .addItemStack(display)
                 .addRichTooltipCallback((slot, tooltip) -> tooltip.add(Component.literal(
                         String.valueOf(ForgeRegistries.BLOCKS.getKey(recipe.block()))
                 )));
+        if (!recipe.stateProperties().isEmpty()) {
+            inputSlot.addRichTooltipCallback((slot, tooltip) -> tooltip.add(Component.translatable(
+                    "jei.magneticraft.block_state",
+                    formatStateProperties(recipe.stateProperties())
+            )));
+        }
     }
 
     @Override
@@ -75,8 +83,12 @@ final class ThermopileRecipeCategory extends AbstractMagneticraftRecipeCategory<
                 36,
                 28
         );
-        if (!recipe.stateProperties().isEmpty()) {
-            drawLine(graphics, Component.literal(recipe.stateProperties().toString()), 8, 50);
-        }
+    }
+
+    private static String formatStateProperties(Map<String, String> properties) {
+        return properties.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(", "));
     }
 }

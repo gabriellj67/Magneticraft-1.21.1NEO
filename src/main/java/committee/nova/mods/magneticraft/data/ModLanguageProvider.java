@@ -43,6 +43,7 @@ final class ModLanguageProvider extends LanguageProvider {
     protected void addTranslations() {
         add("jei.magneticraft.polymerizing", chinese ? "聚合" : "Polymerizing");
         add("jei.magneticraft.heat_per_tick", chinese ? "热耗：%s J/t" : "Heat: %s J/t");
+        add("jei.magneticraft.fluid_fuel", chinese ? "流体燃料" : "Fluid Fuel");
         add(
                 MagneticraftConfig.CRUSHING_TABLE_CAUSES_FIRE_TRANSLATION_KEY,
                 chinese ? "压碎烈焰棒时点燃玩家" : "Crushing Table Causes Fire"
@@ -338,7 +339,6 @@ final class ModLanguageProvider extends LanguageProvider {
         add("tooltip.magneticraft.jade.pressure_warning", chinese
                 ? "警告：压力已达额定容量的 %s"
                 : "Warning: pressure is at %s of rated capacity");
-        add("tooltip.magneticraft.jade.tank", chinese ? "%s：%s / %s mB" : "%s: %s / %s mB");
         add("tooltip.magneticraft.jade.empty", chinese ? "空" : "Empty");
         add("tooltip.magneticraft.jade.structure", chinese ? "结构：%s，%s" : "Structure: %s, %s");
         add("tooltip.magneticraft.jade.formed", chinese ? "已成型" : "formed");
@@ -1062,17 +1062,18 @@ final class ModLanguageProvider extends LanguageProvider {
                 {"pneumatic", "气动物流", "Pneumatic logistics"}
         });
         add("jei.magneticraft.advanced_processing", chinese ? "高级加工" : "Advanced Processing");
+        add("jei.magneticraft.block_state", chinese ? "方块状态：%s" : "Block state: %s");
         add("jei.magneticraft.chance", chinese ? "概率：%s%%" : "Chance: %s%%");
         add("jei.magneticraft.conductivity", chinese ? "导热系数：%s" : "Conductivity: %s");
         add("jei.magneticraft.duration", chinese ? "耗时：%s 刻" : "Duration: %s ticks");
-        add("jei.magneticraft.energy_per_tick", chinese ? "能耗：%s FE/t" : "Energy: %s FE/t");
+        add("jei.magneticraft.energy_per_tick", chinese ? "能耗：%s J/t" : "Energy: %s J/t");
         add("jei.magneticraft.minimum_temperature", chinese ? "最低温度：%s K" : "Minimum: %s K");
         add("jei.magneticraft.machine", chinese ? "机器：%s" : "Machine: %s");
-        add("jei.magneticraft.power", chinese ? "功率：%s FE/t" : "Power: %s FE/t");
+        add("jei.magneticraft.power", chinese ? "功率：%s J/t" : "Power: %s J/t");
         add("jei.magneticraft.press_mode", chinese ? "压力模式：%s" : "Press mode: %s");
         add("jei.magneticraft.required_level", chinese ? "所需等级：%s" : "Required level: %s");
         add("jei.magneticraft.temperature", chinese ? "温度：%s K" : "Temperature: %s K");
-        add("jei.magneticraft.total_energy", chinese ? "能量：%s FE/mB" : "Energy: %s FE/mB");
+        add("jei.magneticraft.total_energy", chinese ? "能量：%s J/mB" : "Energy: %s J/mB");
         add("material.magneticraft.tungsten", chinese ? "钨" : "Tungsten");
         add(
                 "material.magneticraft.tungsten.flavor",
