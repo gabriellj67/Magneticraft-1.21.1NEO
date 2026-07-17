@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_facility_casing"
+    },
+    "H": {
+      "item": "minecraft:hopper"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "P": {
+      "item": "magneticraft:insulated_heat_pipe"
+    }
+  },
+  "pattern": [
+    " I ",
+    "ICI",
+    "PHP"
+  ],
+  "result": {
+    "item": "magneticraft:spent_fuel_pool_port"
+  },
+  "show_notification": true
+}

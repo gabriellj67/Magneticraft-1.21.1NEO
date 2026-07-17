@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_facility_casing"
+    },
+    "L": {
+      "tag": "forge:ingots/lead"
+    }
+  },
+  "pattern": [
+    "LLL",
+    "LCL",
+    "LLL"
+  ],
+  "result": {
+    "count": 8,
+    "item": "magneticraft:lead_radiation_shield"
+  },
+  "show_notification": true
+}

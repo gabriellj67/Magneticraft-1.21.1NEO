@@ -20,6 +20,8 @@ public final class MagneticraftConfig {
     public static final ForgeConfigSpec.IntValue WATER_GENERATOR_PER_TICK_WATER;
     public static final ForgeConfigSpec.BooleanValue ENABLE_ELECTRICAL_DAMAGE;
     public static final ForgeConfigSpec.IntValue ELECTRICAL_RELOAD_GRACE_TICKS;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_NUCLEAR_TERRAIN_DAMAGE;
+    public static final ForgeConfigSpec.DoubleValue NUCLEAR_ACCIDENT_DAMAGE_SCALE;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -42,6 +44,14 @@ public final class MagneticraftConfig {
                 .comment("Ticks after a successful electrical data reload during which damage accumulation is paused.")
                 .translation(ELECTRICAL_RELOAD_GRACE_TICKS_TRANSLATION_KEY)
                 .defineInRange("electrical_reload_grace_ticks", 200, 0, 1_200);
+        builder.pop();
+        builder.push("nuclear_safety");
+        ENABLE_NUCLEAR_TERRAIN_DAMAGE = builder
+                .comment("Allow severe reactor containment breaches to damage a bounded area of terrain.")
+                .define("enable_terrain_damage", true);
+        NUCLEAR_ACCIDENT_DAMAGE_SCALE = builder
+                .comment("Scales deterministic reactor accident terrain damage. Radius remains clamped to 6-24 blocks.")
+                .defineInRange("terrain_damage_scale", 1.0D, 0.0D, 2.0D);
         builder.pop();
         SPEC = builder.build();
     }

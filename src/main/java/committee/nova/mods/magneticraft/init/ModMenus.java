@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityMenu;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorMenu;
 import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalMenu;
+import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolMenu;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricalDeviceMenu;
 import committee.nova.mods.magneticraft.content.network.pressure.PressureTankMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -72,6 +73,11 @@ public final class ModMenus {
             ModRegistries.MENU_TYPES.register(
                     "nuclear_thermal_facility",
                     () -> IForgeMenuType.create(NuclearThermalMenu::new)
+            );
+    public static final RegistryObject<MenuType<SpentFuelPoolMenu>> SPENT_FUEL_POOL =
+            ModRegistries.MENU_TYPES.register(
+                    "spent_fuel_pool",
+                    () -> IForgeMenuType.create(SpentFuelPoolMenu::new)
             );
 
     static {

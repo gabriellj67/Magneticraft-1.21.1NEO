@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "minecraft:leather_chestplate"
+    },
+    {
+      "item": "magneticraft:boron_carbide"
+    }
+  ],
+  "result": {
+    "item": "magneticraft:basic_radiation_chestplate"
+  }
+}

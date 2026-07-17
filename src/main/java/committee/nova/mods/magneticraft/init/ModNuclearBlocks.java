@@ -13,6 +13,10 @@ import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalCo
 import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalFacilityType;
 import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalPortBlock;
 import committee.nova.mods.magneticraft.content.nuclear.thermal.MainCoolantPumpBlock;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.RadioactiveSourceBlock;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.RadioactiveSourceKind;
+import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolControllerBlock;
+import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolPortBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -83,6 +87,22 @@ public final class ModNuclearBlocks {
             "cooling_tower_fan", () -> new Block(controllerProperties()));
     public static final RegistryObject<Block> MAIN_COOLANT_PUMP = register(
             "main_coolant_pump", () -> new MainCoolantPumpBlock(controllerProperties()));
+    public static final RegistryObject<Block> LEAD_RADIATION_SHIELD = register(
+            "lead_radiation_shield", () -> new Block(partProperties().strength(8.0F, 30.0F)));
+    public static final RegistryObject<Block> RADIOACTIVE_DEBRIS = register(
+            "radioactive_debris",
+            () -> new RadioactiveSourceBlock(RadioactiveSourceKind.DEBRIS,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+                            .strength(0.5F).sound(SoundType.GRAVEL).lightLevel(state -> 3)));
+    public static final RegistryObject<Block> CORIUM = register(
+            "corium",
+            () -> new RadioactiveSourceBlock(RadioactiveSourceKind.CORIUM,
+                    BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+                            .strength(6.0F, 20.0F).sound(SoundType.BASALT).lightLevel(state -> 9)));
+    public static final RegistryObject<Block> SPENT_FUEL_POOL_CONTROLLER = register(
+            "spent_fuel_pool_controller", () -> new SpentFuelPoolControllerBlock(controllerProperties()));
+    public static final RegistryObject<Block> SPENT_FUEL_POOL_PORT = register(
+            "spent_fuel_pool_port", () -> new SpentFuelPoolPortBlock(controllerProperties()));
 
     static {
         for (NuclearFacilityType type : NuclearFacilityType.values()) {

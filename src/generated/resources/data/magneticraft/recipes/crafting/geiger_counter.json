@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "D": {
+      "item": "magneticraft:dosimeter"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    },
+    "W": {
+      "item": "magneticraft:fine_copper_wire"
+    }
+  },
+  "pattern": [
+    " I ",
+    "RDR",
+    " W "
+  ],
+  "result": {
+    "item": "magneticraft:geiger_counter"
+  },
+  "show_notification": true
+}

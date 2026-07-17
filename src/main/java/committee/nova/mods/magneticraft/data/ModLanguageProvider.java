@@ -144,6 +144,7 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "燃料状态数据无效；禁止装堆"
                 : "Invalid fuel state; reactor loading is blocked");
         addNuclearReactorTranslations();
+        addNuclearSafetyTranslations();
         add(ModMachineBlocks.CRUSHING_TABLE.get(), chinese ? "压碎台" : "Crushing Table");
         add(ModMachineBlocks.BATTERY.get(), chinese ? "电池箱" : "Battery Box");
         add(ModMachineBlocks.GRATE.get(), chinese ? "铁格栅" : "Iron Grate");
@@ -627,6 +628,10 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.reactor.metric.override", chinese ? "\u5de5\u7a0b\u8d85\u63a7\uff1a%s" : "Engineering override: %s");
         add("gui.magneticraft.reactor.metric.interlocks", chinese ? "\u8054\u9501\uff1a%s" : "Interlocks: %s");
         add("gui.magneticraft.reactor.metric.scram", chinese ? "\u505c\u5806\u539f\u56e0\uff1a%s" : "SCRAM reason: %s");
+        add("gui.magneticraft.reactor.metric.accident_stage", chinese ? "事故阶段：%s" : "Accident stage: %s");
+        add("gui.magneticraft.reactor.metric.pressure", chinese ? "主回路压力：%s" : "Primary pressure: %s");
+        add("gui.magneticraft.reactor.metric.barriers", chinese ? "容器/安全壳完整度：%s" : "Vessel/containment: %s");
+        add("gui.magneticraft.reactor.metric.radiation", chinese ? "剂量率：%s" : "Dose rate: %s");
         add("gui.magneticraft.reactor.enabled", chinese ? "\u5df2\u542f\u7528" : "Enabled");
         add("gui.magneticraft.reactor.disabled", chinese ? "\u5df2\u7981\u7528" : "Disabled");
         String[] statesZh = {"\u505c\u673a", "\u542f\u52a8", "\u8fd0\u884c", "\u4f59\u70ed", "\u7d27\u6025\u505c\u5806"};
@@ -671,6 +676,16 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.reactor.scram.cladding", chinese ? "\u5305\u58f3\u5931\u6548" : "Cladding failure");
         add("gui.magneticraft.reactor.scram.protection_interlock", chinese ? "\u4fdd\u62a4\u8054\u9501" : "Protection interlock");
         add("gui.magneticraft.reactor.scram.runtime_data", chinese ? "\u8fd0\u884c\u6570\u636e\u65e0\u6548" : "Invalid runtime data");
+        add("gui.magneticraft.reactor.scram.accident", chinese ? "事故保护停堆" : "Accident protection");
+        String[] accidentZh = {"正常", "冷却不足", "局部沸腾", "包壳损伤", "燃料熔化", "压力升高", "压力容器破裂", "安全壳破裂"};
+        String[] accidentEn = {"Normal", "Cooling shortage", "Local boiling", "Cladding damage", "Fuel melt", "Pressure rise", "Vessel breach", "Containment breach"};
+        committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorAccidentStage[] accidentStages =
+                committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorAccidentStage.values();
+        for (int index = 0; index < accidentStages.length; index++) {
+            add("gui.magneticraft.reactor.accident."
+                            + accidentStages[index].name().toLowerCase(java.util.Locale.ROOT),
+                    chinese ? accidentZh[index] : accidentEn[index]);
+        }
         add("gui.magneticraft.reactor.action.start", chinese ? "\u542f\u52a8" : "Start");
         add("gui.magneticraft.reactor.action.stop", chinese ? "\u505c\u6b62" : "Stop");
         add("gui.magneticraft.reactor.action.scram", chinese ? "\u505c\u5806" : "SCRAM");
@@ -716,6 +731,49 @@ final class ModLanguageProvider extends LanguageProvider {
                     chinese ? "\u7ed3\u6784\u90e8\u4ef6\u4e0d\u5339\u914d\uff1a" + kind.name()
                             : "expected " + kind.name().toLowerCase(java.util.Locale.ROOT));
         }
+    }
+
+    private void addNuclearSafetyTranslations() {
+        add(ModNuclearBlocks.LEAD_RADIATION_SHIELD.get(), chinese ? "铅辐射屏蔽块" : "Lead Radiation Shield");
+        add(ModNuclearBlocks.RADIOACTIVE_DEBRIS.get(), chinese ? "放射性污染残骸" : "Radioactive Debris");
+        add(ModNuclearBlocks.CORIUM.get(), chinese ? "熔融堆芯残留物" : "Corium");
+        add(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get(), chinese ? "乏燃料池控制器" : "Spent Fuel Pool Controller");
+        add(ModNuclearBlocks.SPENT_FUEL_POOL_PORT.get(), chinese ? "乏燃料池冷却/装卸端口" : "Spent Fuel Pool Cooling Port");
+        add(ModNuclearItems.DOSIMETER.get(), chinese ? "个人剂量计" : "Personal Dosimeter");
+        add(ModNuclearItems.GEIGER_COUNTER.get(), chinese ? "盖革计数器" : "Geiger Counter");
+        add(ModNuclearItems.SEALED_SPENT_FUEL_CASK.get(), chinese ? "密封乏燃料储存罐" : "Sealed Spent Fuel Cask");
+        add(ModNuclearItems.DECONTAMINATION_KIT.get(), chinese ? "去污工具包" : "Decontamination Kit");
+        add(ModNuclearItems.BASIC_RADIATION_HELMET.get(), chinese ? "基础防辐射头罩" : "Basic Radiation Hood");
+        add(ModNuclearItems.BASIC_RADIATION_CHESTPLATE.get(), chinese ? "基础防辐射服" : "Basic Radiation Suit");
+        add(ModNuclearItems.BASIC_RADIATION_LEGGINGS.get(), chinese ? "基础防辐射护腿" : "Basic Radiation Leggings");
+        add(ModNuclearItems.BASIC_RADIATION_BOOTS.get(), chinese ? "基础防辐射靴" : "Basic Radiation Boots");
+        add(ModNuclearItems.HEAVY_RADIATION_HELMET.get(), chinese ? "重型铅衬防辐射头盔" : "Heavy Lead-Lined Helmet");
+        add(ModNuclearItems.HEAVY_RADIATION_CHESTPLATE.get(), chinese ? "重型铅衬防辐射胸甲" : "Heavy Lead-Lined Chestplate");
+        add(ModNuclearItems.HEAVY_RADIATION_LEGGINGS.get(), chinese ? "重型铅衬防辐射护腿" : "Heavy Lead-Lined Leggings");
+        add(ModNuclearItems.HEAVY_RADIATION_BOOTS.get(), chinese ? "重型铅衬防辐射靴" : "Heavy Lead-Lined Boots");
+
+        add("gui.magneticraft.state.connected", chinese ? "已连接" : "Connected");
+        add("gui.magneticraft.state.disconnected", chinese ? "未连接" : "Disconnected");
+        add("gui.magneticraft.spent_fuel_pool.structure", chinese ? "结构：%sx%sx%s（%s）" : "Structure: %sx%sx%s (%s)");
+        add("gui.magneticraft.spent_fuel_pool.direction", chinese ? "朝向：%s" : "Facing: %s");
+        add("gui.magneticraft.spent_fuel_pool.port", chinese ? "装卸/冷却端口：%s" : "Transfer/cooling port: %s");
+        add("gui.magneticraft.spent_fuel_pool.cooling", chinese ? "水池冷却运行中" : "Pool cooling active");
+        add("gui.magneticraft.spent_fuel_pool.cooling_blocked", chinese ? "冷端阻塞或温度过高" : "Cold side blocked or too hot");
+        add("gui.magneticraft.spent_fuel_pool.inventory", chinese ? "安全/总组件：%s/%s" : "Safe/total assemblies: %s/%s");
+        add("gui.magneticraft.spent_fuel_pool.thermal", chinese ? "水量 %s，释热 %s J，端口 %s K" : "Water %s, heat %s J, port %s K");
+        add("gui.magneticraft.spent_fuel_pool.radiation", chinese ? "池边剂量率：%s mSv/h" : "Pool dose rate: %s mSv/h");
+        add("message.magneticraft.spent_fuel_pool.invalid", chinese ? "乏燃料池结构无效：%s @ %s" : "Invalid spent fuel pool: %s @ %s");
+
+        add("message.magneticraft.dosimeter_reading", chinese ? "剂量率 %s mSv/h；累计剂量 %s mSv；污染剂量 %s mSv" : "Dose rate %s mSv/h; cumulative %s mSv; contamination %s mSv");
+        add("message.magneticraft.geiger_ambient_reading", chinese ? "环境剂量率 %s mSv/h；累计剂量 %s mSv；污染剂量 %s mSv" : "Ambient %s mSv/h; cumulative %s mSv; contamination %s mSv");
+        add("message.magneticraft.geiger_source_reading", chinese ? "源剂量率 %s mSv/h；污染：%s" : "Source rate %s mSv/h; contamination: %s");
+        add("message.magneticraft.geiger_no_source", chinese ? "目标不是可识别的辐射源" : "Target is not a recognized radiation source");
+        add("message.magneticraft.contamination.present", chinese ? "存在" : "Present");
+        add("message.magneticraft.contamination.absent", chinese ? "无" : "Absent");
+        add("message.magneticraft.decontamination.complete", chinese ? "已清除可清理的放射性污染" : "Removable radioactive contamination cleared");
+        add("message.magneticraft.spent_fuel_cask.not_cooled", chinese ? "乏燃料尚未冷却到安全封装阈值" : "Spent fuel has not cooled to the safe encapsulation threshold");
+        add("item.magneticraft.sealed_spent_fuel_cask.sealed", chinese ? "已封装乏燃料（燃耗 %s%%）" : "Spent fuel sealed (burnup %s%%)");
+        add("item.magneticraft.sealed_spent_fuel_cask.empty", chinese ? "空储存罐；仅接受已安全冷却的乏燃料" : "Empty; accepts only safely cooled spent fuel");
     }
 
     private void addClientTranslations() {

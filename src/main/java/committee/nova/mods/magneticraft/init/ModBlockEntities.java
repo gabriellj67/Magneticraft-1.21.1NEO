@@ -16,6 +16,9 @@ import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPo
 import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalControllerBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalPortBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.thermal.MainCoolantPumpBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.RadioactiveSourceBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolControllerBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolPortBlockEntity;
 import committee.nova.mods.magneticraft.content.worldgen.OilDepositBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.BoxTransformerBlockEntity;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
@@ -109,6 +112,31 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             MainCoolantPumpBlockEntity::new,
                             ModNuclearBlocks.MAIN_COOLANT_PUMP.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<RadioactiveSourceBlockEntity>> RADIOACTIVE_SOURCE =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "radioactive_source",
+                    () -> BlockEntityType.Builder.of(
+                            RadioactiveSourceBlockEntity::new,
+                            ModNuclearBlocks.RADIOACTIVE_DEBRIS.get(),
+                            ModNuclearBlocks.CORIUM.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<SpentFuelPoolControllerBlockEntity>> SPENT_FUEL_POOL_CONTROLLER =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "spent_fuel_pool_controller",
+                    () -> BlockEntityType.Builder.of(
+                            SpentFuelPoolControllerBlockEntity::new,
+                            ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<SpentFuelPoolPortBlockEntity>> SPENT_FUEL_POOL_PORT =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "spent_fuel_pool_port",
+                    () -> BlockEntityType.Builder.of(
+                            SpentFuelPoolPortBlockEntity::new,
+                            ModNuclearBlocks.SPENT_FUEL_POOL_PORT.get()
                     ).build(null)
             );
     public static final RegistryObject<BlockEntityType<MultiblockGapBlockEntity>> MULTIBLOCK_GAP =

@@ -31,10 +31,10 @@ import java.util.Map;
 /** Immutable menu snapshot for structure preview and the per-column heat map. */
 public final class NuclearReactorMenu extends AbstractContainerMenu {
     public static final int IMAGE_WIDTH = 310;
-    public static final int IMAGE_HEIGHT = 330;
+    public static final int IMAGE_HEIGHT = 370;
     private static final int MAX_COLUMNS = 81;
     private static final int MAX_WARNINGS = 16;
-    private static final int BASE_DATA_SIZE = 25;
+    private static final int BASE_DATA_SIZE = 31;
     private static final int FUEL_DATA_STRIDE = 5;
     private static final int DATA_SIZE = BASE_DATA_SIZE + MAX_COLUMNS * FUEL_DATA_STRIDE;
 
@@ -263,6 +263,7 @@ public final class NuclearReactorMenu extends AbstractContainerMenu {
             case 6 -> "cladding";
             case 7 -> "protection_interlock";
             case 8 -> "runtime_data";
+            case 9 -> "accident";
             default -> "none";
         };
     }
@@ -277,6 +278,16 @@ public final class NuclearReactorMenu extends AbstractContainerMenu {
         }
         return result;
     }
+
+    public ReactorAccidentStage accidentStage() {
+        return enumValue(ReactorAccidentStage.values(), liveData.get(25), ReactorAccidentStage.NORMAL);
+    }
+
+    public double corePressureMegapascals() { return liveData.get(26) / 100.0D; }
+    public double vesselIntegrity() { return liveData.get(27) / 10_000.0D; }
+    public double containmentIntegrity() { return liveData.get(28) / 10_000.0D; }
+    public double accidentEnergyJoules() { return liveData.get(29) * 1_000.0D; }
+    public double doseRateMillisievertsPerHour() { return liveData.get(30) / 1000.0D; }
 
     public FuelView fuelView(ReactorColumnCoordinate coordinate) {
         int index = coordinate.z() * activeWidth() + coordinate.x();
@@ -485,6 +496,12 @@ public final class NuclearReactorMenu extends AbstractContainerMenu {
                 }
                 return mask;
             }
+            if (index == 25) return controller.accidentStage().ordinal();
+            if (index == 26) return scaled(controller.corePressureMegapascals(), 100.0D);
+            if (index == 27) return scaled(controller.vesselIntegrity(), 10_000.0D);
+            if (index == 28) return scaled(controller.containmentIntegrity(), 10_000.0D);
+            if (index == 29) return scaled(controller.accidentEnergyJoules(), 0.001D);
+            if (index == 30) return scaled(controller.doseRateMillisievertsPerHour(), 1000.0D);
             if (index < BASE_DATA_SIZE || index >= DATA_SIZE) return 0;
             int relative = index - BASE_DATA_SIZE;
             int columnIndex = relative / FUEL_DATA_STRIDE;
@@ -525,6 +542,7 @@ public final class NuclearReactorMenu extends AbstractContainerMenu {
                 case "cladding" -> 6;
                 case "protection_interlock" -> 7;
                 case "runtime_schema", "runtime_data" -> 8;
+                case "accident" -> 9;
                 default -> 0;
             };
         }

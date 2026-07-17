@@ -4,6 +4,12 @@ import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyItem;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
 import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearControllerUpgrade;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.DecontaminationKitItem;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.NuclearProtectionMaterial;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.RadiationMeterItem;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.RadiationProtectionItem;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.SealedSpentFuelCaskItem;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -22,6 +28,30 @@ public final class ModNuclearItems {
     private static final Map<NuclearControllerUpgrade, RegistryObject<Item>> CONTROLLER_UPGRADES =
             new EnumMap<>(NuclearControllerUpgrade.class);
     private static final List<RegistryObject<? extends Item>> CREATIVE_ITEMS = new ArrayList<>();
+    public static final RegistryObject<Item> DOSIMETER = register(
+            "dosimeter", () -> new RadiationMeterItem(RadiationMeterItem.Kind.DOSIMETER));
+    public static final RegistryObject<Item> GEIGER_COUNTER = register(
+            "geiger_counter", () -> new RadiationMeterItem(RadiationMeterItem.Kind.GEIGER_COUNTER));
+    public static final RegistryObject<Item> SEALED_SPENT_FUEL_CASK = register(
+            "sealed_spent_fuel_cask", SealedSpentFuelCaskItem::new);
+    public static final RegistryObject<Item> DECONTAMINATION_KIT = register(
+            "decontamination_kit", DecontaminationKitItem::new);
+    public static final RegistryObject<Item> BASIC_RADIATION_HELMET = protection(
+            "basic_radiation_helmet", NuclearProtectionMaterial.BASIC, ArmorItem.Type.HELMET, 0.12D);
+    public static final RegistryObject<Item> BASIC_RADIATION_CHESTPLATE = protection(
+            "basic_radiation_chestplate", NuclearProtectionMaterial.BASIC, ArmorItem.Type.CHESTPLATE, 0.12D);
+    public static final RegistryObject<Item> BASIC_RADIATION_LEGGINGS = protection(
+            "basic_radiation_leggings", NuclearProtectionMaterial.BASIC, ArmorItem.Type.LEGGINGS, 0.12D);
+    public static final RegistryObject<Item> BASIC_RADIATION_BOOTS = protection(
+            "basic_radiation_boots", NuclearProtectionMaterial.BASIC, ArmorItem.Type.BOOTS, 0.12D);
+    public static final RegistryObject<Item> HEAVY_RADIATION_HELMET = protection(
+            "heavy_radiation_helmet", NuclearProtectionMaterial.HEAVY, ArmorItem.Type.HELMET, 0.33D);
+    public static final RegistryObject<Item> HEAVY_RADIATION_CHESTPLATE = protection(
+            "heavy_radiation_chestplate", NuclearProtectionMaterial.HEAVY, ArmorItem.Type.CHESTPLATE, 0.33D);
+    public static final RegistryObject<Item> HEAVY_RADIATION_LEGGINGS = protection(
+            "heavy_radiation_leggings", NuclearProtectionMaterial.HEAVY, ArmorItem.Type.LEGGINGS, 0.33D);
+    public static final RegistryObject<Item> HEAVY_RADIATION_BOOTS = protection(
+            "heavy_radiation_boots", NuclearProtectionMaterial.HEAVY, ArmorItem.Type.BOOTS, 0.33D);
 
     static {
         for (NuclearMaterial material : NuclearMaterial.values()) {
@@ -92,5 +122,17 @@ public final class ModNuclearItems {
 
     public static List<RegistryObject<? extends Item>> creativeItems() {
         return List.copyOf(CREATIVE_ITEMS);
+    }
+
+    private static RegistryObject<Item> register(String id, java.util.function.Supplier<? extends Item> factory) {
+        RegistryObject<Item> item = ModRegistries.ITEMS.register(id, factory);
+        CREATIVE_ITEMS.add(item);
+        return item;
+    }
+
+    private static RegistryObject<Item> protection(
+            String id, NuclearProtectionMaterial material, ArmorItem.Type type, double fraction
+    ) {
+        return register(id, () -> new RadiationProtectionItem(material, type, fraction));
     }
 }

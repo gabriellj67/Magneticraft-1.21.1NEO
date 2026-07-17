@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_facility_casing"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "M": {
+      "item": "magneticraft:motor"
+    },
+    "R": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "RGR",
+    "MCM",
+    "RGR"
+  ],
+  "result": {
+    "item": "magneticraft:spent_fuel_pool_controller"
+  },
+  "show_notification": true
+}

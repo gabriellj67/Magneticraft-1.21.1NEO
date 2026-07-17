@@ -96,7 +96,7 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
         MachineScreenLayout.drawInset(graphics, leftPos + GRID_X - 2, topPos + GRID_Y - 2,
                 gridWidth + 4, gridHeight + 4);
         MachineScreenLayout.drawInset(graphics, leftPos + METRIC_X - 4, topPos + 18,
-                METRIC_WIDTH + 4, 298);
+                METRIC_WIDTH + 4, 338);
         drawColumns(graphics);
     }
 
@@ -186,6 +186,16 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
         drawMetric(graphics, x, y += 10, "interlocks", interlockSummary());
         drawMetric(graphics, x, y += 10, "scram",
                 Component.translatable("gui.magneticraft.reactor.scram." + menu.scramReason()).getString());
+        drawMetric(graphics, x, y += 10, "accident_stage",
+                Component.translatable("gui.magneticraft.reactor.accident."
+                        + menu.accidentStage().name().toLowerCase(Locale.ROOT)).getString());
+        drawMetric(graphics, x, y += 10, "pressure",
+                format(menu.corePressureMegapascals(), " MPa"));
+        drawMetric(graphics, x, y += 10, "barriers",
+                format(menu.vesselIntegrity() * 100.0D, "% / ")
+                        + format(menu.containmentIntegrity() * 100.0D, "%"));
+        drawMetric(graphics, x, y += 10, "radiation",
+                format(menu.doseRateMillisievertsPerHour(), " mSv/h"));
         y += 12;
         for (NuclearReactorPortType port : NuclearReactorPortType.values()) {
             int portColor = menu.ports().contains(port) ? 0xFF67D98B : 0xFFFF6B6B;
@@ -339,6 +349,9 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
     }
 
     private int stateColor() {
+        if (menu.accidentStage().ordinal() >= committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorAccidentStage.CLADDING_DAMAGE.ordinal()) {
+            return 0xFFFF3B30;
+        }
         return switch (menu.operatingState()) {
             case RUNNING -> 0xFF67D98B;
             case STARTUP, DECAY_HEAT -> 0xFFFFB74D;

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/spent_fuel_pool_port",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/spent_fuel_pool_port"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/spent_fuel_pool_port",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/spent_fuel_pool_port",
+      "y": 270
+    }
+  }
+}

@@ -103,6 +103,7 @@ final class ModRecipeProvider extends RecipeProvider {
         addNuclearFacilityRecipes(consumer);
         addNuclearReactorRecipes(consumer);
         addNuclearThermalRecipes(consumer);
+        addNuclearSafetyRecipes(consumer);
         addHammerRecipes(consumer);
         addSmeltingRecipes(consumer);
         addMachineCraftingRecipes(consumer);
@@ -420,6 +421,91 @@ final class ModRecipeProvider extends RecipeProvider {
                     .define('C', core)
                     .unlockedBy("has_thermal_port", has(ModNuclearBlocks.NUCLEAR_THERMAL_PORT.get()))
                     .save(consumer, id("crafting/" + type.id()));
+        }
+    }
+
+    private void addNuclearSafetyRecipes(Consumer<FinishedRecipe> consumer) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.LEAD_RADIATION_SHIELD.get(), 8)
+                .pattern("LLL").pattern("LCL").pattern("LLL")
+                .define('L', ModTags.Items.ingot(Metal.LEAD))
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .unlockedBy("has_lead_ingot", has(ModTags.Items.ingot(Metal.LEAD)))
+                .save(consumer, id("crafting/lead_radiation_shield"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get())
+                .pattern("RGR").pattern("MCM").pattern("RGR")
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('G', Items.GLASS)
+                .define('M', component(CraftingComponent.MOTOR))
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .unlockedBy("has_nuclear_casing", has(ModNuclearBlocks.FACILITY_CASING.get()))
+                .save(consumer, id("crafting/spent_fuel_pool_controller"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS,
+                        ModNuclearBlocks.SPENT_FUEL_POOL_PORT.get())
+                .pattern(" I ").pattern("ICI").pattern("PHP")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('C', ModNuclearBlocks.FACILITY_CASING.get())
+                .define('P', ModNetworkBlocks.INSULATED_HEAT_PIPE.get())
+                .define('H', Items.HOPPER)
+                .unlockedBy("has_pool_controller", has(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get()))
+                .save(consumer, id("crafting/spent_fuel_pool_port"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModNuclearItems.DOSIMETER.get())
+                .pattern(" I ").pattern("RCR").pattern(" W ")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('C', Items.CLOCK)
+                .define('W', component(CraftingComponent.FINE_COPPER_WIRE))
+                .unlockedBy("has_redstone", has(Tags.Items.DUSTS_REDSTONE))
+                .save(consumer, id("crafting/dosimeter"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModNuclearItems.GEIGER_COUNTER.get())
+                .pattern(" I ").pattern("RDR").pattern(" W ")
+                .define('I', Tags.Items.INGOTS_IRON)
+                .define('R', Tags.Items.DUSTS_REDSTONE)
+                .define('D', ModNuclearItems.DOSIMETER.get())
+                .define('W', component(CraftingComponent.FINE_COPPER_WIRE))
+                .unlockedBy("has_dosimeter", has(ModNuclearItems.DOSIMETER.get()))
+                .save(consumer, id("crafting/geiger_counter"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModNuclearItems.SEALED_SPENT_FUEL_CASK.get())
+                .pattern("LZL").pattern("ZBZ").pattern("LZL")
+                .define('L', ModTags.Items.ingot(Metal.LEAD))
+                .define('Z', ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_INGOT).get())
+                .define('B', Items.BUCKET)
+                .unlockedBy("has_zirconium_alloy",
+                        has(ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_INGOT).get()))
+                .save(consumer, id("crafting/sealed_spent_fuel_cask"));
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModNuclearItems.DECONTAMINATION_KIT.get(), 2)
+                .requires(Items.HONEY_BOTTLE)
+                .requires(Items.PAPER)
+                .requires(Items.CHARCOAL)
+                .unlockedBy("has_radioactive_debris", has(ModNuclearBlocks.RADIOACTIVE_DEBRIS.get()))
+                .save(consumer, id("crafting/decontamination_kit"));
+
+        ItemLike[] basicInputs = {Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE,
+                Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS};
+        ItemLike[] basicOutputs = {ModNuclearItems.BASIC_RADIATION_HELMET.get(),
+                ModNuclearItems.BASIC_RADIATION_CHESTPLATE.get(),
+                ModNuclearItems.BASIC_RADIATION_LEGGINGS.get(), ModNuclearItems.BASIC_RADIATION_BOOTS.get()};
+        ItemLike boronCarbide = ModNuclearItems.material(NuclearMaterial.BORON_CARBIDE).get();
+        for (int index = 0; index < basicInputs.length; index++) {
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.COMBAT, basicOutputs[index])
+                    .requires(basicInputs[index]).requires(boronCarbide)
+                    .unlockedBy("has_boron_carbide", has(boronCarbide))
+                    .save(consumer, id("crafting/"
+                            + ForgeRegistries.ITEMS.getKey(basicOutputs[index].asItem()).getPath()));
+        }
+        ItemLike[] heavyInputs = {Items.IRON_HELMET, Items.IRON_CHESTPLATE,
+                Items.IRON_LEGGINGS, Items.IRON_BOOTS};
+        ItemLike[] heavyOutputs = {ModNuclearItems.HEAVY_RADIATION_HELMET.get(),
+                ModNuclearItems.HEAVY_RADIATION_CHESTPLATE.get(),
+                ModNuclearItems.HEAVY_RADIATION_LEGGINGS.get(), ModNuclearItems.HEAVY_RADIATION_BOOTS.get()};
+        for (int index = 0; index < heavyInputs.length; index++) {
+            ShapelessRecipeBuilder.shapeless(RecipeCategory.COMBAT, heavyOutputs[index])
+                    .requires(heavyInputs[index])
+                    .requires(Ingredient.of(ModTags.Items.heavyPlate(Metal.LEAD)), 2)
+                    .unlockedBy("has_lead_heavy_plate", has(ModTags.Items.heavyPlate(Metal.LEAD)))
+                    .save(consumer, id("crafting/"
+                            + ForgeRegistries.ITEMS.getKey(heavyOutputs[index].asItem()).getPath()));
         }
     }
 

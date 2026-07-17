@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.nuclear.thermal;
 
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.api.nuclear.radiation.RadiationSource;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
@@ -12,12 +13,15 @@ import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
+import committee.nova.mods.magneticraft.system.nuclear.data.ReactorParameterRegistry;
+import committee.nova.mods.magneticraft.system.nuclear.radiation.RadiationSourceRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -25,7 +29,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
 /** Persisted role-bound facility penetration. Non-role sides expose no capability. */
-public final class NuclearThermalPortBlockEntity extends MachineBlockEntity {
+public final class NuclearThermalPortBlockEntity extends MachineBlockEntity implements RadiationSource {
     private static final String CONTROLLER_TAG = "controller";
     private static final String ROLE_TAG = "role";
     private static final int FLUID_CAPACITY = 128_000;
@@ -148,6 +152,33 @@ public final class NuclearThermalPortBlockEntity extends MachineBlockEntity {
     public NuclearThermalPortRole role() {
         return role;
     }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level instanceof ServerLevel serverLevel) {
+            RadiationSourceRegistry.register(serverLevel, worldPosition);
+        }
+    }
+
+    @Override
+    public void setRemoved() {
+        if (level instanceof ServerLevel serverLevel) {
+            RadiationSourceRegistry.unregister(serverLevel, worldPosition);
+        }
+        super.setRemoved();
+    }
+
+    @Override public BlockPos radiationOrigin() { return worldPosition; }
+
+    @Override
+    public double doseRateMillisievertsPerHour() {
+        return fluidAmount(ModFluids.get(FluidDefinition.HOT_REACTOR_COOLANT).source().get())
+                / (double) FLUID_CAPACITY
+                * ReactorParameterRegistry.INSTANCE.current().parameters().hotCoolantDoseRateMillisievertsPerHour();
+    }
+
+    @Override public boolean contaminationSource() { return false; }
 
     @Override
     protected void saveMachineData(CompoundTag tag) {

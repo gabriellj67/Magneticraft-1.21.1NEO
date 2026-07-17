@@ -46,6 +46,24 @@ public final class ReactorParameterParser {
         double condenserHeat = decimal(object, "condenser_heat_joules_per_steam_millibucket", errors);
         int towerFillHeat = integer(object, "cooling_tower_heat_joules_per_fill_block_tick", errors);
         int towerFanHeat = integer(object, "cooling_tower_heat_joules_per_fan_tick", errors);
+        double boilingTemperature = decimal(object, "primary_boiling_temperature_kelvin", errors);
+        double meltingTemperature = decimal(object, "fuel_melting_temperature_kelvin", errors);
+        double claddingThreshold = decimal(object, "cladding_accident_threshold", errors);
+        double pressureAlarm = decimal(object, "pressure_alarm_megapascals", errors);
+        double vesselDesignPressure = decimal(object, "vessel_design_pressure_megapascals", errors);
+        double vesselBurstPressure = decimal(object, "vessel_burst_pressure_megapascals", errors);
+        double pressureRise = decimal(object, "pressure_rise_megapascals_per_kelvin_tick", errors);
+        double pressureRelief = decimal(object, "pressure_relief_megapascals_per_tick", errors);
+        double vesselDamage = decimal(object, "vessel_damage_per_megapascal_tick", errors);
+        double containmentDamage = decimal(object, "containment_damage_per_megajoule", errors);
+        double terrainDamageEnergy = decimal(object, "accident_terrain_damage_energy_joules", errors);
+        double freshFuelDose = decimal(object, "fresh_fuel_dose_rate_millisieverts_per_hour", errors);
+        double spentFuelDose = decimal(object, "spent_fuel_dose_rate_millisieverts_per_hour", errors);
+        double hotCoolantDose = decimal(object, "hot_coolant_dose_rate_millisieverts_per_hour", errors);
+        double coriumDose = decimal(object, "corium_dose_rate_millisieverts_per_hour", errors);
+        double contaminationDose = decimal(object, "contamination_dose_rate_millisieverts_per_hour", errors);
+        double spentFuelCooling = decimal(object, "spent_fuel_cooling_kelvin_per_tick", errors);
+        double spentFuelSafeDecay = decimal(object, "spent_fuel_safe_decay_heat_joules", errors);
         if (schema != ReactorParameters.SCHEMA_VERSION) {
             errors.add("schema_version must be " + ReactorParameters.SCHEMA_VERSION);
         }
@@ -54,7 +72,12 @@ public final class ReactorParameterParser {
                 temperatureRise, poisonBuild, poisonDecay, decayResponse, decayLoss,
                 claddingDamage, scramTemperature, unloadTemperature, rodStep, offlineTicks,
                 coolantEnthalpy, pumpFlow, pumpEnergy, steamRatio, turbineEnergy,
-                ventingEfficiency, condenserRatio, condenserHeat, towerFillHeat, towerFanHeat));
+                ventingEfficiency, condenserRatio, condenserHeat, towerFillHeat, towerFanHeat,
+                boilingTemperature, meltingTemperature, claddingThreshold, pressureAlarm,
+                vesselDesignPressure, vesselBurstPressure, pressureRise, pressureRelief,
+                vesselDamage, containmentDamage, terrainDamageEnergy, freshFuelDose,
+                spentFuelDose, hotCoolantDose, coriumDose, contaminationDose,
+                spentFuelCooling, spentFuelSafeDecay));
         if (!errors.isEmpty()) {
             return new Result(Optional.empty(), errors);
         }
@@ -63,7 +86,12 @@ public final class ReactorParameterParser {
                 temperatureRise, poisonBuild, poisonDecay, decayResponse, decayLoss,
                 claddingDamage, scramTemperature, unloadTemperature, rodStep, offlineTicks,
                 coolantEnthalpy, pumpFlow, pumpEnergy, steamRatio, turbineEnergy,
-                ventingEfficiency, condenserRatio, condenserHeat, towerFillHeat, towerFanHeat)), List.of());
+                ventingEfficiency, condenserRatio, condenserHeat, towerFillHeat, towerFanHeat,
+                boilingTemperature, meltingTemperature, claddingThreshold, pressureAlarm,
+                vesselDesignPressure, vesselBurstPressure, pressureRise, pressureRelief,
+                vesselDamage, containmentDamage, terrainDamageEnergy, freshFuelDose,
+                spentFuelDose, hotCoolantDose, coriumDose, contaminationDose,
+                spentFuelCooling, spentFuelSafeDecay)), List.of());
     }
 
     private static int integer(JsonObject object, String field, List<String> errors) {

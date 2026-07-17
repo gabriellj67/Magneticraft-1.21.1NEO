@@ -295,6 +295,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
         });
         registerNuclearReactorModels();
         registerNuclearThermalModels();
+        registerNuclearSafetyModels();
 
         simpleBlockWithItem(
                 ModAdvancedBlocks.OIL_DEPOSIT.get(),
@@ -399,6 +400,21 @@ final class ModBlockStateProvider extends BlockStateProvider {
             horizontalBlock(holder.get(), ignored -> model);
             simpleBlockItem(holder.get(), model);
         });
+    }
+
+    private void registerNuclearSafetyModels() {
+        simpleBlockWithItem(ModNuclearBlocks.LEAD_RADIATION_SHIELD.get(),
+                models().cubeAll("lead_radiation_shield", modLoc("block/lead_block")));
+        simpleBlockWithItem(ModNuclearBlocks.RADIOACTIVE_DEBRIS.get(),
+                models().cubeAll("radioactive_debris", mcLoc("block/moss_block")));
+        simpleBlockWithItem(ModNuclearBlocks.CORIUM.get(),
+                models().cubeAll("corium", mcLoc("block/magma")));
+        ModelFile controller = models().cubeAll(
+                "spent_fuel_pool_controller", modLoc("blocks/multiblock_parts/electric"));
+        horizontalBlock(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get(), ignored -> controller);
+        simpleBlockItem(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get(), controller);
+        registerNuclearPort(ModNuclearBlocks.SPENT_FUEL_POOL_PORT.get(),
+                "spent_fuel_pool_port", modLoc("blocks/multiblock_parts/striped"));
     }
 
     private void registerSingleBlockMachineModel(Block block, SingleBlockMachineDefinition definition) {

@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortTy
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorSnapshot;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorColumnCoordinate;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorRodGroup;
+import committee.nova.mods.magneticraft.api.nuclear.radiation.RadiationSource;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyItem;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyState;
@@ -20,6 +21,9 @@ import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorLayoutSimu
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorRuntimeModel;
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorRuntimeResult;
 import committee.nova.mods.magneticraft.system.nuclear.thermal.NuclearThermalTransactions;
+import committee.nova.mods.magneticraft.system.nuclear.safety.ReactorAccidentModel;
+import committee.nova.mods.magneticraft.system.nuclear.safety.NuclearTerrainDamage;
+import committee.nova.mods.magneticraft.system.nuclear.radiation.RadiationSourceRegistry;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -49,9 +53,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 /** Owns structure, permissions, controls and all durable per-column PWR runtime state. */
-public final class NuclearReactorControllerBlockEntity extends MachineBlockEntity implements MenuProvider {
+public final class NuclearReactorControllerBlockEntity extends MachineBlockEntity implements MenuProvider, RadiationSource {
     private static final int STRUCTURE_CHECK_INTERVAL = 40;
-    private static final int RUNTIME_SCHEMA_VERSION = 1;
+    private static final int RUNTIME_SCHEMA_VERSION = 2;
     private static final int OVERRIDE_CONFIRMATION_TICKS = 200;
     private static final String OWNER_TAG = "owner";
     private static final String SNAPSHOT_TAG = "reactor_snapshot";
@@ -85,6 +89,14 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
     private int stationJoulesRequired;
     private int stationJoulesAvailable;
     private String scramReason = "none";
+    private ReactorAccidentStage accidentStage = ReactorAccidentStage.NORMAL;
+    private String accidentReason = "stable";
+    private double corePressureMegapascals = 15.5D;
+    private double vesselIntegrity = 1.0D;
+    private double containmentIntegrity = 1.0D;
+    private double accidentEnergyJoules;
+    private long lastAccidentTransitionGameTime;
+    private boolean terrainDamageApplied;
     @Nullable
     private CompoundTag rejectedRuntimeTag;
 
@@ -178,6 +190,13 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
     public String scramReason() {
         return scramReason;
     }
+
+    public ReactorAccidentStage accidentStage() { return accidentStage; }
+    public String accidentReason() { return accidentReason; }
+    public double corePressureMegapascals() { return corePressureMegapascals; }
+    public double vesselIntegrity() { return vesselIntegrity; }
+    public double containmentIntegrity() { return containmentIntegrity; }
+    public double accidentEnergyJoules() { return accidentEnergyJoules; }
 
     public Optional<UUID> lastOverrideOperator() {
         return Optional.ofNullable(lastOverrideOperator);
@@ -353,6 +372,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         if (level == null || level.isClientSide) {
             return;
         }
+        RadiationSourceRegistry.register((ServerLevel) level, worldPosition);
         if (snapshot != null) {
             refreshEstimate();
             claimPorts(snapshot);
@@ -367,8 +387,17 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
             if (operatingState.producesFissionHeat()) {
                 forcedScram("chunk_unload");
             }
+            catchUpAccident(now - lastRuntimeGameTime);
         }
         lastRuntimeGameTime = now;
+    }
+
+    @Override
+    public void setRemoved() {
+        if (level instanceof ServerLevel serverLevel) {
+            RadiationSourceRegistry.unregister(serverLevel, worldPosition);
+        }
+        super.setRemoved();
     }
 
     private void tickRuntime() {
@@ -400,6 +429,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
             }
         }
         updateFuelRuntime(now);
+        updateAccidentState();
         EnumSet<ReactorInterlock> active = interlocks();
         if (operatingState.producesFissionHeat()) {
             if (active.contains(ReactorInterlock.OVER_TEMPERATURE)) {
@@ -471,6 +501,98 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
                 current, estimate, fuelStates, data.orElseThrow().fuelDefinitions(), rodInsertion,
                 command, actualCoolantFlow(), operatingState.producesFissionHeat(), now, parameters());
         replaceFuelStates(runtime.fuelStates());
+    }
+
+    private void updateAccidentState() {
+        if (fuelStates.isEmpty()) {
+            if (accidentStage.ordinal() < ReactorAccidentStage.CLADDING_DAMAGE.ordinal()) {
+                resetAccidentState();
+            }
+            return;
+        }
+        ReactorAccidentStage previous = accidentStage;
+        double required = Math.max(1.0D, estimate.requiredCoolantFlowMilliBucketsPerTick());
+        ReactorAccidentModel.Result result = ReactorAccidentModel.step(new ReactorAccidentModel.Input(
+                accidentStage, runtime.totalThermalPowerJoulesPerTick(), actualCoolantFlow() / required,
+                runtime.hottestTemperatureKelvin(), runtime.minimumCladdingIntegrity(),
+                corePressureMegapascals, vesselIntegrity, containmentIntegrity, accidentEnergyJoules), parameters());
+        applyAccidentResult(result);
+        if (accidentStage != previous) {
+            lastAccidentTransitionGameTime = level == null ? 0L : level.getGameTime();
+            markChangedAndSync();
+        }
+        if (accidentStage.ordinal() >= ReactorAccidentStage.LOCAL_BOILING.ordinal()
+                && operatingState.producesFissionHeat()) {
+            forcedScram("accident");
+        }
+        if (accidentStage == ReactorAccidentStage.CONTAINMENT_BREACH && !terrainDamageApplied
+                && level instanceof ServerLevel serverLevel) {
+            terrainDamageApplied = true;
+            NuclearTerrainDamage.apply(serverLevel, worldPosition, accidentEnergyJoules,
+                    containmentIntegrity, parameters());
+            BlockPos coriumPosition = worldPosition.relative(facing().getOpposite()).below();
+            if (serverLevel.hasChunkAt(coriumPosition)
+                    && serverLevel.getBlockEntity(coriumPosition) == null
+                    && serverLevel.getBlockState(coriumPosition).getDestroySpeed(serverLevel, coriumPosition) >= 0.0F) {
+                serverLevel.setBlockAndUpdate(coriumPosition, ModNuclearBlocks.CORIUM.get().defaultBlockState());
+            }
+        }
+    }
+
+    private void catchUpAccident(long elapsedTicks) {
+        long ticks = Math.min(Math.max(0L, elapsedTicks), parameters().maximumOfflineCatchupTicks());
+        if (ticks == 0L || fuelStates.isEmpty()) return;
+        double required = Math.max(1.0D, estimate.requiredCoolantFlowMilliBucketsPerTick());
+        for (long tick = 0; tick < ticks; tick++) {
+            ReactorAccidentModel.Result result = ReactorAccidentModel.step(new ReactorAccidentModel.Input(
+                    accidentStage, runtime.decayHeatJoulesPerTick(), 0.0D / required,
+                    runtime.hottestTemperatureKelvin(), runtime.minimumCladdingIntegrity(),
+                    corePressureMegapascals, vesselIntegrity, containmentIntegrity, accidentEnergyJoules), parameters());
+            applyAccidentResult(result);
+            if (accidentStage == ReactorAccidentStage.CONTAINMENT_BREACH) break;
+        }
+    }
+
+    private void applyAccidentResult(ReactorAccidentModel.Result result) {
+        accidentStage = result.stage();
+        accidentReason = result.reason();
+        corePressureMegapascals = result.pressureMegapascals();
+        vesselIntegrity = result.vesselIntegrity();
+        containmentIntegrity = result.containmentIntegrity();
+        accidentEnergyJoules = result.accidentEnergyJoules();
+    }
+
+    private void resetAccidentState() {
+        accidentStage = ReactorAccidentStage.NORMAL;
+        accidentReason = "stable";
+        corePressureMegapascals = 15.5D;
+        vesselIntegrity = 1.0D;
+        containmentIntegrity = 1.0D;
+        accidentEnergyJoules = 0.0D;
+        lastAccidentTransitionGameTime = 0L;
+        terrainDamageApplied = false;
+    }
+
+    @Override
+    public BlockPos radiationOrigin() {
+        return worldPosition;
+    }
+
+    @Override
+    public double doseRateMillisievertsPerHour() {
+        ReactorParameters p = parameters();
+        double dose = fuelStates.values().stream().mapToDouble(state ->
+                p.freshFuelDoseRateMillisievertsPerHour()
+                        + p.spentFuelDoseRateMillisievertsPerHour() * state.burnupFraction()
+                        * (1.0D + state.decayHeatJoules() / 10.0D)).sum();
+        if (accidentStage.severe()) dose += p.coriumDoseRateMillisievertsPerHour()
+                * (0.25D + accidentStage.ordinal() * 0.1D);
+        return dose;
+    }
+
+    @Override
+    public boolean contaminationSource() {
+        return accidentStage.releasesContamination();
     }
 
     private void applyAutomaticControl() {
@@ -829,6 +951,14 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         tag.putInt("startup_ticks_remaining", startupTicksRemaining);
         tag.putLong("last_runtime_game_time", lastRuntimeGameTime);
         tag.putString("scram_reason", scramReason);
+        tag.putString("accident_stage", accidentStage.name());
+        tag.putString("accident_reason", accidentReason);
+        tag.putDouble("core_pressure_megapascals", corePressureMegapascals);
+        tag.putDouble("vessel_integrity", vesselIntegrity);
+        tag.putDouble("containment_integrity", containmentIntegrity);
+        tag.putDouble("accident_energy_joules", accidentEnergyJoules);
+        tag.putLong("last_accident_transition_game_time", lastAccidentTransitionGameTime);
+        tag.putBoolean("terrain_damage_applied", terrainDamageApplied);
         CompoundTag rods = new CompoundTag();
         for (ReactorRodGroup group : ReactorRodGroup.values()) {
             rods.putDouble(group.name(), rodInsertion(group));
@@ -854,7 +984,8 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         if (tag.isEmpty()) {
             return;
         }
-        if (tag.getInt("schema_version") != RUNTIME_SCHEMA_VERSION) {
+        int schema = tag.getInt("schema_version");
+        if (schema != 1 && schema != RUNTIME_SCHEMA_VERSION) {
             rejectRuntime(tag, "runtime_schema", null);
             return;
         }
@@ -870,6 +1001,19 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
             startupTicksRemaining = Math.max(0, tag.getInt("startup_ticks_remaining"));
             lastRuntimeGameTime = Math.max(0L, tag.getLong("last_runtime_game_time"));
             scramReason = tag.getString("scram_reason");
+            if (schema >= 2) {
+                accidentStage = ReactorAccidentStage.valueOf(tag.getString("accident_stage"));
+                accidentReason = tag.getString("accident_reason");
+                corePressureMegapascals = clamp(tag.getDouble("core_pressure_megapascals"), 0.1D, 100.0D);
+                vesselIntegrity = clamp(tag.getDouble("vessel_integrity"), 0.0D, 1.0D);
+                containmentIntegrity = clamp(tag.getDouble("containment_integrity"), 0.0D, 1.0D);
+                accidentEnergyJoules = Math.max(0.0D, tag.getDouble("accident_energy_joules"));
+                lastAccidentTransitionGameTime = Math.max(0L, tag.getLong("last_accident_transition_game_time"));
+                terrainDamageApplied = tag.getBoolean("terrain_damage_applied");
+            } else {
+                resetAccidentState();
+                Magneticraft.LOGGER.info("Migrated reactor runtime schema 1 to 2 at {}", worldPosition);
+            }
             CompoundTag rods = tag.getCompound("rod_insertion");
             for (ReactorRodGroup group : ReactorRodGroup.values()) {
                 rodInsertion.put(group, clamp(rods.getDouble(group.name()), 0.0D, 1.0D));
@@ -910,6 +1054,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         startupTicksRemaining = 0;
         lastRuntimeGameTime = 0L;
         scramReason = reason;
+        resetAccidentState();
         insertAllRods();
     }
 

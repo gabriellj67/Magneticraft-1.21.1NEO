@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:bucket"
+    },
+    "L": {
+      "tag": "forge:ingots/lead"
+    },
+    "Z": {
+      "item": "magneticraft:zirconium_alloy_ingot"
+    }
+  },
+  "pattern": [
+    "LZL",
+    "ZBZ",
+    "LZL"
+  ],
+  "result": {
+    "item": "magneticraft:sealed_spent_fuel_cask"
+  },
+  "show_notification": true
+}

@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.content.nuclear.reactor;
 
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortType;
+import committee.nova.mods.magneticraft.api.nuclear.radiation.RadiationSource;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
@@ -11,18 +12,21 @@ import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.electric.profile.VoltageTierIds;
+import committee.nova.mods.magneticraft.system.nuclear.data.ReactorParameterRegistry;
+import committee.nova.mods.magneticraft.system.nuclear.radiation.RadiationSourceRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
 /** Claimed structure penetration; only the outer electrical port owns native-J connectivity. */
-public final class NuclearReactorPortBlockEntity extends MachineBlockEntity {
+public final class NuclearReactorPortBlockEntity extends MachineBlockEntity implements RadiationSource {
     private static final String CONTROLLER_TAG = "controller";
     private static final String CLAIMED_ROLE_TAG = "claimed_role";
     private static final int COOLANT_CAPACITY = 64_000;
@@ -202,7 +206,28 @@ public final class NuclearReactorPortBlockEntity extends MachineBlockEntity {
         if (electricity != null) {
             electricity.setSideEnabled(outwardFacing(), controllerPosition != null);
         }
+        if (level instanceof ServerLevel serverLevel) {
+            RadiationSourceRegistry.register(serverLevel, worldPosition);
+        }
     }
+
+    @Override
+    public void setRemoved() {
+        if (level instanceof ServerLevel serverLevel) {
+            RadiationSourceRegistry.unregister(serverLevel, worldPosition);
+        }
+        super.setRemoved();
+    }
+
+    @Override public BlockPos radiationOrigin() { return worldPosition; }
+
+    @Override
+    public double doseRateMillisievertsPerHour() {
+        return coolantAmount(FluidDefinition.HOT_REACTOR_COOLANT) / (double) COOLANT_CAPACITY
+                * ReactorParameterRegistry.INSTANCE.current().parameters().hotCoolantDoseRateMillisievertsPerHour();
+    }
+
+    @Override public boolean contaminationSource() { return false; }
 
     private Direction outwardFacing() {
         BlockState state = getBlockState();

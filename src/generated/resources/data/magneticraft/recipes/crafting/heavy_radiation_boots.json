@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_boots"
+    },
+    {
+      "tag": "magneticraft:heavy_plates/lead"
+    },
+    {
+      "tag": "magneticraft:heavy_plates/lead"
+    }
+  ],
+  "result": {
+    "item": "magneticraft:heavy_radiation_boots"
+  }
+}

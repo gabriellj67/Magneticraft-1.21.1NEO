@@ -83,6 +83,24 @@ final class NuclearDataProvider implements DataProvider {
         root.addProperty("condenser_heat_joules_per_steam_millibucket", value.condenserHeatJoulesPerSteamMilliBucket());
         root.addProperty("cooling_tower_heat_joules_per_fill_block_tick", value.coolingTowerHeatJoulesPerFillBlockTick());
         root.addProperty("cooling_tower_heat_joules_per_fan_tick", value.coolingTowerHeatJoulesPerFanTick());
+        root.addProperty("primary_boiling_temperature_kelvin", value.primaryBoilingTemperatureKelvin());
+        root.addProperty("fuel_melting_temperature_kelvin", value.fuelMeltingTemperatureKelvin());
+        root.addProperty("cladding_accident_threshold", value.claddingAccidentThreshold());
+        root.addProperty("pressure_alarm_megapascals", value.pressureAlarmMegapascals());
+        root.addProperty("vessel_design_pressure_megapascals", value.vesselDesignPressureMegapascals());
+        root.addProperty("vessel_burst_pressure_megapascals", value.vesselBurstPressureMegapascals());
+        root.addProperty("pressure_rise_megapascals_per_kelvin_tick", value.pressureRiseMegapascalsPerKelvinTick());
+        root.addProperty("pressure_relief_megapascals_per_tick", value.pressureReliefMegapascalsPerTick());
+        root.addProperty("vessel_damage_per_megapascal_tick", value.vesselDamagePerMegapascalTick());
+        root.addProperty("containment_damage_per_megajoule", value.containmentDamagePerMegajoule());
+        root.addProperty("accident_terrain_damage_energy_joules", value.accidentTerrainDamageEnergyJoules());
+        root.addProperty("fresh_fuel_dose_rate_millisieverts_per_hour", value.freshFuelDoseRateMillisievertsPerHour());
+        root.addProperty("spent_fuel_dose_rate_millisieverts_per_hour", value.spentFuelDoseRateMillisievertsPerHour());
+        root.addProperty("hot_coolant_dose_rate_millisieverts_per_hour", value.hotCoolantDoseRateMillisievertsPerHour());
+        root.addProperty("corium_dose_rate_millisieverts_per_hour", value.coriumDoseRateMillisievertsPerHour());
+        root.addProperty("contamination_dose_rate_millisieverts_per_hour", value.contaminationDoseRateMillisievertsPerHour());
+        root.addProperty("spent_fuel_cooling_kelvin_per_tick", value.spentFuelCoolingKelvinPerTick());
+        root.addProperty("spent_fuel_safe_decay_heat_joules", value.spentFuelSafeDecayHeatJoules());
         return root;
     }
 }

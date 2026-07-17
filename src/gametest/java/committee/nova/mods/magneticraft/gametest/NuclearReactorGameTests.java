@@ -207,9 +207,27 @@ public final class NuclearReactorGameTests {
         helper.assertTrue(Math.abs(controller.rodInsertion(ReactorRodGroup.A) - 0.375D) < 1.0E-9D,
                 "Valid NBT round-trip changed rod group A insertion");
 
+        CompoundTag legacy = saved.copy();
+        CompoundTag legacyRuntime = legacy.getCompound("reactor_runtime");
+        legacyRuntime.putInt("schema_version", 1);
+        legacyRuntime.remove("accident_stage");
+        legacyRuntime.remove("accident_reason");
+        legacyRuntime.remove("core_pressure_megapascals");
+        legacyRuntime.remove("vessel_integrity");
+        legacyRuntime.remove("containment_integrity");
+        legacyRuntime.remove("accident_energy_joules");
+        legacyRuntime.remove("last_accident_transition_game_time");
+        legacyRuntime.remove("terrain_damage_applied");
+        legacy.put("reactor_runtime", legacyRuntime);
+        controller.load(legacy);
+        CompoundTag migrated = controller.saveWithFullMetadata().getCompound("reactor_runtime");
+        helper.assertTrue(migrated.getInt("schema_version") == 2
+                        && controller.accidentStage() == committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorAccidentStage.NORMAL,
+                "Runtime schema 1 did not migrate once into the safe schema 2 defaults");
+
         CompoundTag future = saved.copy();
         CompoundTag futureRuntime = future.getCompound("reactor_runtime");
-        futureRuntime.putInt("schema_version", 2);
+        futureRuntime.putInt("schema_version", 3);
         futureRuntime.putString("future_marker", "preserve-me");
         future.put("reactor_runtime", futureRuntime);
         controller.load(future);
@@ -218,7 +236,7 @@ public final class NuclearReactorGameTests {
                 "Unknown runtime schema did not fail into a safe SCRAM");
         helper.assertTrue(controller.interlocks().contains(ReactorInterlock.RUNTIME_DATA),
                 "Unknown runtime schema did not expose its non-overridable data interlock");
-        helper.assertTrue(preserved.getInt("schema_version") == 2
+        helper.assertTrue(preserved.getInt("schema_version") == 3
                         && "preserve-me".equals(preserved.getString("future_marker")),
                 "Unknown runtime schema was overwritten instead of preserving raw data");
         helper.succeed();

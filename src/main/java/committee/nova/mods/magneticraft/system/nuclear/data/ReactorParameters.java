@@ -34,7 +34,25 @@ public record ReactorParameters(
         int condenserSteamPerWaterMilliBucket,
         double condenserHeatJoulesPerSteamMilliBucket,
         int coolingTowerHeatJoulesPerFillBlockTick,
-        int coolingTowerHeatJoulesPerFanTick
+        int coolingTowerHeatJoulesPerFanTick,
+        double primaryBoilingTemperatureKelvin,
+        double fuelMeltingTemperatureKelvin,
+        double claddingAccidentThreshold,
+        double pressureAlarmMegapascals,
+        double vesselDesignPressureMegapascals,
+        double vesselBurstPressureMegapascals,
+        double pressureRiseMegapascalsPerKelvinTick,
+        double pressureReliefMegapascalsPerTick,
+        double vesselDamagePerMegapascalTick,
+        double containmentDamagePerMegajoule,
+        double accidentTerrainDamageEnergyJoules,
+        double freshFuelDoseRateMillisievertsPerHour,
+        double spentFuelDoseRateMillisievertsPerHour,
+        double hotCoolantDoseRateMillisievertsPerHour,
+        double coriumDoseRateMillisievertsPerHour,
+        double contaminationDoseRateMillisievertsPerHour,
+        double spentFuelCoolingKelvinPerTick,
+        double spentFuelSafeDecayHeatJoules
 ) {
     public static final int SCHEMA_VERSION = 1;
     public static final ResourceLocation PWR_ID = Magneticraft.id("pressurized_water_reactor");
@@ -42,7 +60,10 @@ public record ReactorParameters(
             PWR_ID, 40, 80, 100, 0.85D, 0.003D, 900.0D,
             0.000020D, 0.000005D, 0.010D, 0.000015D, 0.000001D,
             1_550.0D, 373.15D, 0.005D, 72_000,
-            100, 1_000, 0.5D, 10, 2, 0.8D, 10, 4.0D, 25, 500
+            100, 1_000, 0.5D, 10, 2, 0.8D, 10, 4.0D, 25, 500,
+            620.0D, 2_800.0D, 0.35D, 16.0D, 17.5D, 24.0D,
+            0.00002D, 0.003D, 0.00002D, 0.000002D, 50_000_000.0D,
+            0.002D, 250.0D, 0.05D, 2_000.0D, 20.0D, 0.025D, 5.0D
     );
 
     public ReactorParameters {
@@ -59,7 +80,16 @@ public record ReactorParameters(
                 steamGeneratorSteamPerWaterMilliBucket, turbineJoulesPerSteamMilliBucket,
                 turbineVentingEfficiency, condenserSteamPerWaterMilliBucket,
                 condenserHeatJoulesPerSteamMilliBucket,
-                coolingTowerHeatJoulesPerFillBlockTick, coolingTowerHeatJoulesPerFanTick
+                coolingTowerHeatJoulesPerFillBlockTick, coolingTowerHeatJoulesPerFanTick,
+                primaryBoilingTemperatureKelvin, fuelMeltingTemperatureKelvin,
+                claddingAccidentThreshold, pressureAlarmMegapascals,
+                vesselDesignPressureMegapascals, vesselBurstPressureMegapascals,
+                pressureRiseMegapascalsPerKelvinTick, pressureReliefMegapascalsPerTick,
+                vesselDamagePerMegapascalTick, containmentDamagePerMegajoule,
+                accidentTerrainDamageEnergyJoules, freshFuelDoseRateMillisievertsPerHour,
+                spentFuelDoseRateMillisievertsPerHour, hotCoolantDoseRateMillisievertsPerHour,
+                coriumDoseRateMillisievertsPerHour, contaminationDoseRateMillisievertsPerHour,
+                spentFuelCoolingKelvinPerTick, spentFuelSafeDecayHeatJoules
         );
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(id + ": " + String.join("; ", errors));
@@ -91,7 +121,25 @@ public record ReactorParameters(
             int condenserSteamPerWaterMilliBucket,
             double condenserHeatJoulesPerSteamMilliBucket,
             int coolingTowerHeatJoulesPerFillBlockTick,
-            int coolingTowerHeatJoulesPerFanTick
+            int coolingTowerHeatJoulesPerFanTick,
+            double primaryBoilingTemperatureKelvin,
+            double fuelMeltingTemperatureKelvin,
+            double claddingAccidentThreshold,
+            double pressureAlarmMegapascals,
+            double vesselDesignPressureMegapascals,
+            double vesselBurstPressureMegapascals,
+            double pressureRiseMegapascalsPerKelvinTick,
+            double pressureReliefMegapascalsPerTick,
+            double vesselDamagePerMegapascalTick,
+            double containmentDamagePerMegajoule,
+            double accidentTerrainDamageEnergyJoules,
+            double freshFuelDoseRateMillisievertsPerHour,
+            double spentFuelDoseRateMillisievertsPerHour,
+            double hotCoolantDoseRateMillisievertsPerHour,
+            double coriumDoseRateMillisievertsPerHour,
+            double contaminationDoseRateMillisievertsPerHour,
+            double spentFuelCoolingKelvinPerTick,
+            double spentFuelSafeDecayHeatJoules
     ) {
         ArrayList<String> errors = new ArrayList<>();
         positive("station_instrumentation_joules_per_tick", stationInstrumentationJoulesPerTick, errors);
@@ -124,6 +172,33 @@ public record ReactorParameters(
         positiveFinite("condenser_heat_joules_per_steam_millibucket", condenserHeatJoulesPerSteamMilliBucket, errors);
         positive("cooling_tower_heat_joules_per_fill_block_tick", coolingTowerHeatJoulesPerFillBlockTick, errors);
         positive("cooling_tower_heat_joules_per_fan_tick", coolingTowerHeatJoulesPerFanTick, errors);
+        positiveFinite("primary_boiling_temperature_kelvin", primaryBoilingTemperatureKelvin, errors);
+        positiveFinite("fuel_melting_temperature_kelvin", fuelMeltingTemperatureKelvin, errors);
+        fractionExclusive("cladding_accident_threshold", claddingAccidentThreshold, errors);
+        positiveFinite("pressure_alarm_megapascals", pressureAlarmMegapascals, errors);
+        positiveFinite("vessel_design_pressure_megapascals", vesselDesignPressureMegapascals, errors);
+        positiveFinite("vessel_burst_pressure_megapascals", vesselBurstPressureMegapascals, errors);
+        if (fuelMeltingTemperatureKelvin <= primaryBoilingTemperatureKelvin) {
+            errors.add("fuel_melting_temperature_kelvin must exceed primary_boiling_temperature_kelvin");
+        }
+        if (vesselDesignPressureMegapascals <= pressureAlarmMegapascals) {
+            errors.add("vessel_design_pressure_megapascals must exceed pressure_alarm_megapascals");
+        }
+        if (vesselBurstPressureMegapascals <= vesselDesignPressureMegapascals) {
+            errors.add("vessel_burst_pressure_megapascals must exceed vessel_design_pressure_megapascals");
+        }
+        positiveFinite("pressure_rise_megapascals_per_kelvin_tick", pressureRiseMegapascalsPerKelvinTick, errors);
+        positiveFinite("pressure_relief_megapascals_per_tick", pressureReliefMegapascalsPerTick, errors);
+        positiveFinite("vessel_damage_per_megapascal_tick", vesselDamagePerMegapascalTick, errors);
+        positiveFinite("containment_damage_per_megajoule", containmentDamagePerMegajoule, errors);
+        positiveFinite("accident_terrain_damage_energy_joules", accidentTerrainDamageEnergyJoules, errors);
+        positiveFinite("fresh_fuel_dose_rate_millisieverts_per_hour", freshFuelDoseRateMillisievertsPerHour, errors);
+        positiveFinite("spent_fuel_dose_rate_millisieverts_per_hour", spentFuelDoseRateMillisievertsPerHour, errors);
+        positiveFinite("hot_coolant_dose_rate_millisieverts_per_hour", hotCoolantDoseRateMillisievertsPerHour, errors);
+        positiveFinite("corium_dose_rate_millisieverts_per_hour", coriumDoseRateMillisievertsPerHour, errors);
+        positiveFinite("contamination_dose_rate_millisieverts_per_hour", contaminationDoseRateMillisievertsPerHour, errors);
+        positiveFinite("spent_fuel_cooling_kelvin_per_tick", spentFuelCoolingKelvinPerTick, errors);
+        positiveFinite("spent_fuel_safe_decay_heat_joules", spentFuelSafeDecayHeatJoules, errors);
         return List.copyOf(errors);
     }
 

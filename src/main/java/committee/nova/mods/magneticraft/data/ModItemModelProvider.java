@@ -71,6 +71,24 @@ final class ModItemModelProvider extends ItemModelProvider {
         ModNuclearItems.controllerUpgrades().forEach((upgrade, holder) ->
                 withExistingParent(upgrade.id(), mcLoc("item/generated"))
                         .texture("layer0", modLoc("item/inserter_speed_upgrade")));
+        generatedModel(ModNuclearItems.DOSIMETER, modLoc("item/low_voltage_battery"));
+        generatedModel(ModNuclearItems.GEIGER_COUNTER, modLoc("item/electrical_repair_tool"));
+        generatedModel(ModNuclearItems.SEALED_SPENT_FUEL_CASK, modLoc("item/low_voltage_battery"));
+        generatedModel(ModNuclearItems.DECONTAMINATION_KIT, modLoc("item/electrical_repair_tool"));
+        generatedModel(ModNuclearItems.BASIC_RADIATION_HELMET, modLoc("item/aluminium_dust"));
+        generatedModel(ModNuclearItems.BASIC_RADIATION_CHESTPLATE, modLoc("item/aluminium_dust"));
+        generatedModel(ModNuclearItems.BASIC_RADIATION_LEGGINGS, modLoc("item/aluminium_dust"));
+        generatedModel(ModNuclearItems.BASIC_RADIATION_BOOTS, modLoc("item/aluminium_dust"));
+        generatedModel(ModNuclearItems.HEAVY_RADIATION_HELMET, modLoc("item/lead_heavy_plate"));
+        generatedModel(ModNuclearItems.HEAVY_RADIATION_CHESTPLATE, modLoc("item/lead_heavy_plate"));
+        generatedModel(ModNuclearItems.HEAVY_RADIATION_LEGGINGS, modLoc("item/lead_heavy_plate"));
+        generatedModel(ModNuclearItems.HEAVY_RADIATION_BOOTS, modLoc("item/lead_heavy_plate"));
+    }
+
+    private void generatedModel(RegistryObject<? extends net.minecraft.world.item.Item> item,
+                                ResourceLocation texture) {
+        withExistingParent(item.getId().getPath(), mcLoc("item/generated"))
+                .texture("layer0", texture);
     }
 
     private ResourceLocation nuclearMaterialTexture(NuclearMaterial material) {
