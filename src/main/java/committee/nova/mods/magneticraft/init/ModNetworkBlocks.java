@@ -111,7 +111,7 @@ public final class ModNetworkBlocks {
     );
     public static final RegistryObject<Block> PRESSURE_TANK = register(
             "pressure_tank",
-            () -> new PressureTankBlock(machineProperties())
+            () -> new PressureTankBlock(machineProperties().noOcclusion())
     );
     public static final RegistryObject<Block> CONVEYOR_BELT = register(
             "conveyor_belt",

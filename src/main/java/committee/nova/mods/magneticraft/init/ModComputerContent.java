@@ -66,6 +66,7 @@ public final class ModComputerContent {
                 .mapColor(MapColor.METAL)
                 .requiresCorrectToolForDrops()
                 .strength(3.5F, 10.0F)
-                .sound(SoundType.METAL);
+                .sound(SoundType.METAL)
+                .noOcclusion();
     }
 }

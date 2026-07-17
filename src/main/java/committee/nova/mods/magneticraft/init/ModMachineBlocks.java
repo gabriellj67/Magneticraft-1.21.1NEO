@@ -37,11 +37,12 @@ public final class ModMachineBlocks {
             () -> new CrushingTableBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.WOOD)
                     .strength(2.0F)
-                    .sound(SoundType.WOOD))
+                    .sound(SoundType.WOOD)
+                    .noOcclusion())
     );
     public static final RegistryObject<Block> BATTERY = registerTiered(
             "battery_box",
-            () -> new BatteryBlock(machineProperties())
+            () -> new BatteryBlock(machineProperties().noOcclusion())
     );
     public static final RegistryObject<Block> GRATE = register(
             "iron_grate",
@@ -82,7 +83,7 @@ public final class ModMachineBlocks {
     );
     public static final RegistryObject<Block> PERMANENT_MAGNET = register(
             "permanent_magnet",
-            () -> new Block(machineProperties())
+            () -> new Block(machineProperties().noOcclusion())
     );
 
     static {
@@ -154,12 +155,17 @@ public final class ModMachineBlocks {
     }
 
     private static BlockBehaviour.Properties machineProperties(SingleBlockMachineDefinition definition) {
-        if (definition.isWooden()) {
-            return BlockBehaviour.Properties.of()
+        BlockBehaviour.Properties properties = definition.isWooden()
+                ? BlockBehaviour.Properties.of()
                     .mapColor(MapColor.WOOD)
                     .strength(2.0F, 5.0F)
-                    .sound(SoundType.WOOD);
-        }
-        return machineProperties();
+                    .sound(SoundType.WOOD)
+                : machineProperties();
+        return switch (definition) {
+            case SLUICE_BOX, SMALL_TANK, FEEDING_TROUGH, INSERTER,
+                    COMBUSTION_CHAMBER, STEAM_BOILER, GASIFICATION_UNIT,
+                    ELECTRIC_ENGINE, INTERNAL_COMBUSTION_ENGINE -> properties.noOcclusion();
+            default -> properties;
+        };
     }
 }
