@@ -58,6 +58,7 @@ public final class MultiblockPortLayout {
         Kind kind = switch (domain) {
             case ELECTRICITY -> Kind.ELECTRICITY;
             case HEAT -> Kind.HEAT;
+            case KINETIC -> Kind.KINETIC;
             case FLUID -> Kind.FLUID;
             case LOGISTICS -> Kind.ITEM;
             default -> null;
@@ -79,6 +80,11 @@ public final class MultiblockPortLayout {
         ));
         layouts.put(MultiblockDefinition.STEAM_TURBINE, steamTurbine());
         layouts.put(MultiblockDefinition.GRINDER, grinder());
+        layouts.put(MultiblockDefinition.MECHANICAL_GRINDING_MILL, List.of(
+                network(0, -2, -1, Direction.DOWN, Kind.KINETIC),
+                item(-1, -1, -1, Direction.WEST, slots(0), slots()),
+                item(1, -1, -1, Direction.EAST, slots(), slots(1, 2))
+        ));
         layouts.put(MultiblockDefinition.SIEVE, sieve());
         layouts.put(MultiblockDefinition.HYDRAULIC_PRESS, hydraulicPress());
         layouts.put(MultiblockDefinition.PUMPJACK, List.of(
@@ -280,7 +286,8 @@ public final class MultiblockPortLayout {
         ITEM,
         FLUID,
         ELECTRICITY,
-        HEAT
+        HEAT,
+        KINETIC
     }
 
     public record Port(

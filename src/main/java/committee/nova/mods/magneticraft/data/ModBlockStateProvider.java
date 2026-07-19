@@ -173,6 +173,33 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 models().cubeAll("pressure_tank", modLoc("block/fluid_machines/pressure_tank"))
                         .renderType(CUTOUT_RENDER_TYPE)
         );
+        ModelFile handCrankModel = models().orientable(
+                "hand_crank",
+                mcLoc("block/oak_planks"),
+                modLoc("block/grinder"),
+                mcLoc("block/oak_planks")
+        ).renderType(CUTOUT_RENDER_TYPE);
+        horizontalBlock(ModNetworkBlocks.HAND_CRANK.get(), handCrankModel);
+        simpleBlockItem(ModNetworkBlocks.HAND_CRANK.get(), handCrankModel);
+
+        ModelFile shaftModel = models().cubeColumn(
+                "wooden_shaft",
+                mcLoc("block/oak_planks"),
+                mcLoc("block/iron_block")
+        );
+        getVariantBuilder(ModNetworkBlocks.WOODEN_SHAFT.get()).forAllStates(state -> {
+            Direction.Axis axis = state.getValue(
+                    committee.nova.mods.magneticraft.content.network.kinetic.WoodenShaftBlock.AXIS
+            );
+            ConfiguredModel.Builder<?> builder = ConfiguredModel.builder().modelFile(shaftModel);
+            if (axis == Direction.Axis.Z) {
+                builder.rotationX(90);
+            } else if (axis == Direction.Axis.X) {
+                builder.rotationX(90).rotationY(90);
+            }
+            return builder.build();
+        });
+        simpleBlockItem(ModNetworkBlocks.WOODEN_SHAFT.get(), shaftModel);
 
         Block heatSink = ModNetworkBlocks.HEAT_SINK.get();
         ModelFile heatSinkModel = mcxModel(
@@ -989,6 +1016,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             case BIG_STEAM_BOILER -> advancedGltfModel(generatedName, "big_steam_boiler", particle);
             case CONTAINER -> advancedMcxModel(generatedName, "container", particle);
             case GRINDER -> advancedGltfModel(generatedName, "grinder", particle);
+            case MECHANICAL_GRINDING_MILL -> advancedGltfModel(generatedName, "grinder", particle);
             case HYDRAULIC_PRESS -> advancedGltfModel(generatedName, "hydraulic_press", particle);
             case OIL_HEATER -> advancedMcxModel(generatedName, "oil_heater", particle);
             case POLYMERIZER -> polymerizerControllerModel(generatedName);

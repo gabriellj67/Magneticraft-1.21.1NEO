@@ -43,6 +43,20 @@ class WindTurbineMathTest {
     }
 
     @Test
+    void rotorTiersScaleSweptAreaAndRatedOutput() {
+        assertTrue(WindTurbineMath.bladeCells(WindTurbineRotorTier.SMALL).size()
+                < WindTurbineMath.bladeCells(WindTurbineRotorTier.MEDIUM).size());
+        assertTrue(WindTurbineMath.bladeCells(WindTurbineRotorTier.MEDIUM).size()
+                < WindTurbineMath.bladeCells(WindTurbineRotorTier.LARGE).size());
+        assertEquals(66.0D, WindTurbineMath.productionJoulesPerTick(
+                1.0D, 1.0D, 256, WindTurbineRotorTier.SMALL), EPSILON);
+        assertEquals(200.0D, WindTurbineMath.productionJoulesPerTick(
+                1.0D, 1.0D, 256, WindTurbineRotorTier.MEDIUM), EPSILON);
+        assertEquals(400.0D, WindTurbineMath.productionJoulesPerTick(
+                1.0D, 1.0D, 256, WindTurbineRotorTier.LARGE), EPSILON);
+    }
+
+    @Test
     void windMovesOnePercentTowardBoundedTarget() {
         assertEquals(0.01D, WindTurbineMath.smoothWind(0.0D, 1.0D), EPSILON);
         assertEquals(0.99D, WindTurbineMath.smoothWind(1.0D, 0.0D), EPSILON);

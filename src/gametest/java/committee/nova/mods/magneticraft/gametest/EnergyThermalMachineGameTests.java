@@ -369,7 +369,7 @@ public final class EnergyThermalMachineGameTests {
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 10)
-    public static void engineDoesNotConvertOrActivelyOutputForgeEnergy(GameTestHelper helper) {
+    public static void engineConvertsJToNativeKineticsWithoutForgeEnergy(GameTestHelper helper) {
         helper.setBlock(
                 CENTER,
                 ModMachineBlocks.machine(SingleBlockMachineDefinition.ELECTRIC_ENGINE).get().defaultBlockState()
@@ -397,9 +397,14 @@ public final class EnergyThermalMachineGameTests {
                     requireForgeEnergy(helper, sideReceiver).getEnergyStored() == 0,
                     "Electric engine directly output FE through a side face"
             );
-            helper.assertTrue(energy.storedWholeJoules() == 32_000,
-                    "Electric engine consumed J for a removed FE conversion path");
-            helper.assertFalse(engine.working(), "Electric engine reported a removed FE conversion as working");
+            int consumedJoules = 32_000 - energy.storedWholeJoules();
+            helper.assertTrue(consumedJoules > 0 && consumedJoules <= 200,
+                    "Electric engine consumed an invalid amount of native J");
+            helper.assertTrue(engine.kinetic() != null && engine.kinetic().node().energyJoules() > 0.0D,
+                    "Electric engine did not produce native rotary energy");
+            helper.assertTrue(engine.kinetic().node().energyJoules() <= consumedJoules * 0.9D,
+                    "Electric engine exceeded its 90% J-to-kinetic efficiency");
+            helper.assertTrue(engine.working(), "Electric engine did not report native kinetic conversion");
             helper.succeed();
         });
     }

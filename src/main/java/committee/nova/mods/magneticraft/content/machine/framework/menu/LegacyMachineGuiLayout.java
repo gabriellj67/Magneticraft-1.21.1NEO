@@ -137,7 +137,8 @@ public final class LegacyMachineGuiLayout {
 
     public static List<Point> multiblockSlots(MultiblockDefinition definition) {
         return switch (definition) {
-            case GRINDER -> List.of(new Point(108, 17), new Point(97, 49), new Point(119, 49));
+            case GRINDER, MECHANICAL_GRINDING_MILL ->
+                    List.of(new Point(108, 17), new Point(97, 49), new Point(119, 49));
             case SIEVE -> List.of(
                     new Point(108, 17),
                     new Point(86, 49),
@@ -191,12 +192,14 @@ public final class LegacyMachineGuiLayout {
 
     public static List<StatusBar> singleBlockStatusBars(
             boolean energy,
+            boolean kinetic,
             boolean primaryFluid,
             boolean secondaryFluid,
             boolean progress
     ) {
         StatusBarBuilder builder = new StatusBarBuilder();
         builder.addIf(energy, StatusKind.ENERGY, 0, STATUS_WIDTH);
+        builder.addIf(kinetic, StatusKind.KINETIC, 0, STATUS_WIDTH);
         builder.addIf(primaryFluid, StatusKind.PRIMARY_FLUID, 0, STATUS_WIDTH);
         builder.addIf(secondaryFluid, StatusKind.SECONDARY_FLUID, 0, STATUS_WIDTH);
         builder.addIf(progress, StatusKind.PROGRESS, 0, STATUS_WIDTH);
@@ -205,12 +208,14 @@ public final class LegacyMachineGuiLayout {
 
     public static List<StatusBar> multiblockStatusBars(
             boolean energy,
+            boolean kinetic,
             boolean progress,
             boolean bulk,
             int tankCount
     ) {
         StatusBarBuilder builder = new StatusBarBuilder();
         builder.addIf(energy, StatusKind.ENERGY, 0, STATUS_WIDTH);
+        builder.addIf(kinetic, StatusKind.KINETIC, 0, STATUS_WIDTH);
         builder.addIf(progress, StatusKind.PROGRESS, 0, STATUS_WIDTH);
         builder.addIf(bulk, StatusKind.BULK, 0, STATUS_WIDTH);
         for (int tank = 0; tank < tankCount; tank++) {
@@ -281,6 +286,7 @@ public final class LegacyMachineGuiLayout {
 
     public enum StatusKind {
         ENERGY,
+        KINETIC,
         PRIMARY_FLUID,
         SECONDARY_FLUID,
         PROGRESS,

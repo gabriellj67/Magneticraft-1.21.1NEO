@@ -17,6 +17,7 @@ class MultiblockPortLayoutTest {
             Map.entry(MultiblockDefinition.STEAM_ENGINE, 8),
             Map.entry(MultiblockDefinition.STEAM_TURBINE, 10),
             Map.entry(MultiblockDefinition.GRINDER, 12),
+            Map.entry(MultiblockDefinition.MECHANICAL_GRINDING_MILL, 3),
             Map.entry(MultiblockDefinition.SIEVE, 7),
             Map.entry(MultiblockDefinition.HYDRAULIC_PRESS, 4),
             Map.entry(MultiblockDefinition.PUMPJACK, 2),

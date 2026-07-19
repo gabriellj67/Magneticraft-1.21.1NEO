@@ -1435,6 +1435,10 @@ public final class AdvancedSystemsGameTests {
             case COLUMN_Y -> column(Direction.Axis.Y);
             case COLUMN_Z -> column(rotatedAxis(Direction.Axis.Z, facing));
             case BRICKS -> Blocks.BRICKS.defaultBlockState();
+            case WOODEN_SLAB -> Blocks.OAK_SLAB.defaultBlockState();
+            case STONE_SLAB -> Blocks.STONE_SLAB.defaultBlockState();
+            case KINETIC_SHAFT -> ModNetworkBlocks.WOODEN_SHAFT.get().defaultBlockState()
+                    .setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
             case SMALL_TANK -> ModMachineBlocks.machine(SingleBlockMachineDefinition.SMALL_TANK)
                     .get().defaultBlockState();
             case STRIPED -> ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get().defaultBlockState();

@@ -161,6 +161,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModMachineItems.PRESSURE_GAUGE.get(), chinese ? "压力表" : "Pressure Gauge");
         add(ModMachineItems.INSERTER_SPEED_UPGRADE.get(), chinese ? "机械臂速度升级" : "Inserter Speed Upgrade");
         add(ModMachineItems.INSERTER_STACK_UPGRADE.get(), chinese ? "机械臂批量升级" : "Inserter Stack Upgrade");
+        add(ModMachineItems.SMALL_WIND_TURBINE_ROTOR.get(), chinese ? "小型风力转子" : "Small Wind Turbine Rotor");
+        add(ModMachineItems.WIND_TURBINE_ROTOR.get(), chinese ? "风力转子" : "Wind Turbine Rotor");
+        add(ModMachineItems.LARGE_WIND_TURBINE_ROTOR.get(), chinese ? "大型风力转子" : "Large Wind Turbine Rotor");
         add("container.magneticraft.battery_box", chinese ? "电池箱" : "Battery Box");
         add("container.magneticraft.electric_furnace", chinese ? "电炉" : "Electric Furnace");
         add("container.magneticraft.box_transformer", chinese ? "箱式变压器" : "Box Transformer");
@@ -225,6 +228,8 @@ final class ModLanguageProvider extends LanguageProvider {
         add(ModNetworkBlocks.TESLA_TOWER.get(), chinese ? "特斯拉塔" : "Tesla Tower");
         add(ModNetworkBlocks.WIRELESS_ENERGY_RECEIVER.get(), chinese ? "无线能量接收器" : "Wireless Energy Receiver");
         add(ModNetworkBlocks.WIND_TURBINE.get(), chinese ? "风力发电机" : "Wind Turbine");
+        add(ModNetworkBlocks.HAND_CRANK.get(), chinese ? "手摇曲柄" : "Hand Crank");
+        add(ModNetworkBlocks.WOODEN_SHAFT.get(), chinese ? "木轴" : "Wooden Shaft");
         add(ModNetworkBlocks.HEAT_PIPE.get(), chinese ? "热管" : "Heat Pipe");
         add(ModNetworkBlocks.INSULATED_HEAT_PIPE.get(), chinese ? "保温热管" : "Insulated Heat Pipe");
         add(ModNetworkBlocks.HEAT_SINK.get(), chinese ? "散热器" : "Heat Sink");
@@ -857,6 +862,18 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.steam_turbine.venting_warning", chinese ? "排汽运行 - 效率 -20%" : "Venting - 20% efficiency loss");
         add("gui.magneticraft.state.stopped", chinese ? "已停止" : "Stopped");
         add("gui.magneticraft.energy.tooltip", chinese ? "储能：%s / %s J" : "Stored: %s / %s J");
+        add("gui.magneticraft.kinetic.tooltip", chinese ? "旋转能量：%s / %s J" : "Rotary energy: %s / %s J");
+        add("gui.magneticraft.kinetic.rpm", chinese ? "转速：%s RPM" : "Speed: %s RPM");
+        add("gui.magneticraft.wind_turbine.no_rotor", chinese ? "未安装转子" : "No rotor installed");
+        add("gui.magneticraft.wind_turbine.rotor_tier.1", chinese ? "小型转子" : "Small rotor");
+        add("gui.magneticraft.wind_turbine.rotor_tier.2", chinese ? "中型转子" : "Medium rotor");
+        add("gui.magneticraft.wind_turbine.rotor_tier.3", chinese ? "大型转子" : "Large rotor");
+        add("gui.magneticraft.wind_turbine.output", chinese ? "输出：%s J/t" : "Output: %s J/t");
+        add("gui.magneticraft.wind_turbine.wind", chinese ? "风况：%s%%" : "Wind: %s%%");
+        add("gui.magneticraft.wind_turbine.clearance", chinese ? "净空：%s%%" : "Clearance: %s%%");
+        add("gui.magneticraft.wind_turbine.environment.tooltip", chinese
+                ? "当前风况：%s%%；叶轮前方净空：%s%%"
+                : "Current wind: %s%%; rotor clearance: %s%%");
         add("gui.magneticraft.forge_energy.tooltip", chinese ? "能量：%s / %s FE" : "Energy: %s / %s FE");
         add("gui.magneticraft.progress.tooltip", chinese ? "进度：%s / %s" : "Progress: %s / %s");
         add("gui.magneticraft.machine.rate.tooltip", chinese ? "消耗：%s/t；产出：%s/t" : "Consumption: %s/t; production: %s/t");
@@ -989,6 +1006,9 @@ final class ModLanguageProvider extends LanguageProvider {
                 ? "接收特斯拉塔传来的 J；朝外连接本模组电气端口时直接传输 J，面对仅 FE 设备时自动按 1 J = 1 FE 输出 0–400 FE/t。"
                 : "Receives J from a Tesla tower. Its outward face carries native J to Magneticraft electrical ports, or automatically exports 0-400 FE/t at 1 J = 1 FE to an FE-only target.");
         add("guide.magneticraft.item.wind_turbine.description", chinese
+                ? "安装小型、中型或大型转子后，按转子规格与净空条件最高输出 66、200 或 400 J/t；扫描不会加载区块。"
+                : "Install a small, medium, or large rotor for up to 66, 200, or 400 J/t according to rotor clearance; scanning never loads chunks.");
+        add("guide.magneticraft.item.wind_turbine.legacy_description", chinese
                 ? "风力发电机最高产生 200 J/t。叶轮平面与前方 16 格需要保持开阔；扫描不会加载区块。"
                 : "Generates up to 200 J/t. Keep the rotor plane and 16 blocks ahead clear; its scan never loads chunks.");
         addGuideItemDescription("wrench", "配置机器、管道与网络侧面；潜行交互用于次要配置。",
@@ -1192,6 +1212,7 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String multiblockGuideChinese(MultiblockDefinition definition) {
         return switch (definition) {
+            case MECHANICAL_GRINDING_MILL -> "使用手摇曲柄、电力引擎或木轴输入的原生动能执行研磨配方；转速不足时保留输入与进度。";
             case STIRLING_GENERATOR -> "接收外部热量或燃烧固体燃料，以 75% 热电效率输出低压 J；输出受阻时不抽热也不耗燃料。";
             case POLYMERIZER -> "达到配方最低温度后持续消耗热量，将液态塑料制成塑料片，或用天然气与硫磺制成橡胶；输入或输出受阻时暂停。";
             case BIG_COMBUSTION_CHAMBER -> "燃烧固体燃料并向大型热力网络供热；结构或输出受阻时保留燃料。";
@@ -1215,6 +1236,7 @@ final class ModLanguageProvider extends LanguageProvider {
 
     private static String multiblockGuideEnglish(MultiblockDefinition definition) {
         return switch (definition) {
+            case MECHANICAL_GRINDING_MILL -> "Runs grinder recipes from native rotary power supplied by a hand crank, electric engine, or wooden shaft, retaining input and progress when power is insufficient.";
             case STIRLING_GENERATOR -> "Accepts external heat or burns solid fuel and converts heat to low-voltage joules at 75% efficiency; blocked output consumes neither heat nor fuel.";
             case POLYMERIZER -> "Consumes heat above the recipe temperature to turn liquid plastic into sheets or natural gas and sulfur into rubber, pausing under input or output backpressure.";
             case BIG_COMBUSTION_CHAMBER -> "Burns solid fuel into a large thermal network and preserves fuel while structure or output is blocked.";
@@ -1287,7 +1309,7 @@ final class ModLanguageProvider extends LanguageProvider {
             case BRICK_FURNACE -> "以外部热量执行熔炼配方；更换配方不会抹除已积累进度，工作显示会短暂延迟熄灭。";
             case INFINITE_ENERGY -> "创意管理设备，持续维持 125 V 电源；没有生存配方。";
             case RF_TRANSFORMER -> "从侧面接收 FE，并按 1 FE = 1 J 输入低压 J 电网；机器内部不会额外保存一份 FE。";
-            case ELECTRIC_ENGINE -> "仅接入中压 J 电网，不会直接输出或转换 FE；如需为 FE 设备供电，请使用同层级电力连接器。";
+            case ELECTRIC_ENGINE -> "从中压电网消耗最多 100 J/t，并以 90% 效率从朝向面输出原生动能；不提供 FE 能力或转换。";
             case AIRLOCK -> "每 40 刻扫描半径 9 的已加载区域，以电力维持边界水泡并清除内部水体；欠压后逐步失效。";
             case THERMOPILE -> "根据两侧温差向对应层级的 J 电网发电；发电量受节点容量、输出电压和发电速率限制。";
         };
@@ -1317,7 +1339,7 @@ final class ModLanguageProvider extends LanguageProvider {
             case BRICK_FURNACE -> "Runs smelting recipes from external heat; recipe changes preserve accumulated progress and the working display lingers briefly.";
             case INFINITE_ENERGY -> "A creative administration device that continuously holds a 125 V source; it has no survival recipe.";
             case RF_TRANSFORMER -> "Accepts Forge Energy on its sides and writes it into the low-voltage native node at 1 FE = 1 J, without a second FE buffer.";
-            case ELECTRIC_ENGINE -> "Connects only to its medium-voltage native electrical node and no longer exposes or converts Forge Energy; route J through a matching-tier connector to power FE devices.";
+            case ELECTRIC_ENGINE -> "Consumes up to 100 J/t from its medium-voltage node and exports native rotary power from its facing side at 90% efficiency; it exposes no Forge Energy capability or conversion.";
             case AIRLOCK -> "Every 40 ticks, spends electricity across the loaded radius-9 area to maintain boundary bubbles and clear interior water; it decays when undervolted.";
             case THERMOPILE -> "Reads a temperature difference and generates joules directly into its rated native node, bounded by node capacity, output voltage, and generation rate.";
         };

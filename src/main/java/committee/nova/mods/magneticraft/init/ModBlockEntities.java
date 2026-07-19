@@ -4,6 +4,8 @@ import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlockEnti
 import committee.nova.mods.magneticraft.content.machine.crushingtable.CrushingTableBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineBlockEntity;
+import committee.nova.mods.magneticraft.content.network.kinetic.HandCrankBlockEntity;
+import committee.nova.mods.magneticraft.content.network.kinetic.WoodenShaftBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
@@ -260,6 +262,22 @@ public final class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             WindTurbineBlockEntity::new,
                             ModNetworkBlocks.WIND_TURBINE.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<HandCrankBlockEntity>> HAND_CRANK =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "hand_crank",
+                    () -> BlockEntityType.Builder.of(
+                            HandCrankBlockEntity::new,
+                            ModNetworkBlocks.HAND_CRANK.get()
+                    ).build(null)
+            );
+    public static final RegistryObject<BlockEntityType<WoodenShaftBlockEntity>> WOODEN_SHAFT =
+            ModRegistries.BLOCK_ENTITY_TYPES.register(
+                    "wooden_shaft",
+                    () -> BlockEntityType.Builder.of(
+                            WoodenShaftBlockEntity::new,
+                            ModNetworkBlocks.WOODEN_SHAFT.get()
                     ).build(null)
             );
     public static final RegistryObject<BlockEntityType<HeatPipeBlockEntity>> HEAT_PIPE =

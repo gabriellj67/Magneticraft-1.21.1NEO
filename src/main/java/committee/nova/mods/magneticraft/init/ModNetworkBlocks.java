@@ -22,6 +22,8 @@ import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBl
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticTubeBlock;
 import committee.nova.mods.magneticraft.content.network.pressure.BrassPressurePipeBlock;
 import committee.nova.mods.magneticraft.content.network.pressure.PressureTankBlock;
+import committee.nova.mods.magneticraft.content.network.kinetic.HandCrankBlock;
+import committee.nova.mods.magneticraft.content.network.kinetic.WoodenShaftBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -80,6 +82,14 @@ public final class ModNetworkBlocks {
     public static final RegistryObject<Block> WIND_TURBINE = register(
             "wind_turbine",
             () -> new WindTurbineBlock(machineProperties().noOcclusion())
+    );
+    public static final RegistryObject<Block> HAND_CRANK = register(
+            "hand_crank",
+            () -> new HandCrankBlock(woodenMachineProperties().noOcclusion())
+    );
+    public static final RegistryObject<Block> WOODEN_SHAFT = register(
+            "wooden_shaft",
+            () -> new WoodenShaftBlock(woodenMachineProperties().noOcclusion())
     );
     public static final RegistryObject<Block> HEAT_PIPE = register(
             "heat_pipe",
@@ -211,6 +221,13 @@ public final class ModNetworkBlocks {
                 .requiresCorrectToolForDrops()
                 .strength(3.5F, 10.0F)
                 .sound(SoundType.METAL);
+    }
+
+    private static BlockBehaviour.Properties woodenMachineProperties() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.WOOD)
+                .strength(2.0F, 5.0F)
+                .sound(SoundType.WOOD);
     }
 
     private static BlockBehaviour.Properties poleProperties() {

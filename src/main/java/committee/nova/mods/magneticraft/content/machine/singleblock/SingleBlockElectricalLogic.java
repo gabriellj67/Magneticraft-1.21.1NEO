@@ -29,6 +29,8 @@ import java.util.Set;
  * Native-electricity generation and airlock behavior.
  */
 final class SingleBlockElectricalLogic {
+    private static final int ELECTRIC_ENGINE_MAX_INPUT_JOULES_PER_TICK = 100;
+    private static final double ELECTRIC_ENGINE_EFFICIENCY = 0.90D;
     private static final double AIRLOCK_MIN_VOLTAGE = 60.0D;
     private static final double INTERNAL_ENGINE_ELECTRIC_FRACTION = 0.70D;
     private static final double INTERNAL_ENGINE_HEAT_FRACTION = 0.30D;
@@ -48,6 +50,43 @@ final class SingleBlockElectricalLogic {
             state.working = state.lastProduction > 0;
             machine.markChanged();
         }
+    }
+
+    void tickElectricEngine() {
+        state.lastConsumption = 0;
+        state.lastProduction = 0;
+        if (machine.energy() == null || machine.kinetic() == null) {
+            return;
+        }
+        int available = machine.energy().consumeJoules(ELECTRIC_ENGINE_MAX_INPUT_JOULES_PER_TICK, true);
+        if (available <= 0) {
+            return;
+        }
+        double candidateOutput = available * ELECTRIC_ENGINE_EFFICIENCY;
+        double acceptedOutput = machine.kinetic().insertJoules(candidateOutput, true);
+        if (acceptedOutput <= 0.0D) {
+            return;
+        }
+        int requestedInput = Math.min(
+                available,
+                (int) Math.ceil(acceptedOutput / ELECTRIC_ENGINE_EFFICIENCY)
+        );
+        int consumed = machine.energy().consumeJoules(requestedInput, false);
+        if (consumed <= 0) {
+            return;
+        }
+        double inserted = machine.kinetic().insertJoules(
+                Math.min(acceptedOutput, consumed * ELECTRIC_ENGINE_EFFICIENCY),
+                false
+        );
+        if (inserted <= 0.0D) {
+            machine.energy().restoreStoredJoules(machine.energy().storedJoules() + consumed);
+            return;
+        }
+        state.lastConsumption = consumed;
+        state.lastProduction = (int) Math.round(inserted);
+        state.working = true;
+        machine.markChanged();
     }
 
     void tickAirlock(ServerLevel level) {

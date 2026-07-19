@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.KineticNetworkModule;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import net.minecraft.core.BlockPos;
@@ -40,6 +41,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
+import committee.nova.mods.magneticraft.system.network.kinetic.KineticNode;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +56,7 @@ import java.util.UUID;
  * the advanced behavior layer without changing formation semantics.
  */
 public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity implements MenuProvider {
-    public static final int MENU_LOGICAL_DATA_COUNT = 23;
+    public static final int MENU_LOGICAL_DATA_COUNT = 26;
     public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     private static final String FORMED_TAG = "formed";
     private static final String MIRRORED_TAG = "mirrored";
@@ -84,6 +86,8 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     private final ElectricalNetworkModule electricity;
     @Nullable
     private final HeatNetworkModule heat;
+    @Nullable
+    private final KineticNetworkModule kinetic;
     private final AdvancedMultiblockLogic logic;
     private final ContainerData menuData;
     private final MultiblockStructureSnapshot structureSnapshot = new MultiblockStructureSnapshot();
@@ -126,6 +130,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         electricity = createElectricity();
         energy = createEnergy(electricity);
         heat = createHeat();
+        kinetic = createKinetic();
         logic = new AdvancedMultiblockLogic(this);
         menuData = Int32ContainerData.readOnly(
                 () -> energy == null ? 0 : energy.storedWholeJoules(),
@@ -150,7 +155,10 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
                 () -> tankCapacity(3),
                 () -> tankAmount(4),
                 () -> tankCapacity(4),
-                () -> turbineVentingActive ? 1 : 0
+                () -> turbineVentingActive ? 1 : 0,
+                () -> kinetic == null ? 0 : (int) Math.round(kinetic.node().energyJoules()),
+                () -> kinetic == null ? 0 : (int) Math.round(kinetic.node().capacityJoules()),
+                () -> kinetic == null ? 0 : (int) Math.round(kinetic.node().revolutionsPerMinute() * 10.0D)
         );
     }
 
@@ -255,6 +263,11 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
     @Nullable
     public HeatNetworkModule heat() {
         return heat;
+    }
+
+    @Nullable
+    public KineticNetworkModule kinetic() {
+        return kinetic;
     }
 
     public int progress() {
@@ -507,6 +520,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             }
         }
         return (energy != null && energy.storedJoules() > 0.0D)
+                || (kinetic != null && kinetic.node().energyJoules() > 0.0D)
                 || (heat != null && Math.abs(
                 heat.node().temperatureKelvin() - HeatNode.AMBIENT_TEMPERATURE_KELVIN) > 1.0E-6D)
                 || progress > 0
@@ -773,7 +787,8 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             } else {
                 logic.tick(serverLevel);
             }
-            syncClientState(visualStateHash(progress, totalProgress, working));
+            syncClientState(31 * visualStateHash(progress, totalProgress, working)
+                    + (kinetic == null ? 0 : kinetic.clientStateHash()));
             finishServerTick();
         }
     }
@@ -978,6 +993,23 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         ));
     }
 
+    @Nullable
+    private KineticNetworkModule createKinetic() {
+        if (!definition.usesKinetics()) {
+            return null;
+        }
+        return addModule(new KineticNetworkModule(
+                Magneticraft.id("advanced_kinetic"),
+                this,
+                new KineticNode(12.0D, 8_000.0D),
+                200.0D,
+                0.5D,
+                side -> operational() && MultiblockPortLayout.supports(
+                        this, worldPosition, NetworkDomain.KINETIC, side
+                )
+        ));
+    }
+
     private ItemInventoryModule.SlotAccess inventoryAccess(@Nullable Direction side) {
         int slots = definition.inventorySlots();
         if (slots == 0) {
@@ -989,7 +1021,7 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         }
         boolean recoverySide = side == facing().getOpposite();
         return switch (definition) {
-            case GRINDER, SIEVE, HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE, POLYMERIZER ->
+            case GRINDER, MECHANICAL_GRINDING_MILL, SIEVE, HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE, POLYMERIZER ->
                     new ItemInventoryModule.SlotAccess(
                             new int[]{0},
                             recoverySide ? allSlots(slots) : range(1, slots)
@@ -1013,8 +1045,12 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             return false;
         }
         return switch (definition) {
-            case GRINDER, SIEVE, HYDRAULIC_PRESS -> serverLevel.getRecipeManager()
-                    .getAllRecipesFor(ModRecipeTypes.advancedProcessingType(definition).get())
+            case GRINDER, MECHANICAL_GRINDING_MILL, SIEVE, HYDRAULIC_PRESS -> serverLevel.getRecipeManager()
+                    .getAllRecipesFor(ModRecipeTypes.advancedProcessingType(
+                            definition == MultiblockDefinition.MECHANICAL_GRINDING_MILL
+                                    ? MultiblockDefinition.GRINDER
+                                    : definition
+                    ).get())
                     .stream()
                     .anyMatch(recipe -> recipe.input().test(stack));
             case BIG_ELECTRIC_FURNACE -> serverLevel.getRecipeManager()
@@ -1056,6 +1092,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             }
             if (heat != null) {
                 heat.onLoad();
+            }
+            if (kinetic != null) {
+                kinetic.onLoad();
             }
             if (level instanceof ServerLevel serverLevel) {
                 externalPortNodes = MultiblockExternalPortService.register(serverLevel, this);
@@ -1140,6 +1179,9 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
         }
         if (heat != null) {
             heat.onUnload();
+        }
+        if (kinetic != null) {
+            kinetic.onUnload();
         }
     }
 

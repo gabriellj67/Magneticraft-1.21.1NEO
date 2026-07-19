@@ -43,8 +43,9 @@ final class SingleBlockMachineLogic {
             case AIRLOCK -> electrical.tickAirlock(level);
             case THERMOPILE -> electrical.tickThermopile(level);
             case INTERNAL_COMBUSTION_ENGINE -> electrical.tickInternalCombustionEngine(level);
+            case ELECTRIC_ENGINE -> electrical.tickElectricEngine();
             case GEOTHERMAL_PUMP -> thermal.tickGeothermalPump(level);
-            case RF_TRANSFORMER, ELECTRIC_ENGINE -> {
+            case RF_TRANSFORMER -> {
             }
         }
     }

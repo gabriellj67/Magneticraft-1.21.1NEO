@@ -14,6 +14,7 @@ import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerMo
 import committee.nova.mods.magneticraft.content.network.module.ElectricalVoltageSourceModule;
 import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
 import committee.nova.mods.magneticraft.content.network.module.HeatNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.KineticNetworkModule;
 import committee.nova.mods.magneticraft.content.network.pneumatic.PneumaticConnectionHost;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockBlockEntity;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
@@ -21,6 +22,7 @@ import committee.nova.mods.magneticraft.init.ModFluids;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
 import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
+import committee.nova.mods.magneticraft.system.network.kinetic.KineticNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -53,7 +55,7 @@ import java.util.UUID;
  */
 public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
         implements MenuProvider, PneumaticConnectionHost, TieredElectricalHost {
-    public static final int MENU_LOGICAL_DATA_COUNT = 17;
+    public static final int MENU_LOGICAL_DATA_COUNT = 20;
     public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     public static final int SLUICE_MAX_ITEMS = 10;
     public static final int SLUICE_DURATION = 80;
@@ -80,6 +82,8 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     private final ElectricalNetworkModule electricity;
     @Nullable
     private final HeatNetworkModule heat;
+    @Nullable
+    private final KineticNetworkModule kinetic;
     @Nullable
     private final ElectricalVoltageSourceModule voltageSource;
     private final ContainerData menuData;
@@ -137,6 +141,7 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
         energy = createElectricalPower(createdElectricity);
         forgeEnergy = createForgeEnergyStorage();
         heat = createHeatNetwork();
+        kinetic = createKineticNetwork();
         voltageSource = createVoltageSource(createdElectricity);
         geothermalPumpState = definition == SingleBlockMachineDefinition.GEOTHERMAL_PUMP
                 ? new GeothermalPumpState()
@@ -165,7 +170,10 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
                 () -> definition == SingleBlockMachineDefinition.THERMOPILE
                         ? (int) Math.round(this.state.thermopileFlux / 10_000.0D * 20.0D)
                         : this.state.lastProduction,
-                () -> this.state.working ? 1 : 0
+                () -> this.state.working ? 1 : 0,
+                () -> kinetic == null ? 0 : (int) Math.round(kinetic.node().energyJoules()),
+                () -> kinetic == null ? 0 : (int) Math.round(kinetic.node().capacityJoules()),
+                () -> kinetic == null ? 0 : (int) Math.round(kinetic.node().revolutionsPerMinute() * 10.0D)
         );
     }
 
@@ -262,6 +270,11 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
     @Nullable
     public HeatNetworkModule heat() {
         return heat;
+    }
+
+    @Nullable
+    public KineticNetworkModule kinetic() {
+        return kinetic;
     }
 
     @Nullable
@@ -497,6 +510,9 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
         if (machine.definition == SingleBlockMachineDefinition.GASIFICATION_UNIT && machine.heat != null) {
             hash = 31 * hash + (int) Math.floor(machine.heat.node().temperatureKelvin() / 5.0D);
         }
+        if (machine.kinetic != null) {
+            hash = 31 * hash + machine.kinetic.clientStateHash();
+        }
         ItemStack displayItem = machine.displayItem();
         if (!displayItem.isEmpty()) {
             hash = 31 * hash + displayItem.getItem().hashCode();
@@ -626,6 +642,21 @@ public final class SingleBlockMachineBlockEntity extends MachineBlockEntity
             ));
             default -> null;
         };
+    }
+
+    @Nullable
+    private KineticNetworkModule createKineticNetwork() {
+        if (definition != SingleBlockMachineDefinition.ELECTRIC_ENGINE) {
+            return null;
+        }
+        return addModule(new KineticNetworkModule(
+                Magneticraft.id("kinetic"),
+                this,
+                new KineticNode(4.0D, 4_000.0D),
+                200.0D,
+                0.25D,
+                side -> side == facing()
+        ));
     }
 
     @Nullable

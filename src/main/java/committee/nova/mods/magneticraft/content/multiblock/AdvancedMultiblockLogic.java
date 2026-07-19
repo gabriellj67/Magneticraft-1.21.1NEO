@@ -113,7 +113,8 @@ final class AdvancedMultiblockLogic {
             case STIRLING_GENERATOR -> tickStirlingGenerator();
             case STEAM_ENGINE -> tickSteamGenerator(120, 240.0D);
             case STEAM_TURBINE -> tickSteamTurbine(level);
-            case GRINDER, SIEVE, HYDRAULIC_PRESS -> tickAdvancedProcessing(level);
+            case GRINDER, SIEVE, HYDRAULIC_PRESS -> tickAdvancedProcessing(level, machine.definition());
+            case MECHANICAL_GRINDING_MILL -> tickMechanicalGrinding(level);
             case BIG_ELECTRIC_FURNACE -> tickBigElectricFurnace(level);
             case BIG_COMBUSTION_CHAMBER -> tickBigCombustion(level);
             case BIG_STEAM_BOILER -> tickBigSteamBoiler();
@@ -317,7 +318,7 @@ final class AdvancedMultiblockLogic {
         );
     }
 
-    private void tickAdvancedProcessing(ServerLevel level) {
+    private void tickAdvancedProcessing(ServerLevel level, MultiblockDefinition recipeDefinition) {
         if (machine.inventory() == null || machine.energy() == null) {
             return;
         }
@@ -327,7 +328,7 @@ final class AdvancedMultiblockLogic {
             return;
         }
         Optional<AdvancedProcessingRecipe> recipe = level.getRecipeManager()
-                .getAllRecipesFor(ModRecipeTypes.advancedProcessingType(machine.definition()).get())
+                .getAllRecipesFor(ModRecipeTypes.advancedProcessingType(recipeDefinition).get())
                 .stream()
                 .filter(candidate -> candidate.input().test(input)
                         && input.getCount() >= candidate.inputCount())
@@ -346,6 +347,54 @@ final class AdvancedMultiblockLogic {
                 recipe.get().inputCount(),
                 recipe.get().chanceResults()
         );
+    }
+
+    private void tickMechanicalGrinding(ServerLevel level) {
+        if (machine.inventory() == null || machine.kinetic() == null) {
+            return;
+        }
+        ItemStack input = machine.inventory().getStackInSlot(0);
+        if (input.isEmpty()) {
+            machine.resetProgress();
+            return;
+        }
+        Optional<AdvancedProcessingRecipe> recipe = level.getRecipeManager()
+                .getAllRecipesFor(ModRecipeTypes.advancedProcessingType(MultiblockDefinition.GRINDER).get())
+                .stream()
+                .filter(candidate -> candidate.input().test(input)
+                        && input.getCount() >= candidate.inputCount())
+                .findFirst();
+        if (recipe.isEmpty() || !outputsFit(recipe.get().results())) {
+            machine.resetProgress();
+            return;
+        }
+        AdvancedProcessingRecipe selected = recipe.get();
+        if (!machine.recipeMatches(selected.getId(), selected.duration())) {
+            machine.startRecipe(selected.getId(), selected.duration());
+        }
+        int cost = selected.energyPerTick();
+        if (machine.kinetic().extractJoules(cost, true) + 1.0E-9D < cost) {
+            return;
+        }
+        machine.kinetic().extractJoules(cost, false);
+        machine.advanceProgress();
+        machine.setWorking(true);
+        if (machine.progress() < selected.duration()) {
+            return;
+        }
+        machine.inventory().extractInternal(0, selected.inputCount(), false);
+        IItemHandlerModifiable handler = machine.inventory().menuHandler();
+        for (int index = 0; index < selected.chanceResults().size(); index++) {
+            AdvancedProcessingRecipe.ChanceResult output = selected.chanceResults().get(index);
+            if (level.random.nextFloat() <= output.chance()) {
+                ItemStack remainder = handler.insertItem(index + 1, output.stack().copy(), false);
+                if (!remainder.isEmpty()) {
+                    throw new IllegalStateException("Simulated mechanical mill output no longer fits: "
+                            + selected.getId());
+                }
+            }
+        }
+        machine.resetProgress();
     }
 
     private void tickBigElectricFurnace(ServerLevel level) {

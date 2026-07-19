@@ -12,6 +12,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkHooks;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -35,6 +41,26 @@ public final class WindTurbineBlock extends NetworkComponentBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos position, BlockState state) {
         return new WindTurbineBlockEntity(position, state);
+    }
+
+    @Override
+    public InteractionResult use(
+            BlockState state,
+            net.minecraft.world.level.Level level,
+            BlockPos position,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hit
+    ) {
+        InteractionResult configured = super.use(state, level, position, player, hand, hit);
+        if (configured != InteractionResult.PASS) {
+            return configured;
+        }
+        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer
+                && level.getBlockEntity(position) instanceof WindTurbineBlockEntity turbine) {
+            NetworkHooks.openScreen(serverPlayer, turbine, position);
+        }
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override

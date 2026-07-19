@@ -3,6 +3,8 @@ package committee.nova.mods.magneticraft.content.multiblock;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.content.network.kinetic.WoodenShaftBlock;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -26,7 +28,10 @@ public enum MultiblockRule {
     BRICKS('b'),
     SMALL_TANK('T'),
     STRIPED('S'),
-    ELECTRIC('E');
+    ELECTRIC('E'),
+    WOODEN_SLAB('w'),
+    STONE_SLAB('s'),
+    KINETIC_SHAFT('K');
 
     private final char symbol;
 
@@ -54,6 +59,10 @@ public enum MultiblockRule {
             case SMALL_TANK -> state.is(ModMachineBlocks.machine(SingleBlockMachineDefinition.SMALL_TANK).get());
             case STRIPED -> state.is(ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get());
             case ELECTRIC -> state.is(ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get());
+            case WOODEN_SLAB -> state.is(Blocks.OAK_SLAB);
+            case STONE_SLAB -> state.is(Blocks.STONE_SLAB);
+            case KINETIC_SHAFT -> state.is(ModNetworkBlocks.WOODEN_SHAFT.get())
+                    && state.getValue(WoodenShaftBlock.AXIS) == Direction.Axis.Y;
         };
     }
 
@@ -76,6 +85,10 @@ public enum MultiblockRule {
                     .get().defaultBlockState();
             case STRIPED -> ModAdvancedBlocks.STRIPED_MULTIBLOCK_PART.get().defaultBlockState();
             case ELECTRIC -> ModAdvancedBlocks.ELECTRIC_MULTIBLOCK_PART.get().defaultBlockState();
+            case WOODEN_SLAB -> Blocks.OAK_SLAB.defaultBlockState();
+            case STONE_SLAB -> Blocks.STONE_SLAB.defaultBlockState();
+            case KINETIC_SHAFT -> ModNetworkBlocks.WOODEN_SHAFT.get().defaultBlockState()
+                    .setValue(WoodenShaftBlock.AXIS, Direction.Axis.Y);
         };
     }
 

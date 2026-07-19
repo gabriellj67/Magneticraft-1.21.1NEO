@@ -48,7 +48,11 @@ class ScreenLayoutContractTest {
                 boolean progress = definition.processingKind()
                         != SingleBlockMachineDefinition.ProcessingKind.NONE;
                 controls.addAll(LegacyMachineGuiLayout.singleBlockStatusBars(
-                                definition.usesElectricity(), primaryFluid, secondaryFluid, progress
+                                definition.usesElectricity(),
+                                definition == SingleBlockMachineDefinition.ELECTRIC_ENGINE,
+                                primaryFluid,
+                                secondaryFluid,
+                                progress
                         ).stream()
                         .map(LegacyMachineGuiLayout.StatusBar::bounds)
                         .toList());
@@ -94,6 +98,7 @@ class ScreenLayoutContractTest {
             }
             controls.addAll(LegacyMachineGuiLayout.multiblockStatusBars(
                     definition.usesElectricity(),
+                    definition.usesKinetics(),
                     hasProgress(definition),
                     definition.bulkItemCapacity() > 0,
                     definition.tankCount()
@@ -260,6 +265,10 @@ class ScreenLayoutContractTest {
                 LegacyMachineGuiLayout.STANDARD_WIDTH,
                 LegacyMachineGuiLayout.STANDARD_HEIGHT
         ));
+        layouts.add(WindTurbineScreen.layout(
+                LegacyMachineGuiLayout.STANDARD_WIDTH,
+                LegacyMachineGuiLayout.STANDARD_HEIGHT
+        ));
 
         LegacyMachineGuiLayout.Size computer = LegacyMachineGuiLayout.programmableSize(false);
         layouts.add(ProgrammableScreen.layout(false, computer.width(), computer.height()));
@@ -310,7 +319,7 @@ class ScreenLayoutContractTest {
 
     private static boolean hasProgress(MultiblockDefinition definition) {
         return switch (definition) {
-            case GRINDER, SIEVE, HYDRAULIC_PRESS, PUMPJACK, REFINERY,
+            case GRINDER, MECHANICAL_GRINDING_MILL, SIEVE, HYDRAULIC_PRESS, PUMPJACK, REFINERY,
                     BIG_ELECTRIC_FURNACE, BIG_COMBUSTION_CHAMBER,
                     BIG_STEAM_BOILER, OIL_HEATER -> true;
             default -> false;

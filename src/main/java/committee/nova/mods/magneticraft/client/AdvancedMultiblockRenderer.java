@@ -276,6 +276,19 @@ public final class AdvancedMultiblockRenderer implements BlockEntityRenderer<Adv
                     LegacySceneModels.GRINDER, machine.working() ? "animation" : null, animationSeconds,
                     0.0D, 0.0D, -1.0D, poseStack, buffers, packedLight, packedOverlay
             );
+            case MECHANICAL_GRINDING_MILL -> {
+                poseStack.pushPose();
+                poseStack.translate(0.125D, -2.0D, -0.125D);
+                poseStack.scale(0.75F, 0.75F, 0.75F);
+                translateAndRender(
+                        LegacySceneModels.GRINDER,
+                        machine.working() ? "animation" : null,
+                        animationSeconds,
+                        0.0D, 0.0D, -1.0D,
+                        poseStack, buffers, packedLight, packedOverlay
+                );
+                poseStack.popPose();
+            }
             case SIEVE -> {
                 poseStack.pushPose();
                 MachineRenderHelper.rotateAroundCenterY(poseStack, 180.0F);

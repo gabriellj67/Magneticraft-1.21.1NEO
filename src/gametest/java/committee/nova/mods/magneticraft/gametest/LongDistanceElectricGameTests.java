@@ -20,6 +20,7 @@ import committee.nova.mods.magneticraft.content.network.electric.WirelessEnergyR
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModMachineBlocks;
+import committee.nova.mods.magneticraft.init.ModMachineItems;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
 import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.system.network.longdistance.LongDistanceElectricityService;
@@ -999,6 +1000,7 @@ public final class LongDistanceElectricGameTests {
                     ModNetworkBlocks.WIND_TURBINE.get().defaultBlockState().setValue(WindTurbineBlock.FACING, facing)
             );
             WindTurbineBlockEntity turbine = require(helper, turbinePosition, WindTurbineBlockEntity.class);
+            turbine.inventory().setStackInSlot(0, new ItemStack(ModMachineItems.WIND_TURBINE_ROTOR.get()));
             Direction horizontal = facing.getClockWise();
             BlockPos planeCenter = turbinePosition.relative(facing);
             BlockPos obstruction = planeCenter.relative(horizontal, -5).below(3);

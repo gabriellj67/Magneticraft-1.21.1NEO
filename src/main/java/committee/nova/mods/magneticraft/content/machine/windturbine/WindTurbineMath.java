@@ -10,32 +10,47 @@ final class WindTurbineMath {
     static final int SCAN_INTERVAL_TICKS = 200;
     static final int CLEARANCE_DEPTH = 16;
     static final int MAX_HEIGHT = 256;
-    static final double RATED_OUTPUT_JOULES_PER_TICK = 200.0D;
+    static final double BASE_RATED_OUTPUT_JOULES_PER_TICK = 200.0D;
+    static final double MAX_RATED_OUTPUT_JOULES_PER_TICK = 400.0D;
     static final double MAX_ROTATION_SPEED = 5.0D;
     static final double WIND_SMOOTHING_FACTOR = 0.01D;
 
-    private static final int BLADE_RADIUS = 5;
-    private static final int BLADE_RADIUS_SQUARED = 35;
     private static final LegacyWindNoise WIND_NOISE = new LegacyWindNoise(1_234L);
-    private static final List<BladeCell> BLADE_CELLS = createBladeCells();
 
     private WindTurbineMath() {
     }
 
-    static List<BladeCell> bladeCells() {
-        return BLADE_CELLS;
+    static List<BladeCell> bladeCells(WindTurbineRotorTier tier) {
+        return BladeCells.CELLS.get(tier.ordinal());
     }
 
-    static double openSpace(int openSteps) {
-        int totalSteps = BLADE_CELLS.size() * CLEARANCE_DEPTH;
+    static List<BladeCell> bladeCells() {
+        return bladeCells(WindTurbineRotorTier.MEDIUM);
+    }
+
+    static double openSpace(int openSteps, WindTurbineRotorTier tier) {
+        int totalSteps = bladeCells(tier).size() * CLEARANCE_DEPTH;
         return clamp01((double) Math.max(0, openSteps) / totalSteps);
     }
 
-    static double productionJoulesPerTick(double openSpace, double currentWind, int heightY) {
-        return RATED_OUTPUT_JOULES_PER_TICK
+    static double openSpace(int openSteps) {
+        return openSpace(openSteps, WindTurbineRotorTier.MEDIUM);
+    }
+
+    static double productionJoulesPerTick(
+            double openSpace,
+            double currentWind,
+            int heightY,
+            WindTurbineRotorTier tier
+    ) {
+        return BASE_RATED_OUTPUT_JOULES_PER_TICK * tier.potency()
                 * clamp01(openSpace)
                 * clamp01(currentWind)
                 * clamp01((double) heightY / MAX_HEIGHT);
+    }
+
+    static double productionJoulesPerTick(double openSpace, double currentWind, int heightY) {
+        return productionJoulesPerTick(openSpace, currentWind, heightY, WindTurbineRotorTier.MEDIUM);
     }
 
     static double smoothWind(double currentWind, double targetWind) {
@@ -64,11 +79,12 @@ final class WindTurbineMath {
         return Math.max(0.0D, Math.min(1.0D, value));
     }
 
-    private static List<BladeCell> createBladeCells() {
+    private static List<BladeCell> createBladeCells(int bladeRadius) {
         List<BladeCell> cells = new ArrayList<>();
-        for (int horizontal = -BLADE_RADIUS; horizontal <= BLADE_RADIUS; horizontal++) {
-            for (int vertical = -BLADE_RADIUS; vertical <= BLADE_RADIUS; vertical++) {
-                if (horizontal * horizontal + vertical * vertical < BLADE_RADIUS_SQUARED) {
+        int radiusSquared = bladeRadius * bladeRadius + bladeRadius * 2;
+        for (int horizontal = -bladeRadius; horizontal <= bladeRadius; horizontal++) {
+            for (int vertical = -bladeRadius; vertical <= bladeRadius; vertical++) {
+                if (horizontal * horizontal + vertical * vertical < radiusSquared) {
                     cells.add(new BladeCell(horizontal, vertical));
                 }
             }
@@ -77,5 +93,11 @@ final class WindTurbineMath {
     }
 
     record BladeCell(int horizontal, int vertical) {
+    }
+
+    private static final class BladeCells {
+        private static final List<List<BladeCell>> CELLS = java.util.Arrays.stream(WindTurbineRotorTier.values())
+                .map(tier -> createBladeCells(tier.bladeRadius()))
+                .toList();
     }
 }

@@ -6,6 +6,7 @@ package committee.nova.mods.magneticraft.system.network.runtime;
 public enum NetworkDomain {
     ELECTRICITY,
     HEAT,
+    KINETIC,
     PRESSURE,
     FLUID,
     LOGISTICS

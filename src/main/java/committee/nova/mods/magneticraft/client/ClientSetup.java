@@ -42,6 +42,7 @@ public final class ClientSetup {
             MenuScreens.register(ModMenus.MINING_ROBOT.get(), ProgrammableScreen::new);
             MenuScreens.register(ModMenus.ELECTRICAL_DEVICE.get(), ElectricalDeviceScreen::new);
             MenuScreens.register(ModMenus.PRESSURE_TANK.get(), PressureTankScreen::new);
+            MenuScreens.register(ModMenus.WIND_TURBINE.get(), WindTurbineScreen::new);
             MenuScreens.register(ModMenus.NUCLEAR_FACILITY.get(), NuclearFacilityScreen::new);
             MenuScreens.register(ModMenus.NUCLEAR_REACTOR.get(), NuclearReactorScreen::new);
             MenuScreens.register(ModMenus.NUCLEAR_THERMAL_FACILITY.get(), NuclearThermalScreen::new);

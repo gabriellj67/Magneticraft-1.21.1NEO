@@ -281,6 +281,18 @@ public final class SingleBlockMachineMenu extends AbstractMachineMenu implements
         return Int32ContainerData.read(data, 16) != 0;
     }
 
+    public int kineticEnergyStored() {
+        return Int32ContainerData.read(data, 17);
+    }
+
+    public int kineticEnergyCapacity() {
+        return Int32ContainerData.read(data, 18);
+    }
+
+    public double kineticRpm() {
+        return Int32ContainerData.read(data, 19) / 10.0D;
+    }
+
     @Override
     public BlockPos machinePosition() {
         return position;

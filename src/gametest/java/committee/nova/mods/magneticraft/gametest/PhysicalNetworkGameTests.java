@@ -8,6 +8,10 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.fluid.FluidDefinition;
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.content.network.electric.ElectricCableBlockEntity;
+import committee.nova.mods.magneticraft.content.network.kinetic.HandCrankBlock;
+import committee.nova.mods.magneticraft.content.network.kinetic.HandCrankBlockEntity;
+import committee.nova.mods.magneticraft.content.network.kinetic.WoodenShaftBlock;
+import committee.nova.mods.magneticraft.content.network.kinetic.WoodenShaftBlockEntity;
 import committee.nova.mods.magneticraft.content.network.fluid.IronPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.heat.HeatPipeBlockEntity;
 import committee.nova.mods.magneticraft.content.network.logistics.ConveyorBeltBlock;
@@ -85,6 +89,38 @@ public final class PhysicalNetworkGameTests {
             helper.assertTrue(cable.electricity().node().voltage() > 0.0D, "Cable never acquired voltage");
             helper.assertTrue(furnace.energy().storedWholeJoules() > 0, "Electric furnace did not receive native network energy");
             helper.assertTrue(furnace.electricity().node().voltage() <= 125.0D, "Furnace node exceeded tier voltage");
+            helper.succeed();
+        });
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 30)
+    public static void handCrankTransfersNativeKineticEnergyThroughWoodenShaft(GameTestHelper helper) {
+        helper.setBlock(
+                FIRST,
+                ModNetworkBlocks.HAND_CRANK.get().defaultBlockState()
+                        .setValue(HandCrankBlock.FACING, Direction.WEST)
+        );
+        helper.setBlock(
+                MIDDLE,
+                ModNetworkBlocks.WOODEN_SHAFT.get().defaultBlockState()
+                        .setValue(WoodenShaftBlock.AXIS, Direction.Axis.X)
+        );
+        HandCrankBlockEntity crank = require(helper, FIRST, HandCrankBlockEntity.class);
+        WoodenShaftBlockEntity shaft = require(helper, MIDDLE, WoodenShaftBlockEntity.class);
+        crank.activate();
+
+        helper.runAfterDelay(10, () -> {
+            PhysicalNetworkManager manager = PhysicalNetworkService.manager(helper.getLevel());
+            helper.assertTrue(
+                    manager.component(NetworkDomain.KINETIC, helper.absolutePos(FIRST)).size() == 2,
+                    "Crank and shaft did not join the native kinetic network"
+            );
+            helper.assertTrue(shaft.kinetic().node().energyJoules() > 0.0D,
+                    "Wooden shaft did not receive rotary energy");
+            helper.assertFalse(
+                    crank.getCapability(ForgeCapabilities.ENERGY, Direction.EAST).isPresent(),
+                    "Native kinetic endpoint exposed Forge Energy"
+            );
             helper.succeed();
         });
     }

@@ -149,6 +149,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     private List<StatusBar> statusBars() {
         return LegacyMachineGuiLayout.multiblockStatusBars(
                 menu.energyCapacity() > 0,
+                menu.kineticEnergyCapacity() > 0,
                 menu.totalProgress() > 0,
                 menu.bulkCapacity() > 0,
                 menu.tankCount()
@@ -182,6 +183,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
             }
             String key = switch (bar.kind()) {
                 case ENERGY -> "gui.magneticraft.energy.tooltip";
+                case KINETIC -> "gui.magneticraft.kinetic.tooltip";
                 case PROGRESS -> "gui.magneticraft.progress.tooltip";
                 case BULK -> "gui.magneticraft.items.tooltip";
                 case TANK, PRIMARY_FLUID, SECONDARY_FLUID -> "gui.magneticraft.fluid.tooltip";
@@ -199,6 +201,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     private int value(StatusBar bar) {
         return switch (bar.kind()) {
             case ENERGY -> menu.energyStored();
+            case KINETIC -> menu.kineticEnergyStored();
             case PROGRESS -> menu.progress();
             case BULK -> menu.bulkAmount();
             case TANK -> menu.fluidAmount(bar.index());
@@ -209,6 +212,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     private int capacity(StatusBar bar) {
         return switch (bar.kind()) {
             case ENERGY -> menu.energyCapacity();
+            case KINETIC -> menu.kineticEnergyCapacity();
             case PROGRESS -> menu.totalProgress();
             case BULK -> menu.bulkCapacity();
             case TANK -> menu.fluidCapacity(bar.index());
@@ -219,6 +223,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     private int color(StatusBar bar) {
         return switch (bar.kind()) {
             case ENERGY -> MachineScreenLayout.ENERGY;
+            case KINETIC -> MachineScreenLayout.ACCENT;
             case PROGRESS -> MachineScreenLayout.PROGRESS;
             case BULK -> MachineScreenLayout.WARNING;
             case TANK, PRIMARY_FLUID, SECONDARY_FLUID -> MachineScreenLayout.FLUID;
@@ -263,7 +268,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
                     "player_inventory", "player_slots", 0);
         }
         List<StatusBar> bars = LegacyMachineGuiLayout.multiblockStatusBars(
-                definition.usesElectricity(), hasProgress(definition),
+                definition.usesElectricity(), definition.usesKinetics(), hasProgress(definition),
                 definition.bulkItemCapacity() > 0, definition.tankCount()
         );
         for (int index = 0; index < bars.size(); index++) {
@@ -274,7 +279,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
 
     private static boolean hasProgress(MultiblockDefinition definition) {
         return switch (definition) {
-            case GRINDER, SIEVE, HYDRAULIC_PRESS, PUMPJACK, REFINERY,
+            case GRINDER, MECHANICAL_GRINDING_MILL, SIEVE, HYDRAULIC_PRESS, PUMPJACK, REFINERY,
                     BIG_ELECTRIC_FURNACE, BIG_COMBUSTION_CHAMBER,
                     BIG_STEAM_BOILER, OIL_HEATER -> true;
             default -> false;
@@ -284,6 +289,12 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     private Component statusLabel() {
         if (menu.definition() == MultiblockDefinition.STEAM_TURBINE && menu.turbineVentingActive()) {
             return Component.translatable("gui.magneticraft.steam_turbine.venting_warning");
+        }
+        if (menu.kineticEnergyCapacity() > 0) {
+            return Component.translatable(
+                    "gui.magneticraft.kinetic.rpm",
+                    String.format(Locale.ROOT, "%.1f", menu.kineticRpm())
+            );
         }
         if (menu.voltage() != 0.0D) {
             return Component.translatable(
@@ -365,7 +376,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
                 boolean output = port.itemAccess().extractSlots().length > 0;
                 yield input && output ? "both" : input ? "input" : "output";
             }
-            case ELECTRICITY, HEAT -> "connection";
+            case ELECTRICITY, HEAT, KINETIC -> "connection";
         };
     }
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "tier": "magneticraft:medium_voltage",
-  "role": "passive",
+  "role": "consumer",
   "buffer_capacity_joules": 32000.0,
   "maximum_transfer_joules_per_tick": 1000.0,
   "terminal_rated_charge_per_tick": 8.0

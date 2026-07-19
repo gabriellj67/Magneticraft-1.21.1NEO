@@ -5,6 +5,7 @@ import committee.nova.mods.magneticraft.content.machine.battery.BatteryMenu;
 import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceMenu;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineMenu;
+import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineMenu;
 import committee.nova.mods.magneticraft.content.multiblock.AdvancedMultiblockMenu;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityMenu;
@@ -58,6 +59,11 @@ public final class ModMenus {
             ModRegistries.MENU_TYPES.register(
                     "pressure_tank",
                     () -> IForgeMenuType.create(PressureTankMenu::new)
+            );
+    public static final RegistryObject<MenuType<WindTurbineMenu>> WIND_TURBINE =
+            ModRegistries.MENU_TYPES.register(
+                    "wind_turbine",
+                    () -> IForgeMenuType.create(WindTurbineMenu::new)
             );
     public static final RegistryObject<MenuType<NuclearFacilityMenu>> NUCLEAR_FACILITY =
             ModRegistries.MENU_TYPES.register(

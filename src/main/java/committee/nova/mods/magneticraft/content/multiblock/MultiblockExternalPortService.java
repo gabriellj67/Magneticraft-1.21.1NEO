@@ -89,6 +89,7 @@ public final class MultiblockExternalPortService {
         return switch (kind) {
             case ELECTRICITY -> NetworkDomain.ELECTRICITY;
             case HEAT -> NetworkDomain.HEAT;
+            case KINETIC -> NetworkDomain.KINETIC;
             default -> null;
         };
     }
@@ -141,6 +142,7 @@ public final class MultiblockExternalPortService {
             return switch (domain()) {
                 case ELECTRICITY -> controller.electricity() == null ? this : controller.electricity();
                 case HEAT -> controller.heat() == null ? this : controller.heat();
+                case KINETIC -> controller.kinetic() == null ? this : controller.kinetic();
                 default -> this;
             };
         }

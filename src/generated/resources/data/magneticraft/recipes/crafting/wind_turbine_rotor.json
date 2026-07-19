@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:iron_ingot"
+    },
+    "S": {
+      "item": "magneticraft:wooden_shaft"
+    }
+  },
+  "pattern": [
+    " B ",
+    "BSB",
+    " B "
+  ],
+  "result": {
+    "item": "magneticraft:wind_turbine_rotor"
+  },
+  "show_notification": true
+}

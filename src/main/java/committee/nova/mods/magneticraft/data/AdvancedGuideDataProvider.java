@@ -542,6 +542,7 @@ final class AdvancedGuideDataProvider implements DataProvider {
         return switch (definition) {
             case GRINDER, HYDRAULIC_PRESS, SIEVE, OIL_HEATER, REFINERY ->
                     "magneticraft:" + definition.id();
+            case MECHANICAL_GRINDING_MILL -> "magneticraft:grinder";
             case POLYMERIZER -> "magneticraft:polymerizing";
             case BIG_COMBUSTION_CHAMBER -> "magneticraft:industrial_combustion_chamber";
             case BIG_ELECTRIC_FURNACE -> "minecraft:smelting";
@@ -706,7 +707,8 @@ final class AdvancedGuideDataProvider implements DataProvider {
     private static String category(MultiblockDefinition definition) {
         return switch (definition) {
             case CONTAINER, SHELVING_UNIT -> "storage";
-            case GRINDER, HYDRAULIC_PRESS, SIEVE, POLYMERIZER, BIG_ELECTRIC_FURNACE -> "processing";
+            case GRINDER, MECHANICAL_GRINDING_MILL, HYDRAULIC_PRESS, SIEVE,
+                    POLYMERIZER, BIG_ELECTRIC_FURNACE -> "processing";
             case OIL_HEATER, PUMPJACK, REFINERY -> "oil";
             default -> "energy";
         };

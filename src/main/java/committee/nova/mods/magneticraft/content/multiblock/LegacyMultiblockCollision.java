@@ -151,6 +151,10 @@ public final class LegacyMultiblockCollision {
                 }
         );
         register(
+                MultiblockDefinition.MECHANICAL_GRINDING_MILL, Direction.NORTH, 0.0D, 0.0D, 0.0D,
+                new double[]{-16.0D, -32.0D, 0.0D, 32.0D, 16.0D, 48.0D}
+        );
+        register(
                 MultiblockDefinition.HYDRAULIC_PRESS, Direction.SOUTH, 0.0D, 0.0D, 1.0D,
                 new double[]{
                 -14.000, 4.000, 1.000, -3.000, 20.000, 15.000, 2.000, 16.000, 2.000, 14.000, 30.000, 14.000,

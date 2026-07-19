@@ -25,6 +25,10 @@ public final class WindTurbineRenderer implements BlockEntityRenderer<WindTurbin
             int packedLight,
             int packedOverlay
     ) {
+        var rotorTier = turbine.wind().rotorTier();
+        if (rotorTier == null) {
+            return;
+        }
         long gameTick = turbine.getLevel() == null ? 0L : turbine.getLevel().getGameTime();
         double speed = Math.max(0.0D, Math.min(5.0D, turbine.wind().rotationSpeed()));
         float rotation = (float) ((gameTick + Math.max(0.0F, Math.min(1.0F, partialTick))) * speed * 7.2D % 360.0D);
@@ -32,6 +36,8 @@ public final class WindTurbineRenderer implements BlockEntityRenderer<WindTurbin
         poseStack.pushPose();
         MachineRenderHelper.faceMachine(poseStack, turbine.facing());
         poseStack.translate(ROTOR_X, ROTOR_Y, ROTOR_Z);
+        float scale = (float) rotorTier.renderScale();
+        poseStack.scale(scale, scale, scale);
         poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
         poseStack.translate(-ROTOR_X, -ROTOR_Y, -ROTOR_Z);
         LegacySceneModels.render(

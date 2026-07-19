@@ -57,6 +57,15 @@ public enum MultiblockDefinition {
                     layer("SSS", "S#S", "SSS")
             )
     ),
+    MECHANICAL_GRINDING_MILL(
+            "mechanical_grinding_mill", "Mechanical Grinding Mill", "机械研磨机",
+            new StructureOffset(3, 3, 3), new StructureOffset(1, 2, 0),
+            layers(
+                    layer("www", "wKw", "www"),
+                    layer("AsA", "sAs", "AsA"),
+                    layer(".M.", "...", "...")
+            )
+    ),
     HYDRAULIC_PRESS(
             "hydraulic_press", "Hydraulic Press", "液压机",
             new StructureOffset(3, 5, 3), new StructureOffset(1, 0, 0),
@@ -283,7 +292,7 @@ public enum MultiblockDefinition {
     public int inventorySlots() {
         return switch (this) {
             case SHELVING_UNIT -> 648;
-            case GRINDER -> 3;
+            case GRINDER, MECHANICAL_GRINDING_MILL -> 3;
             case SIEVE -> 4;
             case HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE, POLYMERIZER -> 2;
             case BIG_COMBUSTION_CHAMBER, STIRLING_GENERATOR -> 1;
@@ -335,6 +344,10 @@ public enum MultiblockDefinition {
                     BIG_COMBUSTION_CHAMBER, BIG_STEAM_BOILER -> true;
             default -> false;
         };
+    }
+
+    public boolean usesKinetics() {
+        return this == MECHANICAL_GRINDING_MILL;
     }
 
     private static String[] layer(String... rows) {

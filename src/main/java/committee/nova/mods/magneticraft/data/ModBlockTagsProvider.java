@@ -126,7 +126,9 @@ final class ModBlockTagsProvider extends BlockTagsProvider {
         );
         tag(BlockTags.MINEABLE_WITH_AXE).add(
                 ModNetworkBlocks.ELECTRIC_POLE.get(),
-                ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get()
+                ModNetworkBlocks.ELECTRIC_POLE_TRANSFORMER.get(),
+                ModNetworkBlocks.HAND_CRANK.get(),
+                ModNetworkBlocks.WOODEN_SHAFT.get()
         );
         ModAdvancedBlocks.blockItems().forEach(item -> {
             Block block = Block.byItem(item.get());

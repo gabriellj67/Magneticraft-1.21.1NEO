@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Objects;
 import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Server-authoritative wind sampling and electrical generation.
@@ -22,11 +23,14 @@ public final class WindTurbineModule implements MachineModule {
     private static final String TARGET_WIND_TAG = "target_wind";
     private static final String ROTATION_SPEED_TAG = "rotation_speed";
     private static final String PRODUCTION_TAG = "production_joules_per_tick";
+    private static final String OPEN_SPACE_TAG = "open_space";
+    private static final String ROTOR_TIER_TAG = "rotor_tier";
 
     private final ResourceLocation id;
     private final MachineModuleHost host;
     private final ElectricalPowerModule energy;
     private final Supplier<Direction> facingSupplier;
+    private final Supplier<WindTurbineRotorTier> rotorTierSupplier;
 
     private double currentWind;
     private double targetWind;
@@ -36,17 +40,23 @@ public final class WindTurbineModule implements MachineModule {
     private double clientProductionJoulesPerTick;
     private int ticksUntilScan;
     private boolean operational;
+    @Nullable
+    private WindTurbineRotorTier sampledRotorTier;
+    @Nullable
+    private WindTurbineRotorTier clientRotorTier;
 
     public WindTurbineModule(
             ResourceLocation id,
             MachineModuleHost host,
             ElectricalPowerModule energy,
-            Supplier<Direction> facingSupplier
+            Supplier<Direction> facingSupplier,
+            Supplier<WindTurbineRotorTier> rotorTierSupplier
     ) {
         this.id = Objects.requireNonNull(id);
         this.host = Objects.requireNonNull(host);
         this.energy = Objects.requireNonNull(energy);
         this.facingSupplier = Objects.requireNonNull(facingSupplier);
+        this.rotorTierSupplier = Objects.requireNonNull(rotorTierSupplier);
     }
 
     @Override
@@ -76,6 +86,8 @@ public final class WindTurbineModule implements MachineModule {
     public void saveClientData(CompoundTag tag) {
         tag.putDouble(ROTATION_SPEED_TAG, rotationSpeed());
         tag.putDouble(PRODUCTION_TAG, productionJoulesPerTick());
+        tag.putDouble(OPEN_SPACE_TAG, openSpace());
+        tag.putInt(ROTOR_TIER_TAG, rotorTier() == null ? 0 : rotorTier().ordinal() + 1);
     }
 
     @Override
@@ -86,8 +98,12 @@ public final class WindTurbineModule implements MachineModule {
         );
         clientProductionJoulesPerTick = bound(
                 tag.getDouble(PRODUCTION_TAG),
-                WindTurbineMath.RATED_OUTPUT_JOULES_PER_TICK
+                WindTurbineMath.MAX_RATED_OUTPUT_JOULES_PER_TICK
         );
+        openSpace = WindTurbineMath.clamp01(tag.getDouble(OPEN_SPACE_TAG));
+        int encodedTier = tag.getInt(ROTOR_TIER_TAG) - 1;
+        WindTurbineRotorTier[] tiers = WindTurbineRotorTier.values();
+        clientRotorTier = encodedTier >= 0 && encodedTier < tiers.length ? tiers[encodedTier] : null;
     }
 
     @Override
@@ -95,6 +111,15 @@ public final class WindTurbineModule implements MachineModule {
         Level level = host.level();
         if (!(level instanceof ServerLevel serverLevel)) {
             return;
+        }
+
+        WindTurbineRotorTier installedTier = rotorTierSupplier.get();
+        if (sampledRotorTier != installedTier) {
+            sampledRotorTier = installedTier;
+            ticksUntilScan = 0;
+            operational = false;
+            openSpace = 0.0D;
+            host.markChangedAndSync();
         }
 
         if (ticksUntilScan > 0) {
@@ -112,7 +137,8 @@ public final class WindTurbineModule implements MachineModule {
             double requested = WindTurbineMath.productionJoulesPerTick(
                     openSpace,
                     currentWind,
-                    host.position().getY()
+                    host.position().getY(),
+                    installedTier
             );
             double accepted = energy.generateJoules(requested, false);
             lastProductionJoulesPerTick = accepted;
@@ -130,6 +156,12 @@ public final class WindTurbineModule implements MachineModule {
         return openSpace;
     }
 
+    @Nullable
+    public WindTurbineRotorTier rotorTier() {
+        Level level = host.level();
+        return level != null && level.isClientSide ? clientRotorTier : sampledRotorTier;
+    }
+
     public boolean operational() {
         return operational;
     }
@@ -145,22 +177,30 @@ public final class WindTurbineModule implements MachineModule {
         Level level = host.level();
         return level != null && level.isClientSide
                 ? clientProductionJoulesPerTick
-                : bound(lastProductionJoulesPerTick, WindTurbineMath.RATED_OUTPUT_JOULES_PER_TICK);
+                : bound(lastProductionJoulesPerTick, WindTurbineMath.MAX_RATED_OUTPUT_JOULES_PER_TICK);
     }
 
     public int clientStateHash() {
         return Objects.hash(
                 Double.doubleToLongBits(rotationSpeed()),
-                Double.doubleToLongBits(productionJoulesPerTick())
+                Double.doubleToLongBits(productionJoulesPerTick()),
+                Double.doubleToLongBits(openSpace),
+                rotorTier()
         );
     }
 
     private void updateEnvironment(ServerLevel level) {
+        WindTurbineRotorTier tier = rotorTierSupplier.get();
+        if (tier == null) {
+            operational = false;
+            openSpace = 0.0D;
+            return;
+        }
         Direction facing = facingSupplier.get();
         if (facing == null || !facing.getAxis().isHorizontal()) {
             facing = Direction.NORTH;
         }
-        SpaceSample sample = sampleSpace(level, facing);
+        SpaceSample sample = sampleSpace(level, facing, tier);
         operational = sample.operational();
         openSpace = sample.openSpace();
         BlockPos position = host.position();
@@ -172,11 +212,11 @@ public final class WindTurbineModule implements MachineModule {
         );
     }
 
-    private SpaceSample sampleSpace(ServerLevel level, Direction facing) {
+    private SpaceSample sampleSpace(ServerLevel level, Direction facing, WindTurbineRotorTier tier) {
         Direction horizontal = facing.getClockWise();
         BlockPos planeCenter = host.position().relative(facing);
         int openSteps = 0;
-        for (WindTurbineMath.BladeCell cell : WindTurbineMath.bladeCells()) {
+        for (WindTurbineMath.BladeCell cell : WindTurbineMath.bladeCells(tier)) {
             BlockPos bladePosition = planeCenter
                     .relative(horizontal, cell.horizontal())
                     .above(cell.vertical());
@@ -199,7 +239,7 @@ public final class WindTurbineModule implements MachineModule {
                 openSteps++;
             }
         }
-        return new SpaceSample(true, WindTurbineMath.openSpace(openSteps));
+        return new SpaceSample(true, WindTurbineMath.openSpace(openSteps, tier));
     }
 
     private static boolean isLoadedWorldPosition(ServerLevel level, BlockPos position) {
@@ -212,6 +252,8 @@ public final class WindTurbineModule implements MachineModule {
         lastProductionJoulesPerTick = 0.0D;
         ticksUntilScan = 0;
         operational = false;
+        sampledRotorTier = null;
+        clientRotorTier = null;
     }
 
     private static double bound(double value, double maximum) {

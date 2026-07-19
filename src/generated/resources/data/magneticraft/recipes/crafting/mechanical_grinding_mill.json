@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": {
+      "item": "magneticraft:machine_casing"
+    },
+    "C": {
+      "item": "magneticraft:copper_coil"
+    },
+    "M": {
+      "item": "minecraft:grindstone"
+    }
+  },
+  "pattern": [
+    "BBB",
+    "CMC",
+    "BBB"
+  ],
+  "result": {
+    "item": "magneticraft:mechanical_grinding_mill"
+  },
+  "show_notification": true
+}

@@ -1039,6 +1039,7 @@ final class ModRecipeProvider extends RecipeProvider {
             case BIG_STEAM_BOILER -> Items.CAULDRON;
             case CONTAINER -> Items.CHEST;
             case GRINDER -> Items.DIAMOND;
+            case MECHANICAL_GRINDING_MILL -> Blocks.GRINDSTONE;
             case HYDRAULIC_PRESS -> Blocks.PISTON;
             case OIL_HEATER -> Items.MAGMA_CREAM;
             case POLYMERIZER -> ModItems.PLASTIC_SHEET.get();
@@ -1193,6 +1194,48 @@ final class ModRecipeProvider extends RecipeProvider {
                 .define('C', ModItems.component(CraftingComponent.MOTOR).get())
                 .unlockedBy("has_motor", has(ModItems.component(CraftingComponent.MOTOR).get()))
                 .save(consumer, id("crafting/conveyor_belt"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.WOODEN_SHAFT.get(), 4)
+                .pattern(" I ")
+                .pattern(" S ")
+                .pattern(" I ")
+                .define('I', Tags.Items.NUGGETS_IRON)
+                .define('S', Tags.Items.RODS_WOODEN)
+                .unlockedBy("has_iron_nugget", has(Tags.Items.NUGGETS_IRON))
+                .save(consumer, id("crafting/wooden_shaft"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModNetworkBlocks.HAND_CRANK.get())
+                .pattern("  S")
+                .pattern(" SS")
+                .pattern("W  ")
+                .define('S', Tags.Items.RODS_WOODEN)
+                .define('W', ModNetworkBlocks.WOODEN_SHAFT.get())
+                .unlockedBy("has_wooden_shaft", has(ModNetworkBlocks.WOODEN_SHAFT.get()))
+                .save(consumer, id("crafting/hand_crank"));
+
+        windRotorRecipe(consumer, ModMachineItems.SMALL_WIND_TURBINE_ROTOR.get(), Ingredient.of(Items.COPPER_INGOT),
+                "small_wind_turbine_rotor");
+        windRotorRecipe(consumer, ModMachineItems.WIND_TURBINE_ROTOR.get(), Ingredient.of(Items.IRON_INGOT),
+                "wind_turbine_rotor");
+        windRotorRecipe(consumer, ModMachineItems.LARGE_WIND_TURBINE_ROTOR.get(),
+                Ingredient.of(ModTags.Items.ingot(Metal.STEEL)),
+                "large_wind_turbine_rotor");
+    }
+
+    private void windRotorRecipe(
+            Consumer<FinishedRecipe> consumer,
+            ItemLike result,
+            net.minecraft.world.item.crafting.Ingredient blade,
+            String id
+    ) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, result)
+                .pattern(" B ")
+                .pattern("BSB")
+                .pattern(" B ")
+                .define('B', blade)
+                .define('S', ModNetworkBlocks.WOODEN_SHAFT.get())
+                .unlockedBy("has_wooden_shaft", has(ModNetworkBlocks.WOODEN_SHAFT.get()))
+                .save(consumer, id("crafting/" + id));
     }
 
     private void addPortableElectricRecipes(Consumer<FinishedRecipe> consumer) {

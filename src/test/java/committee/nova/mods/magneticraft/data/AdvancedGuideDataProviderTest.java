@@ -154,6 +154,7 @@ class AdvancedGuideDataProviderTest {
             );
             boolean hasRecipe = Set.of(
                     MultiblockDefinition.GRINDER,
+                    MultiblockDefinition.MECHANICAL_GRINDING_MILL,
                     MultiblockDefinition.HYDRAULIC_PRESS,
                     MultiblockDefinition.SIEVE,
                     MultiblockDefinition.OIL_HEATER,
@@ -169,6 +170,8 @@ class AdvancedGuideDataProviderTest {
                                 ? "minecraft:smelting"
                                 : definition == MultiblockDefinition.POLYMERIZER
                                         ? "magneticraft:polymerizing"
+                                        : definition == MultiblockDefinition.MECHANICAL_GRINDING_MILL
+                                                ? "magneticraft:grinder"
                                         : "magneticraft:" + definition.id(),
                         guide.get("recipe_type").getAsString(),
                         definition.id()
@@ -213,7 +216,7 @@ class AdvancedGuideDataProviderTest {
             assertEquals(MultiblockPortLayout.ports(definition).size(),
                     ports.getAsJsonArray("connections").size());
         }
-        assertEquals(18, ids.size());
+        assertEquals(19, ids.size());
     }
 
     @Test

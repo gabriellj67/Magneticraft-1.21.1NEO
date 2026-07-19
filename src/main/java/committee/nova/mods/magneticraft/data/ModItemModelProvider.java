@@ -36,7 +36,13 @@ final class ModItemModelProvider extends ItemModelProvider {
         registerNuclearItemModels();
         ModMachineItems.creativeItems().stream()
                 .map(RegistryObject::get)
+                .filter(item -> item != ModMachineItems.SMALL_WIND_TURBINE_ROTOR.get()
+                        && item != ModMachineItems.WIND_TURBINE_ROTOR.get()
+                        && item != ModMachineItems.LARGE_WIND_TURBINE_ROTOR.get())
                 .forEach(this::basicItem);
+        generatedModel(ModMachineItems.SMALL_WIND_TURBINE_ROTOR, modLoc("item/copper_wire_coil"));
+        generatedModel(ModMachineItems.WIND_TURBINE_ROTOR, modLoc("item/steel_ingot"));
+        generatedModel(ModMachineItems.LARGE_WIND_TURBINE_ROTOR, modLoc("item/electric_piston"));
         ModNetworkItems.creativeItems().stream()
                 .map(RegistryObject::get)
                 .filter(item -> item != ModNetworkItems.FUSE.get()

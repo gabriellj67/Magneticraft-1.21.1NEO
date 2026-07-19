@@ -221,6 +221,18 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
         return value(22) != 0;
     }
 
+    public int kineticEnergyStored() {
+        return value(23);
+    }
+
+    public int kineticEnergyCapacity() {
+        return value(24);
+    }
+
+    public double kineticRpm() {
+        return value(25) / 10.0D;
+    }
+
     @Override
     protected boolean movePlayerStackToMachine(ItemStack stack) {
         return machineSlots > 0 && moveItemStackTo(stack, 0, machineSlots, false);
@@ -238,7 +250,8 @@ public final class AdvancedMultiblockMenu extends AbstractMachineMenu {
 
     private static boolean isOutputSlot(MultiblockDefinition definition, int slot) {
         return slot > 0 && switch (definition) {
-            case GRINDER, SIEVE, HYDRAULIC_PRESS, BIG_ELECTRIC_FURNACE, POLYMERIZER -> true;
+            case GRINDER, MECHANICAL_GRINDING_MILL, SIEVE, HYDRAULIC_PRESS,
+                    BIG_ELECTRIC_FURNACE, POLYMERIZER -> true;
             default -> false;
         };
     }

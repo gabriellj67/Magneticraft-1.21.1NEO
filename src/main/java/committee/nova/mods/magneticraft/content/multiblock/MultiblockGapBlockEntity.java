@@ -39,6 +39,7 @@ public final class MultiblockGapBlockEntity extends BlockEntity
 
     private final PhysicalPortModule electricity = new PhysicalPortModule(NetworkDomain.ELECTRICITY);
     private final PhysicalPortModule heat = new PhysicalPortModule(NetworkDomain.HEAT);
+    private final PhysicalPortModule kinetic = new PhysicalPortModule(NetworkDomain.KINETIC);
     @Nullable
     private BlockPos controllerPosition;
     @Nullable
@@ -59,12 +60,16 @@ public final class MultiblockGapBlockEntity extends BlockEntity
         if (!heat.connectionSides().isEmpty()) {
             heat.onLoad();
         }
+        if (!kinetic.connectionSides().isEmpty()) {
+            kinetic.onLoad();
+        }
     }
 
     @Override
     public void setRemoved() {
         electricity.onUnload();
         heat.onUnload();
+        kinetic.onUnload();
         super.setRemoved();
     }
 
@@ -80,11 +85,13 @@ public final class MultiblockGapBlockEntity extends BlockEntity
         if (stableController.equals(this.controllerPosition)
                 && definition == this.definition
                 && facing == this.facing) {
+            rebindPhysicalPorts();
             return;
         }
         this.controllerPosition = stableController;
         this.definition = definition;
         this.facing = facing;
+        rebindPhysicalPorts();
         markChangedAndSync();
     }
 
@@ -301,6 +308,7 @@ public final class MultiblockGapBlockEntity extends BlockEntity
             return switch (domain()) {
                 case ELECTRICITY -> controller.electricity() == null ? this : controller.electricity();
                 case HEAT -> controller.heat() == null ? this : controller.heat();
+                case KINETIC -> controller.kinetic() == null ? this : controller.kinetic();
                 default -> this;
             };
         }
@@ -311,6 +319,21 @@ public final class MultiblockGapBlockEntity extends BlockEntity
             if (delegate != this) {
                 delegate.exchangeWith(other.transferNode());
             }
+        }
+    }
+
+    private void rebindPhysicalPorts() {
+        electricity.onUnload();
+        heat.onUnload();
+        kinetic.onUnload();
+        if (!electricity.connectionSides().isEmpty()) {
+            electricity.onLoad();
+        }
+        if (!heat.connectionSides().isEmpty()) {
+            heat.onLoad();
+        }
+        if (!kinetic.connectionSides().isEmpty()) {
+            kinetic.onLoad();
         }
     }
 }

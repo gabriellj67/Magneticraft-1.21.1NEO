@@ -199,6 +199,12 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
     }
 
     private Component statusLabel() {
+        if (menu.kineticEnergyCapacity() > 0) {
+            return Component.translatable(
+                    "gui.magneticraft.kinetic.rpm",
+                    String.format(Locale.ROOT, "%.1f", menu.kineticRpm())
+            );
+        }
         if (menu.temperatureKelvin() > 0.0D) {
             return Component.translatable(
                     "gui.magneticraft.temperature_celsius",
@@ -236,6 +242,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                 case ENERGY -> menu.definition() == SingleBlockMachineDefinition.RF_HEATER
                         ? "gui.magneticraft.forge_energy.tooltip"
                         : "gui.magneticraft.energy.tooltip";
+                case KINETIC -> "gui.magneticraft.kinetic.tooltip";
                 case PROGRESS -> "gui.magneticraft.progress.tooltip";
                 case PRIMARY_FLUID, SECONDARY_FLUID, TANK -> "gui.magneticraft.fluid.tooltip";
                 case BULK -> "gui.magneticraft.items.tooltip";
@@ -262,6 +269,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
     private List<StatusBar> statusBars() {
         return LegacyMachineGuiLayout.singleBlockStatusBars(
                 menu.energyCapacity() > 0,
+                menu.kineticEnergyCapacity() > 0,
                 menu.primaryCapacity() > 0,
                 menu.secondaryCapacity() > 0,
                 displayedProgressTotal() > 0
@@ -271,6 +279,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
     private int value(StatusBar bar) {
         return switch (bar.kind()) {
             case ENERGY -> menu.energyStored();
+            case KINETIC -> menu.kineticEnergyStored();
             case PRIMARY_FLUID -> menu.primaryFluid();
             case SECONDARY_FLUID -> menu.secondaryFluid();
             case PROGRESS -> displayedProgress();
@@ -281,6 +290,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
     private int capacity(StatusBar bar) {
         return switch (bar.kind()) {
             case ENERGY -> menu.energyCapacity();
+            case KINETIC -> menu.kineticEnergyCapacity();
             case PRIMARY_FLUID -> menu.primaryCapacity();
             case SECONDARY_FLUID -> menu.secondaryCapacity();
             case PROGRESS -> displayedProgressTotal();
@@ -291,6 +301,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
     private int color(StatusBar bar) {
         return switch (bar.kind()) {
             case ENERGY -> MachineScreenLayout.ENERGY;
+            case KINETIC -> MachineScreenLayout.ACCENT;
             case PRIMARY_FLUID -> MachineScreenLayout.FLUID;
             case SECONDARY_FLUID -> MachineScreenLayout.TEXT_PRIMARY;
             case PROGRESS -> MachineScreenLayout.PROGRESS;

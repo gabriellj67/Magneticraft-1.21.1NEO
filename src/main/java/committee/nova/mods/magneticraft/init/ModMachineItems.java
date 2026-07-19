@@ -9,6 +9,8 @@ import committee.nova.mods.magneticraft.content.item.OilProspectorItem;
 import committee.nova.mods.magneticraft.content.item.PressureGaugeItem;
 import committee.nova.mods.magneticraft.content.item.ThermometerItem;
 import committee.nova.mods.magneticraft.content.item.VoltmeterItem;
+import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineRotorItem;
+import committee.nova.mods.magneticraft.content.machine.windturbine.WindTurbineRotorTier;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -40,6 +42,18 @@ public final class ModMachineItems {
             ModRegistries.ITEMS.register("inserter_speed_upgrade", () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> INSERTER_STACK_UPGRADE =
             ModRegistries.ITEMS.register("inserter_stack_upgrade", () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SMALL_WIND_TURBINE_ROTOR = ModRegistries.ITEMS.register(
+            WindTurbineRotorTier.SMALL.id(),
+            () -> new WindTurbineRotorItem(WindTurbineRotorTier.SMALL)
+    );
+    public static final RegistryObject<Item> WIND_TURBINE_ROTOR = ModRegistries.ITEMS.register(
+            WindTurbineRotorTier.MEDIUM.id(),
+            () -> new WindTurbineRotorItem(WindTurbineRotorTier.MEDIUM)
+    );
+    public static final RegistryObject<Item> LARGE_WIND_TURBINE_ROTOR = ModRegistries.ITEMS.register(
+            WindTurbineRotorTier.LARGE.id(),
+            () -> new WindTurbineRotorItem(WindTurbineRotorTier.LARGE)
+    );
 
     private ModMachineItems() {
     }
@@ -59,7 +73,10 @@ public final class ModMachineItems {
                 OIL_PROSPECTOR,
                 PRESSURE_GAUGE,
                 INSERTER_SPEED_UPGRADE,
-                INSERTER_STACK_UPGRADE
+                INSERTER_STACK_UPGRADE,
+                SMALL_WIND_TURBINE_ROTOR,
+                WIND_TURBINE_ROTOR,
+                LARGE_WIND_TURBINE_ROTOR
         );
     }
 }
