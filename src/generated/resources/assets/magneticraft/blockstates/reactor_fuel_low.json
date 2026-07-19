@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "formed=false": {
       "model": "magneticraft:block/reactor_fuel_low"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/reactor_fuel_low_formed"
     }
   }
 }

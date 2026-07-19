@@ -22,6 +22,7 @@ import committee.nova.mods.magneticraft.content.multiblock.MultiblockRule;
 import committee.nova.mods.magneticraft.content.multiblock.ShelvingStorageModule;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorColumnCoordinate;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPreset;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorStructure;
 import net.minecraft.core.Direction;
 import net.minecraft.data.CachedOutput;
@@ -75,12 +76,11 @@ final class AdvancedGuideDataProvider implements DataProvider {
             Path path = multiblockGuides.json(Magneticraft.id(definition.id()));
             writes.add(DataProvider.saveStable(output, multiblockGuide(definition), path));
         }
-        for (Map.Entry<String, Map<ReactorColumnCoordinate, NuclearReactorColumnType>> blueprint
-                : reactorBlueprintLayouts().entrySet()) {
+        for (NuclearReactorPreset preset : NuclearReactorPreset.values()) {
             writes.add(DataProvider.saveStable(
                     output,
-                    reactorBlueprintGuide(blueprint.getKey(), blueprint.getValue()),
-                    multiblockGuides.json(Magneticraft.id("pressurized_water_reactor_" + blueprint.getKey()))
+                    reactorBlueprintGuide(preset),
+                    multiblockGuides.json(Magneticraft.id("pressurized_water_reactor_" + preset.id()))
             ));
         }
         writes.add(DataProvider.saveStable(
@@ -143,38 +143,24 @@ final class AdvancedGuideDataProvider implements DataProvider {
 
     static Map<String, Map<ReactorColumnCoordinate, NuclearReactorColumnType>> reactorBlueprintLayouts() {
         Map<String, Map<ReactorColumnCoordinate, NuclearReactorColumnType>> layouts = new LinkedHashMap<>();
-        layouts.put("robust_baseload", blueprint(
-                "FWF",
-                "RAI",
-                "FWF"
-        ));
-        layouts.put("compact_high_power", blueprint(
-                "FFF",
-                "WAW",
-                "FIF"
-        ));
-        layouts.put("fast_load_following", blueprint(
-                "AFB",
-                "WIW",
-                "CFD"
-        ));
+        for (NuclearReactorPreset preset : NuclearReactorPreset.values()) {
+            layouts.put(preset.id(), preset.columns());
+        }
         return Map.copyOf(layouts);
     }
 
-    static JsonObject reactorBlueprintGuide(
-            String blueprint,
-            Map<ReactorColumnCoordinate, NuclearReactorColumnType> columns
-    ) {
-        int width = 7;
-        int length = 7;
-        int height = 7;
+    static JsonObject reactorBlueprintGuide(NuclearReactorPreset preset) {
+        int width = preset.width();
+        int length = preset.length();
+        int height = preset.height();
+        Map<ReactorColumnCoordinate, NuclearReactorColumnType> columns = preset.columns();
         JsonObject root = new JsonObject();
         root.addProperty("schema_version", SCHEMA_VERSION);
-        root.addProperty("id", Magneticraft.MOD_ID + ":pressurized_water_reactor_" + blueprint);
+        root.addProperty("id", Magneticraft.MOD_ID + ":pressurized_water_reactor_" + preset.id());
         root.addProperty("category", "energy");
         root.addProperty("controller", Magneticraft.MOD_ID + ":pressurized_water_reactor_controller");
-        root.addProperty("translation_key", "guide.magneticraft.reactor.blueprint." + blueprint + ".name");
-        root.addProperty("description", "guide.magneticraft.reactor.blueprint." + blueprint + ".description");
+        root.addProperty("translation_key", preset.translationKey());
+        root.addProperty("description", preset.descriptionKey());
         root.addProperty("supports_mirroring", false);
         root.add("size", offset(width, height, length));
         root.add("anchor", offset(width / 2, 1, 0));
@@ -218,26 +204,6 @@ final class AdvancedGuideDataProvider implements DataProvider {
         ports.add("fluid_tank_capacities_mb", tanks);
         root.add("ports", ports);
         return root;
-    }
-
-    private static Map<ReactorColumnCoordinate, NuclearReactorColumnType> blueprint(String... rows) {
-        Map<ReactorColumnCoordinate, NuclearReactorColumnType> columns = new LinkedHashMap<>();
-        for (int z = 0; z < rows.length; z++) {
-            for (int x = 0; x < rows[z].length(); x++) {
-                columns.put(new ReactorColumnCoordinate(x, z), switch (rows[z].charAt(x)) {
-                    case 'F' -> NuclearReactorColumnType.FUEL_STANDARD;
-                    case 'A' -> NuclearReactorColumnType.CONTROL_ROD_A;
-                    case 'B' -> NuclearReactorColumnType.CONTROL_ROD_B;
-                    case 'C' -> NuclearReactorColumnType.CONTROL_ROD_C;
-                    case 'D' -> NuclearReactorColumnType.CONTROL_ROD_D;
-                    case 'W' -> NuclearReactorColumnType.COOLANT_CHANNEL;
-                    case 'I' -> NuclearReactorColumnType.INSTRUMENTATION;
-                    case 'R' -> NuclearReactorColumnType.REFLECTOR;
-                    default -> throw new IllegalArgumentException("Unknown reactor blueprint symbol");
-                });
-            }
-        }
-        return Map.copyOf(columns);
     }
 
     private static BlueprintLegend blueprintLegend(NuclearReactorStructure.ExpectedPart expected) {

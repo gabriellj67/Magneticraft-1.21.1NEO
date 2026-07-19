@@ -17,7 +17,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
 public final class SpentFuelPoolMenu extends AbstractMachineMenu {
-    public static final int IMAGE_WIDTH = 214;
+    public static final int IMAGE_WIDTH = 300;
     public static final int IMAGE_HEIGHT = 205;
     public static final int PLAYER_TOP = 123;
     private final BlockPos position;
@@ -51,7 +51,7 @@ public final class SpentFuelPoolMenu extends AbstractMachineMenu {
                     return controller == null || controller.isSpentFuel(stack);
                 }
                 @Override public boolean mayPickup(Player player) {
-                    return controller == null || controller.safe(getItem());
+                    return controller == null || controller.transferable(getItem());
                 }
             });
         }
@@ -83,5 +83,10 @@ public final class SpentFuelPoolMenu extends AbstractMachineMenu {
     public int releasedHeat() { return value(10); }
     public double portTemperatureKelvin() { return value(11) / 10.0D; }
     public double doseRateMillisievertsPerHour() { return value(12) / 1000.0D; }
+    public int transferableAssemblies() { return value(13); }
+    public SpentFuelHandlingStatus handlingStatus() {
+        return SpentFuelHandlingStatus.from(
+                fuelCount(), transferableAssemblies(), safeAssemblies(), cooling());
+    }
     private int value(int logical) { return Int32ContainerData.read(data, logical); }
 }

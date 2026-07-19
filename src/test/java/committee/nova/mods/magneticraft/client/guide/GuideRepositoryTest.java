@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft.client.guide;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPreset;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
@@ -17,14 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class GuideRepositoryTest {
     @Test
     void generatedReactorStarterBlueprintsLoadThroughTheClientRepositoryContract() throws IOException {
-        for (String id : List.of("robust_baseload", "compact_high_power", "fast_load_following")) {
+        for (NuclearReactorPreset preset : NuclearReactorPreset.values()) {
+            String id = preset.id();
             Path path = Path.of("src/generated/resources/assets/magneticraft/guide/multiblocks/"
                     + "pressurized_water_reactor_" + id + ".json");
             JsonObject root = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
             GuideRepository.MultiblockGuide guide = GuideRepository.parseMultiblock(
                     ResourceLocation.fromNamespaceAndPath("magneticraft", path.getFileName().toString()), root);
             assertEquals(7, guide.layers().size(), id);
-            assertEquals(7, guide.layers().get(0).size(), id);
+            assertEquals(preset.length(), guide.layers().get(0).size(), id);
+            assertEquals(preset.width(), guide.layers().get(0).get(0).length(), id);
             assertTrue(guide.legend().containsKey('M'), id);
             assertTrue(guide.legend().containsKey('F'), id);
             assertEquals(List.of(64_000, 64_000), guide.ports().fluidTankCapacitiesMb(), id);

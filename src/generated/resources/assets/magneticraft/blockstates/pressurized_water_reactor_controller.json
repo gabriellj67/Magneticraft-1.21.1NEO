@@ -5,21 +5,21 @@
       "y": 90
     },
     "facing=east,formed=true": {
-      "model": "magneticraft:block/pressurized_water_reactor_controller",
+      "model": "magneticraft:block/pressurized_water_reactor_controller_formed",
       "y": 90
     },
     "facing=north,formed=false": {
       "model": "magneticraft:block/pressurized_water_reactor_controller"
     },
     "facing=north,formed=true": {
-      "model": "magneticraft:block/pressurized_water_reactor_controller"
+      "model": "magneticraft:block/pressurized_water_reactor_controller_formed"
     },
     "facing=south,formed=false": {
       "model": "magneticraft:block/pressurized_water_reactor_controller",
       "y": 180
     },
     "facing=south,formed=true": {
-      "model": "magneticraft:block/pressurized_water_reactor_controller",
+      "model": "magneticraft:block/pressurized_water_reactor_controller_formed",
       "y": 180
     },
     "facing=west,formed=false": {
@@ -27,7 +27,7 @@
       "y": 270
     },
     "facing=west,formed=true": {
-      "model": "magneticraft:block/pressurized_water_reactor_controller",
+      "model": "magneticraft:block/pressurized_water_reactor_controller_formed",
       "y": 270
     }
   }

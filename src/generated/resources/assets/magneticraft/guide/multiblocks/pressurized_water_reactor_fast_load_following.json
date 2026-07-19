@@ -1,6 +1,6 @@
 {
   "anchor": {
-    "x": 3,
+    "x": 5,
     "y": 1,
     "z": 0
   },
@@ -10,67 +10,95 @@
   "id": "magneticraft:pressurized_water_reactor_fast_load_following",
   "layers": [
     [
-      "#######",
-      "#######",
-      "#######",
-      "#######",
-      "#######",
-      "#######",
-      "#######"
+      "###########",
+      "###########",
+      "###########",
+      "###########",
+      "###########",
+      "###########",
+      "###########",
+      "###########",
+      "###########",
+      "###########",
+      "###########"
     ],
     [
-      "#P#M#P#",
-      "#PVVVP#",
-      "#VVVVV#",
-      "#VVVVV#",
-      "#VVVVV#",
-      "#VVENV#",
-      "###EN##"
+      "#P###M###P#",
+      "#PVVVVVVVP#",
+      "#VVVVVVVVV#",
+      "#VVVVVVVVV#",
+      "#VVVVVVVVV#",
+      "#VVVVVVVVV#",
+      "#VVVVVVVVV#",
+      "#VVVVVVVVV#",
+      "#VVVVVVVVV#",
+      "#VVVVENVVV#",
+      "#####EN####"
     ],
     [
-      "#######",
-      "#VVVVV#",
-      "#VAFBV#",
-      "#VWIWV#",
-      "#VCFDV#",
-      "#VVVVV#",
-      "#######"
+      "###########",
+      "#VVVVVVVVV#",
+      "#VRFWAWFRV#",
+      "#VFWFWFWFV#",
+      "#VWBFIFCWV#",
+      "#VFWFWFWFV#",
+      "#VWCIFIDWV#",
+      "#VFWFWFWFV#",
+      "#VRFWAWFRV#",
+      "#VVVVVVVVV#",
+      "###########"
     ],
     [
-      "#######",
-      "#VVVVV#",
-      "#VSSSV#",
-      "#VSSSV#",
-      "#VSSSV#",
-      "#VVVVV#",
-      "#######"
+      "###########",
+      "#VVVVVVVVV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VVVVVVVVV#",
+      "###########"
     ],
     [
-      "#######",
-      "#VVVVV#",
-      "#VSSSV#",
-      "#VSSSV#",
-      "#VSSSV#",
-      "#VVVVV#",
-      "#######"
+      "###########",
+      "#VVVVVVVVV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VSSSSSSSV#",
+      "#VVVVVVVVV#",
+      "###########"
     ],
     [
-      "#######",
-      "#VVVVV#",
-      "#VTVTV#",
-      "#VVVVV#",
-      "#VTVTV#",
-      "#VVVVV#",
-      "#######"
+      "###########",
+      "#VVVVVVVVV#",
+      "#VVVVTVVVV#",
+      "#VVVVVVVVV#",
+      "#VVTVVVTVV#",
+      "#VVVVVVVVV#",
+      "#VVTVVVTVV#",
+      "#VVVVVVVVV#",
+      "#VVVVTVVVV#",
+      "#VVVVVVVVV#",
+      "###########"
     ],
     [
-      "#######",
-      "#######",
-      "##T#T##",
-      "#######",
-      "##T#T##",
-      "#######",
-      "#######"
+      "###########",
+      "###########",
+      "#####T#####",
+      "###########",
+      "###T###T###",
+      "###########",
+      "###T###T###",
+      "###########",
+      "#####T#####",
+      "###########",
+      "###########"
     ]
   ],
   "legend": [
@@ -105,9 +133,9 @@
       "symbol": "N"
     },
     {
-      "block": "magneticraft:reactor_control_rod_a",
-      "rule": "reactor_control_rod_a",
-      "symbol": "A"
+      "block": "magneticraft:reactor_reflector",
+      "rule": "reactor_reflector",
+      "symbol": "R"
     },
     {
       "block": "magneticraft:reactor_fuel_standard",
@@ -115,14 +143,19 @@
       "symbol": "F"
     },
     {
-      "block": "magneticraft:reactor_control_rod_b",
-      "rule": "reactor_control_rod_b",
-      "symbol": "B"
-    },
-    {
       "block": "magneticraft:reactor_coolant_channel",
       "rule": "reactor_coolant_channel",
       "symbol": "W"
+    },
+    {
+      "block": "magneticraft:reactor_control_rod_a",
+      "rule": "reactor_control_rod_a",
+      "symbol": "A"
+    },
+    {
+      "block": "magneticraft:reactor_control_rod_b",
+      "rule": "reactor_control_rod_b",
+      "symbol": "B"
     },
     {
       "block": "magneticraft:reactor_instrumentation",
@@ -162,9 +195,9 @@
   },
   "schema_version": 1,
   "size": {
-    "x": 7,
+    "x": 11,
     "y": 7,
-    "z": 7
+    "z": 11
   },
   "supports_mirroring": false,
   "translation_key": "guide.magneticraft.reactor.blueprint.fast_load_following.name"

@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.nuclear.reactor;
 
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortType;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.core.BlockPos;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -24,13 +26,16 @@ import java.util.Objects;
 /** Directional structural penetration; runtime capabilities are added in later phases. */
 public final class NuclearReactorPortBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty FORMED = NuclearStructureState.FORMED;
 
     private final NuclearReactorPortType portType;
 
     public NuclearReactorPortBlock(NuclearReactorPortType portType, Properties properties) {
         super(properties);
         this.portType = Objects.requireNonNull(portType);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(stateDefinition.any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(FORMED, false));
     }
 
     public NuclearReactorPortType portType() {
@@ -55,7 +60,7 @@ public final class NuclearReactorPortBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, FORMED);
     }
 
     @Override

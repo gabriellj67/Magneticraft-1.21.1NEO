@@ -203,6 +203,16 @@ final class ModRecipeProvider extends RecipeProvider {
                 List.of(counted(ModNuclearItems.material(NuclearMaterial.LOW_ENRICHED_URANIUM).get(), 1)),
                 List.of(new ItemStack(ModNuclearItems.material(NuclearMaterial.URANIUM_DIOXIDE_PELLET).get(), 8)),
                 240, 100);
+        nuclearProcess(consumer, "standard_enrichment_fuel_assembly_direct",
+                NuclearFacilityType.FUEL_FABRICATOR,
+                List.of(
+                        counted(ModNuclearItems.material(NuclearMaterial.URANIUM_CONCENTRATE).get(), 5),
+                        counted(ModNuclearItems.material(NuclearMaterial.ZIRCONIUM_ALLOY_CLADDING).get(), 4)
+                ),
+                List.of(new ItemStack(ModNuclearItems.fuelAssembly(
+                        committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade
+                                .STANDARD_ENRICHMENT).get())),
+                600, 150);
         int[] pellets = {12, 18, 24};
         committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade[] grades =
                 committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade.values();

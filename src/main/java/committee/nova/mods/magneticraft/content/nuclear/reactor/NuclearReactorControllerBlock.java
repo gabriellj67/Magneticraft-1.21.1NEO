@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.nuclear.reactor;
 
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 /** Sole player interaction surface for a PWR structure. */
 public final class NuclearReactorControllerBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty FORMED = BooleanProperty.create("formed");
+    public static final BooleanProperty FORMED = NuclearStructureState.FORMED;
 
     public NuclearReactorControllerBlock(Properties properties) {
         super(properties);

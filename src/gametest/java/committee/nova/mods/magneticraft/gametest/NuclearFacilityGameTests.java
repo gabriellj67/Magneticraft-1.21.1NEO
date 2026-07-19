@@ -7,6 +7,8 @@ import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacility
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityPortBlock;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType;
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityValidator;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
+import committee.nova.mods.magneticraft.content.nuclear.material.NuclearMaterial;
 import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
@@ -72,13 +74,32 @@ public final class NuclearFacilityGameTests {
     public static void completeFrontEndRecipeCatalogueLoads(GameTestHelper helper) {
         var recipes = helper.getLevel().getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.NUCLEAR_PROCESSING_TYPE.get());
-        helper.assertTrue(recipes.size() == 7,
-                "Expected 7 nuclear front-end recipes, loaded " + recipes.size());
+        helper.assertTrue(recipes.size() == 8,
+                "Expected 8 nuclear front-end recipes, loaded " + recipes.size());
         helper.assertTrue(recipes.stream().allMatch(recipe -> recipe.durationTicks() > 0
                         && recipe.joulesPerTick() > 0
                         && !recipe.ingredients().isEmpty()
                         && !recipe.results().isEmpty()),
                 "Nuclear front-end recipe catalogue contains an incomplete entry");
+        var direct = recipes.stream()
+                .filter(recipe -> recipe.getId().getPath()
+                        .equals("nuclear_processing/standard_enrichment_fuel_assembly_direct"))
+                .findFirst().orElseThrow();
+        helper.assertTrue(direct.facility() == NuclearFacilityType.FUEL_FABRICATOR,
+                "Direct starter fuel recipe targets the wrong facility");
+        helper.assertTrue(direct.ingredients().stream().mapToInt(ingredient -> ingredient.count()).sum() == 9
+                        && direct.ingredients().get(0).count() == 5
+                        && direct.ingredients().get(1).count() == 4,
+                "Direct starter fuel recipe did not retain its 5 concentrate + 4 cladding contract");
+        helper.assertTrue(direct.ingredients().get(0).ingredient().test(new net.minecraft.world.item.ItemStack(
+                                committee.nova.mods.magneticraft.init.ModNuclearItems
+                                        .material(NuclearMaterial.URANIUM_CONCENTRATE).get()))
+                        && direct.results().get(0).is(committee.nova.mods.magneticraft.init.ModNuclearItems
+                                .fuelAssembly(NuclearFuelGrade.STANDARD_ENRICHMENT).get()),
+                "Direct starter fuel recipe exposes the wrong material or result");
+        double advancedConcentratePerAssembly = 18.0D / 8.0D * 3.0D / 2.0D;
+        helper.assertTrue(5.0D / advancedConcentratePerAssembly > 1.4D,
+                "Direct starter route is not materially less uranium-efficient than enrichment");
         helper.succeed();
     }
 

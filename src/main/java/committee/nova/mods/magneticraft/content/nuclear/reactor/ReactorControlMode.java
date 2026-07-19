@@ -3,7 +3,7 @@ package committee.nova.mods.magneticraft.content.nuclear.reactor;
 /** Closed-loop modes unlocked by instrumentation upgrades; none modify physical coefficients. */
 public enum ReactorControlMode {
     MANUAL(ReactorAutomationLevel.NONE),
-    POWER(ReactorAutomationLevel.REGULATION),
+    POWER(ReactorAutomationLevel.PROTECTION),
     TEMPERATURE(ReactorAutomationLevel.REGULATION),
     LOAD_FOLLOWING(ReactorAutomationLevel.LOAD_FOLLOWING);
 

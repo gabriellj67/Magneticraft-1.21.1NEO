@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32Cont
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyItem;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyState;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModMenus;
 import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
@@ -41,9 +42,12 @@ import java.util.UUID;
 public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
         implements MenuProvider, RadiationSource {
     public static final int SLOTS = 16;
-    public static final int MENU_LOGICAL_DATA_COUNT = 13;
+    public static final int MENU_LOGICAL_DATA_COUNT = 14;
     public static final int MENU_DATA_COUNT = MENU_LOGICAL_DATA_COUNT * 2;
     private static final int SCHEMA_VERSION = 1;
+    private static final String RENDER_WIDTH_TAG = "render_width";
+    private static final String RENDER_LENGTH_TAG = "render_length";
+    private static final String RENDER_HEIGHT_TAG = "render_height";
 
     private final SpentFuelPoolStructureValidator validator = new SpentFuelPoolStructureValidator();
     private final ItemInventoryModule inventory;
@@ -55,6 +59,7 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
     private int savedHeight;
     private boolean coolingActive;
     private int safeAssemblies;
+    private int transferableAssemblies;
     private double releasedHeatJoules;
 
     public SpentFuelPoolControllerBlockEntity(BlockPos position, BlockState state) {
@@ -75,7 +80,8 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
                 () -> snapshot == null ? 0 : snapshot.waterBlocks(),
                 () -> (int) Math.min(Integer.MAX_VALUE, Math.round(releasedHeatJoules)),
                 () -> (int) Math.round(portTemperatureKelvin() * 10.0D),
-                () -> (int) Math.min(Integer.MAX_VALUE, Math.round(doseRateMillisievertsPerHour() * 1000.0D)));
+                () -> (int) Math.min(Integer.MAX_VALUE, Math.round(doseRateMillisievertsPerHour() * 1000.0D)),
+                () -> transferableAssemblies);
     }
 
     public static void serverTick(Level level, BlockPos pos, BlockState state,
@@ -91,6 +97,9 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
     public ItemInventoryModule inventory() { return inventory; }
     public ContainerData menuData() { return menuData; }
     public ItemStack stack(int slot) { return validSlot(slot) ? inventory.getStackInSlot(slot) : ItemStack.EMPTY; }
+    public int renderWidth() { return savedWidth; }
+    public int renderLength() { return savedLength; }
+    public int renderHeight() { return savedHeight; }
 
     public boolean canManage(Player player) {
         return player.distanceToSqr(worldPosition.getX() + 0.5D, worldPosition.getY() + 0.5D,
@@ -115,12 +124,17 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
 
     public void unform() {
         SpentFuelPoolSnapshot current = snapshot;
-        snapshot = null;
         coolingActive = false;
         if (current != null && level != null
                 && level.getBlockEntity(current.port()) instanceof SpentFuelPoolPortBlockEntity port) {
             port.release(worldPosition);
         }
+        if (current != null && level instanceof ServerLevel serverLevel) {
+            NuclearStructureState.setFormed(
+                    serverLevel, current.minimum(), current.maximum(), false
+            );
+        }
+        snapshot = null;
         setFormed(false);
         markChangedAndSync();
     }
@@ -137,14 +151,20 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
     }
 
     public ItemStack extractCooledFuel(int slot, int amount, boolean simulate) {
-        if (!validSlot(slot) || !safe(stack(slot))) return ItemStack.EMPTY;
+        if (!validSlot(slot) || !transferable(stack(slot))) return ItemStack.EMPTY;
         return inventory.extractInternal(slot, amount, simulate);
+    }
+
+    public boolean transferable(ItemStack stack) {
+        if (!(stack.getItem() instanceof FuelAssemblyItem item)) return false;
+        return item.state(stack).map(state -> state.temperatureKelvin()
+                <= parameters().safeUnloadTemperatureKelvin()).orElse(false);
     }
 
     public boolean safe(ItemStack stack) {
         if (!(stack.getItem() instanceof FuelAssemblyItem item)) return false;
         var p = parameters();
-        return item.state(stack).map(state -> state.temperatureKelvin() <= p.safeUnloadTemperatureKelvin()
+        return item.state(stack).map(state -> transferable(stack)
                 && state.decayHeatJoules() <= p.spentFuelSafeDecayHeatJoules()).orElse(false);
     }
 
@@ -179,6 +199,29 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
         savedLength = Math.max(0, tag.getInt("length"));
         savedHeight = Math.max(0, tag.getInt("height"));
         releasedHeatJoules = Math.max(0.0D, tag.getDouble("released_heat_joules"));
+    }
+
+    @Override protected void saveClientData(CompoundTag tag) {
+        super.saveClientData(tag);
+        if (savedWidth > 0 && savedLength > 0 && savedHeight > 0) {
+            tag.putInt(RENDER_WIDTH_TAG, savedWidth);
+            tag.putInt(RENDER_LENGTH_TAG, savedLength);
+            tag.putInt(RENDER_HEIGHT_TAG, savedHeight);
+        }
+    }
+
+    @Override protected void loadClientData(CompoundTag tag) {
+        super.loadClientData(tag);
+        int width = tag.getInt(RENDER_WIDTH_TAG);
+        int length = tag.getInt(RENDER_LENGTH_TAG);
+        int height = tag.getInt(RENDER_HEIGHT_TAG);
+        if (validator.descriptor().accepts(width, length, height)) {
+            savedWidth = width;
+            savedLength = length;
+            savedHeight = height;
+        } else {
+            savedWidth = savedLength = savedHeight = 0;
+        }
     }
 
     @Override public void onLoad() {
@@ -219,7 +262,7 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
         SpentFuelPoolPortBlockEntity port = port();
         coolingActive = port != null && port.heat().node().temperatureKelvin() < 550.0D;
         safeAssemblies = 0;
-        if (!coolingActive) return;
+        transferableAssemblies = 0;
         var p = parameters();
         double waterScale = Math.min(2.0D, snapshot.waterBlocks() / 18.0D);
         double released = 0.0D;
@@ -230,21 +273,24 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
             Optional<FuelAssemblyState> stateValue = item.state(stack);
             if (stateValue.isEmpty()) continue;
             FuelAssemblyState state = stateValue.orElseThrow();
-            double nextTemperature = Math.max(FuelAssemblyState.AMBIENT_TEMPERATURE_KELVIN,
-                    state.temperatureKelvin() - p.spentFuelCoolingKelvinPerTick() * 20.0D * waterScale);
-            double nextDecay = state.decayHeatJoules()
-                    * Math.pow(1.0D - p.decayHeatLossPerTick(), 20.0D);
-            released += Math.max(0.0D, state.temperatureKelvin() - nextTemperature) * 200.0D
-                    + state.decayHeatJoules() * 20.0D;
-            FuelAssemblyState next = new FuelAssemblyState(
-                    state.fuelId(), state.burnupFraction(), state.poisonFraction(), nextDecay,
-                    nextTemperature, state.claddingIntegrity(), level.getGameTime());
-            item.writeState(stack, next);
-            handler.setStackInSlot(slot, stack);
+            if (coolingActive) {
+                double nextTemperature = Math.max(FuelAssemblyState.AMBIENT_TEMPERATURE_KELVIN,
+                        state.temperatureKelvin() - p.spentFuelCoolingKelvinPerTick() * 20.0D * waterScale);
+                double nextDecay = state.decayHeatJoules()
+                        * Math.pow(1.0D - p.decayHeatLossPerTick(), 20.0D);
+                released += Math.max(0.0D, state.temperatureKelvin() - nextTemperature) * 200.0D
+                        + state.decayHeatJoules() * 20.0D;
+                FuelAssemblyState next = new FuelAssemblyState(
+                        state.fuelId(), state.burnupFraction(), state.poisonFraction(), nextDecay,
+                        nextTemperature, state.claddingIntegrity(), level.getGameTime());
+                item.writeState(stack, next);
+                handler.setStackInSlot(slot, stack);
+            }
+            if (transferable(stack)) transferableAssemblies++;
             if (safe(stack)) safeAssemblies++;
         }
         releasedHeatJoules = released;
-        if (released > 0.0D) port.heat().node().addHeat(released, false);
+        if (released > 0.0D && port != null) port.heat().node().addHeat(released, false);
         markChangedAndSync();
     }
 
@@ -260,6 +306,11 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
         savedWidth = next.width(); savedLength = next.length(); savedHeight = next.height();
         if (level != null && level.getBlockEntity(next.port()) instanceof SpentFuelPoolPortBlockEntity port) {
             port.claim(worldPosition);
+        }
+        if (level instanceof ServerLevel serverLevel) {
+            NuclearStructureState.setFormed(
+                    serverLevel, next.minimum(), next.maximum(), true
+            );
         }
         setFormed(true);
         markChangedAndSync();
@@ -289,7 +340,7 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
         }
     }
 
-    private Direction facing() { return getBlockState().getValue(SpentFuelPoolControllerBlock.FACING); }
+    public Direction facing() { return getBlockState().getValue(SpentFuelPoolControllerBlock.FACING); }
     private boolean validSlot(int slot) { return slot >= 0 && slot < SLOTS; }
     private committee.nova.mods.magneticraft.system.nuclear.data.ReactorParameters parameters() {
         return ReactorParameterRegistry.INSTANCE.current().parameters();

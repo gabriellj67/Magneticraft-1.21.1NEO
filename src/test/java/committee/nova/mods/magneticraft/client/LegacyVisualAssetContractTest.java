@@ -87,7 +87,7 @@ class LegacyVisualAssetContractTest {
             }
         }
         assertEquals(40, mcx);
-        assertEquals(25, gltf);
+        assertEquals(27, gltf);
         assertEquals(20, gltfBuffers);
     }
 

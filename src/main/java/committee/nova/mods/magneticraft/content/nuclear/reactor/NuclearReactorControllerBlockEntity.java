@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.api.nuclear.radiation.RadiationSource;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyItem;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyState;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
 import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import committee.nova.mods.magneticraft.init.ModNuclearItems;
@@ -63,19 +64,25 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
     private static final String OWNER_TAG = "owner";
     private static final String SNAPSHOT_TAG = "reactor_snapshot";
     private static final String RUNTIME_TAG = "reactor_runtime";
+    private static final String RENDER_WIDTH_TAG = "render_width";
+    private static final String RENDER_LENGTH_TAG = "render_length";
+    private static final String RENDER_HEIGHT_TAG = "render_height";
 
     @Nullable
     private UUID owner;
     @Nullable
     private NuclearReactorSnapshot snapshot;
     private ReactorLayoutEstimate estimate = ReactorLayoutEstimate.empty("unformed");
+    private int renderWidth;
+    private int renderLength;
+    private int renderHeight;
     private long estimateGeneration = Long.MIN_VALUE;
     private final Map<ReactorColumnCoordinate, FuelAssemblyState> fuelStates = new LinkedHashMap<>();
     private final EnumMap<ReactorRodGroup, Double> rodInsertion = ReactorRuntimeModel.fullyInsertedRods();
     private ReactorRuntimeResult runtime = ReactorRuntimeResult.empty(Map.of());
     private ReactorOperatingState operatingState = ReactorOperatingState.SHUTDOWN;
-    private ReactorControlMode controlMode = ReactorControlMode.MANUAL;
-    private ReactorAutomationLevel automationLevel = ReactorAutomationLevel.NONE;
+    private ReactorControlMode controlMode = ReactorControlMode.POWER;
+    private ReactorAutomationLevel automationLevel = ReactorAutomationLevel.PROTECTION;
     private double targetPowerFraction = 1.0D;
     private boolean engineeringOverride;
     @Nullable
@@ -127,6 +134,18 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
 
     public boolean formed() {
         return snapshot != null;
+    }
+
+    public int renderWidth() {
+        return renderWidth;
+    }
+
+    public int renderLength() {
+        return renderLength;
+    }
+
+    public int renderHeight() {
+        return renderHeight;
     }
 
     public Optional<NuclearReactorSnapshot> snapshot() {
@@ -274,8 +293,12 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         NuclearReactorSnapshot current = snapshot;
         if (current != null) {
             releasePorts(current);
+            if (level instanceof ServerLevel serverLevel) {
+                NuclearStructureState.setFormed(serverLevel, current.members(), false);
+            }
         }
         snapshot = null;
+        setRenderDimensions(null);
         estimate = ReactorLayoutEstimate.empty("unformed");
         estimateGeneration = Long.MIN_VALUE;
         forcedScram("structure");
@@ -365,8 +388,34 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
                 ? NuclearReactorSnapshotCodec.load(tag.getCompound(SNAPSHOT_TAG), worldPosition).orElse(null)
                 : null;
         estimate = ReactorLayoutEstimate.empty(snapshot == null ? "unformed" : "awaiting_nuclear_data");
+        setRenderDimensions(snapshot);
         estimateGeneration = Long.MIN_VALUE;
         loadRuntime(tag.getCompound(RUNTIME_TAG));
+    }
+
+    @Override
+    protected void saveClientData(CompoundTag tag) {
+        super.saveClientData(tag);
+        if (renderWidth > 0 && renderLength > 0 && renderHeight > 0) {
+            tag.putInt(RENDER_WIDTH_TAG, renderWidth);
+            tag.putInt(RENDER_LENGTH_TAG, renderLength);
+            tag.putInt(RENDER_HEIGHT_TAG, renderHeight);
+        }
+    }
+
+    @Override
+    protected void loadClientData(CompoundTag tag) {
+        super.loadClientData(tag);
+        int width = tag.getInt(RENDER_WIDTH_TAG);
+        int length = tag.getInt(RENDER_LENGTH_TAG);
+        int height = tag.getInt(RENDER_HEIGHT_TAG);
+        if (NuclearReactorStructure.DESCRIPTOR.accepts(width, length, height)) {
+            renderWidth = width;
+            renderLength = length;
+            renderHeight = height;
+        } else {
+            setRenderDimensions(null);
+        }
     }
 
     @Override
@@ -377,6 +426,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         }
         RadiationSourceRegistry.register((ServerLevel) level, worldPosition);
         if (snapshot != null) {
+            NuclearStructureState.setFormed((ServerLevel) level, snapshot.members(), true);
             refreshEstimate();
             claimPorts(snapshot);
         }
@@ -891,12 +941,25 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         NuclearReactorSnapshot previous = snapshot;
         if (previous != null) {
             releasePorts(previous);
+            if (level instanceof ServerLevel serverLevel && !previous.members().equals(next.members())) {
+                NuclearStructureState.setFormed(serverLevel, previous.members(), false);
+            }
         }
         snapshot = next;
+        setRenderDimensions(next);
         refreshEstimate();
         claimPorts(next);
+        if (level instanceof ServerLevel serverLevel) {
+            NuclearStructureState.setFormed(serverLevel, next.members(), true);
+        }
         updateFormedState(true);
         markChangedAndSync();
+    }
+
+    private void setRenderDimensions(@Nullable NuclearReactorSnapshot value) {
+        renderWidth = value == null ? 0 : value.width();
+        renderLength = value == null ? 0 : value.length();
+        renderHeight = value == null ? 0 : value.height();
     }
 
     private void claimPorts(NuclearReactorSnapshot value) {
@@ -1016,6 +1079,7 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         fuelStates.clear();
         insertAllRods();
         runtime = ReactorRuntimeResult.empty(Map.of());
+        resetRuntimeDefaults();
         if (tag.isEmpty()) {
             return;
         }
@@ -1091,6 +1155,27 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
         scramReason = reason;
         resetAccidentState();
         insertAllRods();
+    }
+
+    private void resetRuntimeDefaults() {
+        operatingState = ReactorOperatingState.SHUTDOWN;
+        controlMode = ReactorControlMode.POWER;
+        automationLevel = ReactorAutomationLevel.PROTECTION;
+        targetPowerFraction = 1.0D;
+        engineeringOverride = false;
+        overrideRequester = null;
+        overrideConfirmationDeadline = 0L;
+        lastOverrideOperator = null;
+        lastOverrideGameTime = 0L;
+        startupTicksRemaining = 0;
+        lastRuntimeGameTime = 0L;
+        reportedCoolantFlow = 0.0D;
+        coolantFlowReportTick = Long.MIN_VALUE;
+        stationPowerAvailable = false;
+        stationJoulesRequired = 0;
+        stationJoulesAvailable = 0;
+        scramReason = "none";
+        resetAccidentState();
     }
 
     private ReactorRuntimeResult summaryOfFuelStates() {

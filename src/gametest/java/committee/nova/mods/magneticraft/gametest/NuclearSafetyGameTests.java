@@ -10,6 +10,7 @@ import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolC
 import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolPortBlock;
 import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolPortBlockEntity;
 import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolStructureValidator;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
 import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import committee.nova.mods.magneticraft.init.ModNuclearItems;
 import committee.nova.mods.magneticraft.system.nuclear.radiation.RadiationExposureService;
@@ -56,9 +57,17 @@ public final class NuclearSafetyGameTests {
         helper.assertTrue(controller.snapshot().orElseThrow().waterBlocks() == 18,
                 "Pool snapshot did not retain its complete water inventory");
 
+        BlockPos casingPosition = SpentFuelPoolStructureValidator.world(
+                controllerPosition, facing, width, length, 0, 0, 0);
+        helper.assertTrue(helper.getLevel().getBlockState(casingPosition).getValue(NuclearStructureState.FORMED),
+                "Formed pool casing did not enter the projected-model state");
+
         BlockPos portPosition = controller.snapshot().orElseThrow().port();
+        helper.assertTrue(helper.getLevel().getBlockState(portPosition).getValue(NuclearStructureState.FORMED),
+                "Formed pool port did not enter the projected-model state");
         SpentFuelPoolPortBlockEntity port =
                 (SpentFuelPoolPortBlockEntity) helper.getLevel().getBlockEntity(portPosition);
+        helper.assertTrue(port != null, "Projected pool port lost its capability-providing block entity");
         Direction outward = facing.getOpposite();
         helper.assertTrue(port.getCapability(ForgeCapabilities.ITEM_HANDLER, outward).isPresent(),
                 "Pool port did not expose item transfer on its exact outward face");
@@ -69,7 +78,7 @@ public final class NuclearSafetyGameTests {
         FuelAssemblyItem item = (FuelAssemblyItem) spent.getItem();
         item.writeState(spent, new FuelAssemblyState(
                 NuclearFuelGrade.STANDARD_ENRICHMENT.definitionId(), 0.75D, 0.2D,
-                5.00005D, 374.0D, 0.9D, helper.getLevel().getGameTime()));
+                50.0D, 374.0D, 0.9D, helper.getLevel().getGameTime()));
         IItemHandler external = port.getCapability(ForgeCapabilities.ITEM_HANDLER, outward).orElseThrow(AssertionError::new);
         helper.assertTrue(external.insertItem(0, spent, false).isEmpty(),
                 "Pool port rejected a valid stateful spent-fuel assembly");
@@ -78,12 +87,14 @@ public final class NuclearSafetyGameTests {
 
         helper.runAfterDelay(45, () -> {
             ItemStack cooled = external.extractItem(0, 1, false);
-            helper.assertTrue(!cooled.isEmpty(), "Pool did not export fuel after reaching both safety thresholds");
+            helper.assertTrue(!cooled.isEmpty(), "Pool did not export fuel after reaching its transfer temperature");
             FuelAssemblyState state = item.state(cooled).orElseThrow();
             helper.assertTrue(state.burnupFraction() == 0.75D,
                     "Pool cooling reset or changed durable fuel burnup");
-            helper.assertTrue(state.temperatureKelvin() <= 373.15D && state.decayHeatJoules() <= 5.0D,
-                    "Exported spent fuel was still above a configured safety threshold");
+            helper.assertTrue(state.temperatureKelvin() <= 373.15D && state.decayHeatJoules() > 5.0D,
+                    "Pool did not keep transfer temperature separate from the later encapsulation threshold");
+            helper.assertTrue(!controller.safe(cooled),
+                    "Transferred spent fuel became sealable before its decay heat was safe");
             helper.assertTrue(port.heat().node().temperatureKelvin() > 293.15D,
                     "Spent-fuel cooling discarded heat instead of forwarding it to the cold-side node");
             helper.succeed();

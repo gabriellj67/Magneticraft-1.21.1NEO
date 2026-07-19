@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "formed=false": {
       "model": "magneticraft:block/reactor_control_rod_actuator"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/reactor_control_rod_actuator_formed"
     }
   }
 }

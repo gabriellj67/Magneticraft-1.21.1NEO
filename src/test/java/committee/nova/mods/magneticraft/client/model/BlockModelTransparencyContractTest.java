@@ -59,7 +59,7 @@ class BlockModelTransparencyContractTest {
         auditAllPackagedScenes(auditedSources, textureAlpha, errors);
 
         assertTrue(auditedModels.size() >= blockstates.size(), "multipart and variant models must be included");
-        assertEquals(65, auditedSources.size(), "every packaged MCX/glTF source must remain in the audit");
+        assertEquals(67, auditedSources.size(), "every packaged MCX/glTF source must remain in the audit");
         assertTrue(errors.isEmpty(), () -> "unsafe block-model transparency:\n" + String.join("\n", errors));
     }
 

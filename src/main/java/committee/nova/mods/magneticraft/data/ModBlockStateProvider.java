@@ -17,6 +17,7 @@ import committee.nova.mods.magneticraft.content.network.electric.PoleSegment;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerBlock;
 import committee.nova.mods.magneticraft.content.network.electric.TeslaTowerPart;
 import committee.nova.mods.magneticraft.content.network.heat.HeatSinkBlock;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
 import committee.nova.mods.magneticraft.init.ModAdvancedBlocks;
 import committee.nova.mods.magneticraft.init.ModBlocks;
 import committee.nova.mods.magneticraft.init.ModComputerContent;
@@ -273,7 +274,12 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 "nuclear_facility_casing",
                 modLoc("block/multiblock_parts/base_side")
         );
-        simpleBlockWithItem(ModNuclearBlocks.FACILITY_CASING.get(), nuclearCasing);
+        nuclearPartWithItem(
+                ModNuclearBlocks.FACILITY_CASING.get(),
+                "nuclear_facility_casing",
+                nuclearCasing,
+                modLoc("block/multiblock_parts/base_side")
+        );
         simpleBlockWithItem(
                 ModNuclearBlocks.PROCESS_CORE.get(),
                 models().cubeAll("nuclear_process_core", modLoc("block/multiblock_parts/striped"))
@@ -336,7 +342,22 @@ final class ModBlockStateProvider extends BlockStateProvider {
 
     private void registerNuclearPort(Block block, String id, ResourceLocation texture) {
         ModelFile model = models().cubeAll(id, texture);
-        horizontalBlock(block, model);
+        ModelFile formed = emptyModel(id + "_formed", texture);
+        horizontalBlock(block, state -> state.hasProperty(NuclearStructureState.FORMED)
+                && state.getValue(NuclearStructureState.FORMED) ? formed : model);
+        simpleBlockItem(block, model);
+    }
+
+    private void nuclearPartWithItem(
+            Block block,
+            String id,
+            ModelFile model,
+            ResourceLocation particle
+    ) {
+        ModelFile formed = emptyModel(id + "_formed", particle);
+        getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(state.getValue(NuclearStructureState.FORMED) ? formed : model)
+                .build());
         simpleBlockItem(block, model);
     }
 
@@ -347,14 +368,16 @@ final class ModBlockStateProvider extends BlockStateProvider {
         ResourceLocation coilSide = modLoc("block/multiblock_parts/copper_coil_side");
         ResourceLocation coilEnd = modLoc("block/multiblock_parts/copper_coil");
 
-        simpleBlockWithItem(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get(),
-                models().cubeAll("reactor_containment_casing", casing));
-        simpleBlockWithItem(ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get(),
-                models().cubeAll("reactor_pressure_vessel", striped));
-        simpleBlockWithItem(ModNuclearBlocks.REACTOR_CONTROL_ROD_ACTUATOR.get(),
-                models().cubeColumn("reactor_control_rod_actuator", electrical, coilEnd));
-        simpleBlockWithItem(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get(),
-                models().cubeColumn("reactor_column_segment", coilSide, coilEnd));
+        nuclearPartWithItem(ModNuclearBlocks.REACTOR_CONTAINMENT_CASING.get(),
+                "reactor_containment_casing", models().cubeAll("reactor_containment_casing", casing), casing);
+        nuclearPartWithItem(ModNuclearBlocks.REACTOR_PRESSURE_VESSEL.get(),
+                "reactor_pressure_vessel", models().cubeAll("reactor_pressure_vessel", striped), striped);
+        nuclearPartWithItem(ModNuclearBlocks.REACTOR_CONTROL_ROD_ACTUATOR.get(),
+                "reactor_control_rod_actuator",
+                models().cubeColumn("reactor_control_rod_actuator", electrical, coilEnd), electrical);
+        nuclearPartWithItem(ModNuclearBlocks.REACTOR_COLUMN_SEGMENT.get(),
+                "reactor_column_segment",
+                models().cubeColumn("reactor_column_segment", coilSide, coilEnd), coilSide);
         registerNuclearPort(ModNuclearBlocks.REACTOR_MAIN_COOLANT_PORT.get(),
                 "reactor_main_coolant_port", coilSide);
         registerNuclearPort(ModNuclearBlocks.REACTOR_ELECTRICAL_PORT.get(),
@@ -363,7 +386,9 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 "reactor_instrumentation_port", striped);
 
         ModelFile controller = models().cubeAll("pressurized_water_reactor_controller", electrical);
-        horizontalBlock(ModNuclearBlocks.REACTOR_CONTROLLER.get(), ignored -> controller);
+        ModelFile formedController = emptyModel("pressurized_water_reactor_controller_formed", electrical);
+        horizontalBlock(ModNuclearBlocks.REACTOR_CONTROLLER.get(), state ->
+                state.getValue(NuclearStructureState.FORMED) ? formedController : controller);
         simpleBlockItem(ModNuclearBlocks.REACTOR_CONTROLLER.get(), controller);
 
         ModNuclearBlocks.reactorColumns().forEach((type, holder) -> {
@@ -376,7 +401,7 @@ final class ModBlockStateProvider extends BlockStateProvider {
             };
             String id = "reactor_" + type.name().toLowerCase(java.util.Locale.ROOT);
             ModelFile model = models().cubeColumn(id, texture, coilEnd);
-            simpleBlockWithItem(holder.get(), model);
+            nuclearPartWithItem(holder.get(), id, model, texture);
         });
     }
 
@@ -411,7 +436,10 @@ final class ModBlockStateProvider extends BlockStateProvider {
                 models().cubeAll("corium", mcLoc("block/magma")));
         ModelFile controller = models().cubeAll(
                 "spent_fuel_pool_controller", modLoc("block/multiblock_parts/electric"));
-        horizontalBlock(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get(), ignored -> controller);
+        ModelFile formedController = emptyModel(
+                "spent_fuel_pool_controller_formed", modLoc("block/multiblock_parts/electric"));
+        horizontalBlock(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get(), state ->
+                state.getValue(NuclearStructureState.FORMED) ? formedController : controller);
         simpleBlockItem(ModNuclearBlocks.SPENT_FUEL_POOL_CONTROLLER.get(), controller);
         registerNuclearPort(ModNuclearBlocks.SPENT_FUEL_POOL_PORT.get(),
                 "spent_fuel_pool_port", modLoc("block/multiblock_parts/striped"));

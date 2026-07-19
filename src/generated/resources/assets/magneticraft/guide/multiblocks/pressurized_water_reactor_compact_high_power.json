@@ -1,6 +1,6 @@
 {
   "anchor": {
-    "x": 3,
+    "x": 4,
     "y": 1,
     "z": 0
   },
@@ -10,67 +10,81 @@
   "id": "magneticraft:pressurized_water_reactor_compact_high_power",
   "layers": [
     [
-      "#######",
-      "#######",
-      "#######",
-      "#######",
-      "#######",
-      "#######",
-      "#######"
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########"
     ],
     [
-      "#P#M#P#",
-      "#PVVVP#",
-      "#VVVVV#",
-      "#VVVVV#",
-      "#VVVVV#",
-      "#VVENV#",
-      "###EN##"
+      "#P##M##P#",
+      "#PVVVVVP#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVENVV#",
+      "####EN###"
     ],
     [
-      "#######",
-      "#VVVVV#",
-      "#VFFFV#",
-      "#VWAWV#",
-      "#VFIFV#",
-      "#VVVVV#",
-      "#######"
+      "#########",
+      "#VVVVVVV#",
+      "#VRFWFRV#",
+      "#VFWAWFV#",
+      "#VWBIBWV#",
+      "#VFWCWFV#",
+      "#VRFWFRV#",
+      "#VVVVVVV#",
+      "#########"
     ],
     [
-      "#######",
-      "#VVVVV#",
-      "#VSSSV#",
-      "#VSSSV#",
-      "#VSSSV#",
-      "#VVVVV#",
-      "#######"
+      "#########",
+      "#VVVVVVV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VVVVVVV#",
+      "#########"
     ],
     [
-      "#######",
-      "#VVVVV#",
-      "#VSSSV#",
-      "#VSSSV#",
-      "#VSSSV#",
-      "#VVVVV#",
-      "#######"
+      "#########",
+      "#VVVVVVV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VVVVVVV#",
+      "#########"
     ],
     [
-      "#######",
-      "#VVVVV#",
-      "#VVVVV#",
-      "#VVTVV#",
-      "#VVVVV#",
-      "#VVVVV#",
-      "#######"
+      "#########",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVTVVV#",
+      "#VVTVTVV#",
+      "#VVVTVVV#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#########"
     ],
     [
-      "#######",
-      "#######",
-      "#######",
-      "###T###",
-      "#######",
-      "#######",
-      "#######"
+      "#########",
+      "#########",
+      "#########",
+      "####T####",
+      "###T#T###",
+      "####T####",
+      "#########",
+      "#########",
+      "#########"
     ]
   ],
   "legend": [
@@ -105,6 +119,11 @@
       "symbol": "N"
     },
     {
+      "block": "magneticraft:reactor_reflector",
+      "rule": "reactor_reflector",
+      "symbol": "R"
+    },
+    {
       "block": "magneticraft:reactor_fuel_standard",
       "rule": "reactor_fuel_standard",
       "symbol": "F"
@@ -120,9 +139,19 @@
       "symbol": "A"
     },
     {
+      "block": "magneticraft:reactor_control_rod_b",
+      "rule": "reactor_control_rod_b",
+      "symbol": "B"
+    },
+    {
       "block": "magneticraft:reactor_instrumentation",
       "rule": "reactor_instrumentation",
       "symbol": "I"
+    },
+    {
+      "block": "magneticraft:reactor_control_rod_c",
+      "rule": "reactor_control_rod_c",
+      "symbol": "C"
     },
     {
       "block": "magneticraft:reactor_column_segment",
@@ -147,9 +176,9 @@
   },
   "schema_version": 1,
   "size": {
-    "x": 7,
+    "x": 9,
     "y": 7,
-    "z": 7
+    "z": 9
   },
   "supports_mirroring": false,
   "translation_key": "guide.magneticraft.reactor.blueprint.compact_high_power.name"

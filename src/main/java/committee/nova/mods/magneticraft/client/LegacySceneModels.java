@@ -109,6 +109,10 @@ final class LegacySceneModels {
     );
     static final Part STEAM_TURBINE_BODY = gltf("steam_turbine", excludeSubtrees("blades"));
     static final Part STEAM_TURBINE_BLADE = gltf("steam_turbine", includeSubtrees("blades"));
+    static final Part PRESSURIZED_WATER_REACTOR = gltf(
+            "pressurized_water_reactor_formed", ModelSceneSelection.ALL
+    );
+    static final Part SPENT_FUEL_POOL = gltf("spent_fuel_pool_formed", ModelSceneSelection.ALL);
     private static final Part[] SHELVING_CRATES = shelvingCrates();
 
     private LegacySceneModels() {

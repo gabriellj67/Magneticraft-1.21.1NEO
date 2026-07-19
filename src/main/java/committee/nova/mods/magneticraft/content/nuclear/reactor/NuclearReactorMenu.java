@@ -30,8 +30,8 @@ import java.util.Map;
 
 /** Immutable menu snapshot for structure preview and the per-column heat map. */
 public final class NuclearReactorMenu extends AbstractContainerMenu {
-    public static final int IMAGE_WIDTH = 310;
-    public static final int IMAGE_HEIGHT = 370;
+    public static final int IMAGE_WIDTH = 420;
+    public static final int IMAGE_HEIGHT = 230;
     private static final int MAX_COLUMNS = 81;
     private static final int MAX_WARNINGS = 16;
     private static final int BASE_DATA_SIZE = 31;

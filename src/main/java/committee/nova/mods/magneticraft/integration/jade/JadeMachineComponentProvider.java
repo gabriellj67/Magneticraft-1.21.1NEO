@@ -13,6 +13,8 @@ import snownee.jade.api.config.IPluginConfig;
 
 import java.util.Locale;
 
+import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorOperatorStatus;
+
 enum JadeMachineComponentProvider implements IBlockComponentProvider {
     INSTANCE;
 
@@ -109,6 +111,9 @@ enum JadeMachineComponentProvider implements IBlockComponentProvider {
                             : "tooltip.magneticraft.jade.unformed")));
         }
         if (reading.accidentStage() != null) {
+            tooltip.add(Component.translatable(
+                    "tooltip.magneticraft.jade.nuclear_operator_status",
+                    Component.translatable(ReactorOperatorStatus.from(reading.accidentStage()).translationKey())));
             tooltip.add(Component.translatable(
                     "tooltip.magneticraft.jade.nuclear_accident",
                     Component.translatable("gui.magneticraft.reactor.accident."

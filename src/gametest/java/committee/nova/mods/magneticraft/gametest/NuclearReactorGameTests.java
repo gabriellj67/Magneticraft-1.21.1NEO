@@ -3,6 +3,7 @@ package committee.nova.mods.magneticraft.gametest;
 import com.mojang.authlib.GameProfile;
 import committee.nova.mods.magneticraft.Magneticraft;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
+import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortType;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorColumnCoordinate;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorRodGroup;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
@@ -16,7 +17,9 @@ import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPo
 import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorOperatingState;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorInterlock;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorControlMode;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorAutomationLevel;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorStructure;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
 import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import committee.nova.mods.magneticraft.init.ModNuclearItems;
 import net.minecraft.core.BlockPos;
@@ -65,6 +68,16 @@ public final class NuclearReactorGameTests {
         helper.assertTrue(controller.estimate().powerDensityJoulesPerTick() > 0.0D,
                 "Formed reactor did not calculate a static layout preview");
 
+        BlockPos casing = NuclearReactorStructure.worldPosition(
+                controllerPosition, facing, width, 0, 0, 0);
+        helper.assertTrue(helper.getLevel().getBlockState(casing).getValue(NuclearStructureState.FORMED),
+                "Formed reactor casing did not enter the projected-model state");
+        BlockPos coolantPort = controller.snapshot().orElseThrow().ports().get(NuclearReactorPortType.COOLANT_INPUT);
+        helper.assertTrue(helper.getLevel().getBlockState(coolantPort).getValue(NuclearStructureState.FORMED),
+                "Formed reactor port did not enter the projected-model state");
+        helper.assertTrue(helper.getLevel().getBlockEntity(coolantPort) instanceof NuclearReactorPortBlockEntity,
+                "Projected reactor port lost its capability-providing block entity");
+
         ReactorColumnCoordinate control = new ReactorColumnCoordinate(1, 0);
         BlockPos actuator = NuclearReactorStructure.worldPosition(
                 controllerPosition, facing, width, control.x() + 2, height - 1, control.z() + 2);
@@ -74,6 +87,8 @@ public final class NuclearReactorGameTests {
             helper.assertTrue(!helper.getLevel().getBlockState(controllerPosition)
                             .getValue(NuclearReactorControllerBlock.FORMED),
                     "Controller block state remained formed after structure damage");
+            helper.assertTrue(!helper.getLevel().getBlockState(casing).getValue(NuclearStructureState.FORMED),
+                    "Reactor casing remained hidden after the structure unformed");
             helper.succeed();
         });
     }
@@ -91,6 +106,9 @@ public final class NuclearReactorGameTests {
                 (NuclearReactorControllerBlockEntity) helper.getLevel().getBlockEntity(controllerPosition);
         ServerPlayer owner = operator(helper, controllerPosition);
         helper.assertTrue(controller.tryForm(owner), "Complete variable reactor did not form");
+        helper.assertTrue(controller.automationLevel() == ReactorAutomationLevel.PROTECTION
+                        && controller.controlMode() == ReactorControlMode.POWER,
+                "Fresh reactor did not start with built-in protection and power regulation");
 
         BlockPos electricalPosition = controller.snapshot().orElseThrow().ports()
                 .get(committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorPortType.ELECTRICAL);
@@ -115,6 +133,14 @@ public final class NuclearReactorGameTests {
         helper.assertTrue(controller.applyAction(owner,
                         NuclearReactorAction.simple(NuclearReactorAction.Type.INSTALL_UPGRADE)),
                 "Closed-loop regulation upgrade was not installed");
+        helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                        NuclearReactorAction.Type.SET_MODE,
+                        null, ReactorControlMode.TEMPERATURE, null, 0, false)),
+                "Regulation upgrade did not retain the engineering temperature mode");
+        helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
+                        NuclearReactorAction.Type.SET_MODE,
+                        null, ReactorControlMode.POWER, null, 0, false)),
+                "Controller did not return to its basic power mode");
 
         double requiredFlow = controller.estimate().requiredCoolantFlowMilliBucketsPerTick();
         helper.onEachTick(() -> controller.reportCoolantFlow(requiredFlow));
@@ -139,10 +165,6 @@ public final class NuclearReactorGameTests {
                             NuclearReactorAction.Type.SET_ROD_GROUP,
                             ReactorRodGroup.A, null, null, 500, false)),
                     "Rod group A did not accept its independent insertion command");
-            helper.assertTrue(controller.applyAction(owner, new NuclearReactorAction(
-                            NuclearReactorAction.Type.SET_MODE,
-                            null, ReactorControlMode.POWER, null, 0, false)),
-                    "Regulation upgrade did not unlock closed-loop power control");
             helper.assertTrue(controller.applyAction(owner,
                             NuclearReactorAction.simple(NuclearReactorAction.Type.START)),
                     "Powered and cooled reactor did not enter startup");
@@ -206,6 +228,16 @@ public final class NuclearReactorGameTests {
                 "Valid NBT round-trip lost the loaded fuel column");
         helper.assertTrue(Math.abs(controller.rodInsertion(ReactorRodGroup.A) - 0.375D) < 1.0E-9D,
                 "Valid NBT round-trip changed rod group A insertion");
+        helper.assertTrue(controller.controlMode() == ReactorControlMode.POWER
+                        && controller.automationLevel() == ReactorAutomationLevel.PROTECTION,
+                "Valid NBT round-trip changed the built-in basic control defaults");
+
+        CompoundTag noRuntime = saved.copy();
+        noRuntime.remove("reactor_runtime");
+        controller.load(noRuntime);
+        helper.assertTrue(controller.controlMode() == ReactorControlMode.POWER
+                        && controller.automationLevel() == ReactorAutomationLevel.PROTECTION,
+                "Missing runtime data did not restore the documented fresh-controller defaults");
 
         CompoundTag legacy = saved.copy();
         CompoundTag legacyRuntime = legacy.getCompound("reactor_runtime");

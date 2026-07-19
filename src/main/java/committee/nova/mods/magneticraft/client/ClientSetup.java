@@ -75,6 +75,12 @@ public final class ClientSetup {
             BlockEntityRenderers.register(ModComputerContent.COMPUTER_BLOCK_ENTITY.get(), ComputerRenderer::new);
             BlockEntityRenderers.register(ModComputerContent.MINING_ROBOT_BLOCK_ENTITY.get(), MiningRobotRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.WIND_TURBINE.get(), WindTurbineRenderer::new);
+            BlockEntityRenderers.register(
+                    ModBlockEntities.NUCLEAR_REACTOR_CONTROLLER.get(), NuclearMultiblockRenderer::new
+            );
+            BlockEntityRenderers.register(
+                    ModBlockEntities.SPENT_FUEL_POOL_CONTROLLER.get(), NuclearMultiblockRenderer::new
+            );
             BlockEntityRenderers.register(ModBlockEntities.BOX_TRANSFORMER.get(), ElectricalDeviceRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.FUSE_BOX.get(), ElectricalDeviceRenderer::new);
             BlockEntityRenderers.register(ModBlockEntities.CIRCUIT_BREAKER.get(), ElectricalDeviceRenderer::new);

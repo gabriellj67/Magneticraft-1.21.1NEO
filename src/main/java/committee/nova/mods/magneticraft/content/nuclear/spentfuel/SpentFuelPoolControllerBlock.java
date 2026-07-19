@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.content.nuclear.spentfuel;
 
 import committee.nova.mods.magneticraft.init.ModBlockEntities;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 /** The only pool member that opens status/inventory UI or emits right-click status. */
 public final class SpentFuelPoolControllerBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty FORMED = BooleanProperty.create("formed");
+    public static final BooleanProperty FORMED = NuclearStructureState.FORMED;
 
     public SpentFuelPoolControllerBlock(Properties properties) {
         super(properties);

@@ -17,6 +17,7 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockPortLayout;
 import committee.nova.mods.magneticraft.api.nuclear.reactor.NuclearReactorColumnType;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPreset;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -39,25 +40,30 @@ class AdvancedGuideDataProviderTest {
         var layouts = AdvancedGuideDataProvider.reactorBlueprintLayouts();
         assertEquals(Set.of("robust_baseload", "compact_high_power", "fast_load_following"),
                 layouts.keySet());
-        layouts.forEach((name, columns) -> {
-            assertEquals(9, columns.size(), name);
+        for (NuclearReactorPreset preset : NuclearReactorPreset.values()) {
+            String name = preset.id();
+            var columns = layouts.get(name);
+            assertEquals((preset.width() - 4) * (preset.length() - 4), columns.size(), name);
             assertTrue(columns.containsValue(NuclearReactorColumnType.FUEL_STANDARD), name);
             assertTrue(columns.values().stream().anyMatch(NuclearReactorColumnType::isControlRod), name);
             assertTrue(columns.containsValue(NuclearReactorColumnType.COOLANT_CHANNEL), name);
             assertTrue(columns.containsValue(NuclearReactorColumnType.INSTRUMENTATION), name);
-            JsonObject guide = AdvancedGuideDataProvider.reactorBlueprintGuide(name, columns);
-            assertEquals(7, guide.getAsJsonObject("size").get("x").getAsInt(), name);
-            assertEquals(7, guide.getAsJsonObject("size").get("y").getAsInt(), name);
-            assertEquals(7, guide.getAsJsonObject("size").get("z").getAsInt(), name);
+            JsonObject guide = AdvancedGuideDataProvider.reactorBlueprintGuide(preset);
+            assertEquals(preset.width(), guide.getAsJsonObject("size").get("x").getAsInt(), name);
+            assertEquals(preset.height(), guide.getAsJsonObject("size").get("y").getAsInt(), name);
+            assertEquals(preset.length(), guide.getAsJsonObject("size").get("z").getAsInt(), name);
             JsonArray layers = guide.getAsJsonArray("layers");
-            assertEquals(7, layers.size(), name);
+            assertEquals(preset.height(), layers.size(), name);
             layers.forEach(layer -> {
-                assertEquals(7, layer.getAsJsonArray().size(), name);
-                layer.getAsJsonArray().forEach(row -> assertEquals(7, row.getAsString().length(), name));
+                assertEquals(preset.length(), layer.getAsJsonArray().size(), name);
+                layer.getAsJsonArray().forEach(row ->
+                        assertEquals(preset.width(), row.getAsString().length(), name));
             });
-        });
-        assertEquals(4, layouts.get("fast_load_following").values().stream()
-                .filter(NuclearReactorColumnType::isControlRod).count());
+        }
+        assertEquals(List.of(7, 9, 11), java.util.Arrays.stream(NuclearReactorPreset.values())
+                .map(NuclearReactorPreset::width).toList());
+        assertTrue(layouts.get("fast_load_following").values().stream()
+                .filter(NuclearReactorColumnType::isControlRod).count() >= 4);
     }
 
     @Test

@@ -17,6 +17,7 @@ import committee.nova.mods.magneticraft.content.nuclear.radiation.RadioactiveSou
 import committee.nova.mods.magneticraft.content.nuclear.radiation.RadioactiveSourceKind;
 import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolControllerBlock;
 import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolPortBlock;
+import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructurePartBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -43,7 +44,7 @@ public final class ModNuclearBlocks {
             new EnumMap<>(NuclearThermalFacilityType.class);
 
     public static final RegistryObject<Block> FACILITY_CASING = register(
-            "nuclear_facility_casing", () -> new Block(partProperties()));
+            "nuclear_facility_casing", () -> new NuclearStructurePartBlock(partProperties().noOcclusion()));
     public static final RegistryObject<Block> PROCESS_CORE = register(
             "nuclear_process_core", () -> new Block(partProperties()));
     public static final RegistryObject<Block> CENTRIFUGE_STAGE = register(
@@ -58,13 +59,13 @@ public final class ModNuclearBlocks {
             "nuclear_electrical_port",
             () -> new NuclearFacilityPortBlock(NuclearFacilityPartRole.ELECTRICAL, controllerProperties()));
     public static final RegistryObject<Block> REACTOR_CONTAINMENT_CASING = register(
-            "reactor_containment_casing", () -> new Block(partProperties()));
+            "reactor_containment_casing", () -> new NuclearStructurePartBlock(partProperties().noOcclusion()));
     public static final RegistryObject<Block> REACTOR_PRESSURE_VESSEL = register(
-            "reactor_pressure_vessel", () -> new Block(partProperties()));
+            "reactor_pressure_vessel", () -> new NuclearStructurePartBlock(partProperties().noOcclusion()));
     public static final RegistryObject<Block> REACTOR_CONTROL_ROD_ACTUATOR = register(
-            "reactor_control_rod_actuator", () -> new Block(controllerProperties()));
+            "reactor_control_rod_actuator", () -> new NuclearStructurePartBlock(controllerProperties()));
     public static final RegistryObject<Block> REACTOR_COLUMN_SEGMENT = register(
-            "reactor_column_segment", () -> new Block(partProperties()));
+            "reactor_column_segment", () -> new NuclearStructurePartBlock(partProperties().noOcclusion()));
     public static final RegistryObject<Block> REACTOR_MAIN_COOLANT_PORT = register(
             "reactor_main_coolant_port",
             () -> new NuclearReactorPortBlock(NuclearReactorPortType.COOLANT_INPUT, controllerProperties()));

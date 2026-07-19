@@ -31,7 +31,7 @@
       "#######",
       "#VVVVV#",
       "#VFWFV#",
-      "#VRAIV#",
+      "#VWAIV#",
       "#VFWFV#",
       "#VVVVV#",
       "#######"
@@ -113,11 +113,6 @@
       "block": "magneticraft:reactor_coolant_channel",
       "rule": "reactor_coolant_channel",
       "symbol": "W"
-    },
-    {
-      "block": "magneticraft:reactor_reflector",
-      "rule": "reactor_reflector",
-      "symbol": "R"
     },
     {
       "block": "magneticraft:reactor_control_rod_a",

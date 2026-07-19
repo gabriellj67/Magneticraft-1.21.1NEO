@@ -605,7 +605,10 @@ final class ModLanguageProvider extends LanguageProvider {
         }
 
         add("gui.magneticraft.reactor.formed", chinese ? "\u5df2\u6210\u578b" : "Formed");
+        add("gui.magneticraft.reactor.structure", chinese ? "结构：%s" : "Structure: %s");
         add("gui.magneticraft.reactor.core_map", chinese ? "\u5806\u82af\u70ed\u529b\u56fe" : "Core Heat Map");
+        add("gui.magneticraft.reactor.view.basic", chinese ? "基础页" : "Basic");
+        add("gui.magneticraft.reactor.view.engineering", chinese ? "工程页" : "Engineering");
         add("gui.magneticraft.reactor.direction", chinese ? "\u671d\u5411\uff1a%s" : "Facing: %s");
         add("gui.magneticraft.reactor.dimensions", chinese ? "\u5916\u90e8\u5c3a\u5bf8\uff1a%s" : "External size: %s");
         add("gui.magneticraft.reactor.ports", chinese ? "\u7aef\u53e3\uff1a%s" : "Ports: %s");
@@ -619,7 +622,7 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.reactor.metric.thermal", chinese ? "\u5806\u82af\u603b\u70ed\u529f\u7387\uff1a%s" : "Core thermal power: %s");
         add("gui.magneticraft.reactor.metric.target_power", chinese ? "\u76ee\u6807\u529f\u7387\uff1a%s" : "Target power: %s");
         add("gui.magneticraft.reactor.metric.temperature", chinese ? "\u6700\u9ad8\u6e29\u5ea6\uff1a%s" : "Hottest temperature: %s");
-        add("gui.magneticraft.reactor.metric.coolant_live", chinese ? "\u5b9e\u9645/\u6240\u9700\u6d41\u91cf\uff1a%s" : "Actual/required flow: %s");
+        add("gui.magneticraft.reactor.metric.coolant_live", chinese ? "冷却流量：%s" : "Coolant flow: %s");
         add("gui.magneticraft.reactor.metric.station_power", chinese ? "\u5382\u7528\u7535\uff1a%s" : "Station power: %s");
         add("gui.magneticraft.reactor.metric.fuel_loaded", chinese ? "\u5df2\u88c5\u6599\u5217\uff1a%s" : "Loaded fuel columns: %s");
         add("gui.magneticraft.reactor.metric.rod_group", chinese ? "\u63a7\u5236\u68d2\u7ec4\uff1a%s" : "Control rod group: %s");
@@ -630,8 +633,18 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.reactor.metric.scram", chinese ? "\u505c\u5806\u539f\u56e0\uff1a%s" : "SCRAM reason: %s");
         add("gui.magneticraft.reactor.metric.accident_stage", chinese ? "事故阶段：%s" : "Accident stage: %s");
         add("gui.magneticraft.reactor.metric.pressure", chinese ? "主回路压力：%s" : "Primary pressure: %s");
-        add("gui.magneticraft.reactor.metric.barriers", chinese ? "容器/安全壳完整度：%s" : "Vessel/containment: %s");
+        add("gui.magneticraft.reactor.metric.barriers", chinese ? "容器/安全壳：%s" : "Vessel/containment: %s");
         add("gui.magneticraft.reactor.metric.radiation", chinese ? "剂量率：%s" : "Dose rate: %s");
+        add("gui.magneticraft.reactor.metric.operator_status", chinese ? "安全状态：%s" : "Safety status: %s");
+        add("gui.magneticraft.reactor.summary.output", chinese ? "当前输出" : "Current output");
+        add("gui.magneticraft.reactor.summary.efficiency", chinese ? "燃料效率" : "Fuel efficiency");
+        add("gui.magneticraft.reactor.summary.safety", chinese ? "安全裕量" : "Safety margin");
+        add("gui.magneticraft.reactor.summary.response", chinese ? "调节响应" : "Control response");
+        add("gui.magneticraft.reactor.summary.fuel_use", chinese ? "布局利用率" : "Layout utilization");
+        add("gui.magneticraft.reactor.operator_status.normal", chinese ? "正常" : "Normal");
+        add("gui.magneticraft.reactor.operator_status.cooling_warning", chinese ? "冷却告警" : "Cooling warning");
+        add("gui.magneticraft.reactor.operator_status.core_damage", chinese ? "堆芯受损" : "Core damage");
+        add("gui.magneticraft.reactor.operator_status.meltdown_or_release", chinese ? "熔毁或释放" : "Meltdown or release");
         add("gui.magneticraft.reactor.enabled", chinese ? "\u5df2\u542f\u7528" : "Enabled");
         add("gui.magneticraft.reactor.disabled", chinese ? "\u5df2\u7981\u7528" : "Disabled");
         String[] statesZh = {"\u505c\u673a", "\u542f\u52a8", "\u8fd0\u884c", "\u4f59\u70ed", "\u7d27\u6025\u505c\u5806"};
@@ -756,12 +769,27 @@ final class ModLanguageProvider extends LanguageProvider {
 
         add("gui.magneticraft.state.connected", chinese ? "已连接" : "Connected");
         add("gui.magneticraft.state.disconnected", chinese ? "未连接" : "Disconnected");
+        add("direction.minecraft.north", chinese ? "北" : "North");
+        add("direction.minecraft.east", chinese ? "东" : "East");
+        add("direction.minecraft.south", chinese ? "南" : "South");
+        add("direction.minecraft.west", chinese ? "西" : "West");
+        add("direction.minecraft.up", chinese ? "上" : "Up");
+        add("direction.minecraft.down", chinese ? "下" : "Down");
         add("gui.magneticraft.spent_fuel_pool.structure", chinese ? "结构：%sx%sx%s（%s）" : "Structure: %sx%sx%s (%s)");
         add("gui.magneticraft.spent_fuel_pool.direction", chinese ? "朝向：%s" : "Facing: %s");
         add("gui.magneticraft.spent_fuel_pool.port", chinese ? "装卸/冷却端口：%s" : "Transfer/cooling port: %s");
         add("gui.magneticraft.spent_fuel_pool.cooling", chinese ? "水池冷却运行中" : "Pool cooling active");
         add("gui.magneticraft.spent_fuel_pool.cooling_blocked", chinese ? "冷端阻塞或温度过高" : "Cold side blocked or too hot");
-        add("gui.magneticraft.spent_fuel_pool.inventory", chinese ? "安全/总组件：%s/%s" : "Safe/total assemblies: %s/%s");
+        add("gui.magneticraft.spent_fuel_pool.cooling_standby", chinese ? "空池，无需冷却" : "Empty pool; cooling not required");
+        add("gui.magneticraft.spent_fuel_pool.handling_status", chinese ? "处理状态：%s" : "Handling status: %s");
+        add("gui.magneticraft.spent_fuel_pool.status.empty", chinese ? "空池" : "Empty");
+        add("gui.magneticraft.spent_fuel_pool.status.dangerous", chinese ? "禁止转运" : "Do not transfer");
+        add("gui.magneticraft.spent_fuel_pool.status.cooling", chinese ? "正在冷却" : "Cooling");
+        add("gui.magneticraft.spent_fuel_pool.status.transferable", chinese ? "可安全转运" : "Safe to transfer");
+        add("gui.magneticraft.spent_fuel_pool.status.sealable", chinese ? "可封装" : "Ready to seal");
+        add("gui.magneticraft.spent_fuel_pool.inventory", chinese
+                ? "可转运/可封装/总组件：%s/%s/%s"
+                : "Transferable/sealable/total: %s/%s/%s");
         add("gui.magneticraft.spent_fuel_pool.thermal", chinese ? "水量 %s，释热 %s J，端口 %s K" : "Water %s, heat %s J, port %s K");
         add("gui.magneticraft.spent_fuel_pool.radiation", chinese ? "池边剂量率：%s mSv/h" : "Pool dose rate: %s mSv/h");
         add("message.magneticraft.spent_fuel_pool.invalid", chinese ? "乏燃料池结构无效：%s @ %s" : "Invalid spent fuel pool: %s @ %s");
@@ -777,25 +805,28 @@ final class ModLanguageProvider extends LanguageProvider {
         add("item.magneticraft.sealed_spent_fuel_cask.sealed", chinese ? "已封装乏燃料（燃耗 %s%%）" : "Spent fuel sealed (burnup %s%%)");
         add("item.magneticraft.sealed_spent_fuel_cask.empty", chinese ? "空储存罐；仅接受已安全冷却的乏燃料" : "Empty; accepts only safely cooled spent fuel");
         add("jei.magneticraft.nuclear_processing", chinese ? "核燃料前端处理" : "Nuclear Fuel Front-End Processing");
+        add("jei.magneticraft.nuclear_processing.route.basic", chinese ? "路线：基础直制" : "Route: direct starter process");
+        add("jei.magneticraft.nuclear_processing.route.advanced", chinese ? "路线：进阶离心分离" : "Route: advanced centrifuge cascade");
         add("jei.magneticraft.energy_per_tick_joules", chinese ? "厂用电：%s J/t" : "Station power: %s J/t");
         add("tooltip.magneticraft.jade.nuclear_dose_rate", chinese ? "剂量率：%s mSv/h" : "Dose rate: %s mSv/h");
         add("tooltip.magneticraft.jade.nuclear_contamination", chinese ? "污染源：%s" : "Contamination source: %s");
         add("tooltip.magneticraft.jade.nuclear_structure", chinese ? "核设施结构：%s" : "Nuclear structure: %s");
+        add("tooltip.magneticraft.jade.nuclear_operator_status", chinese ? "安全状态：%s" : "Safety status: %s");
         add("tooltip.magneticraft.jade.nuclear_accident", chinese ? "事故阶段：%s" : "Accident stage: %s");
         add("tooltip.magneticraft.jade.nuclear_barriers", chinese ? "压力 %s MPa；容器 %s；安全壳 %s" : "Pressure %s MPa; vessel %s; containment %s");
 
-        add("guide.magneticraft.reactor.blueprint.robust_baseload.name", chinese ? "压水堆入门：稳健基荷" : "PWR Starter: Robust Baseload");
+        add("guide.magneticraft.reactor.blueprint.robust_baseload.name", chinese ? "基础压水堆：7×7×7" : "Basic PWR: 7x7x7");
         add("guide.magneticraft.reactor.blueprint.robust_baseload.description", chinese
-                ? "可工作的 7×7×7 入门结构，堆芯截面为 FWF / RAI / FWF（F 标准燃料、W 冷却、R 反射层、A 棒组、I 仪表）。它优先冷却与安全裕量；需玩家逐块搭建，并非自动搭建或最优解。"
-                : "A working 7x7x7 starter with core section FWF / RAI / FWF (F standard fuel, W coolant, R reflector, A rod group, I instrumentation). It favors cooling and safety margin; players build it manually and it is not claimed optimal.");
-        add("guide.magneticraft.reactor.blueprint.compact_high_power.name", chinese ? "压水堆入门：紧凑高功率" : "PWR Starter: Compact High Power");
+                ? "7×7×7 入门结构，堆芯截面为 FWF / WAI / FWF。冷却充足、控制直观，适合首次并网。"
+                : "A 7x7x7 starter with core section FWF / WAI / FWF. It favors generous cooling and straightforward control for a first grid connection.");
+        add("guide.magneticraft.reactor.blueprint.compact_high_power.name", chinese ? "标准压水堆：9×9×7" : "Standard PWR: 9x9x7");
         add("guide.magneticraft.reactor.blueprint.compact_high_power.description", chinese
-                ? "可工作的 7×7×7 入门结构，堆芯截面为 FFF / WAW / FIF。更多燃料列提高功率密度，但需要更强主回路、蒸汽与冷端能力；需玩家逐块搭建，并非最优解。"
-                : "A working 7x7x7 starter with core section FFF / WAW / FIF. More fuel columns raise power density but demand a stronger primary, steam, and cold-side chain; it is manually built and not claimed optimal.");
-        add("guide.magneticraft.reactor.blueprint.fast_load_following.name", chinese ? "压水堆入门：快速调峰" : "PWR Starter: Fast Load Following");
+                ? "9×9×7 标准结构，在功率、冷却与燃料利用率之间取得平衡；适合稳定基荷。"
+                : "A balanced 9x9x7 design for steady baseload, trading power, cooling demand, and fuel utilization.");
+        add("guide.magneticraft.reactor.blueprint.fast_load_following.name", chinese ? "大型压水堆：11×11×7" : "Large PWR: 11x11x7");
         add("guide.magneticraft.reactor.blueprint.fast_load_following.description", chinese
-                ? "可工作的 7×7×7 入门结构，堆芯截面为 AFB / WIW / CFD，使用 A–D 四个独立棒组获得更快负载跟随。燃料经济性与功率密度较低；需玩家逐块搭建，并非最优解。"
-                : "A working 7x7x7 starter with core section AFB / WIW / CFD and all four independent rod groups for faster load following. Fuel economy and power density are lower; it is manually built and not claimed optimal.");
+                ? "11×11×7 大型结构，使用 A–D 四个独立棒组改善调节响应；需要更强主泵、蒸汽与冷端能力。"
+                : "An 11x11x7 design using all four independent rod groups for faster response. It requires a stronger primary pump, steam chain, and cold side.");
         addGuideRule("reactor_controller", "压水堆控制器", "PWR controller");
         addGuideRule("reactor_containment", "反应堆安全壳", "Reactor containment");
         addGuideRule("reactor_pressure_vessel", "压力容器", "Pressure vessel");

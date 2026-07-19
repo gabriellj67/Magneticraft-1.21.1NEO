@@ -1,6 +1,7 @@
 package committee.nova.mods.magneticraft.integration.jei;
 
 import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearProcessRecipe;
+import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityType;
 import committee.nova.mods.magneticraft.init.ModNuclearBlocks;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -50,6 +51,14 @@ final class NuclearProcessingRecipeCategory extends AbstractMagneticraftRecipeCa
         drawArrow(graphics, 78, 18);
         drawLine(graphics, Component.translatable(
                 "block.magneticraft." + recipe.facility().id()), 8, 4);
+        String routeKey = recipe.getId().getPath().endsWith("_direct")
+                ? "jei.magneticraft.nuclear_processing.route.basic"
+                : recipe.facility() == NuclearFacilityType.CENTRIFUGE_CASCADE
+                        ? "jei.magneticraft.nuclear_processing.route.advanced"
+                        : null;
+        if (routeKey != null) {
+            drawLine(graphics, Component.translatable(routeKey), 8, 38);
+        }
         drawLine(graphics, Component.translatable(
                 "jei.magneticraft.duration", recipe.durationTicks()), 8, 50);
         drawLine(graphics, Component.translatable(
