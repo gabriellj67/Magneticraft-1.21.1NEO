@@ -132,6 +132,10 @@ class OptionalIntegrationContractTest {
                 "ModMachineItems.ELECTRIC_DRILL",
                 "ModMachineItems.ELECTRIC_CHAINSAW",
                 "ModMachineItems.ELECTRIC_PISTON",
+                "ModMachineItems.OIL_PROSPECTOR",
+                "ModNetworkBlocks.ELECTRIC_SWITCH",
+                "ModNetworkBlocks.DIODE",
+                "ModNetworkBlocks.RESISTOR",
                 "ModComputerContent.FLOPPY_DISK"
         )) {
             assertTrue(jei.contains(item + ".get()"), item);
