@@ -6,6 +6,7 @@ import committee.nova.mods.magneticraft.api.nuclear.structure.VariableNuclearStr
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.Int32ContainerData;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
+import committee.nova.mods.magneticraft.content.nuclear.NuclearMultiblockBounds;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyItem;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyState;
 import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.Nullable;
 
@@ -100,6 +102,16 @@ public final class SpentFuelPoolControllerBlockEntity extends MachineBlockEntity
     public int renderWidth() { return savedWidth; }
     public int renderLength() { return savedLength; }
     public int renderHeight() { return savedHeight; }
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        if (!getBlockState().getValue(SpentFuelPoolControllerBlock.FORMED)) {
+            return new AABB(worldPosition);
+        }
+        return NuclearMultiblockBounds.renderBounds(
+                worldPosition, facing(), savedWidth, savedHeight, savedLength
+        );
+    }
 
     public boolean canManage(Player player) {
         return player.distanceToSqr(worldPosition.getX() + 0.5D, worldPosition.getY() + 0.5D,

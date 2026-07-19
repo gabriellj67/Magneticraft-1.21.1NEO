@@ -8,6 +8,7 @@ import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorColumnCoordin
 import committee.nova.mods.magneticraft.api.nuclear.reactor.ReactorRodGroup;
 import committee.nova.mods.magneticraft.api.nuclear.radiation.RadiationSource;
 import committee.nova.mods.magneticraft.content.machine.framework.MachineBlockEntity;
+import committee.nova.mods.magneticraft.content.nuclear.NuclearMultiblockBounds;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyItem;
 import committee.nova.mods.magneticraft.content.nuclear.fuel.FuelAssemblyState;
 import committee.nova.mods.magneticraft.content.nuclear.structure.NuclearStructureState;
@@ -47,6 +48,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -146,6 +148,16 @@ public final class NuclearReactorControllerBlockEntity extends MachineBlockEntit
 
     public int renderHeight() {
         return renderHeight;
+    }
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        if (!getBlockState().getValue(NuclearReactorControllerBlock.FORMED)) {
+            return new AABB(worldPosition);
+        }
+        return NuclearMultiblockBounds.renderBounds(
+                worldPosition, facing(), renderWidth, renderHeight, renderLength
+        );
     }
 
     public Optional<NuclearReactorSnapshot> snapshot() {
