@@ -21,9 +21,9 @@ import java.util.Locale;
 
 /** Shared read-only electrical telemetry panel used by every machine screen. */
 final class ElectricalStatePanel {
-    private static final int TEXT_COLOR = 0xFFE0E6EC;
-    private static final int MUTED_COLOR = 0xFFA7B0B9;
-    private static final int WARNING_COLOR = 0xFFFF8A65;
+    private static final int TEXT_COLOR = MachineScreenLayout.TEXT_PRIMARY;
+    private static final int MUTED_COLOR = MachineScreenLayout.TEXT_MUTED;
+    private static final int WARNING_COLOR = MachineScreenLayout.WARNING;
     private static final int LINE_HEIGHT = 9;
     private static final int MAX_TERMINALS = 2;
 

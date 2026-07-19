@@ -18,15 +18,15 @@ public final class LegacyMachineGuiLayout {
     public static final int SHELVING_WIDTH = 194;
     public static final int SHELVING_HEIGHT = 207;
     public static final int PROGRAMMABLE_WIDTH = 350;
-    public static final int COMPUTER_HEIGHT = 250;
-    public static final int MINING_ROBOT_HEIGHT = 308;
+    public static final int COMPUTER_HEIGHT = 240;
+    public static final int MINING_ROBOT_HEIGHT = 240;
     public static final int STANDARD_PLAYER_LEFT = 8;
     public static final int STANDARD_PLAYER_TOP = 84;
     public static final int BOX_PLAYER_TOP = 68;
     public static final int SHELVING_PLAYER_TOP = 125;
     public static final int PROGRAMMABLE_PLAYER_LEFT = 95;
-    public static final int COMPUTER_PLAYER_TOP = 168;
-    public static final int MINING_ROBOT_PLAYER_TOP = 226;
+    public static final int COMPUTER_PLAYER_TOP = 160;
+    public static final int MINING_ROBOT_PLAYER_TOP = 160;
     public static final int PROGRAMMABLE_EDITOR_LEFT = 26;
     public static final int PROGRAMMABLE_EDITOR_TOP = 18;
     public static final int PROGRAMMABLE_EDITOR_WIDTH = 208;
@@ -65,17 +65,25 @@ public final class LegacyMachineGuiLayout {
     }
 
     public static Size withElectricalPanel(Size base) {
+        return withElectricalPanel(base, ELECTRICAL_PANEL_WIDTH);
+    }
+
+    public static Size withElectricalPanel(Size base, int panelWidth) {
         return new Size(
-                base.width() + ELECTRICAL_PANEL_GAP + ELECTRICAL_PANEL_WIDTH + ELECTRICAL_PANEL_MARGIN,
+                base.width() + ELECTRICAL_PANEL_GAP + panelWidth + ELECTRICAL_PANEL_MARGIN,
                 Math.max(base.height(), ELECTRICAL_PANEL_TOP + ELECTRICAL_PANEL_HEIGHT + ELECTRICAL_PANEL_MARGIN)
         );
     }
 
     public static Rect electricalPanel(int baseWidth) {
+        return electricalPanel(baseWidth, ELECTRICAL_PANEL_WIDTH);
+    }
+
+    public static Rect electricalPanel(int baseWidth, int panelWidth) {
         return new Rect(
                 baseWidth + ELECTRICAL_PANEL_GAP,
                 ELECTRICAL_PANEL_TOP,
-                ELECTRICAL_PANEL_WIDTH,
+                panelWidth,
                 ELECTRICAL_PANEL_HEIGHT
         );
     }
@@ -176,8 +184,8 @@ public final class LegacyMachineGuiLayout {
         return List.of(
                 new Rect(8, PROGRAMMABLE_BUTTON_TOP, 20, 18),
                 new Rect(32, PROGRAMMABLE_BUTTON_TOP, 20, 18),
-                new Rect(56, PROGRAMMABLE_BUTTON_TOP, 70, 18),
-                new Rect(130, PROGRAMMABLE_BUTTON_TOP, 108, 18)
+                new Rect(56, PROGRAMMABLE_BUTTON_TOP, 20, 18),
+                new Rect(80, PROGRAMMABLE_BUTTON_TOP, 20, 18)
         );
     }
 

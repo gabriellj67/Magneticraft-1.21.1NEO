@@ -9,13 +9,13 @@ import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorMe
 import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorMenu.ColumnView;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorControlMode;
 import committee.nova.mods.magneticraft.content.nuclear.reactor.ReactorOperatorStatus;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.network.ModNetwork;
 import committee.nova.mods.magneticraft.network.NuclearReactorActionMessage;
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorColumnEstimate;
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorLayoutEstimate;
 import committee.nova.mods.magneticraft.system.nuclear.reactor.ReactorOperatorMetrics;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -36,6 +36,10 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
     private static final int CARD_GAP = 4;
     private static final int SUMMARY_Y = 80;
     private static final int TARGET_BAR_Y = 139;
+    private static final int CONTROL_X = 8;
+    private static final int CONTROL_Y = 136;
+    private static final int CONTROL_SIZE = 20;
+    private static final int CONTROL_GAP = 4;
 
     private int cellSize;
     private int gridWidth;
@@ -44,7 +48,9 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
     private ReactorRodGroup selectedGroup = ReactorRodGroup.A;
     private ViewMode viewMode = ViewMode.BASIC;
     private boolean overrideConfirmationArmed;
-    private Button overrideButton;
+    private MachineIconButton viewButton;
+    private MachineIconButton rodGroupButton;
+    private MachineIconButton overrideButton;
 
     public NuclearReactorScreen(NuclearReactorMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -61,11 +67,22 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
     @Override
     protected void init() {
         super.init();
+        MachineScreenLayout.validateInDevelopment(layout());
         overrideButton = null;
-        addRenderableWidget(Button.builder(Component.translatable(viewMode == ViewMode.BASIC
-                        ? "gui.magneticraft.reactor.view.engineering"
-                        : "gui.magneticraft.reactor.view.basic"), ignored -> toggleView())
-                .bounds(leftPos + imageWidth - 84, topPos + 2, 76, 18).build());
+        rodGroupButton = null;
+        String viewKey = viewMode == ViewMode.BASIC
+                ? "gui.magneticraft.reactor.view.engineering"
+                : "gui.magneticraft.reactor.view.basic";
+        viewButton = addRenderableWidget(new MachineIconButton(
+                leftPos + imageWidth - 28,
+                topPos + 2,
+                20,
+                18,
+                MachineIcon.MODE,
+                Component.translatable(viewKey),
+                controlExplanation(viewKey, viewModeTitle()),
+                ignored -> toggleView()
+        ));
         if (viewMode == ViewMode.BASIC) {
             addBasicButtons();
         } else {
@@ -74,62 +91,67 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
     }
 
     private void addBasicButtons() {
-        int x = leftPos + 8;
-        addRenderableWidget(button(x, topPos + 136, 34, "gui.magneticraft.reactor.action.start",
+        addRenderableWidget(controlButton(0, 0, "gui.magneticraft.reactor.action.start", MachineIcon.START,
                 NuclearReactorAction.simple(NuclearReactorAction.Type.START)));
-        addRenderableWidget(button(x + 36, topPos + 136, 34, "gui.magneticraft.reactor.action.stop",
+        addRenderableWidget(controlButton(1, 0, "gui.magneticraft.reactor.action.stop", MachineIcon.STOP,
                 NuclearReactorAction.simple(NuclearReactorAction.Type.STOP)));
-        addRenderableWidget(button(x + 72, topPos + 136, 44, "gui.magneticraft.reactor.action.scram",
-                NuclearReactorAction.simple(NuclearReactorAction.Type.SCRAM)));
-        addRenderableWidget(button(x, topPos + 155, 56, "gui.magneticraft.reactor.action.load",
-                null, ignored -> loadSelectedFuel()));
-        addRenderableWidget(button(x + 58, topPos + 155, 58, "gui.magneticraft.reactor.action.unload",
-                null, ignored -> unloadSelectedFuel()));
-        addRenderableWidget(button(x, topPos + 174, 56, "gui.magneticraft.reactor.action.target_down",
-                null, ignored -> setTargetPower(-0.05D)));
-        addRenderableWidget(button(x + 58, topPos + 174, 58, "gui.magneticraft.reactor.action.target_up",
-                null, ignored -> setTargetPower(0.05D)));
-        addRenderableWidget(button(x, topPos + 193, 116, "gui.magneticraft.reactor.action.reset",
+        addRenderableWidget(controlButton(2, 0, "gui.magneticraft.reactor.action.scram", MachineIcon.SCRAM,
+                NuclearReactorAction.simple(NuclearReactorAction.Type.SCRAM)).dangerous(true));
+        addRenderableWidget(controlButton(0, 1, "gui.magneticraft.reactor.action.load", MachineIcon.LOAD,
+                ignored -> loadSelectedFuel()));
+        addRenderableWidget(controlButton(1, 1, "gui.magneticraft.reactor.action.unload", MachineIcon.UNLOAD,
+                ignored -> unloadSelectedFuel()));
+        addRenderableWidget(controlButton(2, 1, "gui.magneticraft.reactor.action.target_down", MachineIcon.MINUS,
+                ignored -> setTargetPower(-0.05D)));
+        addRenderableWidget(controlButton(3, 1, "gui.magneticraft.reactor.action.target_up", MachineIcon.PLUS,
+                ignored -> setTargetPower(0.05D)));
+        addRenderableWidget(controlButton(4, 1, "gui.magneticraft.reactor.action.reset", MachineIcon.RESET,
                 NuclearReactorAction.simple(NuclearReactorAction.Type.RESET)));
     }
 
     private void addEngineeringButtons() {
-        int x = leftPos + 8;
-        addRenderableWidget(button(x, topPos + 136, 34, "gui.magneticraft.reactor.action.start",
+        addRenderableWidget(controlButton(0, 0, "gui.magneticraft.reactor.action.start", MachineIcon.START,
                 NuclearReactorAction.simple(NuclearReactorAction.Type.START)));
-        addRenderableWidget(button(x + 36, topPos + 136, 34, "gui.magneticraft.reactor.action.stop",
+        addRenderableWidget(controlButton(1, 0, "gui.magneticraft.reactor.action.stop", MachineIcon.STOP,
                 NuclearReactorAction.simple(NuclearReactorAction.Type.STOP)));
-        addRenderableWidget(button(x + 72, topPos + 136, 44, "gui.magneticraft.reactor.action.scram",
-                NuclearReactorAction.simple(NuclearReactorAction.Type.SCRAM)));
-        addRenderableWidget(button(x, topPos + 155, 28, "gui.magneticraft.reactor.action.rod_down",
-                null, ignored -> setRod(-0.05D)));
-        addRenderableWidget(button(x + 30, topPos + 155, 52, "gui.magneticraft.reactor.action.rod_group",
-                null, ignored -> selectedGroup = ReactorRodGroup.values()[
-                        (selectedGroup.ordinal() + 1) % ReactorRodGroup.values().length]));
-        addRenderableWidget(button(x + 84, topPos + 155, 28, "gui.magneticraft.reactor.action.rod_up",
-                null, ignored -> setRod(0.05D)));
-        addRenderableWidget(button(x, topPos + 174, 54, "gui.magneticraft.reactor.action.load",
-                null, ignored -> loadSelectedFuel()));
-        addRenderableWidget(button(x + 56, topPos + 174, 56, "gui.magneticraft.reactor.action.unload",
-                null, ignored -> unloadSelectedFuel()));
-        addRenderableWidget(button(x, topPos + 193, 34, "gui.magneticraft.reactor.action.reset",
+        addRenderableWidget(controlButton(2, 0, "gui.magneticraft.reactor.action.scram", MachineIcon.SCRAM,
+                NuclearReactorAction.simple(NuclearReactorAction.Type.SCRAM)).dangerous(true));
+        addRenderableWidget(controlButton(0, 1, "gui.magneticraft.reactor.action.rod_down", MachineIcon.DOWN,
+                ignored -> setRod(-0.05D)));
+        rodGroupButton = controlButton(1, 1, "gui.magneticraft.reactor.action.rod_group", MachineIcon.MODE,
+                ignored -> {
+                    selectedGroup = ReactorRodGroup.values()[
+                            (selectedGroup.ordinal() + 1) % ReactorRodGroup.values().length];
+                    refreshRodGroupButton();
+                });
+        addRenderableWidget(rodGroupButton);
+        addRenderableWidget(controlButton(2, 1, "gui.magneticraft.reactor.action.rod_up", MachineIcon.UP,
+                ignored -> setRod(0.05D)));
+        addRenderableWidget(controlButton(3, 1, "gui.magneticraft.reactor.action.load", MachineIcon.LOAD,
+                ignored -> loadSelectedFuel()));
+        addRenderableWidget(controlButton(4, 1, "gui.magneticraft.reactor.action.unload", MachineIcon.UNLOAD,
+                ignored -> unloadSelectedFuel()));
+        addRenderableWidget(controlButton(0, 2, "gui.magneticraft.reactor.action.reset", MachineIcon.RESET,
                 NuclearReactorAction.simple(NuclearReactorAction.Type.RESET)));
-        addRenderableWidget(button(x + 36, topPos + 193, 38, "gui.magneticraft.reactor.action.mode",
-                null, ignored -> cycleMode()));
-        addRenderableWidget(button(x + 76, topPos + 193, 36, "gui.magneticraft.reactor.action.upgrade",
+        addRenderableWidget(controlButton(1, 2, "gui.magneticraft.reactor.action.mode", MachineIcon.MODE,
+                ignored -> cycleMode()));
+        addRenderableWidget(controlButton(2, 2, "gui.magneticraft.reactor.action.upgrade", MachineIcon.UPGRADE,
                 NuclearReactorAction.simple(NuclearReactorAction.Type.INSTALL_UPGRADE)));
-        addRenderableWidget(button(x, topPos + 212, 30, "gui.magneticraft.reactor.action.target_down",
-                null, ignored -> setTargetPower(-0.05D)));
-        addRenderableWidget(button(x + 32, topPos + 212, 30, "gui.magneticraft.reactor.action.target_up",
-                null, ignored -> setTargetPower(0.05D)));
-        overrideButton = button(x + 64, topPos + 212, 48, "gui.magneticraft.reactor.action.override",
-                null, ignored -> toggleOverride());
+        addRenderableWidget(controlButton(3, 2, "gui.magneticraft.reactor.action.target_down", MachineIcon.MINUS,
+                ignored -> setTargetPower(-0.05D)));
+        addRenderableWidget(controlButton(4, 2, "gui.magneticraft.reactor.action.target_up", MachineIcon.PLUS,
+                ignored -> setTargetPower(0.05D)));
+        overrideButton = controlButton(0, 3, "gui.magneticraft.reactor.action.override", MachineIcon.SCRAM,
+                ignored -> toggleOverride()).dangerous(true);
         addRenderableWidget(overrideButton);
+        refreshRodGroupButton();
+        refreshOverrideButton();
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         MachineScreenLayout.drawPanel(graphics, leftPos, topPos, imageWidth, imageHeight);
+        MachineScreenLayout.drawSectionHeader(graphics, leftPos, topPos, imageWidth, 22);
         MachineScreenLayout.drawInset(graphics, leftPos + GRID_X - 2, topPos + GRID_Y - 2,
                 gridWidth + 4, gridHeight + 4);
         MachineScreenLayout.drawInset(graphics, leftPos + METRIC_X - 4, topPos + 18,
@@ -144,24 +166,28 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
         for (int column = 0; column < 4; column++) {
             int x = leftPos + METRIC_X + column * (CARD_WIDTH + CARD_GAP);
             int y = topPos + SUMMARY_Y;
-            graphics.fill(x - 2, y - 2, x + CARD_WIDTH, y + CARD_HEIGHT, 0xFF252B32);
-            graphics.fill(x - 1, y - 1, x + CARD_WIDTH - 1, y, 0xFF48515B);
+            MachineScreenLayout.drawCard(graphics, x - 2, y - 2, CARD_WIDTH + 2, CARD_HEIGHT + 2);
         }
         int barX = leftPos + METRIC_X;
         int barWidth = METRIC_WIDTH - 4;
-        graphics.fill(barX, topPos + TARGET_BAR_Y, barX + barWidth, topPos + TARGET_BAR_Y + 8,
-                0xFF252B32);
-        graphics.fill(barX + 1, topPos + TARGET_BAR_Y + 1,
-                barX + 1 + (int) Math.round((barWidth - 2) * menu.targetPowerFraction()),
-                topPos + TARGET_BAR_Y + 7, 0xFF55A9E8);
+        MachineScreenLayout.drawStatusBar(
+                graphics,
+                barX,
+                topPos + TARGET_BAR_Y,
+                barWidth,
+                8,
+                (int) Math.round((barWidth - 4) * menu.targetPowerFraction()),
+                MachineScreenLayout.ACCENT,
+                false
+        );
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, MachineScreenLayout.fitToWidth(font, title, imageWidth - 104),
-                8, 6, 0xFF303030, false);
+        graphics.drawString(font, MachineScreenLayout.fitToWidth(font, title, imageWidth - 48),
+                8, 6, MachineScreenLayout.TEXT_PRIMARY, false);
         graphics.drawString(font, Component.translatable("gui.magneticraft.reactor.core_map"),
-                GRID_X, GRID_Y - 12, 0xFF404040, false);
+                GRID_X, GRID_Y - 12, MachineScreenLayout.TEXT_MUTED, false);
         if (viewMode == ViewMode.BASIC) {
             drawBasicLines(graphics);
         } else {
@@ -436,14 +462,34 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private Button button(int x, int y, int width, String key, NuclearReactorAction action) {
-        return button(x, y, width, key, action, ignored -> send(action));
+    private MachineIconButton controlButton(
+            int column,
+            int row,
+            String key,
+            MachineIcon icon,
+            NuclearReactorAction action
+    ) {
+        return controlButton(column, row, key, icon, ignored -> send(action));
     }
 
-    private Button button(
-            int x, int y, int width, String key, NuclearReactorAction action, Button.OnPress press
+    private MachineIconButton controlButton(
+            int column,
+            int row,
+            String key,
+            MachineIcon icon,
+            MachineIconButton.OnPress press
     ) {
-        return Button.builder(Component.translatable(key), press).bounds(x, y, width, 17).build();
+        Component action = Component.translatable(key);
+        return new MachineIconButton(
+                leftPos + CONTROL_X + column * (CONTROL_SIZE + CONTROL_GAP),
+                topPos + CONTROL_Y + row * (CONTROL_SIZE + CONTROL_GAP),
+                CONTROL_SIZE,
+                CONTROL_SIZE,
+                icon,
+                action,
+                action,
+                press
+        );
     }
 
     private void toggleView() {
@@ -499,18 +545,103 @@ public final class NuclearReactorScreen extends AbstractContainerScreen<NuclearR
         }
         if (menu.engineeringOverride()) {
             overrideConfirmationArmed = false;
-            overrideButton.setMessage(Component.translatable("gui.magneticraft.reactor.action.override"));
+            refreshOverrideButton();
             send(new NuclearReactorAction(
                     NuclearReactorAction.Type.SET_OVERRIDE, null, null, null, 0, false));
             return;
         }
         boolean confirmed = overrideConfirmationArmed;
         overrideConfirmationArmed = !confirmed;
-        overrideButton.setMessage(Component.translatable(overrideConfirmationArmed
-                ? "gui.magneticraft.reactor.action.confirm_override"
-                : "gui.magneticraft.reactor.action.override"));
+        refreshOverrideButton();
         send(new NuclearReactorAction(
                 NuclearReactorAction.Type.SET_OVERRIDE, null, null, null, 1, confirmed));
+    }
+
+    private void refreshRodGroupButton() {
+        if (rodGroupButton == null) {
+            return;
+        }
+        Component group = Component.literal(selectedGroup.name());
+        rodGroupButton.badge(selectedGroup.name());
+        rodGroupButton.updateExplanation(
+                Component.translatable("gui.magneticraft.reactor.action.rod_group"),
+                controlExplanation("gui.magneticraft.reactor.action.rod_group", group)
+        );
+    }
+
+    private void refreshOverrideButton() {
+        if (overrideButton == null) {
+            return;
+        }
+        String key = overrideConfirmationArmed
+                ? "gui.magneticraft.reactor.action.confirm_override"
+                : "gui.magneticraft.reactor.action.override";
+        overrideButton.badge(overrideConfirmationArmed ? "!" : "");
+        overrideButton.selected(menu.engineeringOverride());
+        overrideButton.updateExplanation(
+                Component.translatable(key),
+                controlExplanation(
+                        key,
+                        Component.translatable(menu.engineeringOverride()
+                                ? "gui.magneticraft.control.enabled"
+                                : "gui.magneticraft.control.disabled")
+                )
+        );
+    }
+
+    private Component viewModeTitle() {
+        return Component.translatable(viewMode == ViewMode.BASIC
+                ? "gui.magneticraft.reactor.view.basic"
+                : "gui.magneticraft.reactor.view.engineering");
+    }
+
+    private static Component controlExplanation(String actionKey, Component currentState) {
+        return Component.translatable(actionKey)
+                .append("\n")
+                .append(Component.translatable("gui.magneticraft.control.current_state", currentState));
+    }
+
+    MachineScreenBounds.Layout layout() {
+        return layout(imageWidth, imageHeight, gridWidth, gridHeight, viewMode == ViewMode.ENGINEERING);
+    }
+
+    static MachineScreenBounds.Layout layout(
+            int imageWidth,
+            int imageHeight,
+            int gridWidth,
+            int gridHeight,
+            boolean engineering
+    ) {
+        MachineScreenBounds.Builder builder = MachineScreenBounds.builder(
+                "nuclear_reactor/" + (engineering ? "engineering" : "basic"),
+                imageWidth,
+                imageHeight
+        ).element("header", new LegacyMachineGuiLayout.Rect(0, 0, imageWidth, 22))
+                .child("view", new LegacyMachineGuiLayout.Rect(imageWidth - 28, 2, 20, 18),
+                        "header", null, 0)
+                .element("core_grid", new LegacyMachineGuiLayout.Rect(
+                        GRID_X - 2, GRID_Y - 2, gridWidth + 4, gridHeight + 4
+                ))
+                .element("metrics", new LegacyMachineGuiLayout.Rect(
+                        METRIC_X - 4, 18, METRIC_WIDTH + 4, imageHeight - 26
+                ));
+        int[] rowCounts = engineering ? new int[]{3, 5, 5, 1} : new int[]{3, 5};
+        for (int row = 0; row < rowCounts.length; row++) {
+            for (int column = 0; column < rowCounts[row]; column++) {
+                builder.element(
+                        "control_" + row + "_" + column,
+                        new LegacyMachineGuiLayout.Rect(
+                                CONTROL_X + column * (CONTROL_SIZE + CONTROL_GAP),
+                                CONTROL_Y + row * (CONTROL_SIZE + CONTROL_GAP),
+                                CONTROL_SIZE,
+                                CONTROL_SIZE
+                        ),
+                        "controls",
+                        CONTROL_GAP
+                );
+            }
+        }
+        return builder.build();
     }
 
     private void send(NuclearReactorAction action) {

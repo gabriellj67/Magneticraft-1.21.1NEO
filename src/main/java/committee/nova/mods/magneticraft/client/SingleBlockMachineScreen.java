@@ -5,7 +5,6 @@ import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockM
 import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.StatusBar;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -27,7 +26,15 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
             "gui.magneticraft.inserter.allow_stacking",
             "gui.magneticraft.inserter.reverse"
     };
-    private final List<Button> inserterButtons = new ArrayList<>();
+    private static final MachineIcon[] INSERTER_BUTTON_ICONS = {
+            MachineIcon.FILTER,
+            MachineIcon.DAMAGE,
+            MachineIcon.TAG,
+            MachineIcon.DATA,
+            MachineIcon.STACK,
+            MachineIcon.REVERSE
+    };
+    private final List<MachineIconButton> inserterButtons = new ArrayList<>();
     private final int baseImageWidth;
     private final LegacyMachineGuiLayout.Rect electricalPanel;
 
@@ -48,26 +55,26 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
     @Override
     protected void init() {
         super.init();
+        MachineScreenLayout.validateInDevelopment(layout());
         inserterButtons.clear();
         if (menu.definition() == SingleBlockMachineDefinition.INSERTER) {
             for (int id = 0; id < INSERTER_BUTTON_KEYS.length; id++) {
                 int buttonId = id;
                 LegacyMachineGuiLayout.Rect bounds = LegacyMachineGuiLayout.inserterButtons().get(id);
-                Button button = Button.builder(
-                                inserterButtonLabel(id, false),
-                                ignored -> {
-                                    if (minecraft != null && minecraft.gameMode != null) {
-                                        minecraft.gameMode.handleInventoryButtonClick(menu.containerId, buttonId);
-                                    }
-                                }
-                        )
-                        .bounds(
-                                leftPos + bounds.x(),
-                                topPos + bounds.y(),
-                                bounds.width(),
-                                bounds.height()
-                        )
-                        .build();
+                MachineIconButton button = new MachineIconButton(
+                        leftPos + bounds.x(),
+                        topPos + bounds.y(),
+                        bounds.width(),
+                        bounds.height(),
+                        INSERTER_BUTTON_ICONS[id],
+                        Component.translatable(INSERTER_BUTTON_KEYS[id]),
+                        inserterExplanation(id, false),
+                        ignored -> {
+                            if (minecraft != null && minecraft.gameMode != null) {
+                                minecraft.gameMode.handleInventoryButtonClick(menu.containerId, buttonId);
+                            }
+                        }
+                );
                 inserterButtons.add(addRenderableWidget(button));
             }
         }
@@ -78,7 +85,12 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
         super.containerTick();
         for (int id = 0; id < inserterButtons.size(); id++) {
             boolean enabled = (menu.flags() & (1 << id)) != 0;
-            inserterButtons.get(id).setMessage(inserterButtonLabel(id, enabled));
+            inserterButtons.get(id)
+                    .selected(enabled)
+                    .updateExplanation(
+                            Component.translatable(INSERTER_BUTTON_KEYS[id]),
+                            inserterExplanation(id, enabled)
+                    );
         }
     }
 
@@ -94,22 +106,30 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
             );
         }
         renderTooltip(graphics, mouseX, mouseY);
-        for (int id = 0; id < inserterButtons.size(); id++) {
-            if (inserterButtons.get(id).isHoveredOrFocused()) {
-                graphics.renderTooltip(
-                        font,
-                        Component.translatable(INSERTER_BUTTON_KEYS[id]),
-                        mouseX,
-                        mouseY
-                );
-                break;
-            }
-        }
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         MachineScreenLayout.drawPanel(graphics, leftPos, topPos, imageWidth, imageHeight);
+        int playerTop = LegacyMachineGuiLayout.singleBlockPlayerTop(menu.definition());
+        int machineHeight = machineHeight(menu.definition(), playerTop);
+        MachineScreenLayout.drawCard(graphics, leftPos + 5, topPos + 3, baseImageWidth - 10, machineHeight);
+        if (menu.definition() != SingleBlockMachineDefinition.BOX) {
+            MachineScreenLayout.drawSectionHeader(
+                    graphics,
+                    leftPos,
+                    topPos + LegacyMachineGuiLayout.CONTENT_TITLE_TOP - 2,
+                    baseImageWidth,
+                    12
+            );
+        }
+        MachineScreenLayout.drawCard(
+                graphics,
+                leftPos + 5,
+                topPos + playerTop - 2,
+                baseImageWidth - 10,
+                imageHeight - playerTop
+        );
         for (Slot slot : menu.slots) {
             MachineScreenLayout.drawSlot(graphics, leftPos, topPos, slot.x, slot.y);
         }
@@ -134,7 +154,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                     MachineScreenLayout.fitToWidth(font, title, baseImageWidth - titleLabelX - 8),
                     titleLabelX,
                     LegacyMachineGuiLayout.CONTENT_TITLE_TOP,
-                    0x404040,
+                    MachineScreenLayout.TEXT_PRIMARY,
                     false
             );
         } else {
@@ -147,7 +167,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                     MachineScreenLayout.fitToWidth(font, title, titleWidth),
                     titleLabelX,
                     LegacyMachineGuiLayout.CONTENT_TITLE_TOP,
-                    0x404040,
+                    MachineScreenLayout.TEXT_PRIMARY,
                     false
             );
             graphics.drawString(
@@ -155,7 +175,7 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
                     fittedStatus,
                     statusX,
                     LegacyMachineGuiLayout.CONTENT_TITLE_TOP,
-                    0x404040,
+                    MachineScreenLayout.TEXT_MUTED,
                     false
             );
         }
@@ -164,20 +184,16 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
     private void drawStatusBars(GuiGraphics graphics) {
         for (StatusBar bar : statusBars()) {
             LegacyMachineGuiLayout.Rect bounds = bar.bounds();
-            MachineScreenLayout.drawInset(
+            int height = scaled(value(bar), capacity(bar), bounds.height() - 4);
+            MachineScreenLayout.drawStatusBar(
                     graphics,
                     leftPos + bounds.x(),
                     topPos + bounds.y(),
                     bounds.width(),
-                    bounds.height()
-            );
-            int height = scaled(value(bar), capacity(bar), bounds.height() - 4);
-            graphics.fill(
-                    leftPos + bounds.x() + 2,
-                    topPos + bounds.bottom() - 2 - height,
-                    leftPos + bounds.right() - 2,
-                    topPos + bounds.bottom() - 2,
-                    color(bar)
+                    bounds.height(),
+                    height,
+                    color(bar),
+                    true
             );
         }
     }
@@ -198,8 +214,15 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
         return menu.working() ? Component.translatable("gui.magneticraft.state.running") : null;
     }
 
-    private Component inserterButtonLabel(int id, boolean enabled) {
-        return Component.literal((enabled ? "✓" : "·") + (id + 1));
+    private Component inserterExplanation(int id, boolean enabled) {
+        return Component.translatable(INSERTER_BUTTON_KEYS[id])
+                .append("\n")
+                .append(Component.translatable(
+                        "gui.magneticraft.control.current_state",
+                        Component.translatable(enabled
+                                ? "gui.magneticraft.control.enabled"
+                                : "gui.magneticraft.control.disabled")
+                ));
     }
 
     private void renderStatusTooltips(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -267,12 +290,63 @@ public final class SingleBlockMachineScreen extends AbstractContainerScreen<Sing
 
     private int color(StatusBar bar) {
         return switch (bar.kind()) {
-            case ENERGY -> 0xFF43D96B;
-            case PRIMARY_FLUID -> 0xFF2F78D0;
-            case SECONDARY_FLUID -> 0xFFE8E8E8;
-            case PROGRESS -> 0xFFE88A2A;
-            case BULK, TANK -> 0xFF4FC3C8;
+            case ENERGY -> MachineScreenLayout.ENERGY;
+            case PRIMARY_FLUID -> MachineScreenLayout.FLUID;
+            case SECONDARY_FLUID -> MachineScreenLayout.TEXT_PRIMARY;
+            case PROGRESS -> MachineScreenLayout.PROGRESS;
+            case BULK, TANK -> MachineScreenLayout.ACCENT;
         };
+    }
+
+    MachineScreenBounds.Layout layout() {
+        return layout(menu.definition(), imageWidth, imageHeight);
+    }
+
+    static MachineScreenBounds.Layout layout(
+            SingleBlockMachineDefinition definition,
+            int imageWidth,
+            int imageHeight
+    ) {
+        int baseImageWidth = LegacyMachineGuiLayout.singleBlockSize(definition).width();
+        int playerTop = LegacyMachineGuiLayout.singleBlockPlayerTop(definition);
+        MachineScreenBounds.Builder builder = MachineScreenBounds.builder(
+                "single_block/" + definition.id(), imageWidth, imageHeight
+        ).element("machine", new LegacyMachineGuiLayout.Rect(5, 3, baseImageWidth - 10,
+                machineHeight(definition, playerTop)))
+                .element("player_inventory", new LegacyMachineGuiLayout.Rect(5, playerTop - 2,
+                        baseImageWidth - 10, imageHeight - playerTop), "sections", 0);
+        if (definition != SingleBlockMachineDefinition.BOX) {
+            builder.element("title", new LegacyMachineGuiLayout.Rect(
+                    1, LegacyMachineGuiLayout.CONTENT_TITLE_TOP - 2, baseImageWidth - 2, 12
+            ), "sections", 0);
+        }
+        if (definition.usesElectricity()) {
+            builder.element("electrical", electricalPanelBounds(definition), "sections", 0);
+        }
+        List<LegacyMachineGuiLayout.Rect> buttons = LegacyMachineGuiLayout.inserterButtons();
+        for (int index = 0; definition == SingleBlockMachineDefinition.INSERTER
+                && index < buttons.size(); index++) {
+            builder.child("inserter_button_" + index, buttons.get(index), "machine", "machine_controls", 2);
+        }
+        List<LegacyMachineGuiLayout.Point> machineSlots = LegacyMachineGuiLayout.singleBlockSlots(definition);
+        for (int index = 0; index < machineSlots.size(); index++) {
+            builder.child("machine_slot_" + index, LegacyMachineGuiLayout.slotBounds(machineSlots.get(index)),
+                    "machine", "machine_slots", 0);
+        }
+        List<LegacyMachineGuiLayout.Rect> playerSlots = LegacyMachineGuiLayout.playerInventorySlots(
+                LegacyMachineGuiLayout.STANDARD_PLAYER_LEFT, playerTop
+        );
+        for (int index = 0; index < playerSlots.size(); index++) {
+            builder.child("player_slot_" + index, playerSlots.get(index),
+                    "player_inventory", "player_slots", 0);
+        }
+        return builder.build();
+    }
+
+    private static int machineHeight(SingleBlockMachineDefinition definition, int playerTop) {
+        return definition == SingleBlockMachineDefinition.BOX
+                ? playerTop - 5
+                : Math.max(24, playerTop - 15);
     }
 
     private int displayedProgress() {

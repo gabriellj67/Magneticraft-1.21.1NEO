@@ -42,10 +42,25 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     }
 
     @Override
+    protected void init() {
+        super.init();
+        MachineScreenLayout.validateInDevelopment(layout());
+    }
+
+    @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         MachineScreenLayout.drawPanel(graphics, leftPos, topPos, imageWidth, imageHeight);
+        MachineScreenLayout.drawHeader(graphics, leftPos, topPos, baseImageWidth);
         int contentBottom = menu.definition() == MultiblockDefinition.SHELVING_UNIT ? 112 : 76;
-        graphics.fill(leftPos + 5, topPos + 14, leftPos + baseImageWidth - 5, topPos + contentBottom, 0xFF15191E);
+        MachineScreenLayout.drawCard(graphics, leftPos + 5, topPos + 14,
+                baseImageWidth - 10, contentBottom - 14);
+        MachineScreenLayout.drawCard(
+                graphics,
+                leftPos + 5,
+                topPos + menu.playerInventoryTop() - 2,
+                baseImageWidth - 10,
+                imageHeight - menu.playerInventoryTop()
+        );
         for (Slot slot : menu.slots) {
             MachineScreenLayout.drawSlot(graphics, leftPos, topPos, slot.x, slot.y);
         }
@@ -70,7 +85,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
                 MachineScreenLayout.fitToWidth(font, title, titleWidth),
                 titleLabelX,
                 titleLabelY,
-                0x404040,
+                MachineScreenLayout.TEXT_PRIMARY,
                 false
         );
         graphics.drawString(
@@ -78,7 +93,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
                 fittedStatus,
                 statusX,
                 titleLabelY,
-                menu.working() ? 0xFF16833B : 0xFF5F6368,
+                menu.working() ? MachineScreenLayout.SUCCESS : MachineScreenLayout.TEXT_MUTED,
                 false
         );
         if (menu.definition() == MultiblockDefinition.SHELVING_UNIT) {
@@ -95,11 +110,12 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
                     ),
                     8,
                     24,
-                    0xFF8A641E,
+                    MachineScreenLayout.WARNING,
                     false
             );
         }
-        graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
+        graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY,
+                MachineScreenLayout.TEXT_MUTED, false);
         Component structureState = MachineScreenLayout.fitToWidth(
                 font,
                 structureOverview(),
@@ -110,7 +126,7 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
                 structureState,
                 baseImageWidth - 8 - font.width(structureState),
                 inventoryLabelY,
-                0xFF5F6368,
+                MachineScreenLayout.TEXT_MUTED,
                 false
         );
     }
@@ -142,22 +158,18 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
     private void drawStatusBars(GuiGraphics graphics, List<StatusBar> bars) {
         for (StatusBar bar : bars) {
             LegacyMachineGuiLayout.Rect bounds = bar.bounds();
-            MachineScreenLayout.drawInset(
+            int value = value(bar);
+            int capacity = capacity(bar);
+            int height = scaled(value, capacity, bounds.height() - 4);
+            MachineScreenLayout.drawStatusBar(
                     graphics,
                     leftPos + bounds.x(),
                     topPos + bounds.y(),
                     bounds.width(),
-                    bounds.height()
-            );
-            int value = value(bar);
-            int capacity = capacity(bar);
-            int height = scaled(value, capacity, bounds.height() - 4);
-            graphics.fill(
-                    leftPos + bounds.x() + 2,
-                    topPos + bounds.bottom() - 2 - height,
-                    leftPos + bounds.right() - 2,
-                    topPos + bounds.bottom() - 2,
-                    color(bar)
+                    bounds.height(),
+                    height,
+                    color(bar),
+                    true
             );
         }
     }
@@ -206,10 +218,66 @@ public final class AdvancedMultiblockScreen extends AbstractContainerScreen<Adva
 
     private int color(StatusBar bar) {
         return switch (bar.kind()) {
-            case ENERGY -> 0xFF43D96B;
-            case PROGRESS -> 0xFFE88A2A;
-            case BULK -> 0xFFD2A85C;
-            case TANK, PRIMARY_FLUID, SECONDARY_FLUID -> 0xFF4FC3C8;
+            case ENERGY -> MachineScreenLayout.ENERGY;
+            case PROGRESS -> MachineScreenLayout.PROGRESS;
+            case BULK -> MachineScreenLayout.WARNING;
+            case TANK, PRIMARY_FLUID, SECONDARY_FLUID -> MachineScreenLayout.FLUID;
+        };
+    }
+
+    MachineScreenBounds.Layout layout() {
+        return layout(menu.definition(), imageWidth, imageHeight);
+    }
+
+    static MachineScreenBounds.Layout layout(
+            MultiblockDefinition definition,
+            int imageWidth,
+            int imageHeight
+    ) {
+        int baseImageWidth = LegacyMachineGuiLayout.multiblockSize(definition).width();
+        int playerTop = LegacyMachineGuiLayout.multiblockPlayerTop(definition);
+        int contentBottom = definition == MultiblockDefinition.SHELVING_UNIT ? 112 : 76;
+        MachineScreenBounds.Builder builder = MachineScreenBounds.builder(
+                "multiblock/" + definition.id(), imageWidth, imageHeight
+        ).element("header", new LegacyMachineGuiLayout.Rect(1, 1, baseImageWidth - 2, 15), "sections", 0)
+                .element("machine", new LegacyMachineGuiLayout.Rect(
+                        5, 14, baseImageWidth - 10, contentBottom - 14
+                ))
+                .element("player_inventory", new LegacyMachineGuiLayout.Rect(
+                        5, playerTop - 2, baseImageWidth - 10,
+                        imageHeight - playerTop
+                ), "sections", 0);
+        if (definition.usesElectricity()) {
+            builder.element("electrical", electricalPanelBounds(definition), "sections", 0);
+        }
+        List<LegacyMachineGuiLayout.Point> machineSlots = LegacyMachineGuiLayout.multiblockSlots(definition);
+        for (int index = 0; index < machineSlots.size(); index++) {
+            builder.child("machine_slot_" + index, LegacyMachineGuiLayout.slotBounds(machineSlots.get(index)),
+                    "machine", "machine_slots", 0);
+        }
+        List<LegacyMachineGuiLayout.Rect> playerSlots = LegacyMachineGuiLayout.playerInventorySlots(
+                LegacyMachineGuiLayout.STANDARD_PLAYER_LEFT, playerTop
+        );
+        for (int index = 0; index < playerSlots.size(); index++) {
+            builder.child("player_slot_" + index, playerSlots.get(index),
+                    "player_inventory", "player_slots", 0);
+        }
+        List<StatusBar> bars = LegacyMachineGuiLayout.multiblockStatusBars(
+                definition.usesElectricity(), hasProgress(definition),
+                definition.bulkItemCapacity() > 0, definition.tankCount()
+        );
+        for (int index = 0; index < bars.size(); index++) {
+            builder.child("status_" + index, bars.get(index).bounds(), "machine", "status_bars", 3);
+        }
+        return builder.build();
+    }
+
+    private static boolean hasProgress(MultiblockDefinition definition) {
+        return switch (definition) {
+            case GRINDER, SIEVE, HYDRAULIC_PRESS, PUMPJACK, REFINERY,
+                    BIG_ELECTRIC_FURNACE, BIG_COMBUSTION_CHAMBER,
+                    BIG_STEAM_BOILER, OIL_HEATER -> true;
+            default -> false;
         };
     }
 

@@ -7,28 +7,31 @@ import committee.nova.mods.magneticraft.content.network.electric.ElectricalDevic
 import committee.nova.mods.magneticraft.network.ElectricalDeviceActionMessage;
 import committee.nova.mods.magneticraft.network.ModNetwork;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 import java.util.Locale;
+import java.util.List;
 
 /** Dedicated controls for all isolated two-terminal electrical devices. */
 public final class ElectricalDeviceScreen extends AbstractContainerScreen<ElectricalDeviceMenu> {
     static final int BASE_IMAGE_WIDTH = LegacyMachineGuiLayout.STANDARD_WIDTH;
     static final LegacyMachineGuiLayout.Rect ELECTRICAL_PANEL =
             LegacyMachineGuiLayout.electricalPanel(BASE_IMAGE_WIDTH);
+    private static final int BOTTOM_STATUS_Y = 63;
+    private static final int INVENTORY_LABEL_Y = LegacyMachineGuiLayout.STANDARD_PLAYER_TOP - 12;
+    private static final int TEXT_LINE_HEIGHT = 9;
     private static final int[] RESISTOR_RING_COLORS = {
             0xFF161616, 0xFF6B3E26, 0xFFC62828, 0xFFEF6C00, 0xFFF9A825,
             0xFF2E7D32, 0xFF1565C0, 0xFF6A1B9A, 0xFF757575, 0xFFF5F5F5
     };
 
-    private Button reverseButton;
-    private Button redstoneButton;
-    private Button resetButton;
-    private Button controlRedstoneButton;
-    private final Button[] resistorButtons = new Button[3];
+    private MachineIconButton reverseButton;
+    private MachineIconButton redstoneButton;
+    private MachineIconButton resetButton;
+    private MachineIconButton controlRedstoneButton;
+    private final MachineIconButton[] resistorButtons = new MachineIconButton[3];
 
     public ElectricalDeviceScreen(ElectricalDeviceMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -42,33 +45,34 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
     @Override
     protected void init() {
         super.init();
+        MachineScreenLayout.validateInDevelopment(layout());
         if (menu.kind() == ElectricalDeviceKind.BOX_TRANSFORMER) {
-            reverseButton = addRenderableWidget(Button.builder(
-                            directionLabel(),
-                            ignored -> send(ElectricalDeviceAction.REVERSE_TRANSFORMER)
-                    )
-                    .bounds(leftPos + 8, topPos + 43, 78, 20)
-                    .build());
-            redstoneButton = addRenderableWidget(Button.builder(
-                            redstoneLabel(),
-                            ignored -> send(ElectricalDeviceAction.CYCLE_REDSTONE_MODE)
-                    )
-                    .bounds(leftPos + 90, topPos + 43, 78, 20)
-                    .build());
+            reverseButton = addRenderableWidget(iconButton(
+                    8, 43, MachineIcon.REVERSE,
+                    "gui.magneticraft.electrical.action.reverse_transformer",
+                    directionLabel(),
+                    ignored -> send(ElectricalDeviceAction.REVERSE_TRANSFORMER)
+            ));
+            redstoneButton = addRenderableWidget(iconButton(
+                    32, 43, MachineIcon.REDSTONE,
+                    "gui.magneticraft.electrical.action.redstone_mode",
+                    redstoneLabel(),
+                    ignored -> send(ElectricalDeviceAction.CYCLE_REDSTONE_MODE)
+            ));
         } else if (menu.kind() == ElectricalDeviceKind.CIRCUIT_BREAKER) {
-            resetButton = addRenderableWidget(Button.builder(
-                            Component.translatable("gui.magneticraft.electrical.reset"),
-                            ignored -> send(ElectricalDeviceAction.RESET_BREAKER)
-                    )
-                    .bounds(leftPos + 48, topPos + 43, 80, 20)
-                    .build());
+            resetButton = addRenderableWidget(iconButton(
+                    8, 43, MachineIcon.RESET,
+                    "gui.magneticraft.electrical.reset",
+                    protectionState(),
+                    ignored -> send(ElectricalDeviceAction.RESET_BREAKER)
+            ));
         } else if (menu.kind() == ElectricalDeviceKind.ELECTRIC_SWITCH) {
-            controlRedstoneButton = addRenderableWidget(Button.builder(
-                            controlRedstoneLabel(),
-                            ignored -> send(ElectricalDeviceAction.CYCLE_CONTROL_REDSTONE)
-                    )
-                    .bounds(leftPos + 8, topPos + 43, 160, 20)
-                    .build());
+            controlRedstoneButton = addRenderableWidget(iconButton(
+                    8, 43, MachineIcon.SWITCH,
+                    "gui.magneticraft.electrical.action.switch_mode",
+                    controlRedstoneLabel(),
+                    ignored -> send(ElectricalDeviceAction.CYCLE_CONTROL_REDSTONE)
+            ));
         } else if (menu.kind() == ElectricalDeviceKind.RESISTOR) {
             ElectricalDeviceAction[] actions = {
                     ElectricalDeviceAction.CYCLE_RESISTOR_FIRST_RING,
@@ -77,12 +81,12 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
             };
             for (int ring = 0; ring < resistorButtons.length; ring++) {
                 int index = ring;
-                resistorButtons[ring] = addRenderableWidget(Button.builder(
-                                resistorRingLabel(ring),
-                                ignored -> send(actions[index])
-                        )
-                        .bounds(leftPos + 8 + ring * 46, topPos + 43, 40, 20)
-                        .build());
+                resistorButtons[ring] = addRenderableWidget(iconButton(
+                        8 + ring * 24, 43, MachineIcon.RESISTOR,
+                        "gui.magneticraft.electrical.action.resistor_ring",
+                        resistorRingLabel(ring),
+                        ignored -> send(actions[index])
+                ).badge(Integer.toString(ring + 1)));
             }
         }
         refreshControls();
@@ -116,6 +120,8 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         MachineScreenLayout.drawPanel(graphics, leftPos, topPos, imageWidth, imageHeight);
+        MachineScreenLayout.drawHeader(graphics, leftPos, topPos, BASE_IMAGE_WIDTH);
+        MachineScreenLayout.drawCard(graphics, leftPos + 5, topPos + 17, BASE_IMAGE_WIDTH - 10, 55);
         MachineScreenLayout.drawPlayerInventory(graphics, leftPos, topPos);
         if (menu.kind() == ElectricalDeviceKind.FUSE_BOX) {
             MachineScreenLayout.drawSlot(
@@ -128,20 +134,20 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
         }
         if (menu.kind() == ElectricalDeviceKind.FUSE_BOX
                 || menu.kind() == ElectricalDeviceKind.CIRCUIT_BREAKER) {
-            int barLeft = leftPos + 8;
-            int barTop = topPos + 32;
             int width = 160;
-            graphics.fill(barLeft, barTop, barLeft + width, barTop + 5, 0xFF252A31);
-            int stressWidth = (int) Math.round(width * Math.max(0.0D, Math.min(1.0D, menu.thermalStress())));
-            graphics.fill(barLeft, barTop, barLeft + stressWidth, barTop + 5, 0xFFE06044);
+            int stressWidth = (int) Math.round((width - 4) * Math.max(0.0D, Math.min(1.0D, menu.thermalStress())));
+            MachineScreenLayout.drawStatusBar(
+                    graphics, leftPos + 8, topPos + 32, width, 7,
+                    stressWidth, MachineScreenLayout.DANGER, false
+            );
         }
         if (menu.kind() == ElectricalDeviceKind.RESISTOR) {
             for (int ring = 0; ring < resistorButtons.length; ring++) {
-                int ringLeft = leftPos + 8 + ring * 46;
+                int ringLeft = leftPos + 8 + ring * 24;
                 graphics.fill(
                         ringLeft,
                         topPos + 33,
-                        ringLeft + 40,
+                        ringLeft + 20,
                         topPos + 39,
                         RESISTOR_RING_COLORS[resistorRing(ring)]
                 );
@@ -161,8 +167,10 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, titleLabelX, titleLabelY, 0x404040, false);
-        graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0x404040, false);
+        graphics.drawString(font, MachineScreenLayout.fitToWidth(font, title, BASE_IMAGE_WIDTH - 16),
+                titleLabelX, titleLabelY, MachineScreenLayout.TEXT_PRIMARY, false);
+        graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY,
+                MachineScreenLayout.TEXT_MUTED, false);
         if (menu.kind() == ElectricalDeviceKind.BOX_TRANSFORMER) {
             graphics.drawString(
                     font,
@@ -174,10 +182,10 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
                     ),
                     8,
                     20,
-                    0x404040,
+                    MachineScreenLayout.TEXT_PRIMARY,
                     false
             );
-            graphics.drawString(font, redstoneLabel(), 8, 31, 0x404040, false);
+            graphics.drawString(font, redstoneLabel(), 8, 31, MachineScreenLayout.TEXT_MUTED, false);
             return;
         }
         if (isControlDevice()) {
@@ -191,7 +199,7 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
                     ),
                     8,
                     18,
-                    0x404040,
+                    MachineScreenLayout.TEXT_PRIMARY,
                     false
             );
             if (menu.kind() == ElectricalDeviceKind.RESISTOR) {
@@ -203,21 +211,22 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
                         ),
                         8,
                         25,
-                        0x404040,
+                        MachineScreenLayout.TEXT_MUTED,
                         false
                 );
             }
+            Component telemetry = Component.translatable(
+                    "gui.magneticraft.electrical.control_telemetry",
+                    Component.translatable(menu.controlDirection().translationKey()),
+                    format(menu.controlCurrentAmps()),
+                    format(menu.controlLossJoules())
+            );
             graphics.drawString(
                     font,
-                    Component.translatable(
-                            "gui.magneticraft.electrical.control_telemetry",
-                            Component.translatable(menu.controlDirection().translationKey()),
-                            format(menu.controlCurrentAmps()),
-                            format(menu.controlLossJoules())
-                    ),
+                    MachineScreenLayout.fitToWidth(font, telemetry, BASE_IMAGE_WIDTH - 16),
                     8,
-                    menu.kind() == ElectricalDeviceKind.DIODE ? 32 : 67,
-                    0x404040,
+                    menu.kind() == ElectricalDeviceKind.DIODE ? 32 : BOTTOM_STATUS_Y,
+                    MachineScreenLayout.TEXT_MUTED,
                     false
             );
             return;
@@ -232,37 +241,57 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
                 ),
                 8,
                 18,
-                0x404040,
+                MachineScreenLayout.TEXT_PRIMARY,
                 false
+        );
+        Component protection = Component.translatable(
+                "gui.magneticraft.electrical.protection_state", protectionState()
         );
         graphics.drawString(
                 font,
-                Component.translatable("gui.magneticraft.electrical.protection_state", protectionState()),
+                MachineScreenLayout.fitToWidth(font, protection, BASE_IMAGE_WIDTH - 16),
                 8,
-                64,
-                0x404040,
+                BOTTOM_STATUS_Y,
+                MachineScreenLayout.TEXT_MUTED,
                 false
         );
     }
 
     private void refreshControls() {
         if (reverseButton != null) {
-            reverseButton.setMessage(directionLabel());
+            reverseButton.selected(menu.transformerReversed());
+            reverseButton.updateExplanation(
+                    Component.translatable("gui.magneticraft.electrical.action.reverse_transformer"),
+                    explanation("gui.magneticraft.electrical.action.reverse_transformer", directionLabel())
+            );
             reverseButton.active = menu.transformerProfileBound();
         }
         if (redstoneButton != null) {
-            redstoneButton.setMessage(redstoneLabel());
+            redstoneButton.updateExplanation(
+                    Component.translatable("gui.magneticraft.electrical.action.redstone_mode"),
+                    explanation("gui.magneticraft.electrical.action.redstone_mode", redstoneLabel())
+            );
             redstoneButton.active = menu.transformerProfileBound();
         }
         if (resetButton != null) {
             resetButton.active = menu.breakerTripped() && !menu.redstoneForcedOpen();
+            resetButton.updateExplanation(
+                    Component.translatable("gui.magneticraft.electrical.reset"),
+                    explanation("gui.magneticraft.electrical.reset", protectionState())
+            );
         }
         if (controlRedstoneButton != null) {
-            controlRedstoneButton.setMessage(controlRedstoneLabel());
+            controlRedstoneButton.updateExplanation(
+                    Component.translatable("gui.magneticraft.electrical.action.switch_mode"),
+                    explanation("gui.magneticraft.electrical.action.switch_mode", controlRedstoneLabel())
+            );
         }
         for (int ring = 0; ring < resistorButtons.length; ring++) {
             if (resistorButtons[ring] != null) {
-                resistorButtons[ring].setMessage(resistorRingLabel(ring));
+                resistorButtons[ring].updateExplanation(
+                        Component.translatable("gui.magneticraft.electrical.action.resistor_ring"),
+                        explanation("gui.magneticraft.electrical.action.resistor_ring", resistorRingLabel(ring))
+                );
             }
         }
     }
@@ -321,6 +350,87 @@ public final class ElectricalDeviceScreen extends AbstractContainerScreen<Electr
             return Component.translatable("gui.magneticraft.electrical.state.blown");
         }
         return Component.translatable("gui.magneticraft.electrical.state.ready");
+    }
+
+    private MachineIconButton iconButton(
+            int x,
+            int y,
+            MachineIcon icon,
+            String actionKey,
+            Component currentState,
+            MachineIconButton.OnPress onPress
+    ) {
+        Component action = Component.translatable(actionKey);
+        return new MachineIconButton(
+                leftPos + x,
+                topPos + y,
+                20,
+                20,
+                icon,
+                action,
+                explanation(actionKey, currentState),
+                onPress
+        );
+    }
+
+    private static Component explanation(String actionKey, Component currentState) {
+        return Component.translatable(actionKey)
+                .append("\n")
+                .append(Component.translatable("gui.magneticraft.control.current_state", currentState));
+    }
+
+    MachineScreenBounds.Layout layout() {
+        return layout(menu.kind(), imageWidth, imageHeight);
+    }
+
+    static MachineScreenBounds.Layout layout(
+            ElectricalDeviceKind kind,
+            int imageWidth,
+            int imageHeight
+    ) {
+        MachineScreenBounds.Builder builder = MachineScreenBounds.builder(
+                "electrical_device/" + kind.name().toLowerCase(Locale.ROOT),
+                imageWidth,
+                imageHeight
+        ).element("header", new LegacyMachineGuiLayout.Rect(1, 1, BASE_IMAGE_WIDTH - 2, 15), "sections", 1)
+                .element("controls", new LegacyMachineGuiLayout.Rect(5, 17, BASE_IMAGE_WIDTH - 10, 55))
+                .element("player_inventory", new LegacyMachineGuiLayout.Rect(5, 78, 166, 86), "sections", 1)
+                .element("electrical", ELECTRICAL_PANEL, "sections", 1)
+                .element("inventory_label", new LegacyMachineGuiLayout.Rect(
+                        8, INVENTORY_LABEL_Y, BASE_IMAGE_WIDTH - 16, TEXT_LINE_HEIGHT
+                ), "bottom_text", 0);
+        int count = kind == ElectricalDeviceKind.RESISTOR ? 3
+                : kind == ElectricalDeviceKind.BOX_TRANSFORMER ? 2
+                : kind == ElectricalDeviceKind.CIRCUIT_BREAKER
+                        || kind == ElectricalDeviceKind.ELECTRIC_SWITCH ? 1 : 0;
+        for (int index = 0; index < count; index++) {
+            builder.child("button_" + index, new LegacyMachineGuiLayout.Rect(8 + index * 24, 43, 20, 20),
+                    "controls", "control_buttons", 4);
+        }
+        if (kind == ElectricalDeviceKind.FUSE_BOX) {
+            builder.child("fuse_slot", new LegacyMachineGuiLayout.Rect(
+                    ElectricalDeviceMenu.FUSE_SLOT_X - 1,
+                    ElectricalDeviceMenu.FUSE_SLOT_Y - 1,
+                    18,
+                    18
+            ), "controls", "control_slots", 0);
+        }
+        if (kind == ElectricalDeviceKind.FUSE_BOX
+                || kind == ElectricalDeviceKind.CIRCUIT_BREAKER
+                || kind == ElectricalDeviceKind.ELECTRIC_SWITCH
+                || kind == ElectricalDeviceKind.RESISTOR) {
+            builder.child("bottom_status", new LegacyMachineGuiLayout.Rect(
+                    8, BOTTOM_STATUS_Y, BASE_IMAGE_WIDTH - 16, TEXT_LINE_HEIGHT
+            ), "controls", "bottom_text", 0);
+        }
+        List<LegacyMachineGuiLayout.Rect> playerSlots = LegacyMachineGuiLayout.playerInventorySlots(
+                LegacyMachineGuiLayout.STANDARD_PLAYER_LEFT, LegacyMachineGuiLayout.STANDARD_PLAYER_TOP
+        );
+        for (int index = 0; index < playerSlots.size(); index++) {
+            builder.child("player_slot_" + index, playerSlots.get(index),
+                    "player_inventory", "player_slots", 0);
+        }
+        return builder.build();
     }
 
     private void send(ElectricalDeviceAction action) {

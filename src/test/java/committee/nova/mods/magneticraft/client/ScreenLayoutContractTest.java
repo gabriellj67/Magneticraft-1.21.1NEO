@@ -3,13 +3,19 @@ package committee.nova.mods.magneticraft.client;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout;
 import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect;
 import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.network.electric.ElectricalDeviceKind;
 import committee.nova.mods.magneticraft.content.multiblock.MultiblockDefinition;
+import committee.nova.mods.magneticraft.content.nuclear.facility.NuclearFacilityMenu;
+import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorMenu;
+import committee.nova.mods.magneticraft.content.nuclear.spentfuel.SpentFuelPoolMenu;
+import committee.nova.mods.magneticraft.content.nuclear.thermal.NuclearThermalMenu;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -106,6 +112,14 @@ class ScreenLayoutContractTest {
     void programmableLayoutsKeepEditorStateButtonsAndInventoriesSeparated() {
         for (boolean miningRobot : List.of(false, true)) {
             LegacyMachineGuiLayout.Size size = LegacyMachineGuiLayout.programmableSize(miningRobot);
+            LegacyMachineGuiLayout.Size displayedSize = miningRobot
+                    ? LegacyMachineGuiLayout.withElectricalPanel(
+                            size, ProgrammableScreen.ROBOT_ELECTRICAL_PANEL_WIDTH
+                    )
+                    : size;
+            assertTrue(displayedSize.width() <= 427 && displayedSize.height() <= 240,
+                    () -> (miningRobot ? "mining_robot" : "computer")
+                            + " must fit a common 427 x 240 GUI viewport");
             List<Rect> all = new ArrayList<>();
             all.add(new Rect(8, 6, 230, 9));
             all.addAll(LegacyMachineGuiLayout.programmableEditorRows());
@@ -192,7 +206,14 @@ class ScreenLayoutContractTest {
             }
         }
         LegacyMachineGuiLayout.Size robot = LegacyMachineGuiLayout.programmableSize(true);
-        assertElectricalPanel(robot, LegacyMachineGuiLayout.electricalPanel(robot.width()), "mining_robot");
+        assertElectricalPanel(
+                robot,
+                LegacyMachineGuiLayout.electricalPanel(
+                        robot.width(), ProgrammableScreen.ROBOT_ELECTRICAL_PANEL_WIDTH
+                ),
+                "mining_robot",
+                64
+        );
         assertElectricalPanel(
                 new LegacyMachineGuiLayout.Size(
                         ElectricalDeviceScreen.BASE_IMAGE_WIDTH,
@@ -201,6 +222,90 @@ class ScreenLayoutContractTest {
                 ElectricalDeviceScreen.ELECTRICAL_PANEL,
                 "electrical_device"
         );
+    }
+
+    @Test
+    void everyModernMagneticraftScreenLayoutIsBoundedAndDisjoint() {
+        List<MachineScreenBounds.Layout> layouts = new ArrayList<>();
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            if (!definition.hasMenu()) {
+                continue;
+            }
+            LegacyMachineGuiLayout.Size base = LegacyMachineGuiLayout.singleBlockSize(definition);
+            LegacyMachineGuiLayout.Size size = definition.usesElectricity()
+                    ? LegacyMachineGuiLayout.withElectricalPanel(base)
+                    : base;
+            layouts.add(SingleBlockMachineScreen.layout(definition, size.width(), size.height()));
+        }
+        for (MultiblockDefinition definition : MultiblockDefinition.values()) {
+            LegacyMachineGuiLayout.Size base = LegacyMachineGuiLayout.multiblockSize(definition);
+            LegacyMachineGuiLayout.Size size = definition.usesElectricity()
+                    ? LegacyMachineGuiLayout.withElectricalPanel(base)
+                    : base;
+            layouts.add(AdvancedMultiblockScreen.layout(definition, size.width(), size.height()));
+        }
+
+        LegacyMachineGuiLayout.Size standardElectrical = LegacyMachineGuiLayout.withElectricalPanel(
+                new LegacyMachineGuiLayout.Size(
+                        LegacyMachineGuiLayout.STANDARD_WIDTH,
+                        LegacyMachineGuiLayout.STANDARD_HEIGHT
+                )
+        );
+        layouts.add(BatteryScreen.layout(standardElectrical.width(), standardElectrical.height()));
+        layouts.add(ElectricFurnaceScreen.layout(standardElectrical.width(), standardElectrical.height()));
+        for (ElectricalDeviceKind kind : ElectricalDeviceKind.values()) {
+            layouts.add(ElectricalDeviceScreen.layout(kind, standardElectrical.width(), standardElectrical.height()));
+        }
+        layouts.add(PressureTankScreen.layout(
+                LegacyMachineGuiLayout.STANDARD_WIDTH,
+                LegacyMachineGuiLayout.STANDARD_HEIGHT
+        ));
+
+        LegacyMachineGuiLayout.Size computer = LegacyMachineGuiLayout.programmableSize(false);
+        layouts.add(ProgrammableScreen.layout(false, computer.width(), computer.height()));
+        LegacyMachineGuiLayout.Size robotBase = LegacyMachineGuiLayout.programmableSize(true);
+        LegacyMachineGuiLayout.Size robot = LegacyMachineGuiLayout.withElectricalPanel(
+                robotBase, ProgrammableScreen.ROBOT_ELECTRICAL_PANEL_WIDTH
+        );
+        layouts.add(ProgrammableScreen.layout(true, robot.width(), robot.height()));
+        layouts.add(GuideScreen.layout(640, 360));
+        layouts.add(NuclearFacilityScreen.layout(
+                NuclearFacilityMenu.IMAGE_WIDTH, NuclearFacilityMenu.IMAGE_HEIGHT
+        ));
+        layouts.add(NuclearThermalScreen.layout(
+                NuclearThermalMenu.IMAGE_WIDTH, NuclearThermalMenu.IMAGE_HEIGHT
+        ));
+        layouts.add(NuclearReactorScreen.layout(
+                NuclearReactorMenu.IMAGE_WIDTH, NuclearReactorMenu.IMAGE_HEIGHT, 104, 104, false
+        ));
+        layouts.add(NuclearReactorScreen.layout(
+                NuclearReactorMenu.IMAGE_WIDTH, NuclearReactorMenu.IMAGE_HEIGHT, 104, 104, true
+        ));
+        layouts.add(SpentFuelPoolScreen.layout(
+                SpentFuelPoolMenu.IMAGE_WIDTH, SpentFuelPoolMenu.IMAGE_HEIGHT
+        ));
+
+        assertTrue(layouts.size() >= 12, "all Magneticraft-owned screen families must publish a layout");
+        for (MachineScreenBounds.Layout layout : layouts) {
+            assertDoesNotThrow(layout::validate, layout.screenName());
+        }
+    }
+
+    @Test
+    void boundsMonitorReportsOverflowOverlapClearanceAndMissingParents() {
+        MachineScreenBounds.Layout layout = MachineScreenBounds.builder("broken", 100, 100)
+                .element("outside", new Rect(95, 95, 10, 10))
+                .element("first", new Rect(10, 10, 20, 20), "controls", 4)
+                .element("overlap", new Rect(20, 20, 20, 20), "controls", 4)
+                .element("too_close", new Rect(41, 20, 20, 20), "controls", 4)
+                .child("orphan", new Rect(60, 60, 10, 10), "missing", null, 0)
+                .build();
+
+        List<String> problems = layout.problems();
+        assertTrue(problems.stream().anyMatch(problem -> problem.contains("exceeds screen")));
+        assertTrue(problems.stream().anyMatch(problem -> problem.contains("overlaps")));
+        assertTrue(problems.stream().anyMatch(problem -> problem.contains("clearance")));
+        assertTrue(problems.stream().anyMatch(problem -> problem.contains("missing parent")));
     }
 
     private static boolean hasProgress(MultiblockDefinition definition) {
@@ -223,10 +328,19 @@ class ScreenLayoutContractTest {
             Rect panel,
             String name
     ) {
-        LegacyMachineGuiLayout.Size expanded = LegacyMachineGuiLayout.withElectricalPanel(base);
+        assertElectricalPanel(base, panel, name, 96);
+    }
+
+    private static void assertElectricalPanel(
+            LegacyMachineGuiLayout.Size base,
+            Rect panel,
+            String name,
+            int minimumWidth
+    ) {
+        LegacyMachineGuiLayout.Size expanded = LegacyMachineGuiLayout.withElectricalPanel(base, panel.width());
         assertTrue(expanded.bounds().contains(panel), () -> name + " electrical panel exceeds its screen");
         assertFalse(base.bounds().overlaps(panel), () -> name + " electrical panel overlaps legacy content");
-        assertTrue(panel.width() >= 96 && panel.height() >= 120,
+        assertTrue(panel.width() >= minimumWidth && panel.height() >= 120,
                 () -> name + " electrical panel cannot fit two terminal summaries");
     }
 

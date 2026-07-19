@@ -9,7 +9,6 @@ import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMac
 import committee.nova.mods.magneticraft.network.ModNetwork;
 import committee.nova.mods.magneticraft.network.UploadComputerProgramMessage;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -32,13 +31,16 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
     static final int STATE_TOP = 20;
     static final int STATE_LINE_HEIGHT = 9;
     static final int EDITOR_PANEL_BOTTOM = 114;
+    static final int ROBOT_ELECTRICAL_PANEL_WIDTH = 69;
     private static final int STATE_LEFT = 246;
     private static final int STATE_WIDTH = 96;
 
     private final List<String> lines = new ArrayList<>(MAX_LINES);
     private final List<EditBox> editors = new ArrayList<>(LINES_PER_PAGE);
     private ScriptLanguage language;
-    private Button languageButton;
+    private MachineIconButton previousButton;
+    private MachineIconButton nextButton;
+    private MachineIconButton languageButton;
     private int page;
     private Component validationMessage = Component.empty();
     private final int baseImageWidth;
@@ -49,11 +51,11 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
         LegacyMachineGuiLayout.Size baseSize = LegacyMachineGuiLayout.programmableSize(menu.miningRobot());
         baseImageWidth = baseSize.width();
         electricalPanel = menu.miningRobot()
-                ? LegacyMachineGuiLayout.electricalPanel(baseImageWidth)
+                ? LegacyMachineGuiLayout.electricalPanel(baseImageWidth, ROBOT_ELECTRICAL_PANEL_WIDTH)
                 : null;
         LegacyMachineGuiLayout.Size size = electricalPanel == null
                 ? baseSize
-                : LegacyMachineGuiLayout.withElectricalPanel(baseSize);
+                : LegacyMachineGuiLayout.withElectricalPanel(baseSize, ROBOT_ELECTRICAL_PANEL_WIDTH);
         imageWidth = size.width();
         imageHeight = size.height();
         inventoryLabelX = LegacyMachineGuiLayout.PROGRAMMABLE_PLAYER_LEFT;
@@ -69,6 +71,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
     @Override
     protected void init() {
         super.init();
+        MachineScreenLayout.validateInDevelopment(layout());
         editors.clear();
         for (int row = 0; row < LINES_PER_PAGE; row++) {
             EditBox editor = new EditBox(
@@ -84,61 +87,62 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
         }
         List<LegacyMachineGuiLayout.Rect> buttons = LegacyMachineGuiLayout.programmableButtons();
         LegacyMachineGuiLayout.Rect previous = buttons.get(0);
-        addRenderableWidget(Button.builder(Component.literal("<"), ignored -> setPage(page - 1))
-                .bounds(leftPos + previous.x(), topPos + previous.y(), previous.width(), previous.height())
-                .build());
+        previousButton = addRenderableWidget(new MachineIconButton(
+                leftPos + previous.x(), topPos + previous.y(), previous.width(), previous.height(),
+                MachineIcon.PREVIOUS,
+                Component.translatable("gui.magneticraft.programmable.previous_page"),
+                pageExplanation("gui.magneticraft.programmable.previous_page"),
+                ignored -> setPage(page - 1)
+        ));
         LegacyMachineGuiLayout.Rect next = buttons.get(1);
-        addRenderableWidget(Button.builder(Component.literal(">"), ignored -> setPage(page + 1))
-                .bounds(leftPos + next.x(), topPos + next.y(), next.width(), next.height())
-                .build());
+        nextButton = addRenderableWidget(new MachineIconButton(
+                leftPos + next.x(), topPos + next.y(), next.width(), next.height(),
+                MachineIcon.NEXT,
+                Component.translatable("gui.magneticraft.programmable.next_page"),
+                pageExplanation("gui.magneticraft.programmable.next_page"),
+                ignored -> setPage(page + 1)
+        ));
         LegacyMachineGuiLayout.Rect languageBounds = buttons.get(2);
-        languageButton = addRenderableWidget(Button.builder(languageLabel(), ignored -> cycleLanguage())
-                .bounds(
-                        leftPos + languageBounds.x(),
-                        topPos + languageBounds.y(),
-                        languageBounds.width(),
-                        languageBounds.height()
-                )
-                .build());
+        languageButton = addRenderableWidget(new MachineIconButton(
+                leftPos + languageBounds.x(), topPos + languageBounds.y(),
+                languageBounds.width(), languageBounds.height(), MachineIcon.LANGUAGE,
+                Component.translatable("gui.magneticraft.programmable.language"),
+                languageExplanation(),
+                ignored -> cycleLanguage()
+        ));
         LegacyMachineGuiLayout.Rect uploadBounds = buttons.get(3);
-        addRenderableWidget(Button.builder(
-                        Component.translatable("gui.magneticraft.programmable.upload"),
-                        ignored -> uploadProgram()
-                )
-                .bounds(
-                        leftPos + uploadBounds.x(),
-                        topPos + uploadBounds.y(),
-                        uploadBounds.width(),
-                        uploadBounds.height()
-                )
-                .build());
+        addRenderableWidget(new MachineIconButton(
+                leftPos + uploadBounds.x(), topPos + uploadBounds.y(),
+                uploadBounds.width(), uploadBounds.height(), MachineIcon.UPLOAD,
+                Component.translatable("gui.magneticraft.programmable.upload"),
+                Component.translatable("gui.magneticraft.programmable.upload.tooltip"),
+                ignored -> uploadProgram()
+        ));
         loadVisibleLines();
+        refreshNavigationButtons();
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xFF20242A);
-        graphics.fill(leftPos + 5, topPos + 14, leftPos + 238, topPos + EDITOR_PANEL_BOTTOM, 0xFF101316);
-        graphics.fill(leftPos + 242, topPos + 14, leftPos + 346, topPos + EDITOR_PANEL_BOTTOM, 0xFF171B20);
+        MachineScreenLayout.drawPanel(graphics, leftPos, topPos, imageWidth, imageHeight);
+        MachineScreenLayout.drawHeader(graphics, leftPos, topPos, baseImageWidth);
+        MachineScreenLayout.drawCard(graphics, leftPos + 5, topPos + 14, 233, EDITOR_PANEL_BOTTOM - 14);
+        MachineScreenLayout.drawCard(graphics, leftPos + 242, topPos + 14, 104, EDITOR_PANEL_BOTTOM - 14);
         int playerTop = LegacyMachineGuiLayout.programmablePlayerTop(menu.miningRobot());
-        graphics.fill(leftPos + 91, topPos + playerTop - 4, leftPos + 258, topPos + playerTop + 78, 0xFF171B20);
+        MachineScreenLayout.drawCard(graphics, leftPos + 91, topPos + playerTop - 4, 167, 82);
         if (menu.miningRobot()) {
-            graphics.fill(leftPos + 264, topPos + playerTop - 4, leftPos + 346, topPos + playerTop + 78, 0xFF171B20);
-            graphics.fill(
-                    leftPos + STATE_LEFT,
-                    topPos + ROBOT_ENERGY_TOP,
-                    leftPos + STATE_LEFT + STATE_WIDTH,
-                    topPos + ROBOT_ENERGY_TOP + ROBOT_ENERGY_HEIGHT,
-                    0xFF303740
-            );
+            MachineScreenLayout.drawCard(graphics, leftPos + 264, topPos + playerTop - 4, 82, 82);
             int capacity = menu.energyCapacity();
             int width = capacity <= 0 ? 0 : (int) Math.min(94L, (long) menu.energyStored() * 94L / capacity);
-            graphics.fill(
-                    leftPos + STATE_LEFT + 1,
-                    topPos + ROBOT_ENERGY_TOP + 1,
-                    leftPos + STATE_LEFT + 1 + width,
-                    topPos + ROBOT_ENERGY_TOP + ROBOT_ENERGY_HEIGHT - 1,
-                    0xFF4DA3FF
+            MachineScreenLayout.drawStatusBar(
+                    graphics,
+                    leftPos + STATE_LEFT,
+                    topPos + ROBOT_ENERGY_TOP,
+                    STATE_WIDTH,
+                    ROBOT_ENERGY_HEIGHT,
+                    width,
+                    MachineScreenLayout.ENERGY,
+                    false
             );
         }
         if (electricalPanel != null) {
@@ -159,7 +163,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                 MachineScreenLayout.fitToWidth(font, title, 230),
                 titleLabelX,
                 titleLabelY,
-                0xFFE6EDF3,
+                MachineScreenLayout.TEXT_PRIMARY,
                 false
         );
         for (int row = 0; row < LINES_PER_PAGE; row++) {
@@ -168,7 +172,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     Integer.toString(page * LINES_PER_PAGE + row),
                     8,
                     20 + row * 12,
-                    0xFF8B949E,
+                    MachineScreenLayout.TEXT_MUTED,
                     false
             );
         }
@@ -177,7 +181,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                 MachineScreenLayout.fitToWidth(font, stateLabel(), STATE_WIDTH),
                 STATE_LEFT,
                 STATE_TOP,
-                menu.fault() == VmFault.NONE ? 0xFF7EE787 : 0xFFFF7B72,
+                menu.fault() == VmFault.NONE ? MachineScreenLayout.SUCCESS : MachineScreenLayout.DANGER,
                 false
         );
         graphics.drawString(
@@ -193,7 +197,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                 ),
                 STATE_LEFT,
                 STATE_TOP + STATE_LINE_HEIGHT,
-                0xFFB8C0C8,
+                MachineScreenLayout.TEXT_MUTED,
                 false
         );
         if (validationMessage.getString().isEmpty()) {
@@ -202,7 +206,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     Component.translatable("gui.magneticraft.programmable.page", page + 1, PAGE_COUNT),
                     8,
                     LegacyMachineGuiLayout.PROGRAMMABLE_PAGE_TOP,
-                    0xFFB8C0C8,
+                    MachineScreenLayout.TEXT_MUTED,
                     false
             );
         } else {
@@ -211,11 +215,12 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
                     MachineScreenLayout.fitToWidth(font, validationMessage, 230),
                     8,
                     LegacyMachineGuiLayout.PROGRAMMABLE_PAGE_TOP,
-                    0xFFFF7B72,
+                    MachineScreenLayout.DANGER,
                     false
             );
         }
-        graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY, 0xFFB8C0C8, false);
+        graphics.drawString(font, playerInventoryTitle, inventoryLabelX, inventoryLabelY,
+                MachineScreenLayout.TEXT_MUTED, false);
     }
 
     @Override
@@ -250,6 +255,7 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
         page = Math.max(0, Math.min(PAGE_COUNT - 1, requestedPage));
         validationMessage = Component.empty();
         loadVisibleLines();
+        refreshNavigationButtons();
     }
 
     private void saveVisibleLines() {
@@ -297,12 +303,100 @@ public final class ProgrammableScreen extends AbstractContainerScreen<Programmab
     private void cycleLanguage() {
         ScriptLanguage[] languages = ScriptLanguage.values();
         language = languages[(language.ordinal() + 1) % languages.length];
-        languageButton.setMessage(languageLabel());
+        languageButton.updateExplanation(
+                Component.translatable("gui.magneticraft.programmable.language"),
+                languageExplanation()
+        );
         validationMessage = Component.empty();
     }
 
     private Component languageLabel() {
         return Component.literal(language.serializedName().toUpperCase(Locale.ROOT));
+    }
+
+    private Component languageExplanation() {
+        return Component.translatable("gui.magneticraft.programmable.language")
+                .append("\n")
+                .append(Component.translatable("gui.magneticraft.control.current_state", languageLabel()));
+    }
+
+    private Component pageExplanation(String actionKey) {
+        return Component.translatable(actionKey)
+                .append("\n")
+                .append(Component.translatable(
+                        "gui.magneticraft.control.current_state",
+                        Component.translatable("gui.magneticraft.programmable.page", page + 1, PAGE_COUNT)
+                ));
+    }
+
+    private void refreshNavigationButtons() {
+        if (previousButton != null) {
+            previousButton.active = page > 0;
+            previousButton.updateExplanation(
+                    Component.translatable("gui.magneticraft.programmable.previous_page"),
+                    pageExplanation("gui.magneticraft.programmable.previous_page")
+            );
+        }
+        if (nextButton != null) {
+            nextButton.active = page + 1 < PAGE_COUNT;
+            nextButton.updateExplanation(
+                    Component.translatable("gui.magneticraft.programmable.next_page"),
+                    pageExplanation("gui.magneticraft.programmable.next_page")
+            );
+        }
+    }
+
+    MachineScreenBounds.Layout layout() {
+        return layout(menu.miningRobot(), imageWidth, imageHeight);
+    }
+
+    static MachineScreenBounds.Layout layout(boolean miningRobot, int imageWidth, int imageHeight) {
+        int baseImageWidth = LegacyMachineGuiLayout.PROGRAMMABLE_WIDTH;
+        int playerTop = LegacyMachineGuiLayout.programmablePlayerTop(miningRobot);
+        MachineScreenBounds.Builder builder = MachineScreenBounds.builder(
+                miningRobot ? "programmable/mining_robot" : "programmable/computer",
+                imageWidth,
+                imageHeight
+        ).element("header", new LegacyMachineGuiLayout.Rect(1, 1, baseImageWidth - 2, 15), "sections", 1)
+                .element("editor_panel", new LegacyMachineGuiLayout.Rect(5, 14, 233, EDITOR_PANEL_BOTTOM - 14))
+                .element("state_panel", new LegacyMachineGuiLayout.Rect(242, 14, 104, EDITOR_PANEL_BOTTOM - 14))
+                .element("player_inventory", new LegacyMachineGuiLayout.Rect(91, playerTop - 4, 167, 82),
+                        "sections", 2);
+        for (int row = 0; row < LINES_PER_PAGE; row++) {
+            builder.child("editor_" + row, new LegacyMachineGuiLayout.Rect(
+                    LegacyMachineGuiLayout.PROGRAMMABLE_EDITOR_LEFT,
+                    LegacyMachineGuiLayout.PROGRAMMABLE_EDITOR_TOP + row * 12,
+                    LegacyMachineGuiLayout.PROGRAMMABLE_EDITOR_WIDTH,
+                    LegacyMachineGuiLayout.PROGRAMMABLE_EDITOR_HEIGHT
+            ), "editor_panel", "editors", 1);
+        }
+        List<LegacyMachineGuiLayout.Rect> buttons = LegacyMachineGuiLayout.programmableButtons();
+        for (int index = 0; index < buttons.size(); index++) {
+            builder.element("button_" + index, buttons.get(index), "buttons", 4);
+        }
+        List<LegacyMachineGuiLayout.Rect> playerSlots = LegacyMachineGuiLayout.playerInventorySlots(
+                LegacyMachineGuiLayout.PROGRAMMABLE_PLAYER_LEFT, playerTop
+        );
+        for (int index = 0; index < playerSlots.size(); index++) {
+            builder.child("player_slot_" + index, playerSlots.get(index),
+                    "player_inventory", "player_slots", 0);
+        }
+        if (miningRobot) {
+            builder.element("robot_inventory", new LegacyMachineGuiLayout.Rect(264, playerTop - 4, 82, 82),
+                    "sections", 2)
+                    .child("robot_energy", new LegacyMachineGuiLayout.Rect(
+                            STATE_LEFT, ROBOT_ENERGY_TOP, STATE_WIDTH, ROBOT_ENERGY_HEIGHT
+                    ), "state_panel", null, 0)
+                    .element("electrical", LegacyMachineGuiLayout.electricalPanel(
+                            baseImageWidth, ROBOT_ELECTRICAL_PANEL_WIDTH
+                    ), "sections", 2);
+            List<LegacyMachineGuiLayout.Point> robotSlots = LegacyMachineGuiLayout.miningRobotSlots();
+            for (int index = 0; index < robotSlots.size(); index++) {
+                builder.child("robot_slot_" + index, LegacyMachineGuiLayout.slotBounds(robotSlots.get(index)),
+                        "robot_inventory", "robot_slots", 0);
+            }
+        }
+        return builder.build();
     }
 
     private Component stateLabel() {
