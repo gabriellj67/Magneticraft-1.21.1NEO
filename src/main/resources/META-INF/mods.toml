@@ -8,6 +8,7 @@ modId = "${mod_id}"
 version = "${project_version}"
 displayName = "${mod_name}"
 displayURL = "${display_url}"
+logoFile = "logo.png"
 authors = "${mod_authors}"
 displayTest = "MATCH_VERSION"
 description = '''${mod_description}'''
