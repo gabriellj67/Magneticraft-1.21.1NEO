@@ -20,14 +20,18 @@ import java.util.Locale;
  */
 public final class GuideScreen extends Screen {
     private static final int SIDEBAR_WIDTH = 150;
+    private static final int ENTRY_LIST_LEFT = 10;
+    private static final int ENTRY_LIST_TOP = 51;
+    private static final int ENTRY_LIST_RIGHT = SIDEBAR_WIDTH - 6;
+    private static final int ENTRY_LIST_BOTTOM_MARGIN = 12;
+    private static final int ENTRY_ROW_HEIGHT = 13;
+    private static final int ENTRY_SCROLLBAR_WIDTH = 4;
     private static final int STRUCTURE_VIEW_TOP = 92;
     private static final int STRUCTURE_VIEW_BOTTOM_MARGIN = 34;
     private static final int STRUCTURE_STEP_MILLIS = 850;
 
     private EditBox search;
     private MachineIconButton modeButton;
-    private MachineIconButton previousEntry;
-    private MachineIconButton nextEntry;
     private MachineIconButton previousLayer;
     private MachineIconButton playLayers;
     private MachineIconButton resetStructure;
@@ -35,6 +39,7 @@ public final class GuideScreen extends Screen {
     private final GuideStructurePreview structurePreview = new GuideStructurePreview();
     private Mode mode = Mode.STRUCTURES;
     private int selectedIndex;
+    private int entryScrollOffset;
     private int layer;
     private boolean playingLayers = true;
     private long lastLayerAdvanceMillis = Util.getMillis();
@@ -60,22 +65,12 @@ public final class GuideScreen extends Screen {
         search.setMaxLength(64);
         search.setResponder(ignored -> {
             selectedIndex = 0;
+            entryScrollOffset = 0;
             resetStructure(true);
-            if (previousEntry != null) {
-                updateButtons();
-            }
         });
         modeButton = addRenderableWidget(guideButton(
                 width - 36, 8, MachineIcon.MODE,
                 "gui.magneticraft.guide.cycle_mode", ignored -> toggleMode()
-        ));
-        previousEntry = addRenderableWidget(guideButton(
-                12, height - 28, MachineIcon.PREVIOUS,
-                "gui.magneticraft.guide.previous_entry", ignored -> select(-1)
-        ));
-        nextEntry = addRenderableWidget(guideButton(
-                40, height - 28, MachineIcon.NEXT,
-                "gui.magneticraft.guide.next_entry", ignored -> select(1)
         ));
         previousLayer = addRenderableWidget(guideButton(
                 SIDEBAR_WIDTH + 12, height - 28, MachineIcon.DOWN,
@@ -113,10 +108,10 @@ public final class GuideScreen extends Screen {
         hoveredLegend = Component.empty();
         switch (mode) {
             case STRUCTURES -> renderStructures(graphics, mouseX, mouseY);
-            case MACHINES -> renderMachines(graphics);
-            case ITEMS -> renderItems(graphics);
-            case LANGUAGES -> renderLanguages(graphics);
-            case OPCODES -> renderOpcodes(graphics);
+            case MACHINES -> renderMachines(graphics, mouseX, mouseY);
+            case ITEMS -> renderItems(graphics, mouseX, mouseY);
+            case LANGUAGES -> renderLanguages(graphics, mouseX, mouseY);
+            case OPCODES -> renderOpcodes(graphics, mouseX, mouseY);
         }
         super.render(graphics, mouseX, mouseY, partialTick);
         if (!hoveredLegend.getString().isEmpty()) {
@@ -142,7 +137,7 @@ public final class GuideScreen extends Screen {
         advanceLayerPlayback(selected.layers().size());
         renderEntryList(graphics, guides.stream()
                 .map(guide -> Component.translatable(guide.translationKey()))
-                .toList());
+                .toList(), mouseX, mouseY);
 
         int contentLeft = SIDEBAR_WIDTH + 12;
         int contentRight = width - 16;
@@ -388,7 +383,7 @@ public final class GuideScreen extends Screen {
         }
     }
 
-    private void renderOpcodes(GuiGraphics graphics) {
+    private void renderOpcodes(GuiGraphics graphics, int mouseX, int mouseY) {
         List<GuideRepository.OpcodeGuide> opcodes = filteredOpcodes();
         if (opcodes.isEmpty()) {
             graphics.drawString(
@@ -403,7 +398,12 @@ public final class GuideScreen extends Screen {
         }
         selectedIndex = Math.max(0, Math.min(selectedIndex, opcodes.size() - 1));
         GuideRepository.OpcodeGuide selected = opcodes.get(selectedIndex);
-        renderEntryList(graphics, opcodes.stream().map(opcode -> Component.literal(opcode.id())).toList());
+        renderEntryList(
+                graphics,
+                opcodes.stream().map(opcode -> Component.literal(opcode.id())).toList(),
+                mouseX,
+                mouseY
+        );
 
         int contentLeft = SIDEBAR_WIDTH + 12;
         graphics.drawString(font, Component.literal(selected.id()), contentLeft, 44, 0xFFE6EDF3, false);
@@ -429,7 +429,7 @@ public final class GuideScreen extends Screen {
         );
     }
 
-    private void renderLanguages(GuiGraphics graphics) {
+    private void renderLanguages(GuiGraphics graphics, int mouseX, int mouseY) {
         List<GuideRepository.ComputerLanguageGuide> languages = filteredLanguages();
         if (languages.isEmpty()) {
             graphics.drawString(
@@ -448,7 +448,7 @@ public final class GuideScreen extends Screen {
                 .map(language -> Component.translatable(
                         "guide.magneticraft.computer.language." + language.id() + ".name"
                 ))
-                .toList());
+                .toList(), mouseX, mouseY);
 
         int contentLeft = SIDEBAR_WIDTH + 12;
         int contentWidth = Math.max(80, width - contentLeft - 16);
@@ -514,7 +514,7 @@ public final class GuideScreen extends Screen {
         graphics.drawWordWrap(font, securityLine, contentLeft, cursorY, contentWidth, 0xFFB8C0C8);
     }
 
-    private void renderItems(GuiGraphics graphics) {
+    private void renderItems(GuiGraphics graphics, int mouseX, int mouseY) {
         List<GuideRepository.ItemGuide> items = filteredItems();
         if (items.isEmpty()) {
             graphics.drawString(
@@ -531,7 +531,7 @@ public final class GuideScreen extends Screen {
         GuideRepository.ItemGuide selected = items.get(selectedIndex);
         renderEntryList(graphics, items.stream()
                 .map(item -> Component.translatable(item.translationKey()))
-                .toList());
+                .toList(), mouseX, mouseY);
 
         int contentLeft = SIDEBAR_WIDTH + 12;
         int contentWidth = Math.max(80, width - contentLeft - 16);
@@ -552,7 +552,7 @@ public final class GuideScreen extends Screen {
         renderItemStat(graphics, "gui.magneticraft.guide.use_cost", selected.useCostFe(), contentLeft, cursorY);
     }
 
-    private void renderMachines(GuiGraphics graphics) {
+    private void renderMachines(GuiGraphics graphics, int mouseX, int mouseY) {
         List<GuideRepository.MachineGuide> machines = filteredMachines();
         if (machines.isEmpty()) {
             graphics.drawString(
@@ -569,7 +569,7 @@ public final class GuideScreen extends Screen {
         GuideRepository.MachineGuide selected = machines.get(selectedIndex);
         renderEntryList(graphics, machines.stream()
                 .map(machine -> Component.translatable(machine.translationKey()))
-                .toList());
+                .toList(), mouseX, mouseY);
 
         int contentLeft = SIDEBAR_WIDTH + 12;
         int contentWidth = Math.max(80, width - contentLeft - 16);
@@ -654,15 +654,83 @@ public final class GuideScreen extends Screen {
         return y + 12;
     }
 
-    private void renderEntryList(GuiGraphics graphics, List<? extends Component> entries) {
-        int visible = Math.max(1, (height - 90) / 11);
-        int first = Math.max(0, Math.min(selectedIndex - visible / 2, entries.size() - visible));
+    private void renderEntryList(
+            GuiGraphics graphics,
+            List<? extends Component> entries,
+            int mouseX,
+            int mouseY
+    ) {
+        int visible = visibleEntryCount(height);
+        entryScrollOffset = clampEntryScroll(entryScrollOffset, entries.size(), height);
+        int first = entryScrollOffset;
         int last = Math.min(entries.size(), first + visible);
+        int hoveredIndex = entryIndexAt(mouseX, mouseY, first, entries.size(), height);
+        boolean hasScrollbar = entries.size() > visible;
+        int textWidth = ENTRY_LIST_RIGHT - ENTRY_LIST_LEFT - 7
+                - (hasScrollbar ? ENTRY_SCROLLBAR_WIDTH + 3 : 0);
         for (int index = first; index < last; index++) {
-            int y = 54 + (index - first) * 11;
-            int color = index == selectedIndex ? 0xFF79C0FF : 0xFFB8C0C8;
-            graphics.drawString(font, entries.get(index), 12, y, color, false);
+            int y = ENTRY_LIST_TOP + (index - first) * ENTRY_ROW_HEIGHT;
+            boolean selected = index == selectedIndex;
+            boolean hovered = index == hoveredIndex;
+            if (selected || hovered) {
+                graphics.fill(
+                        ENTRY_LIST_LEFT,
+                        y,
+                        ENTRY_LIST_RIGHT - (hasScrollbar ? ENTRY_SCROLLBAR_WIDTH + 2 : 0),
+                        y + ENTRY_ROW_HEIGHT - 1,
+                        selected ? MachineScreenLayout.BUTTON_SELECTED : MachineScreenLayout.BUTTON_HOVER
+                );
+            }
+            if (selected) {
+                graphics.fill(
+                        ENTRY_LIST_LEFT,
+                        y,
+                        ENTRY_LIST_LEFT + 2,
+                        y + ENTRY_ROW_HEIGHT - 1,
+                        MachineScreenLayout.ACCENT
+                );
+            }
+            Component entry = entries.get(index);
+            graphics.drawString(
+                    font,
+                    MachineScreenLayout.fitToWidth(font, entry, textWidth),
+                    ENTRY_LIST_LEFT + 4,
+                    y + 2,
+                    selected ? MachineScreenLayout.ACCENT : MachineScreenLayout.TEXT_PRIMARY,
+                    false
+            );
+            if (hovered && font.width(entry) > textWidth) {
+                hoveredLegend = entry;
+            }
         }
+        if (hasScrollbar) {
+            renderEntryScrollbar(graphics, entries.size(), visible);
+        }
+    }
+
+    private void renderEntryScrollbar(GuiGraphics graphics, int entryCount, int visibleCount) {
+        int listBottom = entryListBottom(height);
+        int trackHeight = listBottom - ENTRY_LIST_TOP;
+        int trackLeft = ENTRY_LIST_RIGHT - ENTRY_SCROLLBAR_WIDTH;
+        int thumbHeight = Math.max(10, Math.round(trackHeight * visibleCount / (float) entryCount));
+        int maxOffset = Math.max(1, entryCount - visibleCount);
+        int thumbTop = ENTRY_LIST_TOP + Math.round(
+                (trackHeight - thumbHeight) * entryScrollOffset / (float) maxOffset
+        );
+        graphics.fill(
+                trackLeft,
+                ENTRY_LIST_TOP,
+                ENTRY_LIST_RIGHT,
+                listBottom,
+                MachineScreenLayout.INSET_BACKGROUND
+        );
+        graphics.fill(
+                trackLeft,
+                thumbTop,
+                ENTRY_LIST_RIGHT,
+                thumbTop + thumbHeight,
+                MachineScreenLayout.ACCENT
+        );
     }
 
     private void renderLegendIcon(
@@ -722,24 +790,17 @@ public final class GuideScreen extends Screen {
         Mode[] modes = Mode.values();
         mode = modes[(mode.ordinal() + 1) % modes.length];
         selectedIndex = 0;
+        entryScrollOffset = 0;
         resetStructure(mode == Mode.STRUCTURES);
         updateButtons();
     }
 
-    private void select(int amount) {
-        int size = switch (mode) {
-            case STRUCTURES -> filteredStructures().size();
-            case MACHINES -> filteredMachines().size();
-            case ITEMS -> filteredItems().size();
-            case LANGUAGES -> filteredLanguages().size();
-            case OPCODES -> filteredOpcodes().size();
-        };
-        if (size == 0) {
+    private void selectEntry(int index) {
+        if (index == selectedIndex) {
             return;
         }
-        selectedIndex = Math.floorMod(selectedIndex + amount, size);
+        selectedIndex = index;
         resetStructure(mode == Mode.STRUCTURES);
-        updateButtons();
     }
 
     private void selectLayer(int amount) {
@@ -810,31 +871,9 @@ public final class GuideScreen extends Screen {
         playLayers.active = hasStructures && layers > 1;
         resetStructure.active = hasStructures;
         nextLayer.active = hasStructures && layer < layers - 1;
-        boolean hasEntries = switch (mode) {
-            case STRUCTURES -> !filteredStructures().isEmpty();
-            case MACHINES -> !filteredMachines().isEmpty();
-            case ITEMS -> !filteredItems().isEmpty();
-            case LANGUAGES -> !filteredLanguages().isEmpty();
-            case OPCODES -> !filteredOpcodes().isEmpty();
-        };
-        previousEntry.active = hasEntries;
-        nextEntry.active = hasEntries;
         modeButton.updateExplanation(
                 Component.translatable("gui.magneticraft.guide.cycle_mode"),
                 controlExplanation("gui.magneticraft.guide.cycle_mode", mode.title())
-        );
-        Component entryState = Component.translatable(
-                "gui.magneticraft.guide.entry_position",
-                hasEntries ? selectedIndex + 1 : 0,
-                entryCount()
-        );
-        previousEntry.updateExplanation(
-                Component.translatable("gui.magneticraft.guide.previous_entry"),
-                controlExplanation("gui.magneticraft.guide.previous_entry", entryState)
-        );
-        nextEntry.updateExplanation(
-                Component.translatable("gui.magneticraft.guide.next_entry"),
-                controlExplanation("gui.magneticraft.guide.next_entry", entryState)
         );
         Component layerState = layers == 0
                 ? Component.translatable("gui.magneticraft.guide.none")
@@ -905,6 +944,19 @@ public final class GuideScreen extends Screen {
         if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
+        if (button == 0) {
+            int entryIndex = entryIndexAt(
+                    mouseX,
+                    mouseY,
+                    entryScrollOffset,
+                    entryCount(),
+                    height
+            );
+            if (entryIndex >= 0) {
+                selectEntry(entryIndex);
+                return true;
+            }
+        }
         if (mode != Mode.STRUCTURES) {
             return false;
         }
@@ -945,10 +997,68 @@ public final class GuideScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (insideEntryList(mouseX, mouseY)) {
+            int nextOffset = scrolledEntryOffset(entryScrollOffset, entryCount(), height, delta);
+            if (nextOffset != entryScrollOffset) {
+                entryScrollOffset = nextOffset;
+                return true;
+            }
+        }
         if (mode == Mode.STRUCTURES && structurePreview.mouseScrolled(mouseX, mouseY, delta)) {
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, delta);
+    }
+
+    private boolean insideEntryList(double mouseX, double mouseY) {
+        return mouseX >= ENTRY_LIST_LEFT
+                && mouseX < ENTRY_LIST_RIGHT
+                && mouseY >= ENTRY_LIST_TOP
+                && mouseY < entryListBottom(height);
+    }
+
+    static int visibleEntryCount(int screenHeight) {
+        return Math.max(1, (entryListBottom(screenHeight) - ENTRY_LIST_TOP) / ENTRY_ROW_HEIGHT);
+    }
+
+    static int clampEntryScroll(int offset, int entryCount, int screenHeight) {
+        int maximum = Math.max(0, entryCount - visibleEntryCount(screenHeight));
+        return Mth.clamp(offset, 0, maximum);
+    }
+
+    static int scrolledEntryOffset(int offset, int entryCount, int screenHeight, double delta) {
+        int clamped = clampEntryScroll(offset, entryCount, screenHeight);
+        if (delta == 0.0D) {
+            return clamped;
+        }
+        int direction = delta > 0.0D ? -1 : 1;
+        int steps = Math.max(1, (int) Math.floor(Math.abs(delta)));
+        return clampEntryScroll(clamped + direction * steps, entryCount, screenHeight);
+    }
+
+    static int entryIndexAt(
+            double mouseX,
+            double mouseY,
+            int firstEntry,
+            int entryCount,
+            int screenHeight
+    ) {
+        if (mouseX < ENTRY_LIST_LEFT
+                || mouseX >= ENTRY_LIST_RIGHT - ENTRY_SCROLLBAR_WIDTH - 2
+                || mouseY < ENTRY_LIST_TOP
+                || mouseY >= entryListBottom(screenHeight)) {
+            return -1;
+        }
+        int row = (int) ((mouseY - ENTRY_LIST_TOP) / ENTRY_ROW_HEIGHT);
+        if (row < 0 || row >= visibleEntryCount(screenHeight)) {
+            return -1;
+        }
+        int index = clampEntryScroll(firstEntry, entryCount, screenHeight) + row;
+        return index < entryCount ? index : -1;
+    }
+
+    private static int entryListBottom(int screenHeight) {
+        return Math.max(ENTRY_LIST_TOP + ENTRY_ROW_HEIGHT, screenHeight - ENTRY_LIST_BOTTOM_MARGIN);
     }
 
     private boolean insideTimeline(double mouseX, double mouseY) {
@@ -1003,12 +1113,12 @@ public final class GuideScreen extends Screen {
                 ))
                 .child("search", new Rect(12, 28, SIDEBAR_WIDTH - 24, 18), "sidebar", null, 0)
                 .child("mode", new Rect(width - 36, 8, 24, 20), "header", null, 0)
-                .child("previous_entry", new Rect(
-                        12, height - 28, 24, 20
-                ), "sidebar", "navigation", 4)
-                .child("next_entry", new Rect(
-                        40, height - 28, 24, 20
-                ), "sidebar", "navigation", 4)
+                .child("entry_list", new Rect(
+                        ENTRY_LIST_LEFT,
+                        ENTRY_LIST_TOP,
+                        ENTRY_LIST_RIGHT - ENTRY_LIST_LEFT,
+                        entryListBottom(height) - ENTRY_LIST_TOP
+                ), "sidebar", null, 0)
                 .child("structure_viewport", new Rect(
                         viewportLeft, STRUCTURE_VIEW_TOP, viewportWidth, viewportHeight
                 ), "content", null, 0)

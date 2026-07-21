@@ -302,6 +302,25 @@ class ScreenLayoutContractTest {
     }
 
     @Test
+    void guideSidebarUsesDirectRowSelectionAndClampedWheelScrolling() {
+        assertEquals(13, GuideScreen.visibleEntryCount(240));
+        assertEquals(22, GuideScreen.visibleEntryCount(360));
+
+        assertEquals(0, GuideScreen.entryIndexAt(12, 52, 0, 20, 240));
+        assertEquals(7, GuideScreen.entryIndexAt(12, 52, 7, 20, 240));
+        assertEquals(19, GuideScreen.entryIndexAt(12, 208, 7, 20, 240));
+        assertEquals(-1, GuideScreen.entryIndexAt(12, 227, 7, 20, 240));
+        assertEquals(-1, GuideScreen.entryIndexAt(138, 52, 7, 20, 240));
+        assertEquals(-1, GuideScreen.entryIndexAt(12, 52, 0, 0, 240));
+
+        assertEquals(0, GuideScreen.clampEntryScroll(-10, 20, 240));
+        assertEquals(7, GuideScreen.clampEntryScroll(100, 20, 240));
+        assertEquals(1, GuideScreen.scrolledEntryOffset(0, 20, 240, -1.0D));
+        assertEquals(0, GuideScreen.scrolledEntryOffset(1, 20, 240, 1.0D));
+        assertEquals(7, GuideScreen.scrolledEntryOffset(6, 20, 240, -5.0D));
+    }
+
+    @Test
     void boundsMonitorReportsOverflowOverlapClearanceAndMissingParents() {
         MachineScreenBounds.Layout layout = MachineScreenBounds.builder("broken", 100, 100)
                 .element("outside", new Rect(95, 95, 10, 10))
