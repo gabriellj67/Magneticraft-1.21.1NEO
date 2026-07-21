@@ -6,13 +6,15 @@ import committee.nova.mods.magneticraft.content.nuclear.reactor.NuclearReactorPr
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GuideRepositoryTest {
@@ -30,6 +32,9 @@ class GuideRepositoryTest {
             assertEquals(preset.width(), guide.layers().get(0).get(0).length(), id);
             assertTrue(guide.legend().containsKey('M'), id);
             assertTrue(guide.legend().containsKey('F'), id);
+            assertTrue(guide.legend().values().stream()
+                    .filter(entry -> !entry.ignored())
+                    .allMatch(entry -> entry.blockId() != null), id);
             assertEquals(List.of(64_000, 64_000), guide.ports().fluidTankCapacitiesMb(), id);
         }
     }
@@ -91,6 +96,37 @@ class GuideRepositoryTest {
         assertFalse(guide.ports().electricity());
         assertFalse(guide.ports().heat());
         assertTrue(guide.ports().fluidTankCapacitiesMb().isEmpty());
+        assertNull(guide.legend().get('C').blockId());
+    }
+
+    @Test
+    void parsesThreeDimensionalPreviewBlockStatesAndIgnoredCells() {
+        JsonObject root = JsonParser.parseString("""
+                {
+                  "schema_version": 1,
+                  "id": "magneticraft:test",
+                  "translation_key": "block.magneticraft.test",
+                  "category": "processing",
+                  "layers": [["CX"]],
+                  "legend": [
+                    {
+                      "symbol": "C",
+                      "rule": "column_x",
+                      "block": "magneticraft:machine_support_column",
+                      "properties": {"axis": "x"}
+                    },
+                    {"symbol": "X", "rule": "ignore", "ignored": true}
+                  ]
+                }
+                """).getAsJsonObject();
+
+        GuideRepository.MultiblockGuide guide = GuideRepository.parseMultiblock(FILE, root);
+
+        GuideRepository.LegendEntry column = guide.legend().get('C');
+        assertEquals("magneticraft:machine_support_column", column.blockId().toString());
+        assertEquals(Map.of("axis", "x"), column.properties());
+        assertFalse(column.ignored());
+        assertTrue(guide.legend().get('X').ignored());
     }
 
     @Test

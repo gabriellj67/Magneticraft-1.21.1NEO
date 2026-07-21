@@ -299,9 +299,28 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
                 throw new IllegalArgumentException("Invalid legend symbol in " + file);
             }
             char symbol = symbolText.charAt(0);
+            ResourceLocation blockId = entry.has("block")
+                    ? parseId(file, GsonHelper.getAsString(entry, "block"))
+                    : null;
+            Map<String, String> properties = new LinkedHashMap<>();
+            if (entry.has("properties") && entry.get("properties").isJsonObject()) {
+                for (Map.Entry<String, JsonElement> property : entry.getAsJsonObject("properties").entrySet()) {
+                    String value = property.getValue().getAsString();
+                    if (property.getKey().isBlank() || value.isBlank()) {
+                        throw new IllegalArgumentException("Blank block-state property in " + file);
+                    }
+                    properties.put(property.getKey(), value);
+                }
+            }
             LegendEntry previous = legend.put(
                     symbol,
-                    new LegendEntry(symbol, GsonHelper.getAsString(entry, "rule"))
+                    new LegendEntry(
+                            symbol,
+                            GsonHelper.getAsString(entry, "rule"),
+                            blockId,
+                            properties,
+                            entry.has("ignored") && entry.get("ignored").getAsBoolean()
+                    )
             );
             if (previous != null) {
                 throw new IllegalArgumentException("Duplicate legend symbol " + symbol + " in " + file);
@@ -379,7 +398,16 @@ public final class GuideRepository extends SimplePreparableReloadListener<GuideR
         }
     }
 
-    public record LegendEntry(char symbol, String rule) {
+    public record LegendEntry(
+            char symbol,
+            String rule,
+            ResourceLocation blockId,
+            Map<String, String> properties,
+            boolean ignored
+    ) {
+        public LegendEntry {
+            properties = Map.copyOf(properties);
+        }
     }
 
     public record OpcodeGuide(String id, int code, int operandCount, String descriptionKey) {

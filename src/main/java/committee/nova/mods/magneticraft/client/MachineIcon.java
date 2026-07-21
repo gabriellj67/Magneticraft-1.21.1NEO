@@ -9,6 +9,7 @@ enum MachineIcon {
     UP,
     DOWN,
     START,
+    PAUSE,
     STOP,
     SCRAM,
     LOAD,
@@ -40,6 +41,10 @@ enum MachineIcon {
             case UP -> arrowUp(graphics, centerX, centerY, color);
             case DOWN -> arrowDown(graphics, centerX, centerY, color);
             case START -> triangleRight(graphics, centerX, centerY, color);
+            case PAUSE -> {
+                graphics.fill(centerX - 4, centerY - 4, centerX - 1, centerY + 5, color);
+                graphics.fill(centerX + 1, centerY - 4, centerX + 4, centerY + 5, color);
+            }
             case STOP -> graphics.fill(centerX - 3, centerY - 3, centerX + 4, centerY + 4, color);
             case SCRAM -> {
                 graphics.fill(centerX - 4, centerY - 4, centerX + 5, centerY + 5, color);

@@ -277,6 +277,7 @@ class ScreenLayoutContractTest {
                 robotBase, ProgrammableScreen.ROBOT_ELECTRICAL_PANEL_WIDTH
         );
         layouts.add(ProgrammableScreen.layout(true, robot.width(), robot.height()));
+        layouts.add(GuideScreen.layout(320, 240));
         layouts.add(GuideScreen.layout(640, 360));
         layouts.add(NuclearFacilityScreen.layout(
                 NuclearFacilityMenu.IMAGE_WIDTH, NuclearFacilityMenu.IMAGE_HEIGHT

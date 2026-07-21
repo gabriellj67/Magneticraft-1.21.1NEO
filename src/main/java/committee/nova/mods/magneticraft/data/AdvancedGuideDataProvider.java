@@ -630,13 +630,25 @@ final class AdvancedGuideDataProvider implements DataProvider {
             case COLUMN_X -> addColumn(entry, "x");
             case COLUMN_Y -> addColumn(entry, "y");
             case COLUMN_Z -> addColumn(entry, "z");
+            case WOODEN_SLAB -> entry.addProperty("block", "minecraft:oak_slab");
+            case STONE_SLAB -> entry.addProperty("block", "minecraft:stone_slab");
+            case KINETIC_SHAFT -> addBlockProperty(entry, "magneticraft:wooden_shaft", "axis", "y");
         }
     }
 
     private static void addColumn(JsonObject entry, String axis) {
-        entry.addProperty("block", "magneticraft:machine_support_column");
+        addBlockProperty(entry, "magneticraft:machine_support_column", "axis", axis);
+    }
+
+    private static void addBlockProperty(
+            JsonObject entry,
+            String block,
+            String property,
+            String value
+    ) {
+        entry.addProperty("block", block);
         JsonObject properties = new JsonObject();
-        properties.addProperty("axis", axis);
+        properties.addProperty(property, value);
         entry.add("properties", properties);
     }
 

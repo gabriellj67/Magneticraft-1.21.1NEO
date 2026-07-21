@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 
 /** Accessible icon-only control with a stable hit box and full hover/focus explanation. */
 final class MachineIconButton extends AbstractButton {
-    private final MachineIcon icon;
+    private MachineIcon icon;
     private final OnPress onPress;
     private boolean selected;
     private boolean dangerous;
@@ -55,6 +55,10 @@ final class MachineIconButton extends AbstractButton {
     void updateExplanation(Component narration, Component tooltip) {
         setMessage(narration);
         setTooltip(Tooltip.create(tooltip, narration));
+    }
+
+    void updateIcon(MachineIcon icon) {
+        this.icon = icon;
     }
 
     @Override

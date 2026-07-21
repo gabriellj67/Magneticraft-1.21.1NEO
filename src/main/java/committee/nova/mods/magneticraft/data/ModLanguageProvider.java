@@ -922,6 +922,9 @@ final class ModLanguageProvider extends LanguageProvider {
         add("gui.magneticraft.guide.next_entry", chinese ? "下一个条目" : "Next entry");
         add("gui.magneticraft.guide.previous_layer", chinese ? "查看前一层结构" : "Previous structure layer");
         add("gui.magneticraft.guide.next_layer", chinese ? "查看后一层结构" : "Next structure layer");
+        add("gui.magneticraft.guide.play_layers", chinese ? "播放逐层搭建" : "Play layer construction");
+        add("gui.magneticraft.guide.pause_layers", chinese ? "暂停逐层搭建" : "Pause layer construction");
+        add("gui.magneticraft.guide.reset_structure_view", chinese ? "重置结构视角" : "Reset structure view");
         add("gui.magneticraft.guide.entry_position", chinese ? "条目 %s/%s" : "Entry %s/%s");
         add("gui.magneticraft.guide.mode.structures", chinese ? "多方块结构" : "Multiblocks");
         add("gui.magneticraft.guide.mode.machines", chinese ? "单方块机器" : "Single-Block Machines");
@@ -1061,6 +1064,16 @@ final class ModLanguageProvider extends LanguageProvider {
                 "Spends 500 J to survey registered generated oil fields within 128 horizontal blocks, reporting only direction, rounded distance, height range, and remaining reserve.");
         addMultiblockGuideTranslations();
         add("gui.magneticraft.guide.layer", chinese ? "层 %s/%s" : "Layer %s/%s");
+        add("gui.magneticraft.guide.structure_dimensions", chinese ? "%s × %s × %s 方块" : "%s × %s × %s blocks");
+        add("gui.magneticraft.guide.structure_interaction", chinese
+                ? "左键拖动旋转 · 滚轮缩放"
+                : "Drag to rotate · Scroll to zoom");
+        add("gui.magneticraft.guide.timeline_hint", chinese
+                ? "点击进度条切换层（当前 %s/%s）"
+                : "Click the timeline to select a layer (current %s/%s)");
+        add("gui.magneticraft.guide.structure_data", chinese ? "结构参数" : "Structure Data");
+        add("gui.magneticraft.guide.structure_parts", chinese ? "结构部件" : "Required Parts");
+        add("gui.magneticraft.guide.more_parts", chinese ? "另有 %s 种部件…" : "%s more parts…");
         add("gui.magneticraft.guide.yes", chinese ? "是" : "yes");
         add("gui.magneticraft.guide.no", chinese ? "否" : "no");
         add("gui.magneticraft.guide.none", chinese ? "无" : "none");

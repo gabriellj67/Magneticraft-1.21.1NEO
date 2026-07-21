@@ -1,10 +1,16 @@
 package committee.nova.mods.magneticraft.client;
 
 import committee.nova.mods.magneticraft.client.guide.GuideRepository;
+import committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.Locale;
@@ -14,16 +20,24 @@ import java.util.Locale;
  */
 public final class GuideScreen extends Screen {
     private static final int SIDEBAR_WIDTH = 150;
+    private static final int STRUCTURE_VIEW_TOP = 92;
+    private static final int STRUCTURE_VIEW_BOTTOM_MARGIN = 34;
+    private static final int STRUCTURE_STEP_MILLIS = 850;
 
     private EditBox search;
     private MachineIconButton modeButton;
     private MachineIconButton previousEntry;
     private MachineIconButton nextEntry;
     private MachineIconButton previousLayer;
+    private MachineIconButton playLayers;
+    private MachineIconButton resetStructure;
     private MachineIconButton nextLayer;
+    private final GuideStructurePreview structurePreview = new GuideStructurePreview();
     private Mode mode = Mode.STRUCTURES;
     private int selectedIndex;
     private int layer;
+    private boolean playingLayers = true;
+    private long lastLayerAdvanceMillis = Util.getMillis();
     private Component hoveredLegend = Component.empty();
 
     public GuideScreen() {
@@ -46,7 +60,7 @@ public final class GuideScreen extends Screen {
         search.setMaxLength(64);
         search.setResponder(ignored -> {
             selectedIndex = 0;
-            layer = 0;
+            resetStructure(true);
             if (previousEntry != null) {
                 updateButtons();
             }
@@ -67,8 +81,16 @@ public final class GuideScreen extends Screen {
                 SIDEBAR_WIDTH + 12, height - 28, MachineIcon.DOWN,
                 "gui.magneticraft.guide.previous_layer", ignored -> selectLayer(-1)
         ));
+        playLayers = addRenderableWidget(guideButton(
+                SIDEBAR_WIDTH + 40, height - 28, MachineIcon.PAUSE,
+                "gui.magneticraft.guide.pause_layers", ignored -> toggleLayerPlayback()
+        ));
+        resetStructure = addRenderableWidget(guideButton(
+                SIDEBAR_WIDTH + 68, height - 28, MachineIcon.RESET,
+                "gui.magneticraft.guide.reset_structure_view", ignored -> resetStructure(false)
+        ));
         nextLayer = addRenderableWidget(guideButton(
-                SIDEBAR_WIDTH + 40, height - 28, MachineIcon.UP,
+                SIDEBAR_WIDTH + 96, height - 28, MachineIcon.UP,
                 "gui.magneticraft.guide.next_layer", ignored -> selectLayer(1)
         ));
         updateButtons();
@@ -117,41 +139,157 @@ public final class GuideScreen extends Screen {
         }
         selectedIndex = Math.max(0, Math.min(selectedIndex, guides.size() - 1));
         GuideRepository.MultiblockGuide selected = guides.get(selectedIndex);
+        advanceLayerPlayback(selected.layers().size());
         renderEntryList(graphics, guides.stream()
                 .map(guide -> Component.translatable(guide.translationKey()))
                 .toList());
 
         int contentLeft = SIDEBAR_WIDTH + 12;
-        graphics.drawString(font, Component.translatable(selected.translationKey()), contentLeft, 42, 0xFFE6EDF3, false);
+        int contentRight = width - 16;
+        int contentWidth = Math.max(80, contentRight - contentLeft);
+        graphics.drawString(
+                font,
+                MachineScreenLayout.fitToWidth(
+                        font,
+                        Component.translatable(selected.translationKey()),
+                        contentWidth
+                ),
+                contentLeft,
+                42,
+                MachineScreenLayout.TEXT_PRIMARY,
+                false
+        );
         graphics.drawString(
                 font,
                 Component.translatable("gui.magneticraft.guide.category." + selected.category()),
                 contentLeft,
                 54,
-                0xFF8B949E,
+                MachineScreenLayout.TEXT_MUTED,
                 false
         );
-        int contentWidth = Math.max(80, width - contentLeft - 16);
         Component description = Component.translatable(selected.descriptionKey());
-        graphics.drawWordWrap(font, description, contentLeft, 66, contentWidth, 0xFFB8C0C8);
-        int descriptionBottom = 66 + Math.max(1, font.split(description, contentWidth).size()) * 9 + 3;
-        int metadataY = renderStructureMetadata(graphics, selected, contentLeft, descriptionBottom);
+        renderLimitedDescription(graphics, description, contentLeft, 66, contentWidth);
+
         layer = Math.max(0, Math.min(layer, selected.layers().size() - 1));
+        int viewportBottom = height - STRUCTURE_VIEW_BOTTOM_MARGIN;
+        int viewportWidth = Math.max(1, contentRight - contentLeft);
+        int infoWidth = structureInfoWidth(viewportWidth);
+        int sceneRight = infoWidth == 0 ? contentRight : contentRight - infoWidth - 4;
+        structurePreview.render(
+                graphics,
+                selected,
+                layer,
+                contentLeft,
+                STRUCTURE_VIEW_TOP,
+                sceneRight,
+                viewportBottom
+        );
+        renderStructureOverlay(graphics, selected, contentLeft, sceneRight);
+        if (infoWidth > 0) {
+            renderStructureInformation(
+                    graphics,
+                    selected,
+                    sceneRight + 4,
+                    STRUCTURE_VIEW_TOP,
+                    contentRight,
+                    viewportBottom,
+                    mouseX,
+                    mouseY
+            );
+        }
+        renderLayerTimeline(graphics, selected.layers().size(), mouseX, mouseY);
+    }
+
+    private void renderLimitedDescription(
+            GuiGraphics graphics,
+            Component description,
+            int x,
+            int y,
+            int width
+    ) {
+        List<FormattedCharSequence> lines = font.split(description, width);
+        for (int index = 0; index < Math.min(2, lines.size()); index++) {
+            graphics.drawString(
+                    font,
+                    lines.get(index),
+                    x,
+                    y + index * 9,
+                    MachineScreenLayout.TEXT_MUTED,
+                    false
+            );
+        }
+    }
+
+    private void renderStructureOverlay(
+            GuiGraphics graphics,
+            GuideRepository.MultiblockGuide guide,
+            int left,
+            int right
+    ) {
+        GuideStructurePreview.Dimensions dimensions = GuideStructurePreview.dimensions(guide);
         Component layerText = Component.translatable(
                 "gui.magneticraft.guide.layer",
                 layer + 1,
-                selected.layers().size()
+                guide.layers().size()
+        ).append("  ·  ").append(Component.translatable(
+                "gui.magneticraft.guide.structure_dimensions",
+                dimensions.width(),
+                dimensions.height(),
+                dimensions.depth()
+        ));
+        Component fittedLayer = MachineScreenLayout.fitToWidth(font, layerText, Math.max(1, right - left - 12));
+        int labelRight = left + 5 + font.width(fittedLayer) + 4;
+        graphics.fill(left + 3, STRUCTURE_VIEW_TOP + 3, labelRight, STRUCTURE_VIEW_TOP + 15, 0xD0080E14);
+        graphics.drawString(
+                font,
+                fittedLayer,
+                left + 5,
+                STRUCTURE_VIEW_TOP + 5,
+                MachineScreenLayout.ACCENT,
+                false
         );
-        graphics.drawString(font, layerText, contentLeft, metadataY, 0xFFB8C0C8, false);
-        renderLayer(graphics, selected, contentLeft, metadataY + 14, mouseX, mouseY);
+
+        Component interaction = MachineScreenLayout.fitToWidth(
+                font,
+                Component.translatable("gui.magneticraft.guide.structure_interaction"),
+                Math.max(1, right - left - 12)
+        );
+        int interactionY = height - STRUCTURE_VIEW_BOTTOM_MARGIN - 14;
+        int interactionRight = left + 5 + font.width(interaction) + 4;
+        graphics.fill(left + 3, interactionY - 2, interactionRight, interactionY + 10, 0xD0080E14);
+        graphics.drawString(
+                font,
+                interaction,
+                left + 5,
+                interactionY,
+                MachineScreenLayout.TEXT_MUTED,
+                false
+        );
     }
 
-    private int renderStructureMetadata(
+    private void renderStructureInformation(
             GuiGraphics graphics,
             GuideRepository.MultiblockGuide guide,
-            int x,
-            int y
+            int left,
+            int top,
+            int right,
+            int bottom,
+            int mouseX,
+            int mouseY
     ) {
+        MachineScreenLayout.drawCard(graphics, left, top, right - left, bottom - top);
+        int textX = left + 5;
+        int textWidth = Math.max(1, right - textX - 5);
+        int cursorY = top + 5;
+        graphics.drawString(
+                font,
+                Component.translatable("gui.magneticraft.guide.structure_data"),
+                textX,
+                cursorY,
+                MachineScreenLayout.TEXT_PRIMARY,
+                false
+        );
+        cursorY += 13;
         GuideRepository.PortSummary ports = guide.ports();
         Component yes = Component.translatable("gui.magneticraft.guide.yes");
         Component no = Component.translatable("gui.magneticraft.guide.no");
@@ -181,13 +319,73 @@ public final class GuideScreen extends Screen {
                 ),
                 Component.translatable("gui.magneticraft.guide.ports.tanks", tankCapacities)
         );
-        int lineWidth = Math.max(80, width - x - 16);
-        int cursorY = y;
         for (Component line : lines) {
-            graphics.drawWordWrap(font, line, x, cursorY, lineWidth, 0xFFB8C0C8);
-            cursorY += Math.max(1, font.split(line, lineWidth).size()) * 9;
+            if (cursorY + 9 >= bottom) {
+                return;
+            }
+            graphics.drawString(
+                    font,
+                    MachineScreenLayout.fitToWidth(font, line, textWidth),
+                    textX,
+                    cursorY,
+                    MachineScreenLayout.TEXT_MUTED,
+                    false
+            );
+            cursorY += 10;
         }
-        return cursorY + 3;
+
+        cursorY += 3;
+        if (cursorY + 10 >= bottom) {
+            return;
+        }
+        graphics.drawString(
+                font,
+                Component.translatable("gui.magneticraft.guide.structure_parts"),
+                textX,
+                cursorY,
+                MachineScreenLayout.TEXT_PRIMARY,
+                false
+        );
+        cursorY += 12;
+        List<GuideRepository.LegendEntry> entries = guide.legend().values().stream()
+                .filter(entry -> !entry.ignored())
+                .sorted(java.util.Comparator.comparingInt(GuideRepository.LegendEntry::symbol))
+                .toList();
+        int rendered = 0;
+        for (GuideRepository.LegendEntry entry : entries) {
+            if (cursorY + 17 > bottom - 3) {
+                break;
+            }
+            renderLegendIcon(graphics, guide, entry, textX, cursorY);
+            Component label = MachineScreenLayout.fitToWidth(
+                    font,
+                    Component.translatable("gui.magneticraft.guide.rule." + entry.rule()),
+                    Math.max(1, textWidth - 20)
+            );
+            graphics.drawString(
+                    font,
+                    label,
+                    textX + 20,
+                    cursorY + 4,
+                    MachineScreenLayout.TEXT_MUTED,
+                    false
+            );
+            if (mouseX >= textX && mouseX < right - 4 && mouseY >= cursorY && mouseY < cursorY + 17) {
+                hoveredLegend = legendTooltip(guide, entry);
+            }
+            rendered++;
+            cursorY += 17;
+        }
+        if (rendered < entries.size() && cursorY + 9 < bottom) {
+            graphics.drawString(
+                    font,
+                    Component.translatable("gui.magneticraft.guide.more_parts", entries.size() - rendered),
+                    textX,
+                    cursorY,
+                    MachineScreenLayout.TEXT_DISABLED,
+                    false
+            );
+        }
     }
 
     private void renderOpcodes(GuiGraphics graphics) {
@@ -467,35 +665,56 @@ public final class GuideScreen extends Screen {
         }
     }
 
-    private void renderLayer(
+    private void renderLegendIcon(
             GuiGraphics graphics,
             GuideRepository.MultiblockGuide guide,
+            GuideRepository.LegendEntry entry,
             int x,
-            int y,
-            int mouseX,
-            int mouseY
+            int y
     ) {
-        List<String> rows = guide.layers().get(layer);
-        int columns = rows.stream().mapToInt(String::length).max().orElse(1);
-        int availableWidth = Math.max(1, width - x - 16);
-        int availableHeight = Math.max(1, height - y - 44);
-        int cell = Math.max(3, Math.min(12, Math.min(availableWidth / Math.max(1, columns), availableHeight / rows.size())));
-        for (int row = 0; row < rows.size(); row++) {
-            String rowText = rows.get(row);
-            for (int column = 0; column < rowText.length(); column++) {
-                char symbol = rowText.charAt(column);
-                GuideRepository.LegendEntry legend = guide.legend().get(symbol);
-                String rule = legend == null ? "unknown" : legend.rule();
-                int cellX = x + column * cell;
-                int cellY = y + row * cell;
-                graphics.fill(cellX, cellY, cellX + cell - 1, cellY + cell - 1, ruleColor(rule));
-                if (cell >= 8) {
-                    graphics.drawString(font, Character.toString(symbol), cellX + 1, cellY, 0xFF101418, false);
-                }
-                if (mouseX >= cellX && mouseX < cellX + cell && mouseY >= cellY && mouseY < cellY + cell) {
-                    hoveredLegend = Component.translatable("gui.magneticraft.guide.rule." + rule);
-                }
-            }
+        BlockState state = structurePreview.stateFor(guide, entry);
+        if (state == null || state.isAir()) {
+            graphics.fill(x + 1, y + 1, x + 15, y + 2, MachineScreenLayout.FLUID);
+            graphics.fill(x + 1, y + 14, x + 15, y + 15, MachineScreenLayout.FLUID);
+            graphics.fill(x + 1, y + 2, x + 2, y + 14, MachineScreenLayout.FLUID);
+            graphics.fill(x + 14, y + 2, x + 15, y + 14, MachineScreenLayout.FLUID);
+            return;
+        }
+        graphics.renderItem(new ItemStack(state.getBlock()), x, y);
+    }
+
+    private Component legendTooltip(
+            GuideRepository.MultiblockGuide guide,
+            GuideRepository.LegendEntry entry
+    ) {
+        Component tooltip = Component.translatable("gui.magneticraft.guide.rule." + entry.rule());
+        BlockState state = structurePreview.stateFor(guide, entry);
+        if (state != null && !state.isAir()) {
+            tooltip = tooltip.copy().append("\n").append(new ItemStack(state.getBlock()).getHoverName());
+        }
+        return tooltip;
+    }
+
+    private void renderLayerTimeline(GuiGraphics graphics, int layerCount, int mouseX, int mouseY) {
+        int left = timelineLeft();
+        int right = timelineRight();
+        int top = timelineTop();
+        if (right <= left) {
+            return;
+        }
+        graphics.fill(left, top, right, top + 6, MachineScreenLayout.BUTTON_BORDER);
+        graphics.fill(left + 1, top + 1, right - 1, top + 5, MachineScreenLayout.INSET_BACKGROUND);
+        for (int index = 0; index < layerCount; index++) {
+            int x = timelineLayerX(index, layerCount, left, right);
+            int color = index <= layer ? MachineScreenLayout.ACCENT : MachineScreenLayout.TEXT_DISABLED;
+            graphics.fill(x - 1, top, x + 1, top + 6, color);
+        }
+        if (insideTimeline(mouseX, mouseY)) {
+            hoveredLegend = Component.translatable(
+                    "gui.magneticraft.guide.timeline_hint",
+                    layer + 1,
+                    layerCount
+            );
         }
     }
 
@@ -503,7 +722,7 @@ public final class GuideScreen extends Screen {
         Mode[] modes = Mode.values();
         mode = modes[(mode.ordinal() + 1) % modes.length];
         selectedIndex = 0;
-        layer = 0;
+        resetStructure(mode == Mode.STRUCTURES);
         updateButtons();
     }
 
@@ -519,7 +738,7 @@ public final class GuideScreen extends Screen {
             return;
         }
         selectedIndex = Math.floorMod(selectedIndex + amount, size);
-        layer = 0;
+        resetStructure(mode == Mode.STRUCTURES);
         updateButtons();
     }
 
@@ -529,7 +748,50 @@ public final class GuideScreen extends Screen {
             return;
         }
         GuideRepository.MultiblockGuide selected = guides.get(Math.max(0, Math.min(selectedIndex, guides.size() - 1)));
-        layer = Math.floorMod(layer + amount, selected.layers().size());
+        layer = Mth.clamp(layer + amount, 0, selected.layers().size() - 1);
+        playingLayers = false;
+        lastLayerAdvanceMillis = Util.getMillis();
+        updateButtons();
+    }
+
+    private void toggleLayerPlayback() {
+        int layers = layerCount();
+        if (layers <= 1) {
+            return;
+        }
+        if (!playingLayers && layer >= layers - 1) {
+            layer = 0;
+        }
+        playingLayers = !playingLayers;
+        lastLayerAdvanceMillis = Util.getMillis();
+        updateButtons();
+    }
+
+    private void resetStructure(boolean autoplay) {
+        layer = 0;
+        playingLayers = autoplay;
+        lastLayerAdvanceMillis = Util.getMillis();
+        structurePreview.resetView();
+        if (previousLayer != null) {
+            updateButtons();
+        }
+    }
+
+    private void advanceLayerPlayback(int layers) {
+        if (!playingLayers || layers <= 1) {
+            return;
+        }
+        long now = Util.getMillis();
+        long elapsed = now - lastLayerAdvanceMillis;
+        if (elapsed < STRUCTURE_STEP_MILLIS) {
+            return;
+        }
+        int steps = Math.max(1, (int) (elapsed / STRUCTURE_STEP_MILLIS));
+        layer = Math.min(layers - 1, layer + steps);
+        lastLayerAdvanceMillis += (long) steps * STRUCTURE_STEP_MILLIS;
+        if (layer >= layers - 1) {
+            playingLayers = false;
+        }
         updateButtons();
     }
 
@@ -538,10 +800,16 @@ public final class GuideScreen extends Screen {
             return;
         }
         boolean structureMode = mode == Mode.STRUCTURES;
+        boolean hasStructures = structureMode && !filteredStructures().isEmpty();
+        int layers = layerCount();
         previousLayer.visible = structureMode;
+        playLayers.visible = structureMode;
+        resetStructure.visible = structureMode;
         nextLayer.visible = structureMode;
-        previousLayer.active = structureMode && !filteredStructures().isEmpty();
-        nextLayer.active = previousLayer.active;
+        previousLayer.active = hasStructures && layer > 0;
+        playLayers.active = hasStructures && layers > 1;
+        resetStructure.active = hasStructures;
+        nextLayer.active = hasStructures && layer < layers - 1;
         boolean hasEntries = switch (mode) {
             case STRUCTURES -> !filteredStructures().isEmpty();
             case MACHINES -> !filteredMachines().isEmpty();
@@ -568,7 +836,6 @@ public final class GuideScreen extends Screen {
                 Component.translatable("gui.magneticraft.guide.next_entry"),
                 controlExplanation("gui.magneticraft.guide.next_entry", entryState)
         );
-        int layers = layerCount();
         Component layerState = layers == 0
                 ? Component.translatable("gui.magneticraft.guide.none")
                 : Component.translatable("gui.magneticraft.guide.layer", layer + 1, layers);
@@ -579,6 +846,18 @@ public final class GuideScreen extends Screen {
         nextLayer.updateExplanation(
                 Component.translatable("gui.magneticraft.guide.next_layer"),
                 controlExplanation("gui.magneticraft.guide.next_layer", layerState)
+        );
+        String playbackKey = playingLayers
+                ? "gui.magneticraft.guide.pause_layers"
+                : "gui.magneticraft.guide.play_layers";
+        playLayers.updateIcon(playingLayers ? MachineIcon.PAUSE : MachineIcon.START);
+        playLayers.updateExplanation(
+                Component.translatable(playbackKey),
+                controlExplanation(playbackKey, layerState)
+        );
+        resetStructure.updateExplanation(
+                Component.translatable("gui.magneticraft.guide.reset_structure_view"),
+                controlExplanation("gui.magneticraft.guide.reset_structure_view", layerState)
         );
     }
 
@@ -621,40 +900,146 @@ public final class GuideScreen extends Screen {
                 .append(Component.translatable("gui.magneticraft.control.current_state", currentState));
     }
 
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (mode != Mode.STRUCTURES) {
+            return false;
+        }
+        if (button == 0 && insideTimeline(mouseX, mouseY)) {
+            int layers = layerCount();
+            if (layers > 0) {
+                int trackWidth = Math.max(1, timelineRight() - timelineLeft() - 1);
+                double normalized = Mth.clamp((mouseX - timelineLeft()) / trackWidth, 0.0D, 1.0D);
+                layer = Mth.clamp((int) Math.round(normalized * (layers - 1)), 0, layers - 1);
+                playingLayers = false;
+                lastLayerAdvanceMillis = Util.getMillis();
+                updateButtons();
+            }
+            return true;
+        }
+        return structurePreview.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(
+            double mouseX,
+            double mouseY,
+            int button,
+            double dragX,
+            double dragY
+    ) {
+        if (mode == Mode.STRUCTURES && structurePreview.mouseDragged(mouseX, mouseY, button)) {
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        boolean previewReleased = mode == Mode.STRUCTURES && structurePreview.mouseReleased(button);
+        return super.mouseReleased(mouseX, mouseY, button) || previewReleased;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (mode == Mode.STRUCTURES && structurePreview.mouseScrolled(mouseX, mouseY, delta)) {
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, delta);
+    }
+
+    private boolean insideTimeline(double mouseX, double mouseY) {
+        return mouseX >= timelineLeft()
+                && mouseX < timelineRight()
+                && mouseY >= timelineTop() - 2
+                && mouseY < timelineTop() + 8;
+    }
+
+    private int timelineLeft() {
+        return SIDEBAR_WIDTH + 124;
+    }
+
+    private int timelineRight() {
+        return width - 16;
+    }
+
+    private int timelineTop() {
+        return height - 21;
+    }
+
+    private static int timelineLayerX(int index, int count, int left, int right) {
+        if (count <= 1) {
+            return (left + right) / 2;
+        }
+        return left + 2 + Math.round(index * (right - left - 5) / (float) (count - 1));
+    }
+
+    private static int structureInfoWidth(int viewportWidth) {
+        if (viewportWidth < 390) {
+            return 0;
+        }
+        return Mth.clamp(viewportWidth / 3, 140, 184);
+    }
+
     MachineScreenBounds.Layout layout() {
         return layout(width, height);
     }
 
     static MachineScreenBounds.Layout layout(int width, int height) {
-        return MachineScreenBounds.builder("guide", width, height)
-                .element("header", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
-                        4, 4, width - 8, 26
-                ))
-                .element("sidebar", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
-                        8, 24, SIDEBAR_WIDTH - 12, height - 32
-                ))
-                .element("content", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
+        int viewportLeft = SIDEBAR_WIDTH + 12;
+        int viewportRight = width - 16;
+        int viewportWidth = viewportRight - viewportLeft;
+        int viewportHeight = height - STRUCTURE_VIEW_BOTTOM_MARGIN - STRUCTURE_VIEW_TOP;
+        int infoWidth = structureInfoWidth(viewportWidth);
+        int sceneWidth = infoWidth == 0 ? viewportWidth : viewportWidth - infoWidth - 4;
+        MachineScreenBounds.Builder builder = MachineScreenBounds.builder("guide", width, height)
+                .element("header", new Rect(4, 4, width - 8, 26))
+                .element("sidebar", new Rect(8, 24, SIDEBAR_WIDTH - 12, height - 32))
+                .element("content", new Rect(
                         SIDEBAR_WIDTH + 4, 34, width - SIDEBAR_WIDTH - 8, height - 38
                 ))
-                .child("search", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
-                        12, 28, SIDEBAR_WIDTH - 24, 18
-                ), "sidebar", null, 0)
-                .child("mode", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
-                        width - 36, 8, 24, 20
-                ), "header", null, 0)
-                .child("previous_entry", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
+                .child("search", new Rect(12, 28, SIDEBAR_WIDTH - 24, 18), "sidebar", null, 0)
+                .child("mode", new Rect(width - 36, 8, 24, 20), "header", null, 0)
+                .child("previous_entry", new Rect(
                         12, height - 28, 24, 20
                 ), "sidebar", "navigation", 4)
-                .child("next_entry", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
+                .child("next_entry", new Rect(
                         40, height - 28, 24, 20
                 ), "sidebar", "navigation", 4)
-                .child("previous_layer", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
+                .child("structure_viewport", new Rect(
+                        viewportLeft, STRUCTURE_VIEW_TOP, viewportWidth, viewportHeight
+                ), "content", null, 0)
+                .child("structure_scene", new Rect(
+                        viewportLeft, STRUCTURE_VIEW_TOP, sceneWidth, viewportHeight
+                ), "structure_viewport", "structure_columns", 4)
+                .child("previous_layer", new Rect(
                         SIDEBAR_WIDTH + 12, height - 28, 24, 20
                 ), "content", "navigation", 4)
-                .child("next_layer", new committee.nova.mods.magneticraft.content.machine.framework.menu.LegacyMachineGuiLayout.Rect(
+                .child("play_layers", new Rect(
                         SIDEBAR_WIDTH + 40, height - 28, 24, 20
                 ), "content", "navigation", 4)
-                .build();
+                .child("reset_structure", new Rect(
+                        SIDEBAR_WIDTH + 68, height - 28, 24, 20
+                ), "content", "navigation", 4)
+                .child("next_layer", new Rect(
+                        SIDEBAR_WIDTH + 96, height - 28, 24, 20
+                ), "content", "navigation", 4)
+                .child("layer_timeline", new Rect(
+                        SIDEBAR_WIDTH + 124, height - 21,
+                        Math.max(1, width - SIDEBAR_WIDTH - 140), 6
+                ), "content", "navigation", 4);
+        if (infoWidth > 0) {
+            builder.child("structure_information", new Rect(
+                    viewportRight - infoWidth,
+                    STRUCTURE_VIEW_TOP,
+                    infoWidth,
+                    viewportHeight
+            ), "structure_viewport", "structure_columns", 4);
+        }
+        return builder.build();
     }
 
     private List<GuideRepository.MultiblockGuide> filteredStructures() {
@@ -713,24 +1098,6 @@ public final class GuideScreen extends Screen {
 
     private String query() {
         return search == null ? "" : search.getValue().trim().toLowerCase(Locale.ROOT);
-    }
-
-    private static int ruleColor(String rule) {
-        return switch (rule) {
-            case "air" -> 0xFF9ECFF5;
-            case "controller" -> 0xFFFFB454;
-            case "base" -> 0xFF8B949E;
-            case "grate" -> 0xFFA7B1BC;
-            case "corrugated_iron" -> 0xFFC1CAD4;
-            case "copper_coil" -> 0xFFD98245;
-            case "bricks" -> 0xFFB04B4B;
-            case "small_tank" -> 0xFF4FC3C8;
-            case "striped" -> 0xFFE7C547;
-            case "electric" -> 0xFF4DA3FF;
-            case "column_x", "column_y", "column_z" -> 0xFF787F88;
-            case "ignore" -> 0xFF30363D;
-            default -> 0xFFFF00FF;
-        };
     }
 
     private enum Mode {

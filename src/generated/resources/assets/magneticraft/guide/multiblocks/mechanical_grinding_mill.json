@@ -42,14 +42,20 @@
       "symbol": "M"
     },
     {
+      "block": "minecraft:oak_slab",
       "rule": "wooden_slab",
       "symbol": "w"
     },
     {
+      "block": "minecraft:stone_slab",
       "rule": "stone_slab",
       "symbol": "s"
     },
     {
+      "block": "magneticraft:wooden_shaft",
+      "properties": {
+        "axis": "y"
+      },
       "rule": "kinetic_shaft",
       "symbol": "K"
     }

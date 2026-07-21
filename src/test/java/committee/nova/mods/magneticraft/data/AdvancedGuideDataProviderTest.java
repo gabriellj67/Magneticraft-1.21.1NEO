@@ -202,9 +202,14 @@ class AdvancedGuideDataProviderTest {
             }
 
             Set<String> legendSymbols = new HashSet<>();
-            guide.getAsJsonArray("legend").forEach(entry -> legendSymbols.add(
-                    entry.getAsJsonObject().get("symbol").getAsString()
-            ));
+            guide.getAsJsonArray("legend").forEach(entry -> {
+                JsonObject legend = entry.getAsJsonObject();
+                legendSymbols.add(legend.get("symbol").getAsString());
+                assertTrue(
+                        legend.has("block") || legend.has("ignored"),
+                        () -> definition.id() + " has no 3D preview state for " + legend
+                );
+            });
             assertEquals(usedSymbols, legendSymbols);
 
             JsonObject ports = guide.getAsJsonObject("ports");
