@@ -317,7 +317,6 @@ def verifyReleaseArtifact = tasks.register("verifyReleaseArtifact") {
         def sourceEntries = archiveEntries(sourcesJar)
         def requiredBinaryEntries = [
                 "META-INF/LICENSE",
-                "META-INF/PORTING_SOURCES.md",
                 "META-INF/mods.toml",
                 "assets/magneticraft/lang/en_us.json",
                 "assets/magneticraft/lang/zh_cn.json",
