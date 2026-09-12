@@ -268,15 +268,27 @@ session for diffing; re-download if needed, they're not stored in this repo.
 
 ## Suggested phase order for the rest of the port
 
-1. `init/` + minimal slice of `content/block` + `content/item` needed to
-   make `init/ModBlocks`/`ModItems` compile - re-establishes the
-   registration skeleton content plugs into.
-2. `content/machine/framework` (the module/capability host base classes) -
-   this is where the capability rewrite has to happen first, once, so every
-   concrete machine built on top of it inherits the new pattern.
+1. ~~`init/` + minimal slice of `content/block` + `content/item`~~ -
+   **partially done**: `init/ModRegistries.java` + `init/ModSounds.java`
+   ported: The other 17 `init/*.java` files are still blocked on
+   `content/block`, `content/item`, `content/machine`, `content/multiblock`,
+   `content/nuclear`, `content/recipe`, `content/worldgen` concrete types -
+   see "Why the rest of `init/` can't be ported yet" above for the exact
+   per-file breakdown. Revisit `init/ModBlocks`/`ModItems` once enough of
+   step 3 below exists.
+2. ~~`content/machine/framework`~~ - **done** (see "Phase 2" above). The
+   capability rewrite pattern is established and documented; every
+   concrete machine block entity from here on should reuse
+   `MachineCapabilities.register` + module `view(side)` rather than
+   re-deriving it.
 3. Remaining `content/` by subsystem (`machine`, `multiblock`, `nuclear`,
    `computer`, `network`, `world`/`worldgen`) - each is fairly self
-   contained.
+   contained. **In progress**: `content/machine/singleblock`'s two
+   definition classes and `content/multiblock/MultiblockDefinition` are
+   done; the concrete blocks/items/block-entities/menus in all of these
+   subsystems are not started. `content/network/module/ElectricalNetworkModule`
+   is the immediate next unblock for `MachineBlockEntity`'s one remaining
+   compile gap - see "Suggested next step" above.
 4. `client/` (needs `content/` block/item/BE types to exist first).
 5. `data/` (datagen, needs everything above).
 6. `integration/` (optional, last).
