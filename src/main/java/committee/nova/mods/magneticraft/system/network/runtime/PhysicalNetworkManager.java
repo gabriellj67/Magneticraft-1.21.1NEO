@@ -991,7 +991,7 @@ public final class PhysicalNetworkManager {
         ) {
             if (topologyVersion != currentTopologyVersion
                     || stack.getCount() != candidate.getCount()
-                    || !ItemStack.isSameItemSameTags(stack, candidate)
+                    || !ItemStack.isSameItemSameComponents(stack, candidate)
                     || !graph.neighbors(startNode).contains(firstNode)) {
                 return false;
             }
