@@ -53,18 +53,85 @@ whole tree will NOT compile stand-alone with `./gradlew compileJava` until
 the content phase lands. Do not "fix" this by stubbing fake classes - port
 the real ones instead.
 
+## Phase 2 (IN PROGRESS): init/ + minimal content/ slice
+
+Verified this session: every file count in the table below (as it stood
+before this phase) checked out exactly against the source tree
+(`content` 303, `client` 53, `data` 24, `init` 19, `integration` 17,
+`api` 8, total 530), and the Phase 1 file-parity claim for `system/`
+(98 = 98) and the capability-hit count (46, close to the noted 47) also
+checked out. The cheat sheet and Phase 1 claims in this document are
+accurate.
+
+Ported so far in Phase 2 (9 files, all pure-Java or verified 1:1
+package renames against the actual `neoforge-21.1.208-sources.jar` in
+the local Gradle cache - not guessed from docs):
+
+- `content/material/Metal.java`, `content/material/MaterialForm.java` -
+  pure Java, zero risk, copied verbatim.
+- `content/block/BaseBlockDefinition.java`, `OreBlockDefinition.java`,
+  `DecorativeBlockFamily.java` - pure Java (one uses
+  `org.jetbrains.annotations.Nullable`, not a MC/Forge type), copied
+  verbatim.
+- `content/fluid/FluidDefinition.java` - pure Java, copied verbatim.
+- `content/fluid/MagneticraftFluidType.java` - rewritten:
+  `net.minecraftforge.fluids.FluidType` -> `net.neoforged.neoforge.fluids.FluidType`,
+  `net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions` ->
+  `net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions`.
+  Verified against the NeoForge sources jar: both classes exist at those
+  paths, `FluidType.Properties` builder and
+  `IClientFluidTypeExtensions.getStillTexture/getFlowingTexture/getTintColor`
+  are unchanged. Pure package rename.
+- `init/ModRegistries.java` - rewritten: `DeferredRegister.create(ForgeRegistries.X, ...)`
+  -> `DeferredRegister.create(Registries.x, ...)` (vanilla `ResourceKey`s:
+  `BLOCK`, `ITEM`, `FLUID`, `CREATIVE_MODE_TAB`, `BLOCK_ENTITY_TYPE`, `MENU`,
+  `RECIPE_TYPE`, `RECIPE_SERIALIZER`, `SOUND_EVENT`, `FEATURE`), except
+  `FLUID_TYPES` which stays on `NeoForgeRegistries.Keys.FLUID_TYPES`
+  (verified directly in the sources jar). **Caveat**: the plain
+  `Registries.*` constant names were not individually re-verified against
+  decompiled 1.21.1 vanilla source this session (no joined/patched MC jar
+  was found in the local Gradle cache - the project has never been built)
+  - they're standard, version-stable vanilla registry keys, but confirm on
+    the first real `./gradlew compileJava`.
+- `init/ModSounds.java` - rewritten: `RegistryObject<T>` -> `DeferredHolder<T, T>`
+  (per the cheat sheet's `RegistryObject` -> `DeferredHolder` rename). Only
+  init file with zero `content/` dependencies, so it's the only one that's
+  actually complete end-to-end right now.
+
+### Why the rest of `init/` can't be ported yet (checked, not assumed)
+
+Read every remaining `init/*.java` this session. All 17 remaining files
+import from `content/` packages that don't exist in this project yet:
+`ModFeatures` needs `content/worldgen/OilFieldFeature`; `ModRecipeTypes`
+needs `content/machine/{crushingtable,singleblock/recipe}`,
+`content/multiblock/{recipe,MultiblockDefinition}`,
+`content/nuclear/facility`, `content/recipe/TieredShapedRecipe`;
+`ModBlocks`/`ModItems`/`ModMachineBlocks`/etc. need the corresponding
+`content/block`, `content/item`, `content/machine` concrete types. There
+is no shortcut here - `ModRegistries.register()`'s `bootstrap()` calls
+into all 17 will not compile until those `content/` subsystems exist,
+same as the already-documented Phase 1 gap in `network/*.java`. Do not
+stub fake classes to make it compile; port the real ones.
+
+**Concretely, the next session should port `content/machine/framework`
+first** (the module/capability-host base classes - see "Suggested phase
+order" below, unchanged from before), since that's the one-time
+capability rewrite everything else in `content/machine` inherits from,
+then come back to `init/ModBlocks`+`ModItems`+the block/item slice they
+need.
+
 ## What's left (by size, descending)
 
 | Package | Files | Notes |
 |---|---|---|
-| `content/` | 303 | Blocks, items, machines, multiblocks, menus, block entities. The big one. Heavy user of Forge capabilities (`net.minecraftforge.common.capabilities`, 47 hits) which is a *hard rewrite*, not a rename - see below. |
+| `content/` | 296 | Blocks, items, machines, multiblocks, menus, block entities. The big one. Heavy user of Forge capabilities (`net.minecraftforge.common.capabilities`, 46 hits) which is a *hard rewrite*, not a rename - see below. (7 files ported this session: `material/`, 3x `block/` definition enums, `fluid/`.) |
 | `client/` | 53 | Renderers, screens, models (`.mcx`/`.gltf` custom model formats via a bundled loader - check `content/nuclear/...` and asset pipeline before touching). |
 | `data/` | 24 | Datagen providers (loot, tags, recipes, models, lang). NeoForge datagen API is close to Forge's for 1.21.1 but `HolderLookup.Provider` is now threaded through most providers - check each one. |
-| `init/` | 19 | Registry glue (`ModBlocks`, `ModItems`, etc.) - depends on `content/` types, must be ported together with/after them. Uses `RegistryObject` -> `DeferredHolder` (see below) and `ForgeRegistries` -> `BuiltInRegistries`/`NeoForgeRegistries`. |
+| `init/` | 17 | Registry glue (`ModBlocks`, `ModItems`, etc.) - depends on `content/` types, must be ported together with/after them. Uses `RegistryObject` -> `DeferredHolder` (see below) and `ForgeRegistries` -> `BuiltInRegistries`/`NeoForgeRegistries`. (`ModRegistries`, `ModSounds` ported this session.) |
 | `integration/` | 17 | JEI, CraftTweaker, Jade, Tinkers' Construct. Optional at runtime (`enable_*_runtime` gradle flags) - lowest priority, do last. Versions for NeoForge 1.21.1 found so far: JEI `19.54.0.429`, Jade `15.10.6+neoforge`; Mantle/TConstruct NeoForge 1.21.1 builds were **not found** on Modrinth as of this writing - re-check before wiring `integration/tconstruct`. |
 | `api/` | 1 remaining | `NuclearReactorColumnType` (needs `content/nuclear/fuel/NuclearFuelGrade`). |
 
-Total remaining: ~417 of the original 530 main-source files, plus all of
+Total remaining: ~408 of the original 530 main-source files, plus all of
 `src/gametest`, `src/test`, `src/integrationTest`, `src/generated`, and
 `src/main/resources` (assets/data - 653 files, untouched).
 
