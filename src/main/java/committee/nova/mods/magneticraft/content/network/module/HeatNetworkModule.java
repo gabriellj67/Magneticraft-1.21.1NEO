@@ -1,0 +1,104 @@
+package committee.nova.mods.magneticraft.content.network.module;
+
+import committee.nova.mods.magneticraft.content.machine.framework.MachineModuleHost;
+import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
+import committee.nova.mods.magneticraft.system.network.heat.HeatLink;
+import committee.nova.mods.magneticraft.system.network.heat.HeatNode;
+import committee.nova.mods.magneticraft.system.network.runtime.NetworkDomain;
+import committee.nova.mods.magneticraft.system.network.runtime.PhysicalNetworkNode;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
+
+/**
+ * Persisted lossless thermal node.
+ */
+public final class HeatNetworkModule extends AbstractPhysicalNetworkModule implements ThermalDiagnosticSource {
+    private static final String INTERNAL_ENERGY_TAG = "internal_energy_joules";
+    private static final String CLIENT_TEMPERATURE_TAG = "temperature_kelvin";
+
+    private final HeatNode node;
+    private final double maxTransferWatts;
+    private final Predicate<Direction> sideFilter;
+
+    public HeatNetworkModule(
+            ResourceLocation id,
+            MachineModuleHost host,
+            HeatNode node,
+            double maxTransferWatts,
+            Predicate<Direction> sideFilter
+    ) {
+        super(id, host, NetworkDomain.HEAT);
+        if (maxTransferWatts < 0.0) {
+            throw new IllegalArgumentException("Heat transfer limit must be non-negative");
+        }
+        this.node = Objects.requireNonNull(node);
+        this.maxTransferWatts = maxTransferWatts;
+        this.sideFilter = Objects.requireNonNull(sideFilter);
+    }
+
+    public HeatNode node() {
+        return node;
+    }
+
+    @Override
+    public Optional<ThermalReading> thermalReading(Direction side) {
+        return isSideEnabled(side)
+                ? Optional.of(new ThermalReading(node.temperatureKelvin()))
+                : Optional.empty();
+    }
+
+    @Override
+    protected boolean supportsSide(Direction direction) {
+        return sideFilter.test(direction);
+    }
+
+    @Override
+    public void exchangeWith(PhysicalNetworkNode other) {
+        if (!(other.transferNode() instanceof HeatNetworkModule heat)) {
+            return;
+        }
+        HeatLink.Transfer transfer = HeatLink.transfer(
+                node,
+                heat.node,
+                1.0,
+                Math.min(maxTransferWatts, heat.maxTransferWatts)
+        );
+        if (transfer.moved()) {
+            markStateChanged();
+            heat.markStateChanged();
+        }
+    }
+
+    @Override
+    protected void loadNetworkData(CompoundTag tag, HolderLookup.Provider registries) {
+        if (tag.contains(INTERNAL_ENERGY_TAG, Tag.TAG_ANY_NUMERIC)) {
+            node.setInternalEnergyJoules(tag.getDouble(INTERNAL_ENERGY_TAG));
+        } else {
+            node.setTemperature(HeatNode.AMBIENT_TEMPERATURE_KELVIN);
+        }
+    }
+
+    @Override
+    protected void saveNetworkData(CompoundTag tag, HolderLookup.Provider registries) {
+        tag.putDouble(INTERNAL_ENERGY_TAG, node.internalEnergyJoules());
+    }
+
+    @Override
+    public void loadClientData(CompoundTag tag, HolderLookup.Provider registries) {
+        if (tag.contains(CLIENT_TEMPERATURE_TAG, Tag.TAG_ANY_NUMERIC)) {
+            node.setTemperature(tag.getDouble(CLIENT_TEMPERATURE_TAG));
+        }
+    }
+
+    @Override
+    public void saveClientData(CompoundTag tag, HolderLookup.Provider registries) {
+        tag.putDouble(CLIENT_TEMPERATURE_TAG, node.temperatureKelvin());
+    }
+}

@@ -1,0 +1,57 @@
+package committee.nova.mods.magneticraft.content.network.electric;
+
+import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlockEntity;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.TieredElectricalHost;
+import committee.nova.mods.magneticraft.init.ModBlockEntities;
+import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
+import committee.nova.mods.magneticraft.system.network.electric.ElectricalNodeKind;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.BlockState;
+
+/**
+ * Six-way 125V cable segment.
+ */
+public final class ElectricCableBlockEntity extends NetworkComponentBlockEntity implements TieredElectricalHost {
+    private final ElectricalNetworkModule electricity;
+
+    public ElectricCableBlockEntity(BlockPos position, BlockState state) {
+        super(ModBlockEntities.ELECTRIC_CABLE.get(), position, state);
+        electricity = addModule(new ElectricalNetworkModule(
+                Magneticraft.id("electricity"),
+                this,
+                ElectricalNodeKind.CONDUCTOR,
+                side -> true
+        ));
+    }
+
+    public ElectricalNetworkModule electricity() {
+        return electricity;
+    }
+
+    @Override
+    public ElectricalNetworkModule tieredElectricalModule() {
+        return electricity;
+    }
+
+    @Override
+    public Component configure(Direction side, boolean secondaryAction) {
+        electricity.toggleSide(side);
+        return Component.translatable(
+                electricity.isSideEnabled(side)
+                        ? "message.magneticraft.connection_enabled"
+                        : "message.magneticraft.connection_disabled",
+                Component.translatable("direction.minecraft." + side.getName())
+        );
+    }
+
+    @Override
+    protected void tickElectricalFault() {
+        if (getLevel() != null && !getLevel().isClientSide) {
+            getLevel().setBlockAndUpdate(getBlockPos(), ModNetworkBlocks.BURNT_ELECTRIC_CABLE.get().defaultBlockState());
+        }
+    }
+}

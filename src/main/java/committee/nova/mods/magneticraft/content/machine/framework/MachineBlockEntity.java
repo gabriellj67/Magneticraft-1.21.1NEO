@@ -4,7 +4,9 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.BulkIte
 import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
+import committee.nova.mods.magneticraft.content.multiblock.ShelvingStorageModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
+import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
 import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
@@ -191,6 +193,8 @@ public abstract class MachineBlockEntity extends BlockEntity
                 view = itemModule.view(side);
             } else if (module instanceof BulkItemStorageModule bulkModule) {
                 view = bulkModule.view();
+            } else if (module instanceof ShelvingStorageModule shelvingModule) {
+                view = shelvingModule.view();
             }
             if (view != null) {
                 return view;
@@ -217,11 +221,14 @@ public abstract class MachineBlockEntity extends BlockEntity
     @Nullable
     public final IEnergyStorage exposedEnergyStorage(@Nullable Direction side) {
         for (MachineModule module : modules.values()) {
+            IEnergyStorage view = null;
             if (module instanceof EnergyStorageModule energyModule) {
-                IEnergyStorage view = energyModule.view(side);
-                if (view != null) {
-                    return view;
-                }
+                view = energyModule.view(side);
+            } else if (module instanceof ElectricalPowerModule powerModule) {
+                view = powerModule.view(side);
+            }
+            if (view != null) {
+                return view;
             }
         }
         return null;
