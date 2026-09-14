@@ -1,0 +1,237 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "processing",
+  "controller": "magneticraft:grinder",
+  "description": "guide.magneticraft.multiblock.grinder.description",
+  "id": "magneticraft:grinder",
+  "layers": [
+    [
+      "#M#",
+      "###",
+      "###"
+    ],
+    [
+      "RGR",
+      "GCG",
+      "RGR"
+    ],
+    [
+      "RGR",
+      "G#G",
+      "RGR"
+    ],
+    [
+      "SSS",
+      "S#S",
+      "SSS"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:grinder",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:machine_casing",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:iron_grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:striped_machine_casing",
+      "rule": "striped",
+      "symbol": "S"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "side": "east"
+      },
+      {
+        "extract_slots": [
+          1,
+          2
+        ],
+        "insert_slots": [],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "side": "north"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "side": "west"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": 0
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": 0
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": 0
+        },
+        "side": "up"
+      }
+    ],
+    "electricity": true,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 3
+  },
+  "recipe_type": "magneticraft:grinder",
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 4,
+    "z": 3
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.grinder"
+}

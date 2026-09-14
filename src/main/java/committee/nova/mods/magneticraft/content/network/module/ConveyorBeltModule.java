@@ -422,7 +422,7 @@ public final class ConveyorBeltModule implements MachineModule {
 
         private CompoundTag save(HolderLookup.Provider registries) {
             CompoundTag tag = new CompoundTag();
-            tag.put(ITEM_TAG, stack.save(registries));
+            tag.put(ITEM_TAG, stack.saveOptional(registries));
             tag.putInt(ROUTE_TAG, route.ordinal());
             tag.putInt(PROGRESS_TAG, progress);
             tag.putBoolean(LOCKED_TAG, locked);

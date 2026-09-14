@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "magneticraft:reactor_column_segment"
+    },
+    {
+      "item": "magneticraft:boron_carbide"
+    },
+    {
+      "item": "minecraft:red_dye"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:reactor_control_rod_c"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "automation_profile": "boiler_all_sides",
+  "category": "energy",
+  "description": "guide.magneticraft.machine.steam_boiler.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:steam_boiler",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "fluid_input",
+    "fluid_output",
+    "heat"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.steam_boiler"
+}

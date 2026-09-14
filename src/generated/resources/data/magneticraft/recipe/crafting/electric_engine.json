@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "c:ingots/copper"
+    },
+    "B": {
+      "tag": "c:glass_blocks"
+    },
+    "C": {
+      "item": "magneticraft:motor"
+    },
+    "D": {
+      "item": "minecraft:piston"
+    }
+  },
+  "pattern": [
+    "AAA",
+    " B ",
+    "CDC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:electric_engine"
+  }
+}

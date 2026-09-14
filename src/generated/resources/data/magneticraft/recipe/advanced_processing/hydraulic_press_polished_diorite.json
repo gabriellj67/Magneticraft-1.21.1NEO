@@ -1,0 +1,17 @@
+{
+  "type": "magneticraft:hydraulic_press",
+  "duration": 55,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "item": "minecraft:polished_diorite"
+  },
+  "press_mode": "light",
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "minecraft:diorite"
+      }
+    }
+  ]
+}

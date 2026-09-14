@@ -1,0 +1,33 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "tier_id": "magneticraft:low_voltage"
+  },
+  "key": {
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "S": {
+      "tag": "magneticraft:light_plates/steel"
+    },
+    "T": {
+      "tag": "magneticraft:light_plates/copper"
+    }
+  },
+  "pattern": [
+    "STS",
+    "GRG",
+    "SCS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:fuse_box"
+  }
+}

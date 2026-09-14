@@ -1,0 +1,17 @@
+{
+  "crushing_table_hit": {
+    "category": "block",
+    "sounds": [
+      "magneticraft:crushing_table_hit1",
+      "magneticraft:crushing_table_hit2",
+      "magneticraft:crushing_table_hit3"
+    ]
+  },
+  "crushing_table_complete": {
+    "category": "block",
+    "sounds": [
+      "magneticraft:crushing_table_complete1",
+      "magneticraft:crushing_table_complete2"
+    ]
+  }
+}

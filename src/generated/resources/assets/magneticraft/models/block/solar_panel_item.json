@@ -1,0 +1,135 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.13617021,
+        0.13617021,
+        0.13617021
+      ],
+      "translation": [
+        0.04814345,
+        0.13617021,
+        -0.04814343
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.13617021,
+        0.13617021,
+        0.13617021
+      ],
+      "translation": [
+        -0.048143435,
+        0.13617021,
+        0.048143443
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.17021276,
+        0.17021276,
+        0.17021276
+      ],
+      "translation": [
+        -0.08510638,
+        0.17021276,
+        0
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.08510638,
+        0.08510638,
+        0.08510638
+      ],
+      "translation": [
+        -0.04255319,
+        3.0851064,
+        0
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.21276596,
+        0.21276596,
+        0.21276596
+      ],
+      "translation": [
+        0.075224146,
+        0.22187279,
+        0.04123698
+      ]
+    },
+    "head": {
+      "scale": [
+        0.34042552,
+        0.34042552,
+        0.34042552
+      ],
+      "translation": [
+        -0.17021276,
+        0.34042552,
+        0
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.12765957,
+        0.12765957,
+        0.12765957
+      ],
+      "translation": [
+        0.04513448,
+        2.5766373,
+        0.11162802
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.12765957,
+        0.12765957,
+        0.12765957
+      ],
+      "translation": [
+        -0.04513447,
+        2.4894443,
+        0.13499135
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/solar_panel.mcx",
+  "textures": {
+    "particle": "magneticraft:block/multiblocks/unmounted_multiblock"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

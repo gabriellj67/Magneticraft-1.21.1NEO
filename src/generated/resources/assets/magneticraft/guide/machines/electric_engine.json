@@ -1,0 +1,17 @@
+{
+  "automation_profile": "all_sides",
+  "category": "energy",
+  "description": "guide.magneticraft.machine.electric_engine.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:electric_engine",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "electricity"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.electric_engine"
+}

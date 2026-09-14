@@ -1,0 +1,17 @@
+{
+  "automation_profile": "all_sides",
+  "category": "energy",
+  "description": "guide.magneticraft.machine.infinite_energy_source.description",
+  "ghost_slots": 0,
+  "has_menu": false,
+  "id": "magneticraft:infinite_energy_source",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "electricity"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.infinite_energy_source"
+}

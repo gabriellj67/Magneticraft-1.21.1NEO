@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.logistics;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
@@ -8,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -26,6 +28,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public final class ConveyorBeltBlock extends NetworkComponentBlock {
+    public static final MapCodec<ConveyorBeltBlock> CODEC = simpleCodec(ConveyorBeltBlock::new);
+
+    @Override
+    protected MapCodec<? extends ConveyorBeltBlock> codec() {
+        return CODEC;
+    }
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 4, 16);
 
@@ -41,7 +49,8 @@ public final class ConveyorBeltBlock extends NetworkComponentBlock {
     }
 
     @Override
-    public InteractionResult use(
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
             BlockState state,
             Level level,
             BlockPos position,
@@ -49,20 +58,18 @@ public final class ConveyorBeltBlock extends NetworkComponentBlock {
             InteractionHand hand,
             BlockHitResult hit
     ) {
-        if (player.getItemInHand(hand).is(ModNetworkItems.WRENCH.get())
-                || player.getItemInHand(hand).is(ModTags.Items.WRENCHES)) {
-            return super.use(state, level, position, player, hand, hit);
+        if (stack.is(ModNetworkItems.WRENCH.get()) || stack.is(ModTags.Items.WRENCHES)) {
+            return super.useItemOn(stack, state, level, position, player, hand, hit);
         }
         if (!(level.getBlockEntity(position) instanceof ConveyorBeltBlockEntity conveyor)) {
-            return InteractionResult.PASS;
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        ItemStack held = player.getItemInHand(hand);
-        if (held.is(ModNetworkBlocks.CONVEYOR_BELT.get().asItem())) {
-            return InteractionResult.PASS;
+        if (stack.is(ModNetworkBlocks.CONVEYOR_BELT.get().asItem())) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        if (held.isEmpty()) {
+        if (stack.isEmpty()) {
             if (conveyor.belt().parcels().isEmpty()) {
-                return InteractionResult.PASS;
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             }
             if (!level.isClientSide) {
                 ItemStack removed = conveyor.belt().removeLast();
@@ -70,15 +77,15 @@ public final class ConveyorBeltBlock extends NetworkComponentBlock {
                     player.drop(removed, false);
                 }
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
-        boolean accepts = conveyor.belt().insert(held, true);
+        boolean accepts = conveyor.belt().insert(stack, true);
         if (accepts && !level.isClientSide) {
-            if (conveyor.belt().insert(held, false)) {
+            if (conveyor.belt().insert(stack, false)) {
                 player.setItemInHand(hand, ItemStack.EMPTY);
             }
         }
-        return accepts ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
+        return accepts ? ItemInteractionResult.sidedSuccess(level.isClientSide) : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Nullable

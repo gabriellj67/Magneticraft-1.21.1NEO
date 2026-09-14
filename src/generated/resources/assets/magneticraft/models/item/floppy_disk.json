@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:item/generated",
+  "overrides": [
+    {
+      "model": "magneticraft:item/floppy_disk_lisp",
+      "predicate": {
+        "magneticraft:floppy_variant": 1.0
+      }
+    },
+    {
+      "model": "magneticraft:item/floppy_disk_forth",
+      "predicate": {
+        "magneticraft:floppy_variant": 2.0
+      }
+    },
+    {
+      "model": "magneticraft:item/floppy_disk_shell",
+      "predicate": {
+        "magneticraft:floppy_variant": 3.0
+      }
+    },
+    {
+      "model": "magneticraft:item/floppy_disk_basic",
+      "predicate": {
+        "magneticraft:floppy_variant": 4.0
+      }
+    },
+    {
+      "model": "magneticraft:item/floppy_disk_editor",
+      "predicate": {
+        "magneticraft:floppy_variant": 5.0
+      }
+    },
+    {
+      "model": "magneticraft:item/floppy_disk_asm",
+      "predicate": {
+        "magneticraft:floppy_variant": 6.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "magneticraft:item/floppy_disk_0"
+  }
+}

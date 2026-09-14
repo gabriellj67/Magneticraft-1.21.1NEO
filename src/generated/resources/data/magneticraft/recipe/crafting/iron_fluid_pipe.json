@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "A": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "B": {
+      "tag": "c:glass_blocks"
+    },
+    "C": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    " C ",
+    "ABA",
+    " C "
+  ],
+  "result": {
+    "count": 12,
+    "id": "magneticraft:iron_fluid_pipe"
+  }
+}

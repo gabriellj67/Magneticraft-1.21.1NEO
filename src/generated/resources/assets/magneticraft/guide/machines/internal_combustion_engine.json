@@ -1,0 +1,19 @@
+{
+  "automation_profile": "fluid_top_electric_rear_heat_bottom",
+  "category": "energy",
+  "description": "guide.magneticraft.machine.internal_combustion_engine.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:internal_combustion_engine",
+  "inventory_slots": 0,
+  "physical_ports": [
+    "electricity",
+    "fluid_input",
+    "heat"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [],
+  "translation_key": "block.magneticraft.internal_combustion_engine"
+}

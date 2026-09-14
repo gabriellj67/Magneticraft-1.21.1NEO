@@ -1,0 +1,31 @@
+{
+  "type": "magneticraft:sieve",
+  "duration": 80,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:sand"
+  },
+  "results": [
+    {
+      "chance": 0.04,
+      "item": {
+        "count": 1,
+        "id": "minecraft:gold_nugget"
+      }
+    },
+    {
+      "chance": 0.02,
+      "item": {
+        "count": 1,
+        "id": "minecraft:gold_nugget"
+      }
+    },
+    {
+      "chance": 0.02,
+      "item": {
+        "count": 1,
+        "id": "magneticraft:zircon_sand"
+      }
+    }
+  ]
+}

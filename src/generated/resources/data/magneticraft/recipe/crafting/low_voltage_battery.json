@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "tag": "c:nuggets/iron"
+    },
+    "B": {
+      "tag": "c:ingots/copper"
+    },
+    "C": {
+      "tag": "c:ingots/lead"
+    },
+    "D": {
+      "tag": "c:dusts/sulfur"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "CDC",
+    "CDC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:low_voltage_battery"
+  }
+}

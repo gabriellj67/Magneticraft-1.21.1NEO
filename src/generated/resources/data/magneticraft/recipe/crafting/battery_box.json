@@ -1,0 +1,30 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "misc",
+  "electrical": {
+    "tier_id": "magneticraft:low_voltage"
+  },
+  "key": {
+    "A": {
+      "item": "magneticraft:low_voltage_battery"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "C": {
+      "item": "magneticraft:iron_grate"
+    },
+    "D": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "DCD",
+    "DBD"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:battery_box"
+  }
+}

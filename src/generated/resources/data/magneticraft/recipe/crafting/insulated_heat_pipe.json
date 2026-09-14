@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "A": {
+      "item": "minecraft:brick"
+    },
+    "B": {
+      "item": "magneticraft:heat_pipe"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "BBB",
+    "ABA"
+  ],
+  "result": {
+    "count": 5,
+    "id": "magneticraft:insulated_heat_pipe"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "translation": [
+        0.03372826,
+        1.9993473,
+        0.033728275
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "translation": [
+        -0.03372827,
+        1.9993473,
+        -0.033728264
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "translation": [
+        0,
+        2.4991841,
+        -0.05962372
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "translation": [
+        0,
+        4.249592,
+        -0.02981186
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ],
+      "translation": [
+        0.052700363,
+        2.679096,
+        1.6076298
+      ]
+    },
+    "head": {
+      "translation": [
+        0,
+        4.9983683,
+        -0.11924744
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.375,
+        0.375,
+        0.375
+      ],
+      "translation": [
+        0.03162019,
+        2.9545846,
+        1.8187038
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.375,
+        0.375,
+        0.375
+      ],
+      "translation": [
+        -0.031620253,
+        3.01567,
+        1.8023359
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/feeding_trough_inv.mcx",
+  "textures": {
+    "particle": "magneticraft:block/machines/feeding_trough"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

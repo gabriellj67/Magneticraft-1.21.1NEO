@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "magneticraft:wireless_energy_receiver"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "magneticraft:blocks/wireless_energy_receiver"
+}

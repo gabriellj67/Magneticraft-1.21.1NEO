@@ -1,0 +1,185 @@
+{
+  "anchor": {
+    "x": 4,
+    "y": 1,
+    "z": 0
+  },
+  "category": "energy",
+  "controller": "magneticraft:pressurized_water_reactor_controller",
+  "description": "guide.magneticraft.reactor.blueprint.compact_high_power.description",
+  "id": "magneticraft:pressurized_water_reactor_compact_high_power",
+  "layers": [
+    [
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########",
+      "#########"
+    ],
+    [
+      "#P##M##P#",
+      "#PVVVVVP#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVENVV#",
+      "####EN###"
+    ],
+    [
+      "#########",
+      "#VVVVVVV#",
+      "#VRFWFRV#",
+      "#VFWAWFV#",
+      "#VWBIBWV#",
+      "#VFWCWFV#",
+      "#VRFWFRV#",
+      "#VVVVVVV#",
+      "#########"
+    ],
+    [
+      "#########",
+      "#VVVVVVV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VVVVVVV#",
+      "#########"
+    ],
+    [
+      "#########",
+      "#VVVVVVV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VSSSSSV#",
+      "#VVVVVVV#",
+      "#########"
+    ],
+    [
+      "#########",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#VVVTVVV#",
+      "#VVTVTVV#",
+      "#VVVTVVV#",
+      "#VVVVVVV#",
+      "#VVVVVVV#",
+      "#########"
+    ],
+    [
+      "#########",
+      "#########",
+      "#########",
+      "####T####",
+      "###T#T###",
+      "####T####",
+      "#########",
+      "#########",
+      "#########"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:reactor_containment_casing",
+      "rule": "reactor_containment",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:reactor_main_coolant_port",
+      "rule": "reactor_coolant_port",
+      "symbol": "P"
+    },
+    {
+      "block": "magneticraft:pressurized_water_reactor_controller",
+      "rule": "reactor_controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:reactor_pressure_vessel",
+      "rule": "reactor_pressure_vessel",
+      "symbol": "V"
+    },
+    {
+      "block": "magneticraft:reactor_electrical_port",
+      "rule": "reactor_electrical_port",
+      "symbol": "E"
+    },
+    {
+      "block": "magneticraft:reactor_instrumentation_port",
+      "rule": "reactor_instrumentation_port",
+      "symbol": "N"
+    },
+    {
+      "block": "magneticraft:reactor_reflector",
+      "rule": "reactor_reflector",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:reactor_fuel_standard",
+      "rule": "reactor_fuel_standard",
+      "symbol": "F"
+    },
+    {
+      "block": "magneticraft:reactor_coolant_channel",
+      "rule": "reactor_coolant_channel",
+      "symbol": "W"
+    },
+    {
+      "block": "magneticraft:reactor_control_rod_a",
+      "rule": "reactor_control_rod_a",
+      "symbol": "A"
+    },
+    {
+      "block": "magneticraft:reactor_control_rod_b",
+      "rule": "reactor_control_rod_b",
+      "symbol": "B"
+    },
+    {
+      "block": "magneticraft:reactor_instrumentation",
+      "rule": "reactor_instrumentation",
+      "symbol": "I"
+    },
+    {
+      "block": "magneticraft:reactor_control_rod_c",
+      "rule": "reactor_control_rod_c",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:reactor_column_segment",
+      "rule": "reactor_column_segment",
+      "symbol": "S"
+    },
+    {
+      "block": "magneticraft:reactor_control_rod_actuator",
+      "rule": "reactor_actuator",
+      "symbol": "T"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "electricity": true,
+    "fluid_tank_capacities_mb": [
+      64000,
+      64000
+    ],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 9,
+    "y": 7,
+    "z": 9
+  },
+  "supports_mirroring": false,
+  "translation_key": "guide.magneticraft.reactor.blueprint.compact_high_power.name"
+}

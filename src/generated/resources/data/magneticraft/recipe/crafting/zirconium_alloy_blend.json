@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "magneticraft:zirconium_dust"
+    },
+    {
+      "item": "magneticraft:zirconium_dust"
+    },
+    {
+      "item": "magneticraft:carbide_ingot"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:zirconium_alloy_blend"
+  }
+}

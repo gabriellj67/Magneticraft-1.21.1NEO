@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:emerald_ore"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 2,
+        "id": "minecraft:emerald"
+      }
+    },
+    {
+      "chance": 0.15,
+      "item": {
+        "count": 1,
+        "id": "minecraft:gravel"
+      }
+    }
+  ]
+}

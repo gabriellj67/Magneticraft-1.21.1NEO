@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "magneticraft:block/reactor_fuel_standard"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/reactor_fuel_standard_formed"
+    }
+  }
+}

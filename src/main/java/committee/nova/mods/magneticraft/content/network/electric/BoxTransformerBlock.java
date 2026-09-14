@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.electric;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
 import committee.nova.mods.magneticraft.content.item.TransformerElectricalDrops;
@@ -27,6 +28,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class BoxTransformerBlock extends NetworkComponentBlock {
+    public static final MapCodec<BoxTransformerBlock> CODEC = simpleCodec(BoxTransformerBlock::new);
+
+    @Override
+    protected MapCodec<? extends BoxTransformerBlock> codec() {
+        return CODEC;
+    }
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public BoxTransformerBlock(Properties properties) {
@@ -47,18 +54,13 @@ public final class BoxTransformerBlock extends NetworkComponentBlock {
     }
 
     @Override
-    public InteractionResult use(
+    protected InteractionResult useWithoutItem(
             BlockState state,
             net.minecraft.world.level.Level level,
             BlockPos position,
             Player player,
-            InteractionHand hand,
             BlockHitResult hit
     ) {
-        InteractionResult wrenchResult = super.use(state, level, position, player, hand, hit);
-        if (wrenchResult != InteractionResult.PASS) {
-            return wrenchResult;
-        }
         if (!level.isClientSide
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(position) instanceof BoxTransformerBlockEntity transformer) {

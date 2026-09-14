@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "B": {
+      "item": "magneticraft:machine_casing"
+    },
+    "Y": {
+      "tag": "c:dyes/yellow"
+    }
+  },
+  "pattern": [
+    "YBY"
+  ],
+  "result": {
+    "count": 4,
+    "id": "magneticraft:striped_machine_casing"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "L": {
+      "tag": "c:ingots/lead"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "W": {
+      "item": "magneticraft:fine_copper_wire"
+    }
+  },
+  "pattern": [
+    "LL ",
+    "WRI",
+    "LL "
+  ],
+  "result": {
+    "count": 4,
+    "id": "magneticraft:motor"
+  }
+}

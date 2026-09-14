@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.electric;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
 import net.minecraft.core.BlockPos;
@@ -18,6 +19,12 @@ import java.util.Set;
 
 /** Three-block tower; only the bottom part owns simulation state. */
 public final class TeslaTowerBlock extends NetworkComponentBlock {
+    public static final MapCodec<TeslaTowerBlock> CODEC = simpleCodec(TeslaTowerBlock::new);
+
+    @Override
+    protected MapCodec<? extends TeslaTowerBlock> codec() {
+        return CODEC;
+    }
     public static final EnumProperty<TeslaTowerPart> PART = EnumProperty.create("part", TeslaTowerPart.class);
     private static final int HEIGHT = 3;
     private static final ThreadLocal<Set<BlockPos>> STRUCTURE_UPDATES = ThreadLocal.withInitial(HashSet::new);

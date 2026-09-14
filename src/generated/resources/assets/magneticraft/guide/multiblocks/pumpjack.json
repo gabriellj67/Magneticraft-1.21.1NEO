@@ -1,0 +1,151 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "oil",
+  "controller": "magneticraft:pumpjack",
+  "description": "guide.magneticraft.multiblock.pumpjack.description",
+  "id": "magneticraft:pumpjack",
+  "layers": [
+    [
+      "#MC",
+      "###",
+      "###",
+      "###",
+      "###",
+      "###"
+    ],
+    [
+      "...",
+      "GRG",
+      "GGG",
+      "GYG",
+      ".G.",
+      ".G."
+    ],
+    [
+      "...",
+      "GRG",
+      "GGG",
+      "GYG",
+      ".G.",
+      ".R."
+    ],
+    [
+      "...",
+      "GZG",
+      "GZG",
+      "GZG",
+      ".Z.",
+      ".R."
+    ],
+    [
+      "...",
+      "GGG",
+      "GGG",
+      "GGG",
+      ".G.",
+      ".R."
+    ]
+  ],
+  "legend": [
+    {
+      "ignored": true,
+      "rule": "ignore",
+      "symbol": "."
+    },
+    {
+      "block": "magneticraft:pumpjack",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:machine_casing",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:iron_grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "z"
+      },
+      "rule": "column_z",
+      "symbol": "Z"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": 0
+        },
+        "side": "up"
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "oil_output",
+        "side": "south",
+        "target": 0
+      }
+    ],
+    "electricity": true,
+    "fluid_tank_capacities_mb": [
+      64000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "magneticraft:crude_oil"
+        ],
+        "capacity_mb": 64000,
+        "index": 0,
+        "role": "oil_output"
+      }
+    ],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 5,
+    "z": 6
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.pumpjack"
+}

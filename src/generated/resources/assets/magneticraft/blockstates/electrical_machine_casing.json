@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/electrical_machine_casing"
+    }
+  }
+}

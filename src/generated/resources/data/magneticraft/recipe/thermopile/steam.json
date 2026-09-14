@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "magneticraft:steam",
+  "conductivity": 13.360053440213758,
+  "temperature": 373.0
+}

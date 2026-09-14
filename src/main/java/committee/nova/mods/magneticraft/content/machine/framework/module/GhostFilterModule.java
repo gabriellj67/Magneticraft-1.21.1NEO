@@ -55,7 +55,7 @@ public final class GhostFilterModule implements MachineModule {
     public void save(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag stored = new ListTag();
         for (ItemStack filter : filters) {
-            stored.add(filter.save(registries));
+            stored.add(filter.saveOptional(registries));
         }
         tag.put(FILTERS_TAG, stored);
     }

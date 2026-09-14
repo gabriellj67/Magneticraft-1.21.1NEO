@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "c:ores/zinc"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "magneticraft:zinc_rocky_chunk"
+      }
+    },
+    {
+      "chance": 0.15,
+      "item": {
+        "count": 1,
+        "id": "minecraft:gravel"
+      }
+    }
+  ]
+}

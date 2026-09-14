@@ -1,0 +1,17 @@
+{
+  "values": [
+    "magneticraft:iron_chunk",
+    "magneticraft:gold_chunk",
+    "magneticraft:copper_chunk",
+    "magneticraft:lead_chunk",
+    "magneticraft:cobalt_chunk",
+    "magneticraft:tungsten_chunk",
+    "magneticraft:aluminium_chunk",
+    "magneticraft:mithril_chunk",
+    "magneticraft:nickel_chunk",
+    "magneticraft:osmium_chunk",
+    "magneticraft:silver_chunk",
+    "magneticraft:tin_chunk",
+    "magneticraft:zinc_chunk"
+  ]
+}

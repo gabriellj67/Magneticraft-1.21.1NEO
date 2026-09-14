@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "magneticraft:roof_tile"
+  },
+  "result": {
+    "count": 1,
+    "id": "magneticraft:roof_tile_stairs"
+  }
+}

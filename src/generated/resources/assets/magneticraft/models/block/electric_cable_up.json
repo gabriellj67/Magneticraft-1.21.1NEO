@@ -1,0 +1,128 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        1.0666667,
+        1.0666667,
+        1.0666667
+      ],
+      "translation": [
+        0,
+        -5.3333335,
+        0
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        1.0666667,
+        1.0666667,
+        1.0666667
+      ],
+      "translation": [
+        0,
+        -5.3333335,
+        0
+      ]
+    },
+    "fixed": {
+      "scale": [
+        1.3333334,
+        1.3333334,
+        1.3333334
+      ],
+      "translation": [
+        0,
+        -6.666667,
+        0
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.6666667,
+        0.6666667,
+        0.6666667
+      ],
+      "translation": [
+        0,
+        -0.3333335,
+        0
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        1.6666666,
+        1.6666666,
+        1.6666666
+      ],
+      "translation": [
+        0,
+        -7.2168784,
+        -4.166666
+      ]
+    },
+    "head": {
+      "scale": [
+        2.6666667,
+        2.6666667,
+        2.6666667
+      ],
+      "translation": [
+        0,
+        -13.333334,
+        0
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        1.2059044,
+        -4.829629
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        1.2059047,
+        -4.829629
+      ]
+    }
+  },
+  "include_nodes": [
+    "up"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/electric_cable.mcx",
+  "textures": {
+    "particle": "magneticraft:block/electric_connectors/electric_cable"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

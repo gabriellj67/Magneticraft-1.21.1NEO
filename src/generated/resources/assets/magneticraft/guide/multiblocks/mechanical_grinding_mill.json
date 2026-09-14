@@ -1,0 +1,118 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 2,
+    "z": 0
+  },
+  "category": "processing",
+  "controller": "magneticraft:mechanical_grinding_mill",
+  "description": "guide.magneticraft.multiblock.mechanical_grinding_mill.description",
+  "id": "magneticraft:mechanical_grinding_mill",
+  "layers": [
+    [
+      "www",
+      "wKw",
+      "www"
+    ],
+    [
+      "AsA",
+      "sAs",
+      "AsA"
+    ],
+    [
+      ".M.",
+      "...",
+      "..."
+    ]
+  ],
+  "legend": [
+    {
+      "ignored": true,
+      "rule": "ignore",
+      "symbol": "."
+    },
+    {
+      "block": "minecraft:air",
+      "rule": "air",
+      "symbol": "A"
+    },
+    {
+      "block": "magneticraft:mechanical_grinding_mill",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "minecraft:oak_slab",
+      "rule": "wooden_slab",
+      "symbol": "w"
+    },
+    {
+      "block": "minecraft:stone_slab",
+      "rule": "stone_slab",
+      "symbol": "s"
+    },
+    {
+      "block": "magneticraft:wooden_shaft",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "kinetic_shaft",
+      "symbol": "K"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "kinetic",
+        "offset": {
+          "x": 0,
+          "y": -2,
+          "z": -1
+        },
+        "side": "down"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": -1,
+          "z": -1
+        },
+        "side": "west"
+      },
+      {
+        "extract_slots": [
+          1,
+          2
+        ],
+        "insert_slots": [],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": -1,
+          "z": -1
+        },
+        "side": "east"
+      }
+    ],
+    "electricity": false,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 3
+  },
+  "recipe_type": "magneticraft:grinder",
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 3,
+    "z": 3
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.mechanical_grinding_mill"
+}

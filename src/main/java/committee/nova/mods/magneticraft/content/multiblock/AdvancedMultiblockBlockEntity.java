@@ -16,6 +16,7 @@ import committee.nova.mods.magneticraft.init.ModRecipeTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -29,11 +30,11 @@ import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -222,11 +223,6 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
 
     public Direction facing() {
         return getBlockState().getValue(AdvancedMultiblockBlock.FACING);
-    }
-
-    @Override
-    public AABB getRenderBoundingBox() {
-        return MultiblockBounds.renderBounds(worldPosition, facing(), mirrored, definition);
     }
 
     @Nullable
@@ -430,7 +426,11 @@ public final class AdvancedMultiblockBlockEntity extends MachineBlockEntity impl
             blockEntityTag.put(MachineBlockEntity.MODULES_TAG, modules);
         }
         logic.stripPortableState(blockEntityTag);
-        stack.addTagElement("BlockEntityTag", blockEntityTag);
+        if (blockEntityTag.isEmpty()) {
+            stack.remove(DataComponents.BLOCK_ENTITY_DATA);
+        } else {
+            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(blockEntityTag));
+        }
     }
 
     public void describe(Player player) {

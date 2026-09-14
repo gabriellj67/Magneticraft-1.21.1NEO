@@ -1,0 +1,9 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "minecraft:snow",
+  "conductivity": 18.666666666666668,
+  "state": {
+    "layers": "7"
+  },
+  "temperature": 273.15
+}

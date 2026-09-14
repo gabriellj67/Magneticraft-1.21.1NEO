@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "tag": "c:ores/uranium"
+  },
+  "required_level": 2,
+  "result": {
+    "count": 2,
+    "id": "magneticraft:uranium_dust"
+  }
+}

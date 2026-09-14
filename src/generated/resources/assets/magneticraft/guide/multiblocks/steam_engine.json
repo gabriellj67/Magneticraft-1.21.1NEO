@@ -1,0 +1,201 @@
+{
+  "anchor": {
+    "x": 0,
+    "y": 1,
+    "z": 0
+  },
+  "category": "energy",
+  "controller": "magneticraft:steam_engine",
+  "description": "guide.magneticraft.multiblock.steam_engine.description",
+  "id": "magneticraft:steam_engine",
+  "layers": [
+    [
+      "...",
+      "...",
+      ".G.",
+      ".G."
+    ],
+    [
+      "M..",
+      "b..",
+      "bGC",
+      "bGY"
+    ],
+    [
+      "R..",
+      "Y..",
+      "GG.",
+      ".G."
+    ],
+    [
+      "#..",
+      "#..",
+      "#..",
+      "..."
+    ]
+  ],
+  "legend": [
+    {
+      "ignored": true,
+      "rule": "ignore",
+      "symbol": "."
+    },
+    {
+      "block": "magneticraft:steam_engine",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:machine_casing",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:iron_grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    },
+    {
+      "block": "minecraft:bricks",
+      "rule": "bricks",
+      "symbol": "b"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": -2,
+          "y": 0,
+          "z": -2
+        },
+        "side": "up"
+      },
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": -2,
+          "y": 0,
+          "z": -2
+        },
+        "side": "south"
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_input",
+        "side": "down",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_input",
+        "side": "up",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_input",
+        "side": "south",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      }
+    ],
+    "electricity": true,
+    "fluid_tank_capacities_mb": [
+      16000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "magneticraft:steam"
+        ],
+        "capacity_mb": 16000,
+        "index": 0,
+        "role": "steam_input"
+      }
+    ],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 4,
+    "z": 4
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.steam_engine"
+}

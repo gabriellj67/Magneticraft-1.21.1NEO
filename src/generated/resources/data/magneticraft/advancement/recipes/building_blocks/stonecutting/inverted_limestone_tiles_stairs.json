@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_inverted_limestone_tiles": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:inverted_limestone_tiles"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:stonecutting/inverted_limestone_tiles_stairs"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_inverted_limestone_tiles"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:stonecutting/inverted_limestone_tiles_stairs"
+    ]
+  }
+}

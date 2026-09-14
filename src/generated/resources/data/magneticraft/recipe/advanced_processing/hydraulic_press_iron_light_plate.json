@@ -1,0 +1,17 @@
+{
+  "type": "magneticraft:hydraulic_press",
+  "duration": 120,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "tag": "c:ingots/iron"
+  },
+  "press_mode": "medium",
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "magneticraft:iron_light_plate"
+      }
+    }
+  ]
+}

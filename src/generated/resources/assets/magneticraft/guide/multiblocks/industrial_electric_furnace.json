@@ -1,0 +1,115 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "processing",
+  "controller": "magneticraft:industrial_electric_furnace",
+  "description": "guide.magneticraft.multiblock.industrial_electric_furnace.description",
+  "id": "magneticraft:industrial_electric_furnace",
+  "layers": [
+    [
+      "YMY",
+      "GGG",
+      "YGY"
+    ],
+    [
+      "YGY",
+      "GCG",
+      "YGY"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:industrial_electric_furnace",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:iron_grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "side": "south"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "side": "south"
+      },
+      {
+        "extract_slots": [
+          1
+        ],
+        "insert_slots": [],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "side": "north"
+      }
+    ],
+    "electricity": true,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 2
+  },
+  "recipe_type": "minecraft:smelting",
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 2,
+    "z": 3
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.industrial_electric_furnace"
+}

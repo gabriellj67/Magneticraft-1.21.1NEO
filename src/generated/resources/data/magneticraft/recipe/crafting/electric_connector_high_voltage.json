@@ -1,0 +1,27 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "tier_id": "magneticraft:high_voltage"
+  },
+  "key": {
+    "C": {
+      "tag": "c:ingots/aluminium"
+    },
+    "I": {
+      "tag": "c:ingots/lead"
+    },
+    "S": {
+      "tag": "c:ingots/tungsten"
+    }
+  },
+  "pattern": [
+    "SIS",
+    "CCC",
+    "SIS"
+  ],
+  "result": {
+    "count": 8,
+    "id": "magneticraft:electric_connector"
+  }
+}

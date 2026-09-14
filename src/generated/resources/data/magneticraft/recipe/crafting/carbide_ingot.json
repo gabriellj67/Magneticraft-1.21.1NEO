@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "tag": "minecraft:coals"
+    },
+    "T": {
+      "tag": "c:ingots/tungsten"
+    }
+  },
+  "pattern": [
+    "CCC",
+    "CTC",
+    "CCC"
+  ],
+  "result": {
+    "count": 8,
+    "id": "magneticraft:carbide_ingot"
+  }
+}

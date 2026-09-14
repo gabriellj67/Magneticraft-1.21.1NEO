@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "input_tier": "magneticraft:low_voltage",
+  "output_tier": "magneticraft:medium_voltage",
+  "maximum_transfer_joules_per_tick": 800.0,
+  "efficiency": 0.96
+}

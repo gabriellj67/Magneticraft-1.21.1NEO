@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "A": {
+      "tag": "magneticraft:light_plates/copper"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    }
+  },
+  "pattern": [
+    "AGA"
+  ],
+  "result": {
+    "count": 8,
+    "id": "magneticraft:pneumatic_tube"
+  }
+}

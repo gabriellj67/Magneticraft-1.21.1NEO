@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "magneticraft:block/reactor_pressure_vessel"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/reactor_pressure_vessel_formed"
+    }
+  }
+}

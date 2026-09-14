@@ -1,0 +1,31 @@
+{
+  "type": "magneticraft:refinery",
+  "duration": 1,
+  "fluid_input": {
+    "fluid": "magneticraft:light_oil"
+  },
+  "fluid_input_amount": 10,
+  "fluid_outputs": [
+    {
+      "fluid": {
+        "amount": 5,
+        "id": "magneticraft:diesel"
+      },
+      "tank": 0
+    },
+    {
+      "fluid": {
+        "amount": 2,
+        "id": "magneticraft:kerosene"
+      },
+      "tank": 1
+    },
+    {
+      "fluid": {
+        "amount": 3,
+        "id": "magneticraft:gasoline"
+      },
+      "tank": 2
+    }
+  ]
+}

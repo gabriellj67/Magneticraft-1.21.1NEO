@@ -55,12 +55,7 @@ public final class ElectricConnectorBlockEntity extends NetworkComponentBlockEnt
         return Set.of(LongDistancePort.CONNECTOR);
     }
 
-    @Override
-    public AABB getRenderBoundingBox() {
-        return renderBounds(worldPosition, longDistance.clientConnections());
-    }
-
-    static AABB renderBounds(BlockPos position, List<LongDistanceEndpointModule.WireView> connections) {
+    public static AABB renderBounds(BlockPos position, List<LongDistanceEndpointModule.WireView> connections) {
         double minX = position.getX();
         double minY = position.getY();
         double minZ = position.getZ();

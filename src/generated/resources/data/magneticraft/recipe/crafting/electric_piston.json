@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": {
+      "item": "minecraft:piston"
+    },
+    "B": {
+      "tag": "c:ingots/copper"
+    },
+    "C": {
+      "item": "magneticraft:motor"
+    },
+    "D": {
+      "tag": "c:ingots/iron"
+    },
+    "E": {
+      "item": "magneticraft:low_voltage_battery"
+    }
+  },
+  "pattern": [
+    "AB ",
+    "BCD",
+    " DE"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:electric_piston"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_lead_heavy_plate": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#magneticraft:heavy_plates/lead"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/heavy_radiation_helmet"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_lead_heavy_plate"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/heavy_radiation_helmet"
+    ]
+  }
+}

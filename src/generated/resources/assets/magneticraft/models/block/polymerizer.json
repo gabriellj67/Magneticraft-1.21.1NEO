@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "magneticraft:block/polymerizer_front",
+    "side": "magneticraft:block/polymerizer_side",
+    "top": "magneticraft:block/polymerizer_side"
+  }
+}

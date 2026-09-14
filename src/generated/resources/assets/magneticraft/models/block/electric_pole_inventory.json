@@ -1,0 +1,135 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.08,
+        0.08,
+        0.08
+      ],
+      "translation": [
+        0.028284278,
+        2.56,
+        -0.028284265
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.08,
+        0.08,
+        0.08
+      ],
+      "translation": [
+        -0.028284268,
+        2.56,
+        0.028284272
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "translation": [
+        -0.05,
+        3.2,
+        0
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.05,
+        0.05,
+        0.05
+      ],
+      "translation": [
+        -0.025,
+        4.6,
+        0
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.125,
+        0.125,
+        0.125
+      ],
+      "translation": [
+        0.044194125,
+        3.486199,
+        1.9617267
+      ]
+    },
+    "head": {
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "translation": [
+        -0.1,
+        6.4,
+        0
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.075,
+        0.075,
+        0.075
+      ],
+      "translation": [
+        0.026516441,
+        3.1467788,
+        2.3113592
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.075,
+        0.075,
+        0.075
+      ],
+      "translation": [
+        -0.026516503,
+        3.095553,
+        2.325085
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/electric_pole.mcx",
+  "textures": {
+    "particle": "magneticraft:block/electric_connectors/electric_pole"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

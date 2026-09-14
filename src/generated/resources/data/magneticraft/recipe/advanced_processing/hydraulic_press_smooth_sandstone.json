@@ -1,0 +1,17 @@
+{
+  "type": "magneticraft:hydraulic_press",
+  "duration": 40,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "item": "minecraft:smooth_sandstone"
+  },
+  "press_mode": "light",
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "minecraft:sandstone"
+      }
+    }
+  ]
+}

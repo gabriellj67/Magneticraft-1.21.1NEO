@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/low_pressure_exhaust_steam"
+    }
+  }
+}

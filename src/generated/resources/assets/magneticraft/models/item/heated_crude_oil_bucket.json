@@ -1,0 +1,5 @@
+{
+  "parent": "neoforge:item/bucket",
+  "fluid": "magneticraft:heated_crude_oil",
+  "loader": "neoforge:fluid_container"
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_radioactive_debris": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:radioactive_debris"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/decontamination_kit"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_radioactive_debris"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/decontamination_kit"
+    ]
+  }
+}

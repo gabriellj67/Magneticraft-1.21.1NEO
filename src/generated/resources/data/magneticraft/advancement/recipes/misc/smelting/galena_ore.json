@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_galena_ore": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:ores/galena"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:smelting/galena_ore"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_galena_ore"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:smelting/galena_ore"
+    ]
+  }
+}

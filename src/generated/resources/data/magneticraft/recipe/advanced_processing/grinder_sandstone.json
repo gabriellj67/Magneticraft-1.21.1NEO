@@ -1,0 +1,16 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 40,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:sandstone"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 4,
+        "id": "minecraft:sand"
+      }
+    }
+  ]
+}

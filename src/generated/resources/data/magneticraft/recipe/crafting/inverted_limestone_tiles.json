@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "B": {
+      "item": "magneticraft:burnt_limestone"
+    },
+    "L": {
+      "item": "magneticraft:limestone"
+    }
+  },
+  "pattern": [
+    "BL",
+    "LB"
+  ],
+  "result": {
+    "count": 4,
+    "id": "magneticraft:inverted_limestone_tiles"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "L": {
+      "tag": "magneticraft:light_plates/lead"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "S": {
+      "tag": "magneticraft:light_plates/steel"
+    }
+  },
+  "pattern": [
+    "SCS",
+    " R ",
+    " L "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:electrical_repair_tool"
+  }
+}

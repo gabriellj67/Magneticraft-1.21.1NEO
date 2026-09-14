@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_galena_rocky_chunk": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#magneticraft:rocky_chunks/galena"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:smelting/galena_rocky_chunk"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_galena_rocky_chunk"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:smelting/galena_rocky_chunk"
+    ]
+  }
+}

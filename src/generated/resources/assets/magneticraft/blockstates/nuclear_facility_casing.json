@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "magneticraft:block/nuclear_facility_casing"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/nuclear_facility_casing_formed"
+    }
+  }
+}

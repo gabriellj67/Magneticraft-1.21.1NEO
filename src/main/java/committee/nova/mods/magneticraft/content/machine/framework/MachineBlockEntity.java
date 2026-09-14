@@ -4,9 +4,14 @@ import committee.nova.mods.magneticraft.content.machine.framework.module.BulkIte
 import committee.nova.mods.magneticraft.content.machine.framework.module.EnergyStorageModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.FluidTankModule;
 import committee.nova.mods.magneticraft.content.machine.framework.module.ItemInventoryModule;
+import committee.nova.mods.magneticraft.content.machine.singleblock.PneumaticEndpointModule;
 import committee.nova.mods.magneticraft.content.multiblock.ShelvingStorageModule;
+import committee.nova.mods.magneticraft.content.network.module.ConveyorBeltModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalNetworkModule;
 import committee.nova.mods.magneticraft.content.network.module.ElectricalPowerModule;
+import committee.nova.mods.magneticraft.content.network.module.FluidPipeModule;
+import committee.nova.mods.magneticraft.content.network.module.LogisticsTubeModule;
+import committee.nova.mods.magneticraft.content.network.module.PressureNetworkModule;
 import committee.nova.mods.magneticraft.system.network.diagnostic.DiagnosticHost;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ElectricalDiagnosticSource;
 import committee.nova.mods.magneticraft.system.network.diagnostic.ThermalDiagnosticSource;
@@ -195,6 +200,12 @@ public abstract class MachineBlockEntity extends BlockEntity
                 view = bulkModule.view();
             } else if (module instanceof ShelvingStorageModule shelvingModule) {
                 view = shelvingModule.view();
+            } else if (module instanceof PneumaticEndpointModule pneumaticModule) {
+                view = pneumaticModule.view(side);
+            } else if (module instanceof LogisticsTubeModule logisticsModule) {
+                view = logisticsModule.view(side);
+            } else if (module instanceof ConveyorBeltModule conveyorModule) {
+                view = conveyorModule.view(side);
             }
             if (view != null) {
                 return view;
@@ -207,11 +218,16 @@ public abstract class MachineBlockEntity extends BlockEntity
     @Nullable
     public final IFluidHandler exposedFluidHandler(@Nullable Direction side) {
         for (MachineModule module : modules.values()) {
+            IFluidHandler view = null;
             if (module instanceof FluidTankModule fluidModule) {
-                IFluidHandler view = fluidModule.view(side);
-                if (view != null) {
-                    return view;
-                }
+                view = fluidModule.view(side);
+            } else if (module instanceof PressureNetworkModule pressureModule) {
+                view = pressureModule.view(side);
+            } else if (module instanceof FluidPipeModule pipeModule) {
+                view = pipeModule.view(side);
+            }
+            if (view != null) {
+                return view;
             }
         }
         return null;

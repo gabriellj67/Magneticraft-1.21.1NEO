@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:sieve",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/galena"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "magneticraft:lead_chunk"
+      }
+    },
+    {
+      "chance": 0.25,
+      "item": {
+        "count": 1,
+        "id": "magneticraft:silver_dust"
+      }
+    }
+  ]
+}

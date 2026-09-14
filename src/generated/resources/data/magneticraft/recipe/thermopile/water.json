@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "minecraft:water",
+  "conductivity": 540.5405405405339,
+  "temperature": 300.0
+}

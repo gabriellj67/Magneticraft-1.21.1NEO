@@ -1,0 +1,5 @@
+{
+  "parent": "neoforge:item/bucket",
+  "fluid": "magneticraft:wood_gas",
+  "loader": "neoforge:fluid_container"
+}

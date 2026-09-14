@@ -1,0 +1,30 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "tier_id": "magneticraft:low_voltage"
+  },
+  "key": {
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "D": {
+      "tag": "c:ingots/carbide"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    },
+    "T": {
+      "tag": "magneticraft:light_plates/copper"
+    }
+  },
+  "pattern": [
+    " C ",
+    "TDT",
+    " G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:diode"
+  }
+}

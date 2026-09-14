@@ -1,0 +1,16 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "c:ingots/copper"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "magneticraft:copper_dust"
+      }
+    }
+  ]
+}

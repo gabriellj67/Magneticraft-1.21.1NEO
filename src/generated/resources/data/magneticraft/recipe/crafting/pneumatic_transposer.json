@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "minecraft:planks"
+    },
+    "B": {
+      "tag": "c:cobblestones"
+    },
+    "C": {
+      "item": "magneticraft:motor"
+    },
+    "D": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "AAA",
+    "BCB",
+    "BDB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:pneumatic_transposer"
+  }
+}

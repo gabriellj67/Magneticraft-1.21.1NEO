@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "item": "minecraft:gold_block"
+  },
+  "required_level": 2,
+  "result": {
+    "count": 5,
+    "id": "magneticraft:gold_light_plate"
+  }
+}

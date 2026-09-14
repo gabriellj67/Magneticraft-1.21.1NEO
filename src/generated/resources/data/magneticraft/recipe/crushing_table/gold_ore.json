@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "tag": "c:ores/gold"
+  },
+  "required_level": 1,
+  "result": {
+    "count": 1,
+    "id": "magneticraft:gold_rocky_chunk"
+  }
+}

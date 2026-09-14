@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.electric;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.item.TieredElectricalDrops;
 import net.minecraft.core.BlockPos;
@@ -16,6 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ElectricConnectorBlock extends WallMountedElectricBlock {
+    public static final MapCodec<ElectricConnectorBlock> CODEC = simpleCodec(ElectricConnectorBlock::new);
+
+    @Override
+    protected MapCodec<? extends ElectricConnectorBlock> codec() {
+        return CODEC;
+    }
     public ElectricConnectorBlock(Properties properties) {
         super(properties);
     }

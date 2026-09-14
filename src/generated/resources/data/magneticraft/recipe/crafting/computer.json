@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": {
+      "item": "magneticraft:electrical_machine_casing"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "Q": {
+      "tag": "c:gems/quartz"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "IRI",
+    "QCQ",
+    "III"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:computer"
+  }
+}

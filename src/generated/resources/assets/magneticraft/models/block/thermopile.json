@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "magneticraft:block/electric_machines/thermopile_top",
+    "side": "magneticraft:block/electric_machines/thermopile"
+  }
+}

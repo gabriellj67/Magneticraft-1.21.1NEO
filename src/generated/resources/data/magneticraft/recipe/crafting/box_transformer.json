@@ -1,0 +1,37 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "tier_id": "magneticraft:low_voltage",
+    "transformer_profile_id": "magneticraft:lv_to_mv"
+  },
+  "key": {
+    "A": {
+      "tag": "c:ingots/lead"
+    },
+    "B": {
+      "item": "magneticraft:machine_casing"
+    },
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "M": {
+      "item": "magneticraft:magnet"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "S": {
+      "tag": "c:ingots/steel"
+    }
+  },
+  "pattern": [
+    "AMA",
+    "CRC",
+    "SBS"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:box_transformer"
+  }
+}

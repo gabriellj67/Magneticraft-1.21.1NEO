@@ -1,0 +1,221 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "energy",
+  "controller": "magneticraft:steam_turbine",
+  "description": "guide.magneticraft.multiblock.steam_turbine.description",
+  "id": "magneticraft:steam_turbine",
+  "layers": [
+    [
+      "#M#",
+      "GGG",
+      "GGG",
+      "GGG",
+      "#G#"
+    ],
+    [
+      "G#G",
+      "TRT",
+      "TRT",
+      "#R#",
+      "GGG"
+    ],
+    [
+      "#G#",
+      "GCG",
+      "GGG",
+      "GGG",
+      "#G#"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:steam_turbine",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:machine_casing",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:iron_grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:small_tank",
+      "rule": "small_tank",
+      "symbol": "T"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 0,
+          "y": 2,
+          "z": -1
+        },
+        "side": "up"
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "steam_input",
+        "side": "west",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -2
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 0,
+          "z": -1
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -2
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "steam_input",
+        "side": "east",
+        "target": 0
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -4
+        },
+        "role": "low_pressure_exhaust_output",
+        "side": "north",
+        "target": 1
+      }
+    ],
+    "electricity": true,
+    "fluid_tank_capacities_mb": [
+      32000,
+      32000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "magneticraft:steam"
+        ],
+        "capacity_mb": 32000,
+        "index": 0,
+        "role": "steam_input"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:low_pressure_exhaust_steam"
+        ],
+        "capacity_mb": 32000,
+        "index": 1,
+        "role": "low_pressure_exhaust_output"
+      }
+    ],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 3,
+    "z": 5
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.steam_turbine"
+}

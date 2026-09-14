@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_floppy_disk": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:floppy_disk"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/floppy_disk_shell"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_floppy_disk"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/floppy_disk_shell"
+    ]
+  }
+}

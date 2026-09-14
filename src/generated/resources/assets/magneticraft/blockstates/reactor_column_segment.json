@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "magneticraft:block/reactor_column_segment"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/reactor_column_segment_formed"
+    }
+  }
+}

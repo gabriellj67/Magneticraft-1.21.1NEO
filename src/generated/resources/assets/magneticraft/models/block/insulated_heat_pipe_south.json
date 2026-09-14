@@ -1,0 +1,133 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.64,
+        0.64,
+        0.64
+      ],
+      "translation": [
+        2.9415636,
+        0,
+        2.9415648
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.64,
+        0.64,
+        0.64
+      ],
+      "translation": [
+        -2.9415643,
+        0,
+        -2.9415638
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "translation": [
+        0,
+        0,
+        -5.2000003
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "translation": [
+        0,
+        3,
+        -2.6000001
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        4.5961933,
+        -2.2980974,
+        3.9804218
+      ]
+    },
+    "head": {
+      "scale": [
+        1.6,
+        1.6,
+        1.6
+      ],
+      "translation": [
+        0,
+        0,
+        -10.400001
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "translation": [
+        2.757716,
+        -0.16375017,
+        0.71375
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "translation": [
+        -2.7577167,
+        5.1637497,
+        -0.7137494
+      ]
+    }
+  },
+  "include_nodes": [
+    "south"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/insulated_heat_pipe.mcx",
+  "textures": {
+    "particle": "magneticraft:block/fluid_machines/insulated_heat_pipe"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

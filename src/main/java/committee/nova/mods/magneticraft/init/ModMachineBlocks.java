@@ -1,0 +1,171 @@
+package committee.nova.mods.magneticraft.init;
+
+import committee.nova.mods.magneticraft.content.machine.battery.BatteryBlock;
+import committee.nova.mods.magneticraft.content.machine.crushingtable.CrushingTableBlock;
+import committee.nova.mods.magneticraft.content.machine.electricfurnace.ElectricFurnaceBlock;
+import committee.nova.mods.magneticraft.content.machine.singleblock.AirBubbleBlock;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineBlock;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SingleBlockMachineDefinition;
+import committee.nova.mods.magneticraft.content.machine.singleblock.SmallTankBlockItem;
+import committee.nova.mods.magneticraft.content.machine.singleblock.TubeLightBlock;
+import committee.nova.mods.magneticraft.content.item.TieredElectricalBlockItem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.neoforged.neoforge.registries.DeferredHolder;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
+/**
+ * Registers the machine-framework task's blocks and their items.
+ */
+public final class ModMachineBlocks {
+    private static final List<DeferredHolder<Item, ? extends Item>> BLOCK_ITEMS = new ArrayList<>();
+    private static final Map<SingleBlockMachineDefinition, DeferredHolder<Block, Block>> MACHINES =
+            new EnumMap<>(SingleBlockMachineDefinition.class);
+
+    public static final DeferredHolder<Block, Block> CRUSHING_TABLE = register(
+            "crushing_table",
+            () -> new CrushingTableBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0F)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion())
+    );
+    public static final DeferredHolder<Block, Block> BATTERY = registerTiered(
+            "battery_box",
+            () -> new BatteryBlock(machineProperties().noOcclusion())
+    );
+    public static final DeferredHolder<Block, Block> GRATE = register(
+            "iron_grate",
+            () -> new Block(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .requiresCorrectToolForDrops()
+                    .strength(3.0F, 10.0F)
+                    .sound(SoundType.METAL)
+                    .noOcclusion())
+    );
+    public static final DeferredHolder<Block, Block> ELECTRIC_FURNACE = register(
+            "electric_furnace",
+            () -> new ElectricFurnaceBlock(machineProperties())
+    );
+    public static final DeferredHolder<Block, Block> AIR_BUBBLE = ModRegistries.BLOCKS.register(
+            "air_bubble",
+            () -> new AirBubbleBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WATER)
+                    .noCollission()
+                    .noOcclusion()
+                    .randomTicks()
+                    .strength(-1.0F, 3_600_000.0F)
+                    .sound(SoundType.GLASS)
+                    .noLootTable())
+    );
+    public static final DeferredHolder<Block, Block> TUBE_LIGHT = register(
+            "tube_light",
+            () -> new TubeLightBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_YELLOW)
+                    .strength(0.5F)
+                    .sound(SoundType.GLASS)
+                    .lightLevel(state -> 15)
+                    .noOcclusion())
+    );
+    public static final DeferredHolder<Block, Block> GEOTHERMAL_DRILL_PIPE = ModRegistries.BLOCKS.register(
+            "geothermal_drill_pipe",
+            () -> new Block(machineProperties().noLootTable())
+    );
+    public static final DeferredHolder<Block, Block> PERMANENT_MAGNET = register(
+            "permanent_magnet",
+            () -> new Block(machineProperties().noOcclusion())
+    );
+
+    static {
+        for (SingleBlockMachineDefinition definition : SingleBlockMachineDefinition.values()) {
+            DeferredHolder<Block, Block> block = registerMachine(definition);
+            MACHINES.put(definition, block);
+        }
+    }
+
+    private ModMachineBlocks() {
+    }
+
+    public static void bootstrap() {
+    }
+
+    public static List<DeferredHolder<Item, ? extends Item>> blockItems() {
+        return List.copyOf(BLOCK_ITEMS);
+    }
+
+    public static DeferredHolder<Block, Block> machine(SingleBlockMachineDefinition definition) {
+        DeferredHolder<Block, Block> block = MACHINES.get(definition);
+        if (block == null) {
+            throw new IllegalArgumentException("No single-block machine registered for " + definition);
+        }
+        return block;
+    }
+
+    public static Map<SingleBlockMachineDefinition, DeferredHolder<Block, Block>> machines() {
+        return Collections.unmodifiableMap(MACHINES);
+    }
+
+    private static DeferredHolder<Block, Block> register(String id, Supplier<Block> factory) {
+        DeferredHolder<Block, Block> block = ModRegistries.BLOCKS.register(id, factory);
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties())));
+        return block;
+    }
+
+    private static DeferredHolder<Block, Block> registerTiered(String id, Supplier<Block> factory) {
+        DeferredHolder<Block, Block> block = ModRegistries.BLOCKS.register(id, factory);
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                id,
+                () -> new TieredElectricalBlockItem(block.get(), new Item.Properties())
+        ));
+        return block;
+    }
+
+    private static DeferredHolder<Block, Block> registerMachine(SingleBlockMachineDefinition definition) {
+        DeferredHolder<Block, Block> block = ModRegistries.BLOCKS.register(
+                definition.id(),
+                () -> new SingleBlockMachineBlock(definition, machineProperties(definition))
+        );
+        BLOCK_ITEMS.add(ModRegistries.ITEMS.register(
+                definition.id(),
+                () -> switch (definition) {
+                    case SMALL_TANK -> new SmallTankBlockItem(block.get(), new Item.Properties());
+                    case INFINITE_ENERGY -> new TieredElectricalBlockItem(block.get(), new Item.Properties());
+                    default -> new BlockItem(block.get(), new Item.Properties());
+                }
+        ));
+        return block;
+    }
+
+    private static BlockBehaviour.Properties machineProperties() {
+        return BlockBehaviour.Properties.of()
+                .mapColor(MapColor.METAL)
+                .requiresCorrectToolForDrops()
+                .strength(3.5F, 10.0F)
+                .sound(SoundType.METAL);
+    }
+
+    private static BlockBehaviour.Properties machineProperties(SingleBlockMachineDefinition definition) {
+        BlockBehaviour.Properties properties = definition.isWooden()
+                ? BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WOOD)
+                    .strength(2.0F, 5.0F)
+                    .sound(SoundType.WOOD)
+                : machineProperties();
+        return switch (definition) {
+            case SLUICE_BOX, SMALL_TANK, FEEDING_TROUGH, INSERTER,
+                    COMBUSTION_CHAMBER, STEAM_BOILER, GASIFICATION_UNIT,
+                    ELECTRIC_ENGINE, INTERNAL_COMBUSTION_ENGINE -> properties.noOcclusion();
+            default -> properties;
+        };
+    }
+}

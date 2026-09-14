@@ -1,0 +1,77 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "energy",
+  "controller": "magneticraft:solar_tower",
+  "description": "guide.magneticraft.multiblock.solar_tower.description",
+  "id": "magneticraft:solar_tower",
+  "layers": [
+    [
+      "#M#",
+      "###",
+      "###"
+    ],
+    [
+      "#R#",
+      "RCR",
+      "#R#"
+    ],
+    [
+      "#R#",
+      "RCR",
+      "#R#"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:solar_tower",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:machine_casing",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -1
+        },
+        "side": "down"
+      }
+    ],
+    "electricity": false,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": true,
+    "inventory_slots": 0
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 3,
+    "z": 3
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.solar_tower"
+}

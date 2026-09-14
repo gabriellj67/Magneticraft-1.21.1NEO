@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "magneticraft:block/reactor_control_rod_b"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/reactor_control_rod_b_formed"
+    }
+  }
+}

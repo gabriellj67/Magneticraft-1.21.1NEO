@@ -1,0 +1,16 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 20,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "magneticraft:limestone"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "magneticraft:limestone_cobblestone"
+      }
+    }
+  ]
+}

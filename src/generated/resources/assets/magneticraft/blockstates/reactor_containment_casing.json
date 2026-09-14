@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "magneticraft:block/reactor_containment_casing"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/reactor_containment_casing_formed"
+    }
+  }
+}

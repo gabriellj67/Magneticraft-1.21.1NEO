@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_fuel_pellet": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:uranium_dioxide_pellet"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/reactor_fuel_standard"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_fuel_pellet"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/reactor_fuel_standard"
+    ]
+  }
+}

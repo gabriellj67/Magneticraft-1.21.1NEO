@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "B": {
+      "item": "minecraft:iron_bars"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "IBI",
+    "BIB",
+    "IBI"
+  ],
+  "result": {
+    "count": 8,
+    "id": "magneticraft:cooling_tower_fill"
+  }
+}

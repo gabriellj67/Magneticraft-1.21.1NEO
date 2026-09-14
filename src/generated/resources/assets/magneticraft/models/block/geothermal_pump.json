@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "magneticraft:block/geothermal_pump_front_off",
+    "side": "magneticraft:block/geothermal_pump",
+    "top": "magneticraft:block/geothermal_pump_top"
+  }
+}

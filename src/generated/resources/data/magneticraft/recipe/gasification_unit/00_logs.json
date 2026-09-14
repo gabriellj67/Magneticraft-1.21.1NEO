@@ -1,0 +1,16 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 30,
+  "fluid_result": {
+    "amount": 150,
+    "id": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "tag": "minecraft:logs"
+  },
+  "item_result": {
+    "count": 1,
+    "id": "minecraft:charcoal"
+  },
+  "minimum_temperature": 573.15
+}

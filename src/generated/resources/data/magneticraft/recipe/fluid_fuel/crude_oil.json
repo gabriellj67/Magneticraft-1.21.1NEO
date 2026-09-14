@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:industrial_combustion_chamber",
+  "duration": 10000,
+  "fluid": "magneticraft:crude_oil",
+  "power": 30.0
+}

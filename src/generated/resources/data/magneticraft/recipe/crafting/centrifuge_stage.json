@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_facility_casing"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "M": {
+      "item": "magneticraft:motor"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "CMC",
+    "RIR",
+    "CMC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:centrifuge_stage"
+  }
+}

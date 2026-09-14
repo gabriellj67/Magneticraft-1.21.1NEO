@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 40,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "c:ores/pyrite"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 4,
+        "id": "magneticraft:sulfur"
+      }
+    },
+    {
+      "chance": 0.01,
+      "item": {
+        "count": 1,
+        "id": "magneticraft:iron_dust"
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_boron_carbide_blend": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:boron_carbide_blend"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:smelting/boron_carbide_blend"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_boron_carbide_blend"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:smelting/boron_carbide_blend"
+    ]
+  }
+}

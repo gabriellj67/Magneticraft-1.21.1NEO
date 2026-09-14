@@ -1,0 +1,12 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 10,
+  "fluid_result": {
+    "amount": 30,
+    "id": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "item": "minecraft:lily_pad"
+  },
+  "minimum_temperature": 453.15
+}

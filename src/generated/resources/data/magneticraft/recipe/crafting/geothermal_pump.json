@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "D": {
+      "item": "magneticraft:electric_drill"
+    },
+    "H": {
+      "item": "magneticraft:heat_pipe"
+    },
+    "T": {
+      "tag": "c:ingots/carbide"
+    }
+  },
+  "pattern": [
+    "TTT",
+    "THT",
+    "TDT"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:geothermal_pump"
+  }
+}

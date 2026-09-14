@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "c:ingots/copper"
+    },
+    "B": {
+      "item": "magneticraft:electric_cable"
+    }
+  },
+  "pattern": [
+    " A ",
+    "A A",
+    " B "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:wireless_energy_receiver"
+  }
+}

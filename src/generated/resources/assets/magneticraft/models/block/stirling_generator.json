@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "magneticraft:block/stirling_generator_head",
+    "side": "magneticraft:block/stirling_generator"
+  }
+}

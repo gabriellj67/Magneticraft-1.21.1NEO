@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:reactor_pressure_vessel"
+    },
+    "P": {
+      "item": "magneticraft:iron_fluid_pipe"
+    }
+  },
+  "pattern": [
+    " P ",
+    "PCP",
+    " P "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:reactor_main_coolant_port"
+  }
+}

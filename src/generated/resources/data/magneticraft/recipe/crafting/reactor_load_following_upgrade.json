@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "magneticraft:reactor_regulation_upgrade"
+    },
+    {
+      "item": "minecraft:observer"
+    },
+    {
+      "item": "minecraft:lapis_lazuli"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:reactor_load_following_upgrade"
+  }
+}

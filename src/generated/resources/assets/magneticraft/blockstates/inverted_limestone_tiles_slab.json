@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "magneticraft:block/inverted_limestone_tiles_slab"
+    },
+    "type=double": {
+      "model": "magneticraft:block/inverted_limestone_tiles"
+    },
+    "type=top": {
+      "model": "magneticraft:block/inverted_limestone_tiles_slab_top"
+    }
+  }
+}

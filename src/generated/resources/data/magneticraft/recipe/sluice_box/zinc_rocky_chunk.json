@@ -1,0 +1,35 @@
+{
+  "type": "magneticraft:sluice_box",
+  "ingredient": {
+    "item": "magneticraft:zinc_rocky_chunk"
+  },
+  "results": [
+    {
+      "stack": {
+        "count": 1,
+        "id": "magneticraft:zinc_chunk"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "count": 1,
+        "id": "magneticraft:nickel_dust"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "count": 1,
+        "id": "magneticraft:tin_dust"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "count": 1,
+        "id": "minecraft:cobblestone"
+      }
+    }
+  ]
+}

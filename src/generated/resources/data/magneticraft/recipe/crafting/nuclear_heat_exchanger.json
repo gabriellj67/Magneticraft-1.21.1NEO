@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:copper_coil"
+    },
+    "P": {
+      "item": "magneticraft:iron_fluid_pipe"
+    }
+  },
+  "pattern": [
+    "PCP",
+    "CCC",
+    "PCP"
+  ],
+  "result": {
+    "count": 4,
+    "id": "magneticraft:nuclear_heat_exchanger"
+  }
+}

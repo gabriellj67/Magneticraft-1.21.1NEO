@@ -24,3 +24,31 @@ description = '''${mod_description}'''
     versionRange = "${mc_version_range}"
     ordering = "NONE"
     side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "jei"
+    type = "optional"
+    versionRange = "${jei_version_range}"
+    ordering = "AFTER"
+    side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId = "crafttweaker"
+    type = "optional"
+    versionRange = "${crafttweaker_version_range}"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "tconstruct"
+    type = "optional"
+    versionRange = "${tconstruct_version_range}"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[dependencies.${mod_id}]]
+    modId = "jade"
+    type = "optional"
+    versionRange = "${jade_version_range}"
+    ordering = "AFTER"
+    side = "BOTH"

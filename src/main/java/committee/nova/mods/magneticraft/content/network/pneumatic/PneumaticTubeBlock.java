@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.pneumatic;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.content.machine.framework.NetworkConnectionHost;
@@ -14,6 +15,12 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import org.jetbrains.annotations.Nullable;
 
 public final class PneumaticTubeBlock extends ConduitBlock {
+    public static final MapCodec<PneumaticTubeBlock> CODEC = simpleCodec(PneumaticTubeBlock::new);
+
+    @Override
+    protected MapCodec<? extends PneumaticTubeBlock> codec() {
+        return CODEC;
+    }
     public PneumaticTubeBlock(Properties properties) {
         super(properties);
     }

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "magneticraft:block/reactor_instrumentation"
+    },
+    "formed=true": {
+      "model": "magneticraft:block/reactor_instrumentation_formed"
+    }
+  }
+}

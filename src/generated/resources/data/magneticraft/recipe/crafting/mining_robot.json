@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": {
+      "item": "magneticraft:computer"
+    },
+    "H": {
+      "tag": "c:chests/wooden"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    }
+  },
+  "pattern": [
+    "IPI",
+    "ICI",
+    "IHI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:mining_robot"
+  }
+}

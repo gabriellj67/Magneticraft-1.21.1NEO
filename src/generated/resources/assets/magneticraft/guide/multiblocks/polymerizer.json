@@ -1,0 +1,143 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "processing",
+  "controller": "magneticraft:polymerizer",
+  "description": "guide.magneticraft.multiblock.polymerizer.description",
+  "id": "magneticraft:polymerizer",
+  "layers": [
+    [
+      "#M#",
+      "###",
+      "###"
+    ],
+    [
+      "###",
+      "#A#",
+      "###"
+    ],
+    [
+      "###",
+      "#A#",
+      "###"
+    ],
+    [
+      "###",
+      "#A#",
+      "#C#"
+    ],
+    [
+      "###",
+      "#T#",
+      "###"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "minecraft:air",
+      "rule": "air",
+      "symbol": "A"
+    },
+    {
+      "block": "magneticraft:polymerizer",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:machine_casing",
+      "rule": "base",
+      "symbol": "#"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:small_tank",
+      "rule": "small_tank",
+      "symbol": "T"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -1
+        },
+        "side": "west"
+      },
+      {
+        "extract_slots": [
+          1
+        ],
+        "insert_slots": [],
+        "kind": "item",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "side": "east"
+      },
+      {
+        "kind": "heat",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -2
+        },
+        "side": "north"
+      },
+      {
+        "access": "input",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 4,
+          "z": -1
+        },
+        "role": "feed_input",
+        "side": "up",
+        "target": 0
+      }
+    ],
+    "electricity": false,
+    "fluid_tank_capacities_mb": [
+      4000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "magneticraft:liquid_plastic",
+          "magneticraft:natural_gas"
+        ],
+        "capacity_mb": 4000,
+        "index": 0,
+        "role": "feed_input"
+      }
+    ],
+    "heat": true,
+    "inventory_slots": 2
+  },
+  "recipe_type": "magneticraft:polymerizing",
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 5,
+    "z": 3
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.polymerizer"
+}

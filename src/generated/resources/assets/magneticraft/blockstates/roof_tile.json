@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "magneticraft:block/roof_tile_0"
+      },
+      {
+        "model": "magneticraft:block/roof_tile_1"
+      },
+      {
+        "model": "magneticraft:block/roof_tile_2"
+      },
+      {
+        "model": "magneticraft:block/roof_tile_3"
+      }
+    ]
+  }
+}

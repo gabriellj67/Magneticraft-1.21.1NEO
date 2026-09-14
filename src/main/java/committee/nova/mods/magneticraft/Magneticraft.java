@@ -2,6 +2,7 @@ package committee.nova.mods.magneticraft;
 
 import com.mojang.logging.LogUtils;
 import committee.nova.mods.magneticraft.config.MagneticraftConfig;
+import committee.nova.mods.magneticraft.data.ModDataGenerators;
 import committee.nova.mods.magneticraft.init.ModRegistries;
 import committee.nova.mods.magneticraft.network.ModNetwork;
 import net.minecraft.resources.ResourceLocation;
@@ -22,6 +23,7 @@ public final class Magneticraft {
     public Magneticraft(IEventBus modBus, ModContainer container) {
         ModRegistries.register(modBus);
         modBus.addListener(ModNetwork::register);
+        modBus.addListener(ModDataGenerators::gatherData);
         container.registerConfig(ModConfig.Type.COMMON, MagneticraftConfig.SPEC);
     }
 

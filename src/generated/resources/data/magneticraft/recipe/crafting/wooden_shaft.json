@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "I": {
+      "tag": "c:nuggets/iron"
+    },
+    "S": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "pattern": [
+    " I ",
+    " S ",
+    " I "
+  ],
+  "result": {
+    "count": 4,
+    "id": "magneticraft:wooden_shaft"
+  }
+}

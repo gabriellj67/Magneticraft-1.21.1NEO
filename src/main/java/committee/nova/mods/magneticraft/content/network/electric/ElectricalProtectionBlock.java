@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,6 +43,11 @@ public final class ElectricalProtectionBlock extends NetworkComponentBlock {
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
+    @Override
+    protected MapCodec<? extends ElectricalProtectionBlock> codec() {
+        return simpleCodec(properties -> new ElectricalProtectionBlock(properties, kind));
+    }
+
     public ElectricalProtectionKind kind() {
         return kind;
     }
@@ -52,7 +59,8 @@ public final class ElectricalProtectionBlock extends NetworkComponentBlock {
     }
 
     @Override
-    public InteractionResult use(
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
             BlockState state,
             Level level,
             BlockPos position,
@@ -60,25 +68,31 @@ public final class ElectricalProtectionBlock extends NetworkComponentBlock {
             InteractionHand hand,
             BlockHitResult hit
     ) {
-        ItemStack held = player.getItemInHand(hand);
-        if (kind == ElectricalProtectionKind.FUSE_BOX && held.is(ModNetworkItems.FUSE.get())) {
+        if (kind == ElectricalProtectionKind.FUSE_BOX && stack.is(ModNetworkItems.FUSE.get())) {
             if (level.isClientSide) {
-                return InteractionResult.SUCCESS;
+                return ItemInteractionResult.SUCCESS;
             }
             if (level.getBlockEntity(position) instanceof ElectricalProtectionBlockEntity protection
-                    && protection.protection().insertFuse(held)) {
+                    && protection.protection().insertFuse(stack)) {
                 if (!player.getAbilities().instabuild) {
-                    held.shrink(1);
+                    stack.shrink(1);
                 }
-                return InteractionResult.CONSUME;
+                return ItemInteractionResult.CONSUME;
             }
             player.displayClientMessage(Component.translatable("message.magneticraft.invalid_fuse"), true);
-            return InteractionResult.FAIL;
+            return ItemInteractionResult.FAIL;
         }
-        InteractionResult wrenchResult = super.use(state, level, position, player, hand, hit);
-        if (wrenchResult != InteractionResult.PASS) {
-            return wrenchResult;
-        }
+        return super.useItemOn(stack, state, level, position, player, hand, hit);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state,
+            Level level,
+            BlockPos position,
+            Player player,
+            BlockHitResult hit
+    ) {
         if (!level.isClientSide
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(position) instanceof ElectricalProtectionBlockEntity protection) {

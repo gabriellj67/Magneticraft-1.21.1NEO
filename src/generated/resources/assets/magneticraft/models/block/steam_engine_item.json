@@ -1,0 +1,135 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "translation": [
+        -0.56568533,
+        -0.8998699,
+        -0.5656856
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "translation": [
+        0.56568545,
+        -0.8998699,
+        0.5656854
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.125,
+        0.125,
+        0.125
+      ],
+      "translation": [
+        0,
+        -1.1248374,
+        1
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.0625,
+        0.0625,
+        0.0625
+      ],
+      "translation": [
+        0,
+        2.4375813,
+        0.5
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.15625,
+        0.15625,
+        0.15625
+      ],
+      "translation": [
+        -0.8838833,
+        -0.77573043,
+        -1.468489
+      ]
+    },
+    "head": {
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "translation": [
+        0,
+        -2.2496748,
+        2
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.09375,
+        0.09375,
+        0.09375
+      ],
+      "translation": [
+        -0.53033,
+        2.7939124,
+        -0.9521417
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.09375,
+        0.09375,
+        0.09375
+      ],
+      "translation": [
+        0.5303301,
+        1.7693934,
+        -0.6776226
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/steam_engine.gltf",
+  "textures": {
+    "particle": "magneticraft:block/multiblocks/unmounted_multiblock"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

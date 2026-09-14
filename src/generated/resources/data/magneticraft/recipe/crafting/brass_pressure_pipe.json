@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "B": {
+      "tag": "c:ingots/brass"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    }
+  },
+  "pattern": [
+    "BGB"
+  ],
+  "result": {
+    "count": 8,
+    "id": "magneticraft:brass_pressure_pipe"
+  }
+}

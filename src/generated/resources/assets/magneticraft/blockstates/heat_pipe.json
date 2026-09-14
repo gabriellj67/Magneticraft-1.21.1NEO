@@ -1,0 +1,57 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "magneticraft:block/heat_pipe_base"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/heat_pipe_down"
+      },
+      "when": {
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/heat_pipe_up"
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/heat_pipe_north"
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/heat_pipe_south"
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/heat_pipe_west"
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/heat_pipe_east"
+      },
+      "when": {
+        "east": "true"
+      }
+    }
+  ]
+}

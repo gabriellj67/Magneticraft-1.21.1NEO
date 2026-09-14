@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "A": {
+      "item": "minecraft:brick"
+    },
+    "B": {
+      "tag": "c:ingots/iron"
+    },
+    "C": {
+      "tag": "magneticraft:light_plates/copper"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "BCB",
+    "ABA"
+  ],
+  "result": {
+    "count": 5,
+    "id": "magneticraft:insulated_heat_pipe"
+  }
+}

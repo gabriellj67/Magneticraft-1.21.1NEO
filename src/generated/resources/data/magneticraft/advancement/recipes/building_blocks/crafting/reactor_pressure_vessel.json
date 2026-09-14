@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/reactor_pressure_vessel"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_zirconium_alloy": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:zirconium_alloy_ingot"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_zirconium_alloy"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/reactor_pressure_vessel"
+    ]
+  }
+}

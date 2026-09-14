@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,6 +30,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -50,6 +52,11 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(FORMED, false));
+    }
+
+    @Override
+    protected MapCodec<? extends AdvancedMultiblockBlock> codec() {
+        return simpleCodec(properties -> new AdvancedMultiblockBlock(definition, properties));
     }
 
     public MultiblockDefinition definition() {
@@ -78,7 +85,8 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
             BlockState state,
             Level level,
             BlockPos position,
@@ -87,15 +95,15 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
             BlockHitResult hit
     ) {
         if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
+            return ItemInteractionResult.SUCCESS;
         }
         if (hand != InteractionHand.MAIN_HAND
                 || !(player instanceof ServerPlayer serverPlayer)
                 || !(level.getBlockEntity(position) instanceof AdvancedMultiblockBlockEntity controller)) {
-            return InteractionResult.CONSUME;
+            return ItemInteractionResult.CONSUME;
         }
-        if (controller.handleShelvingChest(serverPlayer, player.getItemInHand(hand))) {
-            return InteractionResult.CONSUME;
+        if (controller.handleShelvingChest(serverPlayer, stack)) {
+            return ItemInteractionResult.CONSUME;
         }
         if (!controller.formed()) {
             if (!controller.tryForm(serverPlayer)) {
@@ -114,7 +122,7 @@ public final class AdvancedMultiblockBlock extends BaseEntityBlock {
         } else {
             controller.describe(serverPlayer);
         }
-        return InteractionResult.CONSUME;
+        return ItemInteractionResult.CONSUME;
     }
 
     @Override

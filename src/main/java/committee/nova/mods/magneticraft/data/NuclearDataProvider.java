@@ -1,0 +1,106 @@
+package committee.nova.mods.magneticraft.data;
+
+import com.google.gson.JsonObject;
+import committee.nova.mods.magneticraft.content.nuclear.fuel.NuclearFuelGrade;
+import committee.nova.mods.magneticraft.system.nuclear.data.NuclearFuelDefinition;
+import committee.nova.mods.magneticraft.system.nuclear.data.ReactorParameters;
+import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataProvider;
+import net.minecraft.data.PackOutput;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+/** Generates built-in nuclear balance entries from the same fixed fuel-grade catalogue as the items. */
+final class NuclearDataProvider implements DataProvider {
+    private final PackOutput.PathProvider fuels;
+    private final PackOutput.PathProvider reactorParameters;
+
+    NuclearDataProvider(PackOutput output) {
+        fuels = output.createPathProvider(PackOutput.Target.DATA_PACK, "magneticraft/nuclear_fuels");
+        reactorParameters = output.createPathProvider(
+                PackOutput.Target.DATA_PACK, "magneticraft/nuclear/reactor_parameters");
+    }
+
+    @Override
+    public CompletableFuture<?> run(CachedOutput output) {
+        List<CompletableFuture<?>> writes = new ArrayList<>();
+        for (NuclearFuelGrade grade : NuclearFuelGrade.values()) {
+            writes.add(DataProvider.saveStable(output, fuelJson(grade), fuels.json(grade.definitionId())));
+        }
+        writes.add(DataProvider.saveStable(
+                output, reactorParametersJson(ReactorParameters.DEFAULT),
+                reactorParameters.json(ReactorParameters.PWR_ID)));
+        return CompletableFuture.allOf(writes.toArray(CompletableFuture[]::new));
+    }
+
+    @Override
+    public String getName() {
+        return "Magneticraft nuclear fuel data";
+    }
+
+    static JsonObject fuelJson(NuclearFuelGrade grade) {
+        JsonObject root = new JsonObject();
+        root.addProperty("schema_version", NuclearFuelDefinition.SCHEMA_VERSION);
+        root.addProperty("enrichment_percent", grade.enrichmentPercent());
+        root.addProperty("thermal_power_joules_per_tick", grade.thermalPowerJoulesPerTick());
+        root.addProperty("design_life_ticks", grade.designLifeTicks());
+        root.addProperty("initial_reactivity", grade.initialReactivity());
+        root.addProperty("temperature_coefficient_per_kelvin", grade.temperatureCoefficientPerKelvin());
+        root.addProperty("void_coefficient", grade.voidCoefficient());
+        root.addProperty("decay_heat_fraction", grade.decayHeatFraction());
+        root.addProperty("cladding_failure_temperature_kelvin", grade.claddingFailureTemperatureKelvin());
+        root.addProperty("load_follow_rate_per_tick", grade.loadFollowRatePerTick());
+        return root;
+    }
+
+    static JsonObject reactorParametersJson(ReactorParameters value) {
+        JsonObject root = new JsonObject();
+        root.addProperty("schema_version", ReactorParameters.SCHEMA_VERSION);
+        root.addProperty("station_instrumentation_joules_per_tick", value.stationInstrumentationJoulesPerTick());
+        root.addProperty("station_running_joules_per_tick", value.stationRunningJoulesPerTick());
+        root.addProperty("startup_ticks", value.startupTicks());
+        root.addProperty("minimum_coolant_fraction", value.minimumCoolantFraction());
+        root.addProperty("fuel_temperature_response_per_tick", value.fuelTemperatureResponsePerTick());
+        root.addProperty("fuel_temperature_rise_at_full_power_kelvin", value.fuelTemperatureRiseAtFullPowerKelvin());
+        root.addProperty("poison_build_per_tick", value.poisonBuildPerTick());
+        root.addProperty("poison_decay_per_tick", value.poisonDecayPerTick());
+        root.addProperty("decay_heat_response_per_tick", value.decayHeatResponsePerTick());
+        root.addProperty("decay_heat_loss_per_tick", value.decayHeatLossPerTick());
+        root.addProperty("cladding_damage_per_kelvin_tick", value.claddingDamagePerKelvinTick());
+        root.addProperty("forced_scram_temperature_kelvin", value.forcedScramTemperatureKelvin());
+        root.addProperty("safe_unload_temperature_kelvin", value.safeUnloadTemperatureKelvin());
+        root.addProperty("automatic_rod_step_per_tick", value.automaticRodStepPerTick());
+        root.addProperty("maximum_offline_catchup_ticks", value.maximumOfflineCatchupTicks());
+        root.addProperty("primary_coolant_enthalpy_joules_per_millibucket", value.primaryCoolantEnthalpyJoulesPerMilliBucket());
+        root.addProperty("main_pump_maximum_flow_millibuckets_per_tick", value.mainPumpMaximumFlowMilliBucketsPerTick());
+        root.addProperty("main_pump_joules_per_millibucket", value.mainPumpJoulesPerMilliBucket());
+        root.addProperty("steam_generator_steam_per_water_millibucket", value.steamGeneratorSteamPerWaterMilliBucket());
+        root.addProperty("turbine_joules_per_steam_millibucket", value.turbineJoulesPerSteamMilliBucket());
+        root.addProperty("turbine_venting_efficiency", value.turbineVentingEfficiency());
+        root.addProperty("condenser_steam_per_water_millibucket", value.condenserSteamPerWaterMilliBucket());
+        root.addProperty("condenser_heat_joules_per_steam_millibucket", value.condenserHeatJoulesPerSteamMilliBucket());
+        root.addProperty("cooling_tower_heat_joules_per_fill_block_tick", value.coolingTowerHeatJoulesPerFillBlockTick());
+        root.addProperty("cooling_tower_heat_joules_per_fan_tick", value.coolingTowerHeatJoulesPerFanTick());
+        root.addProperty("primary_boiling_temperature_kelvin", value.primaryBoilingTemperatureKelvin());
+        root.addProperty("fuel_melting_temperature_kelvin", value.fuelMeltingTemperatureKelvin());
+        root.addProperty("cladding_accident_threshold", value.claddingAccidentThreshold());
+        root.addProperty("pressure_alarm_megapascals", value.pressureAlarmMegapascals());
+        root.addProperty("vessel_design_pressure_megapascals", value.vesselDesignPressureMegapascals());
+        root.addProperty("vessel_burst_pressure_megapascals", value.vesselBurstPressureMegapascals());
+        root.addProperty("pressure_rise_megapascals_per_kelvin_tick", value.pressureRiseMegapascalsPerKelvinTick());
+        root.addProperty("pressure_relief_megapascals_per_tick", value.pressureReliefMegapascalsPerTick());
+        root.addProperty("vessel_damage_per_megapascal_tick", value.vesselDamagePerMegapascalTick());
+        root.addProperty("containment_damage_per_megajoule", value.containmentDamagePerMegajoule());
+        root.addProperty("accident_terrain_damage_energy_joules", value.accidentTerrainDamageEnergyJoules());
+        root.addProperty("fresh_fuel_dose_rate_millisieverts_per_hour", value.freshFuelDoseRateMillisievertsPerHour());
+        root.addProperty("spent_fuel_dose_rate_millisieverts_per_hour", value.spentFuelDoseRateMillisievertsPerHour());
+        root.addProperty("hot_coolant_dose_rate_millisieverts_per_hour", value.hotCoolantDoseRateMillisievertsPerHour());
+        root.addProperty("corium_dose_rate_millisieverts_per_hour", value.coriumDoseRateMillisievertsPerHour());
+        root.addProperty("contamination_dose_rate_millisieverts_per_hour", value.contaminationDoseRateMillisievertsPerHour());
+        root.addProperty("spent_fuel_cooling_kelvin_per_tick", value.spentFuelCoolingKelvinPerTick());
+        root.addProperty("spent_fuel_safe_decay_heat_joules", value.spentFuelSafeDecayHeatJoules());
+        return root;
+    }
+}

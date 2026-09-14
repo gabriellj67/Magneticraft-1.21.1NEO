@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.kinetic;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
 import net.minecraft.core.BlockPos;
@@ -21,6 +22,12 @@ import org.jetbrains.annotations.Nullable;
 
 /** Player-powered native kinetic source. */
 public final class HandCrankBlock extends NetworkComponentBlock {
+    public static final MapCodec<HandCrankBlock> CODEC = simpleCodec(HandCrankBlock::new);
+
+    @Override
+    protected MapCodec<? extends HandCrankBlock> codec() {
+        return CODEC;
+    }
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public HandCrankBlock(Properties properties) {
@@ -29,18 +36,13 @@ public final class HandCrankBlock extends NetworkComponentBlock {
     }
 
     @Override
-    public InteractionResult use(
+    protected InteractionResult useWithoutItem(
             BlockState state,
             Level level,
             BlockPos position,
             Player player,
-            InteractionHand hand,
             BlockHitResult hit
     ) {
-        InteractionResult configured = super.use(state, level, position, player, hand, hit);
-        if (configured != InteractionResult.PASS) {
-            return configured;
-        }
         if (!level.isClientSide && level.getBlockEntity(position) instanceof HandCrankBlockEntity crank) {
             crank.activate();
         }

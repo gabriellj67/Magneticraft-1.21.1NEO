@@ -1,0 +1,12 @@
+{
+  "parent": "magneticraft:block/pneumatic_endpoint",
+  "textures": {
+    "down": "magneticraft:block/machines/relay_side",
+    "east": "magneticraft:block/machines/relay_side",
+    "north": "magneticraft:block/machines/relay_front",
+    "particle": "magneticraft:block/machines/relay_front",
+    "south": "magneticraft:block/machines/relay_back",
+    "up": "magneticraft:block/machines/relay_side",
+    "west": "magneticraft:block/machines/relay_side"
+  }
+}

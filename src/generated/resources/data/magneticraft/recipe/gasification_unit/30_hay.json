@@ -1,0 +1,12 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 15,
+  "fluid_result": {
+    "amount": 100,
+    "id": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "item": "minecraft:hay_block"
+  },
+  "minimum_temperature": 523.15
+}

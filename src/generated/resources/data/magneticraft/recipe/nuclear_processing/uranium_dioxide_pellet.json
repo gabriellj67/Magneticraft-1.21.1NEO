@@ -1,0 +1,19 @@
+{
+  "type": "magneticraft:nuclear_processing",
+  "duration_ticks": 240,
+  "facility": "fuel_fabricator",
+  "ingredients": [
+    {
+      "ingredient": {
+        "item": "magneticraft:low_enriched_uranium"
+      }
+    }
+  ],
+  "joules_per_tick": 100,
+  "results": [
+    {
+      "count": 8,
+      "id": "magneticraft:uranium_dioxide_pellet"
+    }
+  ]
+}

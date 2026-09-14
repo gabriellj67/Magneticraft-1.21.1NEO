@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_low_voltage_battery": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:low_voltage_battery"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/medium_voltage_battery"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_low_voltage_battery"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/medium_voltage_battery"
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "magneticraft:reactor_column_segment"
+    },
+    {
+      "item": "magneticraft:uranium_dioxide_pellet"
+    },
+    {
+      "item": "minecraft:lime_dye"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:reactor_fuel_low"
+  }
+}

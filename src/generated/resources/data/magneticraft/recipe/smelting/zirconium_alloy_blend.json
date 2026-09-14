@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": {
+    "item": "magneticraft:zirconium_alloy_blend"
+  },
+  "result": {
+    "count": 1,
+    "id": "magneticraft:zirconium_alloy_ingot"
+  }
+}

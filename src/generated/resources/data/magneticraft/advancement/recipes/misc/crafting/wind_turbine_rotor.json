@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/wind_turbine_rotor"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_wooden_shaft": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:wooden_shaft"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_wooden_shaft"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/wind_turbine_rotor"
+    ]
+  }
+}

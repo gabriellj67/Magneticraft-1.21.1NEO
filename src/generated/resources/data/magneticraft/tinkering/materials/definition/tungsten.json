@@ -1,0 +1,10 @@
+{
+  "condition": {
+    "type": "neoforge:mod_loaded",
+    "modid": "tconstruct"
+  },
+  "craftable": true,
+  "hidden": false,
+  "sortOrder": 7,
+  "tier": 3
+}

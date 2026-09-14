@@ -23,8 +23,31 @@ tasks.withType(JavaCompile).configureEach {
 
 repositories {
     mavenCentral()
+    maven {
+        name = "BlameJared Maven"
+        url = uri("https://maven.blamejared.com")
+        content {
+            includeGroup "mezz.jei"
+            includeGroup "com.blamejared.crafttweaker"
+            includeGroup "org.openzen.zencode"
+        }
+    }
+    maven {
+        name = "Modrinth"
+        url = uri("https://api.modrinth.com/maven")
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
+def optionalRuntimeEnabled = { String propertyName ->
+    providers.gradleProperty(propertyName).map { it.toBoolean() }.getOrElse(false)
+}
+def jeiRuntimeEnabled = optionalRuntimeEnabled("enable_jei_runtime")
+def craftTweakerRuntimeEnabled = optionalRuntimeEnabled("enable_crafttweaker_runtime")
+def tconstructRuntimeEnabled = optionalRuntimeEnabled("enable_tconstruct_runtime")
+def jadeRuntimeEnabled = optionalRuntimeEnabled("enable_jade_runtime")
 def quickPlayWorld = providers.gradleProperty("quick_play_world").orNull
 def serverWorld = providers.gradleProperty("server_world").orNull
 
@@ -33,6 +56,33 @@ configurations {
 }
 
 dependencies {
+    // Optional integration APIs (integration/ package) - compile-time only, never bundled or
+    // published (see verifyOptionalIntegrationIsolation-equivalent policy from the Forge build).
+    // Mantle/Tinkers' Construct are the one exception: integration/tconstruct/TinkersConstructDataProvider
+    // is API-free (emits raw JSON, no slimeknights.* import - see its own doc comment), so neither jar
+    // is a compile-time dependency at all; they're only wired below for optional runtime testing.
+    compileOnly("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
+    compileOnly("mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}")
+    compileOnly("com.blamejared.crafttweaker:CraftTweaker-neoforge-${mc_version}:${crafttweaker_version}")
+    compileOnly("maven.modrinth:jade:${jade_version}")
+
+    if (jeiRuntimeEnabled) {
+        localRuntime("mezz.jei:jei-${mc_version}-neoforge:${jei_version}")
+    }
+    if (craftTweakerRuntimeEnabled) {
+        localRuntime("com.blamejared.crafttweaker:CraftTweaker-neoforge-${mc_version}:${crafttweaker_version}")
+    }
+    if (jadeRuntimeEnabled) {
+        localRuntime("maven.modrinth:jade:${jade_version}")
+    }
+    if (tconstructRuntimeEnabled) {
+        // No NeoForge 1.21.1 build of Mantle/Tinkers' Construct is published on any public maven
+        // as of this writing (checked BlameJared, Modrinth, CurseMaven, DVS1) - vendored under libs/.
+        localRuntime files("libs/NeoMantle-1.21.1-1.21.0-v1.25.jar")
+        localRuntime files("libs/NeoTinkers-1.21.1-3.11.2-v1.29.jar")
+        localRuntime files("libs/modelloader-reborn-3.0.2.jar")
+    }
+
     testImplementation(platform("org.junit:junit-bom:${junit_version}"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -118,17 +168,21 @@ sourceSets {
 }
 
 def expansionProperties = [
-        project_version    : project.version,
-        mc_version_range   : mc_version_range,
-        neo_version_range  : neo_version_range,
-        loader_version_range: loader_version_range,
-        mod_id             : mod_id,
-        mod_name           : mod_name,
-        mod_license        : mod_license,
-        mod_authors        : mod_authors,
-        mod_description    : mod_description,
-        issue_tracker      : issue_tracker,
-        display_url        : display_url
+        project_version           : project.version,
+        mc_version_range          : mc_version_range,
+        neo_version_range         : neo_version_range,
+        loader_version_range      : loader_version_range,
+        mod_id                    : mod_id,
+        mod_name                  : mod_name,
+        mod_license               : mod_license,
+        mod_authors               : mod_authors,
+        mod_description           : mod_description,
+        issue_tracker             : issue_tracker,
+        display_url               : display_url,
+        jei_version_range         : jei_version_range,
+        crafttweaker_version_range: crafttweaker_version_range,
+        tconstruct_version_range  : tconstruct_version_range,
+        jade_version_range        : jade_version_range
 ]
 
 processResources {

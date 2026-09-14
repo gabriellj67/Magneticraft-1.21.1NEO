@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.heat;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
 import net.minecraft.core.BlockPos;
@@ -17,6 +18,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public final class HeatSinkBlock extends NetworkComponentBlock {
+    public static final MapCodec<HeatSinkBlock> CODEC = simpleCodec(HeatSinkBlock::new);
+
+    @Override
+    protected MapCodec<? extends HeatSinkBlock> codec() {
+        return CODEC;
+    }
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
     private static final VoxelShape[] SHAPES = new VoxelShape[]{
             box(0, 0, 0, 16, 5, 16),

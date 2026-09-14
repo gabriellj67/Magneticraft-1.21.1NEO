@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.1,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/tungsten"
+  },
+  "result": {
+    "count": 1,
+    "id": "magneticraft:tungsten_ingot"
+  }
+}

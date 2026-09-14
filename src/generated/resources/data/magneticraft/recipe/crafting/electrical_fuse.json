@@ -1,0 +1,28 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "rating_id": "magneticraft:standard",
+    "tier_id": "magneticraft:low_voltage"
+  },
+  "key": {
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "G": {
+      "tag": "c:glass_blocks"
+    },
+    "T": {
+      "tag": "magneticraft:light_plates/copper"
+    }
+  },
+  "pattern": [
+    " G ",
+    "CTC",
+    " G "
+  ],
+  "result": {
+    "count": 4,
+    "id": "magneticraft:electrical_fuse"
+  }
+}

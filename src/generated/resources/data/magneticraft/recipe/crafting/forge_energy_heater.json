@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "c:ingots/iron"
+    },
+    "B": {
+      "tag": "c:ingots/copper"
+    },
+    "C": {
+      "item": "magneticraft:iron_grate"
+    },
+    "D": {
+      "tag": "c:dusts/redstone"
+    },
+    "E": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "ACA",
+    "DED"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:forge_energy_heater"
+  }
+}

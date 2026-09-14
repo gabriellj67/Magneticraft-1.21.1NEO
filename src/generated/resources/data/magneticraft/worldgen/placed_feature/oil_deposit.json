@@ -1,0 +1,8 @@
+{
+  "feature": "magneticraft:oil_deposit",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

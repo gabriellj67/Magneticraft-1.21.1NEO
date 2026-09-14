@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:industrial_combustion_chamber",
+  "duration": 2500,
+  "fluid": "magneticraft:wood_gas",
+  "power": 20.0
+}

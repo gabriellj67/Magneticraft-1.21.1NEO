@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_magnet": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:magnet"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/electric_pole_transformer"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_magnet"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/electric_pole_transformer"
+    ]
+  }
+}

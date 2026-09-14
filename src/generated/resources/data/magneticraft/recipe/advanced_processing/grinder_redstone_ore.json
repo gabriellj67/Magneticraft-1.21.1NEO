@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:redstone_ore"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 4,
+        "id": "minecraft:redstone"
+      }
+    },
+    {
+      "chance": 0.15,
+      "item": {
+        "count": 1,
+        "id": "minecraft:gravel"
+      }
+    }
+  ]
+}

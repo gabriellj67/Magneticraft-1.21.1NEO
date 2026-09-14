@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "item": "minecraft:prismarine_bricks"
+  },
+  "required_level": 0,
+  "result": {
+    "count": 1,
+    "id": "minecraft:prismarine"
+  }
+}

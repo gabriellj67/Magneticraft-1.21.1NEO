@@ -1,0 +1,21 @@
+{
+  "automation_profile": "none",
+  "category": "utility",
+  "description": "guide.magneticraft.machine.inserter.description",
+  "ghost_slots": 9,
+  "has_menu": true,
+  "id": "magneticraft:inserter",
+  "inventory_slots": 3,
+  "physical_ports": [
+    "item_transfer"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [
+    "carried",
+    "upgrade",
+    "upgrade"
+  ],
+  "translation_key": "block.magneticraft.inserter"
+}

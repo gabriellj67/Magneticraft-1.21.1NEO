@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_thermal_port"
+    },
+    "M": {
+      "item": "magneticraft:motor"
+    },
+    "P": {
+      "item": "magneticraft:iron_fluid_pipe"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "PMP",
+    "RCR",
+    "PMP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:main_coolant_pump"
+  }
+}

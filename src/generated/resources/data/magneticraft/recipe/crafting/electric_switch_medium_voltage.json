@@ -1,0 +1,30 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "tier_id": "magneticraft:medium_voltage"
+  },
+  "key": {
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "S": {
+      "tag": "magneticraft:light_plates/steel"
+    },
+    "T": {
+      "tag": "magneticraft:light_plates/steel"
+    }
+  },
+  "pattern": [
+    " S ",
+    "CTC",
+    " R "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:electric_switch"
+  }
+}

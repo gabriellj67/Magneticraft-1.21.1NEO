@@ -1,0 +1,95 @@
+{
+  "opcodes": [
+    {
+      "code": 0,
+      "description": "guide.magneticraft.computer.opcode.nop",
+      "id": "nop",
+      "operand_count": 0
+    },
+    {
+      "code": 1,
+      "description": "guide.magneticraft.computer.opcode.halt",
+      "id": "halt",
+      "operand_count": 0
+    },
+    {
+      "code": 2,
+      "description": "guide.magneticraft.computer.opcode.set",
+      "id": "set",
+      "operand_count": 2
+    },
+    {
+      "code": 3,
+      "description": "guide.magneticraft.computer.opcode.add",
+      "id": "add",
+      "operand_count": 2
+    },
+    {
+      "code": 4,
+      "description": "guide.magneticraft.computer.opcode.subtract",
+      "id": "subtract",
+      "operand_count": 2
+    },
+    {
+      "code": 5,
+      "description": "guide.magneticraft.computer.opcode.multiply",
+      "id": "multiply",
+      "operand_count": 2
+    },
+    {
+      "code": 6,
+      "description": "guide.magneticraft.computer.opcode.divide",
+      "id": "divide",
+      "operand_count": 2
+    },
+    {
+      "code": 7,
+      "description": "guide.magneticraft.computer.opcode.modulo",
+      "id": "modulo",
+      "operand_count": 2
+    },
+    {
+      "code": 8,
+      "description": "guide.magneticraft.computer.opcode.load",
+      "id": "load",
+      "operand_count": 2
+    },
+    {
+      "code": 9,
+      "description": "guide.magneticraft.computer.opcode.store",
+      "id": "store",
+      "operand_count": 2
+    },
+    {
+      "code": 10,
+      "description": "guide.magneticraft.computer.opcode.jump",
+      "id": "jump",
+      "operand_count": 1
+    },
+    {
+      "code": 11,
+      "description": "guide.magneticraft.computer.opcode.jump_if_zero",
+      "id": "jump_if_zero",
+      "operand_count": 2
+    },
+    {
+      "code": 32,
+      "description": "guide.magneticraft.computer.opcode.move",
+      "id": "move",
+      "operand_count": 2
+    },
+    {
+      "code": 33,
+      "description": "guide.magneticraft.computer.opcode.mine",
+      "id": "mine",
+      "operand_count": 2
+    },
+    {
+      "code": 34,
+      "description": "guide.magneticraft.computer.opcode.set_redstone",
+      "id": "set_redstone",
+      "operand_count": 2
+    }
+  ],
+  "schema_version": 1
+}

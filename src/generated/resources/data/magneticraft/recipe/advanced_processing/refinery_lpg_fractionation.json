@@ -1,0 +1,31 @@
+{
+  "type": "magneticraft:refinery",
+  "duration": 1,
+  "fluid_input": {
+    "fluid": "magneticraft:lpg"
+  },
+  "fluid_input_amount": 10,
+  "fluid_outputs": [
+    {
+      "fluid": {
+        "amount": 5,
+        "id": "magneticraft:liquid_plastic"
+      },
+      "tank": 0
+    },
+    {
+      "fluid": {
+        "amount": 2,
+        "id": "magneticraft:naphtha"
+      },
+      "tank": 1
+    },
+    {
+      "fluid": {
+        "amount": 3,
+        "id": "magneticraft:natural_gas"
+      },
+      "tank": 2
+    }
+  ]
+}

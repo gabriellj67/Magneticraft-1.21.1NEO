@@ -1,0 +1,18 @@
+{
+  "type": "magneticraft:hydraulic_press",
+  "duration": 250,
+  "energy_per_tick": 60,
+  "ingredient": {
+    "tag": "c:ingots/tungsten"
+  },
+  "input_count": 4,
+  "press_mode": "heavy",
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "magneticraft:tungsten_heavy_plate"
+      }
+    }
+  ]
+}

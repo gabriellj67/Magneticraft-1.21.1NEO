@@ -1,0 +1,70 @@
+{
+  "asset": {"version": "2.0", "generator": "Magneticraft formed nuclear structures"},
+  "scene": 0,
+  "scenes": [{"nodes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]}],
+  "nodes": [
+    {"name": "foundation", "mesh": 1, "translation": [0.01, 0.0, 0.01], "scale": [0.98, 0.08, 0.98]},
+    {"name": "containment_body", "mesh": 0, "translation": [0.04, 0.07, 0.04], "scale": [0.92, 0.57, 0.92]},
+    {"name": "containment_upper", "mesh": 0, "translation": [0.10, 0.64, 0.10], "scale": [0.80, 0.18, 0.80]},
+    {"name": "containment_roof_lower", "mesh": 1, "translation": [0.16, 0.82, 0.16], "scale": [0.68, 0.07, 0.68]},
+    {"name": "containment_roof_upper", "mesh": 1, "translation": [0.25, 0.89, 0.25], "scale": [0.50, 0.06, 0.50]},
+    {"name": "containment_roof_cap", "mesh": 4, "translation": [0.42, 0.95, 0.42], "scale": [0.16, 0.05, 0.16]},
+    {"name": "front_hazard_band", "mesh": 2, "translation": [0.08, 0.47, -0.006], "scale": [0.84, 0.06, 0.055]},
+    {"name": "rear_hazard_band", "mesh": 2, "translation": [0.08, 0.47, 0.951], "scale": [0.84, 0.06, 0.055]},
+    {"name": "left_hazard_band", "mesh": 2, "translation": [-0.006, 0.47, 0.08], "scale": [0.055, 0.06, 0.84]},
+    {"name": "right_hazard_band", "mesh": 2, "translation": [0.951, 0.47, 0.08], "scale": [0.055, 0.06, 0.84]},
+    {"name": "operator_console", "mesh": 3, "translation": [0.36, 0.14, -0.022], "scale": [0.28, 0.25, 0.075]},
+    {"name": "operator_console_header", "mesh": 2, "translation": [0.38, 0.34, -0.028], "scale": [0.24, 0.045, 0.085]},
+    {"name": "coolant_input_manifold", "mesh": 4, "translation": [0.055, 0.12, -0.032], "scale": [0.14, 0.16, 0.105]},
+    {"name": "coolant_output_manifold", "mesh": 4, "translation": [0.805, 0.12, -0.032], "scale": [0.14, 0.16, 0.105]},
+    {"name": "rear_electrical_bus", "mesh": 3, "translation": [0.37, 0.13, 0.947], "scale": [0.16, 0.22, 0.075]},
+    {"name": "rear_instrumentation_bus", "mesh": 2, "translation": [0.56, 0.13, 0.947], "scale": [0.12, 0.22, 0.075]},
+    {"name": "front_left_rib", "mesh": 1, "translation": [0.02, 0.08, 0.02], "scale": [0.07, 0.63, 0.07]},
+    {"name": "front_right_rib", "mesh": 1, "translation": [0.91, 0.08, 0.02], "scale": [0.07, 0.63, 0.07]},
+    {"name": "rear_left_rib", "mesh": 1, "translation": [0.02, 0.08, 0.91], "scale": [0.07, 0.63, 0.07]},
+    {"name": "rear_right_rib", "mesh": 1, "translation": [0.91, 0.08, 0.91], "scale": [0.07, 0.63, 0.07]},
+    {"name": "actuator_a1", "mesh": 3, "translation": [0.31, 0.91, 0.31], "scale": [0.055, 0.09, 0.055]},
+    {"name": "actuator_a2", "mesh": 3, "translation": [0.4725, 0.91, 0.31], "scale": [0.055, 0.09, 0.055]},
+    {"name": "actuator_a3", "mesh": 3, "translation": [0.635, 0.91, 0.31], "scale": [0.055, 0.09, 0.055]},
+    {"name": "actuator_b1", "mesh": 3, "translation": [0.31, 0.91, 0.4725], "scale": [0.055, 0.09, 0.055]},
+    {"name": "actuator_b2", "mesh": 4, "translation": [0.4725, 0.91, 0.4725], "scale": [0.055, 0.09, 0.055]},
+    {"name": "actuator_b3", "mesh": 3, "translation": [0.635, 0.91, 0.4725], "scale": [0.055, 0.09, 0.055]},
+    {"name": "actuator_c1", "mesh": 3, "translation": [0.31, 0.91, 0.635], "scale": [0.055, 0.09, 0.055]},
+    {"name": "actuator_c2", "mesh": 3, "translation": [0.4725, 0.91, 0.635], "scale": [0.055, 0.09, 0.055]},
+    {"name": "actuator_c3", "mesh": 3, "translation": [0.635, 0.91, 0.635], "scale": [0.055, 0.09, 0.055]},
+    {"name": "roof_service_duct", "mesh": 4, "translation": [0.18, 0.865, 0.465], "scale": [0.64, 0.035, 0.07]}
+  ],
+  "meshes": [
+    {"name": "containment_mesh", "primitives": [{"attributes": {"POSITION": 0, "TEXCOORD_0": 1}, "indices": 2, "material": 0}]},
+    {"name": "structural_mesh", "primitives": [{"attributes": {"POSITION": 0, "TEXCOORD_0": 1}, "indices": 2, "material": 1}]},
+    {"name": "hazard_mesh", "primitives": [{"attributes": {"POSITION": 0, "TEXCOORD_0": 1}, "indices": 2, "material": 2}]},
+    {"name": "electrical_mesh", "primitives": [{"attributes": {"POSITION": 0, "TEXCOORD_0": 1}, "indices": 2, "material": 3}]},
+    {"name": "coolant_mesh", "primitives": [{"attributes": {"POSITION": 0, "TEXCOORD_0": 1}, "indices": 2, "material": 4}]}
+  ],
+  "materials": [
+    {"name": "containment", "alphaMode": "OPAQUE", "pbrMetallicRoughness": {"baseColorTexture": {"index": 0}, "metallicFactor": 0.0, "roughnessFactor": 1.0}},
+    {"name": "structure", "alphaMode": "OPAQUE", "pbrMetallicRoughness": {"baseColorTexture": {"index": 1}, "metallicFactor": 0.0, "roughnessFactor": 1.0}},
+    {"name": "hazard", "alphaMode": "OPAQUE", "pbrMetallicRoughness": {"baseColorTexture": {"index": 2}, "metallicFactor": 0.0, "roughnessFactor": 1.0}},
+    {"name": "electrical", "alphaMode": "OPAQUE", "pbrMetallicRoughness": {"baseColorTexture": {"index": 3}, "metallicFactor": 0.0, "roughnessFactor": 1.0}},
+    {"name": "coolant", "alphaMode": "OPAQUE", "pbrMetallicRoughness": {"baseColorTexture": {"index": 4}, "metallicFactor": 0.0, "roughnessFactor": 1.0}}
+  ],
+  "textures": [{"source": 0}, {"source": 1}, {"source": 2}, {"source": 3}, {"source": 4}],
+  "images": [
+    {"uri": "magneticraft:block/multiblock_parts/base_side"},
+    {"uri": "magneticraft:block/multiblock_parts/corrugated_iron_side"},
+    {"uri": "magneticraft:block/multiblock_parts/striped"},
+    {"uri": "magneticraft:block/multiblock_parts/electric"},
+    {"uri": "magneticraft:block/multiblock_parts/copper_coil_side"}
+  ],
+  "accessors": [
+    {"bufferView": 0, "componentType": 5126, "count": 24, "type": "VEC3", "min": [0, 0, 0], "max": [1, 1, 1]},
+    {"bufferView": 1, "componentType": 5126, "count": 24, "type": "VEC2", "min": [0, 0], "max": [1, 1]},
+    {"bufferView": 2, "componentType": 5123, "count": 36, "type": "SCALAR", "min": [0], "max": [23]}
+  ],
+  "bufferViews": [
+    {"buffer": 0, "byteOffset": 0, "byteLength": 288, "target": 34962},
+    {"buffer": 0, "byteOffset": 288, "byteLength": 192, "target": 34962},
+    {"buffer": 0, "byteOffset": 480, "byteLength": 72, "target": 34963}
+  ],
+  "buffers": [{"byteLength": 552, "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AACAPwAAAAAAAAAAAACAPwAAAAAAAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAAAAAACAPwAAgD8AAIA/AAAAAAAAgD8AAIA/AAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAACAAEAAAADAAIABAAGAAUABAAHAAYACAAKAAkACAALAAoADAAOAA0ADAAPAA4AEAASABEAEAATABIAFAAWABUAFAAXABYA"}]
+}

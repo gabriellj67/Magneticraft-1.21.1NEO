@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.kinetic;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
 import net.minecraft.core.BlockPos;
@@ -15,6 +16,12 @@ import org.jetbrains.annotations.Nullable;
 
 /** Straight low-inertia kinetic conductor. */
 public final class WoodenShaftBlock extends NetworkComponentBlock {
+    public static final MapCodec<WoodenShaftBlock> CODEC = simpleCodec(WoodenShaftBlock::new);
+
+    @Override
+    protected MapCodec<? extends WoodenShaftBlock> codec() {
+        return CODEC;
+    }
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
 
     public WoodenShaftBlock(Properties properties) {

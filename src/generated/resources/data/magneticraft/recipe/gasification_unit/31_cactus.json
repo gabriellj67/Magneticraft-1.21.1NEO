@@ -1,0 +1,12 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 10,
+  "fluid_result": {
+    "amount": 10,
+    "id": "magneticraft:wood_gas"
+  },
+  "ingredient": {
+    "item": "minecraft:cactus"
+  },
+  "minimum_temperature": 453.15
+}

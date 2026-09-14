@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "magneticraft:reactor_protection_upgrade"
+    },
+    {
+      "item": "minecraft:repeater"
+    },
+    {
+      "item": "minecraft:clock"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:reactor_regulation_upgrade"
+  }
+}

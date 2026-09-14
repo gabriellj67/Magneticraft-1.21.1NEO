@@ -1,0 +1,35 @@
+{
+  "type": "magneticraft:sluice_box",
+  "ingredient": {
+    "item": "magneticraft:gold_rocky_chunk"
+  },
+  "results": [
+    {
+      "stack": {
+        "count": 1,
+        "id": "magneticraft:gold_chunk"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "count": 1,
+        "id": "magneticraft:copper_dust"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "count": 1,
+        "id": "magneticraft:silver_dust"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "count": 1,
+        "id": "minecraft:cobblestone"
+      }
+    }
+  ]
+}

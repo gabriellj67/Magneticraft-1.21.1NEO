@@ -1,0 +1,27 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "tier_id": "magneticraft:low_voltage"
+  },
+  "key": {
+    "C": {
+      "tag": "c:ingots/copper"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "S": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "SIS",
+    "CCC",
+    "SIS"
+  ],
+  "result": {
+    "count": 3,
+    "id": "magneticraft:electric_pole"
+  }
+}

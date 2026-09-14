@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "item": "magneticraft:borax"
+  },
+  "required_level": 1,
+  "result": {
+    "count": 1,
+    "id": "magneticraft:boron_dust"
+  }
+}

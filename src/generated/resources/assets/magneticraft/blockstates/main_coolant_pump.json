@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "magneticraft:block/main_coolant_pump",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "magneticraft:block/main_coolant_pump"
+    },
+    "facing=south": {
+      "model": "magneticraft:block/main_coolant_pump",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "magneticraft:block/main_coolant_pump",
+      "y": 270
+    }
+  }
+}

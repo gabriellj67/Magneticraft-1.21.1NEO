@@ -127,12 +127,7 @@ public final class ElectricPoleBlockEntity extends NetworkComponentBlockEntity
         return longDistance;
     }
 
-    @Override
-    public AABB getRenderBoundingBox() {
-        return renderBounds(worldPosition, longDistance.clientConnections());
-    }
-
-    static AABB renderBounds(BlockPos position, List<LongDistanceEndpointModule.WireView> connections) {
+    public static AABB renderBounds(BlockPos position, List<LongDistanceEndpointModule.WireView> connections) {
         AABB bounds = new AABB(
                 position.getX() - 0.875D,
                 position.getY() - 4.0D,

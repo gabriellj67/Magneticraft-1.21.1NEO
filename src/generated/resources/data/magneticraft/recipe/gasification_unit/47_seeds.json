@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 10,
+  "fluid_result": {
+    "amount": 30,
+    "id": "magneticraft:wood_gas"
+  },
+  "ingredient": [
+    {
+      "item": "minecraft:wheat_seeds"
+    },
+    {
+      "item": "minecraft:beetroot_seeds"
+    },
+    {
+      "item": "minecraft:melon_seeds"
+    },
+    {
+      "item": "minecraft:pumpkin_seeds"
+    }
+  ],
+  "minimum_temperature": 423.15
+}

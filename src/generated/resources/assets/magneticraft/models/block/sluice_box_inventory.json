@@ -1,0 +1,135 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.32,
+        0.32,
+        0.32
+      ],
+      "translation": [
+        -0.45626473,
+        0.96,
+        -0.43218556
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.32,
+        0.32,
+        0.32
+      ],
+      "translation": [
+        0.45626482,
+        0.96,
+        0.4321854
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "translation": [
+        0.021283342,
+        1.2,
+        0.78528655
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "translation": [
+        0.010641671,
+        3.6,
+        0.39264327
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "translation": [
+        -0.71291363,
+        1.6366831,
+        0.16518168
+      ]
+    },
+    "head": {
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "translation": [
+        0.042566683,
+        2.4,
+        1.5705731
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.3,
+        0.3,
+        0.3
+      ],
+      "translation": [
+        -0.42774826,
+        3.1243052,
+        0.76446646
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.3,
+        0.3,
+        0.3
+      ],
+      "translation": [
+        0.42774832,
+        2.3415692,
+        0.97419995
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/sluice_box_inv.mcx",
+  "textures": {
+    "particle": "magneticraft:block/machines/table_sieve_bottom"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "B": {
+      "item": "magneticraft:machine_casing"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "W": {
+      "item": "magneticraft:fine_copper_wire"
+    }
+  },
+  "pattern": [
+    "RWR",
+    "WBW",
+    "RWR"
+  ],
+  "result": {
+    "count": 4,
+    "id": "magneticraft:electrical_machine_casing"
+  }
+}

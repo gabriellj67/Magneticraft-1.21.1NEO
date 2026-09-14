@@ -1,0 +1,30 @@
+{
+  "type": "magneticraft:sieve",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/tin"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "magneticraft:tin_chunk"
+      }
+    },
+    {
+      "chance": 0.15,
+      "item": {
+        "count": 1,
+        "id": "magneticraft:iron_dust"
+      }
+    },
+    {
+      "chance": 0.15,
+      "item": {
+        "count": 1,
+        "id": "magneticraft:aluminium_dust"
+      }
+    }
+  ]
+}

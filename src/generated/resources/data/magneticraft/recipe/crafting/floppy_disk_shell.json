@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "magneticraft:floppy_disk"
+    },
+    "B": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    " B",
+    "A "
+  ],
+  "result": {
+    "components": {
+      "minecraft:custom_data": {
+        "disk": {
+          "directories": [],
+          "files": [],
+          "formatted": 1,
+          "label": "Shell",
+          "schema_version": 1
+        },
+        "preset": "shell",
+        "read_only": 1,
+        "schema_version": 2,
+        "script": {
+          "language": "shell",
+          "schema_version": 1,
+          "source": ""
+        }
+      }
+    },
+    "count": 1,
+    "id": "magneticraft:floppy_disk"
+  }
+}

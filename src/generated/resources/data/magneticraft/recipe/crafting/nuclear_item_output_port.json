@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "magneticraft:nuclear_item_input_port"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:nuclear_item_output_port"
+  }
+}

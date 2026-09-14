@@ -1,0 +1,29 @@
+{
+  "automation_profile": "all_sides",
+  "category": "utility",
+  "description": "guide.magneticraft.machine.block_breaker.description",
+  "ghost_slots": 9,
+  "has_menu": true,
+  "id": "magneticraft:block_breaker",
+  "inventory_slots": 9,
+  "physical_ports": [
+    "electricity",
+    "ghost_filter",
+    "item"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "requires_no_signal",
+  "schema_version": 1,
+  "slot_roles": [
+    "output",
+    "output",
+    "output",
+    "output",
+    "output",
+    "output",
+    "output",
+    "output",
+    "output"
+  ],
+  "translation_key": "block.magneticraft.block_breaker"
+}

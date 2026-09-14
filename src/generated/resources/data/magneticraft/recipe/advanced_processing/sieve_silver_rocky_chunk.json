@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:sieve",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "tag": "magneticraft:rocky_chunks/silver"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "magneticraft:silver_chunk"
+      }
+    },
+    {
+      "chance": 0.15,
+      "item": {
+        "count": 1,
+        "id": "magneticraft:lead_dust"
+      }
+    }
+  ]
+}

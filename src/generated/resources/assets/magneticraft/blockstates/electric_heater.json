@@ -1,0 +1,76 @@
+{
+  "variants": {
+    "facing=down,lit=false,master=false": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=down,lit=false,master=true": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=down,lit=true,master=false": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=down,lit=true,master=true": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=east,lit=false,master=false": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=east,lit=false,master=true": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=east,lit=true,master=false": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=east,lit=true,master=true": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=north,lit=false,master=false": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=north,lit=false,master=true": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=north,lit=true,master=false": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=north,lit=true,master=true": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=south,lit=false,master=false": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=south,lit=false,master=true": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=south,lit=true,master=false": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=south,lit=true,master=true": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=up,lit=false,master=false": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=up,lit=false,master=true": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=up,lit=true,master=false": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=up,lit=true,master=true": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=west,lit=false,master=false": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=west,lit=false,master=true": {
+      "model": "magneticraft:block/electric_heater"
+    },
+    "facing=west,lit=true,master=false": {
+      "model": "magneticraft:block/electric_heater_on"
+    },
+    "facing=west,lit=true,master=true": {
+      "model": "magneticraft:block/electric_heater_on"
+    }
+  }
+}

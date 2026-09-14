@@ -1,0 +1,139 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.64,
+        0.64,
+        0.64
+      ],
+      "translation": [
+        -1.3576448,
+        0,
+        -1.3576453
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.64,
+        0.64,
+        0.64
+      ],
+      "translation": [
+        1.357645,
+        0,
+        1.3576448
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "translation": [
+        0,
+        0,
+        2.4
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ],
+      "translation": [
+        0,
+        3,
+        1.2
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        -2.12132,
+        1.0606604,
+        -1.8371177
+      ]
+    },
+    "head": {
+      "scale": [
+        1.6,
+        1.6,
+        1.6
+      ],
+      "translation": [
+        0,
+        0,
+        4.8
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "translation": [
+        -1.272792,
+        3.729423,
+        -0.32942307
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.6,
+        0.6,
+        0.6
+      ],
+      "translation": [
+        1.2727923,
+        1.2705771,
+        0.3294228
+      ]
+    }
+  },
+  "exclude_nodes": [
+    "drill1",
+    "drill2",
+    "drill3",
+    "drill4",
+    "drill5",
+    "prop1",
+    "prop2"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/mining_robot.mcx",
+  "textures": {
+    "particle": "magneticraft:block/computers/mining_robot"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

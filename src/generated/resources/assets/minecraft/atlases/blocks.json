@@ -1,0 +1,132 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/steam_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/steam_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/crude_oil_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/crude_oil_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/heated_crude_oil_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/heated_crude_oil_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/lpg_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/lpg_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/light_oil_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/light_oil_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/heavy_oil_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/heavy_oil_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/natural_gas_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/natural_gas_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/naphtha_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/naphtha_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/liquid_plastic_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/liquid_plastic_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/gasoline_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/gasoline_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/kerosene_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/kerosene_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/diesel_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/diesel_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/lubricant_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/lubricant_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/fuel_oil_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/fuel_oil_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/oil_residue_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/oil_residue_flow"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/wood_gas_still"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "magneticraft:fluid/wood_gas_flow"
+    }
+  ]
+}

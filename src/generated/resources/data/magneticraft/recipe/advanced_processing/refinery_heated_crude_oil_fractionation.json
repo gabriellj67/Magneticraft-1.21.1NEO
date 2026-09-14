@@ -1,0 +1,31 @@
+{
+  "type": "magneticraft:refinery",
+  "duration": 1,
+  "fluid_input": {
+    "fluid": "magneticraft:heated_crude_oil"
+  },
+  "fluid_input_amount": 100,
+  "fluid_outputs": [
+    {
+      "fluid": {
+        "amount": 4,
+        "id": "magneticraft:heavy_oil"
+      },
+      "tank": 0
+    },
+    {
+      "fluid": {
+        "amount": 3,
+        "id": "magneticraft:light_oil"
+      },
+      "tank": 1
+    },
+    {
+      "fluid": {
+        "amount": 3,
+        "id": "magneticraft:lpg"
+      },
+      "tank": 2
+    }
+  ]
+}

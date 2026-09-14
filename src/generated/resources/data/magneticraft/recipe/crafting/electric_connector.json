@@ -1,0 +1,27 @@
+{
+  "type": "magneticraft:tiered_shaped",
+  "category": "redstone",
+  "electrical": {
+    "tier_id": "magneticraft:low_voltage"
+  },
+  "key": {
+    "C": {
+      "item": "magneticraft:fine_copper_wire"
+    },
+    "I": {
+      "tag": "c:stones"
+    },
+    "S": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "SIS",
+    "CCC",
+    "SIS"
+  ],
+  "result": {
+    "count": 8,
+    "id": "magneticraft:electric_connector"
+  }
+}

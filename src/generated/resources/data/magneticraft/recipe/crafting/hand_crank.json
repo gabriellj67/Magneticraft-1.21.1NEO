@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "S": {
+      "tag": "c:rods/wooden"
+    },
+    "W": {
+      "item": "magneticraft:wooden_shaft"
+    }
+  },
+  "pattern": [
+    "  S",
+    " SS",
+    "W  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:hand_crank"
+  }
+}

@@ -360,7 +360,7 @@ public final class LogisticsTubeModule extends AbstractPhysicalNetworkModule imp
 
         private CompoundTag save(HolderLookup.Provider registries) {
             CompoundTag tag = new CompoundTag();
-            tag.put("item", stack.save(registries));
+            tag.put("item", stack.saveOptional(registries));
             tag.putDouble("progress", progress);
             tag.putInt("incoming", incoming.ordinal());
             tag.putInt("outgoing", outgoing == null ? -1 : outgoing.ordinal());

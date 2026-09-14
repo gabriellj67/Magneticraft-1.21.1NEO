@@ -1,0 +1,133 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "translation": [
+        -2.2627413,
+        0,
+        -2.2627423
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "translation": [
+        2.2627418,
+        0,
+        2.2627416
+      ]
+    },
+    "fixed": {
+      "translation": [
+        0,
+        0,
+        4
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "translation": [
+        0,
+        3,
+        2
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        1.25,
+        1.25,
+        1.25
+      ],
+      "translation": [
+        -3.5355332,
+        1.7677672,
+        -3.061863
+      ]
+    },
+    "head": {
+      "scale": [
+        2,
+        2,
+        2
+      ],
+      "translation": [
+        0,
+        0,
+        8
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ],
+      "translation": [
+        -2.12132,
+        4.5490384,
+        -0.5490384
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ],
+      "translation": [
+        2.1213205,
+        0.45096183,
+        0.549038
+      ]
+    }
+  },
+  "include_nodes": [
+    "center_north_h"
+  ],
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/pneumatic_tube.gltf",
+  "textures": {
+    "particle": "magneticraft:block/machines/pneumatic_tube"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

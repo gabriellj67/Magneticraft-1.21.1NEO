@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:coal_ore"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "minecraft:coal"
+      }
+    },
+    {
+      "chance": 0.5,
+      "item": {
+        "count": 1,
+        "id": "minecraft:coal"
+      }
+    }
+  ]
+}

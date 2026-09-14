@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "magneticraft:inverted_limestone_tiles"
+  },
+  "result": {
+    "count": 2,
+    "id": "magneticraft:inverted_limestone_tiles_slab"
+  }
+}

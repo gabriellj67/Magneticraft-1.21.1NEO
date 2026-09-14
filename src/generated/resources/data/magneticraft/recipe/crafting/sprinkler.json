@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "item": "magneticraft:iron_fluid_pipe"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/copper"
+    },
+    "C": {
+      "item": "minecraft:water_bucket"
+    }
+  },
+  "pattern": [
+    " A ",
+    "BCB",
+    " B "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:sprinkler"
+  }
+}

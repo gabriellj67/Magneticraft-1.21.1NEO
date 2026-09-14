@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.pressure;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.NetworkComponentBlock;
 import net.minecraft.core.BlockPos;
@@ -13,23 +14,24 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public final class PressureTankBlock extends NetworkComponentBlock {
+    public static final MapCodec<PressureTankBlock> CODEC = simpleCodec(PressureTankBlock::new);
+
+    @Override
+    protected MapCodec<? extends PressureTankBlock> codec() {
+        return CODEC;
+    }
     public PressureTankBlock(Properties properties) {
         super(properties);
     }
 
     @Override
-    public InteractionResult use(
+    protected InteractionResult useWithoutItem(
             BlockState state,
             Level level,
             BlockPos position,
             Player player,
-            InteractionHand hand,
             BlockHitResult hit
     ) {
-        InteractionResult configured = super.use(state, level, position, player, hand, hit);
-        if (configured != InteractionResult.PASS) {
-            return configured;
-        }
         if (!level.isClientSide
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(position) instanceof PressureTankBlockEntity tank) {

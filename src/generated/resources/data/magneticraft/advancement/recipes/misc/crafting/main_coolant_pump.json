@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/main_coolant_pump"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_thermal_port": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:nuclear_thermal_port"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_thermal_port"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/main_coolant_pump"
+    ]
+  }
+}

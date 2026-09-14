@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "tag": "c:ores/pyrite"
+  },
+  "required_level": 1,
+  "result": {
+    "count": 2,
+    "id": "magneticraft:sulfur"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "magneticraft:reactor_column_segment"
+    },
+    {
+      "item": "minecraft:quartz"
+    },
+    {
+      "tag": "c:dusts/redstone"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:reactor_instrumentation"
+  }
+}

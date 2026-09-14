@@ -1,0 +1,17 @@
+{
+  "type": "magneticraft:refinery",
+  "duration": 2,
+  "fluid_input": {
+    "fluid": "magneticraft:steam"
+  },
+  "fluid_input_amount": 10,
+  "fluid_outputs": [
+    {
+      "fluid": {
+        "amount": 1,
+        "id": "minecraft:water"
+      },
+      "tank": 0
+    }
+  ]
+}

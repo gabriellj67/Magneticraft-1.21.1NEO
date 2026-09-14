@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "B": {
+      "tag": "c:glass_blocks"
+    },
+    "C": {
+      "item": "minecraft:water_bucket"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "BCB",
+    "ABA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:water_generator"
+  }
+}

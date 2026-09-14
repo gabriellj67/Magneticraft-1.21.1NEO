@@ -1,0 +1,21 @@
+{
+  "automation_profile": "electric_top_bottom_back",
+  "category": "energy",
+  "description": "guide.magneticraft.machine.battery_box.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:battery_box",
+  "inventory_slots": 2,
+  "physical_ports": [
+    "electricity",
+    "item"
+  ],
+  "processing_kind": "none",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [
+    "charge",
+    "discharge"
+  ],
+  "translation_key": "block.magneticraft.battery_box"
+}

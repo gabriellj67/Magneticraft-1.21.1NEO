@@ -1,0 +1,23 @@
+{
+  "automation_profile": "item_input_output",
+  "category": "processing",
+  "description": "guide.magneticraft.machine.gasification_unit.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:gasification_unit",
+  "inventory_slots": 2,
+  "physical_ports": [
+    "fluid_output",
+    "heat",
+    "item"
+  ],
+  "processing_kind": "gasification",
+  "recipe_type": "magneticraft:gasification_unit",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [
+    "input",
+    "output"
+  ],
+  "translation_key": "block.magneticraft.gasification_unit"
+}

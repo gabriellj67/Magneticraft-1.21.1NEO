@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "tag": "c:storage_blocks/lead"
+  },
+  "required_level": 1,
+  "result": {
+    "count": 5,
+    "id": "magneticraft:lead_light_plate"
+  }
+}

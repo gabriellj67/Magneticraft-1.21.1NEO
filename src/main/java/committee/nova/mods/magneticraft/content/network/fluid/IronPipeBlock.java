@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.fluid;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
 import committee.nova.mods.magneticraft.init.ModNetworkBlocks;
@@ -13,6 +14,12 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import org.jetbrains.annotations.Nullable;
 
 public final class IronPipeBlock extends ConduitBlock {
+    public static final MapCodec<IronPipeBlock> CODEC = simpleCodec(IronPipeBlock::new);
+
+    @Override
+    protected MapCodec<? extends IronPipeBlock> codec() {
+        return CODEC;
+    }
     public IronPipeBlock(Properties properties) {
         super(properties, 4);
     }

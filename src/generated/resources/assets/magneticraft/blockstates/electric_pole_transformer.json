@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "direction=east,segment=base": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=east,segment=down_1": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=east,segment=down_2": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=east,segment=down_3": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=east,segment=down_4": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north,segment=base": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north,segment=down_1": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north,segment=down_2": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north,segment=down_3": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north,segment=down_4": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_east,segment=base": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_east,segment=down_1": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_east,segment=down_2": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_east,segment=down_3": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_east,segment=down_4": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_west,segment=base": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_west,segment=down_1": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_west,segment=down_2": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_west,segment=down_3": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=north_west,segment=down_4": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south,segment=base": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south,segment=down_1": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south,segment=down_2": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south,segment=down_3": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south,segment=down_4": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_east,segment=base": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_east,segment=down_1": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_east,segment=down_2": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_east,segment=down_3": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_east,segment=down_4": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_west,segment=base": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_west,segment=down_1": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_west,segment=down_2": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_west,segment=down_3": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=south_west,segment=down_4": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=west,segment=base": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=west,segment=down_1": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=west,segment=down_2": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=west,segment=down_3": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    },
+    "direction=west,segment=down_4": {
+      "model": "magneticraft:block/electric_pole_transformer_world"
+    }
+  }
+}

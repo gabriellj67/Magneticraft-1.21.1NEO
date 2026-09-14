@@ -1,0 +1,545 @@
+{
+  "items": [
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 250000,
+      "description": "guide.magneticraft.item.low_voltage_battery.description",
+      "id": "magneticraft:low_voltage_battery",
+      "translation_key": "item.magneticraft.low_voltage_battery",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 2500000,
+      "description": "guide.magneticraft.item.medium_voltage_battery.description",
+      "id": "magneticraft:medium_voltage_battery",
+      "translation_key": "item.magneticraft.medium_voltage_battery",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 2000,
+      "break_cost_fe": 1000,
+      "capacity_fe": 512000,
+      "description": "guide.magneticraft.item.electric_drill.description",
+      "id": "magneticraft:electric_drill",
+      "translation_key": "item.magneticraft.electric_drill",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 2000,
+      "break_cost_fe": 1000,
+      "capacity_fe": 512000,
+      "description": "guide.magneticraft.item.electric_chainsaw.description",
+      "id": "magneticraft:electric_chainsaw",
+      "translation_key": "item.magneticraft.electric_chainsaw",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 2000,
+      "break_cost_fe": 0,
+      "capacity_fe": 512000,
+      "description": "guide.magneticraft.item.electric_piston.description",
+      "id": "magneticraft:electric_piston",
+      "translation_key": "item.magneticraft.electric_piston",
+      "use_cost_fe": 4000
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.voltmeter.description",
+      "id": "magneticraft:voltmeter",
+      "translation_key": "item.magneticraft.voltmeter",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.thermometer.description",
+      "id": "magneticraft:thermometer",
+      "translation_key": "item.magneticraft.thermometer",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.pressure_gauge.description",
+      "id": "magneticraft:pressure_gauge",
+      "translation_key": "item.magneticraft.pressure_gauge",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 25000,
+      "description": "guide.magneticraft.item.oil_prospector.description",
+      "id": "magneticraft:oil_prospector",
+      "translation_key": "item.magneticraft.oil_prospector",
+      "use_cost_fe": 500
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.copper_wire_coil.description",
+      "id": "magneticraft:copper_wire_coil",
+      "translation_key": "item.magneticraft.copper_wire_coil",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_connector.description",
+      "id": "magneticraft:electric_connector",
+      "translation_key": "block.magneticraft.electric_connector",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_pole.description",
+      "id": "magneticraft:electric_pole",
+      "translation_key": "block.magneticraft.electric_pole",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_pole_transformer.description",
+      "id": "magneticraft:electric_pole_transformer",
+      "translation_key": "block.magneticraft.electric_pole_transformer",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.tesla_tower.description",
+      "id": "magneticraft:tesla_tower",
+      "translation_key": "block.magneticraft.tesla_tower",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.wireless_energy_receiver.description",
+      "id": "magneticraft:wireless_energy_receiver",
+      "translation_key": "block.magneticraft.wireless_energy_receiver",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.wind_turbine.description",
+      "id": "magneticraft:wind_turbine",
+      "translation_key": "block.magneticraft.wind_turbine",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.wrench.description",
+      "id": "magneticraft:wrench",
+      "translation_key": "item.magneticraft.wrench",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electrical_fuse.description",
+      "id": "magneticraft:electrical_fuse",
+      "translation_key": "item.magneticraft.electrical_fuse",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electrical_repair_tool.description",
+      "id": "magneticraft:electrical_repair_tool",
+      "translation_key": "item.magneticraft.electrical_repair_tool",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_cable.description",
+      "id": "magneticraft:electric_cable",
+      "translation_key": "block.magneticraft.electric_cable",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.box_transformer.description",
+      "id": "magneticraft:box_transformer",
+      "translation_key": "block.magneticraft.box_transformer",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.fuse_box.description",
+      "id": "magneticraft:fuse_box",
+      "translation_key": "block.magneticraft.fuse_box",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.circuit_breaker.description",
+      "id": "magneticraft:circuit_breaker",
+      "translation_key": "block.magneticraft.circuit_breaker",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.electric_switch.description",
+      "id": "magneticraft:electric_switch",
+      "translation_key": "block.magneticraft.electric_switch",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.diode.description",
+      "id": "magneticraft:diode",
+      "translation_key": "block.magneticraft.diode",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.resistor.description",
+      "id": "magneticraft:resistor",
+      "translation_key": "block.magneticraft.resistor",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.heat_pipe.description",
+      "id": "magneticraft:heat_pipe",
+      "translation_key": "block.magneticraft.heat_pipe",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.insulated_heat_pipe.description",
+      "id": "magneticraft:insulated_heat_pipe",
+      "translation_key": "block.magneticraft.insulated_heat_pipe",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.heat_sink.description",
+      "id": "magneticraft:heat_sink",
+      "translation_key": "block.magneticraft.heat_sink",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.iron_fluid_pipe.description",
+      "id": "magneticraft:iron_fluid_pipe",
+      "translation_key": "block.magneticraft.iron_fluid_pipe",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.pneumatic_tube.description",
+      "id": "magneticraft:pneumatic_tube",
+      "translation_key": "block.magneticraft.pneumatic_tube",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.pneumatic_restriction_tube.description",
+      "id": "magneticraft:pneumatic_restriction_tube",
+      "translation_key": "block.magneticraft.pneumatic_restriction_tube",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.brass_pressure_pipe.description",
+      "id": "magneticraft:brass_pressure_pipe",
+      "translation_key": "block.magneticraft.brass_pressure_pipe",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.pressure_tank.description",
+      "id": "magneticraft:pressure_tank",
+      "translation_key": "block.magneticraft.pressure_tank",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.conveyor_belt.description",
+      "id": "magneticraft:conveyor_belt",
+      "translation_key": "block.magneticraft.conveyor_belt",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.inserter_speed_upgrade.description",
+      "id": "magneticraft:inserter_speed_upgrade",
+      "translation_key": "item.magneticraft.inserter_speed_upgrade",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.inserter_stack_upgrade.description",
+      "id": "magneticraft:inserter_stack_upgrade",
+      "translation_key": "item.magneticraft.inserter_stack_upgrade",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.computer.description",
+      "id": "magneticraft:computer",
+      "translation_key": "block.magneticraft.computer",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.mining_robot.description",
+      "id": "magneticraft:mining_robot",
+      "translation_key": "block.magneticraft.mining_robot",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.floppy_disk.description",
+      "id": "magneticraft:floppy_disk",
+      "translation_key": "item.magneticraft.floppy_disk",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.oil_deposit.description",
+      "id": "magneticraft:oil_deposit",
+      "translation_key": "block.magneticraft.oil_deposit",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_stairs.description",
+      "id": "magneticraft:limestone_stairs",
+      "translation_key": "block.magneticraft.limestone_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_slab.description",
+      "id": "magneticraft:limestone_slab",
+      "translation_key": "block.magneticraft.limestone_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_bricks_stairs.description",
+      "id": "magneticraft:limestone_bricks_stairs",
+      "translation_key": "block.magneticraft.limestone_bricks_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_bricks_slab.description",
+      "id": "magneticraft:limestone_bricks_slab",
+      "translation_key": "block.magneticraft.limestone_bricks_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_cobblestone_stairs.description",
+      "id": "magneticraft:limestone_cobblestone_stairs",
+      "translation_key": "block.magneticraft.limestone_cobblestone_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_cobblestone_slab.description",
+      "id": "magneticraft:limestone_cobblestone_slab",
+      "translation_key": "block.magneticraft.limestone_cobblestone_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_stairs.description",
+      "id": "magneticraft:burnt_limestone_stairs",
+      "translation_key": "block.magneticraft.burnt_limestone_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_slab.description",
+      "id": "magneticraft:burnt_limestone_slab",
+      "translation_key": "block.magneticraft.burnt_limestone_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_bricks_stairs.description",
+      "id": "magneticraft:burnt_limestone_bricks_stairs",
+      "translation_key": "block.magneticraft.burnt_limestone_bricks_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_bricks_slab.description",
+      "id": "magneticraft:burnt_limestone_bricks_slab",
+      "translation_key": "block.magneticraft.burnt_limestone_bricks_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_cobblestone_stairs.description",
+      "id": "magneticraft:burnt_limestone_cobblestone_stairs",
+      "translation_key": "block.magneticraft.burnt_limestone_cobblestone_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.burnt_limestone_cobblestone_slab.description",
+      "id": "magneticraft:burnt_limestone_cobblestone_slab",
+      "translation_key": "block.magneticraft.burnt_limestone_cobblestone_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_tiles_stairs.description",
+      "id": "magneticraft:limestone_tiles_stairs",
+      "translation_key": "block.magneticraft.limestone_tiles_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.limestone_tiles_slab.description",
+      "id": "magneticraft:limestone_tiles_slab",
+      "translation_key": "block.magneticraft.limestone_tiles_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.inverted_limestone_tiles_stairs.description",
+      "id": "magneticraft:inverted_limestone_tiles_stairs",
+      "translation_key": "block.magneticraft.inverted_limestone_tiles_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.inverted_limestone_tiles_slab.description",
+      "id": "magneticraft:inverted_limestone_tiles_slab",
+      "translation_key": "block.magneticraft.inverted_limestone_tiles_slab",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.roof_tile.description",
+      "id": "magneticraft:roof_tile",
+      "translation_key": "block.magneticraft.roof_tile",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.roof_tile_stairs.description",
+      "id": "magneticraft:roof_tile_stairs",
+      "translation_key": "block.magneticraft.roof_tile_stairs",
+      "use_cost_fe": 0
+    },
+    {
+      "attack_cost_fe": 0,
+      "break_cost_fe": 0,
+      "capacity_fe": 0,
+      "description": "guide.magneticraft.item.roof_tile_slab.description",
+      "id": "magneticraft:roof_tile_slab",
+      "translation_key": "block.magneticraft.roof_tile_slab",
+      "use_cost_fe": 0
+    }
+  ],
+  "schema_version": 1
+}

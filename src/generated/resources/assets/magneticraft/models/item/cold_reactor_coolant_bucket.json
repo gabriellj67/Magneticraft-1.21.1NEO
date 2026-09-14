@@ -1,0 +1,5 @@
+{
+  "parent": "neoforge:item/bucket",
+  "fluid": "magneticraft:cold_reactor_coolant",
+  "loader": "neoforge:fluid_container"
+}

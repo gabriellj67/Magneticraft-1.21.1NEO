@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "block": "magneticraft:tesla_tower",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "part": "bottom"
+          }
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "magneticraft:tesla_tower"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "magneticraft:blocks/tesla_tower"
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:reactor_containment_casing"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "QRQ",
+    "RCR",
+    "QRQ"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:reactor_instrumentation_port"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_silver_rocky_chunk": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#magneticraft:rocky_chunks/silver"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:smelting/silver_rocky_chunk"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_silver_rocky_chunk"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:smelting/silver_rocky_chunk"
+    ]
+  }
+}

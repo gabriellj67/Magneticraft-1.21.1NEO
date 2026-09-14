@@ -1,0 +1,57 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "magneticraft:block/electric_cable_center"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/electric_cable_down"
+      },
+      "when": {
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/electric_cable_up"
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/electric_cable_north"
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/electric_cable_south"
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/electric_cable_west"
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "magneticraft:block/electric_cable_east"
+      },
+      "when": {
+        "east": "true"
+      }
+    }
+  ]
+}

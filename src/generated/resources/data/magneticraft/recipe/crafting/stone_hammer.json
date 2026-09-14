@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "M": {
+      "tag": "c:cobblestones"
+    },
+    "S": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "pattern": [
+    "MM ",
+    "MSM",
+    " S "
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:stone_hammer"
+  }
+}

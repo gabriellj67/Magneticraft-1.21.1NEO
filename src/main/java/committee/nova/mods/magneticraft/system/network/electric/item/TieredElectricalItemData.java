@@ -1,12 +1,19 @@
 package committee.nova.mods.magneticraft.system.network.electric.item;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -26,6 +33,28 @@ public record TieredElectricalItemData(
     private static final String RATING_ID_TAG = "rating_id";
     private static final String TRANSFORMER_PROFILE_ID_TAG = "transformer_profile_id";
 
+    /**
+     * Recipe-facing codec pair (JSON via {@link com.mojang.serialization.MapCodec}-embeddable
+     * {@link Codec}, network via {@link StreamCodec}) - used by {@code TieredShapedRecipe}'s
+     * {@code RecipeSerializer}. Deliberately separate from the {@link #toTag()}/{@link #fromTag}
+     * NBT format above (which is item-stack persistence, versioned via {@link #SCHEMA_VERSION})
+     * and from {@link #toJson()}/{@link #fromJson} (the old Forge manual-JSON format, unused by
+     * this codec): recipe JSON/network shapes are new for this port, not preserved from the
+     * Forge 1.20.1 originals (see PORTING_NOTES.md's Phase 4 caveat).
+     */
+    public static final Codec<TieredElectricalItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf(TIER_ID_TAG).forGetter(TieredElectricalItemData::tierId),
+            ResourceLocation.CODEC.optionalFieldOf(RATING_ID_TAG).forGetter(TieredElectricalItemData::ratingId),
+            ResourceLocation.CODEC.optionalFieldOf(TRANSFORMER_PROFILE_ID_TAG).forGetter(TieredElectricalItemData::transformerProfileId)
+    ).apply(instance, TieredElectricalItemData::new));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, TieredElectricalItemData> STREAM_CODEC = StreamCodec.composite(
+            ResourceLocation.STREAM_CODEC, TieredElectricalItemData::tierId,
+            ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), TieredElectricalItemData::ratingId,
+            ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), TieredElectricalItemData::transformerProfileId,
+            TieredElectricalItemData::new
+    );
+
     public TieredElectricalItemData {
         tierId = requireId(tierId, "tierId");
         ratingId = normalized(ratingId, "ratingId");
@@ -37,7 +66,8 @@ public record TieredElectricalItemData(
     }
 
     public void write(ItemStack stack) {
-        Objects.requireNonNull(stack, "stack").addTagElement(OWNER_TAG, toTag());
+        Objects.requireNonNull(stack, "stack");
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.put(OWNER_TAG, toTag()));
     }
 
     public CompoundTag toTag() {
@@ -71,8 +101,12 @@ public record TieredElectricalItemData(
     }
 
     public static Optional<TieredElectricalItemData> read(ItemStack stack) {
-        CompoundTag owner = Objects.requireNonNull(stack, "stack").getTag();
-        if (owner == null || !owner.contains(OWNER_TAG, Tag.TAG_COMPOUND)) {
+        CustomData data = Objects.requireNonNull(stack, "stack").get(DataComponents.CUSTOM_DATA);
+        if (data == null) {
+            return Optional.empty();
+        }
+        CompoundTag owner = data.copyTag();
+        if (!owner.contains(OWNER_TAG, Tag.TAG_COMPOUND)) {
             return Optional.empty();
         }
         return fromTag(owner.getCompound(OWNER_TAG));

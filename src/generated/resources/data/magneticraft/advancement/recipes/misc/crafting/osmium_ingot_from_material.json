@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_osmium_ingot_material": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:nuggets/osmium"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/osmium_ingot_from_material"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_osmium_ingot_material"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/osmium_ingot_from_material"
+    ]
+  }
+}

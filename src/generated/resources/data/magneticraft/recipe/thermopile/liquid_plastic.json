@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:thermopile",
+  "block": "magneticraft:liquid_plastic",
+  "conductivity": 13333.333333335355,
+  "temperature": 298.0
+}

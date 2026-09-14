@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:item/generated",
+  "overrides": [
+    {
+      "model": "magneticraft:item/electrical_fuse_heavy_low_voltage",
+      "predicate": {
+        "magneticraft:fuse_variant": 1.0
+      }
+    },
+    {
+      "model": "magneticraft:item/electrical_fuse_heavy_medium_voltage",
+      "predicate": {
+        "magneticraft:fuse_variant": 2.0
+      }
+    },
+    {
+      "model": "magneticraft:item/electrical_fuse_heavy_high_voltage",
+      "predicate": {
+        "magneticraft:fuse_variant": 3.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "magneticraft:item/electrical_fuse"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "minecraft:leather_leggings"
+    },
+    {
+      "item": "magneticraft:boron_carbide"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:basic_radiation_leggings"
+  }
+}

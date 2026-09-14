@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.multiblock;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -13,6 +14,12 @@ import org.jetbrains.annotations.Nullable;
 
 /** Invisible formed-structure proxy used by the released 1.12 multiblock renderer. */
 public final class MultiblockGapBlock extends BaseEntityBlock {
+    public static final MapCodec<MultiblockGapBlock> CODEC = simpleCodec(MultiblockGapBlock::new);
+
+    @Override
+    protected MapCodec<? extends MultiblockGapBlock> codec() {
+        return CODEC;
+    }
     public MultiblockGapBlock(Properties properties) {
         super(properties);
     }

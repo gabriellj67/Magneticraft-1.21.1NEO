@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_burnt_limestone_cobblestone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:burnt_limestone_cobblestone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/burnt_limestone_cobblestone_slab"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_burnt_limestone_cobblestone"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/burnt_limestone_cobblestone_slab"
+    ]
+  }
+}

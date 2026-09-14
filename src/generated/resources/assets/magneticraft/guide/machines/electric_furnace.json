@@ -1,0 +1,22 @@
+{
+  "automation_profile": "item_input_output",
+  "category": "processing",
+  "description": "guide.magneticraft.machine.electric_furnace.description",
+  "ghost_slots": 0,
+  "has_menu": true,
+  "id": "magneticraft:electric_furnace",
+  "inventory_slots": 2,
+  "physical_ports": [
+    "electricity",
+    "item"
+  ],
+  "processing_kind": "smelting",
+  "recipe_type": "minecraft:smelting",
+  "redstone_control": "ignored",
+  "schema_version": 1,
+  "slot_roles": [
+    "input",
+    "output"
+  ],
+  "translation_key": "block.magneticraft.electric_furnace"
+}

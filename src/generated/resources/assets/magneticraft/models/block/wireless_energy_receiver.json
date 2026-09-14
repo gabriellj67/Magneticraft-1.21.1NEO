@@ -1,0 +1,135 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.85333335,
+        0.85333335,
+        0.85333335
+      ],
+      "translation": [
+        0,
+        3.6266668,
+        0
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.85333335,
+        0.85333335,
+        0.85333335
+      ],
+      "translation": [
+        0,
+        3.6266668,
+        0
+      ]
+    },
+    "fixed": {
+      "scale": [
+        1.0666667,
+        1.0666667,
+        1.0666667
+      ],
+      "translation": [
+        0,
+        4.533334,
+        0
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.53333336,
+        0.53333336,
+        0.53333336
+      ],
+      "translation": [
+        0,
+        5.266667,
+        0
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        1.3333334,
+        1.3333334,
+        1.3333334
+      ],
+      "translation": [
+        0,
+        4.907478,
+        2.8333333
+      ]
+    },
+    "head": {
+      "scale": [
+        2.1333334,
+        2.1333334,
+        2.1333334
+      ],
+      "translation": [
+        0,
+        9.066668,
+        0
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "translation": [
+        0,
+        3.379985,
+        3.2841477
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ],
+      "translation": [
+        0,
+        3.3799849,
+        3.2841477
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/gltf/energy_receiver.gltf",
+  "textures": {
+    "particle": "magneticraft:block/electric_connectors/energy_receiver"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

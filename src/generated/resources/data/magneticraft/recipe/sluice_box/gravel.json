@@ -1,0 +1,28 @@
+{
+  "type": "magneticraft:sluice_box",
+  "ingredient": {
+    "item": "minecraft:gravel"
+  },
+  "results": [
+    {
+      "stack": {
+        "count": 1,
+        "id": "minecraft:flint"
+      }
+    },
+    {
+      "chance": 0.15,
+      "stack": {
+        "count": 1,
+        "id": "minecraft:flint"
+      }
+    },
+    {
+      "chance": 0.01,
+      "stack": {
+        "count": 1,
+        "id": "magneticraft:zircon_sand"
+      }
+    }
+  ]
+}

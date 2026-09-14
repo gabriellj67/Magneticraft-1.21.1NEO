@@ -1,0 +1,346 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "oil",
+  "controller": "magneticraft:refinery",
+  "description": "guide.magneticraft.multiblock.refinery.description",
+  "id": "magneticraft:refinery",
+  "layers": [
+    [
+      "YMY",
+      "ZZZ",
+      "ZZZ"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ],
+    [
+      "YYY",
+      "RRR",
+      "RRR"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:refinery",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "z"
+      },
+      "rule": "column_z",
+      "symbol": "Z"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 1,
+          "z": -2
+        },
+        "role": "feed_input",
+        "side": "north",
+        "target": 0
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "process_steam_input",
+        "side": "west",
+        "target": 1
+      },
+      {
+        "access": "both",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "role": "process_steam_input",
+        "side": "east",
+        "target": 1
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": -2
+        },
+        "role": "heavy_product_output",
+        "side": "north",
+        "target": 2
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 3,
+          "z": 0
+        },
+        "role": "heavy_product_output",
+        "side": "south",
+        "target": 2
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "heavy_product_output",
+        "side": "west",
+        "target": 2
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 3,
+          "z": -1
+        },
+        "role": "heavy_product_output",
+        "side": "east",
+        "target": 2
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 5,
+          "z": -2
+        },
+        "role": "light_product_output",
+        "side": "north",
+        "target": 3
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 5,
+          "z": 0
+        },
+        "role": "light_product_output",
+        "side": "south",
+        "target": 3
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 5,
+          "z": -1
+        },
+        "role": "light_product_output",
+        "side": "west",
+        "target": 3
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 5,
+          "z": -1
+        },
+        "role": "light_product_output",
+        "side": "east",
+        "target": 3
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 7,
+          "z": -2
+        },
+        "role": "gas_product_output",
+        "side": "north",
+        "target": 4
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 0,
+          "y": 7,
+          "z": 0
+        },
+        "role": "gas_product_output",
+        "side": "south",
+        "target": 4
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": -1,
+          "y": 7,
+          "z": -1
+        },
+        "role": "gas_product_output",
+        "side": "west",
+        "target": 4
+      },
+      {
+        "access": "output",
+        "kind": "fluid",
+        "offset": {
+          "x": 1,
+          "y": 7,
+          "z": -1
+        },
+        "role": "gas_product_output",
+        "side": "east",
+        "target": 4
+      }
+    ],
+    "electricity": false,
+    "fluid_tank_capacities_mb": [
+      16000,
+      64000,
+      16000,
+      16000,
+      16000
+    ],
+    "fluid_tanks": [
+      {
+        "accepted_fluids": [
+          "magneticraft:steam",
+          "magneticraft:heated_crude_oil",
+          "magneticraft:heavy_oil",
+          "magneticraft:light_oil",
+          "magneticraft:lpg"
+        ],
+        "capacity_mb": 16000,
+        "index": 0,
+        "role": "feed_input"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:steam"
+        ],
+        "capacity_mb": 64000,
+        "index": 1,
+        "role": "process_steam_input"
+      },
+      {
+        "accepted_fluids": [
+          "#minecraft:water",
+          "magneticraft:heavy_oil",
+          "magneticraft:oil_residue",
+          "magneticraft:diesel",
+          "magneticraft:liquid_plastic"
+        ],
+        "capacity_mb": 16000,
+        "index": 2,
+        "role": "heavy_product_output"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:light_oil",
+          "magneticraft:fuel_oil",
+          "magneticraft:kerosene",
+          "magneticraft:naphtha"
+        ],
+        "capacity_mb": 16000,
+        "index": 3,
+        "role": "light_product_output"
+      },
+      {
+        "accepted_fluids": [
+          "magneticraft:lpg",
+          "magneticraft:lubricant",
+          "magneticraft:gasoline",
+          "magneticraft:natural_gas"
+        ],
+        "capacity_mb": 16000,
+        "index": 4,
+        "role": "gas_product_output"
+      }
+    ],
+    "heat": false,
+    "inventory_slots": 0
+  },
+  "recipe_type": "magneticraft:refinery",
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 9,
+    "z": 3
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.refinery"
+}

@@ -1,0 +1,29 @@
+{
+  "type": "magneticraft:gasification_unit",
+  "duration": 10,
+  "fluid_result": {
+    "amount": 10,
+    "id": "magneticraft:wood_gas"
+  },
+  "ingredient": [
+    {
+      "item": "minecraft:sunflower"
+    },
+    {
+      "item": "minecraft:lilac"
+    },
+    {
+      "item": "minecraft:tall_grass"
+    },
+    {
+      "item": "minecraft:large_fern"
+    },
+    {
+      "item": "minecraft:rose_bush"
+    },
+    {
+      "item": "minecraft:peony"
+    }
+  ],
+  "minimum_temperature": 423.15
+}

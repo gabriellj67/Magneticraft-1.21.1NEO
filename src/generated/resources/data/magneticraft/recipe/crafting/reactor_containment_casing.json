@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "item": "magneticraft:nuclear_facility_casing"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "L": {
+      "tag": "c:ingots/lead"
+    }
+  },
+  "pattern": [
+    "ILI",
+    "LCL",
+    "ILI"
+  ],
+  "result": {
+    "count": 4,
+    "id": "magneticraft:reactor_containment_casing"
+  }
+}

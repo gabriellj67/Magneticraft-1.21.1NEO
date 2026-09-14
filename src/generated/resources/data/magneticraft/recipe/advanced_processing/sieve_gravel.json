@@ -1,0 +1,30 @@
+{
+  "type": "magneticraft:sieve",
+  "duration": 50,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:gravel"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "minecraft:flint"
+      }
+    },
+    {
+      "chance": 0.15,
+      "item": {
+        "count": 1,
+        "id": "minecraft:flint"
+      }
+    },
+    {
+      "chance": 0.01,
+      "item": {
+        "count": 1,
+        "id": "magneticraft:zircon_sand"
+      }
+    }
+  ]
+}

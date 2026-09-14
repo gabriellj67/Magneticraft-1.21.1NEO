@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "magneticraft:burnt_limestone"
+  },
+  "result": {
+    "count": 1,
+    "id": "magneticraft:burnt_limestone_stairs"
+  }
+}

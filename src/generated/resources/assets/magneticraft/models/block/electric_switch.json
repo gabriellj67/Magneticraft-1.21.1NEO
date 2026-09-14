@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "magneticraft:block/electrical_breaker_housing",
+    "side": "magneticraft:block/electrical_enclosure",
+    "top": "magneticraft:block/electrical_indicator"
+  }
+}

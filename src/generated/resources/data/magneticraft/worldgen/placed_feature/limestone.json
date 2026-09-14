@@ -1,0 +1,33 @@
+{
+  "feature": "magneticraft:limestone",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:clamped_normal",
+        "deviation": 0.9,
+        "max_inclusive": 5,
+        "mean": 3,
+        "min_inclusive": 0
+      }
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "max_inclusive": {
+          "absolute": 63
+        },
+        "min_inclusive": {
+          "absolute": 16
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

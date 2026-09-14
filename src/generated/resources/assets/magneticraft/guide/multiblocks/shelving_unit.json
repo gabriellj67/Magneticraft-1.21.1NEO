@@ -1,0 +1,56 @@
+{
+  "anchor": {
+    "x": 2,
+    "y": 0,
+    "z": 0
+  },
+  "category": "storage",
+  "controller": "magneticraft:shelving_unit",
+  "description": "guide.magneticraft.multiblock.shelving_unit.description",
+  "id": "magneticraft:shelving_unit",
+  "layers": [
+    [
+      "GGMGG",
+      "GGGGG"
+    ],
+    [
+      "GGGGG",
+      "GGGGG"
+    ],
+    [
+      "GGGGG",
+      "GGGGG"
+    ]
+  ],
+  "legend": [
+    {
+      "block": "magneticraft:shelving_unit",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:iron_grate",
+      "rule": "grate",
+      "symbol": "G"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "chest_upgrade_slots": 24,
+    "connections": [],
+    "electricity": false,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 648,
+    "inventory_slots_per_chest": 27
+  },
+  "schema_version": 1,
+  "size": {
+    "x": 5,
+    "y": 3,
+    "z": 2
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.shelving_unit"
+}

@@ -1,0 +1,18 @@
+{
+  "type": "magneticraft:oil_heater",
+  "duration": 2,
+  "fluid_input": {
+    "fluid": "magneticraft:crude_oil"
+  },
+  "fluid_input_amount": 10,
+  "fluid_outputs": [
+    {
+      "fluid": {
+        "amount": 100,
+        "id": "magneticraft:heated_crude_oil"
+      },
+      "tank": 0
+    }
+  ],
+  "minimum_temperature": 623.15
+}

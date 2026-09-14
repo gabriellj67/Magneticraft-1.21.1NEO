@@ -1,7 +1,11 @@
 package committee.nova.mods.magneticraft.init;
 
 import committee.nova.mods.magneticraft.Magneticraft;
+import committee.nova.mods.magneticraft.content.item.PortableEnergyComponents;
+import committee.nova.mods.magneticraft.content.nuclear.radiation.NuclearProtectionMaterial;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.inventory.MenuType;
@@ -43,11 +47,17 @@ public final class ModRegistries {
             DeferredRegister.create(Registries.SOUND_EVENT, Magneticraft.MOD_ID);
     public static final DeferredRegister<Feature<?>> FEATURES =
             DeferredRegister.create(Registries.FEATURE, Magneticraft.MOD_ID);
+    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES =
+            DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, Magneticraft.MOD_ID);
+    public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS =
+            DeferredRegister.create(Registries.ARMOR_MATERIAL, Magneticraft.MOD_ID);
 
     private ModRegistries() {
     }
 
     public static void register(IEventBus modBus) {
+        PortableEnergyComponents.bootstrap();
+        NuclearProtectionMaterial.bootstrap();
         ModBlocks.bootstrap();
         ModItems.bootstrap();
         ModNuclearItems.bootstrap();
@@ -66,6 +76,9 @@ public final class ModRegistries {
         ModFeatures.bootstrap();
         ModCreativeTabs.bootstrap();
 
+        modBus.addListener(ModBlockEntities::registerCapabilities);
+        modBus.addListener(ModComputerContent::registerCapabilities);
+
         FLUID_TYPES.register(modBus);
         FLUIDS.register(modBus);
         BLOCKS.register(modBus);
@@ -77,5 +90,7 @@ public final class ModRegistries {
         SOUND_EVENTS.register(modBus);
         FEATURES.register(modBus);
         CREATIVE_MODE_TABS.register(modBus);
+        DATA_COMPONENT_TYPES.register(modBus);
+        ARMOR_MATERIALS.register(modBus);
     }
 }

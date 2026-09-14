@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "magneticraft:block/machines/fabricator_bottom",
+    "east": "magneticraft:block/machines/fabricator_side",
+    "north": "magneticraft:block/machines/fabricator_side",
+    "south": "magneticraft:block/machines/fabricator_side",
+    "up": "magneticraft:block/machines/fabricator_top",
+    "west": "magneticraft:block/machines/fabricator_side"
+  }
+}

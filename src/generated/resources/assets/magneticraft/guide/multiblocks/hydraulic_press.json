@@ -1,0 +1,149 @@
+{
+  "anchor": {
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  "category": "processing",
+  "controller": "magneticraft:hydraulic_press",
+  "description": "guide.magneticraft.multiblock.hydraulic_press.description",
+  "id": "magneticraft:hydraulic_press",
+  "layers": [
+    [
+      "GMG",
+      "GGG",
+      "GGG"
+    ],
+    [
+      "GGG",
+      "CRC",
+      "GGG"
+    ],
+    [
+      "...",
+      "YSY",
+      "..."
+    ],
+    [
+      "...",
+      "YRY",
+      "..."
+    ],
+    [
+      "...",
+      "XXX",
+      "..."
+    ]
+  ],
+  "legend": [
+    {
+      "ignored": true,
+      "rule": "ignore",
+      "symbol": "."
+    },
+    {
+      "block": "magneticraft:hydraulic_press",
+      "rule": "controller",
+      "symbol": "M"
+    },
+    {
+      "block": "magneticraft:iron_grate",
+      "rule": "grate",
+      "symbol": "G"
+    },
+    {
+      "block": "magneticraft:corrugated_iron",
+      "rule": "corrugated_iron",
+      "symbol": "R"
+    },
+    {
+      "block": "magneticraft:copper_coil",
+      "rule": "copper_coil",
+      "symbol": "C"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "x"
+      },
+      "rule": "column_x",
+      "symbol": "X"
+    },
+    {
+      "block": "magneticraft:machine_support_column",
+      "properties": {
+        "axis": "y"
+      },
+      "rule": "column_y",
+      "symbol": "Y"
+    },
+    {
+      "block": "magneticraft:striped_machine_casing",
+      "rule": "striped",
+      "symbol": "S"
+    }
+  ],
+  "ports": {
+    "bulk_item_capacity": 0,
+    "connections": [
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": -1,
+          "y": 1,
+          "z": -1
+        },
+        "side": "west"
+      },
+      {
+        "kind": "electricity",
+        "offset": {
+          "x": 1,
+          "y": 1,
+          "z": -1
+        },
+        "side": "east"
+      },
+      {
+        "extract_slots": [],
+        "insert_slots": [
+          0
+        ],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "side": "south"
+      },
+      {
+        "extract_slots": [
+          1
+        ],
+        "insert_slots": [],
+        "kind": "item",
+        "offset": {
+          "x": 0,
+          "y": 0,
+          "z": -2
+        },
+        "side": "north"
+      }
+    ],
+    "electricity": true,
+    "fluid_tank_capacities_mb": [],
+    "fluid_tanks": [],
+    "heat": false,
+    "inventory_slots": 2
+  },
+  "recipe_type": "magneticraft:hydraulic_press",
+  "schema_version": 1,
+  "size": {
+    "x": 3,
+    "y": 5,
+    "z": 3
+  },
+  "supports_mirroring": false,
+  "translation_key": "block.magneticraft.hydraulic_press"
+}

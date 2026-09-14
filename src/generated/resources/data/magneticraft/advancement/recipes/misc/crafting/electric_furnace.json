@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_fine_copper_wire": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:fine_copper_wire"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/electric_furnace"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_fine_copper_wire"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/electric_furnace"
+    ]
+  }
+}

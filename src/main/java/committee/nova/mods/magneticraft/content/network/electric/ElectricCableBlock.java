@@ -1,4 +1,5 @@
 package committee.nova.mods.magneticraft.content.network.electric;
+import com.mojang.serialization.MapCodec;
 
 import committee.nova.mods.magneticraft.content.item.TieredElectricalDrops;
 import committee.nova.mods.magneticraft.content.network.block.ConduitBlock;
@@ -21,6 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ElectricCableBlock extends ConduitBlock {
+    public static final MapCodec<ElectricCableBlock> CODEC = simpleCodec(ElectricCableBlock::new);
+
+    @Override
+    protected MapCodec<? extends ElectricCableBlock> codec() {
+        return CODEC;
+    }
     public ElectricCableBlock(Properties properties) {
         super(properties);
     }

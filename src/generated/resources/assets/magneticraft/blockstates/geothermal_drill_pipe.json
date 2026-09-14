@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "magneticraft:block/geothermal_drill_pipe"
+    }
+  }
+}

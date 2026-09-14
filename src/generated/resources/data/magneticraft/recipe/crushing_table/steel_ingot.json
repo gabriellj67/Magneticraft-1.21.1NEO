@@ -1,0 +1,10 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "tag": "c:ingots/steel"
+  },
+  "result": {
+    "count": 1,
+    "id": "magneticraft:steel_light_plate"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "tag": "c:ingots/copper"
+    },
+    "B": {
+      "item": "magneticraft:low_voltage_battery"
+    },
+    "C": {
+      "tag": "magneticraft:light_plates/lead"
+    }
+  },
+  "pattern": [
+    " A ",
+    "BCB",
+    "BCB"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:medium_voltage_battery"
+  }
+}

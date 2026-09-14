@@ -1,0 +1,135 @@
+{
+  "display": {
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        225,
+        0
+      ],
+      "scale": [
+        0.3764706,
+        0.3764706,
+        0.3764706
+      ],
+      "translation": [
+        0,
+        0.5647059,
+        0
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.3764706,
+        0.3764706,
+        0.3764706
+      ],
+      "translation": [
+        0,
+        0.5647059,
+        0
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.47058824,
+        0.47058824,
+        0.47058824
+      ],
+      "translation": [
+        0,
+        0.7058824,
+        0
+      ]
+    },
+    "ground": {
+      "scale": [
+        0.23529412,
+        0.23529412,
+        0.23529412
+      ],
+      "translation": [
+        0,
+        3.3529413,
+        0
+      ]
+    },
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.5882353,
+        0.5882353,
+        0.5882353
+      ],
+      "translation": [
+        0,
+        0.7641401,
+        0.44117644
+      ]
+    },
+    "head": {
+      "scale": [
+        0.9411765,
+        0.9411765,
+        0.9411765
+      ],
+      "translation": [
+        0,
+        1.4117647,
+        0
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        75,
+        225,
+        0
+      ],
+      "scale": [
+        0.3529412,
+        0.3529412,
+        0.3529412
+      ],
+      "translation": [
+        0,
+        2.637022,
+        0.5113725
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "scale": [
+        0.3529412,
+        0.3529412,
+        0.3529412
+      ],
+      "translation": [
+        0,
+        2.6370218,
+        0.5113725
+      ]
+    }
+  },
+  "loader": "magneticraft:legacy_scene",
+  "model": "magneticraft:models/block/mcx/conveyor_belt.mcx",
+  "textures": {
+    "particle": "magneticraft:block/machines/conveyor_belt"
+  },
+  "translation": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

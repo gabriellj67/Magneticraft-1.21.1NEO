@@ -1,0 +1,11 @@
+{
+  "type": "magneticraft:crushing_table",
+  "ingredient": {
+    "item": "minecraft:polished_diorite"
+  },
+  "required_level": 0,
+  "result": {
+    "count": 1,
+    "id": "minecraft:diorite"
+  }
+}

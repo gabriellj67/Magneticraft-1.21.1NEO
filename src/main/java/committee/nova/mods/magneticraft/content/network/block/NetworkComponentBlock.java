@@ -4,8 +4,9 @@ import committee.nova.mods.magneticraft.init.ModNetworkItems;
 import committee.nova.mods.magneticraft.init.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -25,7 +26,8 @@ public abstract class NetworkComponentBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
             BlockState state,
             Level level,
             BlockPos position,
@@ -33,9 +35,8 @@ public abstract class NetworkComponentBlock extends BaseEntityBlock {
             InteractionHand hand,
             BlockHitResult hit
     ) {
-        if (!player.getItemInHand(hand).is(ModNetworkItems.WRENCH.get())
-                && !player.getItemInHand(hand).is(ModTags.Items.WRENCHES)) {
-            return InteractionResult.PASS;
+        if (!stack.is(ModNetworkItems.WRENCH.get()) && !stack.is(ModTags.Items.WRENCHES)) {
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
         if (!level.isClientSide && level.getBlockEntity(position) instanceof NetworkComponentBlockEntity component) {
             player.displayClientMessage(
@@ -44,7 +45,7 @@ public abstract class NetworkComponentBlock extends BaseEntityBlock {
             );
             ConduitBlock.refreshAround(level, position);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 
 public final class HeatPipeBlock extends ConduitBlock {
@@ -18,6 +19,11 @@ public final class HeatPipeBlock extends ConduitBlock {
     public HeatPipeBlock(Properties properties, boolean insulated) {
         super(properties, insulated ? 3 : 4);
         this.insulated = insulated;
+    }
+
+    @Override
+    protected MapCodec<? extends HeatPipeBlock> codec() {
+        return simpleCodec(properties -> new HeatPipeBlock(properties, insulated));
     }
 
     @Nullable

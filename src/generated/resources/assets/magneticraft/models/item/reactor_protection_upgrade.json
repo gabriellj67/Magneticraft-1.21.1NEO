@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "magneticraft:item/inserter_speed_upgrade"
+  }
+}

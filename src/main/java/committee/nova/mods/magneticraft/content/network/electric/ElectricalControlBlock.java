@@ -9,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -42,6 +44,11 @@ public final class ElectricalControlBlock extends NetworkComponentBlock {
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
+    @Override
+    protected MapCodec<? extends ElectricalControlBlock> codec() {
+        return simpleCodec(properties -> new ElectricalControlBlock(properties, kind));
+    }
+
     public ElectricalControlKind kind() {
         return kind;
     }
@@ -53,7 +60,8 @@ public final class ElectricalControlBlock extends NetworkComponentBlock {
     }
 
     @Override
-    public InteractionResult use(
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
             BlockState state,
             Level level,
             BlockPos position,
@@ -61,14 +69,24 @@ public final class ElectricalControlBlock extends NetworkComponentBlock {
             InteractionHand hand,
             BlockHitResult hit
     ) {
-        ItemStack held = player.getItemInHand(hand);
-        if (held.is(ModNetworkItems.WRENCH.get()) || held.is(ModTags.Items.WRENCHES)) {
+        if (stack.is(ModNetworkItems.WRENCH.get()) || stack.is(ModTags.Items.WRENCHES)) {
             if (!level.isClientSide) {
                 level.setBlock(position, state.setValue(FACING, state.getValue(FACING).getClockWise()), Block.UPDATE_ALL);
                 ConduitBlock.refreshAround(level, position);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state,
+            Level level,
+            BlockPos position,
+            Player player,
+            BlockHitResult hit
+    ) {
         if (!level.isClientSide
                 && player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(position) instanceof ElectricalControlBlockEntity control) {

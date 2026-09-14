@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "item": "magneticraft:fabric_mesh"
+    },
+    "B": {
+      "tag": "magneticraft:light_plates/iron"
+    },
+    "C": {
+      "item": "magneticraft:machine_casing"
+    }
+  },
+  "pattern": [
+    "ABA",
+    "BCB",
+    "ABA"
+  ],
+  "result": {
+    "count": 1,
+    "id": "magneticraft:wind_turbine"
+  }
+}

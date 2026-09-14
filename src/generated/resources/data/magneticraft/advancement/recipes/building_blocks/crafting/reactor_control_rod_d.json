@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_boron_carbide": {
+      "conditions": {
+        "items": [
+          {
+            "items": "magneticraft:boron_carbide"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "magneticraft:crafting/reactor_control_rod_d"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_boron_carbide"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "magneticraft:crafting/reactor_control_rod_d"
+    ]
+  }
+}

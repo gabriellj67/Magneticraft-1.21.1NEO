@@ -20,6 +20,7 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
@@ -43,6 +44,11 @@ public final class ElectricPoleBlock extends NetworkComponentBlock {
         registerDefaultState(stateDefinition.any()
                 .setValue(DIRECTION, PoleDirection.NORTH)
                 .setValue(SEGMENT, PoleSegment.DOWN_4));
+    }
+
+    @Override
+    protected MapCodec<? extends ElectricPoleBlock> codec() {
+        return simpleCodec(properties -> new ElectricPoleBlock(properties, transformer));
     }
 
     public boolean isTransformer() {

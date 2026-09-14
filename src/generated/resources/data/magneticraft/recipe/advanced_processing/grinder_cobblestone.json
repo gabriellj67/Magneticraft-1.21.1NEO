@@ -1,0 +1,23 @@
+{
+  "type": "magneticraft:grinder",
+  "duration": 60,
+  "energy_per_tick": 40,
+  "ingredient": {
+    "item": "minecraft:cobblestone"
+  },
+  "results": [
+    {
+      "item": {
+        "count": 1,
+        "id": "minecraft:gravel"
+      }
+    },
+    {
+      "chance": 0.5,
+      "item": {
+        "count": 1,
+        "id": "minecraft:sand"
+      }
+    }
+  ]
+}

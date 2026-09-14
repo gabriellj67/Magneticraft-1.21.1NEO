@@ -1,0 +1,6 @@
+{
+  "type": "magneticraft:industrial_combustion_chamber",
+  "duration": 25000,
+  "fluid": "magneticraft:naphtha",
+  "power": 40.0
+}
